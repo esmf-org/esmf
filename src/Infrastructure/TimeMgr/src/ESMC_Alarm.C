@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.10 2003/04/15 16:47:41 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.11 2003/05/02 00:58:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.10 2003/04/15 16:47:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.11 2003/05/02 00:58:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -50,8 +50,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *ringInterval,  // in
       ESMC_Time         *ringTime,      // in
+      ESMC_TimeInterval *ringInterval,  // in
       ESMC_Time         *stopTime,      // in
       bool               enabled) {     // in
 //
@@ -68,8 +68,8 @@
     Ringing = false;
     Enabled = true;
     
-    if (ringInterval != ESMC_NULL_POINTER) RingInterval = *ringInterval;
     if (ringTime     != ESMC_NULL_POINTER) RingTime     = *ringTime;
+    if (ringInterval != ESMC_NULL_POINTER) RingInterval = *ringInterval;
     if (stopTime     != ESMC_NULL_POINTER) StopTime     = *stopTime;
     Enabled = enabled;
 
