@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.2 2003/10/20 20:13:55 cdeluca Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.3 2004/02/06 23:29:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.2 2003/10/20 20:13:55 cdeluca Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.3 2004/02/06 23:29:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -91,7 +91,7 @@
         goto 10
       endif
 
-#ifdef EXHAUSTIVE
+#ifdef ESMF_EXHAUSTIVE
       !EX_UTest
       ! test print method via option string
       call ESMF_DELayoutPrint(layout1D, rc=rc)
@@ -118,7 +118,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef EXHAUSTIVE
+#ifdef ESMF_EXHAUSTIVE
       !EX_UTest
       layout1 = ESMF_DELayoutCreate(layout1D, 2, (/2,2/), (/0,0/), &
                                     de_indices=(/0,1,2,3/), rc=rc)
@@ -195,7 +195,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-#ifdef EXHAUSTIVE
+#ifdef ESMF_EXHAUSTIVE
       !EX_UTest
       call ESMF_DELayoutDestroy(layout1, rc)
       write(name, *) "ESMF_DELayoutDestroy layout1"
