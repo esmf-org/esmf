@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.39 2004/02/13 15:25:52 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.40 2004/03/08 16:16:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.39 2004/02/13 15:25:52 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.40 2004/03/08 16:16:12 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -325,7 +325,7 @@
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      f2 = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
@@ -337,7 +337,7 @@
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
       ! Verifing that a Field can be created with a Grid and Array
-      dm = ESMF_DataMapCreate(ESMF_IO_IJ)
+      call ESMF_DataMapInit(dm, ESMF_INDEX_IJ)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 2, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
