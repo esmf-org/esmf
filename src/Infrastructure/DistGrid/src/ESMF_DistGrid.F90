@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.124 2004/09/24 22:13:50 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.125 2004/10/05 22:46:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1589,7 +1589,7 @@
 ! !REQUIREMENTS: 
 
       !integer :: localrc                          ! Error status
-      integer :: i, j, de, bnd
+      integer :: i, j, de, bnd, localCount
       integer :: globalStart, globalEnd           ! global counters
       character(len=ESMF_MAXSTR) :: logMsg
       logical :: dummy
@@ -1622,17 +1622,19 @@
 
         globalStart = 1
         globalEnd   = bnd + countsPerDEDim1(1)
+        localCount  = countsPerDEDim1(1)
+        if (localCount.gt.0) localCount = localCount + bnd
  
-        do i = 1,nDE(1)
+        do i   = 1,nDE(1)
           do j = 1,nDE(2)
             de = (j-1)*nDE(1) + i
-            glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
-                                    * (countsPerDEDim1(1) + bnd)
-            glob%cellCountPerDEPerDim(de,1) = countsPerDEDim1(1) + bnd
+            glob%cellCountPerDE(de)           = glob%cellCountPerDE(de) &
+                                              * localCount
+            glob%cellCountPerDEPerDim(de,1)   = localCount
             glob%globalStartPerDEPerDim(de,1) = globalStart - 1
-            glob%AIPerDEPerDim(de,1)%min = globalStart
-            glob%AIPerDEPerDim(de,1)%max = globalEnd
-            glob%AIPerDEPerDim(de,1)%stride = globalEnd
+            glob%AIPerDEPerDim(de,1)%min      = globalStart
+            glob%AIPerDEPerDim(de,1)%max      = globalEnd
+            glob%AIPerDEPerDim(de,1)%stride   = globalEnd
             if (present(periodic)) then
               if (periodic(1).eq.ESMF_TRUE) &
               glob%AIPerDEPerDim(de,1)%stride = globalEnd &
@@ -1650,15 +1652,17 @@
         globalEnd   = bnd
       
         do i = 1,nDE(1)
-          globalEnd = globalEnd + countsPerDEDim1(i)
+          globalEnd  = globalEnd + countsPerDEDim1(i)
+          localCount = countsPerDEDim1(i)
+          if (localCount.gt.0) localCount = localCount + bnd
           do j = 1,nDE(2)
             de = (j-1)*nDE(1) + i
-            glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
-                                    * (countsPerDEDim1(i) + bnd)
-            glob%cellCountPerDEPerDim(de,1) = countsPerDEDim1(i) + bnd
+            glob%cellCountPerDE(de)           = glob%cellCountPerDE(de) &
+                                              * localCount
+            glob%cellCountPerDEPerDim(de,1)   = localCount
             glob%globalStartPerDEPerDim(de,1) = globalStart - 1
-            glob%AIPerDEPerDim(de,1)%min = globalStart
-            glob%AIPerDEPerDim(de,1)%max = globalEnd
+            glob%AIPerDEPerDim(de,1)%min      = globalStart
+            glob%AIPerDEPerDim(de,1)%max      = globalEnd
           enddo
           globalStart = globalEnd - bnd + 1
         enddo
@@ -1696,17 +1700,19 @@
 
           globalStart = 1
           globalEnd   = bnd + countsPerDEDim2(1)
+          localCount  = countsPerDEDim2(1)
+          if (localCount.gt.0) localCount = localCount + bnd
  
           do i = 1,nDE(1)
             do j = 1,nDE(2)
               de = (j-1)*nDE(1) + i
-              glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
-                                      * (countsPerDEDim2(1) + bnd)
-              glob%cellCountPerDEPerDim(de,2) = countsPerDEDim2(1) + bnd
+              glob%cellCountPerDE(de)           = glob%cellCountPerDE(de) &
+                                                * localCount
+              glob%cellCountPerDEPerDim(de,2)   = localCount
               glob%globalStartPerDEPerDim(de,2) = globalStart - 1
-              glob%AIPerDEPerDim(de,2)%min = globalStart
-              glob%AIPerDEPerDim(de,2)%max = globalEnd
-              glob%AIPerDEPerDim(de,2)%stride = globalEnd
+              glob%AIPerDEPerDim(de,2)%min      = globalStart
+              glob%AIPerDEPerDim(de,2)%max      = globalEnd
+              glob%AIPerDEPerDim(de,2)%stride   = globalEnd
               if (present(periodic)) then
                 if (periodic(2).eq.ESMF_TRUE) &
                 glob%AIPerDEPerDim(de,2)%stride = globalEnd &
@@ -1732,19 +1738,21 @@
           endif
       
           do j = 1,nDE(2)
-            globalEnd = globalEnd + countsPerDEDim2(j)
+            globalEnd  = globalEnd + countsPerDEDim2(j)
+            localCount = countsPerDEDim2(j)
+            if (localCount.gt.0) localCount = localCount + bnd
             do i = 1,nDE(1)
               de = (j-1)*nDE(1) + i
-              glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
-                                      * (countsPerDEDim2(j) + bnd)
-              glob%cellCountPerDEPerDim(de,2) = countsPerDEDim2(j) + bnd
+              glob%cellCountPerDE(de)           = glob%cellCountPerDE(de) &
+                                                * localCount
+              glob%cellCountPerDEPerDim(de,2)   = localCount
               glob%globalStartPerDEPerDim(de,2) = globalStart - 1
-              glob%AIPerDEPerDim(de,2)%min = globalStart
-              glob%AIPerDEPerDim(de,2)%max = globalEnd
+              glob%AIPerDEPerDim(de,2)%min      = globalStart
+              glob%AIPerDEPerDim(de,2)%max      = globalEnd
             enddo
             globalStart = globalEnd - bnd + 1
           enddo
-          do i = 1,nDE(1)
+          do i   = 1,nDE(1)
             do j = 1,nDE(2)
               de = (j-1)*nDE(1) + i
               glob%AIPerDEPerDim(de,2)%stride = globalEnd
@@ -1909,8 +1917,8 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc                          ! Error status
-      integer :: DEID, localCellCount, localCellCountForDim
-      integer :: compCellCount, compCellCountForDim
+      integer :: DEID, localCellCount
+      integer :: compCellCount
       integer :: i, myDEx, myDEy, nDEx, nDEy
       integer :: localDE, deCountPerDim(2), coord(2)
       type(ESMF_DistGridGlobal), pointer :: globC,  globT
@@ -1957,16 +1965,14 @@
         localC%globalAIPerDim(i)       = globC%AIPerDEPerDim(DEID,i)
         localC%globalStartPerDim(i)    = globC%globalStartPerDEPerDim(DEID,i)
         localC%localCellCountPerDim(i) = globC%cellCountPerDEPerDim(DEID,i)
-        compCellCountForDim            = globC%cellCountPerDEPerDim(DEID,i)
-        if (compCellCountForDim.ne.0) &
-                         compCellCount = compCellCount * compCellCountForDim
+        compCellCount                  = compCellCount &
+                                       * globC%cellCountPerDEPerDim(DEID,i)
 
         localT%globalAIPerDim(i)       = globT%AIPerDEPerDim(DEID,i)
         localT%globalStartPerDim(i)    = globT%globalStartPerDEPerDim(DEID,i)
         localT%localCellCountPerDim(i) = globT%cellCountPerDEPerDim(DEID,i)
-        localCellCountForDim           = globT%cellCountPerDEPerDim(DEID,i)
-        if (localCellCountForDim.ne.0) &
-                        localCellCount = localCellCount * localCellCountForDim
+        localCellCount                 = localCellCount &
+                                       * globT%cellCountPerDEPerDim(DEID,i)
       enddo
       localC%localCellCount = compCellCount
       localT%localCellCount = localCellCount
