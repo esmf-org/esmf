@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.35 2004/03/10 03:06:37 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.36 2004/03/19 00:35:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -170,8 +170,14 @@
 
     // native C++ constructors/destructors
     ESMC_Time(void);
-    ESMC_Time(ESMF_KIND_I8 s, int sN, int sD, ESMC_Calendar *calendar,
+    ESMC_Time(ESMF_KIND_I8 s, int sN=0, int sD=1, ESMC_Calendar *calendar=0,
               int timeZone=0);
+    int ESMC_TimeSet(ESMF_KIND_I8 s, int sN=0, int sD=1,
+                     ESMC_Calendar *calendar=0, int timeZone=0);
+                                   // used internally instead of constructor
+                                   // to cover case of initial entry from F90,
+                                   // to avoid automatic destructor invocation
+                                   // when leaving scope to return to F90.
     ~ESMC_Time(void);
 
  // < declare the rest of the public interface methods here >
@@ -189,6 +195,7 @@
     int ESMC_TimeGetDayOfYear(ESMF_KIND_R8 *dayOfYear) const; // (TMG 2.5.2)
     int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
 
+    friend class ESMC_TimeInterval;
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
 //

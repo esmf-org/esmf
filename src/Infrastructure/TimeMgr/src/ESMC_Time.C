@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.57 2004/03/10 03:07:26 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.58 2004/03/19 00:35:11 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -440,10 +440,9 @@
 
  }  // end ESMC_TimeSet
 
-#if 0
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeSet - direct core value initializer
+// !IROUTINE:  ESMC_TimeSet - direct property initializer
 //
 // !INTERFACE:
       int ESMC_Time::ESMC_TimeSet(
@@ -459,7 +458,9 @@
       int timeZone) {          // in - timezone
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt Time} with given values
+//      Initialzes a {\tt Time} with given values.  Used to avoid constructor
+//      to cover case when initial entry is from F90, since destructor is called
+//      automatically when leaving scope to return to F90.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -467,7 +468,8 @@
     // use base class Set()
     if (ESMC_BaseTime::ESMC_BaseTimeSet(s, sN, sD) == ESMF_SUCCESS)
     {
-        this->calendar = calendar;
+        this->calendar = calendar;  // allow ESMC_NULL_POINTER to detect
+                                    //   uninitialized state.
         this->timeZone = timeZone;
 
         return(ESMF_SUCCESS);
@@ -475,7 +477,6 @@
     else return(ESMF_FAILURE);
 
  }  // end ESMC_TimeSet
-#endif
 
 //-------------------------------------------------------------------------
 //BOP
@@ -903,7 +904,7 @@
 //   ESMC_BaseTime(0, 0, 1) {  // TODO: F90 issue with base class constructor?
    s  = 0;
    sN = 0;
-   sD = 0;
+   sD = 1;
    calendar = ESMC_NULL_POINTER;
    timeZone = 0;
 
