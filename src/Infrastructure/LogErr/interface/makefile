@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/03/24 17:36:30 cpboulder Exp $ 
+# $Id: makefile,v 1.6 2004/03/24 17:44:47 cpboulder Exp $ 
 
 ALL: build_here 
 
@@ -6,7 +6,7 @@ CFLAGS    += ${MPI_INCLUDE}
 FFLAGS    += ${MPI_INCLUDE}
 
 SOURCEC	  = 
-SOURCEF	  = 
+SOURCEF	  = ESMF_LogErr.F90
 SOURCEH	  = 
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
