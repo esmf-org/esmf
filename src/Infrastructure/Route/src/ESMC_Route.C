@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.59 2003/08/14 21:57:01 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.60 2003/08/15 17:59:57 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.59 2003/08/14 21:57:01 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.60 2003/08/15 17:59:57 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -901,10 +901,11 @@ static int maxroutes = 10;
     ESMC_AxisIndex my_AI_tot[ESMF_MAXDIM], their_AI_tot[ESMF_MAXDIM];
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
-    ESMC_XPacket *intersect_XP = NULL;
+    ESMC_XPacket intersect_XP;
     ESMC_RouteCacheEntry *ep;
     ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
     int my_XPcount, their_XPcount;
+    int my_global_start[ESMF_MAXDIM];
     int i, j, k, rc;
     int their_de, their_de_parent, their_decount;
 
@@ -925,6 +926,7 @@ static int maxroutes = 10;
         my_AI_exc[k] = AI_snd_exc[my_DE_snd + k*AI_snd_count];
         my_AI_tot[k] = AI_snd_tot[my_DE_snd + k*AI_snd_count];
         my_AI_exc[k].max = my_AI_tot[k].max;
+        my_global_start[k] = global_start_snd[my_DE_snd + k*AI_snd_count];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -956,22 +958,18 @@ static int maxroutes = 10;
                                          boundary, &their_XP, &their_XPcount);
 
           // calculate the intersection
-          intersect_XP = new ESMC_XPacket;
-          intersect_XP->ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
+          intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-              delete intersect_XP;
-              intersect_XP = NULL;
+          if (intersect_XP.ESMC_XPacketEmpty())
               continue;
-          }
 
           // translate from global to local data space
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
-                                                  rank, global_start_snd);
+          intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
+                                                 rank, my_global_start);
 
           // load the intersecting XPacket into the sending RTable
-          sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          sendRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
         }
     }
@@ -986,6 +984,7 @@ static int maxroutes = 10;
         my_AI_exc[k] = AI_rcv_exc[my_DE_rcv + k*AI_rcv_count];
         my_AI_tot[k] = AI_rcv_tot[my_DE_rcv + k*AI_rcv_count];
         my_AI_exc[k].max = my_AI_tot[k].max;
+        my_global_start[k] = global_start_rcv[my_DE_rcv + k*AI_rcv_count];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -1016,22 +1015,18 @@ static int maxroutes = 10;
                                          boundary, &their_XP, &their_XPcount);
 
           // calculate the intersection
-          intersect_XP = new ESMC_XPacket;
-          intersect_XP->ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
+          intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-              delete intersect_XP;
-              intersect_XP = NULL;
+          if (intersect_XP.ESMC_XPacketEmpty())
               continue;
-          }
 
           // translate from global to local
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
-                                                  rank, global_start_rcv);
+          intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
+                                                 rank, my_global_start);
 
           // load the intersecting XPacket into the receiving RTable
-          recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          recvRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
         }
     }
@@ -1041,8 +1036,6 @@ static int maxroutes = 10;
     my_XP = NULL;
     delete their_XP; 
     their_XP = NULL;
-    delete intersect_XP; // contents have been copied in RTable
-    intersect_XP = NULL;
 
     // add to cache table here.
     if (routetable.rcep == NULL) {
@@ -1155,9 +1148,10 @@ static int maxroutes = 10;
     ESMC_AxisIndex my_AI_tot[ESMF_MAXDIM], their_AI_tot[ESMF_MAXDIM];
     ESMC_XPacket *my_XP = NULL;
     ESMC_XPacket *their_XP = NULL;
-    ESMC_XPacket *intersect_XP = NULL;
+    ESMC_XPacket intersect_XP;
     ESMC_RouteCacheEntry *ep;
     ESMC_Logical boundary[ESMF_MAXGRIDDIM][2];
+    int my_global_start[ESMF_MAXDIM];
     int my_XPcount, their_XPcount;
     int i, j, k, rc;
     int their_de, their_de_parent, their_decount;
@@ -1179,6 +1173,7 @@ static int maxroutes = 10;
         my_AI_exc[k] = AI_snd_exc[my_DE_snd + k*AI_snd_count];
         my_AI_tot[k] = AI_snd_tot[my_DE_snd + k*AI_snd_count];
         my_AI_exc[k].max = my_AI_tot[k].max;
+        my_global_start[k] = global_start_snd[my_DE_snd + k*AI_snd_count];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -1210,22 +1205,18 @@ static int maxroutes = 10;
                                          boundary, &their_XP, &their_XPcount);
 
           // calculate the intersection
-          intersect_XP = new ESMC_XPacket;
-          intersect_XP->ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
+          intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-              delete intersect_XP;
-              intersect_XP = NULL;
+          if (intersect_XP.ESMC_XPacketEmpty())
               continue;
-          }
 
           // translate from global to local data space
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
-                                                  rank, global_start_snd);
+          intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
+                                                 rank, my_global_start);
 
           // load the intersecting XPacket into the sending RTable
-          sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          sendRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
         }
     }
@@ -1240,6 +1231,7 @@ static int maxroutes = 10;
         my_AI_exc[k] = AI_rcv_exc[my_DE_rcv + k*AI_rcv_count];
         my_AI_tot[k] = AI_rcv_tot[my_DE_rcv + k*AI_rcv_count];
         my_AI_exc[k].max = my_AI_tot[k].max;
+        my_global_start[k] = global_start_rcv[my_DE_rcv + k*AI_rcv_count];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -1270,22 +1262,18 @@ static int maxroutes = 10;
                                          boundary, &their_XP, &their_XPcount);
 
           // calculate the intersection
-          intersect_XP = new ESMC_XPacket;
-          intersect_XP->ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
+          intersect_XP.ESMC_XPacketIntersect(&my_XP[0], &their_XP[0]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-              delete intersect_XP;
-              intersect_XP = NULL;
+          if (intersect_XP.ESMC_XPacketEmpty())
               continue;
-          }
 
           // translate from global to local
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
-                                                  rank, global_start_rcv);
+          intersect_XP.ESMC_XPacketGlobalToLocal(&intersect_XP, my_AI_tot, 
+                                                 rank, my_global_start);
 
           // load the intersecting XPacket into the receiving RTable
-          recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+          recvRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
           ct->ESMC_CommTableSetPartner(their_de_parent);
         }
     }
@@ -1295,8 +1283,6 @@ static int maxroutes = 10;
     my_XP = NULL;
     delete their_XP; 
     their_XP = NULL;
-    delete intersect_XP; // contents have been copied in RTable
-    intersect_XP = NULL;
 
     // add to cache table here.
     if (routetable.rcep == NULL) {
