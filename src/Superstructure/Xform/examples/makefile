@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/08/03 19:33:53 nscollins Exp $ 
+# $Id: makefile,v 1.8 2005/01/07 21:37:08 jwolfe Exp $ 
 
 ALL:  build_examples
 
@@ -65,10 +65,12 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_XformEx
 # in this makefile.
 #
 
-EXAMPLES_RUN   = run_ESMF_XformEx
+# EXAMPLES_RUN   = run_ESMF_XformEx  commented out until it does more
+EXAMPLES_RUN   =
 
 
-EXAMPLES_RUN_UNI = run_ESMF_XformEx_uni \
+# EXAMPLES_RUN_UNI = run_ESMF_XformEx_uni  commented out until it does more
+EXAMPLES_RUN_UNI =
 
 include $(ESMF_DIR)/makefile
 
