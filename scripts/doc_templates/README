@@ -1,3 +1,5 @@
+% $Id: README,v 1.6 2003/03/03 15:53:56 eschwab Exp $
+
 ================================================================================
             Earth System Modeling Framework Document Templates
 
@@ -88,6 +90,7 @@ This will create a new component directory tree if it does not already exist:
    <comp>/include     - for your include files
    <comp>/src         - for your implementation source code files
    <comp>/interface   - for your interface (wrapper) source code files
+   <comp>/tests       - for your unit test files
 
 Prologued code template files as well as makefile templates will be placed
 in the appropriate directories.  If you choose F90 as your implementation
@@ -97,8 +100,10 @@ C++ .h file is placed in the include directory.  Similarly, if you choose
 C++ as your implementation language, a .h template is placed in the
 include directory, a corresponding .C template is placed in the src
 directory, and a corresponding F90 template is placed in the interface
-directory.  The templates created by do_newcomp are generic, non-class
-specific.  See do_newclass below for class-specific templates.  
+directory.  Also, a unit test template in your chosen implementation language
+will be placed in the tests directory.  Templates created by do_newcomp are
+generic, non-class specific.  See do_newclass below for class-specific
+templates.  
 
 To start coding a new class, execute the following script in a source
 code directory below the component directory (src or interface):
@@ -113,11 +118,13 @@ The implementation language can be one of the following:
 This will create a source code template using the class name provided in
 the chosen language.  For F90, a single ESMF_<Class>.F90 file is created.
 For C++, two files are created:  ESMC_<Class>.h and ESMC_<Class>.C  The
-ESMC_<Class>.h file goes in ../include.  Also, interface templates in the
-language other than the one chosen are created.  For example, if you're
-in the src directory creating a .C file, a corresponding .F90 interface
-file will be placed in ../interface.  See the discussion above about
-do_newcomp and the placement of the template files in the component tree.
+ESMC_<Class>.h file goes in ../include.  In addition, interface templates
+in the language other than the one chosen are created.  For example, if
+you're in the src directory creating a .C file, a corresponding .F90
+interface file will be placed in ../interface.  Also, a unit test template
+ESMF_<Class>Test.F90 or ESMC_<Class>Test.C is created in the ../tests
+directory.  See the discussion above about do_newcomp and the placement
+of the template files in the component tree.
 
 To start a new document, execute the script:
 
@@ -146,6 +153,3 @@ documents.
 
 ================================================================================
 C. DeLuca (cdeluca@ucar.edu) - initial version                 March 13, 2000
-E. Schwab (eschwab@ucar.edu) - added do_newcomp / do_newclass  October 11, 2002
-
-
