@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.5 2004/04/13 21:10:08 eschwab Exp $
+// $Id: ESMC_VM.C,v 1.6 2004/04/20 18:59:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.5 2004/04/13 21:10:08 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.6 2004/04/20 18:59:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -44,7 +44,7 @@
 // Module variable pointing to the global default VM
 // The global VM will be initialized in call ESMC_VMInitialize() and wrapped up
 // calling ESMC_VMFinalize(). 
-ESMC_VM *GlobalVM = NULL;  
+static ESMC_VM *GlobalVM = NULL;  
 //-----------------------------------------------------------------------------
 
 
@@ -104,6 +104,30 @@ void ESMC_VMFinalize(
 //-----------------------------------------------------------------------------
   GlobalVM->vmachine_finalize();
   *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetGlobal
+//
+// !INTERFACE:
+ESMC_VM *ESMC_VMGetGlobal(
+//
+// !RETURN VALUE:
+//    pointer to global VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Return pointer to global VM
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_SUCCESS;
+  return GlobalVM;
 }
 //-----------------------------------------------------------------------------
 

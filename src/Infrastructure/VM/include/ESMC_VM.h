@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.6 2004/04/01 16:20:37 theurich Exp $
+// $Id: ESMC_VM.h,v 1.7 2004/04/20 18:59:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,6 +73,7 @@ class ESMC_VM : public vmachine {   // inherits from vmachine class
 ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global vmachine
 void ESMC_VMFinalize(int *rc);        // Shut down and clean up global vmachine
 
+ESMC_VM *ESMC_VMGetGlobal(int *rc);    // Return pointer to global VM
 
 // class definition
 class ESMC_VMPlan : public vmplan {   // inherits from vmplan class
