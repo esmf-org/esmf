@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.25 2003/02/26 01:17:14 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.26 2003/02/26 01:46:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -151,7 +151,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.25 2003/02/26 01:17:14 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.26 2003/02/26 01:46:41 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -469,11 +469,11 @@ end interface
         compp%instance_id = 1
         ! Call C++ entry point to initialize the function and data pointer
         ! tables.   TODO: add this code
-        ! call c_ESMC_CompTableCreate(compp%this, rc) 
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "CompConstruct: Table create error"
-          return
-        endif
+        ! call c_ESMC_CompTableCreate(compp%this, status) 
+        !if (status .ne. ESMF_SUCCESS) then
+        !  print *, "CompConstruct: Table create error"
+        !  return
+        !endif
    
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
@@ -534,10 +534,10 @@ end interface
         ! call C++ to release function and data pointer tables.
         ! TODO: add this code
         ! call c_ESMC_CompTableDelete(compp%this, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component contents destruction error"
-          return
-        endif
+        !if (status .ne. ESMF_SUCCESS) then
+        !  print *, "Component contents destruction error"
+        !  return
+        !endif
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
