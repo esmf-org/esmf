@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.48 2004/06/15 21:31:10 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.49 2004/08/06 22:31:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.48 2004/06/15 21:31:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.49 2004/08/06 22:31:34 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -678,6 +678,7 @@ int ESMC_Alarm::count=0;
     }
 
     ringing = false;
+    timeStepRingingCount = 0;
 
     return(ESMF_SUCCESS);
 
@@ -1013,19 +1014,64 @@ int ESMC_Alarm::count=0;
                   clock->currTime >= ringTime && clock->prevTime < ringTime :
                   clock->currTime <= ringTime && clock->prevTime > ringTime;
       if (ringing) {
-        // update next ringing time if ringInterval nonzero
-        prevRingTime = ringTime;
-        ringTime += ringInterval;
+        // note time, 
+        ringBegin = clock->currTime;
+
+        // and update next ringing time
+        bool updateNextRingingTime = true;
+        if (stopTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
+          updateNextRingingTime = (positive) ? clock->currTime < stopTime :
+                                               clock->currTime > stopTime ;
+        }
+        if (updateNextRingingTime) {
+          prevRingTime = ringTime;
+          ringTime += ringInterval;
+        }
       }
     }
-    // else check if time to turn off alarm
-    else if (!sticky && enabled) {
-      ESMC_TimeInterval cumulativeRinging;
-      cumulativeRinging = clock->currTime - ringBegin;
-      if (cumulativeRinging.ESMC_TimeIntervalAbsValue() >= ringDuration) {
-        ringingOnCurrTimeStep = ringing = false;
+    // else if not sticky, check if time to turn off alarm
+    else if (!sticky && ringing && enabled) {
+      // first check if next alarm time has been reached
+      bool checkRinging = (positive) ?
+                  clock->currTime >= ringTime && clock->prevTime < ringTime :
+                  clock->currTime <= ringTime && clock->prevTime > ringTime;
+      if (checkRinging) {
+        // if so, refresh ringing state,
+        ringingOnCurrTimeStep = ringing = true;
+
+        // note time,
+        ringBegin = clock->currTime;
+
+        // and update next ringing time
+        bool updateNextRingingTime = true;
+        if (stopTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
+          updateNextRingingTime = (positive) ? clock->currTime < stopTime :
+                                               clock->currTime > stopTime ;
+        }
+        if (updateNextRingingTime) {
+          prevRingTime = ringTime;
+          ringTime += ringInterval;
+        }
+
+      } else { // check if time to turn off alarm
+        if (ringTimeStepCount > 0) {
+          if (timeStepRingingCount+1 >= ringTimeStepCount) {
+            ringingOnCurrTimeStep = ringing = false;
+            timeStepRingingCount = 0;
+          }
+        } else {
+          ESMC_TimeInterval cumulativeRinging;
+          cumulativeRinging = clock->currTime - ringBegin;
+          if (cumulativeRinging.ESMC_TimeIntervalAbsValue() >= ringDuration) {
+            ringingOnCurrTimeStep = ringing = false;
+            timeStepRingingCount = 0;
+          }
+        }
       }
     }
+
+    // count for how many clock time steps the alarm is ringing
+    if (ringing) timeStepRingingCount++;
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -1409,6 +1455,7 @@ int ESMC_Alarm::count=0;
  #define ESMC_METHOD "ESMC_Alarm(void) constructor"
 
     name[0] = '\0';
+    clock = ESMC_NULL_POINTER;
     ringTimeStepCount = 0;
     timeStepRingingCount = 0;
     ringing = ringingOnCurrTimeStep = ringingOnPrevTimeStep = false;
