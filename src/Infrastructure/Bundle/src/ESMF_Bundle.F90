@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.29 2004/03/17 02:20:39 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.30 2004/03/17 21:14:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -798,7 +798,7 @@ end function
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeAddChar(bundle%btypep%base, name, value, status)
+      call c_ESMC_AttributeSetChar(bundle%btypep%base, name, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_BundleAddAttribute"
         return
