@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGlobalEx.F90,v 1.3 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_FieldGlobalEx.F90,v 1.4 2005/02/28 16:22:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,6 @@
     integer :: finalrc, haloWidth, i, rc
     integer :: gridCount(2), gridStart(2)
     integer :: dataIndexList(3), lbounds(3), localCount(3), ubounds(3)
-    character (len = ESMF_MAXSTR) :: fname
     real (ESMF_KIND_R8), dimension(:,:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: origin
     type(ESMF_Array)        :: array1

@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.25 2004/12/09 00:27:26 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.26 2005/02/28 16:22:34 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -26,20 +26,17 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc, mycell, finalrc, npets
+    integer :: rc, finalrc, npets
     integer :: i, j
     integer :: lb(2), ub(2), halo
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: arraya, arrayb
-    type(ESMF_FieldDataMap) :: datamap
+    !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_VM) :: vm
     type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh
-    character (len = ESMF_MAXSTR) :: fname
-    type(ESMF_IOSpec) :: iospec
     type(ESMF_Field) :: field1, field2
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
     finalrc = ESMF_SUCCESS
@@ -147,7 +144,7 @@
     redist_rh = ESMF_RouteHandleCreate(rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldRedistStore(field1, field2, layout2, &
+    call ESMF_FieldRedistStore(field1, field2, vm, &
                                                 routehandle=redist_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 

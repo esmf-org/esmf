@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommEx.F90,v 1.4 2005/02/14 04:36:22 theurich Exp $
+! $Id: ESMF_ArrayCommEx.F90,v 1.5 2005/02/28 16:21:42 nscollins Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -25,14 +25,13 @@
     implicit none
 
 !   ! Local variables
-    integer :: nx, ny, arank, rc
-    integer :: i, j, ni, nj, half, quart
+    integer :: rc
+    integer :: half, quart
     integer :: bytwo, byfour
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2, array3
+    type(ESMF_Array) :: array1, array2
     type(ESMF_Grid) :: grid1, grid2
     type(ESMF_FieldDataMap) :: datamap
-    type(ESMF_Field) :: field
     type(ESMF_VM) :: vm
     type(ESMF_DELayout) :: delayout1, delayout2
     integer :: counts(ESMF_MAXGRIDDIM), nPETs

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.5 2004/12/09 00:29:33 nscollins Exp $
+! $Id: ESMF_RegridEx.F90,v 1.6 2005/02/28 16:22:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,19 +32,16 @@
     type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
-    type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc
 !EOC
 
-    integer :: x, y, mycell, finalrc, npets
+    integer :: finalrc, npets
     integer :: i, j, lb(2), ub(2), halo
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_FieldDataMap) :: datamap
+    !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_VM) :: vm
-    character (len = ESMF_MAXSTR) :: fname
-    type(ESMF_IOSpec) :: iospec
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
 
     finalrc = ESMF_SUCCESS

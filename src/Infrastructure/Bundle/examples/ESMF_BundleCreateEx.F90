@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.22 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.23 2005/02/28 16:21:46 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -23,17 +23,16 @@
     implicit none
     
 !   ! Local variables
-    integer :: i, x, y, rc, mycell, fieldcount
+    integer :: i, rc, fieldcount
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_FieldDataMap) :: datamap
+    !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: delayout
     type(ESMF_VM) :: vm
-    character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2
-    type(ESMF_IOSpec) :: iospec
+    character (len = ESMF_MAXSTR) :: bname1, fname1, fname2
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3
-    real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
+  !real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
     integer :: counts(2)
     real(ESMF_KIND_R8) :: min_coord(2), max_coord(2)
 !\end{verbatim}

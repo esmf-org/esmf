@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.30 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.31 2005/02/28 16:22:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,20 +28,19 @@
     implicit none
     
     ! Local variables
-    integer :: x, y, rc, mycell
+    integer :: rc, mycell
     integer :: gridCount(2)
     type(ESMF_Grid) :: grid
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2
-    type(ESMF_FieldDataMap) :: datamap
     type(ESMF_DELayout) :: layout
     type(ESMF_VM) :: vm
-    type(ESMF_RelLoc) :: relativelocation
-    character (len = ESMF_MAXSTR) :: fname
-    type(ESMF_IOSpec) :: iospec
+    !type(ESMF_RelLoc) :: relativelocation
+    !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_Field) :: field1, field2, field3
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     real (ESMF_KIND_R8), dimension(2) :: origin
+    character (len = ESMF_MAXSTR) :: fname
 !EOC
     integer :: finalrc       
 !   !Set finalrc to success

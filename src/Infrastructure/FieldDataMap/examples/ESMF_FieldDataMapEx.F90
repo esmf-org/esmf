@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapEx.F90,v 1.4 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_FieldDataMapEx.F90,v 1.5 2005/02/28 16:22:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,9 +29,10 @@
 
       ! local variables 
       type(ESMF_FieldDataMap) :: fieldDM
-      type(ESMF_IndexOrder) :: indexOrder
       type(ESMF_RelLoc) :: relativeLocation
-      integer :: dataRank, dataIndexList(ESMF_MAXDIM), counts(ESMF_MAXDIM)
+      integer :: dataRank, dataIndexList(ESMF_MAXDIM)
+      ! integer :: counts(ESMF_MAXDIM)
+      ! type(ESMF_IndexOrder) :: indexOrder
 
 
 

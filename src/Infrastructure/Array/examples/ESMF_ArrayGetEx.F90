@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGetEx.F90,v 1.4 2005/02/14 04:36:22 theurich Exp $
+! $Id: ESMF_ArrayGetEx.F90,v 1.5 2005/02/28 16:21:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,12 +28,12 @@
     implicit none
 
     ! Local variables
-    integer :: nx, ny, arank, rc
+    integer :: arank, rc
     integer :: i, j, ni, nj
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_DataKind) :: akind
     type(ESMF_DataType) :: atype
-    type(ESMF_Array) :: array1, array2, array3
+    type(ESMF_Array) :: array1, array2
     real(selected_real_kind(6,45)), dimension(:,:), pointer :: realptr, realptr2
     integer(selected_int_kind(5)), dimension(:), pointer :: intptr, intptr2
 !EOC

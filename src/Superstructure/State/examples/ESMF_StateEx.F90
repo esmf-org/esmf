@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.19 2005/02/14 04:36:25 theurich Exp $
+! $Id: ESMF_StateEx.F90,v 1.20 2005/02/28 16:22:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,11 +28,11 @@
     implicit none
 
     ! Local variables
-    integer :: x, y, rc
+    integer :: rc
     character(ESMF_MAXSTR) :: statename, bundlename, dataname
-    type(ESMF_Field) :: field1
+    !type(ESMF_Field) :: field1
     type(ESMF_Bundle) :: bundle1, bundle2
-    type(ESMF_State) :: state1, state2, state3, state4
+    type(ESMF_State) :: state1, state2, state3
 !EOC
     integer :: finalrc
     finalrc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.5 2004/06/23 19:22:31 cdeluca Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.6 2005/02/28 16:21:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,6 @@ program ESMF_DELayoutEx
   ! local variables
   integer:: rc
   type(ESMF_VM):: vm
-  integer:: localPet, petCount, peCount, ssiId
   type(ESMF_DELayout):: delayout
   type(ESMF_Logical):: otoflag
   ! result code

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcileEx.F90,v 1.5 2005/02/14 04:36:25 theurich Exp $
+! $Id: ESMF_StateReconcileEx.F90,v 1.6 2005/02/28 16:23:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,11 +55,10 @@
 
     ! Local variables
     integer :: rc
-    type(ESMF_Field) :: field1
     type(ESMF_State) :: state1
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_VM) :: vm, vmsub1, vmsub2
-    character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename, fieldname
+    character(len=ESMF_MAXSTR) :: comp1name, comp2name, statename
 
 !EOC
     integer :: finalrc
