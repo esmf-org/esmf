@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2003/03/10 03:23:14 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.4 2003/03/24 22:56:24 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -96,25 +96,36 @@
 
 !     ! Local variables
         type(ESMF_State) :: mystatelist(2), mysource, mydest
-        type(ESMF_Field) :: humidity
+        type(ESMF_Field) :: humidity1, humidity2
+        type(ESMF_DELayout) :: cpllayout
+
+       
         integer :: status
 
         print *, "User Coupler Run starting"
 
         ! Get information from the component.
-        call ESMF_CompGet(comp, statelist=mystatelist, rc=status)
+        call ESMF_CompGet(comp, statelist=mystatelist, layout=cpllayout, &
+                                                                  rc=status)
         mysource = mystatelist(1)
         mydest = mystatelist(2)
 
         ! Get input data
         call ESMF_StatePrint(mysource, rc=status)
-        call ESMF_StateGetData(mysource, "humidity", humidity, rc=status)
-        call ESMF_FieldPrint(humidity, "", rc=status)
+        call ESMF_StateGetData(mysource, "humidity", humidity1, rc=status)
 
-        ! This is where the model specific computation goes.
+        ! Get location of output data
+        call ESMF_StatePrint(mydest, rc=status)
+        call ESMF_StateGetData(mydest, "humidity", humidity2, rc=status)
+
+
+        ! These are fields on different layouts - call Route to rearrange
+        !  the data using the Comm routines.
+        call ESMF_FieldRoute(humidity1, humidity2, cpllayout, status)
+
 
         ! Set output data
-        call ESMF_StateAddData(mydest, humidity, rc=status)
+        call ESMF_StateAddData(mydest, humidity2, rc=status)
         call ESMF_StatePrint(mydest, rc=status)
 
  

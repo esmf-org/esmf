@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.3 2003/03/10 05:40:49 cdeluca Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.4 2003/03/24 22:56:24 nscollins Exp $
 !
 ! System test code #62502
 
@@ -22,10 +22,6 @@
     use ESMF_BaseMod
     use ESMF_IOMod
     use ESMF_DELayoutMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
     use ESMF_StateMod
     use ESMF_CompMod
     
@@ -36,10 +32,9 @@
     implicit none
     
     ! Local variables
-    integer, dimension(4) :: delist
-    integer :: de_id, rc
+    integer :: de_id, rc, delist(4)
     character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
-    type(ESMF_DELayout) :: layout1 
+    type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_State) :: c1exp, c2imp, cplstate(2)
     type(ESMF_Comp) :: app, comp1, comp2, cpl
         
@@ -55,14 +50,9 @@
 !-------------------------------------------------------------------------
 !
 
-    ! TODO: move layout create down into comp after discover method ready.
-    ! Create a DELayout for the Component
-    delist = (/ 0, 1, 2, 3 /)
-    layout1 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
-
     ! Create the top level application component.
     aname = "System Test #62502"
-    app = ESMF_CompCreate(aname, layout=layout1, ctype=ESMF_APPCOMP, rc=rc)
+    app = ESMF_CompCreate(aname, ctype=ESMF_APPCOMP, rc=rc)
     print *, "Created component ", trim(aname), ",  rc =", rc
 
     ! Query application for layout.
@@ -71,11 +61,14 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    comp1 = ESMF_CompCreate(cname1, layout=layout1, ctype=ESMF_GRIDCOMP, rc=rc)
+    delist = (/ 0, 1, 2, 3 /)
+    layout2 = ESMF_DELayoutCreate(4, 1, delist, ESMF_XFAST, rc)
+    comp1 = ESMF_CompCreate(cname1, layout=layout2, ctype=ESMF_GRIDCOMP, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
 
     cname2 = "user model 2"
-    comp2 = ESMF_CompCreate(cname2, layout=layout1, ctype=ESMF_GRIDCOMP, rc=rc)
+    layout3 = ESMF_DELayoutCreate(2, 2, delist, ESMF_XFAST, rc)
+    comp2 = ESMF_CompCreate(cname2, layout=layout3, ctype=ESMF_GRIDCOMP, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
 
     cplname = "user one-way coupler"
