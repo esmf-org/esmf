@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2002/12/09 23:18:48 nscollins Exp $ 
+# $Id: makefile,v 1.5 2002/12/10 00:06:03 nscollins Exp $ 
 
 ALL: 
 
@@ -29,8 +29,8 @@ ESMF_ArrayCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_ArrayCreateEx: ESMF_ArrayCreateEx.o  chkopts
-	${F90CXXLD} -v -o ESMF_ArrayCreateEx ESMF_ArrayCreateEx.o ${ESMC_TIME_LIB} -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
-	${RM} -f ESMF_ArrayCreateEx.o
+	${F90CXXLD} -o ESMF_ArrayCreateEx ESMF_ArrayCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	${RM} ESMF_ArrayCreateEx.o
 
 RUN_ESMF_ArrayCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmps
