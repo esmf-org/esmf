@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.2 2004/02/26 20:45:07 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.3 2004/02/27 16:51:53 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,19 +118,15 @@ extern "C" {
     *status = ESMF_SUCCESS;
   }
 
-  void FTN(c_esmc_vmscatter)(ESMC_VM **vm, int *input, int *output, int *len,
+  void FTN(c_esmc_vmscatter)(ESMC_VM **vm, void *input, void *output, int *size,
     int *root, int *status){
-    // len must be converted into bytes:
-    int blen = (*len) * 4; // this is hard-coded for 32 bit integers
-    (*vm)->vmachine_scatter(input, output, blen, *root);
+    (*vm)->vmachine_scatter(input, output, *size, *root);
     *status = ESMF_SUCCESS;
   }
   
-  void FTN(c_esmc_vmgather)(ESMC_VM **vm, int *input, int *output, int *len, 
+  void FTN(c_esmc_vmgather)(ESMC_VM **vm, void *input, void *output, int *size, 
     int *root, int *status){
-    // len must be converted into bytes:
-    int blen = (*len) * 4; // this is hard-coded for 32 bit integers
-    (*vm)->vmachine_gather(input, output, blen, *root);
+    (*vm)->vmachine_gather(input, output, *size, *root);
     *status = ESMF_SUCCESS;
   }
 

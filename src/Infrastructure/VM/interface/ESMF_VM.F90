@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.1 2004/02/24 22:07:27 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.2 2004/02/27 16:51:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.1 2004/02/24 22:07:27 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.2 2004/02/27 16:51:53 theurich Exp $'
 
 !==============================================================================
       
@@ -672,6 +672,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: size
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -682,7 +683,8 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_VMScatter(vm, input, output, len, root, status)
+    size = len*4
+    call c_ESMC_VMScatter(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMScatter error"
       return
@@ -733,6 +735,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
     logical :: rcpresent
+    integer :: size
 
     ! Initialize return code; assume failure until success is certain       
     status = ESMF_FAILURE
@@ -743,7 +746,8 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_VMGather(vm, input, output, len, root, status)
+    size = len*4
+    call c_ESMC_VMGather(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMGather error"
       return
