@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.17 2004/05/27 11:36:16 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.18 2004/05/28 22:07:09 jwolfe Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -73,7 +73,7 @@
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    name="srcgrid", rc=rc)
-    call ESMF_GridDistribute(srcgrid, delayout=layout2, rc=rc)
+    call ESMF_GridDistribute(dstgrid, delayout=layout2, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
