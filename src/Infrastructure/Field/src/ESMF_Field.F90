@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.173 2004/07/21 21:20:12 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.174 2004/07/21 21:43:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.173 2004/07/21 21:20:12 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.174 2004/07/21 21:43:40 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -482,8 +482,99 @@
 !     \end{description}
 !
 !EOP
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
 
 
+      type(ESMF_FieldType), pointer :: ftype      ! Pointer to new field
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+   
+      ! Initialize pointers
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      nullify(ftype)
+      nullify(ESMF_FieldCreateNoDataPtr%ftypep)
+
+      ! Initialize return code   
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      allocate(ftype, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "Allocating Field information", &
+                                       ESMF_CONTEXT, rc)) return
+
+      ! Call construction method to build field internals.
+      call ESMF_FieldConstructNoDataPtr(ftype, grid, arrayspec, horzRelloc, &
+                                       vertRelloc, haloWidth, datamap, name, &
+                                       iospec, status)
+      if (ESMF_LogMsgFoundError(status, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      ESMF_FieldCreateNoDataPtr%ftypep => ftype
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_FieldCreateNoDataPtr
+
+!------------------------------------------------------------------------------
+
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_FieldCreateNoArray"
+
+!BOP
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
+
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldCreateNoData()
+      function ESMF_FieldCreateNoArray(grid, horzRelloc, vertRelloc, &
+                                       haloWidth, datamap, name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Field) :: ESMF_FieldCreateNoArray 
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid                 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
+      integer, intent(in), optional :: haloWidth
+      type(ESMF_FieldDataMap), intent(in), optional :: datamap              
+      character (len=*), intent(in), optional :: name    
+      type(ESMF_IOSpec), intent(in), optional :: iospec  
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     An interface function to {\tt ESMF\_FieldCreateNoData()}.
+!     This version of {\tt ESMF\_FieldCreate} builds an {\tt ESMF\_Field} 
+!     and depends on a later call to add an {\tt ESMF\_Array} to it.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid] 
+!           Pointer to an {\tt ESMF\_Grid} object. 
+!     \item [{[horzRelloc]}] 
+!           Relative location of data per grid cell/vertex in the horizontal
+!           grid.
+!     \item [{[vertRelloc]}] 
+!           Relative location of data per grid cell/vertex in the vertical grid.
+!     \item [{[haloWidth]}] 
+!           Maximum halo depth along all edges.  Default is 0.
+!     \item [{[datamap]}]
+!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!     \item [{[name]}] 
+!           {\tt Field} name. 
+!     \item [{[iospec]}] 
+!           I/O specification. 
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: FLD1.1.3, FLD1.5.1
+
+ 
       type(ESMF_FieldType), pointer :: ftype  ! Pointer to new field
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
