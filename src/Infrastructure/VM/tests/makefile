@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.6 2004/12/21 16:11:28 rfaincht Exp $ 
+# $Id: makefile,v 1.7 2005/01/24 17:20:26 rfaincht Exp $ 
 
 ALL:  build_tests
 
 CFLAGS    =
-FFLAGS    =
+FFLAGS    = -omp
 SOURCEC	  = 
 SOURCEF	  =
 
@@ -18,16 +18,28 @@ LOCDIR	  = src/Infrastructure/VM/tests
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_VMUTest\
 		$(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest\
 		$(ESMC_TESTDIR)/ESMF_VMSendRecvUTest\
-		$(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest
+		$(ESMC_TESTDIR)/ESMF_VMScatterUTest\
+		$(ESMC_TESTDIR)/ESMF_VMGatherUTest\
+		$(ESMC_TESTDIR)/ESMF_VMBroadcastUTest\
+		$(ESMC_TESTDIR)/ESMF_VMBarrierUTest\
+		$(ESMC_TESTDIR)/ESMF_VMThreadBarrierUTest
 
 TESTS_RUN     = RUN_ESMF_VMUTest\
                 RUN_ESMF_VMSendVMRecvUTest\
                 RUN_ESMF_VMSendRecvUTest\
-                RUN_ESMF_VMScatterVMGatherUTest
+                RUN_ESMF_VMScatterUTest\
+                RUN_ESMF_VMGatherUTest\
+		RUN_ESMF_VMBroadcastUTest\
+		RUN_ESMF_VMBarrierUTest\
+		RUN_ESMF_VMThreadBarrierUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
                 RUN_ESMF_VMSendVMRecvUTestUNI\
-                RUN_ESMF_VMScatterVMGatherUTestUNI
+                RUN_ESMF_VMScatterUTestUNI\
+                RUN_ESMF_VMGatherUTestUNI\
+		RUN_ESMF_VMBroadcastUTestUNI\
+		RUN_ESMF_VMBarrierUTestUNI\
+		RUN_ESMF_VMThreadBarrierUTestUNI
 
 TESTS_RM      = ESMF_VMUTest.rm
 
@@ -76,12 +88,52 @@ RUN_ESMF_VMSendVMRecvUTestUNI:
 	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest > $(ESMC_TESTDIR)/ESMF_VMSendVMRecvUTest.stdout
 
 #
-# VM Scatter Gather
+# VM Scatter 
 #
-RUN_ESMF_VMScatterVMGatherUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_VMScatterVMGatherUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest > $(ESMC_TESTDIR)/ESMF_VMScatterVMGatherUTest.stdout
+RUN_ESMF_VMScatterUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMScatterUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMScatterUTest > $(ESMC_TESTDIR)/ESMF_VMScatterUTest.stdout
 
-ESMF_VMScatterVMGatherUTest.rm:
-	echo "ESMF_VMScatterVMGatherUTest.rm target called here."
+ESMF_VMScatterUTest.rm:
+	echo "ESMF_VMScatterUTest.rm target called here."
+
+#
+# VM Gather
+#
+RUN_ESMF_VMGatherUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMGatherUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMGatherUTest > $(ESMC_TESTDIR)/ESMF_VMGatherUTest.stdout
+
+ESMF_VMGatherUTest.rm:
+	echo "ESMF_VMGatherUTest.rm target called here."
+#
+# VM Broadcast
+#
+RUN_ESMF_VMBroadcastUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMBroadcastUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMBroadcastUTest > $(ESMC_TESTDIR)/ESMF_VMBroadcastUTest.stdout
+
+ESMF_VMBroadcastUTest.rm:
+	echo "ESMF_VMBroadcastUTest.rm target called here."
+
+#
+# VM Barrier
+#
+RUN_ESMF_VMBarrierUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMBarrierUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_VMBarrierUTest > $(ESMC_TESTDIR)/ESMF_VMBarrierUTest.stdout
+
+ESMF_VMBarrierUTest.rm:
+	echo "ESMF_VMBarrierUTest.rm target called here."
+
+#
+# VM Barrier
+#
+RUN_ESMF_VMThreadBarrierUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_VMThreadBarrierUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_VMThreadBarrierUTest > $(ESMC_TESTDIR)/ESMF_VMThreadBarrierUTest.stdout
+
+ESMF_VMBarrierUTest.rm:
+	echo "ESMF_VMThreadBarrierUTest.rm target called here."
+
 

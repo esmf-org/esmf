@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.7 2004/12/16 04:27:18 svasquez Exp $
+! $Id: ESMF_VMScatterUTest.F90,v 1.1 2005/01/24 17:20:26 rfaincht Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_VMScatterVMGatherUTest
+      program ESMF_VMScatterUTest
 
 !------------------------------------------------------------------------------
  
@@ -18,12 +18,12 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_VMScatterVMGatherUTest - Unit test for VM Scatter Gather Functions
+! !PROGRAM: ESMF_VMScatterUTest - Unit test for VM Scatter Functions
 !
 ! !DESCRIPTION:
 !
-! The code in this file drives the F90 VM Scatter Gather tests.  The VM
-!   Scatter Gather function is complex enough to require a separate test file.
+! The code in this file drives the F90 VM Scatter tests.  The VM
+!   Scatter  function is complex enough to require a separate test file.
 !   It runs on multiple processors.
 !
 !-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.7 2004/12/16 04:27:18 svasquez Exp $'
+      '$Id: ESMF_VMScatterUTest.F90,v 1.1 2005/01/24 17:20:26 rfaincht Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -52,6 +52,8 @@
       integer:: localPet, petCount
       integer:: nlen, nsize, i, scatterRoot, gatherRoot
       integer, allocatable:: array1(:), array2(:)
+      real(ESMF_KIND_R8), allocatable:: farray1(:), farray2(:)
+      real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:)
      
       integer :: status, myde 
 
@@ -77,15 +79,23 @@
       nlen = nsize * petCount
       allocate(array1(nlen))
       allocate(array2(nsize))
+      allocate(farray1(nlen))
+      allocate(farray2(nsize))
+      allocate(f4array1(nlen))
+      allocate(f4array2(nsize))
 
       ! prepare data array1
       do i=1, nlen
         array1(i) = localPet * 100 + i
+        farray1(i) = real(array1(i))
+        f4array1(i) = farray1(i)
       enddo
 
       ! prepare data array2
       do i=1, nsize
         array2(i) = 0
+        farray2(i) = 0.
+        f4array2(i) = 0.
       enddo
 
       !------------------------------------------------------------------------
@@ -104,6 +114,8 @@
         print *, localPet,' array1: ', array1(i)
       enddo
 
+      ! Testing with Integer arguments
+      !===============================
       !------------------------------------------------------------------------
       !NEX_UTest
       ! Verify array2 data before scatter
@@ -162,54 +174,94 @@
       enddo
 
 
+      !Testing with ESMF_KIND_R8 arguments
+      !===================================
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Gather from gatherRoot
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Gather Test"
-      call ESMF_VMGather(vm, sendData=array2, recvData=array1, count=nsize, &
-      root=gatherRoot, rc=rc)
+      ! Scatter from scatterRoot
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Scatter Test"
+      call ESMF_VMScatter(vm, sendData=farray1, recvData=farray2, count=nsize, &
+      root=scatterRoot, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Verify array1 data after gather
+      ! Verify farray1 data after scatter
       write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array1 data after gather Test"
+      write(name, *) "Verifying farray1 data after scatter Test"
       rc = ESMF_SUCCESS
-      if (localPet==gatherRoot) then
-      	do i=1, nlen
-		if (array1(i)/=(scatterRoot * 100 + i)) rc = ESMF_FAILURE
-      	enddo
-      else
-      	do i=1, nlen
-		if (array1(i)/=(localPet * 100 + i)) rc = ESMF_FAILURE
-      	enddo
-      endif
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-      print *, 'contents after gather:'
       do i=1, nlen
-        print *, localPet,' array1: ', array1(i)
+        if ( farray1(i)/=( real(localPet*100+i) ) ) rc = ESMF_FAILURE
+      enddo
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'contents after scatter:'
+      do i=1, nlen
+        print *, localPet,' farray1: ', farray1(i)
       enddo
 
       !------------------------------------------------------------------------
       !NEX_UTest
-      ! Verify array2 data after gather
+      ! Verify farray2 data after scatter
       write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array2 data after gather Test"
+      write(name, *) "Verifying farray2 data after scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
-	if (array2(i)/=(scatterRoot * 100 + i + 2 * localPet)) rc = ESMF_FAILURE
+        if (farray2(i) /= ( real( scatterRoot*100+i+2*localPet ) ) ) &
+         rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, 'contents after gather:'
+      print *, 'contents after scatter:'
       do i=1, nsize
-        print *, localPet,' array2: ', array2(i)
+        print *, localPet,' farray2: ', farray2(i)
       enddo
 
+      !Testing with ESMF_KIND_R4 arguments
+      !===================================
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Scatter from scatterRoot
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Scatter Test"
+      call ESMF_VMScatter(vm, sendData=f4array1, recvData=f4array2, count=nsize, &
+      root=scatterRoot, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify f4array1 data after scatter
+      write(failMsg, *) "Wrong data."
+      write(name, *) "Verifying f4array1 data after scatter Test"
+      rc = ESMF_SUCCESS
+      do i=1, nlen
+        if ( f4array1(i)/=( real(localPet*100+i) ) ) rc = ESMF_FAILURE
+      enddo
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'contents after scatter:'
+      do i=1, nlen
+        print *, localPet,' f4array1: ', f4array1(i)
+      enddo
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify f4array2 data after scatter
+      write(failMsg, *) "Wrong data."
+      write(name, *) "Verifying f4array2 data after scatter Test"
+      rc = ESMF_SUCCESS
+      do i=1, nsize
+        if (f4array2(i) /= ( real( scatterRoot*100+i+2*localPet ) ) ) &
+         rc = ESMF_FAILURE
+      enddo
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'contents after scatter:'
+      do i=1, nsize
+        print *, localPet,' f4array2: ', f4array2(i)
+      enddo
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-      end program ESMF_VMScatterVMGatherUTest
+      end program ESMF_VMScatterUTest
