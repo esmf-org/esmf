@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.43 2003/07/07 20:15:41 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.44 2003/07/07 22:28:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -165,16 +165,20 @@
 
 !------------------------------------------------------------------------------
 !
-      !! TODO: this should be a shallow object, with a simple init() and
-      !!  get() function, and the contents should go back to being private.
       type ESMF_AxisIndex
       sequence
-!     !!private
-          integer :: l
-          integer :: r
+          integer :: min
           integer :: max
-          integer :: decomp
-          integer :: gstart
+          integer :: stride
+      end type
+
+!------------------------------------------------------------------------------
+!
+      ! possible new type
+      type ESMF_Domain
+      sequence
+          integer :: rank
+          type (ESMF_AxisIndex) :: ai[MAXDIM]
       end type
 
 !------------------------------------------------------------------------------
@@ -241,7 +245,7 @@
       public ESMF_DataValue, ESMF_Attribute
       public ESMF_BasePointer, ESMF_Base
 
-      public ESMF_AxisIndex, ESMF_AxisIndexInit, ESMF_AxisIndexGet
+      public ESMF_AxisIndex, ESMF_AxisIndexSet, ESMF_AxisIndexGet
       public ESMF_Logical, ESMF_TF_TRUE, ESMF_TF_FALSE
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -308,7 +312,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.43 2003/07/07 20:15:41 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.44 2003/07/07 22:28:38 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -459,11 +463,9 @@ function ESMF_aieq(ai1, ai2)
  logical ESMF_aieq
  type(ESMF_AxisIndex), intent(in) :: ai1, ai2
 
- ESMF_aieq = ((ai1%l .eq. ai2%l) .and. &
-              (ai1%r .eq. ai2%r) .and. &
+ ESMF_aieq = ((ai1%min .eq. ai2%min) .and. &
               (ai1%max .eq. ai2%max) .and. &
-              (ai1%decomp .eq. ai2%decomp) .and. &
-              (ai1%gstart .eq. ai2%gstart))
+              (ai1%stride .eq. ai2%stride))
 
 end function
 
@@ -471,11 +473,9 @@ function ESMF_aine(ai1, ai2)
  logical ESMF_aine
  type(ESMF_AxisIndex), intent(in) :: ai1, ai2
 
- ESMF_aine = ((ai1%l .ne. ai2%l) .or. &
-              (ai1%r .ne. ai2%r) .or. &
+ ESMF_aine = ((ai1%min .ne. ai2%min) .or. &
               (ai1%max .ne. ai2%max) .or. &
-              (ai1%decomp .ne. ai2%decomp) .or. &
-              (ai1%gstart .ne. ai2%gstart))
+              (ai1%stride .ne. ai2%stride))
 
 end function
 
@@ -931,15 +931,15 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_AxisIndexInit - initialize an AxisIndex object
+!IROUTINE:  ESMC_AxisIndexSet - initialize an AxisIndex object
 
 !
 ! !INTERFACE:
-      subroutine ESMF_AxisIndexInit(ai, l, r, max, decomp, gstart, rc)
+      subroutine ESMF_AxisIndexSet(ai, min, max, stride, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_AxisIndex), intent(inout) :: ai
-      integer, intent(in) :: l, r, max, decomp, gstart
+      integer, intent(in) :: min, max, stride
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -949,27 +949,25 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-      ai%l = l
-      ai%r = r
+      ai%min = min
       ai%max = max
-      ai%decomp = decomp
-      ai%gstart = gstart
+      ai%stride = stride
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_AxisIndexInit
+      end subroutine ESMF_AxisIndexSet
 
+!-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_AxisIndexInit - initialize an AxisIndex object
-
+!IROUTINE:  ESMC_AxisIndexGet - get contents of an AxisIndex object
 !
 ! !INTERFACE:
-      subroutine ESMF_AxisIndexGet(ai, l, r, max, decomp, gstart, rc)
+      subroutine ESMF_AxisIndexGet(ai, min, max, stride, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_AxisIndex), intent(inout) :: ai
-      integer, intent(out), optional :: l, r, max, decomp, gstart
+      type(ESMF_AxisIndex), intent(in) :: ai
+      integer, intent(out), optional :: min, max, stride
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -979,11 +977,9 @@ end function
 !EOP
 ! !REQUIREMENTS:
 
-      if (present(l)) l = ai%l
-      if (present(r)) r = ai%r
+      if (present(max)) min = ai%min
       if (present(max)) max = ai%max
-      if (present(decomp)) decomp = ai%decomp
-      if (present(gstart)) gstart = ai%gstart
+      if (present(gstart)) stride = ai%stride
 
       if (present(rc)) rc = ESMF_SUCCESS
 
