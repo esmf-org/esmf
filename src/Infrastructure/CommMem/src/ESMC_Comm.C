@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.17 2003/03/25 16:35:35 nscollins Exp $
+// $Id: ESMC_Comm.C,v 1.18 2003/03/25 16:44:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,6 +28,7 @@
 //using std::endl;
 #include <ESMC.h>
 #include <string.h>  // memset TODO:  ?? remove -test only
+#include <stdio.h>
 #include <mpi.h>
 
  // associated class definition file
@@ -36,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.17 2003/03/25 16:35:35 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.18 2003/03/25 16:44:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
