@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.18 2003/07/09 19:47:21 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.19 2003/07/09 20:02:23 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@ struct ESMC_Attribute {
 
 // elemental index for axis decompositions
 struct ESMC_AxisIndex {
-    int     max;
+    int     min;
     int     max;
     int  stride;
 };
