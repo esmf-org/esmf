@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.C,v 1.16 2004/06/14 22:16:48 theurich Exp $
+// $Id: ESMC_ArrayComm.C,v 1.17 2004/06/23 16:33:22 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.16 2004/06/14 22:16:48 theurich Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.17 2004/06/23 16:33:22 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -375,9 +375,9 @@ static int ESMC_newDELayoutGatherArray(
                                   NULL, NULL, NULL, 0);
 
     // create array with global data buffer
-    printf("arraygather: %d, %d\n", thisde, deid);
+    //printf("arraygather: %d, %d\n", thisde, deid);
     if (thisde == deid) {
-      printf("arraygather: I am root\n");
+      //printf("arraygather: I am root\n");
         gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
 
         // call something which will do a receive
@@ -390,7 +390,7 @@ static int ESMC_newDELayoutGatherArray(
                                               this->kind, gathered->base_addr);
         //gathered->ESMC_ArrayPrint();
     } else {
-      printf("arraygather: I am not root\n");
+      //printf("arraygather: I am not root\n");
         // call something which will do a send
        ESMC_newDELayoutGatherArray(delayout, deid, this->base_addr, global_dimlengths, 
                                              decompids, size_decomp, 
@@ -510,7 +510,7 @@ static int ESMC_newDELayoutGatherArray(
       default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data type", &rc);
-        !printf("no code to handle data type %d yet\n", this->type);
+        //printf("no code to handle data type %d yet\n", this->type);
         return (rc);
     }
 
@@ -588,7 +588,7 @@ static int ESMC_newDELayoutGatherArray(
       case 1:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data rank", &rc);
-        !printf("no code to handle array rank %d yet\n", this->rank);
+        //printf("no code to handle array rank %d yet\n", this->rank);
         return (rc);
       break;
       case 2:
@@ -695,13 +695,13 @@ static int ESMC_newDELayoutGatherArray(
       case 5:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data rank", &rc);
-        !printf("no code to handle array rank %d yet\n", this->rank);
+        //printf("no code to handle array rank %d yet\n", this->rank);
         return (rc);
       break;
       default:
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
                                           "unsupported data rank", &rc);
-        !printf("no code to handle array rank %d yet\n", this->rank);
+        //printf("no code to handle array rank %d yet\n", this->rank);
         return (rc);
       break;
     }
