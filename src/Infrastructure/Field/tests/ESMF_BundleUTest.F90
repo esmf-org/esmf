@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.18 2003/06/19 16:55:45 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.19 2003/06/19 19:01:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.18 2003/06/19 16:55:45 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.19 2003/06/19 19:01:02 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -91,8 +91,7 @@
      
 #ifdef ESMF_EXHAUSTIVE
 
-      ! The following code is commented out because it crashes the program
-      ! It will be uncommented when the bug is fixed
+      !EX_UTest
       !  Verify that the Field count query from an uninitialized Bundle is handled properly
       call ESMF_BundleGetFieldCount(bundle1, fieldcount, rc);
       write(failMsg, *) ""
@@ -126,30 +125,33 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
-      ! Verify that adding a Field to an uninitialized Bundle is handled correctly
-      ! This code is commented out because it crashes the program.
-      !It will be uncommented when the bug is fixed
+      !EX_UTest
       call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
-      write(failMsg, *) "Add Field to uncreated Bundle failed"
-      write(name, *) "Adding a Field to an uncreated Bundle Test"
+      write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
+      write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+#endif
 
       !  Verify that a Field can be added to a Bundle
-      ! The following code is commented out because it crashes. Bug 703872
-      simplefield = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
-                                     name="rh", rc=rc)
-
-      grid = ESMF_GridCreate(rc=rc)
-      fields(1) = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
+      !NEX_UTest
       !  Verify that an empty Bundle can be created
-      bundle2 = ESMF_BundleCreate(1, fields, name="time step 1", rc=rc);
+      bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);
       write(failMsg, *) ""
       write(name, *) "Creating Empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-#endif
+      !NEX_UTest
+      ! Add a field to an empty Bundle
+      grid = ESMF_GridCreate(rc=rc)
+      simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
+      call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
+      write(failMsg, *) ""
+      write(name, *) "Adding a field to an Empty Bundle"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
 
       !NEX_UTest
       !  Verify that recreating a created Bundle is handled properly
