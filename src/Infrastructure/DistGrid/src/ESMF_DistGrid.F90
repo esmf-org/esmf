@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.8 2002/12/04 21:29:25 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.9 2002/12/13 18:54:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,8 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_DistGrid.h>
-#include <ESMF_Macros.inc>
+#include "ESMF_DistGrid.h"
+#include "ESMF_Macros.inc"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_DistGridMod - contains Grid decompostion methods
@@ -39,6 +39,7 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_ArrayMod
       use ESMF_BaseMod
       implicit none
 
@@ -58,16 +59,83 @@
       end type
 
 !------------------------------------------------------------------------------
+!     ! ESMF_DecompAxis
+!
+!     ! Description of ESMF_DecompAxis
+
+      type ESMF_DecompAxis
+      sequence
+      private
+        integer :: start
+        integer :: end
+        integer :: size
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_Decomp
+!
+!     ! Description of ESMF_Decomp
+
+      type ESMF_Decomp
+      sequence
+      private
+        type (ESMF_DecompAxis) :: DEdir1   ! axis decomposition in 1st dir
+        type (ESMF_DecompAxis) :: DEdir2   ! axis decomposition in 2nd dir
+        logical ::  periodic_dir1          ! periodic boundary in 1st dir
+        logical ::  periodic_dir2          ! periodic boundary in 2nd dir
+        integer :: num_masks               ! number of decomposition masks
+        type (ESMF_Array) :: mask          ! decomposition masks
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_MyDE
+!
+!     ! Description of ESMF_MyDE
+
+      type ESMF_MyDE
+      sequence
+      private
+        integer :: MyDE      ! identifier for this DE
+        integer :: DE_East   ! identifier for DE to the east
+        integer :: DE_West   ! identifier for DE to the west
+        integer :: DE_North  ! identifier for DE to the north
+        integer :: DE_South  ! identifier for DE to the south
+        integer :: DE_NE     ! identifier for DE to the northeast
+        integer :: DE_NW     ! identifier for DE to the northwest
+        integer :: DE_SE     ! identifier for DE to the southeast
+        integer :: DE_SW     ! identifier for DE to the southwest
+        integer :: lsize     ! local (on this DE) number of cells
+        type (ESMF_DecompAxis) :: n_dir1  ! global cell count in 1st dir
+        type (ESMF_DecompAxis) :: n_dir2  ! global cell count in 2nd dir
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_DistGridType
 !
 !     !  Description of ESMF_DistGrid. 
+!     !  WARNING!  this is not complete -- there is no halo functionality
 
       type ESMF_DistGridType
       sequence
       private
         type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
+!       type (ESMF_Layout), dimension(:), pointer :: layouts
+        type (ESMF_Decomp) :: decomp       ! DE decomposition object
+        type (ESMF_MyDE) :: MyDE           ! local DE identifiers
+        integer :: gsize                   ! global number of cells
+        integer :: gsize_dir1              ! global number of cells in 1st dir
+        integer :: gsize_dir2              ! global number of cells in 2nd dir
+        type (ESMF_Array) :: DEids         ! array of all DE identifiers
+        type (ESMF_DecompAxis), dimension(:), pointer :: local_dir1
+        type (ESMF_DecompAxis), dimension(:), pointer :: local_dir2
+        type (ESMF_DecompAxis), dimension(:), pointer :: global_dir1
+        type (ESMF_DecompAxis), dimension(:), pointer :: global_dir2
+        type (ESMF_DecompAxis), dimension(:), pointer :: memory_dir1
+        type (ESMF_DecompAxis), dimension(:), pointer :: memory_dir2
+        integer :: maxsize_dir1            ! maximum DE cell count in 1st dir
+        integer :: maxsize_dir2            ! maximum DE cell count in 2nd dir
+        logical :: covers_domain_dir1      ! identifiers if distgrid covers
+        logical :: covers_domain_dir2      ! the entire physical domain
       end type
 
 !------------------------------------------------------------------------------
@@ -85,38 +153,32 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_DistGridConfig
+      public ESMF_MyDE
+      public ESMF_DecompAxis
+      public ESMF_Decomp
       public ESMF_DistGrid
+      public ESMF_DistGridType
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-!  Pick one or the other of the init/create sections depending on
-!  whether this is a deep class (the class/derived type has pointers to
-!  other memory which must be allocated/deallocated) or a shallow class
-!  (the class/derived type is self-contained) and needs no destroy methods
-!  other than deleting the memory for the object/derived type itself.
-
-! the following routines apply to deep classes only
-    public ESMF_DistGridCreate                 ! interface only, deep class
-    public ESMF_DistGridDestroy                ! interface only, deep class
-
+    public ESMF_DistGridCreate
+    public ESMF_DistGridDestroy
     public ESMF_DistGridGetConfig
     public ESMF_DistGridSetConfig
-    public ESMF_DistGridGetValue               ! Get<Value>
-    public ESMF_DistGridSetValue               ! Set<Value>
- 
+    public ESMF_DistGridSetCounts
+    public ESMF_DistGridSetDecomp
+    public ESMF_DistGridGetValue
+    public ESMF_DistGridSetValue
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
  
-! < list the rest of the public interfaces here >
-!
-!
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.8 2002/12/04 21:29:25 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.9 2002/12/13 18:54:27 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -128,7 +190,9 @@
       interface ESMF_DistGridCreate 
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_DistGridCreateNew
+         module procedure ESMF_DistGridCreateEmpty
+         module procedure ESMF_DistGridCreateInternal
+!        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for DistGrid create
@@ -143,7 +207,8 @@
       interface ESMF_DistGridConstruct
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_DistGridConstructNew
+         module procedure ESMF_DistGridConstructEmpty
+         module procedure ESMF_DistGridConstructInternal
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
@@ -153,9 +218,36 @@
       end interface 
 !
 !------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_DistGridSetCounts
 
-!    < add other interfaces here>
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DistGridSetCountsInternal
 
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     extent counts in a {\tt DistGrid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_DistGridSetDecomp
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_DistGridSetDecompInternal
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     extent counts in a {\tt DistGrid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
 !==============================================================================
 
       contains
@@ -167,33 +259,26 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_DistGridCreateNew - Create a new DistGrid
+!     ESMF_DistGridCreateEmpty - Create a new DistGrid with no data
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateNew(name, rc)
+      function ESMF_DistGridCreateEmpty(name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DistGrid) :: ESMF_DistGridCreateNew
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateEmpty
 !
 ! !ARGUMENTS:
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 
-!     integer, intent(in) :: arg1                        
-!     integer, intent(in) :: arg2                        
-!
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt DistGrid} object and constructs its
-!     internals.
+!     internals.  Returns a pointer to a new {\tt DistGrid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[[name]] 
 !          {\tt DistGrid} name.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -207,7 +292,7 @@
 
 !     Initialize pointers
       nullify(distgrid)
-      nullify(ESMF_DistGridCreateNew%ptr)
+      nullify(ESMF_DistGridCreateEmpty%ptr)
 
 !     Initialize return code
       if(present(rc)) then
@@ -219,22 +304,98 @@
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridCreateNew: Allocate"
+        print *, "ERROR in ESMF_DistGridCreateEmpty: Allocate"
         return
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructNew(distgrid, name, status)
+      call ESMF_DistGridConstruct(distgrid, name, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridCreateNew: DistGrid construct"
+        print *, "ERROR in ESMF_DistGridCreateEmpty: DistGrid construct"
         return
       endif
 
 !     Set return values.
-      ESMF_DistGridCreateNew%ptr => distgrid
+      ESMF_DistGridCreateEmpty%ptr => distgrid
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_DistGridCreateNew
+      end function ESMF_DistGridCreateEmpty
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridCreateInternal - Create a new DistGrid internally
+
+! !INTERFACE:
+      function ESMF_DistGridCreateInternal(nDE_i, nDE_j, i_max, j_max, &
+                                           name, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
+!
+! !ARGUMENTS:
+      integer, intent(in) :: nDE_i
+      integer, intent(in) :: nDE_j
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
+      character (len = *), intent(in), optional :: name  
+      integer, intent(out), optional :: rc               
+
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt DistGrid} object, constructs its
+!     internals, and internally sets necessary attributes and values.
+!     Returns a pointer to a new {\tt DistGrid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[nDE\_i]] 
+!          Number of distributed elements (DE's) in the 1st direction.
+!     \item[[nDE\_j]] 
+!          Number of distributed elements (DE's) in the 2nd direction.
+!     \item[[i\_max]] 
+!          Global number of computation cells in the 1st direction.
+!     \item[[j\_max]] 
+!          Global number of computation cells in the 2nd direction.
+!     \item[[name]] 
+!          {\tt DistGrid} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
+      integer :: status=ESMF_FAILURE                ! Error status
+      logical :: rcpresent=.FALSE.                  ! Return code present
+
+!     Initialize pointers
+      nullify(distgrid)
+      nullify(ESMF_DistGridCreateInternal%ptr)
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(distgrid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridCreateEmpty: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_DistGridConstructInternal(distgrid, name, nDE_i, nDE_j, i_max, &
+                                          j_max, rc)
+
+!     Set return values.
+      ESMF_DistGridCreateInternal%ptr => distgrid
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_DistGridCreateInternal
 
 !------------------------------------------------------------------------------
 !BOP
@@ -271,11 +432,10 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_DistGridConstructNew - Construct the internals of an allocated
-!                                 DistGrid
+!     ESMF_DistGridConstructEmpty - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructNew(distgrid, name, rc)
+      subroutine ESMF_DistGridConstructEmpty(distgrid, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), intent(in) :: distgrid 
@@ -294,12 +454,8 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Pointer to a {\tt DistGrid}.
-!     \item[arg1]
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
 !     \item[[name]] 
-!          Argument 3.
+!          Name of the {\tt DistGrid}.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -317,13 +473,118 @@
       endif
 
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_DistGridConstructNew: DistGrid construct"
+        print *, "ERROR in ESMF_DistGridConstructEmpty: DistGrid construct"
         return
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridConstructNew
+      end subroutine ESMF_DistGridConstructEmpty
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridConstructInternal(distgrid, name, nDE_i, nDE_j, &
+                                                i_max, j_max, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid 
+      character (len = *), intent(in), optional :: name  
+      integer, intent(in) :: nDE_i
+      integer, intent(in) :: nDE_j
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     ESMF routine which fills in the contents of an already
+!     allocated {\tt DistGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding ESMF_DistGridDestruct
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only; end-users use {\tt ESMF\_DistGridCreate}, which calls
+!     {\tt ESMF\_DistGridConstruct}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Pointer to a {\tt DistGrid}.
+!     \item[[name]] 
+!          {\tt DistGrid} name.
+!     \item[[nDE\_i]] 
+!          Number of distributed elements (DE's) in the 1st direction.
+!     \item[[nDE\_j]] 
+!          Number of distributed elements (DE's) in the 2nd direction.
+!     \item[[i\_max]] 
+!          Global number of computation cells in the 1st direction.
+!     \item[[j\_max]] 
+!          Global number of computation cells in the 2nd direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      integer :: status=ESMF_SUCCESS              ! Error status
+      integer :: nDE_avail                        ! Number of DE's available
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Set distgrid attributes from input or default
+!     TODO:  temporary fix, also add defaults to objects
+      distgrid%gsize_dir1 = i_max
+      distgrid%gsize_dir2 = j_max
+      distgrid%gsize = i_max*j_max
+      distgrid%covers_domain_dir1 = .true.
+      distgrid%covers_domain_dir2 = .true.
+
+!     Set decomposition attributes based on input numbers of processors
+      call ESMF_DistGridSetDecomp(distgrid, nDE_i, nDE_j, status)
+
+!     Query layout for number of DE's available and check with decomposition
+!     nDE_avail = ESMF_LayoutGetSize(distgrid%layout(1), status)
+      nDE_avail = 1
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: Layout getsize"
+        return
+      endif
+      if(nDE_avail .NE. nDE_i*nDE_j) then
+        status = ESMF_FAILURE
+        print *, "ERROR in ESMF_DistGridConstructInternal: bad number of DEs"
+        return
+      endif
+
+!     Parse problem size
+      call ESMF_DistGridSetCounts(distgrid, nDE_i, nDE_j, i_max, j_max, &
+                                  status)
+        
+!     Set DE attributes
+!     call ESMF_DistGridSetDE(distgrid, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
+        return
+      endif
+
+!     Calculate other distgrid attributes from DE information
+!     distgrid%maxsize_dir1 = GlobalCommMax()
+!     distgrid%maxsize_dir2 = GlobalCommMax()
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridConstructInternal
 
 !------------------------------------------------------------------------------
 !BOP
@@ -500,6 +761,142 @@
 !  code goes here
 !
       end subroutine ESMF_DistGridSetValue
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridSetCountsInternal(distgrid, nDE_i, nDE_j, &
+                                                i_max, j_max, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(in) :: nDE_i
+      integer, intent(in) :: nDE_j
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set a DistGrid attribute with the given value.
+!     May be multiple routines, one per attribute.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be modified.
+!     \item[[nDE\_i]]
+!          Number of DE's in the 1st direction.
+!     \item[[nDE\_j]]
+!          Number of DE's in the 2nd direction.
+!     \item[[i\_max]]
+!          Number of cells in the 1st direction.
+!     \item[[j\_max]]
+!          Number of cells in the 2nd direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      integer :: i, j                                !
+      integer :: ni, nj                              ! increment counters
+      integer :: global_s, global_e                  ! global counters
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Set extent counts for each axis from the number of pe's and number
+!     of cells
+      ni = i_max/nDE_i
+      global_s = 1
+      global_e = 0
+      do i = 1,nDE_i
+        global_e = min(global_e + ni, i_max)
+        distgrid%global_dir1(i)%start = global_s
+        distgrid%global_dir1(i)%end = global_e
+        distgrid%local_dir1(i)%start = 1
+        distgrid%local_dir1(i)%end = global_e - global_s + 1
+        global_s = global_e + 1
+      enddo
+      nj = j_max/nDE_j
+      global_s = 1
+      global_e = 0
+      do j = 1,nDE_j
+        global_e = min(global_e + nj, j_max)
+        distgrid%global_dir2(j)%start = global_s
+        distgrid%global_dir2(j)%end = global_e
+        distgrid%local_dir2(j)%start = 1
+        distgrid%local_dir2(j)%end = global_e - global_s + 1
+        global_s = global_e + 1
+      enddo
+
+      end subroutine ESMF_DistGridSetCountsInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_DistGridSetDecompInternal - Set decomposition for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridSetDecompInternal(DistGrid, nDE_i, nDE_j, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      integer, intent(in) :: nDE_i
+      integer, intent(in) :: nDE_j
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Set a DistGrid decomposition object corresponding to the given number
+!     of DE's per decomposition axis.  The number of DE's for either axis
+!     may be one to set a 1-D decomposition.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be modified.
+!     \item[[nDE\_i]]
+!          Number of DE's in the 1st direction.
+!     \item[[nDE\_j]]
+!          Number of DE's in the 2nd direction.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      distgrid%decomp%DEdir1%start = 1
+      distgrid%decomp%DEdir1%end = nDE_i
+      distgrid%decomp%DEdir1%size = nDE_i
+      distgrid%decomp%DEdir2%start = 1
+      distgrid%decomp%DEdir2%end = nDE_j
+      distgrid%decomp%DEdir2%size = nDE_j
+      distgrid%decomp%periodic_dir1 = .false.
+      distgrid%decomp%periodic_dir2 = .false.
+      distgrid%decomp%num_masks = 0
+
+      end subroutine ESMF_DistGridSetDecompInternal
 
 !------------------------------------------------------------------------------
 !BOP
