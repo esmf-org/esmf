@@ -45,8 +45,8 @@
 
       i_max = 10
       j_max = 12
-      nDE_i = 1
-      nDE_j = 1
+      nDE_i = 2
+      nDE_j = 2
       horz_gridtype = ESMF_GridType_XY
       vert_gridtype = ESMF_GridType_Unknown
       horz_stagger = ESMF_GridStagger_A
