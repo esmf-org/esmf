@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.7 2004/11/09 00:44:59 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.8 2004/11/09 16:28:35 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1281,7 +1281,9 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan &vmp, void *arg){
     vmkt_catch(&(sarg[0].vmkt));
     vmkt_catch(&(sarg[0].vmkt_extra));
   }
-  // now block all pets of the parent until the child has exited
+  // the following barrier has the effect that all parent PETs which either
+  // spawn or contribute to this child are being blocked until _all_ child
+  // PETs have reached this point. 
   vmk_barrier();
 }
 
