@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.19 2003/05/07 04:34:29 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.20 2003/06/16 20:06:06 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,10 +26,9 @@
 !BOPI
 ! !MODULE: ESMF_DELayoutMod - F90 Interface to C++ ESMC_DELayout class
 !
-! !DESCRIPTION:
-!
+! !DESCRIPTION: !
 ! The code in this file implements the Fortran interfaces to the
-! {\tt DELayout} class and associated functions and subroutines.  
+! {\tt ESMF\_DELayout} class and associated functions and subroutines.  
 !
 !
 !------------------------------------------------------------------------------
@@ -110,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.19 2003/05/07 04:34:29 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.20 2003/06/16 20:06:06 rstaufer Exp $'
 
 !==============================================================================
 ! 
@@ -227,18 +226,18 @@
       integer, intent(out), optional :: rc          ! return code
 !
 ! !DESCRIPTION:
-!  Create a new {\tt DELayout} using a parent {\tt DELayout}'s {\tt DE}s.  
+!  Create a new {\tt ESMF\_DELayout} using a parent {\tt ESMF\_DELayout}'s {\tt ESMF\_DE}s.  
 !
-!  The return value is a new {\tt DELayout}.
+!  The return value is a new {\tt ESMF\_DELayout}.
 !    
 !  The arguments are:
 !  \begin{description}
 ! 
 !   \item[parent]
-!     Parent {\tt DELayout}.
+!     Parent {\tt ESMF\_DELayout}.
 ! 
 !   \item[ndim]
-!     Dimension of new {\tt DELayout}.
+!     Dimension of new {\tt ESMF\_DELayout}.
 !     
 !   \item[lengths]
 !     Array of length {\tt ndim} that contains the number of
@@ -251,7 +250,7 @@
 !     {\tt ESMF\_COMMTYPE\_MP}.
 !
 !   \item[{[parent\_offsets]}]
-!     Offset in each parent {\tt DELayout} dimension.
+!     Offset in each parent {\tt ESMF\_DELayout} dimension.
 ! 
 !   \item[{[de\_indices]}]
 !     Selection of {\tt DE} indices to use.
@@ -326,22 +325,22 @@
       integer, intent(out), optional :: rc        ! return code
 !
 ! !DESCRIPTION:
-!  Create a new {\tt DELayout} from a list of {\tt DE} indices.  
+!  Create a new {\tt ESMF\_DELayout} from a list of {\tt ESMF\_DE} indices.  
 !
-!  The return value is a new {\tt DELayout}.
+!  The return value is a new {\tt ESMF\_DELayout}.
 !    
 !  The arguments are:
 !  \begin{description}
 ! 
 !   \item[delist]
-!     List of {\tt DE} indices.
+!     List of {\tt ESMF\_DE} indices.
 ! 
 !   \item[ndim]
-!     Dimension of new {\tt DELayout}.
+!     Dimension of new {\tt ESMF\_DELayout}.
 !     
 !   \item[lengths]
 !     Array of length {\tt ndim} that contains the number of
-!     {\tt DE}s in each dimension.
+!     {\tt ESMF\_DE}s in each dimension.
 !
 !   \item[commtypes]
 !     Array of length {\tt ndim} that contains the communication
@@ -401,7 +400,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Create a new empty {\tt DELayout} object.
+!  Create a new empty {\tt ESMF\_DELayout} object.
 !
 !  The arguments are:
 !  \begin{description}
@@ -454,13 +453,13 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt DELayout}.
+!     Releases all resources associated with this {\tt ESMF\_DELayout}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item[layout]
-!       Destroy contents of this {\tt DELayout}.
+!       Destroy contents of this {\tt ESMF\_DELayout}.
 !
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -548,7 +547,7 @@
 
 !
 ! !DESCRIPTION:
-!      Returns information about the {\tt DELayout}.  For queries where the caller
+!      Returns information about the {\tt ESMF\_DELayout}.  For queries where the caller
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the layout input are optional to facilitate this
 !
@@ -668,7 +667,7 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!      Returns information about the {\tt DELayout}.  For queries where the caller
+!      Returns information about the {\tt ESMF\_DELayout}.  For queries where the caller
 !      only wants a single value, specify the argument by name.
 !
 !EOP
@@ -713,7 +712,7 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!      Returns information about the {\tt DELayout}. 
+!      Returns information about the {\tt ESMF\_DELayout}. 
 !
 !EOP
 
@@ -1306,7 +1305,7 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Print contents of a {\tt DELayout}.
+!     Print contents of a {\tt ESMF\_DELayout}.
 !
 !EOP
 
@@ -1450,8 +1449,8 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Broadcasts data from a root {\tt DE} to all other {\tt DE}s in
-!     the {\tt DELayout}.
+!     Broadcasts data from a root {\tt ESMF\_DE} to all other {\tt ESMF\_DE}s in
+!     the {\tt ESMF\_DELayout}.
 !
 !EOP
 
