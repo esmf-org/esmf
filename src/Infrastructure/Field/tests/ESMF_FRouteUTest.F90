@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.42 2004/06/08 20:06:06 svasquez Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.43 2004/06/15 18:57:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.42 2004/06/08 20:06:06 svasquez Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.43 2004/06/15 18:57:33 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -172,7 +172,7 @@
       !------------------------------------------------------------------------
 
       ! Verifing that an Array can be created
-      call ESMF_GridGetDE(grid1, localCellCountPerDim=g1_cells, &
+      call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=g1_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
       allocate(f90ptr1(g1_cells(1), g1_cells(2)))
       f90ptr1 = 10+myde
@@ -184,7 +184,7 @@
       !------------------------------------------------------------------------
 
       ! second array
-      call ESMF_GridGetDE(grid2, localCellCountPerDim=g2_cells, &
+      call ESMF_GridGetDELocalInfo(grid2, localCellCountPerDim=g2_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
       allocate(f90ptr2(g2_cells(1), g2_cells(2)))
       f90ptr2 = -1
