@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.48 2004/12/03 22:10:24 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.49 2004/12/03 22:35:02 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -341,7 +341,7 @@ end subroutine ESMF_LogFinalize
 
     if (present(rc)) rc=ESMF_FAILURE
     if (present(petnum)) then 
-        pet=petnum+1
+        pet=petnum
     else
         pet=1
     endif	
