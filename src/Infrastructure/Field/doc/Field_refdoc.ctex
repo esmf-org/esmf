@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.24 2004/03/20 00:08:39 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.25 2004/03/22 17:22:46 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -63,13 +63,6 @@
 \input{Field_implnotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/Field_implnotes}
-#endif
-
-\subsection{Flags and Options}
-#ifdef STANDALONE
-\input{Field_fparam}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_fparam}
 #endif
 
 \subsection{Class API: Basic Field Methods}
