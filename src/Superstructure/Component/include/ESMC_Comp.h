@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.18 2004/04/23 17:25:16 theurich Exp $
+// $Id: ESMC_Comp.h,v 1.19 2004/04/23 21:49:37 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,7 +58,7 @@ extern const char *ESMC_SetReadRestart;
 //-----------------------------------------------------------------------------
 // 
 // !USES:
-#include "ESMC.h"
+#include "ESMC_Start.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
 #include "ESMC_Calendar.h"
 #include "ESMC_State.h"
