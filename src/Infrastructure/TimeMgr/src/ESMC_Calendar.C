@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.46 2004/02/05 21:31:36 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.47 2004/02/10 18:45:50 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.46 2004/02/05 21:31:36 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.47 2004/02/10 18:45:50 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -635,6 +635,17 @@ int ESMC_Calendar::count=0;
         // convert No Leap Date => Time
         case ESMC_CAL_NOLEAP:
         {
+            // Validate inputs. TODO: determine lowpoint year, month & day
+            if (mm < 1 || mm > 12 || dd < 1) {
+              return (ESMF_FAILURE);
+            }
+            // check day of the month
+            if (dd > daysPerMonth[mm-1]) {
+              return (ESMF_FAILURE);
+            }
+            // TODO: upper bounds date range check dependent on machine
+            //  word size
+
             t->s = yy * secondsPerYear;
             for(int month=0; month < mm-1; month++) {
               t->s += daysPerMonth[month] * secondsPerDay;
@@ -647,6 +658,13 @@ int ESMC_Calendar::count=0;
         // convert 360 Day Date => Time
         case ESMC_CAL_360DAY:
         {
+            // Validate inputs. TODO: determine lowpoint year, month & day
+            if (mm < 1 || mm > 12 || dd < 1 || d > 30) {
+              return (ESMF_FAILURE);
+            }
+            // TODO: upper bounds date range check dependent on machine
+            //  word size
+
             t->s  = yy * secondsPerYear
                   + (mm-1) * 30 * secondsPerDay   // each month has 30 days
                   + (dd-1) * secondsPerDay + 146565244800LL;
@@ -657,6 +675,13 @@ int ESMC_Calendar::count=0;
         // convert Julian Date => Time
         case ESMC_CAL_JULIANDAY:
         {
+            // Validate input
+            // From Fliegel algorithm:  lower limit of 3/1/-4800 Gregorian
+            //    equals -32044 Julian days
+            if (d < -32044) return(ESMF_FAILURE);
+            // TODO: upper bounds date range check dependent on machine
+            //  word size
+
             // convert Julian days to basetime seconds (>= 64 bit)
             t->s = d * secondsPerDay;
 
