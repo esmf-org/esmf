@@ -8,13 +8,15 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.7 2003/02/28 04:21:45 eschwab Exp $
+# $Id: do_newclass,v 1.8 2003/03/03 22:35:46 nscollins Exp $
 #
 #===============================================================================
 # do_newclass
 #===============================================================================
 #
-# Create a new class template in the current directory
+# Create a new class template in the current directory, and create an
+#   interface template in the ../interface directory.  Expects the
+#   current directory to be .../component/src.
 #
 # Usage: do_newclass <class> <core language>> 
 #
@@ -55,6 +57,24 @@ endif
         sed 's/<Comp>/'$comp'/g' > ESMF_$class.F90
       endif
 
+      if(!(-r ../interface/ESMC_$class.C)) then
+        cat $DOCT_DIR/inter_ESMC_class.C | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../interface/ESMC_$class.C
+      endif
+
+      if(!(-r ../interface/ESMF_${class}_C.F90)) then
+        cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../interface/ESMF_${class}_C.F90
+      endif
+
+      if(!(-r ../include/ESMC_$class.h)) then
+        cat $DOCT_DIR/inter_ESMC_class.h | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../include/ESMC_$class.h
+      endif
+
       if(!(-r ../tests/ESMF_${class}Test.F90)) then
         cat $DOCT_DIR/ESMF_classTest.F90 | \
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
@@ -71,6 +91,18 @@ endif
         cat $DOCT_DIR/ESMC_class.h | \
         sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
            > ../include/ESMC_$class.h
+      endif
+
+      if(!(-r ../interface/ESMF_$class.F90)) then
+        cat $DOCT_DIR/inter_ESMF_class.F90 | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../interface/ESMF_$class.F90
+      endif
+
+      if(!(-r ../interface/ESMC_${class}_F.C)) then
+        cat $DOCT_DIR/inter_ESMC_class_F.C | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../interface/ESMC_${class}_F.C
       endif
 
       if(!(-r ../tests/ESMC_${class}Test.C)) then
