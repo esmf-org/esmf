@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/25 00:18:07 flanigan Exp $ 
+# $Id: makefile,v 1.4 2003/03/28 17:30:34 svasquez Exp $ 
 
 ALL: 
 
@@ -42,7 +42,7 @@ ESMF_FieldCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_FieldCreateEx: ESMF_FieldCreateEx.o  chkopts
-	-${F90CXXLD} -o ESMF_FieldCreateEx ESMF_FieldCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${F90CXXLD} -o ESMF_FieldCreateEx ESMF_FieldCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_FieldCreateEx.o
 
 RUN_ESMF_FieldCreateEx:
@@ -61,7 +61,7 @@ ESMF_BundleCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_BundleCreateEx: ESMF_BundleCreateEx.o  chkopts
-	-${F90CXXLD} -o ESMF_BundleCreateEx ESMF_BundleCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${F90CXXLD} -o ESMF_BundleCreateEx ESMF_BundleCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_BundleCreateEx.o
 
 RUN_ESMF_BundleCreateEx:
