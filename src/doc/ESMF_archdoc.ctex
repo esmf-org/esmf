@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.ctex,v 1.1 2002/09/05 18:35:20 cdeluca Exp $
+% $Id: ESMF_archdoc.ctex,v 1.2 2002/09/09 06:48:39 cdeluca Exp $
 
 %
 \documentclass[]{article}
@@ -80,10 +80,10 @@
 \noindent{\bf Architecture Review}
 \input{ESMF_auth}
 
-%\section{Bibliography}
-%\bibliography{comp} 
-%\bibliographystyle{plain}
-%\addcontentsline{toc}{section}{Bibliography}
+\section{Bibliography}
+\bibliography{ESMF} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
 
 \end{document}
 

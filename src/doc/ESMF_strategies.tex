@@ -21,7 +21,8 @@ explaining the structure of ESMF.
 \subsection{Object-Oriented Design}
 \label{sec:oop}
 
-The ESMF is being designed using object-oriented (OO) principles.  OO design
+The ESMF is being designed using object-oriented (OO) principles (e.g.,
+\cite{booch, rumbaugh}).  OO design
 is based on {\it classes}, which organize data, attributes, and associated 
 operations into well-defined structures.  The OO approach distinguishes between 
 the abstract concept of a class and an actual implementation or instance of the 
@@ -41,17 +42,31 @@ different argument lists when performing conceptually similar operations.
 Together these OO strategies help to organize and streamline codes, making 
 them more flexible, maintainable, and extensible.  
 
+The practice of OO design has grown to include the recognition of a family
+of commonly occuring ``design patterns'' and strategies for using them 
+effectively (e.g., \cite{alexandrescu, gamma}.  For example, a widely
+recognized design pattern relevant to ESMF is that of a {\bf mediator},
+the generic equivalent of an Earth system coupler.  The role of a 
+mediator object is to enhance reusability by preventing interacting objects 
+in an application from referring to each other explicitly.  Eliminating 
+context-dependent code from objects simplifies them and enables them to be 
+reconfigured more easily.   It also simplifies the application as a whole, turning 
+many-to-many interactions into one-to-many interactions.\footnote{This is a 
+model of control flow and not data flow:  it doesn't imply that a 
+mediator is necessary a serial bottleneck in a parallel code!}  
+
 \subsubsection{ESMF Classes}
 
 The ESMF is being implemented in the C++ and F90 languages, both of which support 
-basic implementation of the OOP concepts outlined above (see the {\it ESMF 
-Implementation Report} and other references, e.g. ~\cite{Decyk}).  
+basic implementation of the OOP concepts outlined above (see the \htmladdnormallink{{\it ESMF 
+Implementation Report}}{http://www.esmf.ucar.edu/esmf_docs/impl_rep} \cite{bib:ESMFimplrep}
+and other references, e.g. ~\cite{decyk97, decyk00}).  
 
 Te ESMF architecture is class-based, as described in Sections~\ref{sec:superclasses}, 
 \ref{sec:fieldclasses}, and \ref{sec:utilclasses}.  Privacy descriptors 
 implement encapsulation.  The modularity provided by classes facilitates reuse
 and extensibility across the framework.  It also makes the system easier to 
-understand by breaking up the functionality into digestible portions.
+understand by breaking up the functionality into discrete well-defined segments.
 
 We define a base class for all the objects in ESMF, as well as a base class 
 from which all components will inherit.  See Sections~\ref{sec:esmfbase} and 
@@ -67,15 +82,23 @@ Function and operator overloading are employed throughout ESMF.  This too
 enhances ease of use since it reduces the number of individual interfaces
 the user must remember.  
 
+Recognizing the relevance of design patterns to ESMF
+is useful because the advantages and disadvantages of these patterns have
+been analyzed extensively by the software engineering community.  For example,
+one of the acknowledged drawbacks of the mediator pattern is that the mediator
+itself may become a monolithic, excessively complex code that is difficult
+to maintain.  By anticipating such issues we can work to avoid them.
+
 \subsection{Component-Based Design}
 
 Component architectures have proliferated in the commercial world, with
 packages such as COM, CORBA, Enterprise Java Beans, and others enabling 
 interoperability
 of different software packages and different languages in a wide range
-of domains.  Component architectures have recently extended into the 
+of domains (e.g. \cite{com, corba, javabeans}).  Component architectures have 
+recently extended into the 
 scientific domain through the Common Component Architecture (CCA) project, a 
-DOE effort to standardize science components using the same basic ideas.
+DOE effort to standardize science components using the same basic ideas. \cite{cca}
 In this section we describe the features of component-based software 
 architecture, then outline how the ESMF borrows from that model.  Unlike
 OO design, the basic concepts of component-based design are not especially
@@ -90,31 +113,28 @@ An interface is an array of function pointers.  Components usually have multiple
 interfaces, with each interface representing a collection of functionally 
 related methods.  In addition to components, component 
 architectures must define some sort of control mechanism that can handle tasks 
-such as acquiring computing resources and starting an application, 
-and creating, running, sequencing and synchronizing components.  We'll refer to
+such as scheduling and running components.  We'll refer to
 this mechanism as the Object Request Broker (ORB), as it's called in CORBA.  In the 
 CCA, this is called the framework - a different usage
 of the word than we are accustomed to in ESMF.
 
 The component model gets more complicated when, as in most ESMF applications, 
-an application contains multiple processes.  Calling a 
+an application contains multiple address spaces (ASP).  Calling a 
 method using a function pointer requires that the calling code share the 
-same process as the called function.  
-
+same ASP as the called function.  
 In COM and CORBA, component {\it proxies} are defined across
-all the processes in the application.  A component proxy consists of gutted 
+all the ASPs in the application.  A component proxy consists of gutted 
 versions of all the functions in the interfaces of the component.  If the 
-called function shares the same process as the caller, the proxy just 
-calls the local function.  If the called component is in a different process, 
-the proxy initiates some action such as a RPC through which a {\it stub} in 
-the remote process actually makes the function call.\footnote{Different 
+called function shares the same ASP as the caller, the proxy just 
+calls the local function.  If the called component is in a different ASP, 
+the proxy initiates some action such as a remote procedure call through which 
+a {\it stub} in the remote process actually makes the function call.\footnote{Different 
 component systems call proxies and 
 stubs by different names - skeletons, etc., but the concept remains the same.}  
 The CCA architecture gets around this complication by 
-requiring that all cross-process communication occur within a component, and
-that all inter-component calls exchange only local data.  So, for example,
+requiring that all inter-component calls exchange only local data.  So, for example,
 if you wanted to transfer data between two CCA components A and B, you would need 
-to define a third component C on the union of A and B's processes and perform
+to define a third component C on the union of A and B's ASPs and perform
 the data transfer entirely within component C.
 
 Architectures such as CCA enable components to instantiate and run 
@@ -123,7 +143,7 @@ capability is very import to support system scalability.  CCA does it
 through an interface, called {\tt BuilderServices}, that any component
 can implement.  It allows components that have it to instantiate other
 components, run them, and direct them to communicate with each other.
-CCA has a specification but no implementation of this interface.
+\footnote{CCA currently has a specification but no implementation of this interface.}
 
 Another feature common to component architectures is an Interface Definition 
 Language (IDL).  This is a language-independent way to express 
@@ -136,7 +156,7 @@ niceties such as allowing the ORB to automatically generate proxies and stubs.
 
 Component-based architecture is most relevant to ESMF at the superstructure level. 
 The ESMF is based on those aspects of component-based design that
-provide the most immediate benefits, are feasible to implement within the
+provide immediate benefits, are feasible to implement within the
 timeframe of our project, and will facilitate compatibility with efforts
 such as the CCA as those projects evolve.  
 
@@ -150,8 +170,7 @@ project such as CCA can understand and support them.
 ESMF supports the concept of subcomponents.  In ESMF this is done simply
 by allowing parent components to instantiate and run child components.
 
-The ESMF, like CCA, requires that all cross-process communication occur
-within a component, and that all inter-component calls exchange only
+The ESMF, like CCA, requires that all inter-component calls exchange only
 local data.  This greatly simplifies the architecture, without 
 imposing undue restrictions on communication mechanisms within component
 models or the ESMF.
@@ -166,9 +185,18 @@ development of and experiment with CCA's Scientific IDL (SIDL),
 as described in the {\it ESMF Implementation Report}.
 
 We do not anticipate using function pointers exclusively to manipulate
-components in our initial implementation of ESMF.  We will conceptually
-group related component methods into interfaces, and wherever possible 
-make them consistent across different types of components.
+components in our initial implementation of ESMF.  However, function 
+pointers do play a key role in the current ESMF design.  They are 
+the mechanism that reconciles convenience and performance requirements 
+with the reuse
+strategy of keeping components unaware of how they are coupled to
+other components.  Basically, function pointers allow data sends and 
+transforms to 
+occur as soon as component data is ready, without requiring either a return
+point or knowledge internal to the component about how the send should occur.
+The strategy is described in more detail in Section \ref{sec:superclasses}.
+The similarity to a standard component ``interface'' enhances ESMF 
+compatibility with CCA.
 
 \subsection{Layered Architecture}
 
@@ -182,14 +210,14 @@ and identify which of these apply to ESMF.
 \subsubsection{Types of Layering}
 \label{sec:layering}
 
-We use the term {\it hardware layering} to refer to a strategy to encapsulate 
+We introduce the term {\it hardware layering} to refer to a strategy to encapsulate 
 programming constructs and tools that reflect the structure of the underlying 
 computing environment.  In hardware layering, a bottom layer typically includes 
 vendor-specific constructs.  Middle layers may automatically 
 handle standard operations, such as distributed transposes, that do not involve  
 vendor-specific calls but still reflect the computer architecture.  At the highest
 level, the user handles objects that represent the application 
-domain and not the computing environment.  POOMA and FMS are examples of frameworks
+domain and not the computing environment.  POOMA \cite{pooma} and FMS \cite{fms} are examples of frameworks
 that employ hardware layering.  
 
 Hardware layering is one form of {\it layering by generality}; general 
@@ -214,7 +242,7 @@ synchronize and referee data transfers occur at a higher level. We refer to
 this as {\it task layering}.
 
 Closely related to task layering is the {\it data structure layering} used 
-in the Weather Research and Forecast (WRF) model.  The top ``driver'' layer 
+in the WRF model.  The top ``driver'' layer 
 in this approach specifies data decompositions and controls
 the flow of execution.  The lowest ``model'' layer consists of physics routines that
 operate on simple arrays.  The middle ``mediation''layer is responsible for 
@@ -235,8 +263,8 @@ simplify coding
 when computations are free from communications.  When communications or other
 operations that reflect hardware are required within model computations, coding
 model calcuations using more complex data objects can encapsulate some of 
-these details and simplify codes.  Overture is an example of a framework 
-that provides such complex data objects.
+these details and simplify codes.  Overture \cite{overture} is an example of a framework 
+that provides such complex data objects. 
 
 \subsubsection{ESMF Layers}
 
