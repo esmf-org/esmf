@@ -1,10 +1,10 @@
-! $Id: ESMF_Grid.F90,v 1.10 2002/12/03 23:23:02 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.11 2002/12/05 18:52:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
-! Copyright 2002-2003, University Corporation for Atmospheric Research, 
-! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-! Laboratory, University of Michigan, National Centers for Environmental 
-! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 ! NASA Goddard Space Flight Center.
 ! Licensed under the GPL.
 !
@@ -15,22 +15,23 @@
 !
 !==============================================================================
 !
-! This file contains the Grid class definition and all Grid class 
+! This file contains the Grid class definition and all Grid class
 ! methods.
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_Grid.h>
-#include <ESMF_Macros.inc>
+#include "ESMF_Grid.h"
+#include "ESMF_Macros.inc"
 !==============================================================================
 !BOP
-! !MODULE: ESMF_GridMod - One line general statement about this class
+! !MODULE: ESMF_GridMod - Grid class
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Class> class ...
-!
-! < Insert a paragraph or two explaining the function of this class. >
+! The code in this file implements the {\tt Grid} class.  This class
+! provides a unified interface for both PhysGrid and DistGrid information
+! for model grids.  Functions for defining and computing grid information
+! are available through this class.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -69,23 +70,25 @@
         type (ESMF_Base) :: base                     ! base class object
         type (ESMF_Status) :: gridstatus             ! uninitialized, init ok,
                                                      ! etc
-        integer :: gridtype                          ! enum for type of grid
-        integer :: stagger                           ! enum for grid staggering
-        integer :: coord_system                      ! enum for physical
+        integer :: horz_gridtype                     ! enum for type of horizontal grid
+        integer :: vert_gridtype                     ! enum for type of vertical grid
+        integer :: horz_stagger                      ! enum for horizontal grid staggering
+        integer :: vert_stagger                      ! enum for vertical grid staggering
+        integer :: horz_coord_system                 ! enum for horizontal physical
+                                                     ! coordinate system
+        integer :: vert_coord_system                 ! enum for vertical physical
                                                      ! coordinate system
         integer :: coord_order                       ! enum for mapping of xyz 
                                                      ! to ijk
-        integer :: num_subgrids                      ! number of grid descriptors
+        integer :: num_physgrids                     ! number of grid descriptors
                                                      ! necessary to support
-                                                     ! staggering
-        real :: global_min_x                         ! global extents
-        real :: global_max_x                         ! global extents
-        real :: global_min_y                         ! global extents
-        real :: global_max_y                         ! global extents
-        type (ESMF_PhysGridSpec), dimension(:), pointer :: subgrid  !
-        type (ESMF_PhysGrid), pointer :: physgrid  !
-!jw     type (ESMF_VertGrid), pointer :: vertgrid    !
-        type (ESMF_DistGrid), pointer :: distgrid    !
+                                                     ! staggering, vertical
+                                                     ! grids, background grids
+        type (ESMF_PhysGrid), dimension(:), pointer :: &
+           physgrids         ! grid info for all grid descriptions necessary
+                             ! to define horizontal, staggered and vertical grids
+        type (ESMF_DistGrid), pointer :: distgrid    ! decomposition and other
+                                                     ! logical space info for grid
 
       end type
 
@@ -101,44 +104,85 @@
       end type
 
 !------------------------------------------------------------------------------
+!
 ! !PUBLIC TYPES:
+
       public ESMF_GridConfig
       public ESMF_Grid
+
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-!
-!  Pick one or the other of the init/create sections depending on
-!  whether this is a deep class (the class/derived type has pointers to
-!  other memory which must be allocated/deallocated) or a shallow class
-!  (the class/derived type is self-contained) and needs no destroy methods
-!  other than deleting the memory for the object/derived type itself.
 
-! the following routines apply to deep classes only
-    public ESMF_GridCreate                 ! interface only, deep class
-    public ESMF_GridDestroy                ! interface only, deep class
-
+    public ESMF_GridCreate
+    public ESMF_GridDestroy
     public ESMF_GridGetConfig
     public ESMF_GridSetConfig
-    public ESMF_GridGetValue               ! Get<Value>
-    public ESMF_GridSetCoordinate 
-    public ESMF_GridSetLMask     
-    public ESMF_GridSetMMask    
-    public ESMF_GridSetMetric  
+    public ESMF_GridGetCoordinate
+    public ESMF_GridSetCoordinate
+    public ESMF_GridGetLMask
+    public ESMF_GridSetLMask
+    public ESMF_GridGetMMask
+    public ESMF_GridSetMMask
+    public ESMF_GridGetMetric
+    public ESMF_GridSetMetric
+    public ESMF_GridGetRegionID
     public ESMF_GridSetRegionID
- 
     public ESMF_GridValidate
     public ESMF_GridPrint
- 
-! < list the rest of the public interfaces here >
+
+!------------------------------------------------------------------------------
 !
-!
+! !PUBLIC DATA MEMBERS:
+
+   integer, parameter ::                   &! recognized grid types
+      ESMF_GridType_Unknown           =  0 &! unknown or undefined grid
+      ESMF_GridType_LatLon            =  1 &! equally-spaced lat/lon grid
+      ESMF_GridType_Mercator          =  2 &! Mercator lat/lon grid
+      ESMF_GridType_Dipole            =  3 &! Displaced-pole dipole grid
+      ESMF_GridType_Tripole           =  4 &! Tripolar grids
+      ESMF_GridType_XY                =  5 &! Cartesian equally-space x-y grid
+      ESMF_GridType_DataStream        =  6 &! Data stream
+      ESMF_GridType_PhysFourier       =  7 &! Mixed Fourier Space/Phys Space grid
+      ESMF_GridType_LatLonGauss       =  8 &! lat/lon grid with Gaussian latitudes
+      ESMF_GridType_SphericalSpectral =  9 &! spectral space for spherical harmonics
+      ESMF_GridType_Geodesic          = 10 &! spherical geodesic grid
+      ESMF_GridType_CubedSphere       = 11  ! cubed sphere grid
+
+   integer, parameter ::                   &! recognized staggering types
+      ESMF_GridStagger_Unknown        =  0 &! unknown or undefined staggering
+      ESMF_GridStagger_A              =  1 &! Arakawa A (centered velocity)
+      ESMF_GridStagger_B              =  2 &! Arakawa B (velocities at grid corner)
+      ESMF_GridStagger_C              =  3 &! Arakawa C (velocities at cell faces)
+      ESMF_GridStagger_Z              =  4 &! C grid equiv for geodesic grid
+      ESMF_GridStagger_VertCenter     =  5 &! vert velocity at vertical midpoints
+      ESMF_GridStagger_VertFace       =  6  ! vert velocity/Pgrad at top(bottom)face
+
+   integer, parameter ::                   &! recognized coordinate systems
+      ESMF_CoordSystem_Unknown        =  0 &! unknown or undefined coord system
+      ESMF_CoordSystem_Spherical      =  1 &! spherical coordinates (lat/lon)
+      ESMF_CoordSystem_Cartesian      =  2 &! Cartesian coordinates (x,y)
+      ESMF_CoordSystem_Cylindrical    =  3 &! cylindrical coordinates
+      ESMF_CoordSystem_LatFourier     =  4 &! mixed latitude/spectral space
+      ESMF_CoordSystem_Spectral       =  5 &! wavenumber space
+      ESMF_CoordSystem_Depth          =  6 &! vertical z coord. depth (0 at surface)
+      ESMF_CoordSystem_Height         =  7 &! vertical z coord. height (0 at bottom)
+      ESMF_CoordSystem_Pressure       =  8 &! vertical pressure coordinate
+      ESMF_CoordSystem_Sigma          =  9 &! vertical sigma coordinate
+      ESMF_CoordSystem_Theta          = 10 &! vertical theta coordinate
+      ESMF_CoordSystem_Eta            = 11 &! vertical eta coordinate
+      ESMF_CoordSystem_Isopycnal      = 12 &! vertical density coordinate
+      ESMF_CoordSystem_Hybrid         = 13 &! hybrid vertical coordinates
+      ESMF_CoordSystem_Lagrangian     = 14  ! Lagrangian coordinates
+      ! I'm sure there are more - I'm not sure
+      ! what the atmospheric ESMF models are using for vertical coords
+
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.10 2002/12/03 23:23:02 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.11 2002/12/05 18:52:13 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -147,7 +191,7 @@
 !==============================================================================
 !BOP
 ! !INTERFACE:
-      interface ESMF_GridCreate 
+      interface ESMF_GridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridCreateEmpty
@@ -163,7 +207,7 @@
 !     methods.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -178,7 +222,7 @@
 !     complete {\tt Grid}.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -196,7 +240,7 @@
 !     coordinates as part of a {\tt Grid}.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -214,7 +258,7 @@
 !     logical masks as part of a {\tt Grid}.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -232,7 +276,7 @@
 !     multiplicative masks as part of a {\tt Grid}.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -250,7 +294,7 @@
 !     metrics as part of a {\tt Grid}.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -268,7 +312,7 @@
 !     region id's as part of a {\tt Grid}.
 !
 !EOP
-      end interface 
+      end interface
 !
 !------------------------------------------------------------------------------
 
@@ -294,7 +338,7 @@
 !
 ! !ARGUMENTS:
       character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object and constructs its
@@ -302,9 +346,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -319,7 +363,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateEmpty%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -377,9 +421,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[gridtype]] 
+!     \item[[gridtype]]
 !          Integer specifier to denote gridtype:
 !             gridtype=1   lat-lon
 !             TODO:  fill out
@@ -400,7 +444,7 @@
 !          Number of even-spaced grid increments in the i-direction.
 !     \item[[j\_max]]
 !          Number of even-spaced grid increments in the j-direction.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -415,7 +459,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateInternal%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -455,7 +499,7 @@
 ! !ARGUMENTS:
       character (len=*), intent(in) :: name
       type(ESMF_IOSpec), intent(in) :: iospec   ! file specs
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object, constructs its
@@ -464,11 +508,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[iospec]] 
+!     \item[[iospec]]
 !          File I/O specification.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -483,7 +527,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateRead%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -523,7 +567,7 @@
 ! !ARGUMENTS:
       character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object, constructs its
@@ -532,11 +576,11 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[grid\_in]] 
+!     \item[[grid\_in]]
 !          {\tt Grid} to be copied.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -551,7 +595,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateCopy%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -592,11 +636,11 @@
 ! !ARGUMENTS:
       character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in
-      integer, intent(in) :: i_min                       
-      integer, intent(in) :: i_max                       
-      integer, intent(in) :: j_min                       
-      integer, intent(in) :: j_max                       
-      integer, intent(out), optional :: rc               
+      integer, intent(in) :: i_min
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_min
+      integer, intent(in) :: j_max
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object, constructs its
@@ -605,19 +649,19 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[grid\_in]] 
+!     \item[[grid\_in]]
 !          {\tt Grid} to be partially copied.
-!     \item[[i\_min]] 
+!     \item[[i\_min]]
 !          Minimum global i-index for the region of the grid to be cutout.
-!     \item[[i\_max]] 
+!     \item[[i\_max]]
 !          Maximum global i-index for the region of the grid to be cutout.
-!     \item[[j\_min]] 
+!     \item[[j\_min]]
 !          Minimum global j-index for the region of the grid to be cutout.
-!     \item[[j\_max]] 
+!     \item[[j\_max]]
 !          Maximum global j-index for the region of the grid to be cutout.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -632,7 +676,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateCutout%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -684,21 +728,21 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[grid\_in]] 
+!     \item[[grid\_in]]
 !          Source {\tt Grid} to be coarsened or refined.
-!     \item[[i\_resolution]] 
+!     \item[[i\_resolution]]
 !          Integer resolution factor in the i-direction.
-!     \item[[j\_resolution]] 
+!     \item[[j\_resolution]]
 !          Integer resolution factor in the j-direction.
 !          Note:  The above arguments assume refinement by factor if positive
-!          and coarsening by absolute value of the factor if negative.  For 
+!          and coarsening by absolute value of the factor if negative.  For
 !          example, i\_resolution=4 indicates the new {\tt Grid} will be four
 !          times as resolved in the i-direction as the source {\tt Grid},
 !          whereas j\_resolution=-3 means the new {\tt Grid} will sample every
 !          third point in the j-direction.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -713,7 +757,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateChangeResolution%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -754,7 +798,7 @@
       character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in1
       type(ESMF_Grid), intent(in) :: grid_in2
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object, constructs its
@@ -763,13 +807,13 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[[name]]
 !          New {\tt Grid} name.
-!     \item[[grid\_in1]] 
+!     \item[[grid\_in1]]
 !          First source {\tt Grid}.
-!     \item[[grid\_in2]] 
+!     \item[[grid\_in2]]
 !          Second source {\tt Grid}.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -784,7 +828,7 @@
       nullify(grid)
       nullify(ESMF_GridCreateExchange%ptr)
 
-!     Initialize return code  
+!     Initialize return code
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -819,8 +863,8 @@
       subroutine ESMF_GridDestroy(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid   
-      integer, intent(out), optional :: rc        
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt Grid} object previously allocated
@@ -828,14 +872,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          The class to be destroyed.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -850,8 +894,8 @@
       subroutine ESMF_GridConstructNew(grid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_GridType) :: grid 
-      character (len = *), intent(in), optional :: name  
+      type(ESMF_GridType) :: grid
+      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -860,19 +904,19 @@
 !     as needed.  Must call the corresponding ESMF\_GridDestruct
 !     routine to free the additional memory.  Intended for internal
 !     ESMF use only; end-users use {\tt ESMF\_GridCreate}, which calls
-!     {\tt ESMF\_GridConstruct}. 
+!     {\tt ESMF\_GridConstruct}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid}
 !     \item[arg1]
 !          Argument 1.
 !     \item[arg2]
-!          Argument 2.         
-!     \item[[name]] 
+!          Argument 2.
+!     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -886,7 +930,7 @@
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
-      endif    
+      endif
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructNew: Grid construct"
@@ -905,8 +949,8 @@
       subroutine ESMF_GridDestruct(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid    
-      integer, intent(out), optional :: rc         
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     ESMF routine which deallocates any space allocated by
@@ -917,14 +961,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          The class to be destructed.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -940,24 +984,24 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(out) :: config   
-      integer, intent(out), optional :: rc              
+      integer, intent(out) :: config
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Returns the set of resources the Grid object was configured with.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Class to be queried.
 !     \item[config]
-!          Configuration information.         
-!     \item[[rc]] 
+!          Configuration information.
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -973,8 +1017,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: config   
-      integer, intent(out), optional :: rc             
+      integer, intent(in) :: config
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -982,16 +1026,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Class to be configured.
 !     \item[config]
-!          Configuration information.         
-!     \item[[rc]] 
+!          Configuration information.
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1008,7 +1052,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       integer, intent(out) :: value
-      integer, intent(out), optional :: rc             
+      integer, intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -1017,16 +1061,16 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Class to be queried.
 !     \item[value]
-!          Value to be retrieved.         
-!     \item[[rc]] 
+!          Value to be retrieved.
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1052,10 +1096,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
-!          ESMF Array of data.         
+!          ESMF Array of data.
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
@@ -1064,12 +1108,12 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1086,8 +1130,8 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
-      integer, intent(in) :: id            
-      integer, intent(out), optional :: rc            
+      integer, intent(in) :: id
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the coordinates exist already and are being
@@ -1095,10 +1139,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
-!          Raw data buffer.         
+!          Raw data buffer.
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
@@ -1107,12 +1151,12 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1137,7 +1181,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
@@ -1147,14 +1191,14 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!TODO: figure out the argument list necessary to completely describe the 
+!TODO: figure out the argument list necessary to completely describe the
 !      internal calculation of the coordinates of a simple grid.
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1179,9 +1223,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[grid\_in] 
+!     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
 !     \item[[id]]
 !          Identifier for which set of coordinates are being set:
@@ -1191,12 +1235,12 @@
 !             4  corner\_y
 !             5  face\_x
 !             6  face\_y 
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1214,7 +1258,7 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the logical mask data exists already and is
@@ -1222,18 +1266,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [[name]]
 !           {\tt LMask} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1251,7 +1295,7 @@
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the logical mask data exists already and is
@@ -1259,18 +1303,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
-!          Raw data buffer.         
+!          Raw data buffer.
 !     \item [[name]]
 !           {\tt LMask} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1287,7 +1331,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set internally computes a logical mask for a Grid via a
@@ -1295,18 +1339,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt LMask} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!TODO: figure out the argument list necessary to completely describe the 
+!TODO: figure out the argument list necessary to completely describe the
 !      internal calculation of a logical mask for a simple grid.
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1325,27 +1369,27 @@
       character (len=*), intent(in) :: name  ! TODO: optional?
       type(ESMF_Grid), intent(in) :: grid_in
       character (len=*), intent(in) :: name_in  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set copies a logical mask for a Grid from another Grid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt LMask} name to be set.
-!     \item[grid\_in] 
+!     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
 !     \item [[name\_in]]
 !           {\tt LMask} name to be copied.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1363,7 +1407,7 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the multiplicative mask data exists already
@@ -1371,18 +1415,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [[name]]
 !           {\tt MMask} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1400,7 +1444,7 @@
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the multiplicative mask data exists already
@@ -1408,18 +1452,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
-!          Raw data buffer.         
+!          Raw data buffer.
 !     \item [[name]]
 !           {\tt MMask} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1436,7 +1480,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set internally computes a multiplicative mask for a
@@ -1444,18 +1488,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt MMask} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!TODO: figure out the argument list necessary to completely describe the 
+!TODO: figure out the argument list necessary to completely describe the
 !      internal calculation of a multiplicative mask for a simple grid.
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1474,7 +1518,7 @@
       character (len=*), intent(in) :: name  ! TODO: optional?
       type(ESMF_Grid), intent(in) :: grid_in
       character (len=*), intent(in) :: name_in  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set copies a multiplicative mask for a Grid from another
@@ -1482,20 +1526,20 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt MMask} name to be set.
-!     \item[grid\_in] 
+!     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
 !     \item [[name\_in]]
 !           {\tt MMask} name to be copied.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1513,7 +1557,7 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the metric data exists already and is being
@@ -1521,18 +1565,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [[name]]
 !           {\tt Metric} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1550,7 +1594,7 @@
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the metric data exists already and is being
@@ -1558,18 +1602,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
-!          Raw data buffer.         
+!          Raw data buffer.
 !     \item [[name]]
 !           {\tt Metric} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1595,18 +1639,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt Metric} name.
-!     \item[[id]] 
+!     \item[[id]]
 !          Identifier for predescribed metrics.  TODO: make list
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1625,27 +1669,27 @@
       character (len=*), intent(in) :: name  ! TODO: optional?
       type(ESMF_Grid), intent(in) :: grid_in
       character (len=*), intent(in) :: name_in  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set copies a metric for a Grid from another Grid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt Metric} name to be set.
-!     \item[grid\_in] 
+!     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
 !     \item [[name\_in]]
 !           {\tt Metric} name to be copied.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1663,7 +1707,7 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the region identifier data exists already
@@ -1671,18 +1715,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[array]
 !          ESMF Array of data.
 !     \item [[name]]
 !           {\tt RegionID} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1700,7 +1744,7 @@
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set assumes the multiplicative mask data exists already
@@ -1708,18 +1752,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[buffer]
-!          Raw data buffer.         
+!          Raw data buffer.
 !     \item [[name]]
 !           {\tt RegionID} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1736,7 +1780,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       character (len=*), intent(in) :: name  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set internally computes a region identifier for a
@@ -1744,18 +1788,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt RegionID} name.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!TODO: figure out the argument list necessary to completely describe the 
+!TODO: figure out the argument list necessary to completely describe the
 !      internal calculation of a region identifier for a simple grid.
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1774,7 +1818,7 @@
       character (len=*), intent(in) :: name  ! TODO: optional?
       type(ESMF_Grid), intent(in) :: grid_in
       character (len=*), intent(in) :: name_in  ! TODO: optional?
-      integer, intent(out), optional :: rc            
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     This version of set copies a region identifier for a Grid from another
@@ -1782,20 +1826,20 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item [[name]]
 !           {\tt RegionID} name to be set.
-!     \item[grid\_in] 
+!     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
 !     \item [[name\_in]]
 !           {\tt RegionID} name to be copied.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS: 
+! !REQUIREMENTS:
 
 !
 !  code goes here
@@ -1810,20 +1854,20 @@
       subroutine ESMF_GridValidate(grid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid       
-      character (len=*), intent(in), optional :: opt    
-      integer, intent(out), optional :: rc            
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in), optional :: opt
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Validates that a Grid is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Class to be queried.
 !     \item[[opt]]
 !          Validation options.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1843,21 +1887,21 @@
       subroutine ESMF_GridPrint(grid, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid      
-      character (len=*), intent(in) :: opt      
-      integer, intent(out), optional :: rc           
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: opt
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print information about a Grid.  
+!      Print information about a Grid.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[grid] 
+!     \item[grid]
 !          Class to be queried.
 !     \item[[opt]]
-!          Print ptions that control the type of information and level of 
+!          Print options that control the type of information and level of
 !          detail.
-!     \item[[rc]] 
+!     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
