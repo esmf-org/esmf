@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.1 2002/10/07 16:28:55 eschwab Exp $
+! $Id: ESMF_class.F90,v 1.2 2002/10/08 23:29:01 nscollins Exp $
 !
 ! ESMF <Class> Module
 !
@@ -48,6 +48,7 @@
 !
 ! !PUBLIC TYPES:
       implicit none
+      private
 
       type ESMF_<Class>Config
       private
@@ -64,36 +65,43 @@
       end type
 
 ! !PUBLIC MEMBER FUNCTIONS:
+
+    public ESMF_<Class>Config
+    public ESMF_<Class>
 !
-!  function   ESMF_<Class>Create()               (interface only, deep class)
-!  subroutine ESMF_<Class>Destroy(<class>, rc)   (interface only, deep class)
-!  subroutine ESMF_<Class>Construct(<class>, rc) (internal only, deep class)
-!  subroutine ESMF_<Class>Destruct(<class>, rc)  (internal only, deep class)
-! or
-!  subroutine ESMF_<Class>Init(<class>, rc)      (shallow class)
-!
-!  subroutine ESMF_<Class>Getconfig(<class>, config, rc)
-!  subroutine ESMF_<Class>Setconfig(<class>, config, rc)
-!  subroutine ESMF_<Class>Get<Value>(<class>, value, rc)
-!  subroutine ESMF_<Class>Set<Value>(<class>, value, rc)
-!
-!  subroutine ESMF_<Class>Validate(<class>, options, rc)
-!  subroutine ESMF_<Class>Print(<class>, options, rc)
-!
+! pick one or the other of the init/create sections depending on
+!  whether this is a deep class (the class/derived type has pointers to
+!  other memory which must be allocated/deallocated) or a shallow class
+!  (the class/derived type is self-contained) and needs no destroy methods
+!  other than deleting the memory for the object/derived type itself.
+
+! the following routines apply to deep classes only
+    public ESMF_<Class>Create                 ! (interface only, deep class)
+    public ESMF_<Class>Destroy                ! (interface only, deep class)
+    public ESMF_<Class>Construct              ! (internal only, deep class)
+    public ESMF_<Class>Destruct               ! (internal only, deep class)
+
+! the following routine applies to a shallow class
+    public ESMF_<Class>Init                   ! (shallow class)
+
+    public ESMF_<Class>Getconfig
+    public ESMF_<Class>Setconfig
+    public ESMF_<Class>Get<Value>
+    public ESMF_<Class>Set<Value>
+ 
+    public ESMF_<Class>Validate
+    public ESMF_<Class>Print
+ 
 ! < list the rest of the public interfaces here >
 !
 !
 !EOP
 
-! !PRIVATE MEMBER FUNCTIONS:
-!
-!  < list internal func/subrs which won't be visible outside this file >
-!
 
 !-------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.1 2002/10/07 16:28:55 eschwab Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_class.F90,v 1.2 2002/10/08 23:29:01 nscollins Exp $'
 !-------------------------------------------------------------------------
 
 ! interface blocks for functions which are going to have a single
@@ -104,6 +112,8 @@
 ! no creates.
 !
 !BOP
+! !IROUTINE: ESMF_<Class>Create - Generic interface to create a new <Class> object
+
 ! !INTERFACE:
       interface ESMF_<Class>Create 
 
@@ -118,10 +128,6 @@
 !EOP
 
       end interface 
-
-! declare actual overloaded routines private
-      private ESMF_<Class>CreateNew, ESMF_<Class>CreateCopy, &
-              ESMF_<Class>CreateRemap
 
 ! < add other interfaces here>
 
@@ -139,6 +145,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>CreateNew - Create a new <Class>
+
 ! !INTERFACE:
       function ESMF_<Class>CreateNew(arg1, arg2, arg3, rc)
 !
@@ -169,6 +177,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Destroy - free a <Class> created with Create
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Destroy(<class>, rc)
 !
@@ -190,6 +200,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Construct - fill in an already allocated <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Construct(<class>, arg1, arg2, arg3, rc)
 !
@@ -218,6 +230,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Destruct - release resources associated w/ a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Destruct(<class>, rc)
 !
@@ -243,6 +257,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Init - initialize a <Class> object
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Init(<class>, arg1, arg2, arg3, rc)
 !
@@ -271,6 +287,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>SetConfig - set configuration information for a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>SetConfig(<class>, config, rc)
 !
@@ -293,6 +311,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>GetConfig - get configuration information from a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>GetConfig(<class>, config, rc)
 !
@@ -315,6 +335,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Set<Value> - set <Value> for a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Set<Value>(<class>, value, rc)
 !
@@ -338,6 +360,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Get<Value> - get <Value> for a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Get<Value>(<class>, value, rc)
 !
@@ -361,6 +385,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Validate - internal consistency check for a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Validate(<class>, options, rc)
 !
@@ -385,6 +411,8 @@
 
 !-------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_<Class>Print - print contents of a <Class>
+
 ! !INTERFACE:
       subroutine ESMF_<Class>Print(<class>, options, rc)
 !
