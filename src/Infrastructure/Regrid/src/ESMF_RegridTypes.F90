@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.64 2004/11/18 22:45:56 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.65 2004/11/23 00:42:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -255,7 +255,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.64 2004/11/18 22:45:56 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.65 2004/11/23 00:42:58 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -467,7 +467,7 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      newLink = .true.
+      newLink      = .true.
       aggregateUse = .false.
       if (present(aggregate)) aggregateUse=aggregate
 
@@ -605,7 +605,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_DomainList) :: sendDomainList
-      type(ESMF_RelLoc) :: horzRelLoc
+      type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc
       type(ESMF_Route) :: route
       type(ESMF_VM) :: vm
 
@@ -639,8 +639,9 @@
                                      ESMF_CONTEXT, rc)) return
 
       if (hasSrcDataUse) then
-        call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-        call ESMF_GridGetDELocalAI(srcGrid, myAI, horzRelLoc, &
+        call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcHorzRelLoc, &
+                                  rc=localrc)
+        call ESMF_GridGetDELocalAI(srcGrid, myAI, srcHorzRelLoc, &
                                    reorder=reorder, total=totalUse, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -653,7 +654,7 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "src arrays", &
                                        ESMF_CONTEXT, rc)) return
 
-        call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
+        call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcHorzRelLoc, &
                                      minLocalCoordPerDim=srcMin, &
                                      maxLocalCoordPerDim=srcMax, &
                                      reorder=.false., rc=localrc)
@@ -666,8 +667,9 @@
         if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
                                        ESMF_CONTEXT, rc)) return
 
-        call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=localrc)
-        call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=horzRelLoc, &
+        call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, &
+                                  rc=localrc)
+        call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstHorzRelLoc, &
                                      minLocalCoordPerDim=dstMin, &
                                      maxLocalCoordPerDim=dstMax, &
                                      reorder=.false., rc=localrc)
@@ -675,8 +677,11 @@
 
       ! calculate intersections
       if (hasSrcDataUse) then
-        call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                       myAI, sendDomainList, localrc)
+        call ESMF_GridBoxIntersectSend(srcGrid, dstGrid, srcMin, srcMax, &
+                                       myAI, sendDomainList, &
+                                       total=totalUse, rc=localrc)
+                             !          srcHorzRelLoc, dstHorzRelLoc, &
+                             !          total=totalUse, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -687,8 +692,11 @@
       endif
 
       if (hasDstDataUse) then
-        call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                       recvDomainList, total=totalUse, rc=localrc)
+        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, dstMin, dstMax, &
+                                       recvDomainList, &
+                                       total=totalUse, rc=localrc)
+                           !            srcHorzRelLoc, dstHorzRelLoc, &
+                           !            total=totalUse, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -821,7 +829,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Clean up
-      deallocate(  myAI, stat=localrc)
+      deallocate(myAI, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
 
