@@ -1,5 +1,44 @@
-% $Id: ESMF_examples.tex,v 1.1 2003/09/22 17:25:41 flanigan Exp $
+% $Id: ESMF_examples.tex,v 1.2 2003/09/23 21:04:13 flanigan Exp $
 
 \subsection{Running ESMF Examples}
 \label{examples}
 
+
+\subsubsection{Example Source Code}
+
+Example source code for each class is found in the class's example
+directory. For example, example source code for the Time Manager class
+is found in this directory:
+
+\begin{verbatim}
+        ESMF_DIR/src/Infrastructure/TimeMgr/examples/
+\end{verbatim}
+
+
+\subsubsection{Building and Running Examples}
+
+The GNU makefile targets {\tt examples} and {\tt examples\_uni} build
+and run programs found in a class's examples directory.  After the
+examples are built, the {\tt examples} target runs the examples using
+multiple processors , while {\tt examples\_uni} runs the examples on
+a single processor.
+
+These targets first build the ESMF library.
+
+Run from ESMF\_DIR, this command will build and run all examples on
+multiple processors:
+
+\begin{verbatim}
+       gmake examples
+\end{verbatim}
+
+If the command is run in an example source code directory, then only
+the example from that directory will be built and run.  The examples
+and output files are created in this directory:
+
+\begin{verbatim}
+       ESMF_DIR/examples/examplesESMF_BOPT/ESMF_ARCH.ESMF_PREC.ESMF_SITE/
+\end{verbatim}
+
+The name of an output file will begin with the name of the example
+that created it followed by .stdout.
