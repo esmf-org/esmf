@@ -1,0 +1,265 @@
+% $ Id: $
+
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{html}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+
+\newcommand{\docmttype}{Requirements}
+\newcommand{\req}[1]{\section{\hspace{.2in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
+\newcommand{\mytitle}{DRAFT \longname \docmttype ~~}
+
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{ESMF }
+\newcommand{\funcname}{ESMF }
+\newcommand{\shortname}{GR}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Byron Boville, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Shepard Smithline, Max Suarez, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+%===============================================================================
+\setlength{\textwidth}{6.5truein}
+\setlength{\textheight}{8.5truein}
+\setlength{\oddsidemargin}{0in}
+\setlength{\unitlength}{1truecm}
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+% Title page
+
+\input{../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+%\section{Synopsis}
+\input{ESMF_syn}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{General Requirements}
+\end{htmlonly}
+\part{General Requirements}
+\label{part:General_Requirements}
+
+\section{Target codes and review team}
+\input{ESMF_auth}
+
+\newpage
+%\section{Introduction}
+\input{ESMF_intro}
+
+%\section{Objectives}
+\input{ESMF_obj}
+
+%\section{Scope}
+\input{ESMF_scope}
+
+\section{Organization and conventions of detailed requirements chapters}
+\input{../../scripts/doc_templates/templates/conv_reqdoc}
+
+\subsection{Requirement attributes}
+\input{../../scripts/doc_templates/templates/attr_reqdoc}
+
+\newpage
+
+\begin{htmlonly}
+\addcontentsline{toc}{section}{Framework-wide requirements}
+\end{htmlonly}
+\section{Framework-wide requirements}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+\input{ESMF_req}
+
+%\section{Bibliography}
+\bibliography{ESMF} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Superstructure: Components}
+\end{htmlonly}
+\part{Superstructure: Components}
+\label{part:Superstructure:_Components}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Superstructure/Coupler/doc/Coupler_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Fields}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/Fields/doc/Fields_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Physical Grids}
+\label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/PhysGrid/doc/PhysGrid_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Distributed Grids}
+\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/DistGrid/doc/DistGrid_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Regridding}
+\label{part:Infrastructure_Fields_and_Grids:_Regridding}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/Regrid/doc/Regrid_reqdoc.ctex"
+%====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
+\end{htmlonly}
+\part{Infrastructure Utilities: Time Management}
+\label{part:Infrastructure_Utilities:_Time_Management}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/TimeMgmt/doc/TimeMgmt_reqdoc.ctex"
+%====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Communication and Memory Kernels}
+\end{htmlonly}
+\part{Infrastructure Utilities: Communication and Memory Kernels}
+\label{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/CommMem/doc/CommMem_reqdoc.ctex"
+%====================================================================================================
+
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Configuration Attributes}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Configuration Atrributes}
+%\label{part:Infrastructure_Utilities:_Configuration_Attributes}
+
+%\setcounter{section}{0}
+%\renewcommand{\thesection}{\shortname\arabic{section}}
+%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+% replace % with # below to uncomment
+%include "../Infrastructure/ConfigAttr/doc/ConfigAttr_reqdoc.ctex"
+%====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Performance Profiling}
+\end{htmlonly}
+\part{Infrastructure Utilities: Performance Profiling}
+\label{part:Infrastructure_Utilities:_Performance_Profiling}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/PerfProf/doc/PerfProf_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
+\end{htmlonly}
+\part{Infrastructure Utilities: Log}
+\label{part:Infrastructure_Utilities:_Log}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/Log/doc/Log_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: I/O}
+\end{htmlonly}
+\part{Infrastructure Utilities: I/O}
+\label{part:Infrastructure Utilities:_I/O}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/IO/doc/IO_reqdoc.ctex"
+
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Glossary}
+\end{htmlonly}
+\part{Glossary}
+\label{part:Glossary}
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+%\section{Glossary}
+\input{ESMF_terms}
+
+\end{document}
