@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.7 2003/03/17 23:33:38 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.8 2003/03/18 18:31:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.7 2003/03/17 23:33:38 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.8 2003/03/18 18:31:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -462,6 +462,7 @@
 
         ! local variables
         integer :: status                  ! local error status
+        integer :: i,j                     ! counters
         logical :: rcpresent               ! did user specify rc?
         logical :: lcache
         type(ESMF_Route) :: lroute
@@ -476,6 +477,18 @@
           rc = ESMF_FAILURE
         endif
 
+        ! Translate AxisIndices from F90 to C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst(i,j).l = AI_dst(i,j).l - 1
+            AI_dst(i,j).r = AI_dst(i,j).r - 1
+          enddo
+          do i=1,AI_src_count
+            AI_src(i,j).l = AI_src(i,j).l - 1
+            AI_src(i,j).r = AI_src(i,j).r - 1
+          enddo
+        enddo
+
         ! Call C++  code
         call c_ESMC_RouteGetCached(rank, &
                        my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
@@ -485,6 +498,18 @@
           print *, "Route Get Cached error"
           return  
         endif
+
+        ! Translate AxisIndices back to  F90 from C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst(i,j).l = AI_dst(i,j).l + 1
+            AI_dst(i,j).r = AI_dst(i,j).r + 1
+          enddo
+          do i=1,AI_src_count
+            AI_src(i,j).l = AI_src(i,j).l + 1
+            AI_src(i,j).r = AI_src(i,j).r + 1
+          enddo
+        enddo
 
         if (present(hascachedroute)) hascachedroute = lcache
         if (present(route)) route = lroute
@@ -589,6 +614,7 @@
 
         ! local variables
         integer :: status                  ! local error status
+        integer :: i,j                     ! counters
         logical :: rcpresent               ! did user specify rc?
 
         ! Set initial values
@@ -601,6 +627,18 @@
           rc = ESMF_FAILURE
         endif
 
+        ! Translate AxisIndices from F90 to C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst(i,j).l = AI_dst(i,j).l - 1
+            AI_dst(i,j).r = AI_dst(i,j).r - 1
+          enddo
+          do i=1,AI_src_count
+            AI_src(i,j).l = AI_src(i,j).l - 1
+            AI_src(i,j).r = AI_src(i,j).r - 1
+          enddo
+        enddo
+
         ! Call C++  code
         call c_ESMC_RoutePrecompute(route, rank, &
                        my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
@@ -609,6 +647,18 @@
           print *, "Route Precompute error"
           return  
         endif
+
+        ! Translate AxisIndices back to  F90 from C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst(i,j).l = AI_dst(i,j).l + 1
+            AI_dst(i,j).r = AI_dst(i,j).r + 1
+          enddo
+          do i=1,AI_src_count
+            AI_src(i,j).l = AI_src(i,j).l + 1
+            AI_src(i,j).r = AI_src(i,j).r + 1
+          enddo
+        enddo
 
         if (rcpresent) rc = ESMF_SUCCESS
 
