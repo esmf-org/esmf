@@ -1,25 +1,24 @@
+# $Id: makefile,v 1.2 2002/10/08 18:46:38 nscollins Exp $ 
+ALL: lib 
 
-# longs
-DO_F = lf95
-DO_CC = g++
+CFLAGS    =
+FFLAGS    =
+SOURCEC	  = 
+SOURCEF	  = ESMF_Grid.F90
+SOURCEH	  = 
+OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
+OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
+TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
+MANSEC	  = Gridobj
+LIBBASE	  = libesmf
+DIRS	  = 
+LOCDIR	  = src/Infrastructure/Grid/src
+CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
-# halem
-#DO_F = f90
-#DO_CC = cxx
-
-# any/all
-DO_C = cc
-
-CLASSES = ESMF_Grid.o
-IFLAGS = -I../../Base/interface -I../../IO/interface -I../../DistGrid/src \
-         -I../../PhysGrid/src
-
-all: ${CLASSES}
-
-
-ESMF_Grid.o : ESMF_Grid.F90
-	${DO_F} -c ${IFLAGS} ESMF_Grid.F90
+include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 
-clean:
-	rm -f *.o *.mod
+
+
+
+
