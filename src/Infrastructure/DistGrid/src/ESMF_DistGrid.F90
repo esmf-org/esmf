@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.81 2003/11/11 18:40:21 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.82 2003/11/13 00:10:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,14 +29,13 @@
 ! !DESCRIPTION:
 !
 ! The code in this file implements the {\tt ESMF\_DistGrid} class, which 
-! contains a
-! collection of subgrids which constitute a single logical {\tt ESMF\_Grid}. The
-! subgrids can be operated on in parallel on a multiprocessor machine. The
-! {\tt ESMF\_DistGrid} class contains the mapping between the local grid 
-! decompositions and the global logical {\tt ESMF\_Grid}. It contains methods to
-! synchronize data values between the boundaries of subsets, and to collect
-! and communicate global data values. It interacts closely with the
-! {\tt ESMF\_PhysGrid} object.
+! contains a collection of subgrids which constitute a single logical
+! {\tt ESMF\_Grid}. The subgrids can be operated on in parallel on a
+! multiprocessor machine. The {\tt ESMF\_DistGrid} class contains the mapping
+! between the local grid decompositions and the global logical {\tt ESMF\_Grid}.
+! It contains methods to synchronize data values between the boundaries of
+! subsets, and to collect and communicate global data values. It interacts closely
+! with the {\tt ESMF\_PhysGrid} object.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -202,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.81 2003/11/11 18:40:21 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.82 2003/11/13 00:10:43 jwolfe Exp $'
 
 !==============================================================================
 !
