@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.1 2003/07/30 17:10:06 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.2 2003/07/30 17:49:45 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,12 +99,17 @@
       end type
 
       type(ESMF_RelLoc), parameter :: &
-                           ESMF_CELL_CENTER = ESMF_RelLoc(1), &
-                           ESMF_CELL_NORTH = ESMF_RelLoc(2), &
-                           ESMF_CELL_EAST = ESMF_RelLoc(3), &
-                           ESMF_CELL_NE = ESMF_RelLoc(4), &
-                           ESMF_CELL_CELL = ESMF_RelLoc(5), &
-                           ESMF_CELL_VERTEX = ESMF_RelLoc(6)
+                           ESMF_CELL_CENTER   = ESMF_RelLoc( 1), &
+                           ESMF_CELL_NFACE    = ESMF_RelLoc( 2), &
+                           ESMF_CELL_SFACE    = ESMF_RelLoc( 3), &
+                           ESMF_CELL_EFACE    = ESMF_RelLoc( 4), &
+                           ESMF_CELL_WFACE    = ESMF_RelLoc( 5), &
+                           ESMF_CELL_NECORNER = ESMF_RelLoc( 6), &
+                           ESMF_CELL_NWCORNER = ESMF_RelLoc( 7), &
+                           ESMF_CELL_SECORNER = ESMF_RelLoc( 8), &
+                           ESMF_CELL_SWCORNER = ESMF_RelLoc( 9), &
+                           ESMF_CELL_CELL     = ESMF_RelLoc(10), &
+                           ESMF_CELL_VERTEX   = ESMF_RelLoc(11)
 
  
 !------------------------------------------------------------------------------
@@ -178,8 +183,12 @@
              ESMF_IO_IJK, ESMF_IO_JIK, ESMF_IO_KJI, ESMF_IO_IKJ, &
              ESMF_IO_JKI, ESMF_IO_KIJ 
 
-      public ESMF_RelLoc, ESMF_CELL_CENTER, ESMF_CELL_NORTH, ESMF_CELL_EAST
-      public ESMF_CELL_NE, ESMF_CELL_CELL, ESMF_CELL_VERTEX
+      public ESMF_RelLoc,        ESMF_CELL_CENTER
+      public ESMF_CELL_NFACE,    ESMF_CELL_SFACE
+      public ESMF_CELL_EFACE,    ESMF_CELL_WFACE
+      public ESMF_CELL_NECORNER, ESMF_CELL_NWCORNER
+      public ESMF_CELL_SECORNER, ESMF_CELL_SWCORNER
+      public ESMF_CELL_CELL,     ESMF_CELL_VERTEX
 
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -205,7 +214,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.1 2003/07/30 17:10:06 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.2 2003/07/30 17:49:45 pwjones Exp $'
 !------------------------------------------------------------------------------
 
 
