@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.1 2002/03/04 18:49:10 dneckels Exp $ 
+# $Id: makefile,v 1.2 2002/05/10 19:29:34 eschwab Exp $ 
 
-DIRS     = Control Coupler
+DIRS     = Coupler
 LOCDIR   = src/Superstructure
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
