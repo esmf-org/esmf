@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.69 2003/08/28 20:04:46 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.70 2003/08/28 21:28:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -160,6 +160,8 @@
    public ESMF_FieldDetachData         ! Dissociate data from a Field and 
                                        !   return its pointer
 
+   public ESMF_FieldGet                ! Generic Get() routine, replaces others
+
    public ESMF_FieldGetName            ! Get Field name
    public ESMF_FieldGetConfig          ! e.g., has associated Grid or data
  
@@ -220,7 +222,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.69 2003/08/28 20:04:46 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.70 2003/08/28 21:28:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1580,6 +1582,99 @@
 !
 ! Set and get Field name, attributes, Grid and Data values.
 !
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGet(field, grid, array, datamap, relloc, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field    
+      type(ESMF_Grid), intent(out), optional :: grid     
+      type(ESMF_Array), intent(out), optional :: array     
+      type(ESMF_DataMap), intent(out), optional :: datamap     
+      type(ESMF_RelLoc), intent(out), optional :: relloc
+      character(len=*), intent(out), optional :: name
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Query a {\tt ESMF\_Field} for various things.  All arguments after
+!      the {\tt Field} are optional.  To select individual items use the
+!      named_argument=value syntax.
+!
+! !REQUIREMENTS: FLD1.6.2
+!EOP
+        type(ESMF_FieldType), pointer :: ftypep
+        integer :: status
+
+        ! assume failure
+        if (present(rc)) rc = ESMF_FAILURE
+
+        ! Minimal error checking
+        if (.not.associated(field%ftypep)) then
+          print *, "ERROR: Invalid or Destroyed Field"
+          return
+        endif
+ 
+        ftypep = field%ftypep
+        if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+          print *, "ERROR: Field not ready"
+          return
+        endif
+
+        if (present(grid)) then
+            if (ftypep%gridstatus .ne. ESMF_STATE_READY) then
+              print *, "ERROR: No grid attached to Field"
+              return
+            endif
+            grid = ftypep%grid
+        endif
+
+        if (present(array)) then
+            if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+              print *, "ERROR: No data attached to Field"
+              return
+            endif
+            array = ftypep%localfield%localdata
+        endif
+
+        if (present(datamap)) then
+            ! TODO: what's the proper test here?
+            if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+              print *, "ERROR: No data attached to Field"
+              return
+            endif
+            datamap = ftypep%mapping
+        endif
+
+        if (present(relloc)) then
+            ! TODO: what's the proper test here?
+            if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+              print *, "ERROR: No data attached to Field"
+              return
+            endif
+            call ESMF_DataMapGet(ftypep%mapping, relloc=relloc, rc=status)
+            if (status .ne. ESMF_SUCCESS) then
+                print *, "ERROR in getting RelLoc in ESMF_DataMapGet"
+                rc = status
+                return
+            endif
+        endif
+
+        if (present(name)) then
+            call ESMF_GetName(ftypep%base, name, status)
+            if (status .ne. ESMF_SUCCESS) then
+                print *, "ERROR in getting Field name in ESMF_FieldGet"
+                rc = status
+                return
+            endif
+        endif
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_FieldGet
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldGetName - Retrieve the name of a Field
