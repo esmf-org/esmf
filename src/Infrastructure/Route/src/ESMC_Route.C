@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.77 2004/02/19 23:10:11 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.78 2004/02/19 23:50:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.77 2004/02/19 23:10:11 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.78 2004/02/19 23:50:33 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -659,7 +659,7 @@ static int maxroutes = 10;
 // !REQUIREMENTS:  
     
     int rc = ESMF_FAILURE;
-    int i, j, l, m;
+    int i, j, k, l, m;
     int ixs, ixr;
     int ccount, xscount, xrcount, xmcount;
     int mydeid, theirdeid;
@@ -667,6 +667,7 @@ static int maxroutes = 10;
     ESMC_XPacket *sendxp, *recvxp;
     int srank, rrank, mrank;
     int srcbytes, rcvbytes;
+    int srcitems, rcvitems;
     int soffset, roffset;
     int scontig_length, rcontig_length;
     int sstride[ESMF_MAXDIM], rstride[ESMF_MAXDIM];
@@ -747,6 +748,7 @@ static int maxroutes = 10;
      
             // if sendxp == NULL, nothing to send
             // if recvxp == NULL, nothing to recv
+            // (but one way communication is certainly possible)
 
            // TODO: for now, ranks must match.
            mrank = MAX(srank, rrank);
@@ -754,9 +756,11 @@ static int maxroutes = 10;
            //printf(" starting srcaddr=0x%08lx, dstaddr=0x%08lx\n", 
            //                     (long int)srcaddr, (long int)dstaddr);
 
-	   // Count the total number of points to send/recv
-	   srctcount=scontig_length;
-	   rcvtcount=rcontig_length;
+	   // Count the total number of points to send/recv.  set count to 0
+           // if this PE has nothing to send or receive (which is a possible
+           // case which must be handled).
+	   srctcount = sendxp ? scontig_length : 0;
+	   rcvtcount = recvxp ? rcontig_length : 0;
            for (j=0; j<mrank-1; j++) {
                if (sendxp) srctcount *= srep_count[j];
                if (recvxp) rcvtcount *= rrep_count[j];
@@ -765,22 +769,43 @@ static int maxroutes = 10;
            nbytes = ESMC_DataKindSize(dk);
 
 	   // allocate temporary buffers
-	   srcbufstart = (char *)(malloc(srctcount*nbytes));
-	   rcvbufstart = (char *)(malloc(rcvtcount*nbytes));
+           if (srctcount > 0)
+	       srcbufstart = (char *)(malloc(srctcount*nbytes));
+           else
+               srcbufstart = NULL;
+           if (rcvtcount > 0)
+	       rcvbufstart = (char *)(malloc(rcvtcount*nbytes));
+           else
+               rcvbufstart = NULL;
 	   srcbuf = srcbufstart;
 	   rcvbuf = rcvbufstart;
 
            // copy in to the send buffer
-	   if(srctcount > 0){
-             for (j=0, srcbytes = soffset; j<mrank-1; j++) {
-               //printf("j=%d, srep_count[j]=%d", j, srep_count[j]);
-               for (l=0; l<srep_count[j] ; l++, srcbytes += sstride[j]) {
+	   if(srctcount > 0) {
+             switch (srank) {
+               case 2:
+                 srcitems = soffset;
+                 for (l=0; l<srep_count[0] ; l++, srcitems += sstride[0]) {
 
-                    srcptr = (char *)srcaddr+(srcbytes*nbytes); 
-                    srccount = sendxp ? scontig_length : 0;
-		    memcpy(srcbuf,srcptr,srccount*nbytes);
-		    srcbuf += srccount*nbytes;
-               }
+                      srcptr = (char *)srcaddr+(srcitems*nbytes); 
+		      memcpy(srcbuf,srcptr,scontig_length*nbytes);
+		      srcbuf += scontig_length*nbytes;
+                 }
+                 break;
+               case 3:
+                 for (k=0; k<srep_count[1]; k++, soffset += sstride[1]*sstride[0]) {
+                   srcitems = soffset;
+                   for (l=0; l<srep_count[0]; l++, srcitems += sstride[0]) {
+
+                        srcptr = (char *)srcaddr+(srcitems*nbytes); 
+		        memcpy(srcbuf,srcptr,scontig_length*nbytes);
+		        srcbuf += scontig_length*nbytes;
+                   }
+                 }
+                 break;
+               default:
+                 printf("no code to handle rank %d yet\n", srank);
+                 return ESMF_FAILURE;
              }
            }
 
@@ -791,20 +816,38 @@ static int maxroutes = 10;
                          srctcount, rcvtcount, theirdeid, theirdeid, dk);
 
            // copy out of the recv buffer
-	   if(rcvtcount > 0){
-             for (j=0, rcvbytes = roffset; j<mrank-1; j++) {
-               //printf("j=%d, rrep_count[j]=%d", j, rrep_count[j]);
-               for (l=0; l<rrep_count[j]; l++, rcvbytes += rstride[j]) {
-                    rcvptr = (char *)dstaddr+(rcvbytes*nbytes); 
-                    rcvcount = recvxp ? rcontig_length : 0;
-		    memcpy(rcvptr,rcvbuf,rcvcount*nbytes);
-		    rcvbuf += rcvcount*nbytes;
-               }
+	   if(rcvtcount > 0) {
+             switch (rrank) {
+               case 2:
+                 rcvitems = roffset;
+                 for (l=0; l<rrep_count[0] ; l++, rcvitems += rstride[0]) {
+
+                      rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
+		      memcpy(rcvbuf,rcvptr,rcontig_length*nbytes);
+		      rcvbuf += rcontig_length*nbytes;
+                 }
+                 break;
+               case 3:
+                 for (k=0; k<rrep_count[1]; k++, roffset += rstride[1]*rstride[0]) {
+                   rcvitems = roffset;
+                   for (l=0; l<rrep_count[0]; l++, rcvitems += rstride[0]) {
+
+                        rcvptr = (char *)dstaddr+(rcvitems*nbytes); 
+		        memcpy(rcvbuf,rcvptr,rcontig_length*nbytes);
+		        rcvbuf += rcontig_length*nbytes;
+                   }
+                 }
+                 break;
+               default:
+                 printf("no code to handle rank %d yet\n", rrank);
+                 return ESMF_FAILURE;
              }
            }
 
-           free(srcbufstart);
-           free(rcvbufstart);
+           if (srcbufstart)
+               free(srcbufstart);
+           if (rcvbufstart)
+               free(rcvbufstart);
 
 	}
 
