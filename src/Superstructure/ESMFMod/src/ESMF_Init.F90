@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.16 2004/11/09 01:28:00 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.17 2004/11/15 16:53:46 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,9 +216,9 @@
       endif
 
       if (present(defaultLogFileName)) then
-          call ESMF_LogInitialize(defaultLogFileName, status)
+          call ESMF_LogInitialize(defaultLogFileName, rc=status)
       else
-          call ESMF_LogInitialize("ESMF_LogFile", status)
+          call ESMF_LogInitialize("ESMF_LogFile", rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing the default log/error manager"
