@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.33 2003/05/29 20:59:12 flanigan Exp $ 
+# $Id: makefile,v 1.34 2003/09/09 17:27:38 flanigan Exp $ 
 ALL: alldoc 
 
 
@@ -55,6 +55,12 @@ CLEANDIRS   = ESMF_reqdoc ESMF_usrdoc ESMF_refdoc $(HTMLFILES)
 CLEANFILES  = *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG ESMF_reqdoc.tex ESMF_refdoc.tex ESMF_usrdoc.tex $(PDFFILES) $(DVIFILES)
 CLOBBERDIRS = 
 
+# TEXINPUTS_VALUE lists the paths to search for files specified by the
+# \input and \includegraphics LateX commands.  Paths are seperated by
+# colons.  The first path should be a "." for the local directory.
+# The last path listed should have a trailing colon.
+
+TEXINPUTS_VALUE = ".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 
 
 #
 # The build rules for the req are in 
@@ -64,10 +70,11 @@ CLOBBERDIRS =
 # Dvi files
 ESMF_usrdoc.dvi: $(USRDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
-	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_LATEX} ESMF usr
 
 ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	${DO_LATEX} ESMF ref
 
@@ -76,13 +83,14 @@ ESMF_refdoc.dvi: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 ${ESMC_DOCDIR}/ESMF_usrdoc: $(USRDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -r $(ESMC_DOCDIR)/ESMF_usrdoc
-	export TEXINPUTS=".:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" ;\
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_L2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_refdoc: ESMF_refdoc.ctex $(REFDOC_DEP_FILES)
 	cd $(ESMF_TOP_DIR) ; $(MAKE) tex
 	-rm -rf $(ESMC_DOCDIR)/ESMF_refdoc
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_L2H} ESMF ref
 	mv -f ESMF_refdoc ${ESMC_DOCDIR}
 
