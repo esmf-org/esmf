@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.59 2003/08/13 21:48:07 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.60 2003/08/13 22:58:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -227,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.59 2003/08/13 21:48:07 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.60 2003/08/13 22:58:35 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2559,12 +2559,12 @@
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-!      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
-!                               AI_count, layout, my_DE, src_AI, src_AI, &
-!                               AI_count, layout, periodic, &
-!                               hascachedroute, route, status)
+       call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
+                                AI_count, layout, my_DE, src_AI, src_AI, &
+                                AI_count, layout, periodic, &
+                                hascachedroute, route, status)
 
-!      if (.not. hascachedroute) then
+       if (.not. hascachedroute) then
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
@@ -2572,7 +2572,7 @@
                                         AI_count, global_start, global_count, &
                                         ai_global, layout, periodic, status)
 
-!      endif
+       endif
 
       ! Once table is full, execute the communications it represents.
 
