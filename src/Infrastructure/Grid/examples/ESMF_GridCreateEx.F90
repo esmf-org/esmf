@@ -63,6 +63,10 @@
 
       print *, "Grid example 1 returned"
 
+     call ESMF_GridDestroy(grid, status)
+
+     print *, "Grid example 1 destroyed"
+
      end program ESMF_GridCreateEx
     
 !\end{verbatim}
