@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.25 2004/03/05 16:44:21 svasquez Exp $
+! $Id: ESMF_Bundle.F90,v 1.26 2004/03/08 16:03:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -790,7 +790,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_BundleGetAllFields - Retrieve an arrays of Fields 
+! !IROUTINE: ESMF_BundleGetAllFields - Retrieve an array of Fields 
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetAllFields(bundle, fieldptrs, count, rc)
@@ -3313,7 +3313,7 @@ end function
     
       ! early exit.
       if (fieldCount .le. 0) then
-          print *, "ERROR in ESMF_BundleAddFields: called with 0 Fields"
+          print *, "ERROR in ESMF_BundleAddField: called with 0 Fields"
           return
       endif
       
@@ -3326,7 +3326,7 @@ end function
         
           allocate(btype%flist(fieldCount), stat=status)
           if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
+            print *, "ERROR in ESMF_BundleAddField: Fieldlist allocate"
             return
           endif
          

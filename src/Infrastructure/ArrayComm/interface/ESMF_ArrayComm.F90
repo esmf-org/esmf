@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.19 2004/03/05 23:58:38 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.20 2004/03/08 16:03:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.19 2004/03/05 23:58:38 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.20 2004/03/08 16:03:21 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -187,8 +187,9 @@
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
-      call ESMF_DataMapGet(datamap, dimlist=dimOrder, horizRelLoc=horzRelLoc, &
-                           vertRelLoc=vertRelLoc, rc=status)
+      call ESMF_DataMapGet(datamap, dataIorder=dimOrder, &
+                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                           rc=status)
 
       ! allocate arrayindex array and get all of them from the array
       allocate(arrayindex(datarank), stat=status)
@@ -380,16 +381,16 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(dstDataMap, horizRelLoc=dstHorzRelLoc, &
+      call ESMF_DataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
                            vertRelLoc=dstVertRelLoc, &
-                           dimlist=dstDimOrder, rc=status)
+                           dataIorder=dstDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayRedist: DataMapGet returned failure"
         return
       endif
-      call ESMF_DataMapGet(srcDataMap, horizRelLoc=srcHorzRelLoc, &
+      call ESMF_DataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
                            vertRelLoc=srcVertRelLoc, &
-                           dimlist=srcDimOrder, rc=status)
+                           dataIorder=srcDimOrder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayRedist: DataMapGet returned failure"
         return
@@ -756,9 +757,9 @@
 
       ! Query the datamap and set info for grid so it knows how to
       ! match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(datamap, horizRelLoc=horzRelLoc, &
+      call ESMF_DataMapGet(datamap, horzRelLoc=horzRelLoc, &
                            vertRelLoc=vertRelLoc, &
-                           dimlist=dimorder, rc=status)
+                           dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayHalo: DataMapGet returned failure"
         return
@@ -1046,7 +1047,7 @@
 
 ! Query the datamap and set info for grid so it knows how to match up the
 ! array indices and the grid indices.
-      call ESMF_DataMapGet(datamap, dimlist=dimorder, rc=status)
+      call ESMF_DataMapGet(datamap, dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
         return

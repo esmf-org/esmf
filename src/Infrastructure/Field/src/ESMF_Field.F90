@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.114 2004/03/05 16:28:11 svasquez Exp $
+! $Id: ESMF_Field.F90,v 1.115 2004/03/08 16:03:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.114 2004/03/05 16:28:11 svasquez Exp $'
+      '$Id: ESMF_Field.F90,v 1.115 2004/03/08 16:03:23 nscollins Exp $'
 
 !==============================================================================
 !
@@ -342,7 +342,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldSetAttribute - Set a Field Attribute
+! !IROUTINE: ESMF_FieldSetAttribute  - Set Field Attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldSetAttribute 
@@ -365,7 +365,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttribute - Get a Field Attribute
+! !IROUTINE: ESMF_FieldGetAttribute  - Get Field Attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldGetAttribute 
@@ -544,7 +544,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateNew(grid, arrayspec, allocflag, horizRelloc, &
+      function ESMF_FieldCreateNew(grid, arrayspec, allocflag, horzRelloc, &
                                    vertRelloc, haloWidth, datamap, name, &
                                    iospec, rc)
 !
@@ -555,7 +555,7 @@
       type(ESMF_Grid) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
       type(ESMF_DataAllocate), intent(in), optional :: allocflag
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap          
@@ -581,7 +581,7 @@
 !           Whether to allocate space for the array.  Default is
 !           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -635,7 +635,7 @@
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstructNew(ftype, grid, arrayspec, allocflag, &
-                                  horizRelloc, vertRelloc, haloWidth, &
+                                  horzRelloc, vertRelloc, haloWidth, &
                                   datamap, name, iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldCreateNew: Field construct new asp"
@@ -654,7 +654,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateFromArray(grid, array, copyflag, horizRelloc, &
+      function ESMF_FieldCreateFromArray(grid, array, copyflag, horzRelloc, &
                                          vertRelloc, haloWidth, datamap, name, &
                                          iospec, rc)
 !
@@ -665,7 +665,7 @@
       type(ESMF_Grid), intent(in) :: grid                
       type(ESMF_Array), intent(in) :: array              
       type(ESMF_CopyFlag), intent(in), optional :: copyflag       
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap           
@@ -690,7 +690,7 @@
 !           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
 !           {\tt ESMF\_DATA\_REF}, respectively.
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -743,7 +743,7 @@
       endif 
 
 !     Call construction method to allocate and initialize field internals.
-      call ESMF_FieldConstructNewArray(ftype, grid, array, horizRelloc, &
+      call ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -764,7 +764,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateRemap(srcfield, grid, horizRelloc, vertRelloc, &
+      function ESMF_FieldCreateRemap(srcfield, grid, horzRelloc, vertRelloc, &
                                      haloWidth, datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -773,7 +773,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcfield            
       type(ESMF_Grid), intent(in) :: grid                 
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap              
@@ -796,7 +796,7 @@
 !     \item [grid]
 !           {\tt ESMF\_Grid} of source {\tt ESMF\_Field}.
 !
-!     \item [horizRelLoc]
+!     \item [horzRelLoc]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -863,7 +863,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoBuffer(grid, arrayspec, horizRelloc, vertRelloc, &
+      function ESMF_FieldCreateNoBuffer(grid, arrayspec, horzRelloc, vertRelloc, &
                                         haloWidth, datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -872,7 +872,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
       type(ESMF_ArraySpec), intent(in) :: arrayspec    
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap    
@@ -892,7 +892,7 @@
 !     \item [arrayspec]
 !           Data specification. 
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -945,7 +945,7 @@
       endif 
 
       ! Call construction method to build field internals.
-      call ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, horizRelloc, &
+      call ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, horzRelloc, &
                                        vertRelloc, haloWidth, datamap, name, &
                                        iospec, status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -965,7 +965,7 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoArray(grid, horizRelloc, vertRelloc, &
+      function ESMF_FieldCreateNoArray(grid, horzRelloc, vertRelloc, &
                                        haloWidth, datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -973,7 +973,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid                 
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap              
@@ -990,7 +990,7 @@
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -1043,7 +1043,7 @@
       endif 
 
       ! Call field construction method
-      call ESMF_FieldConstructNoArray(ftype, grid, horizRelloc, vertRelloc, &
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       haloWidth, datamap, name, iospec, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldCreateNoArray: Construct"
@@ -1198,7 +1198,7 @@
       end subroutine ESMF_FieldDestroy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_FieldDetachData - Disassociate a buffer from a Field
 
 ! !INTERFACE:
@@ -1231,17 +1231,19 @@
 !           
 !     \end{description}
 !           
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.5
 
 
 !
-! TODO: code goes here
+! TODO: code goes here.   this routine BOPI for 2 reasons - one, it isn't
+!  implemented, and two - it may be removed and replaced by a GetData call
+!  with a flag to indicate exclusive access.
 !
         end subroutine ESMF_FieldDetachBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_FieldDetachData - Disassociate an Array from a Field
 
 ! !INTERFACE:
@@ -1274,12 +1276,13 @@
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.6.5
 
 
 !
-! TODO: code goes here
+! TODO: code goes here.  This code marked BOPI for the same reason as above;
+!  it may be replaced by a GetData call with a flag. 
 !
         end subroutine ESMF_FieldDetachArray
 
@@ -1288,7 +1291,7 @@
 ! !IROUTINE: ESMF_FieldGet - Return info associated with a Field
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGet(field, grid, array, datamap, horizRelloc, &
+      subroutine ESMF_FieldGet(field, grid, array, datamap, horzRelloc, &
                                vertRelloc, name, rc)
 !
 ! !ARGUMENTS:
@@ -1296,7 +1299,7 @@
       type(ESMF_Grid), intent(out), optional :: grid     
       type(ESMF_Array), intent(out), optional :: array     
       type(ESMF_DataMap), intent(out), optional :: datamap     
-      type(ESMF_RelLoc), intent(out), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       character(len=*), intent(out), optional :: name
       integer, intent(out), optional :: rc     
@@ -1320,7 +1323,7 @@
 !     \item [{[datamap]}]
 !           {\tt ESMF\_DataMap}.
 !
-!     \item [{[horizRelloc]}]
+!     \item [{[horzRelloc}]]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -1381,13 +1384,13 @@
             datamap = ftype%mapping
         endif
 
-        if (present(horizRelloc)) then
+        if (present(horzRelloc)) then
             ! TODO: what's the proper test here?  ditto code above.
             !if (ftype%datastatus .ne. ESMF_STATE_READY) then
             !  print *, "ERROR: No data attached to Field"
             !  return
             !endif
-            call ESMF_DataMapGet(ftype%mapping, horizRelloc=horizRelloc, rc=status)
+            call ESMF_DataMapGet(ftype%mapping, horzRelloc=horzRelloc, rc=status)
             if (status .ne. ESMF_SUCCESS) then
                 print *, "ERROR in getting Horizontal RelLoc in ESMF_DataMapGet"
                 rc = status
@@ -1492,7 +1495,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer Attribute
+! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -2194,7 +2197,7 @@
         end subroutine ESMF_FieldGetGrid
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalGridInfo - Get information about the Global Grid
 !
 ! !INTERFACE:
@@ -2235,17 +2238,21 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.7.2
 
 
 !
-! TODO: code goes here
+! TODO: code goes here.  This marked BOPI because it isn't implemented yet,
+!   and it may be that a lot of the query routines are not actually
+!   implemented at the field level - only the most commonly used ones.
+!   the rest are to be implemented by GridGet() - the caller gets the grid
+!   from the field and then queries the grid directly.
 !
         end subroutine ESMF_FieldGetGlobalGridInfo
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetLocalGridInfo - Get information about the Local Grid
 !
 ! !INTERFACE:
@@ -2286,7 +2293,7 @@
 !     \end{description}
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.7.2
 
 
@@ -2336,9 +2343,6 @@
 ! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 
 
-!
-! TODO: code goes here
-!
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       logical :: apresent                         ! Array present
@@ -2398,7 +2402,7 @@
       end subroutine ESMF_FieldGetData
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalDataInfo - Get information about Field Data
 !
 ! !INTERFACE:
@@ -2438,12 +2442,12 @@
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 
 
 !
-! TODO: code goes here
+! TODO: code goes here.  BOPI because not implemented yet.
 !
         end subroutine ESMF_FieldGetGlobalDataInfo
 
@@ -2505,7 +2509,7 @@
         end subroutine ESMF_FieldGetDataMap
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetLocalDataInfo - Get information about Field Data
 !
 ! !INTERFACE:
@@ -2546,7 +2550,7 @@
 !
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
 
 
@@ -2560,11 +2564,11 @@
 ! !IROUTINE: ESMF_FieldGetRelLoc - Return relative location
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldGetRelLoc(field, horizRelloc, vertRelloc, rc)
+      subroutine ESMF_FieldGetRelLoc(field, horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
-      type(ESMF_RelLoc), intent(out), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: rc 
 !
@@ -2577,7 +2581,7 @@
 !     \item [name]
 !           A {\tt ESMF\_Field} name.
 !
-!     \item [{[horizRelloc]}]
+!     \item [{[horzRelloc]}]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -2593,7 +2597,7 @@
 ! !REQUIREMENTS:
 
 
-      call ESMF_DataMapGet(field%ftypep%mapping, horizRelloc=horizRelloc, &
+      call ESMF_DataMapGet(field%ftypep%mapping, horzRelloc=horzRelloc, &
                            vertRelloc=vertRelloc, rc=rc)
 
       end subroutine ESMF_FieldGetRelLoc
@@ -2809,14 +2813,15 @@
       subroutine ESMF_FieldSetGrid(field, grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field            ! field to add grid to
-      type(ESMF_Grid), intent(in) :: grid              ! grid to be added
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_Field), intent(inout) :: field  
+      type(ESMF_Grid), intent(in) :: grid      
+      integer, intent(out), optional :: rc    
 !
 ! !DESCRIPTION:
-!      Used only with the version of {\tt ESMF\_FieldCreate} which creates an empty 
-!      {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  Otherwise it is 
-!      an error to try to change the {\tt ESMF\_Grid} associated with a {\tt ESMF\_Field}.
+!  Used only with the version of {\tt ESMF\_FieldCreate} which creates an empty 
+!  {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  
+!  Otherwise it is an error to try to change the {\tt ESMF\_Grid} 
+!  associated with a {\tt ESMF\_Field}.
 !
 !     \begin{description}
 !     \item [field]
@@ -2833,10 +2838,39 @@
 !EOP
 ! !REQUIREMENTS: FLD1.1.3
 
+        logical :: had_grid
 
-!
-! TODO: code goes here
-!
+        ! assume failure
+        if (present(rc)) rc = ESMF_FAILURE
+
+        ! Minimal error checking
+        if (.not.associated(field%ftypep)) then
+          print *, "ERROR: Invalid or Destroyed Field"
+          return
+        endif
+ 
+        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+          print *, "ERROR: Field not ready"
+          return
+        endif
+
+        ! decide if we're regridding or just adding a grid to a partially
+        ! created field.
+        had_grid = .FALSE.
+        if (field%ftypep%gridstatus .eq. ESMF_STATE_READY) had_grid = .TRUE.
+
+        if (.not. had_grid) then
+           ! if no grid, just add it
+           field%ftypep%grid = grid
+           field%ftypep%gridstatus = ESMF_STATE_READY
+        else
+           ! this could be considered a request to regrid the data
+           print *, "not currently supported.  since a grid exists, this"
+           print *, "will be a request to regrid the field"
+        endif
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
         end subroutine ESMF_FieldSetGrid
 
 !------------------------------------------------------------------------------
@@ -2847,15 +2881,15 @@
       subroutine ESMF_FieldSetDataMap(field, datamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
+      type(ESMF_Field), intent(inout) :: field
       type(ESMF_DataMap), intent(in) :: datamap
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Used to set the ordering of a {\tt ESMF\_Field}.  If an initialized {\tt ESMF\_DataMap}
-!     and associated data are already in the {\tt ESMF\_Field}, the data will be 
-!     reordered according to the new speciification.
-!
+!  Used to set the ordering of a {\tt ESMF\_Field}.  If an initialized 
+!  {\tt ESMF\_DataMap} and associated data are already in the 
+!  {\tt ESMF\_Field}, the data will be reordered according to the new 
+!  specification.
 !
 !     \begin{description}
 !     \item [field]
@@ -2872,10 +2906,39 @@
 !EOP
 ! !REQUIREMENTS: FLD1.2
 
+        logical :: had_data
 
-!
-! TODO: code goes here
-!
+        ! assume failure
+        if (present(rc)) rc = ESMF_FAILURE
+
+        ! Minimal error checking
+        if (.not.associated(field%ftypep)) then
+          print *, "ERROR: Invalid or Destroyed Field"
+          return
+        endif
+ 
+        if (field%ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+          print *, "ERROR: Field not ready"
+          return
+        endif
+
+        ! decide if we're reordering data or just setting an initial map
+        ! created field.
+        had_data = .FALSE.
+        if (field%ftypep%datastatus .eq. ESMF_STATE_READY) had_data = .TRUE.
+
+        if (.not. had_data) then
+           ! if no datamap, just add it
+           field%ftypep%mapping = datamap
+        else
+           ! this could be considered a request to reorder the data
+           print *, "not currently supported.  since data exists, this"
+           print *, "will be a request to reorder the data in the field"
+           return
+        endif
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
         end subroutine ESMF_FieldSetDataMap
 
 !------------------------------------------------------------------------------
@@ -2887,7 +2950,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field
+      type(ESMF_Field), intent(inout) :: field
       integer, dimension (:), intent(in) :: index
       real, dimension (:), intent(in) :: value
       integer, intent(out), optional :: rc
@@ -2930,7 +2993,7 @@
       subroutine ESMF_FieldSetIntAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
+      type(ESMF_Field), intent(inout) :: field  
       character (len = *), intent(in) :: name
       integer(ESMF_KIND_I4), intent(in) :: value
       integer, intent(out), optional :: rc   
@@ -3035,7 +3098,7 @@
   
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          print *, "ESMF_FieldSetAttribute: count longer than value list"
           return
       endif
 
@@ -3164,7 +3227,7 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          print *, "ESMF_FieldSetAttribute: count longer than value list"
           return
       endif
 
@@ -3295,7 +3358,7 @@
 
       limit = size(value)
       if (count > limit) then
-          print *, "ESMF_FieldGetAttribute: count longer than value list"
+          print *, "ESMF_FieldSetAttribute: count longer than value list"
           return
       endif
 
@@ -3567,7 +3630,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNew(ftype, grid, arrayspec, allocflag, &
-                                        horizRelloc, vertRelloc, haloWidth, &
+                                        horzRelloc, vertRelloc, haloWidth, &
                                         datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:
@@ -3575,7 +3638,7 @@
       type(ESMF_Grid) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
       type(ESMF_DataAllocate), intent(in), optional :: allocflag
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap           
@@ -3602,7 +3665,7 @@
 !           Set to allocate space for data array.  Default is
 !           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
@@ -3656,7 +3719,7 @@
           hwidth = 0
       endif
 
-      call ESMF_FieldConstructNoArray(ftype, grid, horizRelloc, vertRelloc, &
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       hwidth, datamap, name, iospec, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA"
@@ -3673,7 +3736,7 @@
         print *, "ERROR in ESMF_GridGet"
         return
       endif 
-      call ESMF_GridGetDE(grid, horzRelLoc=horizRelLoc, vertRelLoc=vertRelLoc, &
+      call ESMF_GridGetDE(grid, horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                           localCellCountPerDim=gridcounts(1:gridRank), rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE"
@@ -3681,7 +3744,7 @@
       endif 
 
       ! get information back from datamap
-      call ESMF_DataMapGet(ftype%mapping, dimlist=dimorder, &
+      call ESMF_DataMapGet(ftype%mapping, dataIorder=dimorder, &
                                                     counts=counts, rc=status)
 
       arraycounts(:) = 1
@@ -3713,7 +3776,7 @@
 ! !IROUTINE: ESMF_FieldConstructNewArray - Construct the internals of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNewArray(ftype, grid, array, horizRelloc, &
+      subroutine ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
                                              vertRelloc, haloWidth, datamap, &
                                              name, iospec, rc)
 !
@@ -3721,7 +3784,7 @@
       type(ESMF_FieldType), pointer :: ftype 
       type(ESMF_Grid) :: grid               
       type(ESMF_Array), intent(in) :: array     
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap           
@@ -3744,7 +3807,7 @@
 !     \item [array]
 !           Data. 
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -3783,7 +3846,7 @@
         rc = ESMF_FAILURE
       endif     
 
-      call ESMF_FieldConstructNoArray(ftype, grid, horizRelloc, vertRelloc, &
+      call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       haloWidth, datamap, name, iospec, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Field construct NoA 2"
@@ -3809,14 +3872,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNoBuffer(ftype, grid, arrayspec, &
-                                           horizRelloc, vertRelloc, haloWidth, &
+                                           horzRelloc, vertRelloc, haloWidth, &
                                            datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype                
       type(ESMF_Grid) :: grid               
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap 
@@ -3839,7 +3902,7 @@
 !     \item [arrayspec]
 !           Data specification. 
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -3898,19 +3961,24 @@
 
       call ESMF_GridGet(grid, numDims=gridRank, rc=status)
       if (present(datamap)) then
-        ftype%mapping = datamap   ! copy, datamap can be deleted by user now
-        call ESMF_DataMapSet(ftype%mapping, horizRelloc=horizRelloc, &
+        ftype%mapping = datamap   ! copy, datamap can be reused by user now
+        ! if specified as explicit args to create, they override anything
+        ! in the existing datamap
+        call ESMF_DataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
         if (gridRank .eq. 1) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, horizRelloc, &
-                                               vertRelloc, gridRank, rc=status)
+          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_I, &
+                                horzRelloc=horzRelloc, &
+                                vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, horizRelloc, &
-                                               vertRelloc, gridRank, rc=status)
+          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+                                horzRelloc=horzRelloc, &
+                                vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, horizRelloc, &
-                                               vertRelloc, gridRank, rc=status)
+          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+                                horzRelloc=horzRelloc, &
+                                vertRelloc=vertRelloc, rc=status)
         endif
       endif
 
@@ -3943,14 +4011,14 @@
 ! !IROUTINE: ESMF_FieldConstructNoArray - Construct a Field with no associated Array
 
 ! !INTERFACE:
-      subroutine ESMF_FieldConstructNoArray(ftype, grid, horizRelloc, &
+      subroutine ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, &
                                             vertRelloc, haloWidth, &
                                             datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
       type(ESMF_FieldType), pointer :: ftype   
       type(ESMF_Grid) :: grid                 
-      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(in), optional :: haloWidth
       type(ESMF_DataMap), intent(in), optional :: datamap              
@@ -3969,7 +4037,7 @@
 !     \item [grid] 
 !           Pointer to a {\tt ESMF\_Grid} object. 
 !
-!     \item [{[horizRelloc]}] 
+!     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
 !
@@ -4030,21 +4098,24 @@
         ! this does a copy, datamap ok for user to delete now
         ftype%mapping = datamap   
 
-        ! take care of override horiz and vert rellocs.  if specified both in
+        ! take care of override horz and vert rellocs.  if specified both in
         ! the datamap and as explicit args, the arguments take priority.
-        call ESMF_DataMapSet(ftype%mapping, horizRelloc=horizRelloc, &
+        call ESMF_DataMapSet(ftype%mapping, horzRelloc=horzRelloc, &
                              vertRelloc=vertRelloc, rc=status)
       else
         ! create default datamap with 1-for-1 correspondence to grid
         if (gridRank .eq. 1) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, horizRelloc, &
-                                               vertRelloc, gridRank, rc=status)
+          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_I, &
+                                horzRelloc=horzRelloc, &
+                                vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 2) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, horizRelloc, &
-                                               vertRelloc, gridRank, rc=status)
+          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJ, &
+                                horzRelloc=horzRelloc, &
+                                vertRelloc=vertRelloc, rc=status)
         else if (gridRank .eq. 3) then
-          ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, horizRelloc, &
-                                               vertRelloc, gridRank, rc=status)
+          call ESMF_DataMapInit(ftype%mapping, ESMF_INDEX_IJK, &
+                                horzRelloc=horzRelloc, &
+                                vertRelloc=vertRelloc, rc=status)
         endif
       endif
 
@@ -4195,12 +4266,12 @@
 ! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBoxIntersect(src_field, dst_field, recvDomainlist, &
+      subroutine ESMF_FieldBoxIntersect(srcField, dstField, recvDomainlist, &
                                         sendDomainList, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: src_field 
-      type(ESMF_Field), intent(in) :: dst_field
+      type(ESMF_Field), intent(in) :: srcField 
+      type(ESMF_Field), intent(in) :: dstField
       type(ESMF_DomainList), intent(inout) :: recvDomainlist
       type(ESMF_DomainList), intent(inout) :: sendDomainlist
       integer, intent(out), optional :: rc 
@@ -4212,10 +4283,10 @@
 !      most of the work is done in the {\tt ESMF\_Grid} class.
 !
 !     \begin{description}
-!     \item [src\_field]
+!     \item [srcField]
 !           Source {\tt ESMF\_Field} object.
 !
-!     \item [dst\_field]
+!     \item [dstField]
 !           Destination {\tt ESMF\_Field} object.
 !
 !     \item [recvDomainlist]
@@ -4242,7 +4313,7 @@
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
       type(ESMF_DELayout) :: parentlayout, srclayout, dstlayout
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
-      type(ESMF_Grid) :: src_grid, dst_grid
+      type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc 
 
@@ -4254,8 +4325,8 @@
         rc = ESMF_FAILURE
       endif
 
-      stypep = src_field%ftypep
-      dtypep = dst_field%ftypep
+      stypep = srcField%ftypep
+      dtypep = dstField%ftypep
 
       ! Our DE number in the parent layout  TODO: for now, just use one of the
       !                                           grid layouts.  In the future,
@@ -4284,7 +4355,7 @@
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
         call ESMF_GridGet(stypep%grid, numDims=gridrank, rc=status)
-        call ESMF_FieldGetRelLoc(src_field, horzRelLoc, vertRelLoc, rc)
+        call ESMF_FieldGetRelLoc(srcField, horzRelLoc, vertRelLoc, rc)
         call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
                             vertRelLoc=vertRelLoc, &
                             globalAIPerDim=myAI(1:gridrank), rc=status)
@@ -4311,15 +4382,15 @@
       if (hassrcdata) then
         ! Query the datamap and set info for grid so it knows how to
         ! match up the array indices and the grid indices.
-        call ESMF_FieldGetGrid(src_field, src_grid, status)
+        call ESMF_FieldGetGrid(srcField, srcGrid, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGet(src_grid, minLocalCoordPerDim=src_min, &
+        call ESMF_GridGet(srcGrid, minLocalCoordPerDim=src_min, &
                          maxLocalCoordPerDim=src_max, rc=status)
-        call ESMF_GridBoxIntersectSend(dst_grid, src_grid, src_min, src_max, &
+        call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, src_min, src_max, &
                                        myAI, sendDomainList, status)
       endif
 
@@ -4327,15 +4398,15 @@
       if (hasdstdata) then
         ! Query the datamap and set info for grid so it knows how to
         ! match up the array indices and the grid indices.
-        call ESMF_FieldGetGrid(dst_field, dst_grid, status)
+        call ESMF_FieldGetGrid(dstField, dstGrid, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in FieldBoxIntersect: FieldGetGrid returned failure"
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGet(dst_grid, minLocalCoordPerDim=dst_min, &
+        call ESMF_GridGet(dstGrid, minLocalCoordPerDim=dst_min, &
                           maxLocalCoordPerDim=dst_max, rc=status)
-        call ESMF_GridBoxIntersectRecv(src_grid, dst_min, dst_max, &
+        call ESMF_GridBoxIntersectRecv(srcGrid, dst_min, dst_max, &
                                        recvDomainList, rc=status)
       endif
 

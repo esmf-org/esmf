@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2004/03/04 18:11:10 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2004/03/08 16:03:26 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -102,7 +102,6 @@
 
       ! Local variables
         type(ESMF_Field) :: humidity1, humidity2
-        type(ESMF_DELayout) :: cpllayout
 
        
         integer :: status
@@ -117,14 +116,9 @@
         call ESMF_StateGetField(exportstate, "humidity", humidity2, rc=rc)
         call ESMF_FieldPrint(humidity2, "", rc=rc)
 
-        ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
-
-
         ! These are fields on different layouts - call Redist to rearrange
         !  the data using the Comm routines.
-        call ESMF_FieldRedist(humidity1, humidity2, cpllayout, &
-                              routehandle, rc=status)
+        call ESMF_FieldRedist(humidity1, humidity2, routehandle, rc=status)
 
 
         ! Output data operated on in place, export state now has new values.

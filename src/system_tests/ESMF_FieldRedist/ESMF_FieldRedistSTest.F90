@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.3 2004/03/06 00:04:15 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.4 2004/03/08 16:03:25 nscollins Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -127,9 +127,9 @@
                                           horzStagger=horzStagger, &
                                           horzCoordSystem=horzCoordSystem, &
                                           name="source grid", rc=status)
-    field1 = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=2, name="field1", rc=rc)
-    field3 = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+    field3 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=2, name="field3", rc=rc)
 
     decompids2(1) = 2
@@ -143,7 +143,7 @@
                                           horzStagger=horzStagger, &
                                           horzCoordSystem=horzCoordSystem, &
                                           name="destination grid", rc=status)
-    field2 = ESMF_FieldCreate(grid2, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(grid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=2, name="field2", rc=rc)
 
     ! precompute redist patterns

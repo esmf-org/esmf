@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.55 2004/02/26 17:00:15 svasquez Exp $
+! $Id: ESMF_Regrid.F90,v 1.56 2004/03/08 16:03:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.55 2004/02/26 17:00:15 svasquez Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.56 2004/03/08 16:03:24 nscollins Exp $'
 
 !==============================================================================
 
@@ -450,8 +450,8 @@
 
      allocate(dstDimOrder(rank))
      allocate(srcDimOrder(rank))
-     call ESMF_DataMapGet(dstDataMap, dimlist=dstDimOrder, rc=status)
-     call ESMF_DataMapGet(srcDataMap, dimlist=srcDimOrder, rc=status)
+     call ESMF_DataMapGet(dstDataMap, dataIorder=dstDimOrder, rc=status)
+     call ESMF_DataMapGet(srcDataMap, dataIorder=srcDimOrder, rc=status)
 
      ! break out here by rank   TODO: compare datarank to regridrank (or
      !                                compare datamaps)

@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.2 2004/02/09 17:57:25 nscollins Exp $
+! $Id: ArraysGlobalMod.F90,v 1.3 2004/03/08 16:03:25 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -90,52 +90,52 @@
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                               kind=ESMF_R4)
 
-      field_sie  = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="SIE", rc=status)
       call ESMF_FieldGetData(field_sie, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
 
-      field_u    = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_EFACE, &
+      field_u    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=halo_width, name="U", rc=status)
       call ESMF_FieldGetData(field_u, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, u, ESMF_DATA_REF, status)
 
-      field_v    = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_NFACE, &
+      field_v    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=halo_width, name="V", rc=status)
       call ESMF_FieldGetData(field_v, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, v, ESMF_DATA_REF, status)
 
-      field_rho  = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field_rho  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="RHO", rc=status)
       call ESMF_FieldGetData(field_rho, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rho, ESMF_DATA_REF, status)
 
-      field_rhoi = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field_rhoi = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="RHOI", rc=status)
       call ESMF_FieldGetData(field_rhoi, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rhoi, ESMF_DATA_REF, status)
 
-      field_rhou = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_EFACE, &
+      field_rhou = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_EFACE, &
                    haloWidth=halo_width, name="RHOU", rc=status)
       call ESMF_FieldGetData(field_rhou, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rhou, ESMF_DATA_REF, status)
 
-      field_rhov = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_NFACE, &
+      field_rhov = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_NFACE, &
                    haloWidth=halo_width, name="RHOV", rc=status)
       call ESMF_FieldGetData(field_rhov, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, rhov, ESMF_DATA_REF, status)
 
-      field_p    = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field_p    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="P", rc=status)
       call ESMF_FieldGetData(field_p, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, p, ESMF_DATA_REF, status)
 
-      field_q    = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field_q    = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="Q", rc=status)
       call ESMF_FieldGetData(field_q, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, q, ESMF_DATA_REF, status)
 
-      field_flag = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field_flag = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                    haloWidth=halo_width, name="FLAG", rc=status)
       call ESMF_FieldGetData(field_flag, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)

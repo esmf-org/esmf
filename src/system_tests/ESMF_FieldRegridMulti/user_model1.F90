@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2004/03/02 00:04:34 jwolfe Exp $
+! $Id: user_model1.F90,v 1.5 2004/03/08 16:03:25 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -140,17 +140,17 @@
         call ESMF_ArraySpecInit(arrayspec, rank=3, type=ESMF_DATA_REAL, &
                                 kind=ESMF_R8)
 
-        ! Create a datamap to tell the framework which of the 2 axes
+        ! Set up a datamap to tell the framework which of the 2 axes
         ! correspond to the grid, and which one is multiple scalar
         ! values for the same grid cell.
         order(1) = 0
         order(2) = 1
         order(3) = 2
-        datamap = ESMF_DataMapCreate(order, counts=counts(1:1), rc=rc)
+        call ESMF_DataMapInit(datamap, 3, order, counts=counts(1:1), rc=rc)
 
         ! Create the field 
         humidity = ESMF_FieldCreate(grid1, arrayspec=arrayspec, datamap=datamap, &
-                                    horizRelloc=ESMF_CELL_CENTER, &
+                                    horzRelloc=ESMF_CELL_CENTER, &
                                     haloWidth=0, name="humidity", rc=rc)
 
         ! Get the allocated array back and get an F90 array pointer
@@ -208,7 +208,7 @@
       
         ! get the grid and coordinates
         allocate(coordArray(2))
-        call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
+        call ESMF_FieldGetRelLoc(humidity, horzRelloc=relloc, rc=status)
         call ESMF_FieldGetGrid(humidity, grid, rc=status)
         !call ESMF_GridGetDE(grid, localCellCountPerDim=counts, rc=status)
         call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &

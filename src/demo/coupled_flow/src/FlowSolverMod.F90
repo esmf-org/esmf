@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.7 2004/01/30 04:40:59 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.8 2004/03/08 16:03:25 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -171,9 +171,9 @@
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
       integer :: counts(2)
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
+      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
       namelist /input/ uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
@@ -577,8 +577,8 @@
           global(1,2) = j
           do i = iobs_min(n),iobs_max(n)
             global(1,1) = i
-            call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
-                                             local2d=local, rc=status)
+            call ESMF_GridGlobalToLocalIndex(grid, horzRelloc=ESMF_CELL_CENTER,&
+                                      global2d=global, local2d=local, rc=status)
             if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
             if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
   ! TODO:  The above two lines are junk, making up for the halo width which is
@@ -596,8 +596,8 @@
         do j = 1, 2 
           global(1,1) = i
           global(1,2) = j
-          call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
-                                           local2d=local, rc=status)
+          call ESMF_GridGlobalToLocalIndex(grid, horzRelloc=ESMF_CELL_CENTER, &
+                                      global2d=global, local2d=local, rc=status)
           if (local(1,1).gt.-1) local(1,1) = local(1,1) + 1
           if (local(1,2).gt.-1) local(1,2) = local(1,2) + 1
 ! TODO:  The above two lines are junk, making up for the halo width which is

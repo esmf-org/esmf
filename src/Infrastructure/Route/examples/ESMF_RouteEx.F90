@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.8 2004/02/18 22:17:57 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.9 2004/03/08 16:03:24 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -80,14 +80,14 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    field1 = ESMF_FieldCreate(srcgrid, arraya, horizRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(srcgrid, arraya, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=3, name="src pressure", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
 
-    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                                     name="dst pressure", rc=rc)
 
  
@@ -99,28 +99,22 @@
 !   !  Calling Field Halo
 
 
-    call ESMF_FieldHalo(field1, rc=rc)
+    halo_rh = ESMF_RouteHandleCreate(rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+    call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldHalo(field1, halo_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_FieldHaloRelease(halo_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_RouteHandleDestroy(halo_rh)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Halo example 1 returned"
-
-    ! should transition over to:
-
-    !call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
-
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    ! this should take the route handle and not the layout
-    !call ESMF_FieldHalo(field1, halo_rh, rc=rc)
-
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    !call ESMF_FieldHaloRelease(halo_rh, rc=rc)
-
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    !print *, "Halo example 1a returned"
 
 !-------------------------------------------------------------------------
 !   ! Example 2:
@@ -128,18 +122,20 @@
 !   !  Calling Field Redist
 
 
-    call ESMF_FieldRedistStore(field1, field2, layout1, &
-                                                routehandle=redist_rh, rc=rc)
-
+    redist_rh = ESMF_RouteHandleCreate(rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! this should take the route handle and not the layout
-    call ESMF_FieldRedist(field1, field2, layout1, rc=rc)
+    call ESMF_FieldRedistStore(field1, field2, layout1, &
+                                                routehandle=redist_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+    call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+    call ESMF_RouteHandleDestroy(redist_rh)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Redist example 2 returned"
@@ -150,17 +146,20 @@
 !   !  Calling Field Regrid
 
 
-    !call ESMF_FieldRegridStore(field1, field2, layout1, &
-    !                                            routehandle=regrid_rh, rc=rc)
-
+    regrid_rh = ESMF_RouteHandleCreate(rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    !call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
-
+    call ESMF_FieldRegridStore(field1, field2, layout1, &
+                                                routehandle=regrid_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    !call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+    call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+    call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    call ESMF_RouteHandleDestroy(redist_rh)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Regrid example 3 returned"
@@ -169,19 +168,15 @@
 !    ! Cleanup
 
     call ESMF_FieldDestroy(field1, rc=rc)
-
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldDestroy(field2, rc=rc)
-
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridDestroy(srcgrid)
-
+    call ESMF_GridDestroy(srcgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_GridDestroy(dstgrid)
-
+    call ESMF_GridDestroy(dstgrid, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.9 2004/02/18 21:12:02 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.10 2004/03/08 16:03:22 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -82,7 +82,7 @@
 
 
     simplefield = ESMF_FieldCreate(grid, arrayspec, &
-                                horizRelloc=ESMF_CELL_CENTER, name="rh", rc=rc)
+                                horzRelloc=ESMF_CELL_CENTER, name="rh", rc=rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -94,7 +94,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 !BOC
-    call ESMF_BundleAddFields(bundle2, simplefield, rc);
+    call ESMF_BundleAddField(bundle2, simplefield, rc);
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -118,7 +118,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleAddFields(bundle3, 3, field, rc);
+    call ESMF_BundleAddField(bundle3, 3, field, rc);
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -136,7 +136,7 @@
 !   !  Get a Field back from a Bundle, first by name and then by index.
 !   !  Also get the Bundle name.
 
-    call ESMF_BundleGetFields(bundle1, "pressure", returnedfield1, rc)
+    call ESMF_BundleGetField(bundle1, "pressure", returnedfield1, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
@@ -148,7 +148,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_BundleGetFields(bundle1, 2, returnedfield2, rc)
+    call ESMF_BundleGetField(bundle1, 2, returnedfield2, rc)
 !EOC
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

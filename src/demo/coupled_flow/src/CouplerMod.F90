@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.2 2004/02/17 21:57:38 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.3 2004/03/08 16:03:25 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -15,6 +15,11 @@
 !
 !
 !EOP
+
+    module global_data
+      use ESMF_Mod
+      type(ESMF_RouteHandle), save :: fromFlow_rh, fromInject_rh
+    end module
 
     module CouplerMod
 
@@ -74,6 +79,8 @@
 
 ! !INTERFACE:
       subroutine coupler_init(comp, importstate, exportstate, clock, rc)
+
+      use global_data
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp
@@ -105,17 +112,29 @@
     type(ESMF_State) :: flowstates, injectstates
     type(ESMF_State) :: toflow, fromflow
     type(ESMF_State) :: toinject, frominject
+    type(ESMF_Field) :: src_field, dst_field
+    type(ESMF_DELayout) :: cpllayout
     character(ESMF_MAXSTR) :: statename
 
     print *, "Coupler Init starting"
 
+    ! Get layout from coupler component
+    call ESMF_CplCompGet(comp, layout=cpllayout, rc=rc)
+
     call ESMF_StateGetName(importstate, statename, rc=rc)
+    call ESMF_StateGetField(importstate, "SIE", src_field, rc=rc)
+    call ESMF_StateGetField(exportstate, "SIE", dst_field, rc=rc)
 
     if (trim(statename) .eq. "FlowSolver Feedback") then
       call ESMF_StateSetNeeded(importstate, "SIE", ESMF_STATEDATAISNEEDED, rc)
       call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
       call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
       call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+
+      fromFlow_rh = ESMF_RouteHandleCreate(rc)
+      call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
+                                 fromFlow_rh, rc=rc)
+      
     endif
 
     if (trim(statename) .eq. "Injection Feedback") then
@@ -123,6 +142,11 @@
       call ESMF_StateSetNeeded(importstate, "V", ESMF_STATEDATAISNEEDED, rc)
       call ESMF_StateSetNeeded(importstate, "RHO", ESMF_STATEDATAISNEEDED, rc)
       call ESMF_StateSetNeeded(importstate, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+
+      fromInject_rh = ESMF_RouteHandleCreate(rc)
+      call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
+                                 fromInject_rh, rc=rc)
+
     endif
 
     print *, "Coupler Init returning"
@@ -136,6 +160,8 @@
 
 ! !INTERFACE:
       subroutine coupler_run(comp, importstate, exportstate, clock, rc)
+
+      use global_data
 !
 ! !ARGUMENTS:
      type(ESMF_CplComp), intent(inout) :: comp
@@ -167,7 +193,7 @@
         type(ESMF_Field) :: srcfield, dstfield
         type(ESMF_Array) :: srcarray, dstarray
         real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
-        type(ESMF_DELayout) :: cpllayout
+        type(ESMF_RouteHandle) :: routehandle
       
         character(len=ESMF_MAXSTR) :: statename
        
@@ -184,11 +210,15 @@
         datanames(6) = "Q"
         datanames(7) = "FLAG"
 
-        ! In this case, the coupling is symmetric - you call Redist either
-        ! way - so we don't care which direction we're coupling.
-
-        ! Get layout from coupler component
-        call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
+        ! In this case, the coupling is symmetric - you call Redist either way
+        ! we only care about the coupling direction in order to get
+        ! the right routehandle selected.
+        call ESMF_StateGetName(importstate, statename, rc=rc)
+        if (trim(statename) .eq. "FlowSolver Feedback") then
+            routehandle = fromFlow_rh 
+        else
+            routehandle = fromInject_rh 
+        endif
 
         do i=1, datacount
 
@@ -212,8 +242,8 @@
 !   an Export State and the other is an Import State.
 !
 !\begin{verbatim}
-           call ESMF_StateGetData(importstate, datanames(i), srcfield, rc=status)
-           call ESMF_StateGetData(exportstate, datanames(i), dstfield, rc=status)
+           call ESMF_StateGetData(importstate, datanames(i), srcfield, rc=rc)
+           call ESMF_StateGetData(exportstate, datanames(i), dstfield, rc=rc)
 !\end{verbatim}
 !
 !   The Route routine uses information contained in the Fields and the
@@ -224,7 +254,7 @@
 !   example of a Field Route call:
 !
 !\begin{verbatim}
-           call ESMF_FieldRedist(srcfield, dstfield, cpllayout, rc=status)
+           call ESMF_FieldRedist(srcfield, dstfield, routehandle, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -241,6 +271,8 @@
 
 ! !INTERFACE:
       subroutine coupler_final(comp, importstate, exportstate, clock, rc)
+
+      use global_data
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp) :: comp
@@ -267,9 +299,16 @@
 !     \end{description}
 !
 !EOPI
+
         print *, "Coupler Final starting"
   
-        ! Nothing to do here.
+        ! Only thing to do here is release redist and route handles
+        call ESMF_FieldRedistRelease(fromFlow_rh, rc)
+        call ESMF_RouteHandleDestroy(fromFlow_rh, rc)
+
+        call ESMF_FieldRedistRelease(fromInject_rh, rc)
+        call ESMF_RouteHandleDestroy(fromFlow_rh, rc)
+
         rc = ESMF_SUCCESS
     
         print *, "Coupler Final returning"

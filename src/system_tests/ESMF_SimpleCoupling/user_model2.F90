@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/02/09 18:00:41 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2004/03/08 16:03:26 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -133,7 +133,7 @@
                                 kind=ESMF_I4)
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+        humidity = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                          name="humidity", rc=rc)
 
         ! Get the allocated array back and get an F90 array pointer

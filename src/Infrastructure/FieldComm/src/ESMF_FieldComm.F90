@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.10 2004/03/06 00:00:57 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.11 2004/03/08 16:03:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.10 2004/03/06 00:00:57 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.11 2004/03/08 16:03:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -250,7 +250,7 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength, numDims
+      integer :: i, datarank, thisdim, thislength, numDims
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
       integer, dimension(:), allocatable :: decomps, globalCellCountPerDim
@@ -269,7 +269,7 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, dimlist=dimorder, &
+      call ESMF_DataMapGet(ftypep%mapping, dataIorder=dimorder, &
                            rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: DataMapGet returned failure"
@@ -314,7 +314,7 @@
       enddo
 
       ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, gridrank
+      do i=1, numDims
           thisdim = dimorder(i)
           if (thisdim .eq. 0) cycle
 
@@ -605,14 +605,11 @@
 ! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcField, dstField, parentLayout, &
-                                  routehandle, blocking, rc)
-!
+      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blocking, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
-      type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
@@ -633,12 +630,6 @@
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField]
 !           {\tt ESMF\_Field} containing destination grid.
-!     \item [parentLayout]
-!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, 
-!           most commonly the layout
-!           of the Coupler if the redistribution is inter-component, 
-!           but could also be the individual layout for a component if the 
-!           redistribution is intra-component.  
 !     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
@@ -1314,7 +1305,7 @@
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
-      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: i, datarank, thisdim, thislength, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
@@ -1331,12 +1322,14 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                           dimlist=dimorder, rc=status)
+      call ESMF_DataMapGet(ftypep%mapping, dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldScatter: DataMapGet returned failure"
         return
       endif 
+
+      call ESMF_GridGet(ftypep%grid, numDims=numDims, rc=status) 
+
 !     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
 !     if(status .NE. ESMF_SUCCESS) then 
 !       print *, "ERROR in FieldScatter: GridGet returned failure"
@@ -1424,7 +1417,7 @@
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
-      integer :: i, j, gridrank, datarank, thisdim, numDims
+      integer :: i, j, datarank, thisdim, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
@@ -1458,9 +1451,9 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                           horizRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
-                           dimlist=dimorder, rc=status)
+      call ESMF_DataMapGet(ftypep%mapping, &
+                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                           dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHalo: DataMapGet returned failure"
         return

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.4 2004/03/04 18:11:39 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.5 2004/03/08 16:03:26 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -187,10 +187,10 @@
          !  the data using the Comm routines.  The handle identifies which
          !  precomputed pattern to use
          if (injecttoflow)  then
-            call ESMF_FieldRedist(srcfield, dstfield, cpllayout, &
+            call ESMF_FieldRedist(srcfield, dstfield, &
                                   rh_Inject_to_Flow, rc=status)
          else
-            call ESMF_FieldRedist(srcfield, dstfield, cpllayout, &
+            call ESMF_FieldRedist(srcfield, dstfield, &
                                   rh_Flow_to_Inject, rc=status)
          endif
 

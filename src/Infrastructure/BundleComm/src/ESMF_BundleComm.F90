@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.6 2004/03/05 23:59:18 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.6 2004/03/05 23:59:18 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $'
 
 !==============================================================================
 !
@@ -233,7 +233,7 @@
       type(ESMF_BundleType), pointer :: btypep     ! bundle type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: i, datarank, thisdim, thislength, numDims
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps, globalCellCountPerDim
@@ -252,13 +252,13 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(btypep%flist(1)%ftypep%mapping, gridrank=gridrank, dimlist=dimorder, &
-                           rc=status)
+      call ESMF_DataMapGet(btypep%flist(1)%ftypep%mapping, &
+                           dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleGather: DataMapGet returned failure"
         return
       endif 
-      call ESMF_GridGet(btypep%grid, &
+      call ESMF_GridGet(btypep%grid, numDims=numDims, &
                         globalCellCountPerDim=globalCellCountPerDim, &
                         maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
                         rc=status)
@@ -290,7 +290,7 @@
       enddo
 
       ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, gridrank
+      do i=1, numDims
           thisdim = dimorder(i)
           if (thisdim .eq. 0) cycle
 
@@ -441,7 +441,7 @@
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
-      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: i, datarank, thisdim, thislength, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
@@ -458,8 +458,8 @@
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
-      call ESMF_DataMapGet(btypep%flist(1)%ftypep%mapping, gridrank=gridrank, &
-                           dimlist=dimorder, rc=status)
+      call ESMF_DataMapGet(btypep%flist(1)%ftypep%mapping, &
+                           dataIorder=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleScatter: DataMapGet returned failure"
         return

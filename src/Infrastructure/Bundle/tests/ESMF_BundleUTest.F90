@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.6 2004/02/17 16:35:20 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.6 2004/02/17 16:35:20 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -130,7 +130,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
-      call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
+      call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
       write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -153,7 +153,7 @@
       grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), mincoord, &
                                            layout=layout, rc=rc)
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
-      call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
+      call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       write(failMsg, *) ""
       write(name, *) "Adding a field to an Empty Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -183,7 +183,7 @@
 
       !NEX_UTest
       !  Verify that a Field can be added to an empty Bundle
-      call ESMF_BundleAddFields(bundle2, simplefield, rc=rc);
+      call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       write(failMsg, *) ""
       write(name, *) "Adding a Field to an Empty Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -216,7 +216,7 @@
    
       !NEX_UTest
       !  Verify that multiple Fields can be added to a Bundle 
-      call ESMF_BundleAddFields(bundle3, 3, fields, rc);
+      call ESMF_BundleAddField(bundle3, 3, fields, rc);
       write(failMsg, *) ""
       write(name, *) "Adding multiple Fields to a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.10 2004/03/05 20:09:08 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.11 2004/03/08 16:03:25 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -288,7 +288,7 @@
 
       ! Create a Field using the Grid and ArraySpec created above
       fname = "DE id"
-      field1 = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
+      field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                 haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldPrint(field1, "", rc)

@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/03/04 18:19:27 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2004/03/08 16:03:25 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -146,7 +146,7 @@
       order(1) = 0
       order(2) = 1
       order(3) = 2
-      datamap = ESMF_DataMapCreate(order, horizRelloc=ESMF_CELL_NFACE, &
+      call ESMF_DataMapInit(datamap, 3, order, horzRelloc=ESMF_CELL_NFACE, &
                                    counts=counts(1:1), rc=rc)
 
       ! Create the field 
@@ -284,7 +284,7 @@
 
       ! get the grid and coordinates
       allocate(coordArray(2))
-      call ESMF_FieldGetRelLoc(humidity, horizRelloc=relloc, rc=status)
+      call ESMF_FieldGetRelLoc(humidity, horzRelloc=relloc, rc=status)
       call ESMF_FieldGetGrid(humidity, grid, rc=status)
       call ESMF_GridGetDE(grid, myDE=myDE, localCellCountPerDim=counts, &
                           horzRelloc=ESMF_CELL_CENTER, rc=status)

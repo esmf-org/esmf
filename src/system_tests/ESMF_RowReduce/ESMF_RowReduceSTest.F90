@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.12 2004/03/05 17:23:39 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.13 2004/03/08 16:03:26 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -123,15 +123,24 @@
     allocate(idata(ni))
     allocate(ldata(ni))
 
+    ! set original values to 0; local to global call below will overwrite
+    ! this with global index numbers
+    idata(:) = 0
+    
     ! Generate global cell numbers.  First set to local number and
     ! then translate to global index.
     do i=1,ni
        ldata(i) = i
     enddo
+    print *, "size local1D", size(ldata)
+    print *, "size global1D", size(idata)
     call ESMF_GridLocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, &
                                      horzRelloc=ESMF_CELL_CENTER, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    print *, "after local to global"
+    print *, "ldata was = ", ldata
+    print *, "idata now = ", idata
     ! Delete local cell number array, not needed anymore.
     deallocate(ldata, stat=rc)
 
@@ -146,7 +155,7 @@
 
     ! Create a Field using the Grid and Arrays created above
     fname = "relative humidity"
-    field1 = ESMF_FieldCreate(grid1, array1, horizRelloc=ESMF_CELL_CENTER, &
+    field1 = ESMF_FieldCreate(grid1, array1, horzRelloc=ESMF_CELL_CENTER, &
                                     name=fname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_FieldPrint(field1, rc=rc)
