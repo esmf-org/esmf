@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.2 2003/10/20 20:13:54 cdeluca Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.3 2003/10/21 04:08:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.2 2003/10/20 20:13:54 cdeluca Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.3 2003/10/21 04:08:44 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -118,10 +118,10 @@
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACK_FIELD_DATA option
-      bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACK_FIELD_DATA, &
+      ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
+      bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
 				name="atmosphere data", rc=rc)
-      write(name, *) "Creating Bundle with ESMF_PACK_FIELD_DATA Req. FLD2.1.1"
+      write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 

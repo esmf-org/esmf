@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.2 2003/10/07 22:36:37 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.3 2003/10/21 04:08:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
         integer :: packflag
       end type
 
-      type(ESMF_PackFlag), parameter :: ESMF_PACK_FIELD_DATA = ESMF_PackFlag(1), &
+      type(ESMF_PackFlag), parameter :: ESMF_PACKED_DATA = ESMF_PackFlag(1), &
                                         ESMF_NO_PACKED_DATA = ESMF_PackFlag(2)
 
 !------------------------------------------------------------------------------
@@ -149,7 +149,7 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC TYPES:
-      public ESMF_Bundle, ESMF_PackFlag, ESMF_PACK_FIELD_DATA, ESMF_NO_PACKED_DATA
+      public ESMF_Bundle, ESMF_PackFlag, ESMF_PACKED_DATA, ESMF_NO_PACKED_DATA
       public ESMF_BundleType   ! intended for internal ESMF use only
 
 
@@ -1218,7 +1218,7 @@ end function
       endif
 
       ! If packed data buffer requested, create or update it here.
-      if (btype%pack_flag .eq. ESMF_PACK_FIELD_DATA) then
+      if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
 
          call ESMF_BundleTypeRepackData(btype, rc=rc)
 
@@ -1331,7 +1331,7 @@ end function
         return
       endif
 
-      btype%pack_flag = ESMF_PACK_FIELD_DATA
+      btype%pack_flag = ESMF_PACKED_DATA
 !     btype%localbundle%packed_data = pkarray
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1390,7 +1390,7 @@ end function
         return
       endif
 
-      btype%pack_flag = ESMF_PACK_FIELD_DATA
+      btype%pack_flag = ESMF_PACKED_DATA
 !     btype%localbundle%packed_data = pkarray
 
       if(rcpresent) rc = ESMF_SUCCESS
