@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.8 2004/11/09 16:28:35 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.9 2004/11/11 08:50:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -550,6 +550,8 @@ static void *vmk_spawn(void *arg){
 #endif
     if (*f==1) break; // check whether this was a wrap up call
 
+    //vm.vmk_barrier();
+    
     // call the function pointer with the new ESMC_VMK as its argument
     // this is where we finally enter the user code again...
     if (vmkt->arg==NULL)
@@ -614,6 +616,15 @@ static void *vmk_sigcatcher(void *arg){
   pthread_mutex_lock(&(vmkt->mut_extra2));
   pthread_cond_signal(&(vmkt->cond_extra2));
   pthread_mutex_unlock(&(vmkt->mut_extra2));
+  // more preparation
+  sigset_t sigs_to_catch;
+  sigemptyset(&sigs_to_catch);
+  sigaddset(&sigs_to_catch, VM_SIG1);
+  int caught;
+//  pthread_t thread_wake;
+  MPI_Status mpi_s;
+  ESMC_VMK vm;  // need a handle to access the MPI_Comm of default ESMC_VMK
+  
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
@@ -636,12 +647,6 @@ static void *vmk_sigcatcher(void *arg){
   // via MPI and receive the actual pthread_id that need to be awoken on this
   // process, which is actually a blocker thread which then will wrap up and 
   // by that indicate that the resource has been made available again.
-  sigset_t sigs_to_catch;
-  sigemptyset(&sigs_to_catch);
-  sigaddset(&sigs_to_catch, VM_SIG1);
-  int caught;
-//  pthread_t thread_wake;
-  MPI_Status mpi_s;
   // suspend thread until a signal arrives
 #if (VERBOSITY > 9)
   printf("I am a sigcatcher for pid %d and am going to sleep...\n", getpid());
@@ -653,7 +658,6 @@ static void *vmk_sigcatcher(void *arg){
 #endif
   // this signal was received from a thread running under another process
   // receive the thread id of the blocker thread that needs to be woken up
-  ESMC_VMK vm;  // need a handle to access the MPI_Comm of default ESMC_VMK
 //  MPI_Recv(&thread_wake, sizeof(pthread_t), MPI_BYTE, MPI_ANY_SOURCE, 
 //    VM_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
   MPI_Recv(&blocker_vmkt, sizeof(vmkt_t *), MPI_BYTE, MPI_ANY_SOURCE, 
@@ -1255,13 +1259,21 @@ void ESMC_VMK::vmk_enter(class ESMC_VMKPlan &vmp, void *arg, void *argvmkt){
   // pets that do not spawn but contribute need to release their blocker and
   // sigcatcher _before_ the actual spawner threads get released 
   // (this is so that no signals get missed!)
-  if (vmp.spawnflag[mypet]==0 && vmp.contribute[mypet]>-1){
-    vmkt_release(&(sarg[0].vmkt), NULL);
-    vmkt_release(&(sarg[0].vmkt_extra), NULL);
+  if (vmp.spawnflag[mypet]==0){
+    if (vmp.contribute[mypet]>-1){
+      vmkt_release(&(sarg[0].vmkt), NULL);          // release blocker
+      vmkt_release(&(sarg[0].vmkt_extra), NULL);    // release sigcatcher
+      vmk_send(NULL, 0, vmp.contribute[mypet]);     // tell spawner about me
+    }
+  }else{
+    // wait on all the contributors to this spawner
+    for (int i=0; i<npets; i++)
+      if (vmp.contribute[i]==mypet && i!=mypet)
+        vmk_recv(NULL, 0, i); // listen if contributor has released its threads
+    // now all contributors are in, pets that spawn need to release their vmkts
+    for (int i=0; i<vmp.spawnflag[mypet]; i++)
+      vmkt_release(&(sarg[i].vmkt), argvmkt);
   }
-  // pets that spawn need to release their vmkts
-  for (int i=0; i<vmp.spawnflag[mypet]; i++)
-    vmkt_release(&(sarg[i].vmkt), argvmkt);
 }
 
 
@@ -1283,8 +1295,13 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan &vmp, void *arg){
   }
   // the following barrier has the effect that all parent PETs which either
   // spawn or contribute to this child are being blocked until _all_ child
-  // PETs have reached this point. 
-  vmk_barrier();
+  // PETs have been caught. However, even those parent PETs that don't 
+  // participate in the child VM will be blocked here!
+  // After reworking the vmk_enter I can take this barrier out, which will
+  // further bring down the callback overhead! Also the previous VM 
+  // behavior is restored in that only those parent PETs are blocked in a
+  // vmk_exit which participate in that child VM. 
+  //vmk_barrier();
 }
 
 
