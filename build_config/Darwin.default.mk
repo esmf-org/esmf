@@ -1,4 +1,4 @@
-#  $Id: Darwin.default.mk,v 1.2 2003/09/09 21:45:44 flanigan Exp $
+#  $Id: Darwin.default.mk,v 1.3 2003/09/11 19:24:43 nscollins Exp $
 #
 #  Darwin.default.mk
 #
@@ -29,18 +29,30 @@ ESMF_PREC = 32
 # installed the mpich library.  (the first section assumes
 # it is installed under /usr/local - change MPI_HOME if other dir.)
 
-# with mpich installed in /usr/local:
-##ESMC_MPIRUN      = mpirun
-##MPI_HOME       =  /usr/local
-##MPI_LIB        = -lmpich -lpmpich
-##MPI_INCLUDE    = -I${MPI_HOME}/include
-##MPIRUN         =  ${MPI_HOME}/bin/mpirun
+ifeq ($(ESMF_MPI),lam)
+# with lam-mpi installed in /usr/local:
+MPI_HOME       = 
+MPI_LIB        = -lmpi -llam
+MPI_INCLUDE    = 
+MPIRUN         =  mpirun
+endif
 
+ifeq ($(ESMF_MPI),mpich)
+# with mpich installed in /usr/local:
+ESMC_MPIRUN      = mpirun
+MPI_HOME       =  /usr/local
+MPI_LIB        = -lmpich -lpmpich
+MPI_INCLUDE    = -I${MPI_HOME}/include
+MPIRUN         =  ${MPI_HOME}/bin/mpirun
+endif
+
+ifeq ($(ESMF_MPI),)
 # without mpich installed:
 MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
+endif
 
 
 # MP_LIB is for openMP
@@ -78,8 +90,7 @@ C_CLINKER	   = cc
 C_FLINKER	   = f95
 C_CCV		   = ${C_CC} --version
 C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
-C_SYS_LIB	   = -ldl -lc -lg2c -lm
-#C_SYS_LIB	   = -ldl -lc -lf2c -lm
+C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
@@ -104,12 +115,12 @@ CXX_CLINKER	   = g++
 CXX_FLINKER	   = g++
 CXX_CCV		   = ${CXX_CC} --version
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
-CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLD         = f95 
-C_F90CXXLIBS       = -lstdc++
+C_F90CXXLIBS       = ${MPI_LIB} -lstdc++
 C_CXXF90LD         = f95
-C_CXXF90LIBS       = 
+C_CXXF90LIBS       = ${MPI_LIB}  
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
