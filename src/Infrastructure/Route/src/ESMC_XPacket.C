@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.39 2003/09/04 22:24:21 cdeluca Exp $
+// $Id: ESMC_XPacket.C,v 1.40 2004/02/18 23:32:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.39 2003/09/04 22:24:21 cdeluca Exp $";
+              "$Id: ESMC_XPacket.C,v 1.40 2004/02/18 23:32:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -304,7 +304,7 @@
       ESMC_AxisIndex *indexlist,  // in  - set of global AxisIndices
       int size_axisindex,         // in  - size of AxisIndex array
       int *global_count,          // in -  array of global counts per dimension
-      ESMC_Logical (*boundary)[2],// in  - for each dim, is it periodic?
+      ESMC_Logical (*boundary)[2], // in - per dim, is left/right periodic?
       ESMC_XPacket **xp_list,     // out - list of xp's created
       int *xp_count) {            // out - count of xp's created
 //
@@ -350,6 +350,83 @@
           xps[nextxp].contig_length = indexlist[0].max - indexlist[0].min + 1;
           xps[nextxp].stride[0] = indexlist[0].stride;
           xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+
+          // if periodic along the first axis and this piece along boundary:
+          for (i=0; i<size_axisindex; i++) {
+            if (boundary && (boundary[i][0] == ESMF_TRUE)) {
+ 
+              nextxp++;
+
+              xps[nextxp].rank = 2;
+
+              boundary_l[0] = indexlist[0].min;
+              boundary_l[1] = indexlist[1].min;
+              boundary_r[0] = indexlist[0].max;
+              boundary_r[1] = indexlist[1].max;
+              boundary_l[i] = boundary_l[i] + global_count[i];
+              boundary_r[i] = boundary_r[i] + global_count[i];
+    
+              xps[nextxp].offset  = boundary_l[1]*indexlist[0].stride 
+                                  + boundary_l[0];
+              xps[nextxp].contig_length = boundary_r[0] - boundary_l[0] + 1;
+              xps[nextxp].stride[0] = indexlist[0].stride;
+              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+            }
+            if (boundary && (boundary[i][1] == ESMF_TRUE)) {
+ 
+              nextxp++;
+
+              xps[nextxp].rank = 2;
+
+              boundary_l[0] = indexlist[0].min;
+              boundary_l[1] = indexlist[1].min;
+              boundary_r[0] = indexlist[0].max;
+              boundary_r[1] = indexlist[1].max;
+              boundary_l[i] = boundary_l[i] - global_count[i];
+              boundary_r[i] = boundary_r[i] - global_count[i];
+    
+              xps[nextxp].offset  = boundary_l[1]*indexlist[0].stride
+                                  + boundary_l[0];
+              xps[nextxp].contig_length = boundary_r[0] - boundary_l[0] + 1;
+              xps[nextxp].stride[0] = indexlist[0].stride;
+              xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+            }
+          }
+        }
+      break;
+
+      case 3:
+        {
+          int boundary_l[3];
+          int boundary_r[3];
+
+          nxp = 1;
+          if (boundary) {
+              for (i=0; i<size_axisindex; i++) {
+                if (boundary[i][0] == ESMF_TRUE) nxp++;
+                if (boundary[i][1] == ESMF_TRUE) nxp++;
+              }
+          }
+
+          xps = new ESMC_XPacket[nxp];
+        
+           *xp_list = xps; 
+           *xp_count = nxp;
+
+          // there's always 1.
+          nextxp = 0;
+
+          xps[nextxp].rank = 3;
+          xps[nextxp].offset  = indexlist[2].min * indexlist[1].stride
+                              + indexlist[1].min * indexlist[0].stride
+                              + indexlist[0].min;
+          xps[nextxp].contig_length = indexlist[0].max - indexlist[0].min + 1;
+          xps[nextxp].stride[0] = indexlist[0].stride;
+          xps[nextxp].rep_count[0] = indexlist[1].max - indexlist[1].min + 1;
+          xps[nextxp].stride[1] = indexlist[1].stride;
+          xps[nextxp].rep_count[1] = indexlist[2].max - indexlist[2].min + 1;
+
+// TODO: done to here.  does *NOT* handle periodic yet
 
           // if periodic along the first axis and this piece along boundary:
           for (i=0; i<size_axisindex; i++) {
