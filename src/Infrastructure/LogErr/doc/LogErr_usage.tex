@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.13 2004/11/01 23:00:32 cpboulder Exp $
+% $Id: LogErr_usage.tex,v 1.14 2004/11/16 22:40:35 cpboulder Exp $
 
 %\subsection{Use and Examples}
 
@@ -51,6 +51,22 @@ be placed at the beginning of each method.  The user can then use the
 parameters into the method.  The user does not have to specify line number as
 it is a value supplied by cpp.
 
+An example of log output is given below:
+
+20041105 163418.472210 INFO      Running with ESMF Version 2.0.2   
+
+20041105 163419.186153 ERROR     ESMF_Field.F90             812  ESMF_FieldGet
+No Grid or Bad Grid attached to Field
+
+The first entry of the shows date and time stamp.  The time is given in 
+microsecond precision.  The next item shown is the type of message (INFO 
+in this case).  Lastly, the context is written.
+
+The second entry shows something slightly different.  In this case, we have
+an ERROR.  The method name (ESMF\_Field.F90) is automatically provided from 
+the cpp macros as well as the line number (812).  Lastly, the context of the 
+message is written.
+ 
 When done writing messages, the Log is closed by calling 
 {\tt ESMF\_LogClose()} which will release the assigned unit number.
 
