@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.20 2003/02/18 22:31:02 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.21 2003/02/19 19:54:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,20 +99,17 @@
       type ESMF_CompClass
       sequence
       private
-         character(len=ESMF_MAXSTR) :: compname
-         type(ESMF_CompType) :: ctype
-         type(ESMF_ModelType) :: mtype
-         type(ESMF_State) :: importstate
-         type(ESMF_State) :: exportstate
-         type(ESMF_State), dimension(:), pointer :: statelist
-         type(ESMF_Layout) :: layout
-         type(ESMF_CompPrivateData) :: opaque_private_data
-         type(ESMF_Clock) :: clock
-         character(len=ESMF_MAXSTR) :: filepath
-         integer :: instance_id                              ! for ensembles
-         integer :: function_count  ! entry points supplied by component code
-         character(len=ESMF_MAXSTR), dimension(:), pointer :: function_name
-         type(ESMF_Pointer), dimension(:), pointer :: function_list
+         type(ESMF_Base) :: base                       ! base class
+         type(ESMF_CompType) :: ctype                  ! component type
+         type(ESMF_ModelType) :: mtype                 ! model type
+         type(ESMF_State) :: importstate               ! import state
+         type(ESMF_State) :: exportstate               ! export state
+         type(ESMF_State), dimension(:), pointer :: statelist  ! coupling list
+         type(ESMF_Layout) :: layout                   ! component layout
+         type(ESMF_Clock) :: clock                     ! component clock
+         character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
+         integer :: instance_id                        ! for ensembles
+	 type(ESMF_Pointer) :: this   ! C++ data for function & data pointers
       end type
 
 !------------------------------------------------------------------------------
@@ -147,13 +144,12 @@
       public ESMF_CompValidate
       public ESMF_CompPrint
  
-      public ESMF_CompSetRoutine  ! (component, "init", My_Init)
-      ! These are the primary routines the user must provide.
-      public ESMF_CompInit        !  (comptype, modeltype, ...)
-      public ESMF_CompRun         ! (component, time) or (coupler, statelist?, time)
-      public ESMF_CompFinalize    ! (component)
+      ! These call the user-provided routines.
+      public ESMF_CompInit      
+      public ESMF_CompRun      
+      public ESMF_CompFinalize 
 
-      ! Other routines the user might set.
+      ! Other routines the user might request to setup.
       !public ESMF_CompCheckpoint
       !public ESMF_CompRestore
       !public ESMF_CompWrite
@@ -163,7 +159,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.20 2003/02/18 22:31:02 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.21 2003/02/19 19:54:59 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -209,7 +205,7 @@ end interface
 ! !IROUTINE: ESMF_CompCreateNew -- Create a new Component.
 
 ! !INTERFACE:
-      function ESMF_CompCreateNew(name, layout, ctype, mtype, filepath, rc)
+      function ESMF_CompCreateNew(name, layout, ctype, mtype, clock, filepath, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Comp) :: ESMF_CompCreateNew
@@ -219,6 +215,7 @@ end interface
       type(ESMF_Layout), intent(in) :: layout
       type(ESMF_CompType), intent(in) :: ctype
       type(ESMF_ModelType), intent(in) :: mtype 
+      type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
       integer, intent(out), optional :: rc 
 !
@@ -244,6 +241,9 @@ end interface
 !   \item[mtype]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
+!
+!   \item[{[clock]}]
+!    Clock for coordinating component and model time and timesteps.
 !
 !   \item[{[filepath]}]
 !    Directory where component-specfic configuration or data files
@@ -284,7 +284,7 @@ end interface
 
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, name, layout, ctype, mtype, &
-                                                             filepath, status)
+                                                     clock, filepath, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -362,7 +362,8 @@ end interface
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      subroutine ESMF_CompConstruct(compp, name, layout, ctype, mtype, filepath, rc)
+      subroutine ESMF_CompConstruct(compp, name, layout, ctype, mtype, &
+                                                          clock, filepath, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -370,6 +371,7 @@ end interface
       type(ESMF_Layout), intent(in) :: layout
       type(ESMF_CompType), intent(in) :: ctype
       type(ESMF_ModelType), intent(in) :: mtype 
+      type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: filepath
       integer, intent(out), optional :: rc 
 !
@@ -397,6 +399,9 @@ end interface
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
 !
+!   \item[{[clock]}]
+!    Clock for coordinating component and model time and timesteps.
+!
 !   \item[{[filepath]}]
 !    Directory where component-specfic configuration or data files
 !    are located.
@@ -423,10 +428,14 @@ end interface
         endif
 
         ! TODO: fill in values here.
-        compp%compname = name
+        call ESMF_SetName(compp%base, name, "Component", status)
 	compp%ctype = ctype
 	compp%mtype = mtype
-        !compp%clock = ESMF_ClockCreate()
+        if (present(clock)) then
+          compp%clock = clock   
+        else
+          !compp%clock = ESMF_ClockInit()
+        endif
         compp%layout = layout
         compp%filepath = filepath
 
@@ -444,7 +453,13 @@ end interface
         nullify(compp%statelist)
 
         compp%instance_id = 1
-        compp%function_count = 0
+        ! Call C++ entry point to initialize the function and data pointer
+        ! tables.   TODO: add this code
+        ! call c_ESMC_CompTableCreate(compp%this, rc) 
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CompConstruct: Table create error"
+          return
+        endif
    
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
@@ -502,19 +517,12 @@ end interface
            nullify(compp%statelist)
         endif
         
-        if (compp%function_count .gt. 0) then
-          deallocate(compp%function_name, stat=status)
-          if (status .ne. ESMF_SUCCESS) then
-            print *, "Component contents destruction error"
-            return
-          endif
-          nullify(compp%function_name)
-          deallocate(compp%function_list, stat=status)
-          if (status .ne. ESMF_SUCCESS) then
-            print *, "Component contents destruction error"
-            return
-          endif
-          nullify(compp%function_list)
+        ! call C++ to release function and data pointer tables.
+        ! TODO: add this code
+        ! call c_ESMC_CompTableDelete(compp%this, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component contents destruction error"
+          return
         endif
 
         ! Set return code if user specified it
