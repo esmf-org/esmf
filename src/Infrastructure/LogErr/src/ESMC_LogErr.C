@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.28 2004/04/22 21:19:22 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.29 2004/04/22 22:31:59 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.28 2004/04/22 21:19:22 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.29 2004/04/22 22:31:59 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -171,6 +171,121 @@ int ESMC_Log::ESMC_LogWrite(
 //
 // !ARGUMENTS:
 	char msg[],	// Log Entry
+    int logtype// Log Type   
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	time_t tm;
+	struct tm ti;
+	int ok=0;
+	int i=0;
+	
+	time (&tm);
+	ti=*localtime(&tm);
+    //return ESMF_FAILURE;
+    puts("Write Log");
+	do
+	{
+    	ESMC_LogFile = fopen(nameLogErrFile, "a+");
+		if (ESMC_LogFile==NULL)
+		  ok=0;
+		else
+		  ok=2;
+		i++;
+		if (i>100000)
+		  ok=1;
+	} while (ok<1);
+	if (ok<2)
+	  return ESMF_FAILURE;
+	switch(logtype)
+	{
+		case 0:
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
+	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
+			ti.tm_sec,"INFO",__FILE__,__LINE__,msg);
+			break;
+		case 1:
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
+	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
+			ti.tm_sec,"WARNING",__FILE__,__LINE__,msg);
+			break;
+		case 2:
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
+	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
+			ti.tm_sec,"ERROR",__FILE__,__LINE__,msg);
+			break;
+	}		
+    fclose(ESMC_LogFile);
+    return ESMF_SUCCESS;
+}
+
+int ESMC_Log::ESMC_LogWrite(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+	char msg[],	// Log Entry
+    int logtype,// Log Type   
+	char modmeth[]
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	time_t tm;
+	struct tm ti;
+	int ok=0;
+	int i=0;
+	
+	time (&tm);
+	ti=*localtime(&tm);
+    //return ESMF_FAILURE;
+    puts("Write Log");
+	do
+	{
+    	ESMC_LogFile = fopen(nameLogErrFile, "a+");
+		if (ESMC_LogFile==NULL)
+		  ok=0;
+		else
+		  ok=2;
+		i++;
+		if (i>100000)
+		  ok=1;
+	} while (ok<1);
+	if (ok<2)
+	  return ESMF_FAILURE;
+	switch(logtype)
+	{
+		case 0:
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
+	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
+			ti.tm_sec,"INFO",__FILE__,__LINE__,modmeth,msg);
+			break;
+		case 1:
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
+	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
+			ti.tm_sec,"WARNING",__FILE__,__LINE__,modmeth,msg);
+			break;
+		case 2:
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
+	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
+			ti.tm_sec,"ERROR",__FILE__,__LINE__,modmeth,msg);
+			break;
+	}		
+    fclose(ESMC_LogFile);
+    return ESMF_SUCCESS;
+}
+
+int ESMC_Log::ESMC_LogWrite(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+	char msg[],	// Log Entry
     int logtype,// Log Type   
 	char module[],
 	char method[]
@@ -223,12 +338,61 @@ int ESMC_Log::ESMC_LogWrite(
     fclose(ESMC_LogFile);
     return ESMF_SUCCESS;
 }
-
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogFoundError - LogFoundError
 //
 // !INTERFACE:
+
+int ESMC_Log::ESMC_LogFoundError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int rc,
+	char msg[],	// Log Entry
+    int logtype// Log Type   
+      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	int result=ESMF_FALSE;
+	if (rc!=ESMF_SUCCESS)
+	{
+		ESMC_LogWrite(msg,logtype);
+		result=ESMF_TRUE;
+	}
+	return result;
+
+}
+
+int ESMC_Log::ESMC_LogFoundError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int rc,
+	char msg[],	// Log Entry
+    int logtype,// Log Type   
+	char modmeth[]      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	int result=ESMF_FALSE;
+	if (rc!=ESMF_SUCCESS)
+	{
+		ESMC_LogWrite(msg,logtype,modmeth);
+		result=ESMF_TRUE;
+	}
+	return result;
+
+}
 
 int ESMC_Log::ESMC_LogFoundError(
 
