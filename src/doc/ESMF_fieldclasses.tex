@@ -144,7 +144,7 @@ a {\tt Gridded Components}, as shown in Figure~\ref{fig:datastruct}.
 \caption[{Hierarchy of Data Structures}]{{\tt Field}, {\tt Grid}, and 
 related data structures form an hierarchy within a {\tt Gridded Component}.}
 \label{fig:datastruct}
-\scalebox{0.70}{\includegraphics{ESMF_DataStructureHierarchy.eps}}
+\scalebox{0.70}{\includegraphics{GridsandfieldsDiagram.eps}}
 \end{figure}
 
 
@@ -217,7 +217,17 @@ as well as the
 decomposition of the grid into sets of gridpoints for processing in parallel on a
 multiprocessor system.  The {\tt Grid} class provides methods to the
 {\tt Field} and {\tt Bundle} classes for obtaining coordinate, indexing, and 
-decomposition information.
+decomposition information. The grid class will be extensible 
+to allow specialization to different categories of grid, whilst maintaining
+some common interface abstractions. The specialization strategy is illustrated
+in figure \ref{fig:GridStyleDiagram}.
+
+\begin{figure}
+\caption[{Grid Specialization}]{The generic grid class will be extensible to
+encompass a wide variety of current and future grids.}
+\label{fig:GridStyleDiagram}
+\scalebox{0.70}{\includegraphics{GridStyleDiagram.eps}}
+\end{figure}
 
 \subsubsection{Physical Grid (ESMF\_PhysGrid)}
 \label{sec:physgrid} 
