@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.3 2004/02/25 20:21:09 eschwab Exp $"
+"$Id: ESMC_Conf.h,v 1.3.2.1 2004/07/22 20:30:43 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -61,12 +61,16 @@ Licensed under the GPL.
 
 #if 0
 PGI method for marking F90 "not present" optional arguments uses
-the address of compiler-generated global array element pghpf_0_[8].
-However, PGI says check against entire array to be safe.
+the address of compiler-generated global array element pghpf_0_[8] for
+non-character data.  However, PGI says check against entire array to be safe.
+For character data, "not present" optional arguments are marked with the
+address of global compiler-generated variable pghpf_0c_.
 #endif
 extern char pghpf_0_[];
-#define ESMC_PRESENT(arg) ( ! ( (char*)(arg) >=  pghpf_0_ && \
-                                (char*)(arg) <= &pghpf_0_[12] ) )
+extern char pghpf_0c_;
+#define ESMC_PRESENT(arg) ( ! ( ( (char*)(arg) >=  pghpf_0_ && \
+                                  (char*)(arg) <= &pghpf_0_[12] ) || \
+		                  (char*)(arg) == &pghpf_0c_ ) )
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
