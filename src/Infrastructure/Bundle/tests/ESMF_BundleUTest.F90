@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.25 2004/06/18 21:31:14 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.26 2004/06/20 05:34:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,13 +36,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.25 2004/06/18 21:31:14 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.26 2004/06/20 05:34:58 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0, number
 !     ! Local variables
-      integer :: i, x, y, rc, mycell, fieldcount, count
+      integer :: i, x, y, rc, mycell, fieldcount, count, countlist(2)
       type(ESMF_Grid) :: grid, grid2
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
@@ -174,7 +174,13 @@
 
       !EX_UTest
       ! Creating a Grid
-      grid = ESMF_GridCreate(name="Grid", rc=rc)
+      countlist(:) = (/ 180, 90 /)
+      mincoord(:) = 1.0
+      grid = ESMF_GridCreateHorzXYUni(counts=countlist, &
+                              minGlobalCoordPerDim=mincoord, &
+                              name="Grid",  rc=rc) 
+      call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
+
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Create a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
