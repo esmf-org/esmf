@@ -1,4 +1,4 @@
-/* $Id: mpi.h,v 1.2 2002/01/25 20:43:16 dneckels Exp $ */
+/* $Id: mpi.h,v 1.3 2003/04/17 17:59:07 nscollins Exp $ */
 
 /*
    This is a special set of bindings for uni-processor use of MPI by the PETSc library.
@@ -146,6 +146,7 @@ extern int    Petsc_MPI_Comm_free(MPI_Comm*);
 extern int    Petsc_MPI_Initialized(int *);
 extern int    Petsc_MPI_Comm_dup(MPI_Comm,MPI_Comm *);
 extern int    Petsc_MPI_Finalize(void);
+extern int    Petsc_MPI_Finalized(int *);
 
 #define MPI_Abort         Petsc_MPI_Abort
 #define MPI_Attr_get      Petsc_MPI_Attr_get
@@ -157,6 +158,7 @@ extern int    Petsc_MPI_Finalize(void);
 #define MPI_Initialized   Petsc_MPI_Initialized
 #define MPI_Comm_dup      Petsc_MPI_Comm_dup
 #define MPI_Finalize      Petsc_MPI_Finalize
+#define MPI_Finalized     Petsc_MPI_Finalized
 
 /* 
     Routines we have replace with macros that do nothing 

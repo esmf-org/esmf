@@ -1,4 +1,4 @@
-/*$Id: mpi.c,v 1.2 2002/01/25 20:43:15 dneckels Exp $*/
+/*$Id: mpi.c,v 1.3 2003/04/17 17:59:07 nscollins Exp $*/
 
 /*
       This provides a few of the MPI-uni functions that cannot be implemented
@@ -149,9 +149,22 @@ int Petsc_MPI_Initialized(int *flag)
   return 0;
 }
 
+static int MPI_was_finalized = 0;
+
+int Petsc_MPI_Finalized(int *flag)
+{
+  *flag = MPI_was_finalized;
+  return 0;
+}
+
+// according to the spec, you call MPI_Finalized to
+// see if finalize has already been called, and that
+// MPI_Initialized always returns true once MPI_Init
+// has been called.  but the old code was this
 int Petsc_MPI_Finalize(void)
 {
-  MPI_was_initialized = 0;
+  MPI_was_initialized = 0;   // this was how it was
+  MPI_was_finalized = 1;
   return 0;
 }
 
