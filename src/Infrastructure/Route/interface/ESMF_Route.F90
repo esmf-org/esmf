@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.31 2003/08/29 21:10:24 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.32 2003/09/04 19:41:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.31 2003/08/29 21:10:24 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.32 2003/09/04 19:41:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -486,6 +486,13 @@
         endif
 
         ! Translate AxisIndices from F90 to C++
+        ! TODO: fix this hack:
+        !  The halo code sends in src=dst, so don't decrement
+        !  twice in that case.  The AI arrays should really have
+        !  an explicit flag saying which indexing scheme they
+        !  are currently in, so we can just say "go to fortran order"
+        !  or "go to C order" and if already there don't increment 
+        !  or decrement too many times.
         do j=1,rank
           do i=1,AI_dst_count
             AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
@@ -493,12 +500,18 @@
             AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
             AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
           enddo
-          do i=1,AI_src_count
-            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
-            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
-            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
-            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
-          enddo
+          if (.not. associated(AI_src_exc, AI_dst_exc)) then
+            do i=1,AI_src_count
+              AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
+              AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
+            enddo
+          endif
+          if (.not. associated(AI_src_tot, AI_dst_tot)) then
+            do i=1,AI_src_count
+              AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
+              AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
+            enddo
+          endif
         enddo
 
         ! Call C++  code
@@ -515,12 +528,18 @@
             AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
             AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
           enddo
-          do i=1,AI_src_count
-            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
-            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
-            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
-            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
-          enddo
+          if (.not. associated(AI_src_exc, AI_dst_exc)) then
+            do i=1,AI_src_count
+              AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
+              AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
+            enddo
+          endif
+          if (.not. associated(AI_src_tot, AI_dst_tot)) then
+            do i=1,AI_src_count
+              AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
+              AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
+            enddo
+          endif
         enddo
 
         if (status .ne. ESMF_SUCCESS) then  
