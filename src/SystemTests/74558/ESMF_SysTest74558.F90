@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.1 2003/04/04 18:28:00 jwolfe Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.2 2003/04/04 21:39:00 nscollins Exp $
 !
 ! System test code #74558
 
@@ -15,19 +15,8 @@
 
     program ESMF_SysTest74558
 
-#include "ESMF.h"
-
-    ! Modules needed
-    ! TODO: (these will be collapsed into a single ESMF_Mod soon)
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_TimeMod
-    use ESMF_TimeIntervalMod
-    use ESMF_CalendarMod
-    use ESMF_ClockMod
-    use ESMF_StateMod
-    use ESMF_CompMod
+    ! ESMF Framework module
+    use ESMF_Mod
     
     use flowmod
 
@@ -72,7 +61,9 @@
     ! Create the model component
     cname1 = "fluid flow"
     delist = (/ 0 /)
-    layout2 = ESMF_DELayoutCreate(delist, 1, (/ 1 /), (/ 0 /), rc)
+    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0 /), rc)
+    ! TODO: add 1D layout support to DELayout and DistGrid
+    !layout2 = ESMF_DELayoutCreate(delist, 1, (/ 1 /), (/ 0 /), rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
 
