@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.4 2003/01/09 02:15:54 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.5 2003/01/10 00:53:42 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,7 +82,6 @@
  //                                 in F90 modules
      int numDEs;          // number of DEs in communication group
      ESMC_DE *DE;         // this DE we're communicating on behalf of
-     bool commFinal;      // flag to prevent double finalization via destructor
      int *threadCount;    // count threads in a barrier
 
      // ESMC-to-MPI type maps
@@ -91,6 +90,9 @@
 
      void *ESMC_Request; // linked list of requests
      void *ESMC_Status;  // linked list of statuses
+
+     // flag to prevent double finalization via destructor
+     static bool commFinal;
 
      static pthread_mutex_t bufMutex;
      static pthread_mutex_t initMutex;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.7 2003/01/10 00:52:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.7 2003/01/10 00:52:40 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -64,6 +64,9 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //
 
 // Initialize class statics
+
+ // finalization flag
+ bool ESMC_Comm::commFinal = false;
 
  pthread_mutex_t ESMC_Comm::bufMutex = PTHREAD_MUTEX_INITIALIZER;
  pthread_mutex_t ESMC_Comm::initMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -100,9 +103,6 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
-
-  // finalization flag
-  commFinal = false;
 
   // save DE pointer
   DE = de;
@@ -178,7 +178,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //    int error return code
 //
 // !ARGUMENTS:
-//    int error return code
+//    none
 //
 // !DESCRIPTION:
 //      ESMF routine which finalizes a Comm object; performs any 
@@ -188,6 +188,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 // !REQUIREMENTS:  developer's guide for classes
 
   if (!commFinal) {
+cout << "ESMC_CommFinal DE = " << DE << endl;
     if (DE->deType == ESMC_PROCESS) MPI_Finalize();
     commFinal = true;
   }
@@ -395,6 +396,8 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+cout << "ESMC_Comm(void) constructor invoked\n";
+
   threadCount = &threadCountA;
 
  } // end ESMC_Comm
@@ -421,6 +424,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+cout << "ESMC_Comm(argc, argv, de) constructor invoked\n";
   ESMC_Comm();
   ESMC_CommInit(argc, argv,de);
 
@@ -445,6 +449,7 @@ pthread_t ESMC_Comm_tid[ESMC_COMM_NTHREADS];
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+cout << "~ESMC_Comm() invoked\n";
   if (!commFinal) ESMC_CommFinal();
 
  } // end ~ESMC_Comm
