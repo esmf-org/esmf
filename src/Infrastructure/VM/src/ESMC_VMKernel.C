@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.11 2004/11/16 16:25:11 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.12 2004/11/17 06:07:50 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1924,6 +1924,126 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
 }
 
 
+void ESMC_VMK::vmk_send(void *message, int size, int dest, 
+  vmk_commhandle *commhandle){
+  // p2p send
+#if (VERBOSITY > 9)
+  printf("sending to: %d, %d\n", dest, lpid[dest]);
+#endif
+  shared_mp *shmp;
+  pipc_mp *pipcmp;
+  int scpsize;
+  char *pdest;
+  char *psrc;
+  int i;
+  char *mess;
+  // switch into the appropriate implementation
+  switch(commarray[mypet][dest].comm_type){
+  case VM_COMM_TYPE_MPI1:
+    commhandle->nelements=1;
+    commhandle->type=1;
+    commhandle->mpireq = new MPI_Request[1];
+    // MPI-1 implementation
+    // not sure if I need to make this atomic if called multi-threaded?
+    //pthread_mutex_lock(pth_mutex);
+    MPI_Isend(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c, 
+       commhandle->mpireq);
+    //pthread_mutex_unlock(pth_mutex);
+    break;
+  case VM_COMM_TYPE_PTHREAD:
+    // Pthread implementation
+    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    shmp->ptr_src = message;                        // set the source pointer
+    // synchronize with vmk_recv()
+    pthread_mutex_lock(&(shmp->mutex1));
+    shmp->tcounter++;
+    if (shmp->tcounter < 2){
+      // wait for vmk_recv()
+      pthread_cond_wait(&(shmp->cond1), &(shmp->mutex1));
+    }else{
+      // reset counter and wake up vmk_recv()
+      shmp->tcounter = 0;
+      pthread_cond_broadcast(&(shmp->cond1));
+    }
+    pthread_mutex_unlock(&(shmp->mutex1));
+    // now ptr_src and ptr_dest are valid for this message
+    scpsize = size/2;   // send takes the lower half
+    pdest = (char *)shmp->ptr_dest;
+    psrc = (char *)shmp->ptr_src;
+    // do the actual memcpy
+    memcpy(pdest, psrc, scpsize);
+    // synchronize with vmk_recv()
+    pthread_mutex_lock(&(shmp->mutex2));
+    shmp->tcounter++;
+    if (shmp->tcounter < 2){
+      // wait for vmk_recv()
+      pthread_cond_wait(&(shmp->cond2), &(shmp->mutex2));
+    }else{
+      // reset counter and wake up vmk_recv()
+      shmp->tcounter = 0;
+      pthread_cond_broadcast(&(shmp->cond2));
+    }
+    pthread_mutex_unlock(&(shmp->mutex2));
+    break;
+  case VM_COMM_TYPE_SHMHACK:
+    // Shared memory hack sync with spin-lock
+    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    if (size<=SHARED_BUFFER){
+      // use buffer
+      pdest = shmp->buffer;
+      // wait until buffer is ready to be used
+      sync_buffer_wait_empty(&shmp->shms, 0);
+      // do the actual memcpy
+      memcpy(pdest, message, size);
+      // set flag indicating that send's memcpy() is done and buffer is valid
+      sync_buffer_flag_fill(&shmp->shms, 0);
+    }else{
+      // don't use buffer
+      shmp->ptr_src = message;                        // set the source pointer
+      // synchronize with vmk_recv()
+      sync_a_flip(&shmp->shms);
+      // now ptr_src and ptr_dest are valid for this message
+      scpsize = size/2;   // send takes the lower half
+      pdest = (char *)shmp->ptr_dest;
+      psrc = (char *)shmp->ptr_src;
+      // do the actual memcpy
+      memcpy(pdest, psrc, scpsize);
+      // synchronize with vmk_recv()
+      sync_a_flop(&shmp->shms);
+    }
+    break;
+  case VM_COMM_TYPE_POSIXIPC:
+    // Shared memory hack sync with spin-lock
+    pipcmp = commarray[mypet][dest].pipcmp;  // shared memory mp channel
+    i=0;
+    mess = (char *)message;
+    while (size>PIPC_BUFFER){
+      pdest = pipcmp->buffer[i];
+      // wait until buffer is ready to be used
+      sync_buffer_wait_empty(&pipcmp->shms, i);
+      // do the actual memcpy
+      memcpy(pdest, mess, PIPC_BUFFER);
+      // set flag indicating that send's memcpy() is done and buffer is valid
+      sync_buffer_flag_fill(&pipcmp->shms, i);
+      size -= PIPC_BUFFER;
+      mess += PIPC_BUFFER;
+      i = i^1; // 0->1  or  1->0
+    }
+    // do the remaining parts of the message
+    pdest = pipcmp->buffer[i];
+    // wait until buffer is ready to be used
+    sync_buffer_wait_empty(&pipcmp->shms, i);
+    // do the actual memcpy
+    memcpy(pdest, mess, size);
+    // set flag indicating that send's memcpy() is done and buffer is valid
+    sync_buffer_flag_fill(&pipcmp->shms, i);
+    break;
+  default:
+    break;
+  }
+}
+
+
 void ESMC_VMK::vmk_recv(void *message, int size, int source){
   // p2p recv
 #if (VERBOSITY > 9)
@@ -1945,6 +2065,128 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
     MPI_Status mpi_s;
     MPI_Recv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
       mpi_c, &mpi_s);
+    //pthread_mutex_unlock(pth_mutex2);
+    break;
+  case VM_COMM_TYPE_PTHREAD:
+    // Pthread implementation
+    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    shmp->ptr_dest = message;               // set the destination pointer
+    // synchronize with vmk_send()
+    pthread_mutex_lock(&(shmp->mutex1));
+    shmp->tcounter++;
+    if (shmp->tcounter < 2){
+      // wait for vmk_send()
+      pthread_cond_wait(&(shmp->cond1), &(shmp->mutex1));
+    }else{
+      // reset counter and wake up vmk_send()
+      shmp->tcounter = 0;
+      pthread_cond_broadcast(&(shmp->cond1));
+    }
+    pthread_mutex_unlock(&(shmp->mutex1));
+    // now ptr_src and ptr_dest are valid for this message
+    scpsize = size/2;           // send takes the lower half
+    rcpsize = size - scpsize;   // recv takes the upper half
+    pdest = (char *)shmp->ptr_dest;
+    psrc = (char *)shmp->ptr_src;
+    // do actual memcpy
+    memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
+    // synchronize with vmk_send()
+    pthread_mutex_lock(&(shmp->mutex2));
+    shmp->tcounter++;
+    if (shmp->tcounter < 2){
+      // wait for vmk_send()
+      pthread_cond_wait(&(shmp->cond2), &(shmp->mutex2));
+    }else{
+      // reset counter and wake up vmk_send()
+      shmp->tcounter = 0;
+      pthread_cond_broadcast(&(shmp->cond2));
+    }
+    pthread_mutex_unlock(&(shmp->mutex2));
+    break;
+  case VM_COMM_TYPE_SHMHACK:
+    // Shared memory hack sync with spin-lock
+    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    if (size<=SHARED_BUFFER){
+      // use buffer
+      psrc = shmp->buffer;
+      // wait until buffer is ready to be used
+      sync_buffer_wait_fill(&shmp->shms, 0);
+      // do actual memcpy
+      memcpy(message, psrc, size);
+      // set flag indicating that recv's memcpy() is done and buffer is empty
+      sync_buffer_flag_empty(&shmp->shms, 0);
+    }else{
+      // don't use buffer
+      shmp->ptr_dest = message;               // set the destination pointer
+      // synchronize with vmk_send()
+      sync_b_flip(&shmp->shms);
+      // now ptr_src and ptr_dest are valid for this message
+      scpsize = size/2;           // send takes the lower half
+      rcpsize = size - scpsize;   // recv takes the upper half
+      pdest = (char *)shmp->ptr_dest;
+      psrc = (char *)shmp->ptr_src;
+      // do actual memcpy
+      memcpy(pdest + scpsize, psrc + scpsize, rcpsize);
+      // synchronize with vmk_send()
+      sync_b_flop(&shmp->shms);
+    }
+    break;
+  case VM_COMM_TYPE_POSIXIPC:
+    // Shared memory hack sync with spin-lock
+    pipcmp = commarray[source][mypet].pipcmp;   // shared memory mp channel
+    i=0;
+    mess = (char *)message;
+    while (size>PIPC_BUFFER){
+      psrc = pipcmp->buffer[i];
+      // wait until buffer is ready to be used
+      sync_buffer_wait_fill(&pipcmp->shms, i);
+      // do the actual memcpy
+      memcpy(mess, psrc, PIPC_BUFFER);
+      // set flag indicating that send's memcpy() is done and buffer is valid
+      sync_buffer_flag_empty(&pipcmp->shms, i);
+      size -= PIPC_BUFFER;
+      mess += PIPC_BUFFER;
+      i = i^1; // 0->1  or  1->0
+    }
+    // do the remaining parts of the message
+    psrc = pipcmp->buffer[i];
+    // wait until buffer is ready to be used
+    sync_buffer_wait_fill(&pipcmp->shms, i);
+    // do the actual memcpy
+    memcpy(mess, psrc, size);
+    // set flag indicating that send's memcpy() is done and buffer is valid
+    sync_buffer_flag_empty(&pipcmp->shms, i);
+    break;
+  default:
+    break;
+  }
+}
+
+
+void ESMC_VMK::vmk_recv(void *message, int size, int source,
+  vmk_commhandle *commhandle){
+  // p2p recv
+#if (VERBOSITY > 9)
+  printf("receiving from: %d, %d\n", source, lpid[source]);
+#endif
+  pipc_mp *pipcmp;
+  shared_mp *shmp;
+  int scpsize, rcpsize;
+  char *pdest;
+  char *psrc;
+  int i;
+  char *mess;
+  // switch into the appropriate implementation
+  switch(commarray[source][mypet].comm_type){
+  case VM_COMM_TYPE_MPI1:
+    commhandle->nelements=1;
+    commhandle->type=1;
+    commhandle->mpireq = new MPI_Request[1];
+    // MPI-1 implementation
+    // not sure if I need to make this atomic if called multi-threaded
+    //pthread_mutex_lock(pth_mutex2);
+    MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
+      mpi_c, commhandle->mpireq);
     //pthread_mutex_unlock(pth_mutex2);
     break;
   case VM_COMM_TYPE_PTHREAD:
@@ -2108,6 +2350,48 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
       // dst is first receiver
       vmk_send(sendData, sendSize, dst);
       vmk_recv(recvData, recvSize, src);
+    }
+  }
+}
+  
+void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
+  void *recvData, int recvSize, int src, vmk_commhandle *commhandle){
+  // p2p sendrecv
+  if (commhandle==NULL){
+    // blocking
+    if (mpionly){
+      MPI_Status mpi_s;
+      MPI_Sendrecv(sendData, sendSize, MPI_BYTE, dst, 1000*mypet+dst, 
+        recvData, recvSize, MPI_BYTE, src, 1000*src+mypet, mpi_c, &mpi_s);
+    }else{
+      // A unique order of the send and receive is given by the PET index.
+      // This very simplistic implementation establishes a unique order by
+      // first transfering data to the smallest receiver PET and then to the
+      // other one. A sendrecv has two receiver PETs, one is the local PET and
+      // the other is rcv.
+      if (mypet<=dst){
+        // mypet is the first receiver
+        vmk_recv(recvData, recvSize, src);
+        vmk_send(sendData, sendSize, dst);
+      }else{
+        // dst is first receiver
+        vmk_send(sendData, sendSize, dst);
+        vmk_recv(recvData, recvSize, src);
+      }
+    }
+  }else{
+    // non-blocking
+    commhandle->nelements = 2; // 2 requests for send/recv
+    commhandle->type=0; // subhandles
+    commhandle->handles = new vmk_commhandle[commhandle->nelements];
+    if (mypet<=dst){
+      // mypet is the first receiver
+      vmk_recv(recvData, recvSize, src, &(commhandle->handles[0]));
+      vmk_send(sendData, sendSize, dst, &(commhandle->handles[1]));
+    }else{
+      // dst is first receiver
+      vmk_send(sendData, sendSize, dst, &(commhandle->handles[0]));
+      vmk_recv(recvData, recvSize, src, &(commhandle->handles[1]));
     }
   }
 }
@@ -2415,6 +2699,27 @@ void ESMC_VMK::vmk_gather(void *in, void *out, int len, int root){
 }
 
 
+void ESMC_VMK::vmk_wait(vmk_commhandle *commhandle){
+  if (commhandle!=NULL){
+    // wait for all non-blocking requests in commhandle to complete
+    if (commhandle->type==0){
+      // this is a commhandle container
+      for (int i=0; i<commhandle->nelements; i++)
+        vmk_wait(&(commhandle->handles[i]));  // recursive call
+      delete [] commhandle->handles;
+    }else if (commhandle->type==1){
+      // this commhandle contains MPI_Requests
+      MPI_Status mpi_s;
+      for (int i=0; i<commhandle->nelements; i++){
+        MPI_Wait(&(commhandle->mpireq[i]), &mpi_s);
+      }
+      delete [] commhandle->mpireq;
+    }else{
+      printf("ESMC_VMK: only MPI non-blocking implemented\n");
+    }
+  }
+}
+  
 
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

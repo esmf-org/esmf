@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.39 2004/11/11 05:00:05 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.40 2004/11/17 06:07:50 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,12 @@ module ESMF_VMMod
   type ESMF_CommHandle
   sequence
   private
-    integer :: dummy  !so compiler is satisfied for now...
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
+    type(ESMF_Pointer) :: this
+#endif
+!    integer :: dummy  !so compiler is satisfied for now...
 !    integer :: mpi_handle  ! mpi returns this for async calls
 !    integer :: wait        ! after an async call, does query block?
   end type
@@ -149,7 +154,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.39 2004/11/11 05:00:05 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.40 2004/11/17 06:07:50 theurich Exp $'
 
 !==============================================================================
 
@@ -2651,15 +2656,33 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
     integer :: localrc                        ! local return code
     integer :: sendSize, recvSize
+    logical :: blocking
 
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
+!    if (present(blockingflag)) then
+!      if (blockingflag == ESMF_NONBLOCKING) then
+!print *, 'gjt in ESMF_VMSendRecvI4: ESMF_NONBLOCKING'
+!        call ESMF_LogWrite('Non-blocking not yet implemented', &
+!          ESMF_LOG_WARNING, &
+!          ESMF_CONTEXT)
+!        return
+!      endif
+!    endif
+
+    ! decide whether this is blocking or non-blocking
+    blocking = .true. !default is blocking
     if (present(blockingflag)) then
-      if (blockingflag == ESMF_NONBLOCKING) then
-        call ESMF_LogWrite('Non-blocking not yet implemented', &
-          ESMF_LOG_WARNING, &
+      if (blockingflag == ESMF_NONBLOCKING) blocking = .false. ! non-blocking
+    endif
+    
+    ! check that we have a commHandle
+    if (.not.blocking) then
+      if (.not.present(commhandle)) then
+        call ESMF_LogWrite('Must provide commhandle for non-blocking call', &
+          ESMF_LOG_ERROR, &
           ESMF_CONTEXT)
         return
       endif
@@ -2668,8 +2691,13 @@ module ESMF_VMMod
     sendSize = sendCount * 4 ! 4 bytes
     recvSize = recvCount * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
-      recvData, recvSize, src, localrc)
+    if (blocking) then
+      call c_ESMC_VMSendRecv(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, localrc)
+    else
+      call c_ESMC_VMSendRecvNB(vm, sendData, sendSize, dst, &
+        recvData, recvSize, src, commhandle, localrc)
+    endif
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -3128,15 +3156,20 @@ module ESMF_VMMod
     ! Assume failure until success
     if (present(rc)) rc = ESMF_FAILURE
 
-    ! Call into the C++ interface, which will sort out optional arguments.
-    ! TODO: call c_ESMC_VMWait(vm, ...)
-    localrc = ESMF_FAILURE  ! until there is really an implementation
+    ! Call into the C++ interface
+    if (commhandle%this /= ESMF_NULL_POINTER) then
+      call c_ESMC_VMWait(vm, commhandle, localrc)
+    else
+      call ESMF_LogWrite('Must provide valid commhandle for wait call', &
+        ESMF_LOG_ERROR, &
+        ESMF_CONTEXT)
+    endif
 
     ! Use LogErr to handle return code
-!    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-!      ESMF_CONTEXT, rcToReturn=rc)) return
-    if (ESMF_LogMsgFoundError(localrc, "Method not implemented", &
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
       ESMF_CONTEXT, rcToReturn=rc)) return
+!    if (ESMF_LogMsgFoundError(localrc, "Method not implemented", &
+!      ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMWait
 !------------------------------------------------------------------------------
