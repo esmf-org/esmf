@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desdoc.ctex,v 1.4 2002/10/08 18:16:02 eschwab Exp $
+% $Id: TimeMgr_desdoc.ctex,v 1.5 2002/10/14 16:17:56 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -295,8 +295,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
+\input{TimeInstant_chapi}
 \input{TimeInstant_ccapi}
 #elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/TimeInstant_chapi}
 \input{../Infrastructure/TimeMgr/doc/TimeInstant_ccapi}
 #endif
 
