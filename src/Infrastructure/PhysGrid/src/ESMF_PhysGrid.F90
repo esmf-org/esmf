@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.53 2003/10/17 22:43:46 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.54 2003/10/22 19:57:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.53 2003/10/17 22:43:46 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.54 2003/10/22 19:57:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2437,7 +2437,8 @@
 !
 !     set constants
 !
-      zero = 0.d0
+      zero = 0.0
+      ref_product = zero
 !
 !     perform the cross product for each cell side
 !
