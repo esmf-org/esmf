@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.32 2003/04/30 21:59:53 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.33 2003/05/01 00:32:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.32 2003/04/30 21:59:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.33 2003/05/01 00:32:39 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -795,9 +795,10 @@
     ESMC_Time referenceMonday = *this;
                                 // copy calendar & timezone from this time
 
-    // initialize Gregorian reformation date of September 3, 1752
+    // initialize Gregorian reformation date to September 14, 1752, the
+    //   first valid post-reformation date
     ESMC_Time GregorianReformation = *this;  // copy calendar & timezone
-    YR=1752; MM=9; DD=3;
+    YR=1752; MM=9; DD=14;
     GregorianReformation.ESMC_TimeSet(&YR, &MM, &DD,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -810,8 +811,8 @@
 
     // Set the reference date to any Monday depending on whether the given
     //   date is before or after the Gregorian Reformation.  Assume the
-    //   10 eliminated days fall on the post-reformation week alignment.
-    if (*this > GregorianReformation) {
+    //   10 eliminated days fall on the pre-reformation week alignment.
+    if (*this >= GregorianReformation) {
       YR=1796; MM=7; DD=4;    // America's 20th birthday
     } else {
       YR=1492; MM=10; DD=29;  // Christopher Columbus lands in Cuba
@@ -847,8 +848,9 @@
 
     // calculate day of the week as simply modulo 7 from the reference date,
     //  adjusted for a 1-based count and negative deltas
-    int weekDay = diffDays % 7;  // (-6 to 0) or (0 to 6)
-    *dayOfWeek = (weekDay >= 0) ? (weekDay + 1) : (weekDay + 7); // (1 to 7)
+    int mod7 = diffDays % 7;  // (-6 to 0) or (0 to 6)
+    if (mod7 < 0) mod7 += 7;  // ensure positive (0 to 6) range
+    *dayOfWeek = mod7 + 1;    // adjust to 1-based count (1 to 7)
 
     return(ESMF_SUCCESS);
 
