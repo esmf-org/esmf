@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.10 2004/12/14 16:33:28 rfaincht Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.11 2004/12/15 17:29:45 rfaincht Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.10 2004/12/14 16:33:28 rfaincht Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.11 2004/12/15 17:29:45 rfaincht Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -45,6 +45,7 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
+      character(len=8) :: strvalue
 
       ! local variables
       integer:: i, rc
@@ -54,6 +55,8 @@
       integer, allocatable:: localData(:),soln(:)
       real(ESMF_KIND_R8), allocatable:: r8_localData(:),r8_soln(:)
       real(ESMF_KIND_R4), allocatable:: r4_localData(:),r4_soln(:)
+
+      type(ESMF_logical), allocatable:: local_logical(:),logical_soln(:)
      
       integer :: status, myde, npets
       integer :: isum
@@ -83,17 +86,24 @@
       allocate(localData(count))
       allocate(r8_localData(count))
       allocate(r4_localData(count))
+      allocate(local_logical(count))
 
       ! Allocate the solution arrays
       Allocate(soln(count))
       Allocate(r8_soln(count))
       Allocate(r4_soln(count))
+      allocate(logical_soln(count))
 
       !Assign values
       do i=1,count
         localData(i)    = localPet*100+i 
         r4_localData(i) = real( localData(i) )
         r8_localData(i) = real( localData(i) )
+        if (mod(localData(i)+localPet,2).eq.0) then
+          local_logical(i)= ESMF_TRUE
+        else
+          local_logical(i)= ESMF_FALSE
+        endif
       end do 
 
       src = localPet - 1
@@ -107,6 +117,11 @@
         soln(i)    = src*100+i
         r8_soln(i) = real( soln(i) )
         r4_soln(i) = r8_soln(i)
+        if ( mod(soln(i)+src,2) .eq. 0 ) then
+          logical_soln(i)= ESMF_TRUE
+        else
+          logical_soln(i)= ESMF_FALSE
+        endif
       end do 
 
      !Test with integer arguments
@@ -199,6 +214,48 @@
       R8Sum=(r8_localData(1) - r8_soln(1)) +  &
             (r8_localData(2) - r8_soln(2))
       call ESMF_Test( (R8Sum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
+
+     !Test with logical arguments
+     !===========================
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Send local data to dst
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Sending local data Test"
+      call ESMF_VMSend(vm, sendData=local_logical, count=count, dst=dst, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      call ESMF_LogicalString(local_logical(1), strvalue, rc)
+      print *, localPet, "before recv: Local_Logical(1) is ", trim(strvalue)
+      call ESMF_LogicalString(local_logical(2), strvalue, rc)
+      print *, localPet, "before recv: Local_Logical(2) is ", trim(strvalue)
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! dst receives local data from src
+      write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
+      write(name, *) "Receiving local data Test"
+      call ESMF_VMRecv(vm, recvData=local_logical, count=count, src=src, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify localData after VM Receive
+      ISum=0.
+      write(failMsg, *) "Wrong Local Data"
+      write(name, *) "Verify local data after receive Test"
+      call ESMF_LogicalString(local_logical(1), strvalue, rc)
+      print *, localPet, "After recv: Local_Logical(1) is ", trim(strvalue)
+      call ESMF_LogicalString(local_logical(2), strvalue, rc)
+      print *, localPet, "After recv: Local_Logical(2) is ", trim(strvalue)
+      call ESMF_LogicalString(logical_soln(1), strvalue, rc)
+      print *, localPet, "After recv: Logical_soln(1) is ", trim(strvalue)
+      call ESMF_LogicalString(logical_soln(2), strvalue, rc)
+      print *, localPet, "After recv: logical_soln(2) is ", trim(strvalue)
+      do i=1,count
+        if (local_logical(i).ne. logical_soln(i)) ISum= ISum + 1
+      end do
+      call ESMF_Test( (ISum .eq. 0), name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
