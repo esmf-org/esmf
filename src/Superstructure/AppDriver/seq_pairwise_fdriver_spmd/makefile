@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/11/06 21:06:28 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/11/06 21:25:50 nscollins Exp $ 
 
 ALL:  executable
 
@@ -24,7 +24,6 @@ CLOBBERDIRS =
 
 APPOBJS = CouplerComponentTemplate.o GridComponentTemplate.o \
           ParentGridComponentTemplate.o AppDriver.o
-APPMODS = USERCPLCOMPMOD.mod USERGRIDCOMPMOD.mod USERPARENTGRIDCOMPMOD.mod
 
 #
 #
@@ -32,7 +31,7 @@ APPMODS = USERCPLCOMPMOD.mod USERGRIDCOMPMOD.mod USERPARENTGRIDCOMPMOD.mod
 #
 executable: $(APPOBJS)
 	-$(SL_F_LINKER) -o Application $(APPOBJS) -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} -f $(APPOBJS) $(APPMODS)
+	${RM} -f $(CLEANFILES)
 
 run:  Application
 	-${MPIRUN} -np 4 ./Application
@@ -42,4 +41,4 @@ rununi: Application
 
 
 clean:
-	${RM} -f Application $(APPOBJS) $(APPMODS)
+	${RM} -f Application $(CLEANFILES)
