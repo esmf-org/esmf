@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.5 2004/01/07 22:12:02 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.6 2004/01/28 23:15:10 nscollins Exp $
 
 
 !-------------------------------------------------------------------------
@@ -89,7 +89,7 @@
 !\begin{verbatim}
     bundlename = "Temperature"
 
-    bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+    bundle1 = ESMF_BundleCreate(name=bundlename, rc=rc)
 
     print *, "Bundle Create returned", rc
 !\end{verbatim}
@@ -247,7 +247,7 @@
 !\begin{verbatim}
       bundlename = dataname
 
-      bundle2 = ESMF_BundleCreate(bundlename, rc=rc)
+      bundle2 = ESMF_BundleCreate(name=bundlename, rc=rc)
 
       print *, "Bundle Create returned", rc, "name = ", trim(bundlename)
 !\end{verbatim}
