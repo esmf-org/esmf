@@ -1,5 +1,5 @@
 #!/bin/ksh
-# $Id: mpirun.rs6000_sp,v 1.7 2003/04/03 15:48:45 nscollins Exp $
+# $Id: mpirun.rs6000_sp,v 1.8 2003/05/02 22:20:49 nscollins Exp $
 # This script provides an interface such that the simple command
 # mpirun -np # runs # copies of the program in parallel.
 # The IBM poe command does not fit this paradigm.
@@ -18,7 +18,8 @@ prog=$*
 
 # this may be different on different machines.
 # TODO: make it an optional arg to mpirun?
-MAX_TASKS_PER_NODE=4
+MAX_TASKS_PER_NODE=4      # true on blackforest
+#MAX_TASKS_PER_NODE=32    # true on bluesky
 
 if [ $num_procs -le $MAX_TASKS_PER_NODE ]; then
   num_nodes=1
