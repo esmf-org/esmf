@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.29 2004/02/11 17:13:16 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.30 2004/02/11 18:36:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,11 +100,7 @@
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
-
  
-      public ESMF_ArraySpecInit
-      public ESMF_ArraySpecGet
-
       public ESMF_ArrayGet, ESMF_ArrayGetName, ESMF_ArraySetName
 
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex  
@@ -123,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.29 2004/02/11 17:13:16 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.30 2004/02/11 18:36:39 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -314,79 +310,9 @@ end subroutine
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_ArrayReorder
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-     subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
-!
-!
-! !ARGUMENTS:
-     type(ESMF_ArraySpec), intent(inout) :: as
-     integer, intent(in) :: rank
-     type(ESMF_DataType), intent(in) :: type
-     type(ESMF_DataKind), intent(in) :: kind
-     integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!  Creates a description of the data -- the type, the dimensionality, etc.  
-!  This specification can be
-!  used in an ArrayCreate call with data to create a full Array.
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!  \item[arrayspec]
-!    Uninitialized array spec.
-!
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!
-!  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!
-!  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-
-        ! Local vars
-        integer :: status                        ! local error status
-        logical :: rcpresent                     ! did user specify rc?
-
-        ! Initialize pointer
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Set arrayspec contents
-      
-        as%rank = rank   
-        as%type = type
-        as%kind = kind
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArraySpecInit
-
 
 
 !------------------------------------------------------------------------------
@@ -438,34 +364,52 @@ end subroutine
 
       if (present(rank)) then
          call c_ESMC_ArrayGetRank(array, rank, status)
-         ! TODO: test status
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(type)) then
          call c_ESMC_ArrayGetType(array, type, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(kind)) then
          call c_ESMC_ArrayGetKind(array, kind, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(counts)) then
          call c_ESMC_ArrayGetRank(array, lrank, status)
+         if (status .ne. ESMF_SUCCESS) return
          call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
 
       if (present(lbounds)) then
-          call c_ESMC_ArrayGetRank(array, lrank, status)
-          call c_ESMC_ArrayGetLbounds(array, lrank, lbounds, status)
+         call c_ESMC_ArrayGetRank(array, lrank, status)
+         if (status .ne. ESMF_SUCCESS) return
+         call c_ESMC_ArrayGetLbounds(array, lrank, lbounds, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
    
       if (present(ubounds)) then
-          call c_ESMC_ArrayGetRank(array, lrank, status)
-          call c_ESMC_ArrayGetUbounds(array, lrank, ubounds, status)
+         call c_ESMC_ArrayGetRank(array, lrank, status)
+         if (status .ne. ESMF_SUCCESS) return
+         call c_ESMC_ArrayGetUbounds(array, lrank, ubounds, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
    
       if (present(base)) then
-          call c_ESMC_ArrayGetBaseAddr(array, base, status)
+         call c_ESMC_ArrayGetBaseAddr(array, base, status)
+         if (status .ne. ESMF_SUCCESS) return
+      endif
+   
+      if (present(strides)) then
+         print *, "Warning: strides not supported yet"
+         strides(:) = 1
+      endif
+      if (present(name)) then
+         call c_ESMC_ArrayGetName(array, name, status)
+         if (status .ne. ESMF_SUCCESS) return
       endif
    
       if (rcpresent) rc = ESMF_SUCCESS
@@ -514,7 +458,6 @@ end subroutine
 
       end subroutine ESMF_ArrayGetName
 
-
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArraySetName - Set the name of a Array
@@ -558,73 +501,6 @@ end subroutine
 
 
 !------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: as
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Return information about the contents of a ArraySpec type.
-!
-!  The arguments are:
-!  \begin{description}
-!
-!  \item[as]
-!    An {\tt ArraySpec} object.
-!
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!
-!  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!
-!  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
-!   \item[[rc]]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-
-        ! Local vars
-        integer :: i
-        integer :: status                        ! local error status
-        logical :: rcpresent                     ! did user specify rc?
-
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Get arrayspec contents
-      
-        if(present(rank)) rank = as%rank
-        if(present(type)) type = as%type
-        if(present(kind)) kind = as%kind
-
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_ArraySpecGet
-
-
-!------------------------------------------------------------------------------ 
-
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section is I/O for Arrays
@@ -651,6 +527,8 @@ end subroutine
 !
 ! TODO: code goes here
 !
+        if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_ArrayCheckpoint
 
 
@@ -689,6 +567,8 @@ end subroutine
 
         ESMF_ArrayRestore = a 
  
+        if (present(rc)) rc = ESMF_FAILURE
+
         end function ESMF_ArrayRestore
 
 
@@ -778,7 +658,9 @@ end subroutine
 !
 
         ESMF_ArrayRead = a 
- 
+
+        if (present(rc)) rc = ESMF_FAILURE
+
         end function ESMF_ArrayRead
 
 
