@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/10/08 21:36:51 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.5 2003/12/19 21:44:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -182,7 +182,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/10/08 21:36:51 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.5 2003/12/19 21:44:59 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1495,14 +1495,11 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           rc = ESMF_FAILURE
       endif
 
-      ! TODO: add an interface to the C code here
-      !call c_ESMC_LocalArrayGetName(array, name, status)
-      !if(status .NE. ESMF_FAILURE) then
-      !  print *, "ERROR in ESMF_LocalArrayGetName"
-      !  return
-      !endif
-
-      name = "default array name"
+      call c_ESMC_LocalArrayGetName(array, name, status)
+      if(status .eq. ESMF_FAILURE) then
+        print *, "ERROR in ESMF_LocalArrayGetName"
+        return
+      endif
 
       if (rcpresent) rc = ESMF_SUCCESS
 
