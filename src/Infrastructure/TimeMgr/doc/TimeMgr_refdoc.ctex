@@ -100,7 +100,7 @@
 % -------------------
 % Time Interval Class
 % -------------------
-
+\newpage
 \section{Time Interval Class}
 
 \subsection{Description}
@@ -136,7 +136,7 @@
 % ----------
 % Time Class
 % ----------
-
+\newpage
 \section{Time Class}
 
 \subsection{Description}
@@ -172,7 +172,7 @@
 % --------------
 % Calendar Class
 % --------------
-
+\newpage
 \section{Calendar Class}
 
 \subsection{Description}
@@ -208,7 +208,7 @@
 % -----------
 % Clock Class
 % -----------
-
+\newpage
 \section{Clock Class}
 \label{sec:Clock}
 
@@ -245,7 +245,7 @@
 % -----------
 % Alarm Class
 % -----------
-
+\newpage
 \section{Alarm Class}
 \label{sec:Alarm}
 
