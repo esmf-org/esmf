@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.55 2004/06/11 16:41:58 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.56 2004/06/11 17:49:27 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,20 +51,20 @@
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateImpExpType
+!     ! ESMF_StateType
 !     !   Enumerated value for storing Import or Export State type.
 !
-      type ESMF_StateImpExpType
+      type ESMF_StateType
       sequence
       private
          integer :: state
       end type
 
-      type(ESMF_StateImpExpType), parameter :: &
-                ESMF_STATE_IMPORT   = ESMF_StateImpExpType(1), &
-                ESMF_STATE_EXPORT   = ESMF_StateImpExpType(2), &
-                ESMF_STATE_LIST     = ESMF_StateImpExpType(3), &
-                ESMF_STATE_INVALID  = ESMF_StateImpExpType(4)
+      type(ESMF_StateType), parameter :: &
+                ESMF_STATE_IMPORT   = ESMF_StateType(1), &
+                ESMF_STATE_EXPORT   = ESMF_StateType(2), &
+                ESMF_STATE_LIST     = ESMF_StateType(3), &
+                ESMF_STATE_INVALID  = ESMF_StateType(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateItem
@@ -163,7 +163,7 @@
           type(ESMF_Bundle) :: bp
           type(ESMF_Field)  :: fp 
           type(ESMF_Array)  :: ap
-          type(ESMF_StateType), pointer  :: spp
+          type(ESMF_StateClass), pointer  :: spp
       end type
 
 !------------------------------------------------------------------------------
@@ -188,18 +188,18 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_StateType
+!     ! ESMF_StateClass
 !
 !     ! Internal State data type.
 
-      type ESMF_StateType
+      type ESMF_StateClass
 #ifndef ESMF_SEQUENCE_BUG
       sequence
 #endif
       private
         type(ESMF_Base) :: base
         type(ESMF_Status) :: statestatus
-        type(ESMF_StateImpExpType) :: st
+        type(ESMF_StateType) :: st
         type(ESMF_StateDataNeeded) :: needed_default
         type(ESMF_StateDataReady) :: ready_default
         type(ESMF_StateDataValid) :: stvalid_default
@@ -220,9 +220,9 @@
 #endif
       private
 #ifndef ESMF_NO_INITIALIZERS
-        type(ESMF_StateType), pointer :: statep => NULL()
+        type(ESMF_StateClass), pointer :: statep => NULL()
 #else
-        type(ESMF_StateType), pointer :: statep
+        type(ESMF_StateClass), pointer :: statep
 #endif
       end type
 
@@ -232,7 +232,7 @@
       public ESMF_StateItem, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
                                    ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
                                    ESMF_STATEITEM_NAME
-      public ESMF_StateImpExpType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
+      public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_LIST
       public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
                                    ESMF_STATEDATANOTNEEDED
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.55 2004/06/11 16:41:58 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.56 2004/06/11 17:49:27 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -556,14 +556,14 @@ end function
 
 function ESMF_imexeq(s1, s2)
  logical ESMF_imexeq
- type(ESMF_StateImpExpType), intent(in) :: s1, s2
+ type(ESMF_StateType), intent(in) :: s1, s2
 
  ESMF_imexeq = (s1%state .eq. s2%state)
 end function
 
 function ESMF_imexne(s1, s2)
  logical ESMF_imexne
- type(ESMF_StateImpExpType), intent(in) :: s1, s2
+ type(ESMF_StateType), intent(in) :: s1, s2
 
  ESMF_imexne = (s1%state .ne. s2%state)
 end function
@@ -657,7 +657,7 @@ end function
 
       temp_list(1) = array
 
-      call ESMF_StateTypeAddArrayList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddArrayList(state%statep, 1, temp_list, rc)      
 
       end subroutine ESMF_StateAddOneArray
 
@@ -701,7 +701,7 @@ end function
 !
 !EOP
 
-        call ESMF_StateTypeAddArrayList(state%statep, acount, arrays, rc)
+        call ESMF_StateClassAddArrayList(state%statep, acount, arrays, rc)
 
         end subroutine ESMF_StateAddArrayList
 
@@ -1136,7 +1136,7 @@ end function
 
       temp_list(1) = bundle
 
-      call ESMF_StateTypeAddBundleList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddBundleList(state%statep, 1, temp_list, rc)      
 
       end subroutine ESMF_StateAddOneBundle
 
@@ -1180,7 +1180,7 @@ end function
 !
 !EOP
 
-        call ESMF_StateTypeAddBundleList(state%statep, bcount, bundles, rc)
+        call ESMF_StateClassAddBundleList(state%statep, bcount, bundles, rc)
 
         end subroutine ESMF_StateAddBundleList
 
@@ -1227,7 +1227,7 @@ end function
 
       temp_list(1) = field
 
-      call ESMF_StateTypeAddFieldList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddFieldList(state%statep, 1, temp_list, rc)      
 
       end subroutine ESMF_StateAddOneField
 
@@ -1271,7 +1271,7 @@ end function
 !
 !EOP
 
-      call ESMF_StateTypeAddFieldList(state%statep, fcount, fields, rc)
+      call ESMF_StateClassAddFieldList(state%statep, fcount, fields, rc)
 
       end subroutine ESMF_StateAddFieldList
 
@@ -1364,7 +1364,7 @@ end function
 !
 !EOP
 
-      call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
+      call ESMF_StateClassAddDataNameList(state%statep, namecount, namelist, rc)      
       end subroutine ESMF_StateAddNameList
 
 !------------------------------------------------------------------------------
@@ -1411,7 +1411,7 @@ end function
 
       temp_list(1) = nestedstate
 
-      call ESMF_StateTypeAddStateList(state%statep, 1, temp_list, rc)      
+      call ESMF_StateClassAddStateList(state%statep, 1, temp_list, rc)      
 
       end subroutine ESMF_StateAddOneState
 
@@ -1457,7 +1457,7 @@ end function
 !
 !EOP
 
-        call ESMF_StateTypeAddStateList(state%statep, scount, nestedstates, rc)
+        call ESMF_StateClassAddStateList(state%statep, scount, nestedstates, rc)
 
         end subroutine ESMF_StateAddStateList
 
@@ -1477,7 +1477,7 @@ end function
 !
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: statename 
-      type(ESMF_StateImpExpType), intent(in), optional :: statetype
+      type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_Bundle), dimension(:), intent(in), optional :: bundles
       type(ESMF_Field), dimension(:), intent(in), optional :: fields
       type(ESMF_Array), dimension(:), intent(in), optional :: arrays
@@ -1551,7 +1551,7 @@ end function
 !EOP
 
         ! local vars
-        type (ESMF_StateType), pointer :: stypep
+        type (ESMF_StateClass), pointer :: stypep
         integer :: localrc                          ! local error status
 
         ! Initialize return code; assume failure until success is certain
@@ -1657,13 +1657,13 @@ end function
 ! !IROUTINE: ESMF_StateGet - Get information about a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateGet(state, name, stateType, &
+      subroutine ESMF_StateGet(state, name, statetype, &
                                      itemCount, itemNames, objTypes, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state
       character (len=*), intent(out), optional :: name
-      type(ESMF_StateImpExpType), intent(out), optional :: stateType
+      type(ESMF_StateType), intent(out), optional :: statetype
       integer, intent(out), optional :: itemCount
       character (len=*), intent(out), optional :: itemNames(:)
       type(ESMF_StateItem), intent(out), optional :: objTypes(:)
@@ -1679,7 +1679,7 @@ end function
 !       An {\tt ESMF\_State} object to be queried.
 !      \item[{[name]}]
 !       Name of this {\tt ESMF\_State}.
-!      \item[{[stateType]}]
+!      \item[{[statetype]}]
 !       Import or Export {\tt ESMF\_State}.  Returns either 
 !       {\tt ESMF\_STATE\_IMPORT},
 !       {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.
@@ -1701,7 +1701,7 @@ end function
 !
 !EOP
       integer :: i, localrc
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       type(ESMF_StateData), pointer :: nextitem
 
       if (.not.associated(state%statep)) then
@@ -1807,7 +1807,7 @@ end function
       ! TODO: do we need an empty (or invalid) array to mark failure?
 
       if (present(statename)) then
-          exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+          exists = ESMF_StateClassFindData(state%statep, statename, .true., &
                                                           dataitem, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -1832,7 +1832,7 @@ end function
       endif
 
 
-      exists = ESMF_StateTypeFindData(top%statep, arrayname, .true., &
+      exists = ESMF_StateClassFindData(top%statep, arrayname, .true., &
                                                           dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2483,7 +2483,7 @@ end function
       ! TODO: do we need an empty bundle to mark failure?
 
       if (present(statename)) then
-          exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+          exists = ESMF_StateClassFindData(state%statep, statename, .true., &
                                                           dataitem, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2508,7 +2508,7 @@ end function
       endif
 
 
-      exists = ESMF_StateTypeFindData(top%statep, bundlename, .true., &
+      exists = ESMF_StateClassFindData(top%statep, bundlename, .true., &
                                                           dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2594,7 +2594,7 @@ end function
       ! TODO: do we need an empty field to mark failure?
 
       if (present(statename)) then
-          exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+          exists = ESMF_StateClassFindData(state%statep, statename, .true., &
                                                           dataitem, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
@@ -2619,7 +2619,7 @@ end function
       endif
 
 
-      exists = ESMF_StateTypeFindData(top%statep, fieldname, .true., &
+      exists = ESMF_StateClassFindData(top%statep, fieldname, .true., &
                                                           dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2693,7 +2693,7 @@ end function
 
       integer :: localrc
       integer :: nstates, i
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       character (len=ESMF_MAXSTR) :: tryname
       character(len=ESMF_MAXSTR) :: errmsg
       logical :: dummy
@@ -2786,7 +2786,7 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., &
+      exists = ESMF_StateClassFindData(state%statep, dataname, .true., &
                                       dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2851,7 +2851,7 @@ end function
       if (present(rc)) rc = ESMF_FAILURE
       ! TODO: do we need an empty state to mark failure?
 
-      exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
+      exists = ESMF_StateClassFindData(state%statep, statename, .true., &
                                                          dataitem, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -2926,7 +2926,7 @@ end function
       ! should it be an error to ask about a state which doesn't exist?
       ! if the 3rd arg below is .true. then it's an error, if it's .false.
       ! then it's not.  for now, it's an error.
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., &
+      exists = ESMF_StateClassFindData(state%statep, dataname, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
           dummy=ESMF_LogMsgFoundError(localrc, &
@@ -2975,7 +2975,7 @@ end function
 ! TODO: this needs more code added to be complete
 !
        character (len=6) :: defaultopts
-       type(ESMF_StateType), pointer :: sp
+       type(ESMF_StateClass), pointer :: sp
        type(ESMF_StateData), pointer :: dp
        character (len=1024) :: outbuf
        integer :: localrc                          ! local error status
@@ -3110,7 +3110,7 @@ end function
         type (ESMF_State) :: a 
 
 !       this is just to shut the compiler up
-        type (ESMF_StateType), target :: b 
+        type (ESMF_StateClass), target :: b 
         a%statep => b
         nullify(a%statep)
 
@@ -3161,7 +3161,7 @@ end function
       ! Assume failure until we know we will succeed
       if (present(rc)) rc = ESMF_FAILURE
 
-      exists = ESMF_StateTypeFindData(state%statep, dataname, .true., &
+      exists = ESMF_StateClassFindData(state%statep, dataname, .true., &
                                       dataitem, rc=localrc)
       if (.not. exists) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_NOT_FOUND, dataname, &
@@ -3386,9 +3386,9 @@ end function
                          dataneeded, dataready, datavalid, datareqrestart, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_StateType), pointer :: stypep
+      type (ESMF_StateClass), pointer :: stypep
       character(len=*), intent(in), optional :: statename 
-      type(ESMF_StateImpExpType), intent(in), optional :: statetype
+      type(ESMF_StateType), intent(in), optional :: statetype
       type(ESMF_Bundle), dimension(:), intent(in), optional :: bundles
       type(ESMF_Field), dimension(:), intent(in), optional :: fields
       type(ESMF_Array), dimension(:), intent(in), optional :: arrays
@@ -3408,7 +3408,7 @@ end function
 !  The arguments are:
 !  \begin{description}
 !   \item[stypep]
-!    Internal StateType pointer.  Required.
+!    Internal StateClass pointer.  Required.
 !   \item[{[statename]}]
 !    Name of this {\tt ESMF\_State} object. 
 !   \item[{[statetype]}]
@@ -3514,7 +3514,7 @@ end function
         endif
 
         ! Set the initial size of the datalist
-        call ESMF_StateTypeExtendList(stypep, count, localrc)
+        call ESMF_StateClassExtendList(stypep, count, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3524,7 +3524,7 @@ end function
         if (present(bundles)) then
           count = size(bundles)
           if (count .gt. 0) then
-            call ESMF_StateTypeAddBundleList(stypep, count, bundles, localrc)
+            call ESMF_StateClassAddBundleList(stypep, count, bundles, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3534,7 +3534,7 @@ end function
         if (present(fields)) then
           count = size(fields)
           if (count .gt. 0) then
-            call ESMF_StateTypeAddFieldList(stypep, count, fields, localrc)
+            call ESMF_StateClassAddFieldList(stypep, count, fields, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3544,7 +3544,7 @@ end function
         if (present(arrays)) then
           count = size(arrays)
           if (count .gt. 0) then
-            call ESMF_StateTypeAddArrayList(stypep, count, arrays, localrc)
+            call ESMF_StateClassAddArrayList(stypep, count, arrays, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3554,7 +3554,7 @@ end function
         if (present(states)) then
           count = size(states)
           if (count .gt. 0) then
-            call ESMF_StateTypeAddStateList(stypep, count, states, localrc)
+            call ESMF_StateClassAddStateList(stypep, count, states, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3564,7 +3564,7 @@ end function
         if (present(names)) then
           count = size(names)
           if (count .gt. 0) then
-            call ESMF_StateTypeAddDataNameList(stypep, count, names, localrc)
+            call ESMF_StateClassAddDataNameList(stypep, count, names, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -3587,9 +3587,9 @@ end function
       subroutine ESMF_StateConstructEmpty(stypep, statename, statetype, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_StateType), pointer :: stypep
+      type (ESMF_StateClass), pointer :: stypep
       character(len=*), intent(in), optional :: statename 
-      type(ESMF_StateImpExpType), intent(in), optional :: statetype
+      type(ESMF_StateType), intent(in), optional :: statetype
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -3598,7 +3598,7 @@ end function
 !      The arguments are:
 !      \begin{description}
 !       \item[{[stypep]}]
-!       Internal StateType pointer.  Required.
+!       Internal StateClass pointer.  Required.
 !       \item[{[statetype]}]
 !        Import or Export {\tt State}.  One of {\tt ESMF\_STATE\_IMPORT},
 !        {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.  Default is 
@@ -3650,7 +3650,7 @@ end function
       subroutine ESMF_StateDestruct(stypep, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3659,7 +3659,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Destroy contents of this {\tt ESMF\_StateType}.
+!       Destroy contents of this {\tt ESMF\_StateClass}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3716,15 +3716,15 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeAddArrayList"
+#define ESMF_METHOD "ESMF_StateClassAddArrayList"
 !BOPI
-! !IROUTINE: ESMF_StateTypeAddArrayList - Add a list of Arrays to a StateType
+! !IROUTINE: ESMF_StateClassAddArrayList - Add a list of Arrays to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTypeAddArrayList(stypep, acount, arrays, rc)
+      subroutine ESMF_StateClassAddArrayList(stypep, acount, arrays, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: acount
       type(ESMF_Array), dimension(:), intent(in) :: arrays
       integer, intent(out), optional :: rc     
@@ -3735,7 +3735,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Pointer to {\tt ESMF\_StateType}.
+!       Pointer to {\tt ESMF\_StateClass}.
 !     \item[acount]
 !       The number of {\tt ESMF\_Arrays} to be added.
 !     \item[arrays]
@@ -3817,7 +3817,7 @@ end function
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, aname, .false., &
+        exists = ESMF_StateClassFindData(stypep, aname, .false., &
                                         dataitem, aindex, localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
@@ -3858,7 +3858,7 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -3905,19 +3905,19 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateTypeAddArrayList
+      end subroutine ESMF_StateClassAddArrayList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeAddFieldList"
+#define ESMF_METHOD "ESMF_StateClassAddFieldList"
 !BOPI
-! !IROUTINE: ESMF_StateTypeAddFieldList - Add a list of Fields to a StateType
+! !IROUTINE: ESMF_StateClassAddFieldList - Add a list of Fields to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTypeAddFieldList(stypep, fcount, fields, rc)
+      subroutine ESMF_StateClassAddFieldList(stypep, fcount, fields, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: fcount
       type(ESMF_Field), dimension(:), intent(in) :: fields
       integer, intent(out), optional :: rc     
@@ -3928,7 +3928,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Pointer to {\tt ESMF\_StateType}.
+!       Pointer to {\tt ESMF\_StateClass}.
 !     \item[fcount]
 !       The number of {\tt ESMF\_Fields} to be added.
 !     \item[fields]
@@ -4008,7 +4008,7 @@ end function
         endif
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, fname, .false., &
+        exists = ESMF_StateClassFindData(stypep, fname, .false., &
                                         dataitem, findex, localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) then
@@ -4051,7 +4051,7 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4101,19 +4101,19 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateTypeAddFieldList
+      end subroutine ESMF_StateClassAddFieldList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeAddBundleList"
+#define ESMF_METHOD "ESMF_StateClassAddBundleList"
 !BOPI
-! !IROUTINE: ESMF_StateTypeAddBundleList - Add a list of Bundles to a StateType
+! !IROUTINE: ESMF_StateClassAddBundleList - Add a list of Bundles to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTypeAddBundleList(stypep, bcount, bundles, rc)
+      subroutine ESMF_StateClassAddBundleList(stypep, bcount, bundles, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: bcount
       type(ESMF_Bundle), dimension(:), intent(in) :: bundles
       integer, intent(out), optional :: rc     
@@ -4124,7 +4124,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Internal StateType pointer.  Required.
+!       Internal StateClass pointer.  Required.
 !     \item[bcount]
 !       The number of {\tt ESMF\_Bundles} to be added.
 !     \item[bundles]
@@ -4214,7 +4214,7 @@ end function
                                   ESMF_CONTEXT, rc)) goto 10
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, bname, .false., &
+        exists = ESMF_StateClassFindData(stypep, bname, .false., &
                                         dataitem, bindex, localrc)
         if (ESMF_LogMsgFoundError(localrc, "looking for preexisting entry", &
                                   ESMF_CONTEXT, rc)) goto 10
@@ -4264,7 +4264,7 @@ end function
                                       ESMF_ERR_PASSTHRU, &
                                       ESMF_CONTEXT, rc)) goto 10
     
-            exists = ESMF_StateTypeFindData(stypep, fname, .false., dataitem, &
+            exists = ESMF_StateClassFindData(stypep, fname, .false., dataitem, &
                                                               findex, localrc)
             if (ESMF_LogMsgFoundError(localrc, &
                                       ESMF_ERR_PASSTHRU, &
@@ -4324,7 +4324,7 @@ end function
       if (newcount .eq. 0)  goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) goto 10
@@ -4417,7 +4417,7 @@ end function
           !  found.  We just added the bundle above, so bindex is the
           !  value to set.
           else if (ftodo(fruncount) .eq. -2) then
-            exists = ESMF_StateTypeFindData(stypep, fname, .true., dataitem, &
+            exists = ESMF_StateClassFindData(stypep, fname, .true., dataitem, &
                                                               findex, localrc)
 
             if (.not. exists) then
@@ -4464,20 +4464,20 @@ end function
 
       ! do not reset rc here - it should already have a valid value.
 
-      end subroutine ESMF_StateTypeAddBundleList
+      end subroutine ESMF_StateClassAddBundleList
 
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeAddStateList"
+#define ESMF_METHOD "ESMF_StateClassAddStateList"
 !BOPI
-! !IROUTINE: ESMF_StateTypeAddStateList - Add a list of States to a StateType
+! !IROUTINE: ESMF_StateClassAddStateList - Add a list of States to a StateClass
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTypeAddStateList(stypep, scount, states, rc)
+      subroutine ESMF_StateClassAddStateList(stypep, scount, states, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: scount
       type(ESMF_State), dimension(:), intent(in) :: states
       integer, intent(out), optional :: rc     
@@ -4488,7 +4488,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Pointer to {\tt StateType}.
+!       Pointer to {\tt StateClass}.
 !     \item[scount]
 !       The number of {\tt ESMF\_State}s to be added.
 !     \item[nestedstate]
@@ -4552,7 +4552,7 @@ end function
                                   ESMF_CONTEXT, rc)) return
     
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, sname, .false., dataitem, sindex, status)
+        exists = ESMF_StateClassFindData(stypep, sname, .false., dataitem, sindex, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4588,7 +4588,7 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, status)
+      call ESMF_StateClassExtendList(stypep, newcount, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4638,23 +4638,23 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateTypeAddStateList
+      end subroutine ESMF_StateClassAddStateList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeFindData"
+#define ESMF_METHOD "ESMF_StateClassFindData"
 !BOPI
-! !IROUTINE: ESMF_StateTypeFindData - internal routine to find data item by name
+! !IROUTINE: ESMF_StateClassFindData - internal routine to find data item by name
 !
 ! !INTERFACE:
-      function ESMF_StateTypeFindData(stypep, dataname, expected, dataitem, &
+      function ESMF_StateClassFindData(stypep, dataname, expected, dataitem, &
                                                                      index, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_StateTypeFindData
+      logical :: ESMF_StateClassFindData
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       character (len=*), intent(in) :: dataname
       logical, intent(in) :: expected
       type(ESMF_StateData), pointer, optional :: dataitem
@@ -4672,7 +4672,7 @@ end function
 !     The arguments are:
 !     \begin{description}     
 !     \item[stypep]
-!       {\tt ESMF\_StateType} to query.
+!       {\tt ESMF\_StateClass} to query.
 !      \item[dataname]
 !       Name of the data item to query.
 !      \item[expected]
@@ -4726,12 +4726,12 @@ end function
       enddo
   
       if (itemfound) then
-        ESMF_StateTypeFindData = .TRUE.
+        ESMF_StateClassFindData = .TRUE.
         if (present(dataitem)) dataitem => stypep%datalist(itemindex) 
         if (present(index)) index = itemindex
         localrc = ESMF_SUCCESS
       else   ! item not found
-        ESMF_StateTypeFindData = .FALSE.
+        ESMF_StateClassFindData = .FALSE.
         nullify(dataitem)
         if (expected) then 
           localrc = ESMF_FAILURE
@@ -4742,19 +4742,19 @@ end function
 
       if (present(rc)) rc = localrc
 
-      end function ESMF_StateTypeFindData
+      end function ESMF_StateClassFindData
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeAddDataNameList"
+#define ESMF_METHOD "ESMF_StateClassAddDataNameList"
 !BOPI
-! !IROUTINE: ESMF_StateTypeAddDataNameList - internal routine
+! !IROUTINE: ESMF_StateClassAddDataNameList - internal routine
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTypeAddDataNameList(stypep, ncount, namelist, rc)
+      subroutine ESMF_StateClassAddDataNameList(stypep, ncount, namelist, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: ncount
       character (len=*), intent(in) :: namelist(:)
       integer, intent(out), optional :: rc
@@ -4771,7 +4771,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Pointer to {\tt ESMF\_StateType}.
+!       Pointer to {\tt ESMF\_StateClass}.
 !     \item[name]
 !       The name to be added.
 !     \item[{[rc]}]
@@ -4820,7 +4820,7 @@ end function
       do i=1, ncount
 
         ! See if this name is already in the state
-        exists = ESMF_StateTypeFindData(stypep, namelist(i), .false., &
+        exists = ESMF_StateClassFindData(stypep, namelist(i), .false., &
                                         dataitem, nindex, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4866,7 +4866,7 @@ end function
       if (newcount .eq. 0) goto 10
 
       ! We now know how many total new items need to be added
-      call ESMF_StateTypeExtendList(stypep, newcount, localrc)
+      call ESMF_StateClassExtendList(stypep, newcount, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -4909,19 +4909,19 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateTypeAddDataNameList
+      end subroutine ESMF_StateClassAddDataNameList
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_StateTypeExtendList"
+#define ESMF_METHOD "ESMF_StateClassExtendList"
 !BOPI
-! !IROUTINE: ESMF_StateTypeExtendList - internal routine
+! !IROUTINE: ESMF_StateClassExtendList - internal routine
 !
 ! !INTERFACE:
-      subroutine ESMF_StateTypeExtendList(stypep, itemcount, rc)
+      subroutine ESMF_StateClassExtendList(stypep, itemcount, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateClass), pointer :: stypep
       integer, intent(in) :: itemcount
       integer, intent(out) :: rc
 !     
@@ -4933,7 +4933,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item[stypep]
-!       Pointer to {\tt ESMF\_StateType}.
+!       Pointer to {\tt ESMF\_StateClass}.
 !     \item[itemcount]
 !       The number of items that space is needed for.
 !     \item[rc]
@@ -4996,7 +4996,7 @@ end function
    
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateTypeExtendList
+      end subroutine ESMF_StateClassExtendList
 
 
 
