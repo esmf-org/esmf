@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.6 2004/06/08 18:39:15 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.7 2004/06/12 15:27:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.6 2004/06/08 18:39:15 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.7 2004/06/12 15:27:24 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -141,8 +141,9 @@ InterfaceMacro(FieldCreateEPtr)
 !     \item [arrayspec]
 !           {\tt ESMF\_Data} specification. 
 !     \item [{[allocflag]}]
-!           Whether to allocate space for the array.  Default is
-!           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
+!           Whether to allocate space for the array.  See 
+!           Section~\ref{opt:allocflag} for possible values.  Default is
+!           {\tt ESMF\_ALLOC}.
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.

@@ -129,7 +129,7 @@ program ESMF_FieldWriteEx
      print*, "' call ESMF_ArraySpecSet' succeeded"
   endif
   
-  field_u2  = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_DO_ALLOCATE, &
+  field_u2  = ESMF_FieldCreate(grid, arrayspec, allocflag=ESMF_ALLOC, &
        horzRelloc=ESMF_CELL_CENTER, &
        haloWidth=0, name="u2", iospec=iospec, rc=status)
   if (status.NE.ESMF_SUCCESS) then

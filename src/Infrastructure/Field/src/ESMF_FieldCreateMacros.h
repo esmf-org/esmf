@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.3 2004/06/07 05:21:07 nscollins Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.4 2004/06/12 15:27:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -210,8 +210,9 @@
 !    proper rank, type, and kind for the data to be associated with @\
 !    this {\tt EWSF\_Field}. @\
 !  \item [{[allocflag]}] @\
-!    Whether to allocate space for the array.  Default is @\
-!    {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}. @\
+!    Whether to allocate space for the array.  @\
+!    See Section~\ref{opt:allocflag} for possible values.  Default @\
+!    is {\tt ESMF\_ALLOC}. @\
 !  \item [{[horzRelloc]}] @\
 !    Relative location of data per grid cell/vertex in the horizontal grid. @\
 !  \item [{[vertRelloc]}] @\

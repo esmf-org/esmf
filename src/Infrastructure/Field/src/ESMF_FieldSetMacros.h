@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.4 2004/06/10 23:39:49 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.5 2004/06/12 15:27:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,11 +34,11 @@
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_FieldSetDataPointer() @\
-!      subroutine ESMF_FieldSetDataPointer<rank><type><kind>(field, ptr, copyflag, indexflag, rc) @\
+!      subroutine ESMF_FieldSetDataPtr<rank><type><kind>(field, dataPointer, copyflag, indexflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Field), intent(inout) :: field @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: ptr @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: dataPointer @\
 !      integer, intent(in), optional :: haloWidth  @\
 !      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
 !      type(ESMF_IndexFlag), intent(in), optional :: indexflag  @\
@@ -51,7 +51,7 @@
 !  \begin{description} @\
 !  \item[field] @\
 !   The {\tt ESMF\_Field} to query. @\
-!  \item[ptr] @\
+!  \item[dataPointer] @\
 !   An associated Fortran pointer of the proper Type, Kind, and Rank as @\
 !   the data in the Field.  When this call returns successfully, the pointer @\
 !   will now point to the data in the Field.  This is either a reference or @\
@@ -65,8 +65,9 @@
 !   Defaults to 0.  If specified, the halo width to add to all sides of the @\
 !   data array. @\
 !  \item[{[indexflag]}] @\
-!   Defaults to {\tt ESMF\_LOCAL\_INDEX}.  If set to @\
-!   {\tt ESMF\_GLOBAL\_INDEX} and the {\tt ESMF\_Grid} associated with the @\
+!   See Section~\ref{opt:indexflag} for possible values.  Defaults @\
+!   to {\tt ESMF\_INDEX\_DELOCAL}.  If set to @\
+!   {\tt ESMF\_INDEX\_GLOBAL} and the {\tt ESMF\_Grid} associated with the @\
 !   {\tt ESMF\_Field} is regular, then the lower bounds and upper bounds will @\
 !   be allocated with global index numbers corresponding to the grid. @\
 !  \item[{[rc]}] @\
@@ -89,7 +90,7 @@
       subroutine ESMF_FieldSetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, haloWidth, indexflag, rc) @\
  @\
       type(ESMF_Field), intent(inout) :: field @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       integer, intent(in), optional :: haloWidth  @\
       type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
@@ -112,13 +113,14 @@
         endif @\
  @\
         ! Test to see if pointer already associated, and fail if so. @\
-        if (associated(ptr)) then @\
+        if (associated(dataPointer)) then @\
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
                               "Data Pointer cannot already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_ArrayCreate(ptr, counts, haloWidth, lbounds, ubounds, rc=status) @\
+        array = ESMF_ArrayCreate(dataPointer, counts, haloWidth, & @\
+                lbounds, ubounds, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
@@ -133,4 +135,9 @@
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
+
+
+
+
+
 

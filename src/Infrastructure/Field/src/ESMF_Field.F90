@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.163 2004/06/10 23:39:48 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.164 2004/06/12 15:27:24 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,8 +95,8 @@
       end type
 
       type(ESMF_AllocFlag), parameter ::  &
-                               ESMF_DO_ALLOCATE = ESMF_AllocFlag(0), &
-                               ESMF_NO_ALLOCATE = ESMF_AllocFlag(1)
+                               ESMF_ALLOC = ESMF_AllocFlag(0), &
+                               ESMF_NO_ALLOC = ESMF_AllocFlag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_IndexFlag
@@ -110,8 +110,8 @@
       end type
 
       type(ESMF_IndexFlag), parameter ::  &
-                               ESMF_LOCAL_INDEX  = ESMF_IndexFlag(0), &
-                               ESMF_GLOBAL_INDEX = ESMF_IndexFlag(1)
+                               ESMF_INDEX_DELOCAL  = ESMF_IndexFlag(0), &
+                               ESMF_INDEX_GLOBAL = ESMF_IndexFlag(1)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_LocalField
@@ -181,8 +181,8 @@
 ! !PUBLIC TYPES:
       public ESMF_Field, ESMF_Access
       public ESMF_FieldType, ESMF_LocalField  ! for internal lib use only
-      public ESMF_AllocFlag, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
-      public ESMF_IndexFlag, ESMF_LOCAL_INDEX, ESMF_GLOBAL_INDEX
+      public ESMF_AllocFlag, ESMF_NO_ALLOC, ESMF_ALLOC
+      public ESMF_IndexFlag, ESMF_INDEX_DELOCAL, ESMF_INDEX_GLOBAL
 
 !------------------------------------------------------------------------------
 !
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.163 2004/06/10 23:39:48 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.164 2004/06/12 15:27:24 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -3745,8 +3745,8 @@
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[allocflag]}]
-!           Set to allocate space for data array.  Default is
-!           {\tt ESMF\_DO\_ALLOCATE}.  Other option is {\tt ESMF\_NO\_ALLOCATE}.
+!           Allocate space for data array or not.  For possible values
+!           see Section~\ref{opt:allocflag}.
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.  If a relative location is specified both as an argument

@@ -1,27 +1,24 @@
-% $Id: ESMF_options.tex,v 1.6 2004/06/09 12:09:05 theurich Exp $
+% $Id: ESMF_options.tex,v 1.7 2004/06/12 15:27:24 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
 \subsection{Flags}
 
 \subsubsection{ESMF\_AllocFlag}
-
+\label{opt:allocflag}
 {\sf DESCRIPTION:\\}  
 Indicates whether to allocate data or not.
 
 Valid values are:
 \begin{description}
-\item [ESMF\_DO\_ALLOCATE]
+\item [ESMF\_ALLOC]
       Allocate data. 
-\item [ESMF\_NO\_ALLOCATE]
+\item [ESMF\_NO\_ALLOC]
       Do not allocate data at this time. 
 \end{description}
 
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
-
 \subsubsection{ESMF\_BlockingFlag}
-
+\label{opt:blockingflag}
 {\sf DESCRIPTION:\\}  
 Indicates whether to block during a communication call.
 
@@ -40,11 +37,8 @@ Valid values are:
 
 \end{description}
 
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
-
 \subsubsection{ESMF\_CopyFlag}
-
+\label{opt:copyflag}
 {\sf DESCRIPTION:\\}
 Indicates whether to reference a data item or make a copy of it.
 
@@ -56,27 +50,50 @@ Valid values are:
       Reference the data item.
 \end{description}
 
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
-
 \subsubsection{ESMF\_IndexFlag}
-
+\label{opt:indexflag}
 {\sf DESCRIPTION:\\}
 Indicates whether index is local (per DE) or global (per object).
 
 Valid values are:
 \begin{description}
-\item [ESMF\_LOCAL\_INDEX]
+\item [ESMF\_INDEX\_DELOCAL]
       Refers to indices on the local DE.
-\item [ESMF\_GLOBAL\_INDEX]
+\item [ESMF\_INDEX\_GLOBAL]
       Refers to object-wide indices.
 \end{description}
 
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
+\subsubsection{ESMF\_NeededFlag}
+\label{opt:neededflag}
+{\sf DESCRIPTION:\\}
+Specifies whether or not a data item is needed for a 
+particular application configuration.  Used in {\tt ESMF\_State}.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_NEEDED] 
+         Data is needed.
+   \item [ESMF\_NOTNEEDED]
+         Data is not needed.
+\end{description}
+
+\subsubsection{ESMF\_ReadyFlag}
+\label{opt:readyflag}
+{\sf DESCRIPTION:\\}
+Specifies whether a data item is ready to read or write.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_READYTOREAD] 
+         Data is ready to read.
+   \item [ESMF\_READYTOWRITE]
+         Data is ready to write.
+   \item [ESMF\_NOTREADY]
+         Data is not ready.
+\end{description}
 
 \subsubsection{ESMF\_ReduceFlag}
-
+\label{opt:reduceflag}
 {\sf DESCRIPTION:\\}
 Indicates reduce operation to a {\tt Reduce()} method.
 
@@ -90,8 +107,34 @@ Valid values are:
          Determine the maximum of all data elements.
 \end{description}
 
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
+\subsubsection{ESMF\_RequiredForRestartFlag}
+\label{opt:requiredforrestartflag}
+{\sf DESCRIPTION:\\}
+Specifies whether a data item is necessary for restart.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_REQUIRED\_FOR\_RESTART] 
+         Data is required for restart.
+   \item [ESMF\_NOTREQUIRED\_FOR\_RESTART]
+         Data is not required for restart.
+\end{description}
+
+\subsubsection{ESMF\_ValidFlag}
+\label{opt:stateitemvalid}
+{\sf DESCRIPTION:\\}
+Specifies whether a data item contains valid data.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_VALID] 
+         Data is ready to read.
+   \item [ESMF\_INVALID]
+         Data is ready to write.
+   \item [ESMF\_NOTREADY]
+         Data is not ready.
+\end{description}
+
 
 \subsection{Parameters}
 
@@ -120,9 +163,6 @@ Valid values are:
       16 byte character.
 \end{description}
 
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
-
 \subsubsection{ESMF\_DataType}
 
 {\sf DESCRIPTION:\\}
@@ -139,9 +179,6 @@ Valid values are:
 \item [ESMF\_DATA\_CHARACTER]
       Character type.
 \end{description}
-
-%////////////////////////////////////////////////////////////
-\mbox{}\hrulefill\
 
 
 
