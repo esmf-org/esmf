@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.14 2004/06/05 00:14:02 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.15 2004/06/17 21:34:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.14 2004/06/05 00:14:02 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.15 2004/06/17 21:34:01 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,8 +54,10 @@
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1
       type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3
+      type(ESMF_Alarm) :: alarmList(10)
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
       logical :: willRingNext
+      integer :: alarmCount
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
@@ -193,6 +195,15 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS and alarmCount = 3"
+      write(name, *) "Clock Get Alarm List Test"
+      call ESMF_ClockGetAlarmList(clock1, ESMF_ALARMLIST_ALL, alarmList, &
+                                  alarmCount, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS.and.alarmCount.eq.3), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "alarmCount = ", alarmCount
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
