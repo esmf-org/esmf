@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.3 2004/02/25 18:59:10 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.4 2004/03/01 18:48:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.3 2004/02/25 18:59:10 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.4 2004/03/01 18:48:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -690,16 +690,17 @@
 ! !IROUTINE: ESMF_BundleRedistStore - Data Redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedistStore(srcbundle, dstbundle, parentlayout, &
-                                       routehandle, blocking, rc)
+      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentLayout, &
+                                       routehandle, blocking, total, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle                 
-      type(ESMF_Bundle), intent(inout) :: dstbundle                 
-      type(ESMF_DELayout), intent(in) :: parentlayout
+      type(ESMF_Bundle), intent(in) :: srcBundle                 
+      type(ESMF_Bundle), intent(inout) :: dstBundle                 
+      type(ESMF_DELayout), intent(in) :: parentLayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -714,9 +715,9 @@
 !     only data movement.
 !
 !     \begin{description}
-!     \item [srcbundle] 
+!     \item [srcBundle]
 !           {\tt ESMF\_Bundle} containing source data.
-!     \item [dstbundle] 
+!     \item [dstBundle]
 !           {\tt ESMF\_Bundle} containing destination grid.
 !     \item [parentlayout]
 !           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Bundle}s, 
@@ -724,7 +725,7 @@
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual layout for a component if the 
 !           redistribution is intra-component.  
-!     \item [routehandle] 
+!     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
 !           redistribution when {\tt ESMF\_BundleRedist} is called.
 !     \item [{[blocking]}]
@@ -742,31 +743,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
-      type(ESMF_Route) :: route
-      type(ESMF_DELayout) :: srclayout, dstlayout
-      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: i, gridrank, datarank, thisdim
-      integer :: nx, ny
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
-      type(ESMF_LocalArray) :: src_local_array, dst_local_array
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
-      integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
-      integer, dimension(:,:), allocatable :: dst_global_start
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
-      integer :: AI_snd_count, AI_rcv_count
-
+      type(ESMF_BundleType), pointer :: stypep, dtypep
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -776,206 +753,42 @@
         rc = ESMF_FAILURE
       endif     
 
-      stypep = srcbundle%btypep
-      dtypep = dstbundle%btypep
-
-      ! Our DE number in the parent layout
-      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
-
-      ! TODO: we need not only to know if this DE has data in the bundle,
-      !   but also the de id for both src & dest bundles
-
-      ! This routine is called on every processor in the parent layout.
-      !  It is quite possible that the source and destination bundles do
-      !  not completely cover every processor on that layout.  Make sure
-      !  we do not go lower than this on the processors which are uninvolved
-      !  in this communication.
-
-      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TRUE) 
-      hassrcdata = .true.   ! temp for now
-      if (hassrcdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
+      ! Sanity checks for good bundle, and that it has an associated grid
+      ! and data before going down to the next level.
+      if (.not.associated(dstBundle%btypep)) then
+        print *, "Invalid or Destroyed Bundle"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+      if (.not.associated(srcBundle%btypep)) then
+        print *, "Invalid or Destroyed Bundle"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
       endif
 
-      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TRUE) 
-      hasdstdata = .true.   ! temp for now
-      if (hasdstdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
+      dtypep => dstBundle%btypep
+      stypep => srcBundle%btypep
+
+      if (dtypep%bundlestatus.ne.ESMF_STATE_READY .or. &
+          stypep%bundlestatus.ne.ESMF_STATE_READY) then
+        print *, "Bundle not ready"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
       endif
 
-      ! if neither are true this DE cannot be involved in the communication
-      !  and it can just return now.
-      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-      endif
-
-      ! if src bundle exists on this DE, query it for information
-      if (hassrcdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
-          call ESMF_DataMapGet(stypep%flist(1)%ftypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in BundleRedist: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(stypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in BundleRedist: ArrayGet returned failure"
-             return
-          endif 
-      endif 
-
-      ! if dst bundle exists on this DE, query it for information
-      if (hasdstdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indicies and the grid indicies.
-          call ESMF_DataMapGet(dtypep%flist(1)%ftypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in BundleRedist: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in BundleRedist: ArrayGet returned failure"
-             return
-          endif 
-      endif
-
-      ! set up things we need to find a cached route or precompute one
-      if (hassrcdata) then
-          call ESMF_DELayoutGetSize(srclayout, nx, ny);
-          AI_snd_count = nx * ny
-
-          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, &
-                            globalCellCountPerDim=src_global_count, &
-                            globalStartPerDEPerDim=src_global_start, rc=status)
-
-          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(stypep%flist(1)%ftypep%localfield%localdata, &
-                                           stypep%grid, stypep%flist(1)%ftypep%mapping, &
-                                           src_AI_tot, src_AI_exc, rc=rc)
-          ! translate the AI's to global index
-          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
-                                           globalAI2D=gl_src_AI_tot, rc=rc)
-          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_exc, &
-                                           globalAI2D=gl_src_AI_exc, rc=rc)
-      else
-          AI_snd_count = 0
-      endif
-      if (hasdstdata) then
-          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
-          AI_rcv_count = nx * ny
-
-          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, &
-                            globalCellCountPerDim=dst_global_count, &
-                            globalStartPerDEPerDim=dst_global_start, rc=status)
-
-          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(dtypep%flist(1)%ftypep%localfield%localdata, &
-                                           dtypep%grid, dtypep%flist(1)%ftypep%mapping, &
-                                           dst_AI_tot, dst_AI_exc, rc=rc)
-          ! translate the AI's to global index
-          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
-                                           globalAI2D=gl_dst_AI_tot, rc=rc)
-          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_exc, &
-                                           globalAI2D=gl_dst_AI_exc, rc=rc)
-      else
-          AI_rcv_count = 0
-      endif
-          
-      ! periodic only matters for halo operations
-      do i=1, ESMF_MAXGRIDDIM
-        periodic(i) = ESMF_FALSE
-      enddo
-
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, &
-                               my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
-                               AI_rcv_count, dstlayout, &
-                               my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
-                               AI_snd_count, srclayout, periodic, &
-                               hascachedroute, route, rc=status)
-
-      if (.not. hascachedroute) then
-          ! Create the route object.  This needs to be the parent layout which
-          ! includes the DEs from both bundles.
-          route = ESMF_RouteCreate(parentlayout, rc) 
-
-          call ESMF_RoutePrecomputeRedist(route, datarank, &
-                                    my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
-                                    AI_rcv_count, dst_global_start, &
-                                    dst_global_count, dstlayout,  &
-                                    my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
-                                    AI_snd_count, src_global_start, &
-                                    src_global_count, srclayout, &
-                                    rc=status)
-
-      endif
-
-      ! Once table is full, execute the communications it represents.
-
-      ! There are 3 possible cases - src+dst, src only, dst only
-      !  (if both are false then we've already returned.)
-      if ((hassrcdata) .and. (.not. hasdstdata)) then
-          src_local_array=stypep%flist(1)%ftypep%localfield%localdata
-          call ESMF_RouteRun(route, srcarray=src_local_array, rc=status) 
-
-      else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          dst_local_array=dtypep%flist(1)%ftypep%localfield%localdata
-          call ESMF_RouteRun(route, dstarray=dst_local_array, rc=status)
-
-      else
-          src_local_array=stypep%flist(1)%ftypep%localfield%localdata
-          dst_local_array=dtypep%flist(1)%ftypep%localfield%localdata
-          call ESMF_RouteRun(route, src_local_array, dst_local_array, status)
-      endif
+      call ESMF_ArrayRedistStore(stypep%flist(1)%ftypep%localfield%localdata, &
+                                 stypep%grid, &
+                                 stypep%flist(1)%ftypep%mapping, &
+                                 dtypep%flist(1)%ftypep%localfield%localdata, &
+                                 dtypep%grid, &
+                                 dtypep%flist(1)%ftypep%mapping, &
+                                 parentLayout, &
+                                 routehandle, blocking, total, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRedist: RouteRun returned failure"
+        print *, "ERROR in BundleRedistStore: ArrayRedistStore returned failure"
         return
       endif 
 
-      ! TODO: do not delete the route because we are caching it.
-      !call ESMF_RouteDestroy(route, rc)
-
-      ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (associated(gl_src_AI_tot)) deallocate(gl_src_AI_tot, stat=status)
-      if (associated(gl_src_AI_exc)) deallocate(gl_src_AI_exc, stat=status)
-      if (associated(gl_dst_AI_tot)) deallocate(gl_dst_AI_tot, stat=status)
-      if (associated(gl_dst_AI_exc)) deallocate(gl_dst_AI_exc, stat=status)
-      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
-      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
-
-      ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundleRedistStore
@@ -986,14 +799,16 @@
 ! !IROUTINE: ESMF_BundleRedist - Data Redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedist(srcbundle, dstbundle, parentlayout, async, rc)
+      subroutine ESMF_BundleRedist(srcBundle, dstBundle, parentLayout, &
+                                   routehandle, blocking, rc)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: srcbundle                 
-      type(ESMF_Bundle), intent(inout) :: dstbundle                 
-      type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_Bundle), intent(in) :: srcBundle
+      type(ESMF_Bundle), intent(inout) :: dstBundle
+      type(ESMF_DELayout), intent(in) :: parentLayout
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -1018,7 +833,7 @@
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual layout for a component if the 
 !           redistribution is intra-component.  
-!     \item [{[async]}]
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -1034,30 +849,6 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_BundleType) :: stypep, dtypep      ! bundle type info
-      type(ESMF_Route) :: route
-      type(ESMF_DELayout) :: srclayout, dstlayout
-      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
-      logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: i, gridrank, datarank, thisdim
-      integer :: nx, ny
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
-      integer :: my_src_DE, my_dst_DE, my_DE
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
-      type(ESMF_LocalArray) :: src_local_array, dst_local_array
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
-      integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
-      integer, dimension(:,:), allocatable :: dst_global_start
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
-      integer :: AI_snd_count, AI_rcv_count
-
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -1067,205 +858,16 @@
         rc = ESMF_FAILURE
       endif     
 
-      stypep = srcbundle%btypep
-      dtypep = dstbundle%btypep
+      stypep = srcBundle%btypep
+      dtypep = dstBundle%btypep
 
-      ! Our DE number in the parent layout
-      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
-
-      ! TODO: we need not only to know if this DE has data in the bundle,
-      !   but also the de id for both src & dest bundles
-
-      ! This routine is called on every processor in the parent layout.
-      !  It is quite possible that the source and destination bundles do
-      !  not completely cover every processor on that layout.  Make sure
-      !  we do not go lower than this on the processors which are uninvolved
-      !  in this communication.
-
-      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
-      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
-      hassrcdata = (hasdata .eq. ESMF_TRUE) 
-      hassrcdata = .true.   ! temp for now
-      if (hassrcdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
-      endif
-
-      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
-      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
-      hasdstdata = (hasdata .eq. ESMF_TRUE) 
-      hasdstdata = .true.   ! temp for now
-      if (hasdstdata) then
-          ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
-      endif
-
-      ! if neither are true this DE cannot be involved in the communication
-      !  and it can just return now.
-      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-      endif
-
-      ! if src bundle exists on this DE, query it for information
-      if (hassrcdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indices and the grid indices.
-          call ESMF_DataMapGet(stypep%flist(1)%ftypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in BundleRedist: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(stypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in BundleRedist: ArrayGet returned failure"
-             return
-          endif 
-      endif 
-
-      ! if dst bundle exists on this DE, query it for information
-      if (hasdstdata) then
-          ! Query the datamap and set info for grid so it knows how to
-          !  match up the array indices and the grid indices.
-          call ESMF_DataMapGet(dtypep%flist(1)%ftypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-            print *, "ERROR in BundleRedist: DataMapGet returned failure"
-            return
-          endif 
-
-          ! And get the Array sizes
-          call ESMF_ArrayGet(dtypep%flist(1)%ftypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
-          if(status .NE. ESMF_SUCCESS) then 
-             print *, "ERROR in BundleRedist: ArrayGet returned failure"
-             return
-          endif 
-      endif
-
-      ! set up things we need to find a cached route or precompute one
-      if (hassrcdata) then
-          call ESMF_DELayoutGetSize(srclayout, nx, ny);
-          AI_snd_count = nx * ny
-
-          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(stypep%grid, &
-                            globalCellCountPerDim=src_global_count, &
-                            globalStartPerDEPerDim=src_global_start, rc=status)
-
-          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(stypep%flist(1)%ftypep%localfield%localdata, &
-                                           stypep%grid, stypep%flist(1)%ftypep%mapping, &
-                                           src_AI_tot, src_AI_exc, rc=rc)
-          ! translate the AI's to global index
-          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
-                                           globalAI2D=gl_src_AI_tot, rc=rc)
-          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_exc, &
-                                           globalAI2D=gl_src_AI_exc, rc=rc)
-      else
-          AI_snd_count = 0
-      endif
-      if (hasdstdata) then
-          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
-          AI_rcv_count = nx * ny
-
-          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_GridGet(dtypep%grid, &
-                            globalCellCountPerDim=dst_global_count, &
-                            globalStartPerDEPerDim=dst_global_start, rc=status)
-
-          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          call ESMF_ArrayGetAllAxisIndices(dtypep%flist(1)%ftypep%localfield%localdata, &
-                                           dtypep%grid, dtypep%flist(1)%ftypep%mapping, &
-                                           dst_AI_tot, dst_AI_exc, rc=rc)
-          ! translate the AI's to global index
-          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
-                                           globalAI2D=gl_dst_AI_tot, rc=rc)
-          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_exc, &
-                                           globalAI2D=gl_dst_AI_exc, rc=rc)
-      else
-          AI_rcv_count = 0
-      endif
-          
-      ! periodic only matters for halo operations
-      do i=1, ESMF_MAXGRIDDIM
-        periodic(i) = ESMF_FALSE
-      enddo
-
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, &
-                               my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
-                               AI_rcv_count, dstlayout, &
-                               my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
-                               AI_snd_count, srclayout, periodic, &
-                               hascachedroute, route, rc=status)
-
-      if (.not. hascachedroute) then
-          ! Create the route object.  This needs to be the parent layout which
-          ! includes the DEs from both bundles.
-          route = ESMF_RouteCreate(parentlayout, rc) 
-
-          call ESMF_RoutePrecomputeRedist(route, datarank, &
-                                    my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
-                                    AI_rcv_count, dst_global_start, &
-                                    dst_global_count, dstlayout,  &
-                                    my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
-                                    AI_snd_count, src_global_start, &
-                                    src_global_count, srclayout, &
-                                    rc=status)
-
-      endif
-
-      ! Once table is full, execute the communications it represents.
-      ! TODO: fix code here
-
-      ! There are 3 possible cases - src+dst, src only, dst only
-      !  (if both are false then we've already returned.)
-      if ((hassrcdata) .and. (.not. hasdstdata)) then
-          src_local_array=stypep%flist(1)%ftypep%localfield%localdata
-          call ESMF_RouteRun(route, srcarray=src_local_array, rc=status) 
-
-      else if ((.not. hassrcdata) .and. (hasdstdata)) then
-          dst_local_array=dtypep%flist(1)%ftypep%localfield%localdata
-          call ESMF_RouteRun(route, dstarray=dst_local_array, rc=status)
-
-      else
-          src_local_array=stypep%flist(1)%ftypep%localfield%localdata
-          dst_local_array=dtypep%flist(1)%ftypep%localfield%localdata
-          call ESMF_RouteRun(route, src_local_array, dst_local_array, status)
-      endif
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in BundleRedist: RouteRun returned failure"
+      call ESMF_ArrayRedist(stypep%flist(1)%ftypep%localfield%localdata, &
+                            dtypep%flist(1)%ftypep%localfield%localdata, &
+                            routehandle, blocking, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in BundleRedist: ArrayRedist returned failure"
         return
-      endif 
-
-      ! TODO: do not delete the route because we are caching it.
-      !call ESMF_RouteDestroy(route, rc)
-
-      ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (associated(gl_src_AI_tot)) deallocate(gl_src_AI_tot, stat=status)
-      if (associated(gl_src_AI_exc)) deallocate(gl_src_AI_exc, stat=status)
-      if (associated(gl_dst_AI_tot)) deallocate(gl_dst_AI_tot, stat=status)
-      if (associated(gl_dst_AI_exc)) deallocate(gl_dst_AI_exc, stat=status)
-      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
-      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
+      endif
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
