@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.47 2003/07/23 22:30:35 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.48 2003/07/24 16:51:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -312,7 +312,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.47 2003/07/23 22:30:35 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.48 2003/07/24 16:51:46 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -341,7 +341,7 @@ end interface
 interface assignment (=)
  module procedure ESMF_dtas
  module procedure ESMF_dkas
- module procedure ESMF_ptas
+ module procedure ESMF_tfas
 end interface
 
 !------------------------------------------------------------------------------
@@ -440,7 +440,7 @@ end subroutine
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_Logicals to see if they're the same or not
-! also need assignment to real f90 logical?
+! also assignment to real f90 logical 
 
 function ESMF_tfeq(tf1, tf2)
  logical ESMF_tfeq
@@ -455,6 +455,13 @@ function ESMF_tfne(tf1, tf2)
 
  ESMF_tfne = (tf1%value .ne. tf2%value)
 end function
+
+subroutine ESMF_tfas(lval, tfval)
+ logical, intent(out) :: lval
+ type(ESMF_Logical), intent(in) :: tfval
+
+ lval = (tfval%value .eq. 2)    ! this must match initializer
+end subroutine
 
 !------------------------------------------------------------------------------
 ! function to compare two ESMF_AxisIndex to see if they're the same or not
