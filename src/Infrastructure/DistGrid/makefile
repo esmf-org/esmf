@@ -1,20 +1,7 @@
-# $Id: makefile,v 1.1 2002/10/08 15:25:13 nscollins Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.2 2002/10/08 18:02:05 nscollins Exp $ 
 
-CFLAGS    =
-FFLAGS    =
-SOURCEC	  = 
-SOURCEF	  = ESMF_DistGrid.F90
-SOURCEH	  = 
-OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
-OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
-MANSEC	  = Timeobj
-LIBBASE	  = libesmf
-DIRS	  = 
-#DIRS	  = examples doc
+DIRS	  = doc src interface examples 
 LOCDIR	  = src/Infrastructure/DistGrid/
-CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
