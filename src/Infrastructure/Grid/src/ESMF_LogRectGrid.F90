@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.11 2004/02/06 20:11:20 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.12 2004/02/09 22:15:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.11 2004/02/06 20:11:20 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.12 2004/02/09 22:15:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -973,7 +973,7 @@
 !          Array of number of grid increments in each dimension.
 !     \item[minGlobalCoordPerDim]
 !          Array of minimum physical coordinates in each dimension.
-!     \item[maxGlobalCoordPerDim]
+!     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum physical coordinates in each direction.
 !     \item[{[horzGridKind]}]
 !          Integer specifier to denote horizontal grid type.
@@ -1008,6 +1008,8 @@
       logical :: rcpresent                    ! Return code present
       integer :: i
       type (ESMF_LogRectGrid), target :: lrgrid
+      real :: recheck
+      real, dimension(numDims) :: useMaxes, useDeltas
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1033,11 +1035,50 @@
          endif
       endif
 
+!     sanity check for bad values
+      do i=1,numDims
+        if (counts(i) .le. 0) then
+           print *, "bad value for count, ", counts(i), "for dimension ", i
+           return
+        endif
+      enddo
+
+!     Fill in default values for optional arguments which weren't specified
+!     and check for an over-specified system which isn't consistent.  (in which
+!     case, deltas are overwritten and a warning printed.)
+      if (present(deltaPerDim)) then
+         do i=1,numDims
+           useDeltas(i) = deltaPerDim(i)
+         enddo
+      else
+         useDeltas(:) = 1.0   ! default values
+      endif
+
+      if (present(maxGlobalCoordPerDim)) then
+         do i=1,numDims
+           useMaxes(i) = maxGlobalCoordPerDim(i)
+         enddo
+      else
+         do i=1,numDims
+           useMaxes(i) = minGlobalCoordPerDim(i) + (counts(i) * useDeltas(i))
+         enddo
+      endif
+
+      if (present(deltaPerDim) .and. present(maxGlobalCoordPerDim)) then
+         do i=1,numDims
+            recheck = (useMaxes(i) - minGlobalCoordPerDim(i)) / real(counts(i))
+            if (recheck-useDeltas(i) .gt. 0.00001) then
+              print *, "WARNING: Inconsistent set of min, max, deltas, and counts specified"
+              print *, "delta for dimension", i, "reset from", useDeltas(i), "to ", recheck
+              useDeltas(i) = recheck
+            endif
+         enddo
+      endif
+
 !     Fill in logRectGrid derived type with subroutine arguments
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
-        lrgrid%deltaPerDim(i) = &
-          (maxGlobalCoordPerDim(i)-minGlobalCoordPerDim(i))/real(counts(i))
+        lrgrid%deltaPerDim(i) = useDeltas(i) 
       enddo
       grid%gridSpecific%logRectGrid => lrgrid
 
@@ -1091,6 +1132,11 @@
         endif
         do i=1,size(maxGlobalCoordPerDim)
           grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
+        enddo
+      else
+        ! default values computed above
+        do i=1,size(maxGlobalCoordPerDim)
+          grid%maxGlobalCoordPerDim(i) = useMaxes(i)
         enddo
       endif
 
