@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.21 2003/08/26 22:40:52 jwolfe Exp $
+// $Id: ESMC_Base.h,v 1.22 2003/08/27 23:11:16 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -139,6 +139,7 @@ struct ESMC_Domain {
 struct ESMC_DomainList {
     int num_domains;
     int current_size;
+    int total_size;
     struct ESMC_Domain *domains;
 };
 
