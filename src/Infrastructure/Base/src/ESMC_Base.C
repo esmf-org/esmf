@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.36 2004/04/23 21:53:13 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.37 2004/06/02 08:53:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -8,8 +8,14 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
+#define ESMF_FILENAME "ESMC_Base.C"
+
 // ESMC Base method implementation (body) file
 
+// single blank line to make protex happy.
+//BOP
+
+//EOP
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -28,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.36 2004/04/23 21:53:13 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.37 2004/06/02 08:53:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -43,140 +49,253 @@ static int globalCount = 0;
 //
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Read - virtual read-in contents of a Base class
+//BOPI
+// !IROUTINE:  ESMC_BaseGetClassName - Get Base class name
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_Read(void) {
-//
-// !RETURN VALUE:
-//    int error return code
+      char *ESMC_Base::ESMC_BaseGetClassName(
 //
 // !ARGUMENTS:
-//    const char *options) const {     //  in - print options
-//
-// !DESCRIPTION:
-//      base class provides stubs for optional Read/Write
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return ESMF_SUCCESS;
-
- } // end ESMC_Read
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Write - virtual write-out contents of a Base class
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Write(void) const {
+      void) const {
 // 
 // !RETURN VALUE:
-//    int error return code
-// 
-// !ARGUMENTS:
-//    const char *options) const {     //  in - print options
+//    Character pointer to class name.
 // 
 // !DESCRIPTION:
-//      base class provides stubs for optional Read/Write
+//    Accessor method for the class name of the object.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
-  return ESMF_SUCCESS;
+  return (char * const)className;
 
-} // end ESMC_Write
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Validate - virtual internal consistency check for a Base
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_Validate(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const char *options) const {    // in - validate options
-//
-// !DESCRIPTION:
-//      base provides stub for required Validate method in derived classes
-//      (must define for sub-classes on either C++ or F90 side)
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-  if (baseStatus != ESMF_STATE_READY) 
-    return ESMF_FAILURE;
-
-  return ESMF_SUCCESS;
-
- } // end ESMC_Validate
-
+}  // end ESMC_BaseGetClassName
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Print - virutal print contents of a Base
+//BOPI
+// !IROUTINE:  ESMC_BaseGetF90ClassName - Get Base class name in Fortran format
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_Print(
-//
+      int ESMC_Base::ESMC_BaseGetF90ClassName(
+// 
 // !RETURN VALUE:
-//    int error return code
-//
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
 // !ARGUMENTS:
-      const char *options) const {     //  in - print options
-//
+     char *name,         // in - Location to copy name into
+     int nlen) const {   // in - Maximum length of string buffer
+// 
 // !DESCRIPTION:
-//      base provides stub for required Validate method in derived classes
-//      (must define for sub-classes on either C++ or F90 side)
+//     Return a separate copy of the base class name, in Fortran friendly
+//     format, which means not null terminated, and space filled.  
+//     Will not copy more than {\tt nlen} bytes into {\tt name} string.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
-  int i;
+  // the (char *) cast is to try to make the compiler happy:
+  return ESMC_CtoF90string((char *)className, name, nlen);
 
-  printf("Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
-           ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
-
-  printf("  %d Attributes:\n", attrCount);
-  for (i=0; i<attrCount; i++) {
-      printf(" Attr %d: ", i);
-      attrList[i]->ESMC_Print();
-  }
-                         
-  return ESMF_SUCCESS;
-
- } // end ESMC_Print
+}  // end ESMC_BaseGetF90ClassName
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetInstCount - get number of base class instances
+//BOPI
+// !IROUTINE:  ESMC_BaseGetID - Get Base class unique ID
+//  
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetID(
+// 
+// !ARGUMENTS:
+      void) const {
+//  
+// !RETURN VALUE:
+//    Unique object ID.
+//  
+// !DESCRIPTION:
+//    Returns the unique object ID.
+//  
+//EOPI
+
+  return ID;
+
+} // end ESMC_BaseGetID
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseGetInstCount - Get number of Base class instances
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetInstCount(void) const {
+      int ESMC_Base::ESMC_BaseGetInstCount(
+// 
+// !ARGUMENTS:
+      void) const {
 //
 // !RETURN VALUE:
-//    int instance count
-//
-// !ARGUMENTS:
-//    none
+//    Integer instance count.
 //
 // !DESCRIPTION:
-//     accessor to number of base class instances
+//    Return a count of how many instances of the {\tt ESMC_Base} class
+//    have been instantiated.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
   return globalCount;
 
 } // end ESMC_BaseGetInstCount
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseSetID - set Base class unique ID
+//BOPI
+// !IROUTINE:  ESMC_BaseGetName - Get Base object name
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetName(
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !RETURN VALUE:
+//    Character pointer to {\tt ESMC\_Base} name.
+// 
+// !DESCRIPTION:
+//    Accessor method for the {\tt ESMC\_Base} name.
+//
+//EOPI
+
+  return (char * const)baseName;
+
+}  // end ESMC_BaseGetName
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseGetF90Name - Get Base object name in Fortran format
+//
+// !INTERFACE:
+      char *ESMC_Base::ESMC_BaseGetF90Name(
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !RETURN VALUE:
+//     Pointer to object name, not null terminated and space filled.
+// 
+// !DESCRIPTION:
+//     Accessor to base class name returned in Fortran friendly format, which
+//     means not null terminated, and space filled.
+//
+//EOPI
+
+  return (char * const)baseNameF90;
+
+}  // end ESMC_BaseGetF90Name
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseGetRefCount - Get Base class reference count
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseGetRefCount(
+// 
+// !ARGUMENTS:
+      void) const {
+//
+// !RETURN VALUE:
+//    Integer reference count.
+//
+// !DESCRIPTION:
+//    Accessor method for base class reference count.
+//
+//EOPI
+
+  return refCount;
+} // end ESMC_BaseGetRefCount
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseGetStatus - Get Base class status
+//
+// !INTERFACE:
+      ESMC_Status ESMC_Base::ESMC_BaseGetStatus(
+// 
+// !ARGUMENTS:
+      void) const {
+// 
+// !RETURN VALUE:
+//    {\tt ESMC\_Status} object containing the {\tt ESMC\_Base} status.
+// 
+// !DESCRIPTION:
+//    Accessor method for base class status.
+//
+//EOPI
+
+  return baseStatus;
+
+}  // end ESMC_BaseGetStatus
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseSetClassName - Set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetClassName(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *classname) {    // in - context in which name should be unique
+// 
+// !DESCRIPTION:
+//    Accessor method to set base class name.
+//
+//EOPI
+
+  int len;
+ 
+  if (classname) {
+     len = strlen(classname);
+     if (len >= ESMF_MAXSTR) {
+       fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
+                          len, ESMF_MAXSTR-1);
+       return ESMF_FAILURE;
+     }
+  }
+
+  strcpy(className, classname ? classname : "global");
+
+  return ESMF_SUCCESS;
+
+}  // end ESMC_BaseSetClassName
+ 
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseSetF90ClassName - Set Base class name
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_BaseSetF90ClassName(
+// 
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+// 
+// !ARGUMENTS:
+      char *name,      // in - contains name to set in fortran format
+      int nlen) {      // in - length of the input name buffer
+// 
+// !DESCRIPTION:
+//    Accessor method to set base class name.
+//
+//EOPI
+
+  if (nlen > ESMF_MAXSTR) {
+      fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
+                       nlen, ESMF_MAXSTR);
+      return ESMF_FAILURE;
+  }
+
+  return ESMC_F90toCstring(name, nlen, className, ESMF_MAXSTR);
+
+}  // end ESMC_BaseSetF90ClassName
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseSetID - Set Base class unique ID
 //  
 // !INTERFACE:
       void ESMC_Base::ESMC_BaseSetID(
@@ -190,145 +309,30 @@ static int globalCount = 0;
 // !DESCRIPTION: 
 //     override default ID (see constructor)
 //  
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
   ID = id;
 
 }  // end ESMC_BaseSetID
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetID - get Base class unique ID
-//  
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetID(void) const {
-//  
-// !RETURN VALUE:
-//    int ID
-//  
-// !ARGUMENTS:
-//    none
-//  
-// !DESCRIPTION:
-//     accessor to unique ID
-//  
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return ID;
-} // end ESMC_BaseGetID
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseSetRefCount - set Base class reference count
-//
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetRefCount(
-// 
-// !RETURN VALUE:
-//    none
-// 
-// !ARGUMENTS:
-      int count) {
-// 
-// !DESCRIPTION:
-//     accessor to reference count
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  refCount = count;
-
-} // end ESMC_BaseSetRefCount
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetRefCount - get Base class reference count
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetRefCount(void) const {
-//
-// !RETURN VALUE:
-//    int reference count
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//     accessor to reference count
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return refCount;
-} // end ESMC_BaseGetRefCount
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseSetStatus - set Base class status
-//
-// !INTERFACE:
-      void ESMC_Base::ESMC_BaseSetStatus(
-// 
-// !RETURN VALUE:
-//    none
-// 
-// !ARGUMENTS:
-      ESMC_Status status) {   // in - base status to set
-// 
-// !DESCRIPTION:
-//     accessor to base class status
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  baseStatus = status;
-
-}  // end ESMC_BaseSetStatus
- 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetStatus - get Base class status
-//
-// !INTERFACE:
-      ESMC_Status ESMC_Base::ESMC_BaseGetStatus(void) const {
-// 
-// !RETURN VALUE:
-//    ESMC_Status
-// 
-// !ARGUMENTS:
-//    none
-// 
-// !DESCRIPTION:
-//     accessor to base class status
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return baseStatus;
-
-}  // end ESMC_BaseGetStatus
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseSetName - set Base class name
+//BOPI
+// !IROUTINE:  ESMC_BaseSetName - Set Base class name
 //
 // !INTERFACE:
       int ESMC_Base::ESMC_BaseSetName(
 // 
 // !RETURN VALUE:
-//    return code
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
       char *name,           // in - base name to set
       char *classname) {    // in - context in which name should be unique
 // 
 // !DESCRIPTION:
-//     accessor to base class name
+//     Accessor method for base class name.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
   int len;
   int defname, defclass;
@@ -373,69 +377,23 @@ static int globalCount = 0;
 }  // end ESMC_BaseSetName
  
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetName - get Base class name
+//BOPI
+// !IROUTINE:  ESMC_BaseSetF90Name - Set Base class name
 //
 // !INTERFACE:
-      char *ESMC_Base::ESMC_BaseGetName(void) const {
+      int ESMC_Base::ESMC_BaseSetF90Name(
 // 
 // !RETURN VALUE:
-//    char pointer to name
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-//    none
+      char *name,     // in - class name to set, in fortran format
+      int nlen) {     // in - length of class name buffer
 // 
 // !DESCRIPTION:
-//     accessor to base class name
+//     Accessor method to set base class name.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return (char * const)baseName;
-
-}  // end ESMC_BaseGetName
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetF90Name - get Base class name
-//
-// !INTERFACE:
-      char *ESMC_Base::ESMC_BaseGetF90Name(void) const {
-// 
-// !RETURN VALUE:
-//    char pointer to name.  not null terminated, space filled.
-// 
-// !ARGUMENTS:
-//    none
-// 
-// !DESCRIPTION:
-//     accessor to base class name
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return (char * const)baseNameF90;
-
-}  // end ESMC_BaseGetF90Name
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseSetF90Name - set Base class name
-//
-// !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetF90Name(char *name, int nlen) {
-// 
-// !RETURN VALUE:
-//    ESMF_SUCCESS or ESMF_FAILURE
-// 
-// !ARGUMENTS:
-//    char pointer to name.  not null terminated, space filled.
-// 
-// !DESCRIPTION:
-//     accessor to base class name
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
   if (nlen > ESMF_MAXSTR) {
       fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
@@ -454,124 +412,162 @@ static int globalCount = 0;
 
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseSetClassName - set Base class name
+//BOPI
+// !IROUTINE:  ESMC_BaseSetRefCount - Set Base class reference count
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetClassName(
+      void ESMC_Base::ESMC_BaseSetRefCount(
 // 
 // !RETURN VALUE:
-//    return code
+//    none
 // 
 // !ARGUMENTS:
-      char *classname) {    // in - context in which name should be unique
+      int count) {
 // 
 // !DESCRIPTION:
-//     accessor to base class name
+//     Accessor method for reference count.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
-  int len;
+  refCount = count;
+
+} // end ESMC_BaseSetRefCount
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_BaseSetStatus - Set Base class status
+//
+// !INTERFACE:
+      void ESMC_Base::ESMC_BaseSetStatus(
+// 
+// !RETURN VALUE:
+//    none
+// 
+// !ARGUMENTS:
+      ESMC_Status status) {   // in - base status to set
+// 
+// !DESCRIPTION:
+//     Accessor method for base class status.
+//
+//EOPI
+
+  baseStatus = status;
+
+}  // end ESMC_BaseSetStatus
  
-  if (classname) {
-     len = strlen(classname);
-     if (len >= ESMF_MAXSTR) {
-       fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
-                          len, ESMF_MAXSTR-1);
-       return ESMF_FAILURE;
-     }
-  }
 
-  strcpy(className, classname ? classname : "global");
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_Print - Print contents of a Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Print(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      const char *options) const {     //  in - print options
+//
+// !DESCRIPTION:
+//    Print the contents of an {\tt ESMC\_Base} object.  Expected to be
+//    called internally from the object-specific print routines.
+//
+//EOPI
+
+  int i;
+
+  printf("Base object ID: %d, Ref count: %d, Status=%s, Name=%s, Class=%s\n", 
+           ID, refCount, ESMC_StatusString(baseStatus), baseName, className);
+
+  printf("  %d Attributes:\n", attrCount);
+  for (i=0; i<attrCount; i++) {
+      printf(" Attr %d: ", i);
+      attrList[i]->ESMC_Print();
+  }
+                         
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Print
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_Read - Read in contents of a Base object
+//
+// !INTERFACE:
+      int ESMC_Base::ESMC_Read(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      void) {
+//
+// !DESCRIPTION:
+//    Base class provides stubs for optional read/write methods.
+//
+//EOPI
 
   return ESMF_SUCCESS;
 
-}  // end ESMC_BaseSetClassName
- 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetClassName - get Base class name
-//
-// !INTERFACE:
-      char *ESMC_Base::ESMC_BaseGetClassName(void) const {
-// 
-// !RETURN VALUE:
-//    char pointer to name
-// 
-// !ARGUMENTS:
-//    none
-// 
-// !DESCRIPTION:
-//     accessor to base class name
-//
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
-
-  return (char * const)className;
-
-}  // end ESMC_BaseGetClassName
+ } // end ESMC_Read
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseGetF90ClassName - get Base class name
+//BOPI
+// !IROUTINE:  ESMC_Validate - Internal consistency check for Base object
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_BaseGetF90ClassName(char *name, int nlen) const {
-// 
-// !RETURN VALUE:
-//    char pointer to name.  not null terminated, space filled.
-// 
-// !ARGUMENTS:
-//    none
-// 
-// !DESCRIPTION:
-//     accessor to base class name
+      int ESMC_Base::ESMC_Validate(
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - validate options
+//
+// !DESCRIPTION:
+//     Validation of the {\tt ESMC\_Base} object.  Expected to be called
+//     internally from the object-specific validation methods.
+//
+//EOPI
 
-  // make the compiler happy:
-  return ESMC_CtoF90string((char *)className, name, nlen);
+  if (baseStatus != ESMF_STATE_READY) 
+    return ESMF_FAILURE;
 
-}  // end ESMC_BaseGetF90ClassName
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Validate
+
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseSetF90ClassName - set Base class name
+// !IROUTINE:  ESMC_Write - Write out contents of a Base object
 //
 // !INTERFACE:
-      int ESMC_Base::ESMC_BaseSetF90ClassName(char *name, int nlen) {
+      int ESMC_Base::ESMC_Write(
 // 
 // !RETURN VALUE:
-//    ESMF_SUCCESS or ESMF_FAILURE
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 // 
 // !ARGUMENTS:
-//    char pointer to name.  not null terminated, space filled.
+      void) const {
 // 
 // !DESCRIPTION:
-//     accessor to base class name
+//    Base class provides stubs for optional read/write methods.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  if (nlen > ESMF_MAXSTR) {
-      fprintf(stderr, "string name %d bytes longer than limit of %d bytes\n",
-                       nlen, ESMF_MAXSTR);
-      return ESMF_FAILURE;
-  }
+  return ESMF_SUCCESS;
 
-  return ESMC_F90toCstring(name, nlen, className, ESMF_MAXSTR);
-
-}  // end ESMC_BaseSetF90ClassName
-
+} // end ESMC_Write
 
 //-----------------------------------------------------------------------------
 // Misc Utility methods
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AxisIndexSet - Initialize an AxisIndex object
 //
 // !INTERFACE:
@@ -589,7 +585,7 @@ static int globalCount = 0;
 // !DESCRIPTION:
 //     Initialize/set an AxisIndex object.
 //
-//EOP
+//EOPI
 
      if (ai == NULL) 
          return ESMF_FAILURE;
@@ -602,7 +598,7 @@ static int globalCount = 0;
 };
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AxisIndexGet - Retrieve values from an AxisIndex object
 //
 // !INTERFACE:
@@ -620,7 +616,7 @@ static int globalCount = 0;
 // !DESCRIPTION:
 //     Get values from an AxisIndex object.
 //
-//EOP
+//EOPI
 
      if (ai == NULL) 
         return ESMF_FAILURE;
@@ -633,7 +629,7 @@ static int globalCount = 0;
 };
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AxisIndexPrint - Print an AxisIndex object
 //
 // !INTERFACE:
@@ -648,7 +644,7 @@ static int globalCount = 0;
 // !DESCRIPTION:
 //     Print values from an AxisIndex object.
 //
-//EOP
+//EOPI
 
      if (ai == NULL) 
         printf("Empty (NULL) AxisIndex pointer\n");
@@ -659,7 +655,7 @@ static int globalCount = 0;
 };
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AxisIndexEqual - Compare two AxisIndex structs for equality
 //
 // !INTERFACE:
@@ -675,7 +671,7 @@ static int globalCount = 0;
 // !DESCRIPTION:
 //     Compare two AxisIndex objects for equality.
 //
-//EOP
+//EOPI
 
      // if both null, say ok.
      if ((ai1 == NULL) && (ai2 == NULL))
@@ -714,7 +710,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 //-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_DataKindSize - Return number of bytes in a DataKind
 //
 // !INTERFACE:
@@ -725,6 +721,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // 
 // !ARGUMENTS:
     ESMC_DataKind dk) {       // in - a data kind 
+//EOPI
 
     switch (dk) {
       case ESMF_I1:  return  1;
@@ -744,7 +741,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_StatusString - Return fixed char string for printing
 //
 // !INTERFACE:
@@ -755,6 +752,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // 
 // !ARGUMENTS:
     ESMC_Status stat) {       // in - a status value
+//EOPI
 
     switch (stat) {
       case ESMF_STATE_UNINIT:       return  "Uninitialized";
@@ -772,7 +770,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_DataTypeString - Return fixed char string for printing
 //
 // !INTERFACE:
@@ -783,6 +781,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // 
 // !ARGUMENTS:
     ESMC_DataType dt) {       // in - a datatype value
+//EOPI
 
     switch (dt) {
       case ESMF_DATA_INTEGER:      return  "Integer";
@@ -798,7 +797,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_DataKindString - Return fixed char string for printing
 //
 // !INTERFACE:
@@ -809,6 +808,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // 
 // !ARGUMENTS:
     ESMC_DataKind dk) {       // in - a datakind value
+//EOPI
 
     switch (dk) {
       case ESMF_I1:      return  "Integer*1";
@@ -828,7 +828,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_LogicalString - Return fixed char string for printing
 //
 // !INTERFACE:
@@ -839,6 +839,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // 
 // !ARGUMENTS:
     ESMC_Logical tf) {       // in - a logical value
+//EOPI
 
     switch (tf) {
       case ESMF_TRUE:      return  "True";
@@ -853,7 +854,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
 //
 // !INTERFACE:
@@ -866,6 +867,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 // !ARGUMENTS:
     char *src,                // in - F90 character source buffer
     int slen) {               // in - length of the F90 source buffer
+//EOPI
 
     char *cp, *ctmp;
     int clen;
@@ -890,7 +892,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
 //
 // !INTERFACE:
@@ -905,6 +907,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
     int slen,                 // in - length of the F90 source buffer
     char *dst,                // inout - pointer to a buffer to hold C string
     int dlen) {               // in - max len of C dst buffer, inc term NULL
+//EOPI
 
     char *cp, *ctmp;
     int clen;
@@ -936,7 +939,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_CtoF90string - Convert a C++ string into an F90 string
 //
 // !INTERFACE:
@@ -950,6 +953,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
     char *src,                // in - C++ null term string source buffer
     char *dst,                // inout - pointer to a buffer holding F90 string
     int dlen) {               // in - length of dst buffer, space padded
+//EOPI
 
     char *cp, *ctmp;
     int clen;
@@ -979,7 +983,7 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMF_F90toCstring - Fortran-callable conversion routine from F90 character to C++ string
 //
 // !INTERFACE:
@@ -998,6 +1002,7 @@ extern "C" {
     int *rc,            // out - return code
     int *slen,          // *hidden* in - length of the F90 source buffer
     int *dlen) {        // *hidden* in - max len of C dst buffer, inc term NULL
+//EOPI
 
     char *cp, *ctmp;
     int clen;
@@ -1033,7 +1038,7 @@ extern "C" {
 }
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMF_CtoF90string - Fortran-callable conversion routine from C++ string to F90 character 
 //
 // !INTERFACE:
@@ -1052,6 +1057,7 @@ extern "C" {
     int *rc,           // out - return code
     int *slen,         // *hidden* in - length of the F90 source buffer
     int *dlen) {       // *hidden* in - max len of C dst buffer, inc term NULL
+//EOPI
 
     char *cp, *ctmp;
     int clen;
@@ -1133,7 +1139,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AttributeSet - set attribute on an ESMF type
 //
 // !INTERFACE:
@@ -1153,7 +1159,7 @@ extern "C" {
 //     delete the attribute.  Generally used internally - see below for
 //     individual attribute set routines for each supported type.
 //
-//EOP
+//EOPI
 
   int i, rc;
 
@@ -1192,7 +1198,7 @@ extern "C" {
 }  // end ESMC_AttributeSet
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AttributeSet(int) - set attribute on an ESMF type
 //
 // !INTERFACE:
@@ -1208,7 +1214,7 @@ extern "C" {
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
 //
-//EOP
+//EOPI
 
   int rc;
   ESMC_Attribute *attr;
@@ -1224,7 +1230,7 @@ extern "C" {
 }  // end ESMC_AttributeSet(int)
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_AttributeSet(int *) - set attribute on an ESMF type
 //
 // !INTERFACE:
@@ -1241,7 +1247,7 @@ extern "C" {
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
 //
-//EOP
+//EOPI
 
   int rc;
   ESMC_Attribute *attr;
@@ -2041,7 +2047,6 @@ extern "C" {
 //      Returns number of attributes present
 //
 //EOP
-// !REQUIREMENTS:   FLD1.7.5
 
   
   return attrCount;
@@ -2067,7 +2072,6 @@ extern "C" {
 
 //
 //EOP
-// !REQUIREMENTS:   
 
 
   int rc, i;
@@ -2101,7 +2105,6 @@ extern "C" {
 //     Return a list of all attribute names without returning the values.
 //
 //EOP
-// !REQUIREMENTS:   FLD1.7.3
 
   return ESMF_SUCCESS;
 
@@ -2125,7 +2128,6 @@ extern "C" {
 //    Set multiple attributes on an object in one call. 
 //
 //EOP
-// !REQUIREMENTS:   (none.  added for completeness)
 
   return ESMF_SUCCESS;
 
@@ -2149,7 +2151,6 @@ extern "C" {
 //     Get multiple attributes from an object in a single call
 //
 //EOP
-// !REQUIREMENTS:   FLD1.7.4
 
   return ESMF_SUCCESS;
 
@@ -2174,7 +2175,6 @@ extern "C" {
 //     copied to the destination object. 
 
 //EOP
-// !REQUIREMENTS:   FLD1.5.4
 
   return ESMF_SUCCESS;
 
@@ -2199,7 +2199,6 @@ extern "C" {
 //     {\tt read only} and won't be updated by this call. 
 
 //EOP
-// !REQUIREMENTS:   FLD1.5.4
 
   return ESMF_SUCCESS;
 
@@ -2280,7 +2279,6 @@ extern "C" {
 //     Set the same attribute on multiple objects in one call
 //
 //EOP
-// !REQUIREMENTS:   FLD1.5.5 (pri 2)
 
   return ESMF_SUCCESS;
 
@@ -2305,7 +2303,6 @@ extern "C" {
 //     Get the same attribute name from multiple objects in one call
 //
 //EOP
-// !REQUIREMENTS:   FLD1.5.5 (pri 2)
 
   return ESMF_SUCCESS;
 
@@ -2330,7 +2327,6 @@ extern "C" {
 //   copy an attribute, including contents, to current object (this)
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
   int i, len;
 
   memcpy(attrName, source.attrName, ESMF_MAXSTR);
@@ -2411,7 +2407,6 @@ extern "C" {
 //     create an empty attribute structure
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
   attrName[0] = '\0';
   items = 0;
@@ -2440,7 +2435,6 @@ extern "C" {
 //   initialize an attribute, and make a copy of the data if items > 1
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
   int i, len;
 
   if (!name)
@@ -2538,7 +2532,6 @@ extern "C" {
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
   if (dt == ESMF_DATA_CHARACTER) delete [] vcp;
 
@@ -2553,7 +2546,7 @@ extern "C" {
  } // end ~ESMC_Attribute
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
@@ -2568,8 +2561,7 @@ extern "C" {
 // !DESCRIPTION:
 //   default initialization 
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
   ID = ++globalCount;
   refCount = 1;
@@ -2586,7 +2578,7 @@ extern "C" {
  } // end ESMC_Base
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ESMC_Base - native C++ constructor for ESMC_Base class
 //
 // !INTERFACE:
@@ -2602,8 +2594,7 @@ extern "C" {
 //   initialization with known class name, object name, initial number
 //   of attributes to make space for.
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
 
   ID = ++globalCount;
   refCount = 1;
@@ -2631,7 +2622,7 @@ extern "C" {
  } // end ESMC_Base
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  ~ESMC_Base - native C++ destructor for ESMC_Base class
 //
 // !INTERFACE:
@@ -2645,8 +2636,7 @@ extern "C" {
 //
 // !DESCRIPTION:
 //
-//EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+//EOPI
   int i;
 
   baseStatus = ESMF_STATE_INVALID;
