@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.11 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.12 2004/03/09 22:37:57 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.11 2004/03/08 16:03:24 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.12 2004/03/09 22:37:57 svasquez Exp $'
 
 !==============================================================================
 !
@@ -153,6 +153,7 @@
 !     decomposed over N {\tt ESMF\_DE}s, this routine returns a copy of the
 !     entire collected data {\tt ESMF\_Array} on each of the N {\tt ESMF\_DE}s.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be gathered.
@@ -166,7 +167,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -223,6 +223,7 @@
 !     {\tt ESMF\_DE} number.  On all other {\tt ESMF\_DE}s, there is no return
 !     {\tt ESMF\_Array}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be gathered.
@@ -239,7 +240,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -375,6 +375,7 @@
 !     in an {\tt ESMF\_Field}.  This routine updates the data 
 !     inside the {\tt ESMF\_Field} in place.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be halo'd.
@@ -390,7 +391,6 @@
 !           blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -437,12 +437,12 @@
 !     Release all stored information about the Halo associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} associated with this Field Halo.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -472,6 +472,7 @@
 !     in an {\tt ESMF\_Field}.  This routine updates the data 
 !     inside the {\tt ESMF\_Field} in place.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be halo'd.
@@ -489,7 +490,6 @@
 !           specified, the default is blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -554,6 +554,7 @@
 ! !DESCRIPTION:
 !     Perform a reduction operation over the data in a {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           Field containing data to be reduced.
@@ -568,7 +569,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -625,6 +625,7 @@
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcField]
 !           {\tt ESMF\_Field} containing source data.
@@ -637,7 +638,6 @@
 !           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -687,12 +687,12 @@
 !     Release all stored information about the redistribution associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} associated with this Field Redist.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -730,6 +730,7 @@
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
@@ -751,7 +752,6 @@
 !           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -839,6 +839,7 @@
 !     Unlike {\tt ESMF\_FieldRegrid} this routine does not do interpolation,
 !     only data movement.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcField] 
 !           {\tt ESMF\_Field} containing source data.
@@ -862,7 +863,6 @@
 !           If not present, default is to do synchronous communication.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -950,6 +950,7 @@
 !     control the transformation of data.  The array data in the 
 !     destination field is overwritten by this call.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcfield] 
 !           {\tt ESMF\_Field} containing source data.
@@ -970,7 +971,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1086,12 +1086,12 @@
 !     Release all stored information about the regridding associated
 !     with this {\tt ESMF\_RouteHandle}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} associated with this Field regridding.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1131,6 +1131,7 @@
 !     returned to identify the stored information, and must be supplied
 !     to the execution call to actually move the data.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [srcfield] 
 !           {\tt ESMF\_Field} containing source data.
@@ -1159,7 +1160,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1274,6 +1274,7 @@
 !     takes a single array on the specified {\tt ESMF\_DE} and returns a decomposed copy
 !     on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Field}.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [array] 
 !           Input {\tt ESMF\_Array} containing the collected data.
@@ -1293,7 +1294,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOP
@@ -1395,6 +1395,7 @@
 !     in an {\tt ESMF\_Field}.  This routine updates the data 
 !     inside the {\tt ESMF\_Field} in place.
 !
+!     The arguments are:
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be halo'd.
@@ -1405,7 +1406,6 @@
 !           If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!           
 !     \end{description}
 !
 !EOPI
