@@ -1,4 +1,4 @@
-// $Id: ESMC_FieldCreateEx.C,v 1.7 2004/05/10 15:43:36 nscollins Exp $
+// $Id: ESMC_FieldCreateEx.C,v 1.8 2004/09/23 17:10:00 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -21,7 +21,7 @@
     
 main(int argc, char **argv) {
 //   // Local variables
-    int x, y, rc, mycell;
+    int x, y, rc, finalrc, mycell;
 //   ESMC_Grid *grid;
 //   ESMC_ArraySpec arrayspec;
 //   ESMC_Array *arraya, *arrayb;
@@ -31,8 +31,11 @@ main(int argc, char **argv) {
 //   ESMC_IOSpec iospec;
     ESMC_Field *field1, *field2, *field3, *field4;
         
+     finalrc = ESMF_SUCCESS; 
+
 //-------------------------------------------------------------------------
-     //rc = ESMC_Initialize();
+     rc = ESMC_Initialize();
+     if (rc != ESMF_SUCCESS) finalrc = rc;
 //-------------------------------------------------------------------------
 
 //-------------------------------------------------------------------------
@@ -114,9 +117,16 @@ main(int argc, char **argv) {
      //ESMC_FieldDestroy(field5);
 
 //-------------------------------------------------------------------------
-     //rc = ESMC_Finalize();
+     rc = ESMC_Finalize();
+     if (rc != ESMF_SUCCESS) finalrc = rc;
 //-------------------------------------------------------------------------
 
+     if (finalrc == ESMF_SUCCESS)
+        printf("PASS: ESMC_FieldCreateEx.C\n");
+     else
+        printf("FAIL: ESMC_FieldCreateEx.C\n");
+
+     exit(0);
 }
 
     
