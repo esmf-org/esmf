@@ -1,4 +1,4 @@
-% $Id: State_usage.tex,v 1.3 2004/06/11 16:41:58 cdeluca Exp $
+% $Id: State_usage.tex,v 1.4 2004/06/12 22:02:32 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,5 +10,72 @@
 
 %\subsection{Use and Examples}
 
-States are not stored inside 
+In ESMF applications States are created at the same 
+time as the components that they will be associated with.  
+A Gridded Component generally has one associated import 
+State and one export State.  In most cases the States 
+associated with a Gridded Component will be created by 
+the Gridded Component's parent component with no data 
+buffers yet attached.  Both the incomplete States and the 
+pointer to the newly created Gridded Component are passed
+by the parent component into the Gridded Component's initialize 
+method.  This is where the States get prepared for use 
+and the import State is first filled with data.
+
+States can be created without the Fields, Arrays, Bundles,
+and other States they will eventually contain in a number 
+of ways.  They can be created with names as placeholders where 
+these data items will eventually be.  When the States are passed 
+into the Gridded Component's initialize method, Field,
+Bundle, and Array create calls can be made in that method
+to replace the name placeholders with real data objects.
+
+States can also be filled with data items that do not yet 
+have data allocated.  Fields, Bundles, and Arrays each have 
+methods that support their creation without actual data 
+allocation - the grid and metadata are set up but no
+Fortran array of data values is allocated.  In this approach, 
+when a State is passed into its associated Gridded component's 
+initialize method, the incomplete Arrays, Fields, and 
+Bundles within the State can allocate or reference data 
+inside the initialize method.
+
+States are passed through the interfaces of the Gridded 
+and Coupler Components' run methods in order to carry data 
+between the components.  While we expect
+a Gridded Component's import State to be filled with data 
+during initialization, its export State will typically be
+filled over the course of its run method.  At the end of
+a Gridded Component's run method, the filled export State 
+is passed out through the argument list into a Coupler 
+Component's run method.  We recommend the convention that 
+it enters the Coupler Component as the Coupler Component's
+import State.  Here is it transformed into a form
+that another Gridded Component requires, and passed out
+of the Coupler Component as its export State.  It can then
+be passed into the run method of a recipient Gridded Component
+as that component's import State.
+
+While the above sounds complicated, the rule is simple:
+a State going into a component is an import State, and a 
+State leaving a component is an export State.
+
+Data items within a State can be marked needed or not needed,
+depending on whether they are required for a particular 
+application configuration.  If the item is marked not needed,
+the user can make the Gridded Component's initialize method 
+clever enough to not allocate the data for that item at all
+and not compute it within the Gridded Component code.
+For example, some diagnostics may not be desired for all 
+runs.
+
+Other flags will eventually be available for data items within 
+a State, such as data ready for reading or writing, data valid or 
+invalid, and data required for restart or not.  These are not
+yet fully implemented, so only the default value for each value 
+can be set at this time.
+
+
+
+
 
