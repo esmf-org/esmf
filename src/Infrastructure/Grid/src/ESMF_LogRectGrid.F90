@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.95 2004/09/20 23:07:37 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.96 2004/09/21 15:11:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.95 2004/09/20 23:07:37 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.96 2004/09/21 15:11:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -190,7 +190,7 @@
          module procedure ESMF_LRGridSetCoordFromArray
          module procedure ESMF_LRGridSetCoordFromBuffer
          module procedure ESMF_LRGridSetCoordComputeBlock
-         module procedure ESMF_LRGridSetCoordComputeVector
+         module procedure ESMF_LRGridSetCoordComputeVect
          module procedure ESMF_LRGridSetCoordCopy
 
 ! !DESCRIPTION:
@@ -2834,7 +2834,7 @@
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
       character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
       integer :: distGridId, physGridId, nDEs(0:2)
-      integer :: i, dimCount, dimCountGrid, aSize, ndim
+      integer :: i, dimCount, dimCountGrid, ndim
       integer, dimension(:), allocatable :: decompIdsUse, counts
       real(ESMF_KIND_R8) :: delta
       real(ESMF_KIND_R8), dimension(:), allocatable :: min, max
@@ -4048,9 +4048,7 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, j, i1, i2, j1, j2, myDE(2), myDEDecomp(0:2)
-      integer :: localDE
-      integer, dimension(dimCount) :: counts, compCount, localStart
+      integer :: i, i1, j1
       integer, dimension(:), allocatable :: cellType
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
       logical :: dummy
@@ -6499,12 +6497,12 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetCoordComputeVector"
+#define ESMF_METHOD "ESMF_LRGridSetCoordComputeVect"
 !BOPI
 ! !IROUTINE: ESMF_LRGridSetCoordCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSetCoordComputeVector(grid, physGridId, dimCount, &
+      subroutine ESMF_LRGridSetCoordComputeVect(grid, physGridId, dimCount, &
                                                   myCount, myIndices, relloc, &
                                                   coord1, coord2, rc)
 !
@@ -6852,7 +6850,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridSetCoordComputeVector
+      end subroutine ESMF_LRGridSetCoordComputeVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -7582,7 +7580,7 @@
 
       integer :: localrc                          ! Error status
       character(len=ESMF_MAXSTR) :: name
-      integer :: i, j, iMax1, jMax1, iType, jType
+      integer :: i
       integer, dimension(1) :: counts
       integer, dimension(:), pointer :: temp
       type(ESMF_Array) :: arrayTemp
