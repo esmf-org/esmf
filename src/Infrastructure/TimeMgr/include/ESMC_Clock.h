@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.37 2004/04/09 20:13:38 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.38 2004/12/04 01:42:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,7 +95,10 @@
                                                 //   been called (number of
                                                 //   time steps taken so far)
     int               alarmCount;               // number of defined alarms
-    ESMC_Alarm       *alarmList[MAX_ALARMS];    // associated alarms
+    int               alarmListCapacity;        // max number of defined alarms
+                                                //  before a reallocation is
+                                                //  necessary
+    ESMC_Alarm      **alarmList;                // associated alarm array
 
     bool              stopTimeSet;  // true if optional property set
 
@@ -174,6 +177,9 @@
 
     int ESMC_ClockSyncToRealTime(void); // TMG3.4.5
     // (see ESMC_Time::SyncToRealTime()
+
+    // to suuport copying of the alarmList
+    ESMC_Clock& operator=(const ESMC_Clock &);
 
     bool operator==(const ESMC_Clock &) const;
     bool operator!=(const ESMC_Clock &) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.67 2004/12/01 01:18:09 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.68 2004/12/04 01:42:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.67 2004/12/01 01:18:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.68 2004/12/04 01:42:48 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -86,6 +86,7 @@ int ESMC_Clock::count=0;
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
 
+    // allocate a clock object & set defaults via constructor
     try {
       clock = new ESMC_Clock;
     }
@@ -222,7 +223,8 @@ int ESMC_Clock::count=0;
 //EOP
 
    // TODO: clock->ESMC_ClockDestruct(); constructor calls it!
-   delete *clock;   // ok to delete null pointer
+   delete *clock; // ok to delete null pointer
+
    *clock = ESMC_NULL_POINTER;
    return(ESMF_SUCCESS);
 
@@ -1019,6 +1021,70 @@ int ESMC_Clock::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_Clock(=) - assignment operator
+//
+// !INTERFACE:
+      ESMC_Clock& ESMC_Clock::operator=(
+//
+// !RETURN VALUE:
+//    ESMC_Clock& result
+//
+// !ARGUMENTS:
+      const ESMC_Clock &clock) {   // in - ESMC_Clock to copy
+//
+// !DESCRIPTION:
+//      Assign current object's (this) {\tt ESMC\_Clock} with given
+//      {\tt ESMC\_Clock}.  
+//EOP
+// !REQUIREMENTS:  
+
+    // check for self-assignment
+    if (&clock != this) {
+
+      // reallocate alarmList if not same size
+      if (alarmListCapacity != clock.alarmListCapacity) {
+        delete [] alarmList;
+        try {
+          alarmList = new ESMC_AlarmPtr[clock.alarmListCapacity];
+        }
+        catch (...) {
+          ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
+          return(*this);  // TODO:  throw exception
+        }
+        alarmListCapacity = clock.alarmListCapacity;
+      }
+  
+      // copy alarm list (array of pointers)
+      for(int i=0; i<clock.alarmCount; i++) {
+        alarmList[i] = clock.alarmList[i];
+      }
+      alarmCount = clock.alarmCount;
+
+      // copy all other members
+      strcpy(name,   clock.name);
+      timeStep     = clock.timeStep;
+      startTime    = clock.startTime;
+      stopTime     = clock.stopTime;
+      refTime      = clock.refTime;
+      currTime     = clock.currTime;
+      prevTime     = clock.prevTime;
+      advanceCount = clock.advanceCount;
+      stopTimeSet  = clock.stopTimeSet;
+      id           = clock.id;
+
+      // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
+                        //       and operator!=)  Must do same in assignment
+                        //       overloaded method and interface from F90.
+                        //       Also, inherit from ESMC_Base class.
+                        //       See also copy constructor
+    }
+
+    return(*this);
+
+}  // end ESMC_Clock::operator=
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_Clock(==) - Clock equality comparison
 // 
 // !INTERFACE:
@@ -1464,9 +1530,22 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Clock::ESMC_Clock() native constructor"
+
+    // allocate the clock's alarm list (array of pointers)
+    try {
+      alarmList = new ESMC_AlarmPtr[ESMF_ALARM_BLOCK_SIZE];
+    }
+    catch (...) {
+      ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
+      return;
+    }
+    alarmCount = 0;
+    alarmListCapacity = ESMF_ALARM_BLOCK_SIZE;
+
     name[0] = '\0';
     advanceCount = 0;
-    alarmCount = 0;
     stopTimeSet = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
     // copy = false;  // TODO: see notes in constructors and destructor below
@@ -1492,11 +1571,27 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Clock::ESMC_Clock() copy constructor"
+
+    // allocate the new clock's own alarm list (array of pointers)
+    try {
+      alarmList = new ESMC_AlarmPtr[clock.alarmListCapacity];
+    }
+    catch (...) {
+      ESMC_LogDefault.ESMC_LogAllocError(ESMC_NULL_POINTER);
+      return;
+    }
+    alarmListCapacity = clock.alarmListCapacity;
+
+    // memberwise copy (invokes overloaded assignment operator=)
     *this = clock;
+
     // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
                       //       and operator!=)  Must do same in assignment
                       //       overloaded method and interface from F90.
                       //       Also, inherit from ESMC_Base class.
+                      //       See also overloaded assignment operator=
 
  } // end ESMC_Clock
 
@@ -1518,6 +1613,8 @@ int ESMC_Clock::count=0;
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+
+  delete [] alarmList;
 
   // TODO: Decrement static count for one less object; but don't decrement   //       for copies.  Must create and set a copy flag property to detect.
   //       Also must set copy flag in copy constructor and overloaded
@@ -1555,20 +1652,14 @@ int ESMC_Clock::count=0;
 
     int rc = ESMF_SUCCESS;
 
+    // validate inputs
+
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
          "; 'this' pointer is NULL.", &rc);
       return(rc);
     }
 
-    // validate inputs
-    if (alarmCount == MAX_ALARMS) {
-      char logMsg[ESMF_MAXSTR];
-      sprintf(logMsg, "For clock %s, alarm list is full (%d alarms).",
-              this->name, MAX_ALARMS);
-      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
-      return(ESMF_FAILURE);
-    }
     if (alarm == ESMC_NULL_POINTER) {
       char logMsg[ESMF_MAXSTR];
       sprintf(logMsg, "For clock %s, given alarm is NULL.", this->name);
@@ -1576,7 +1667,37 @@ int ESMC_Clock::count=0;
       return(ESMF_FAILURE);
     }
 
-    // append to list and count
+    // if alarm list full, re-allocate it
+    if (alarmCount == alarmListCapacity) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "For clock %s, alarm list is full (%d alarms), "
+              "re-allocating to hold %d alarms.",
+                this->name, alarmListCapacity, 
+                alarmListCapacity+ESMF_ALARM_BLOCK_SIZE);
+      ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_INFO);
+
+      // re-allocate clock's alarm list to next block size
+      ESMC_Alarm **tempList;
+      try {
+        tempList = new ESMC_AlarmPtr[alarmListCapacity + ESMF_ALARM_BLOCK_SIZE];
+      }
+      catch (...) {
+        ESMC_LogDefault.ESMC_LogAllocError(&rc);
+        return(rc);
+      }
+
+      // copy alarm list to re-allocated array
+      for(int i=0; i<alarmCount; i++) {
+        tempList[i] = alarmList[i];
+      }
+
+      // deallocate the old alarmList and reset to the new one
+      delete [] alarmList;
+      alarmList = tempList;
+      alarmListCapacity += ESMF_ALARM_BLOCK_SIZE;
+    }
+
+    // append given alarm to list and count it
     alarmList[alarmCount++] = alarm;
 
     // check new alarm to see if it's time to ring
