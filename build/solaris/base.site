@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.6 2003/04/14 22:11:51 nscollins Exp $ 
+# $Id: base.site,v 1.7 2003/04/14 22:16:16 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -11,8 +11,8 @@
 # Location of MPI (Message Passing Interface) software
 
 ESMC_MPIRUN      = 
-MPI_HOME       = /opt/SUNWhpc/
-MPI_LIB        = -L/opt/SUNWhpc/lib -lmpi
+MPI_HOME       = /opt/SUNWhpc
+MPI_LIB        = -L${MPI_HOME}/lib -R${MPI_HOME}/lib -lmpi
 MPI_INCLUDE    = -I${MPI_HOME}/include
 MPIRUN         =  ${MPI_HOME}/bin/mprun
 
