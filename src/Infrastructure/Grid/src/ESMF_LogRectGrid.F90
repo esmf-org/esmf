@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.1 2004/01/16 23:46:52 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.2 2004/01/20 23:12:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,7 +74,6 @@
     public ESMF_LRGridLocalToGlobalIndex
     public ESMF_LRGridGet
     public ESMF_LRGridSet
-    public ESMF_LRGridGetCellMask
     public ESMF_LRGridSetCellMask
     !public ESMF_LRGridGetMask
     public ESMF_LRGridSetMask
@@ -95,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.1 2004/01/16 23:46:52 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.2 2004/01/20 23:12:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3687,106 +3686,6 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LRGridGetCellMask - Retrieves cell identifier mask for a Grid
-
-! !INTERFACE:
-      subroutine ESMF_LRGridGetCellMask(grid, maskArray, physGridId, relloc, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid) :: grid
-      type(ESMF_Array), intent(inout) :: maskArray
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     This version of get retrieves an {\tt ESMF\_Array} of cell types for an
-!     {\tt ESMF\_Grid} from a corresponding {\tt ESMF\_PhysGrid}.
-!     This mask is intended for internal use to indicate which cells are in
-!     the computational regime (cellType=0), a ghost region (cellType=1), or a
-!     halo region (cellType=2).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Pointer to a {\tt ESMF\_Grid} to be modified.
-!     \item[maskArray]
-!          {\tt ESMF\_Array} to contain the internally-used cell array denoting
-!          whether cells are in the computational regime, a ghost region, or a
-!          halo region.
-!     \item[{[physGridId]}]
-!          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
-!     \item[{[relloc]}]
-!          Relative location in grid cell for this PhysGrid.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!EOPI
-
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      integer :: physIdUse
-      logical :: rellocIsValid, physIdIsValid
-
-!     Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Initialize other variables
-      physIdUse = -1
-      rellocIsValid = .false.
-      physIdIsValid = .false.
-
-      ! Either the relative location or PhysGridId must be present and valid
-      if (present(relloc)) then
-!        rellocIsValid = ESMF_RelLocIsValid(relloc)  TODO: assume OK if there for now
-        rellocIsValid = .true.
-      endif
-      if (present(physGridId)) then
-        if ((physGridId.ge.1) .and. (physGridId.le.grid%ptr%numPhysGrids)) then
-          physIdIsValid = .true.
-          physIdUse = physGridId
-       endif
-      endif
-      if (.not.(rellocIsValid .or. physIdIsValid)) then
-        print *, "ERROR in ESMF_LRGridGetCoord: need either relloc or physGridId"
-        return
-      endif
-
-      ! If there is a relloc but no PhysGrid id, then get the id from the relloc
-      if (rellocIsValid .and. .not.(physIdIsValid)) then
-        call ESMF_GridGetPhysGridId(grid%ptr, relloc, physIdUse, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_LRGridGetCoord: get PhysGrid id"
-          return
-        endif
-        if (physIdUse.eq.-1) then
-          print *, "ERROR in ESMF_LRGridGetCoord: no PhysGrid corresponding", &
-                   " to relloc"
-          return
-        endif
-      endif
-
-      ! call PhysGrid with the valid Id
-      call ESMF_PhysGridGetMask(grid%ptr%physGrids(physIdUse), maskArray, id=1, &
-                                rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridGetCellMask: PhysGrid get mask"
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_LRGridGetCellMask
-
-!------------------------------------------------------------------------------
-!BOPI
 ! !IROUTINE: ESMF_LRGridSetCellMask - Compute cell identifier mask for a Grid
 
 ! !INTERFACE:
@@ -4512,14 +4411,15 @@
 ! !IROUTINE: ESMF_LRGridBoxIntersectRecv - Determine a DomainList covering a box
 !
 ! !INTERFACE:
-      subroutine ESMF_LRGridBoxIntersectRecv(grid, local_min, local_max, &
+      subroutine ESMF_LRGridBoxIntersectRecv(grid, &
+                                             localMinPerDim, localMaxPerDim, &
                                              domainList, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_min
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMinPerDim
                                                          ! array of local mins
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: local_max
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: localMaxPerDim
                                                          ! array of local maxs
       type(ESMF_DomainList), intent(inout) :: domainList ! domain list
       logical, intent(in), optional :: total             ! flag to indicate
@@ -4539,10 +4439,10 @@
 !     \item[grid]
 !          Source {\tt ESMF\_Grid} to use to calculate the resulting
 !          {\tt ESMF\_DomainList}.
-!     \item[local\_min]
+!     \item[localMinPerDim]
 !          Array of local minimum coordinates, one per rank of the array,
 !          defining the "box."
-!     \item[local\_max]
+!     \item[localMaxPerDim]
 !          Array of local maximum coordinates, one per rank of the array,
 !          defining the "box."
 !     \item[domainList]
@@ -4620,10 +4520,10 @@
       ! TODO: use David's DomainList routines, but they are untested
       num_domains = 0
       do i = 1,nDEs
-        if ((local_min(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
-            (local_max(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
-            (local_min(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
-            (local_max(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
+        if ((localMinPerDim(1).gt.max(boxes(i,2,1),boxes(i,3,1))) .or. &
+            (localMaxPerDim(1).lt.min(boxes(i,1,1),boxes(i,4,1))) .or. &
+            (localMinPerDim(2).gt.max(boxes(i,3,2),boxes(i,4,2))) .or. &
+            (localMaxPerDim(2).lt.min(boxes(i,1,2),boxes(i,2,2)))) cycle
         num_domains = num_domains + 1
       enddo
 
@@ -4636,10 +4536,10 @@
       num_domains = 0
       totalPoints  = 0
       do j = 1,nDEs
-        if ((local_min(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
-            (local_max(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
-            (local_min(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
-            (local_max(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
+        if ((localMinPerDim(1).gt.max(boxes(j,2,1),boxes(j,3,1))) .or. &
+            (localMaxPerDim(1).lt.min(boxes(j,1,1),boxes(j,4,1))) .or. &
+            (localMinPerDim(2).gt.max(boxes(j,3,2),boxes(j,4,2))) .or. &
+            (localMaxPerDim(2).lt.min(boxes(j,1,2),boxes(j,2,2)))) cycle
         num_domains = num_domains + 1
         domainList%domains(num_domains)%DE   = j - 1  ! DEs start with 0
         domainList%domains(num_domains)%rank = rank

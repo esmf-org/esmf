@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.5 2004/01/16 23:47:50 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.6 2004/01/20 23:12:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -343,7 +343,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.5 2004/01/16 23:47:50 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.6 2004/01/20 23:12:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1415,13 +1415,13 @@
 ! !IROUTINE: ESMF_GridGetPhysGrid - retrieves complete PhysGrid from Grid type
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetPhysGrid(physgrid, grid, name, relloc, rc)
+      subroutine ESMF_GridGetPhysGrid(physgrid, grid, relloc, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGrid), intent(out) :: physgrid
       type(ESMF_GridType), intent(in)  :: grid
-      character(*), intent(in), optional :: name
       type(ESMF_RelLoc), intent(in), optional :: relloc
+      character(*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1435,11 +1435,11 @@
 !          {\tt ESMF\_PhysGrid} to be retrieved.
 !     \item[grid]
 !          Grid structure from which PhysGrid is to be extracted.
-!     \item[{[name]}]
-!          Optional name to identify which PhysGrid to retrieve.
 !     \item[{[relloc]}]
 !          Relative location ({\tt ESMF_RelLoc}) to identify which
 !          PhysGrid to retrieve.
+!     \item[{[name]}]
+!          Optional name to identify which PhysGrid to retrieve.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
