@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.11 2004/06/13 19:17:01 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.12 2004/06/14 02:27:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -713,7 +713,7 @@ end subroutine ESMF_LogSet
 !      This function writes to the file associated with an {\tt ESMF\_Log}.
 !      A message is
 !      passed in along with the {\tt msgtype}, {\tt line}, {\tt file} and 
-!      {\ttt method}.  If the write to
+!      {\tt method}.  If the write to
 !      the {\tt ESMF\_Log} is successful, the function will return a 
 !      logical {\tt true}.  This function
 !      is the base function used by all the other {\tt ESMF\_Log} 
