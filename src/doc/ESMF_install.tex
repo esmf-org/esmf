@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.22 2003/05/07 14:14:38 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.23 2003/05/07 20:05:45 cdeluca Exp $
 
 \subsection{ESMF Download Options}
 
@@ -43,9 +43,6 @@ The following environment variables must be set:
 \subsubsection{Supported Platforms}
 \input{user_arch.tex}
 
-% GNU make requirement.  File in build/doc
-\input{user_make.tex}
-
 Simultaneous multiple architecture builds are supported, with
 one restriction; the test cases may only be run on one platform at a time. 
 
@@ -62,43 +59,11 @@ Build the library with the command:
 \end{verbatim}
   for an optimized version.
 
+% GNU make requirement.  File in build/doc
+\input{user_make.tex}
+
 Build options that enable you to copy the library and *.mod files to
 specified directories are explained in Section~\ref{BuildOptions}. 
-
-\subsubsection{Building the ESMF Test Suites}
-\label{BuildTestSuite}
-A test suite is included with the library. Tests are provided for both MPI
-and uniprocessor builds. Tests can be built both from the top ESMF directory and
-the local source code directories.
-
-\noindent The following command builds the System Tests:
-\begin{verbatim}
-  gmake BOPT=<g,O> [SYSTEM_TEST=NNNNN] build_system_tests
-\end{verbatim}
-
-For example:
-\begin{verbatim}
-  gmake BOPT=O build_system_tests
-\end{verbatim}
-Will build all available system tests. Specifying a specific SYSTEM\_TEST number will build only the specified system test.
-
-\noindent The following command builds the Unit Tests:
-\begin{verbatim}
-  gmake BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] build_tests
-\end{verbatim}
-
-For example:
-\begin{verbatim}
-  gmake BOPT=g ESMF_EXHAUSTIVE=OFF build_tests
-\end{verbatim}
-will build tests that verify basic correctness of the library build and installation. Turning the {\tt ESMF\_EXHAUSIVE} option {\tt ON} when building will create a more comprehensive set of tests, but, will take significantly longer to run. 
-
-Output files from the test examples will be directed to files in:
-\begin{verbatim}
-  ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
-\end{verbatim}
-
-See Section~\ref{TestingProcedures} for instruction on running ESMF tests.
 
 \subsubsection{Building the ESMF Documentation}
 \label{BuildDocumentation}

@@ -1,14 +1,27 @@
 \subsection{Demonstration Application}
 \label{sec:demo}
 
-In this section we describe the {\tt ESMF\_COUPLED\_FLOW} demonstration 
-code that illustrates usage of both the ESMF infrastructure and superstructure.
+The {\tt ESMF\_COUPLED\_FLOW} demonstration illustrates use of both the
+ESMF infrastructure and superstructure.  It is described in detail in 
+Section~\ref{sec:demo}.
+
 \subsubsection{Running the Coupled Wave Demonstration}
 
-To run the demonstration, type 
+To run the demo starting from ESMF source code, type 
 
 \begin{verbatim}
 gmake ESMF_COUPLED_FLOW
+\end{verbatim}
+
+from the \$(ESMF_DIR) directory.  This will compile the 
+ESMF and the demo and run them.
+
+To run the demo when using a precompiled shared
+library packet, {\tt cd} into the {\tt CoupledFlowExe}
+directory and type
+
+\begin{verbatim}
+gmake run
 \end{verbatim}
 
 
