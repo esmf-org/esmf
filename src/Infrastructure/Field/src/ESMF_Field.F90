@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.2 2003/03/11 23:05:55 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.3 2003/03/13 15:29:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,6 +43,7 @@
       use ESMF_GridMod
       use ESMF_ArrayMod
       use ESMF_DELayoutMod
+      use ESMF_XPacketMod
       use ESMF_RouteMod
       use ESMF_DataMapMod
       implicit none
@@ -191,7 +192,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.2 2003/03/11 23:05:55 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.3 2003/03/13 15:29:01 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2071,7 +2072,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_FieldType) :: fp                  ! field type info
       integer :: i, gridrank, datarank, thisdim
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
@@ -2084,11 +2085,11 @@
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = srcfield%ftypep
+      fp = srcfield%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indicies and the grid indicies.
-      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
+      call ESMF_DataMapGet(fp%mapping, gridrank=gridrank, &
                                                dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: DataMapGet returned failure"
@@ -2096,7 +2097,7 @@
       endif 
 
       ! And get the Array sizes
-      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+      call ESMF_ArrayGet(fp%localfield%localdata, rank=datarank, &
                                                lengths=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldRegrid: ArrayGet returned failure"
@@ -2106,7 +2107,7 @@
       ! TODO: add code here to call Regrid correctly
 
       ! Call Grid method to perform actual work
-      ! call ESMF_GridRegrid(ftypep%grid, ftypep%localfield%localdata, status)
+      ! call ESMF_GridRegrid(fp%grid, fp%localfield%localdata, status)
       status = ESMF_FAILURE
 
       if(status .NE. ESMF_SUCCESS) then 
@@ -2145,7 +2146,10 @@
 !     \item [dstfield] 
 !           Field containing destination grid.
 !     \item [layout] 
-!           Layout which encompasses both Fields.
+!           Layout which encompasses both Fields, most commonly the layout
+!           of the Coupler if the route is inter-component, but could 
+!           also be the individual layout for a component if the Route 
+!           is intra-component.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2158,6 +2162,8 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Route) :: route
+      type(ESMF_XPacket) :: srclxp, dstlxp        ! src/dst localdata xps
+      type(ESMF_XPacket) :: srcgxp, dstgxp        ! src/dst global xp
       integer :: i, gridrank, datarank, thisdim
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
@@ -2190,15 +2196,37 @@
         return
       endif 
 
-      ! TODO: add code here to call Route correctly
+      ! Create the route object.  This needs to be the parent layout which
+      ! includes the DEs from both fields.
       route = ESMF_RouteCreate(layout, rc) 
 
-      ! Call Grid method to perform actual work
-      ! call ESMF_GridRoute(ftypep%grid, ftypep%localfield%localdata, status)
-      status = ESMF_FAILURE
+      ! Query grid/layout for the local DE num of the localdata of both fields
 
+      ! somewhere in here is there a loop?
+
+      ! Compute an XPacket for the localdata for both the src array and any
+      !  part of the destination field which is local to this same de.  (this
+      !  won't happen if the layouts are disjoint, but might happen if the
+      !  same layouts are shared in the sequential case.)
+      !call ESMF_ArrayGetAxisIndex(stypep%localfield%localdata, ...)
+      !call ESMF_XPacketInit(srclxp, 2, 0, x, x, x)
+      ! etc.
+     
+      ! Then compute an XPacket for the entire destination grid?
+   
+      ! Intersect the src localdata with the entire destination grid (do
+      !  we have that info?)   For each intersection,  add an entry in the
+      !  route table. 
+      !call ESMF_RouteSetSend(route, dest_de, stypep%localfield%localdata, xp)
+      !call ESMF_RouteSetRecv(route, src_de, dtypep%localfield%localdata, xp)
+
+      ! keep filling the table as long as there's things to send or recv
+      ! from this de.  each other de is doing the same thing.
+
+      ! once table is full, execute the communications it represents.
+      call ESMF_RouteRun(route, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldRoute: Grid Route returned failure"
+        print *, "ERROR in FieldRoute: RouteRun returned failure"
         return
       endif 
 
