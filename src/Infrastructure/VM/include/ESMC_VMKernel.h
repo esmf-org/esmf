@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.5 2004/11/18 23:46:05 nscollins Exp $
+// $Id: ESMC_VMKernel.h,v 1.6 2004/12/23 04:31:06 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,12 +108,13 @@ typedef struct{
 class ESMC_VMK{
   // members
   private:
-    int mypet;      // PET id of this instance
+    int mypet;          // PET id of this instance
+    pthread_t mypthid;  // my pthread id
     // pet -> core mapping
     int npets;      // number of PETs in this ESMC_VMK
     int *lpid;      // local pid (equal to rank in local MPI context)
     int *pid;       // pid (equal to rank in MPI_COMM_WORLD)
-    int *tid;       // thread index 
+    int *tid;       // thread index
     int *ncpet;     // number of cores this pet references
     int **cid;      // core id of the cores this pet references
     // general information about this ESMC_VMK
@@ -151,11 +152,10 @@ class ESMC_VMK{
     void vmk_finalize(void);
       // finalize default (all MPI) virtual machine
 
-    void vmk_construct(int mypet, int npets, int *lpid, int *pid, 
-      int *tid, int *ncpet, int **cid, MPI_Group mpi_g, MPI_Comm mpi_c,
-      pthread_mutex_t *pth_mutex2, 
-      pthread_mutex_t *pth_mutex, int *pth_finish_count, 
-      comminfo **commarray, int pref_intra_ssi);
+    void vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid, 
+      int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 
+      MPI_Comm mpi_c, pthread_mutex_t *pth_mutex2, pthread_mutex_t *pth_mutex,
+      int *pth_finish_count, comminfo **commarray, int pref_intra_ssi);
       // fill an already existing ESMC_VMK object with info
     void vmk_destruct(void);
       // free allocations within an existing ESMC_VMK object
@@ -173,6 +173,7 @@ class ESMC_VMK{
     // info calls
     int vmk_npets(void);           // return npets
     int vmk_mypet(void);           // return mypet
+    pthread_t vmk_mypthid(void);   // return mypthid
     int vmk_ncpet(int i);          // return ncpet
     int vmk_ssiid(int i);          // return ssiid
     MPI_Comm vmk_mpi_comm(void);   // return mpi_c

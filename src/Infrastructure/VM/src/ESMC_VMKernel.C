@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.17 2004/12/15 04:07:32 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.18 2004/12/23 04:30:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -299,13 +299,13 @@ void ESMC_VMK::vmk_finalize(void){
 }
 
 
-void ESMC_VMK::vmk_construct(int mypet, int npets, int *lpid, int *pid,
-  int *tid, int *ncpet, int **cid, MPI_Group mpi_g, MPI_Comm mpi_c,
-  pthread_mutex_t *pth_mutex2,
-  pthread_mutex_t *pth_mutex, int *pth_finish_count, comminfo **commarray,
-  int pref_intra_ssi){
+void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
+  int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 
+  MPI_Comm mpi_c, pthread_mutex_t *pth_mutex2, pthread_mutex_t *pth_mutex, 
+  int *pth_finish_count, comminfo **commarray, int pref_intra_ssi){
   // fill an already existing ESMC_VMK object with info
   this->mypet=mypet;
+  this->mypthid=pthid;
   this->npets=npets;
   this->lpid = new int[npets];
   this->pid = new int[npets];
@@ -527,7 +527,16 @@ static void *vmk_spawn(void *arg){
 #endif
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
-  // use vmkt features to prepare for catch/release loop
+  // obtain reference to the vm instance on heap
+  ESMC_VMK &vm = *(sarg->myvm);
+  // setup the pet section in this vm instance
+  vm.vmk_construct(sarg->mypet, sarg->pthid, sarg->npets, sarg->lpid, 
+    sarg->pid, sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
+    sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
+    sarg->commarray, sarg->pref_intra_ssi);
+  // note: The VM above must be constructed _before_ back-sync'ing to
+  //       vmkt_create in order to assure that the entries in the VM are valid!
+  // now use vmkt features to prepare for catch/release loop (back-sync)
   vmkt_t *vmkt = &(sarg->vmkt);
   pthread_mutex_lock(&(vmkt->mut0));
   pthread_mutex_lock(&(vmkt->mut1));
@@ -535,13 +544,6 @@ static void *vmk_spawn(void *arg){
   pthread_cond_signal(&(vmkt->cond0));
   pthread_mutex_unlock(&(vmkt->mut0));  
   volatile int *f = &(vmkt->flag);
-  // obtain reference to the vm instance on heap
-  ESMC_VMK &vm = *(sarg->myvm);
-  // setup the pet section in this vm instance
-  vm.vmk_construct(sarg->mypet, sarg->npets, sarg->lpid, sarg->pid,
-    sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
-    sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
-    sarg->commarray, sarg->pref_intra_ssi);  
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
@@ -1400,6 +1402,11 @@ int ESMC_VMK::vmk_npets(void){
 
 int ESMC_VMK::vmk_mypet(void){
   return mypet;
+}
+
+
+pthread_t ESMC_VMK::vmk_mypthid(void){
+  return mypthid;
 }
 
 
