@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.21 2004/12/23 18:15:31 theurich Exp $
+// $Id: ESMC_VM.C,v 1.22 2004/12/27 18:44:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.21 2004/12/23 18:15:31 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.22 2004/12/27 18:44:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -58,7 +58,7 @@ static ESMC_VM *GlobalVM = NULL;
 #define ESMC_VM_MAXTIDS 1000
 static pthread_t matchArray_tid[ESMC_VM_MAXTIDS];
 static ESMC_VM *matchArray_vm[ESMC_VM_MAXTIDS];
-static int *matchArray_vmID[ESMC_VM_MAXTIDS];
+static int matchArray_vmID[ESMC_VM_MAXTIDS];
 static int matchArray_count = 0;
 //-----------------------------------------------------------------------------
 
