@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2004/10/12 16:27:51 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2004/11/01 23:42:48 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -229,6 +229,8 @@
                                  regridmethod=ESMF_REGRID_METHOD_BILINEAR, &
                                  rc=status)
 
+      ! for debugging, this prints who is planning to send data and where 
+      !call ESMF_RouteHandlePrint(routehandle, "", rc=status)
 
       print *, "User Coupler Init returning"
    

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.9 2004/11/01 17:14:42 theurich Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.10 2004/11/01 23:42:48 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -200,20 +200,21 @@
       print *, 'gjt: clock tick'
       
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
-                            !blockingFlag=ESMF_BLOCKING, rc=rc)
-                            blockingFlag=ESMF_NONBLOCKING, rc=rc)
+                            blockingFlag=ESMF_BLOCKING, rc=rc)
+                            !blockingFlag=ESMF_NONBLOCKING, rc=rc)
       print *, "Comp 1 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
  
-      call ESMF_GridCompWait(comp1, rc)
-      print *, "Comp 1 Wait returned, rc =", rc
-      if (rc .ne. ESMF_SUCCESS) goto 10
+      !call ESMF_GridCompWait(comp1, rc)
+      !print *, "Comp 1 Wait returned, rc =", rc
+      !if (rc .ne. ESMF_SUCCESS) goto 10
 
-      if (firstflag .neqv. .true.) then
-      	call ESMF_GridCompWait(comp2, rc)
-      	print *, "Comp 2 Wait returned, rc =", rc
-      	if (rc .ne. ESMF_SUCCESS) goto 10
-      endif
+      !if (.not.firstflag) then
+      !	call ESMF_GridCompWait(comp2, rc)
+      !	print *, "Comp 2 Wait returned, rc =", rc
+      !	if (rc .ne. ESMF_SUCCESS) goto 10
+      !  firstflag = .false.
+      !endif
 
       call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, &
                             blockingFlag=ESMF_BLOCKING, rc=rc)
@@ -221,8 +222,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
-                            !blockingFlag=ESMF_BLOCKING, rc=rc)
-                            blockingFlag=ESMF_NONBLOCKING, rc=rc)
+                            blockingFlag=ESMF_BLOCKING, rc=rc)
+                            !blockingFlag=ESMF_NONBLOCKING, rc=rc)
       print *, "Comp 2 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -232,13 +233,15 @@
 
     enddo
  
+!    TODO: this should not cause a crash, but currently does.
+!    cannot wait for components which have already returned.
 !    call ESMF_GridCompWait(comp1, rc)
 !    print *, "Comp 1 Wait returned, rc =", rc
 !    if (rc .ne. ESMF_SUCCESS) goto 10
 
-    call ESMF_GridCompWait(comp2, rc)
-    print *, "Comp 2 Wait returned, rc =", rc
-    if (rc .ne. ESMF_SUCCESS) goto 10
+    !call ESMF_GridCompWait(comp2, rc)
+    !print *, "Comp 2 Wait returned, rc =", rc
+    !if (rc .ne. ESMF_SUCCESS) goto 10
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
