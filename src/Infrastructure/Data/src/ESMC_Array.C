@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.8 2002/12/10 21:47:37 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.9 2002/12/10 22:54:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.8 2002/12/10 21:47:37 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.9 2002/12/10 22:54:54 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -442,10 +442,11 @@
     int rc = ESMF_FAILURE;
     int i;
 
-    printf("Array at address 0x%08lx:\n", (unsigned long)this);
-    printf("rank = %d, type = %d, kind = %d, ", 
+    printf("ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
+    printf("            rank = %d, type = %d, kind = %d, ", 
                              this->rank, this->type, this->kind);
     printf("base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
+    printf("            ");
     for (i=0; i<this->rank; i++)
         printf("dim[%d] = %d  ", i, this->length[i]);
     printf("\n");
