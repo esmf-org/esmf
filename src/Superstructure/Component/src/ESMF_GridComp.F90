@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.14 2004/02/09 21:54:57 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.15 2004/02/11 22:18:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.14 2004/02/09 21:54:57 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.15 2004/02/11 22:18:22 svasquez Exp $'
 
 !==============================================================================
 !
@@ -346,7 +346,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine
+! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine.
 
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompInitialize(component, importstate, &
@@ -470,6 +470,42 @@
 !      All the arguments after the component input are optional 
 !      to facilitate this.
 !
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[name]
+!    Component to query.
+!
+!   \item[{[name]}]
+!    Component name.
+!
+!   \item[{[layout]}]
+!    Component layout.
+!
+!   \item[{[mtype]}]
+!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.
+!
+!   \item[{[grid]}]
+!    Default grid associated with this component.
+!
+!   \item[{[clock]}]
+!    Component-specific clock object.
+!
+!   \item[{[configfile]}]
+!    Component-specific configuration object.
+!
+!   \item[{[config]}]
+!    Already created {\tt Config} object. If specified, takes
+!    priority over filename.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+
+!
 !EOP
 ! !REQUIREMENTS:
 
@@ -481,7 +517,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompSet -- Query a component for various information
+! !IROUTINE: ESMF_GridCompSet -- Sets or resets information about the component.
 !
 ! !INTERFACE:
       subroutine ESMF_GridCompSet(component, name, layout, mtype, grid, clock, &
@@ -504,6 +540,40 @@
 !      only wants to set a single value specify the argument by name.
 !      All the arguments after the component input are optional 
 !      to facilitate this.
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to set value for.
+!
+!   \item[{[name]}]
+!    Component name.
+!
+!   \item[{[layout]}]
+!    Component layout.
+!
+!   \item[{[mtype]}]
+!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.
+!
+!   \item[{[grid]}]
+!    Default grid associated with this component.
+!
+!   \item[{[clock]}]
+!    Private clock associated with this component.
+!
+!   \item[{[config]}]
+!    Already created {\tt Config} object.   If specified, takes
+!    priority over filename.
+!
+!   \item[{[configfile]}]
+!    Component-specific configuration filename.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -528,6 +598,20 @@
 !
 ! !DESCRIPTION:
 !      Routine to ensure a Component is valid.
+!
+!  The arguments are:
+!  \begin{description}
+!      
+!   \item[component]
+!    Component to validate.
+!
+!   \item[{[options]}]  
+!    Object to be validated.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -554,6 +638,20 @@
 !
 ! !DESCRIPTION:
 !      Routine to print information about a component.
+!
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to print.
+!
+!   \item[{[options]}]
+!    Print options.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
