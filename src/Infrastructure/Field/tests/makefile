@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.28 2004/08/27 17:00:33 nscollins Exp $ 
+# $Id: makefile,v 1.29 2004/08/27 20:14:37 svasquez Exp $ 
 
 ALL:  build_tests
 
@@ -34,7 +34,7 @@ CLEANFILES  = *.o *.mod NULL *.txt stdoutfiles core ESMF_LogFile \
 CLOBBERDIRS =
 
 ESMF_FRoute8UTest.F90:  ESMF_FRoute4UTest.F90
-	cp ESMF_FRoute4UTest.F90 ESMF_FRoute8UTest.F90
+	cp -f ESMF_FRoute4UTest.F90 ESMF_FRoute8UTest.F90
 
 #
 # Field
