@@ -1,0 +1,46 @@
+
+DESTEX =  \
+      Grid_alg.tex Grid_desc.tex Grid_desrev.tex \
+      Grid_fapi.tex Grid_glos.tex Grid_req.tex \
+      Grid_syn.tex Grid_desdoc.ctex
+
+# DESEPS = fieldclass.eps bundleclass.eps 
+
+FSRC = ../src/ESMF_Grid.F90
+
+# are these .C or .h (or both)?
+# CSRC = ../include/ESMC_Field.h ../include/ESMC_Bundle.h \
+#        ../include/ESMC_DataMap.h ../../Data/include/ESMC_Array.h 
+
+
+all: doc
+
+
+doc: Grid_desdoc.ps Grid_desdoc.pdf Grid_desdoc.html
+
+# design doc
+Grid_desdoc.html: Grid_desdoc.dvi
+	rm -f Grid_desdoc/*.gif
+	do_l2h Grid des
+	rm -f Grid_desdoc.html
+	ln -s Grid_desdoc/Grid_desdoc.html .
+
+Grid_desdoc.ps:  Grid_desdoc.dvi
+	dvips -o Grid_desdoc.ps Grid_desdoc.dvi
+
+Grid_desdoc.pdf:  Grid_desdoc.dvi
+	dvipdf Grid_desdoc.dvi Grid_desdoc.pdf
+
+Grid_desdoc.dvi: ${DESTEX} ${DESEPS} fsrc ccsrc
+	do_latex Grid des
+
+# source files which gen input for design doc
+ccsrc: ${CSRC}
+	touch ccsrc
+
+fsrc:  ${FSRC}
+	do_fprotex Grid ../src/ESMF_Grid.F90
+	touch fsrc
+
+clean:
+	rm -f *.dvi *.ps Grid_desdoc/* fsrc ccsrc
