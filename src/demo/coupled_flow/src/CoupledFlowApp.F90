@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.19 2004/09/23 17:02:58 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.20 2004/11/22 15:58:35 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -203,7 +203,7 @@
 !  file, but the rest of the Grid parameters are set here by default.  The
 !  Grid spans the Application's DELayout, while the type of the Grid is 
 !  assumed to be horizontal and cartesian x-y with an Arakawa C staggering.  
-!  The Halo width for the Grid is set to one and the name to "source grid":
+!  The Grid name is set to "source grid":
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
