@@ -243,10 +243,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Alarm_usage}
-\input{Alarm_fex}
+\input{ESMF_AlarmEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Alarm_usage}
-\input{../Infrastructure/TimeMgr/doc/Alarm_fex}
+\input{../Infrastructure/TimeMgr/doc/ESMF_AlarmEx_fapi}
 #endif
 
 %\subsection{Restrictions}
