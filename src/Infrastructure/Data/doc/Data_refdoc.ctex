@@ -1,0 +1,135 @@
+% $Id: Data_refdoc.ctex,v 1.1 2003/04/08 15:23:50 flanigan Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{<Title>}
+\newcommand{\myauthors}{<Authors>}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+%\section{Synopsis}
+% #ifdef STANDALONE
+% \input{Data_syn}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Data/doc/Data_syn}
+% #endif
+
+\section{Installation and General Usage}
+See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
+usage of the ESMF libraries.
+
+%\section{Architecture}
+% #ifdef STANDALONE
+% \input{Data_arch}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Data/doc/Data_arch}
+% #endif
+
+\newpage
+\section{<Name1> Class}
+
+% \subsection{Description}
+% #ifdef STANDALONE
+% \input{class_desc}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Data/doc/class_desc}
+% #endif
+
+% \subsection{Restrictions}
+% #ifdef STANDALONE
+% \input{class_rest}
+% #elif defined(CONSTITUENT)
+% \input{../Infrastructure/Data/doc/class_rest}
+% #endif
+
+% \subsection{Use and Examples}
+% #ifdef STANDALONE
+% %\input{class_ex} 
+% #elif defined(CONSTITUENT)
+% %\input{../Infrastructure/Data/doc/class_ex} 
+% #endif
+
+\newpage
+\section{<Name2> Class} ...
+
+#ifdef STANDALONE
+%\section{Glossary}
+%\input{Data_glos}
+
+%\section{Bibliography}
+\bibliography{Data} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+
+\newpage
+\setcounter{section}{1}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\section*{Appendix A:  Fortran Interface}
+\addcontentsline{toc}{section}{Appendix A:  Fortran Interface}
+
+%\input{}
+
+\newpage
+\setcounter{section}{2}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\section*{Appendix B:  Class Implementations}
+\addcontentsline{toc}{section}{Appendix B:  Class Implementations}
+
+\subsection{Public Classes}
+
+
+%
+% No FORTRAN interface
+%
+#ifdef STANDALONE
+%\input{}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Data/doc/}
+#endif
+
+\subsection{Private Classes}
+
+%\input{<Name2>}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
