@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.4 2003/03/21 23:56:10 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.5 2003/03/22 00:03:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.4 2003/03/21 23:56:10 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.5 2003/03/22 00:03:25 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! Some common definitions.  This requires the C preprocessor.
@@ -251,7 +251,8 @@ print *, "StateUnitTest EXHAUSTIVE"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_BundleGetName(bundle2(1), bname, rc)
-      write(name, *) "Getting Bundle from a State Test continued"
+      write(failMsg, *) "Bundle name not 'Temperature'"
+      write(name, *) "Verifying that the Bundle has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bname.eq."Temperature"), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
@@ -263,7 +264,8 @@ print *, "StateUnitTest EXHAUSTIVE"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldGetName(field2, fname, rc)
-      write(name, *) "Getting Field from a State Test continued"
+      write(failMsg, *) "Field name not 'Humidity'"
+      write(name, *) "Verifying that the Field has correct name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(fname.eq."Humidity"), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
