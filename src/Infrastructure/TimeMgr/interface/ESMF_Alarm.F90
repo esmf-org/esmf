@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.42 2004/02/04 23:24:00 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.43 2004/02/05 23:03:46 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.42 2004/02/04 23:24:00 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.43 2004/02/05 23:03:46 eschwab Exp $'
 
 !==============================================================================
 !
@@ -133,6 +133,8 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_AlarmOverloadedOperator(==) - Test if Alarm 1 is equal to Alarm 2
+!
 ! !INTERFACE:
       interface operator(==)
 !     if (alarm1 == alarm2) then ... endif
@@ -170,6 +172,8 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_AlarmOverloadedOperator(/=) - Test if Alarm 1 is not equal to Alarm 2
+!
 ! !INTERFACE:
       interface operator(/=)
 !     if (alarm1 /= alarm2) then ... endif

@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.44 2004/02/05 21:28:03 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.45 2004/02/05 23:03:46 eschwab Exp $'
 
 !==============================================================================
 !
@@ -121,6 +121,8 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_ClockOverloadedOperator(==) - Test if Clock 1 is equal to Clock 2
+!
 ! !INTERFACE:
       interface operator(==)
 !     if (clock1 == clock2) then ... endif
@@ -158,6 +160,8 @@
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_ClockOverloadedOperator(/=) - Test if Clock 1 is not equal to Clock 2
+!
 ! !INTERFACE:
       interface operator(/=)
 !     if (clock1 /= clock2) then ... endif
