@@ -1,4 +1,4 @@
-% $Id: Config_usage.tex,v 1.2 2004/06/22 23:13:44 cdeluca Exp $
+% $Id: Config_usage.tex,v 1.3 2005/03/28 21:19:47 jwolfe Exp $
 
  \subsubsection{Resource Files}
 
@@ -45,42 +45,42 @@
     for a complete description of parameters for each routine/function}:
 
  \begin{verbatim}
-       cf = ESMF_ConfigCreate (layout, rc)
-       call ESMF_ConfigLoadFile (cf, fname, rc = rc)
+       cf = ESMF_ConfigCreate(rc)
+       call ESMF_ConfigLoadFile(cf, fname, layout, rc=rc)
  \end{verbatim}
 
     The next step is to select the label (record) of interest, say
 
  \begin{verbatim}
-       call ESMF_ConfigFindLabel  ( cf, 'constants:', rc = rc )
+       call ESMF_ConfigFindLabel(cf, 'constants:', rc=rc)
  \end{verbatim}
 
-  The 2 constants above can be retrieved with the following code
+  The two constants above can be retrieved with the following code
   fragment:
  \begin{verbatim}
-       real    r
-       integer i
-       call ESMF_ConfigFindLabel( cf, 'constants:', rc = rc)
-       r = ESMF_ConfigGetFloat( cf, rc = rc )        results in r = 3.1415
-       i = ESMF_ConfigGetInt( cf, rc = rc )          results in i = 25
+       real    :: r
+       integer :: i
+       call ESMF_ConfigFindLabel(cf, 'constants:', rc=rc)
+       call ESMF_ConfigGetAttribute(cf, r, rc=rc)       results in r = 3.1415
+       call ESMF_ConfigGetAttribute(cf, i, rc=rc)       results in i = 25
  \end{verbatim}
 
   The file names above can be retrieved with the following
   code fragment:
  \begin{verbatim}
-       character*20 fn1, fn2, fn3
-       integer      rc
-       call ESMF_ConfigFindLabel ( cf, 'my_file_names:', rc = rc )
-       call ESMF_ConfigGetString ( cf, fn1, rc = rc )   ==> fn1 = 'jan87.dat'
-       call ESMF_ConfigGetString ( cf, fn2, rc = rc )   ==> fn1 = 'jan88.dat'
-       call ESMF_ConfigGetString ( cf, fn3, rc = rc )   ==> fn1 = 'jan89.dat'
+       character*20 :: fn1, fn2, fn3
+       integer      :: rc
+       call ESMF_ConfigFindLabel(cf, 'my_file_names:', rc=rc)
+       call ESMF_ConfigGetAttribute(cf, fn1, rc=rc)   ==> fn1 = 'jan87.dat'
+       call ESMF_ConfigGetAttribute(cf, fn2, rc=rc)   ==> fn1 = 'jan88.dat'
+       call ESMF_ConfigGetAttribute(cf, fn3, rc=rc)   ==> fn1 = 'jan89.dat'
  \end{verbatim}
 
  To access the table above, the user first must use 
  ${\tt ESMF\_ConfigFindLabel()}$ to locate the beginning of the table, e.g.,
 
  \begin{verbatim}
-       call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc = rc)
+       call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc)
  \end{verbatim}
 
  Subsequently, ${\tt call ESMF\_ConfigNextLine()}$ can be used to gain 
@@ -88,14 +88,14 @@
  table (7 rows, 3 columns):
 
  \begin{verbatim}
-       real          table(7,3)
-       character*20  word
-       integer       rc
-       call  ESMF_ConfigFindLabel(cf, 'my_table_name::', rc = rc)
+       real          :: table(7,3)
+       character*20  :: word
+       integer       :: rc
+       call  ESMF_ConfigFindLabel(cf, 'my_table_name::', rc=rc)
        do i = 1, 7
-          call  call ESMF_ConfigNextLine( cf, rc = rc )
+          call ESMF_ConfigNextLine(cf, rc=rc)
           do j = 1, 3
-             table(i,j) = ESMF_ConfigGetFloat( cf, rc = rc )
+             call ESMF_ConfigGetAttribute(cf, table(i,j), rc=rc)
           end do                   
        end do
  \end{verbatim}
@@ -103,18 +103,18 @@
  The work with the configuration {\tt cf} is finalized by call to
  ${\tt ESMF\_ConfigDestroy()}$:
  \begin{verbatim}
-       integer rc
-       call ESMF_ConfigDestroy( cf, rc )
+       integer :: rc
+       call ESMF_ConfigDestroy(cf, rc)
  \end{verbatim}
 
  {\em Common Arguments:}
 
  \begin{verbatim}
- character*(*)      fname       file name
- integer            rc        error return code (0 is OK)
- character*(*)      label       label (key) to locate record
- character*(*)      word        blank delimited string
- character*(*)      string      a sequence of characters
+ character*(*)   :: fname       file name
+ integer         :: rc          error return code (0 is OK)
+ character*(*)   :: label       label (key) to locate record
+ character*(*)   :: word        blank delimited string
+ character*(*)   :: string      a sequence of characters
  \end{verbatim}
 
 
