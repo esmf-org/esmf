@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.33 2003/04/04 15:11:55 cdeluca Exp $
+// $Id: ESMC_Route.C,v 1.34 2003/04/08 23:06:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
  #include <ESMC.h>
  #include <stdio.h>
  #include <stdlib.h>
+ #include <iostream.h>
 
  // associated class definition file
  #include <ESMC_Route.h>
@@ -32,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.33 2003/04/04 15:11:55 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.34 2003/04/08 23:06:36 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -544,8 +545,12 @@
           their_de = i;
 
           // get the parent DE identifier for this DE in the rcv layout
-          // layout_rcv->ESMC_DELayoutGetParentID(their_de, their_de_parent);
-          their_de_parent = their_de;     // temporarily
+          layout_rcv->ESMC_DELayoutGetParentDEID(their_de, layout, 
+                                                 &their_de_parent);
+          //their_de_parent = their_de;     // temporarily
+          if (their_de_parent != their_de) 
+	     cout << "their_de = " << their_de << ", parent_de = " 
+                  << their_de_parent << endl;
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
@@ -593,8 +598,12 @@
           their_de = i;
 
           // get the parent DE identifier for this DE in the snd layout
-          // layout_snd->ESMC_DELayoutGetParentID(their_de, their_de_parent);
-          their_de_parent = their_de;     // temporarily
+          layout_snd->ESMC_DELayoutGetParentDEID(their_de, layout, 
+                                                 &their_de_parent);
+          //their_de_parent = their_de;     // temporarily
+          if (their_de_parent != their_de) 
+	     cout << "their_de = " << their_de << ", parent_de = " 
+                  << their_de_parent << endl;
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
