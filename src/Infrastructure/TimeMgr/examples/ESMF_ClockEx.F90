@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.8 2003/04/19 00:13:01 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.9 2003/04/19 00:33:33 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,8 +13,6 @@
       program ESMF_ClockEx
 
 !------------------------------------------------------------------------------
-! INCLUDES
-#include <ESMF.h>
 !
 !==============================================================================
 !BOP
@@ -35,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.8 2003/04/19 00:13:01 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.9 2003/04/19 00:33:33 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
