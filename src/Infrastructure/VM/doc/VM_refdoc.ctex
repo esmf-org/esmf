@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.10 2004/05/22 03:42:09 theurich Exp $ 
+% $Id: VM_refdoc.ctex,v 1.11 2004/05/22 04:18:14 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,6 +70,7 @@
 \input{ESMF_VMTest3Ex_fapi}
 \input{ESMF_VMTest4Ex_fapi}
 \input{ESMF_VMTest5Ex_fapi}
+\input{ESMF_VMTest6Ex_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/VM/doc/VM_usage}
 \input{../Infrastructure/VM/doc/ESMF_VMTest1Ex_fapi}
@@ -77,6 +78,7 @@
 \input{../Infrastructure/VM/doc/ESMF_VMTest3Ex_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMTest4Ex_fapi}
 \input{../Infrastructure/VM/doc/ESMF_VMTest5Ex_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMTest6Ex_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
