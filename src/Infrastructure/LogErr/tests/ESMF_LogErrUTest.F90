@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.14 2005/03/28 21:46:25 svasquez Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.15 2005/03/28 23:30:29 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.14 2005/03/28 21:46:25 svasquez Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.15 2005/03/28 23:30:29 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,10 +48,11 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name, msg_type, Pet_num, todays_date, my_todays_date
+      character(ESMF_MAXSTR) :: name, msg_type, Pet_num
       character(10) :: log_time, my_time
       character(1) :: pet_char
       character(4) :: my_pet_char
+      character(8) :: my_todays_date, todays_date
 
       character :: random_char
       character (5) :: random_string, msg_string
@@ -311,7 +312,7 @@
       call random_seed
       do i=1, 5
       	call random_number(r1)
-      	ran_num = int(26*r1) + 65
+      	ran_num = int(26.0*r1) + 65
       	random_char  = achar(ran_num)
 	random_string(i:i) = random_char
       end do
@@ -366,14 +367,15 @@
       write(failMsg, *) "Date in file is wrong"
       write(name, *) "Verify date in Log File Test"
       call ESMF_Test((my_todays_date.eq.todays_date), name, failMsg, result, ESMF_SRCLINE)
-      print *, " rc = ", rc
+      print *, " my_todays_date is ", my_todays_date
+      print *, " todays_date is ", todays_date
 
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Verify correct date was written to log file
-      write(failMsg, *) "Date in file is wrong"
-      write(name, *) "Verify date in Log File Test"
+      write(failMsg, *) "time in file is wrong"
+      write(name, *) "Verify time in Log File Test"
       call ESMF_Test((my_time.eq.log_time), name, failMsg, result, ESMF_SRCLINE)
       print *, " my_time = ", my_time
 
@@ -390,7 +392,7 @@
       call ESMF_VMGet(vm, localPet=my_pet, rc=rc)
       ! Convert PET to character
       pet_char  = achar(my_pet + 48)
-      ! Append tp "PET"
+      ! Append to "PET"
       my_pet_char = "PET" // pet_char
       !EX_UTest
       ! Verify correct PET was written into log file
