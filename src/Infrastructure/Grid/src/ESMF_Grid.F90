@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.175 2004/06/18 21:58:36 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.176 2004/06/21 14:33:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.175 2004/06/18 21:58:36 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.176 2004/06/21 14:33:14 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1947,7 +1947,7 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       ! Initialize other variables
-      gridp = grid%ptr
+      gridp => grid%ptr
 
       ! if present, set information filling in grid derived type
       if (present(horzgridtype   )) gridp%horzGridType    = horzgridtype
