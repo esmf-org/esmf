@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.28 2004/02/25 03:04:46 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.29 2004/04/09 20:13:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -50,7 +50,9 @@ extern "C" {
                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                 ESMF_KIND_R8 *ns_r8,
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                ESMC_Calendar **calendar, int *timeZone,
+                                ESMC_Calendar **calendar,
+                                ESMC_CalendarType *calendarType,
+                                int *timeZone,
                                 int *status) {
           int rc = (ptr)->ESMC_TimeSet(
                        ESMC_NOT_PRESENT_FILTER(yy),
@@ -75,7 +77,8 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(ns_r8),
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
-                                              *calendar,    // required
+                       ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calendarType),
                        ESMC_NOT_PRESENT_FILTER(timeZone) );
           if (ESMC_PRESENT(status)) *status = rc;
        }
@@ -93,7 +96,9 @@ extern "C" {
                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                 ESMF_KIND_R8 *ns_r8,
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                ESMC_Calendar **calendar, int *timeZone,
+                                ESMC_Calendar **calendar, 
+                                ESMC_CalendarType *calendarType, 
+                                int *timeZone,
                                 int *timeStringLen, int *tempTimeStringLen, 
                                 char *tempTimeString, int *dayOfWeek,
                                 ESMC_Time *midMonth,
@@ -125,6 +130,7 @@ extern "C" {
                        ESMC_NOT_PRESENT_FILTER(sN),
                        ESMC_NOT_PRESENT_FILTER(sD),
                        ESMC_NOT_PRESENT_FILTER(calendar),
+                       ESMC_NOT_PRESENT_FILTER(calendarType),
                        ESMC_NOT_PRESENT_FILTER(timeZone),
                                           // always present internal arguments
                                               *timeStringLen,

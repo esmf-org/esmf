@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.24 2004/01/29 04:44:34 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.25 2004/04/09 20:13:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -53,6 +53,18 @@
       ! result code
       integer :: finalrc
       finalrc = ESMF_SUCCESS
+
+!BOP
+!\begin{verbatim}
+      ! set default time manager calendar to be Gregorian
+      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
 !BOP
 !\begin{verbatim}
       ! initialize calendar to be Gregorian type

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.38 2004/03/19 00:31:14 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.39 2004/04/09 20:13:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,6 +81,7 @@ class ESMC_TimeInterval;
                                                        (year%100 != 0)) )
 
 // (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
+#define CALENDAR_TYPE_COUNT 6
 enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         ESMC_CAL_JULIANDAY,
                         ESMC_CAL_NOLEAP,      // like Gregorian, except
@@ -91,7 +92,8 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                                               //   only
                         // Note: add new calendars between ESMC_CAL_GREGORIAN
                         // and ESMC_CAL_NOCALENDAR so Validate() doesn't need
-                        // to change
+                        // to change.  Also add to static intializers at top
+                        // of ESMC_Calendar.C
 
 // !PUBLIC TYPES:
  class ESMC_Calendar;
@@ -121,6 +123,11 @@ class ESMC_Calendar {
         ESMF_KIND_I4 dN;   // fractional number of days per year (numerator)
         ESMF_KIND_I4 dD;   //                                    (denominator)
     } daysPerYear;    // e.g. for Venus, d=0, dN=926, dD=1000
+
+    // one-of-each calendar type held automatically, as needed
+    static ESMC_Calendar *internalCalendar[CALENDAR_TYPE_COUNT];
+    static ESMC_Calendar *defaultCalendar;  // set-up upon ESMF_Initialize();
+                                            // defaults to ESMC_CAL_NOCALENDAR
 
     int               id;         // unique identifier. used for equality
                                   //    checks and to generate unique default
@@ -220,6 +227,9 @@ class ESMC_Calendar {
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
                                               ESMC_CalendarType, int*);
 
+    // friend function to allocate and initialize internal calendar from heap
+    friend int ESMC_CalendarCreate(ESMC_CalendarType);
+
     // friend function to allocate and initialize custom calendar from heap
     friend ESMC_Calendar *ESMC_CalendarCreate(int, const char*,
                                               int*, int,
@@ -231,9 +241,17 @@ class ESMC_Calendar {
     // friend function to copy a calendar
     friend ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar*, int*);
 
-    // friend function to de-allocate clock
+    // friend function to de-allocate calendar
     friend int ESMC_CalendarDestroy(ESMC_Calendar **);
+
+    // friend function to de-allocate all internal calendars
+    friend int ESMC_CalendarFinalize(void);
     
+    // friend functions to initialize and set the default calendar
+    friend int ESMC_CalendarInitialize(ESMC_CalendarType *);
+    friend int ESMC_CalendarSetDefault(ESMC_Calendar **);
+    friend int ESMC_CalendarSetDefault(ESMC_CalendarType *);
+
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
@@ -261,6 +279,9 @@ class ESMC_Calendar {
                                                            ESMC_CAL_NOCALENDAR,
                                        int*              rc=0);
 
+    // friend function to allocate and initialize internal calendar from heap
+    int ESMC_CalendarCreate(ESMC_CalendarType calendarType);
+
     // friend function to allocate and initialize custom calendar from heap
     ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
                                        const char   *name=0,
@@ -278,10 +299,18 @@ class ESMC_Calendar {
     // friend function to de-allocate calendar
     int ESMC_CalendarDestroy(ESMC_Calendar **calendar);
 
+    // friend function to de-allocate all internal calendars
+    int ESMC_CalendarFinalize(void);
+
     // friend to restore state
     ESMC_Calendar *ESMC_CalendarReadRestart(int nameLen,
                                             const char*  name=0,
                                             ESMC_IOSpec* iospec=0,
                                             int*         rc=0);
+
+    // friend functions to initialize and set the default calendar
+    int ESMC_CalendarInitialize(ESMC_CalendarType *calendarType);
+    int ESMC_CalendarSetDefault(ESMC_Calendar **calendar);
+    int ESMC_CalendarSetDefault(ESMC_CalendarType *calendarType);
 
 #endif // ESMC_CALENDAR_H

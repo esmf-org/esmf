@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.30 2004/02/25 03:04:46 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.31 2004/04/09 20:13:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,19 @@
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
+
+       void FTN(c_esmc_calendarinitialize)(ESMC_CalendarType *calendarType, 
+                                           int *status) {
+          int rc =
+                ESMC_CalendarInitialize(
+                   (ESMC_CalendarType *)ESMC_NOT_PRESENT_FILTER(calendarType));
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_calendarfinalize)(int *status) {
+          int rc = ESMC_CalendarFinalize();
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
 
        void FTN(c_esmc_calendarcreatenew)(ESMC_Calendar    **ptr,
                                           int               *nameLen,
@@ -123,6 +136,22 @@ extern "C" {
                       ESMC_NOT_PRESENT_FILTER(name),
                                              *calendarType);  // required
            if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_calendarsetdefaultcal)(ESMC_Calendar **calendar, 
+                                              int *status) {
+          int rc =
+                ESMC_CalendarSetDefault(
+                          (ESMC_Calendar **)ESMC_NOT_PRESENT_FILTER(calendar));
+          if (ESMC_PRESENT(status)) *status = rc;
+       }
+
+       void FTN(c_esmc_calendarsetdefaulttype)(ESMC_CalendarType *calendarType, 
+                                               int *status) {
+          int rc =
+                ESMC_CalendarSetDefault(
+                   (ESMC_CalendarType *)ESMC_NOT_PRESENT_FILTER(calendarType));
+          if (ESMC_PRESENT(status)) *status = rc;
        }
 
        // for daysPerMonth present

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.53 2004/03/19 18:22:32 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.54 2004/04/09 20:13:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.53 2004/03/19 18:22:32 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.54 2004/04/09 20:13:56 eschwab Exp $'
 
 !==============================================================================
 !
@@ -890,8 +890,10 @@
                                       d_r8, h_r8, m_r8, s_r8, &
                                       ms_r8, us_r8, ns_r8, &
                                       sN, sD, &
-                                      startTime,   endTime,   calendar, &
-                                      startTimeIn, endTimeIn, calendarIn, &
+                                      startTime, endTime, &
+                                      calendar, calendarType, &
+                                      startTimeIn, endTimeIn, &
+                                      calendarIn, calendarTypeIn, &
                                       timeString, rc)
 
 ! !ARGUMENTS:
@@ -921,9 +923,11 @@
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Time),         intent(out), optional :: endTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
-      type(ESMF_Time),         intent(in),  optional :: startTimeIn  ! Input
-      type(ESMF_Time),         intent(in),  optional :: endTimeIn    ! Input
-      type(ESMF_Calendar),     intent(in),  optional :: calendarIn   ! Input
+      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_Time),         intent(in),  optional :: startTimeIn    ! Input
+      type(ESMF_Time),         intent(in),  optional :: endTimeIn      ! Input
+      type(ESMF_Calendar),     intent(in),  optional :: calendarIn     ! Input
+      type(ESMF_CalendarType), intent(in),  optional :: calendarTypeIn ! Input
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: rc
 
@@ -1007,6 +1011,8 @@
 !          (yy, mm, and/or d).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}, if any.
+!     \item[{[calendarType]}]
+!          Associated {\tt CalendarType}, if any.
 !     \item[{[startTimeIn]}]
 !          INPUT argument:  pins a calendar interval to a specific point
 !          in time to allow conversion between relative units (yy, mm, d) and
@@ -1021,7 +1027,13 @@
 !          INPUT argument:  pins a calendar interval to a specific calendar
 !          to allow conversion between relative units (yy, mm, d) and
 !          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
-!          and endTimeIn since they contain a calendar.
+!          and endTimeIn since they contain a calendar.  Alternate to, and
+!          mutually exclusive with, calendarTypeIn below.  Primarily for
+!          specifying a custom calendar type.
+!     \item[{[calendarTypeIn]}]
+!          INPUT argument:  Alternate to, and mutually exclusive with,
+!          calendarIn above.  More convenient way of specifying a built-in
+!          calendar type.
 !     \item[timeString]
 !          The string to return.
 !     \item[{[rc]}]
@@ -1037,8 +1049,10 @@
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, &
-                                  startTime,   endTime,   calendar, &
-                                  startTimeIn, endTimeIn, calendarIn, &
+                                  startTime, endTime, &
+                                  calendar, calendarType, &
+                                  startTimeIn, endTimeIn, &
+                                  calendarIn, calendarTypeIn, &
                                   timeString, rc)
     
       end subroutine ESMF_TimeIntervalGet
@@ -1171,7 +1185,8 @@
                                       d_r8, h_r8, m_r8, s_r8, &
                                       ms_r8, us_r8, ns_r8, &
                                       sN, sD, &
-                                      startTime, endTime, calendar, rc)
+                                      startTime, endTime, &
+                                      calendar, calendarType, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeInterval
@@ -1200,6 +1215,7 @@
       type(ESMF_Time),         intent(in),  optional :: startTime
       type(ESMF_Time),         intent(in),  optional :: endTime
       type(ESMF_Calendar),     intent(in),  optional :: calendar
+      type(ESMF_CalendarType), intent(in),  optional :: calendarType
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1253,9 +1269,9 @@
 !     \item[{[s\_r8]}]
 !          Double precision seconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.  (Not implemented yet).
+!          Double precision milliseconds.  Default = 0.0. (Not implemented yet).
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.  (Not implemented yet).
+!          Double precision microseconds.  Default = 0.0. (Not implemented yet).
 !     \item[{[ns\_r8]}]
 !          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[sN]}]
@@ -1284,7 +1300,11 @@
 !          Default = NULL; if startTime and endTime also not specified, calendar
 !          interval "floats" across all calendars and times.
 !          Mutually exclusive with startTime and endTime since they contain
-!          a calendar.
+!          a calendar.  Alternate to, and mutually exclusive with, calendarType
+!          below.  Primarily for specifying a custom calendar type.
+!     \item[{[calendarType]}]
+!          Alternate to, and mutually exclusive with, calendar above.  More
+!          convenient way of specifying a built-in calendar type.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1298,7 +1318,8 @@
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, &
-                                  startTime, endTime, calendar, rc)
+                                  startTime, endTime, &
+                                  calendar, calendarType, rc)
 
       end subroutine ESMF_TimeIntervalSet
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.53 2004/02/18 21:28:50 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.53 2004/02/18 21:28:50 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -200,8 +200,7 @@ int ESMC_Clock::count=0;
 //
 //EOP
 
-  // TODO: don't really need (delete doesn't care) ?
-  if (*clock == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+  if (clock == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
    // TODO: clock->ESMC_ClockDestruct(); constructor calls it!
    delete *clock;
@@ -307,6 +306,7 @@ int ESMC_Clock::count=0;
       ESMC_TimeInterval *currSimTime,      // out
       ESMC_TimeInterval *prevSimTime,      // out
       ESMC_Calendar    **calendar,         // out
+      ESMC_CalendarType *calendarType,     // out
       int               *timeZone,         // out
       ESMF_KIND_I8      *advanceCount,     // out
       int               *alarmCount) {     // out
@@ -372,6 +372,20 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       calendar);
     }
+    if (calendarType != ESMC_NULL_POINTER) {
+      // get calendar type from currTime, but could get from any other clock
+      // Time, since they all use the same calendar
+      // TODO: use native C++ Get, not F90 entry point, when ready
+      this->currTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, calendarType);
+    }
     if (timeZone != ESMC_NULL_POINTER) {
       // get timeZone from currTime, but could get from any other clock Time,
       //   since they all are in the same timezone
@@ -384,7 +398,7 @@ int ESMC_Clock::count=0;
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                       ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                      ESMC_NULL_POINTER, timeZone);
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, timeZone);
     }
 
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
@@ -1216,8 +1230,8 @@ int ESMC_Clock::count=0;
 //    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
+//      Initializes for either C++ or F90, since ESMC_Clock is a deep,
+//      dynamically allocated class.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -1227,6 +1241,7 @@ int ESMC_Clock::count=0;
     alarmCount = 0;
     stopTimeSet = false;
     id = ++count;  // TODO: inherit from ESMC_Base class
+    // copy = false;  // TODO: see notes in constructors and destructor below
 
  } // end ESMC_Clock
 
@@ -1250,8 +1265,10 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     *this = clock;
-    // id = ++count;  // TODO: unique copy ? review operator==
-                      //       also, inherit from ESMC_Base class
+    // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
+                      //       and operator!=)  Must do same in assignment
+                      //       overloaded method and interface from F90.
+                      //       Also, inherit from ESMC_Base class.
 
  } // end ESMC_Clock
 
@@ -1274,9 +1291,10 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here
-//
+  // TODO: Decrement static count for one less object; but don't decrement   //       for copies.  Must create and set a copy flag property to detect.
+  //       Also must set copy flag in copy constructor and overloaded
+  //       assignment method, and provide interface from F90.
+  // if (!copy) count--;
 
  } // end ~ESMC_Clock
 

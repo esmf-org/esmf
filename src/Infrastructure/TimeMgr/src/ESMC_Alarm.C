@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.32 2004/02/18 01:48:04 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.33 2004/04/09 20:13:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.32 2004/02/18 01:48:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.33 2004/04/09 20:13:56 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -242,8 +242,7 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 
-  // TODO: don't really need (delete doesn't care) ?
-  if (*alarm == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+  if (alarm == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
   // TODO: alarm->ESMC_AlarmDestruct(); constructor calls it!
   delete *alarm;
@@ -1132,8 +1131,9 @@ int ESMC_Alarm::count=0;
 //    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values.
+//      Initializes a {\tt ESMC\_Alarm} with defaults for either
+//      C++ or F90, since {\tt ESMC_Alarm} is a deep, dynamically
+//      allocated class.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -1145,6 +1145,7 @@ int ESMC_Alarm::count=0;
     enabled = true;
     sticky  = true;
     id = ++count;  // TODO: inherit from ESMC_Base class
+    // copy = false;  // TODO: see notes in constructors and destructor below
 
     // initialize ring interval to zero
     ESMF_KIND_I4 s = 0;
@@ -1177,8 +1178,10 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     *this = alarm;
-    // id = ++count;  // TODO: unique copy ? review operator==
-                      //       also, inherit from ESMC_Base class
+    // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
+                      //       and operator!=)  Must do same in assignment
+                      //       overloaded method and interface from F90.
+                      //       Also, inherit from ESMC_Base class.
 
  } // end ESMC_Alarm
 
@@ -1201,8 +1204,9 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//
-//  code goes here TODO
-//
+  // TODO: Decrement static count for one less object; but don't decrement   //       for copies.  Must create and set a copy flag property to detect.
+  //       Also must set copy flag in copy constructor and overloaded 
+  //       assignment method, and provide interface from F90. 
+  // if (!copy) count--;
 
  } // end ~ESMC_Alarm

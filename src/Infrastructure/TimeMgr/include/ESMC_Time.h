@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.36 2004/03/19 00:35:11 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.37 2004/04/09 20:13:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,8 +75,8 @@
                                           // TODO: (& ESMC_Base class when
                                           // fully aligned with F90 equiv)
   private:   // corresponds to F90 module 'type ESMF_Time' members 
-    class ESMC_Calendar *calendar;    // associated calendar
-    int timeZone;                     // Offset from UTC
+    ESMC_Calendar *calendar;    // associated calendar
+    int timeZone;               // Offset from UTC
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -100,7 +100,9 @@
                      ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
                      ESMF_KIND_R8 *ns_r8=0,
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
-                     ESMC_Calendar *calendar=0, int *timeZone=0);
+                     ESMC_Calendar **calendar=0, 
+                     ESMC_CalendarType *calendarType=0, 
+                     int *timeZone=0);
 
     int ESMC_TimeGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                      int *mm=0, int *dd=0,
@@ -114,7 +116,9 @@
                      ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
                      ESMF_KIND_R8 *ns_r8=0,
                      ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
-                     ESMC_Calendar **calendar=0, int *timeZone=0,
+                     ESMC_Calendar **calendar=0, 
+                     ESMC_CalendarType *calendarType=0, 
+                     int *timeZone=0,
                      int timeStringLen=0, int *tempTimeStringLen=0,
                      char *tempTimeString=0, int *dayOfWeek=0,
                      ESMC_Time *midMonth=0,
@@ -134,7 +138,7 @@
     int ESMC_TimeSet(const char *timeList, ...);
     // e.g. ESMC_TimeSet("s" , (double) s);
 
-    bool ESMC_TimeIsSameCalendar(ESMC_Time *time, int *rc) const;
+    bool ESMC_TimeIsSameCalendar(ESMC_Time *time, int *rc=0) const;
 
     // to support ESMC_Clock::SyncToWallClock() and TMG 2.5.7
     int ESMC_TimeSyncToRealTime(void);
@@ -171,9 +175,12 @@
     // native C++ constructors/destructors
     ESMC_Time(void);
     ESMC_Time(ESMF_KIND_I8 s, int sN=0, int sD=1, ESMC_Calendar *calendar=0,
+              ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
               int timeZone=0);
     int ESMC_TimeSet(ESMF_KIND_I8 s, int sN=0, int sD=1,
-                     ESMC_Calendar *calendar=0, int timeZone=0);
+                     ESMC_Calendar *calendar=0,
+                     ESMC_CalendarType calendarType=(ESMC_CalendarType)0,
+                     int timeZone=0);
                                    // used internally instead of constructor
                                    // to cover case of initial entry from F90,
                                    // to avoid automatic destructor invocation

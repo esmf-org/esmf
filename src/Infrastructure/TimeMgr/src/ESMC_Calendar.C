@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.53 2004/03/10 03:08:31 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,8 +34,23 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.53 2004/03/10 03:08:31 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.54 2004/04/09 20:13:57 eschwab Exp $";
 //-------------------------------------------------------------------------
+
+// array of calendar type names
+static const char *const calendarTypeName[CALENDAR_TYPE_COUNT] =
+                                               { "Gregorian", "Julian Day", 
+                                                 "No Leap", "360 Day", "Custom",
+                                                 "No Calendar" };
+
+// initialize static internal calendar pointer array
+ESMC_Calendar *ESMC_Calendar::internalCalendar[CALENDAR_TYPE_COUNT] =
+                                      { ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER };
+
+// initialize default calendar
+ESMC_Calendar *ESMC_Calendar::defaultCalendar = ESMC_NULL_POINTER;
 
 // initialize static calendar instance counter
 // TODO: inherit from ESMC_Base class
@@ -48,6 +63,57 @@ int ESMC_Calendar::count=0;
 // This section includes all the ESMC_Calendar routines
 //
 //
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarInitialize - initialize the default Calendar type
+//
+// !INTERFACE:
+      int ESMC_CalendarInitialize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_CalendarType *calendarType) {  // in - ESMC_CalendarType to be the
+                                          //      default
+//
+// !DESCRIPTION:
+//      Friend function which initializes the Time Manager default calendar.
+//
+//EOP
+
+  return(ESMC_CalendarSetDefault(calendarType));
+
+ } // end ESMC_CalendarInitialize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarFinalize - free all internal Calendars
+//
+// !INTERFACE:
+      int ESMC_CalendarFinalize(void) { 
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Friend function which de-allocates all internal built-in Calendars.
+//
+//EOP
+
+  for (int i=0; i<CALENDAR_TYPE_COUNT; i++) {
+    delete ESMC_Calendar::internalCalendar[i];
+    ESMC_Calendar::internalCalendar[i] = ESMC_NULL_POINTER;
+  }
+  ESMC_Calendar::defaultCalendar = ESMC_NULL_POINTER;
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_CalendarFinalize
+
 //-------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_CalendarCreate - Allocates and Initializes a Calendar object
@@ -120,6 +186,72 @@ int ESMC_Calendar::count=0;
     return(calendar);
 
  } // end ESMC_CalendarCreate (new)
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarCreate - Allocates and Initializes an internal Calendar object
+//
+// !INTERFACE:
+      int ESMC_CalendarCreate(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_CalendarType calendarType) { // in
+
+// !DESCRIPTION:
+//      Allocates and Initializes an internal {\tt ESMC\_Calendar} of given type
+//
+//EOP
+// !REQUIREMENTS:
+
+    int returnCode;
+
+    // make sure it is valid
+    if (calendarType < 1 || calendarType > CALENDAR_TYPE_COUNT) {
+      return(ESMF_FAILURE);
+    }
+
+    // select internal calendar static pointer based on specified cal type
+    ESMC_Calendar **internalCal =
+                            &(ESMC_Calendar::internalCalendar[calendarType-1]);
+
+    // check if valid internal calendar already exists
+    if (*internalCal != ESMC_NULL_POINTER) {
+      if ((*internalCal)->ESMC_CalendarValidate()) {
+        return(ESMF_SUCCESS);
+      } else {
+        // something malformed exists; delete it and try again
+        delete *internalCal;
+      }
+    }
+
+    // create desired internal calendar
+    try {
+      *internalCal = new ESMC_Calendar;
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_CalendarCreate() (internal) memory allocation failed\n";
+      return(ESMF_FAILURE);
+    }
+
+    // create default internal name, e.g. "InternalGregorian001"
+    sprintf((*internalCal)->name, "Internal%s%3.3d\0",
+                                   calendarTypeName[calendarType-1],
+                                                    (*internalCal)->id);
+
+    if((returnCode =
+       (*internalCal)->ESMC_CalendarSet(strlen((*internalCal)->name), 
+                                               (*internalCal)->name, 
+                                              calendarType)) != ESMF_SUCCESS) {
+      return(returnCode);
+    }
+
+    return((*internalCal)->ESMC_CalendarValidate());
+
+ } // end ESMC_CalendarCreate (internal)
 
 //-------------------------------------------------------------------------
 //BOP
@@ -267,8 +399,7 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 
-  // TODO: don't really need (delete doesn't care) ?
-  if (*calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+  if (calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
 
   // TODO: calendar->ESMC_CalendarDestruct(); constructor calls it!
   delete *calendar;
@@ -276,6 +407,73 @@ int ESMC_Calendar::count=0;
   return(ESMF_SUCCESS);
 
  } // end ESMC_CalendarDestroy
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarSetDefault - set the default Calendar
+//
+// !INTERFACE:
+      int ESMC_CalendarSetDefault(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Calendar **calendar) {  // in - ESMC_Calendar to be the default
+//
+// !DESCRIPTION:
+//      Friend function which sets the Time Manager default calendar.
+//
+//EOP
+
+  int rc;
+
+  // ensure we have a valid calendar
+  if (calendar  == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+  if (*calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+  if ((rc=(*calendar)->ESMC_CalendarValidate()) != ESMF_SUCCESS) return(rc);
+
+  // set the default calendar
+  ESMC_Calendar::defaultCalendar = *calendar;
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_CalendarSetDefault
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarSetDefault - set the default Calendar type
+//
+// !INTERFACE:
+      int ESMC_CalendarSetDefault(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_CalendarType *calendarType) {  // in - ESMC_CalendarType to be the
+                                          //      default
+//
+// !DESCRIPTION:
+//      Friend function which sets the Time Manager default calendar.
+//
+//EOP
+
+  int rc;
+
+  ESMC_CalendarType calType = (calendarType == ESMC_NULL_POINTER) ?
+                                            ESMC_CAL_NOCALENDAR : *calendarType;
+
+  // create internal calendar if necessary
+  if ((rc=ESMC_CalendarCreate(calType)) != ESMF_SUCCESS) return (rc);
+
+  // set the default calendar
+  ESMC_Calendar::defaultCalendar = 
+                             ESMC_Calendar::internalCalendar[calType-1];
+
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_CalendarSetDefault
 
 //-------------------------------------------------------------------------
 //BOP
@@ -676,7 +874,7 @@ int ESMC_Calendar::count=0;
         case ESMC_CAL_360DAY:
         {
             // Validate inputs. TODO: determine lowpoint year, month & day
-            if (mm < 1 || mm > 12 || dd < 1 || d > 30) {
+            if (mm < 1 || mm > 12 || dd < 1 || dd > 30) {
               return (ESMF_FAILURE);
             }
             // TODO: upper bounds date range check dependent on machine
@@ -704,7 +902,16 @@ int ESMC_Calendar::count=0;
 
             break;
         }
+        case ESMC_CAL_CUSTOM:
+            // TODO:
+            break;
+        case ESMC_CAL_NOCALENDAR:
+            // need real calendar type
+            return(ESMF_FAILURE);
+            break;
         default:
+            // unknown calendar type
+            return(ESMF_FAILURE);
             break;
     }
 
@@ -961,7 +1168,16 @@ int ESMC_Calendar::count=0;
             }
             break;
         }
+        case ESMC_CAL_CUSTOM:
+            // TODO:
+            break;
+        case ESMC_CAL_NOCALENDAR:
+            // need real calendar type
+            rc = ESMF_FAILURE;
+            break;
         default:
+            // unknown calendar type
+            rc = ESMF_FAILURE;
             break;
     }
 
@@ -1040,7 +1256,8 @@ int ESMC_Calendar::count=0;
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, &cal, &timeZone);
+                                   ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
+                                   &timeZone);
                                    // TODO: use native C++ interface when
                                    //   ready
             
@@ -1074,7 +1291,8 @@ int ESMC_Calendar::count=0;
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, cal, &timeZone);
+                                 ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
+                                 &timeZone);
                                  // TODO: use native C++ interface when
                                  //   ready
             }
@@ -1170,7 +1388,8 @@ int ESMC_Calendar::count=0;
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                    ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, &cal, &timeZone);
+                                   ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
+                                   &timeZone);
                                    // TODO: use native C++ interface when
                                    //   ready
 
@@ -1204,7 +1423,8 @@ int ESMC_Calendar::count=0;
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, cal, &timeZone);
+                                  ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
+                                  &timeZone);
                                   // TODO: use native C++ interface when
                                   //   ready
             }
@@ -1354,8 +1574,8 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS: 
 
-    if (this->calendarType < ESMC_CAL_GREGORIAN ||
-        this->calendarType > ESMC_CAL_NOCALENDAR) return(ESMF_FAILURE);
+    if (this->calendarType < 1 ||
+        this->calendarType > CALENDAR_TYPE_COUNT) return(ESMF_FAILURE);
 
     return(ESMF_SUCCESS);
 
@@ -1463,13 +1683,16 @@ int ESMC_Calendar::count=0;
 //    none
 //
 // !DESCRIPTION:
-//      Initializes a {\tt ESMC\_Calendar} with defaults
+//      Initializes a {\tt ESMC\_Calendar} with defaults for either
+//      C++ or F90, since {\tt ESMC_Calendar} is a deep, dynamically
+//      allocated class.
 //
 //EOP
 // !REQUIREMENTS: 
 
     name[0] = '\0';
     id = ++count;  // TODO: inherit from ESMC_Base class
+    // copy = false;  // TODO: see notes in constructors and destructor below
 
     calendarType   = ESMC_CAL_NOCALENDAR;
     // TODO: make daysPerMonth[] dynamically allocatable with monthsPerYear
@@ -1562,8 +1785,10 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     *this = calendar;
-    // id = ++count;  // TODO: unique copy ? review operator==
-                      //       also, inherit from ESMC_Base class
+    // copy = true;   // TODO: Unique copy ? (id = ++count) (review operator==
+                      //       and operator!=)  Must do same in assignment
+                      //       overloaded method and interface from F90.
+                      //       Also, inherit from ESMC_Base class.
 
  } // end ESMC_Calendar
 
@@ -1585,6 +1810,12 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 // !REQUIREMENTS: 
+
+  // TODO: Decrement static count for one less object; but don't decrement
+  //       for copies.  Must create and set a copy flag property to detect.
+  //       Also must set copy flag in copy constructor and overloaded
+  //       assignment method, and provide interface from F90.
+  // if (!copy) count--;
 
   // TODO: make dynamically allocatable with monthsPerYear
   // delete[] daysPerMonth;

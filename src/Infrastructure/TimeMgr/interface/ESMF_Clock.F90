@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.50 2004/03/19 18:22:32 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.51 2004/04/09 20:13:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.50 2004/03/19 18:22:32 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.51 2004/04/09 20:13:39 eschwab Exp $'
 
 !==============================================================================
 !
@@ -419,7 +419,8 @@
       subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
                                runDuration, runTimeStepCount, refTime, &
                                currTime, prevTime, currSimTime, prevSimTime, &
-                               calendar, timeZone, advanceCount, alarmCount, rc)
+                               calendar, calendarType, timeZone, advanceCount, &
+                               alarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -435,6 +436,7 @@
       type(ESMF_TimeInterval), intent(out), optional :: currSimTime
       type(ESMF_TimeInterval), intent(out), optional :: prevSimTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
+      type(ESMF_CalendarType), intent(out), optional :: calendarType
       integer,                 intent(out), optional :: timeZone
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
@@ -475,6 +477,9 @@
 !          the previous time step.
 !     \item[{[calendar]}]
 !          The {\tt Calendar} on which all the {\tt Clock}'s times are defined.
+!     \item[{[calendarType]}]
+!          The {\tt CalendarType} on which all the {\tt Clock}'s times are
+!          defined.
 !     \item[{[timeZone]}]
 !          The timezone within which all the {\tt Clock}'s times are defined.
 !     \item[{[advanceCount]}]
@@ -507,7 +512,8 @@
                            timeStep, startTime, stopTime, &
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
-                           calendar, timeZone, advanceCount, alarmCount, rc)
+                           calendar, calendarType, timeZone, advanceCount, &
+                           alarmCount, rc)
 
       ! copy temp name back to given name to restore native Fortran
       !   storage style

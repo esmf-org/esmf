@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.14 2004/02/18 01:48:53 eschwab Exp $
+// $Id: ESMC_ClockEx.C,v 1.15 2004/04/09 20:13:37 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.14 2004/02/18 01:48:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.15 2004/04/09 20:13:37 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -72,7 +72,7 @@
    int mm = 3, dd = 27;
    rc = startTime.ESMC_TimeSet(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
                                0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                               gregorianCalendar);
+                               &gregorianCalendar);
 
    if (rc != ESMF_SUCCESS) {
        finalrc = ESMF_FAILURE;
@@ -83,7 +83,7 @@
    yy = 2003; mm = 3; dd = 29;
    rc = stopTime.ESMC_TimeSet(&yy, 0, &mm, &dd, 0, 0, 0, 0, 0, 0, 0, 0, 
                               0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                              gregorianCalendar);
+                              &gregorianCalendar);
 
    if (rc != ESMF_SUCCESS) {
        finalrc = ESMF_FAILURE;
@@ -110,7 +110,7 @@
    // get the number of times the clock was advanced
    ESMF_KIND_I8 advanceCount;
    rc = clock->ESMC_ClockGet(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, &advanceCount);
+                             0, 0, 0, &advanceCount);
 
    if (rc != ESMF_SUCCESS) {
        finalrc = ESMF_FAILURE;

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.21 2004/02/13 18:29:42 svasquez Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.22 2004/04/09 20:13:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,6 +36,15 @@
       ! result code
       integer :: finalrc
       finalrc = ESMF_SUCCESS
+
+!BOC
+      ! set default time manager calendar to be Gregorian
+      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
+!EOC
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
 
 !BOC
       ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)

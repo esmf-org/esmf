@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.13 2004/03/24 00:44:25 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.14 2004/04/09 20:13:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.13 2004/03/24 00:44:25 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.14 2004/04/09 20:13:58 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -75,7 +75,7 @@
 !-------------------------------------------------------------------------------
 
      ! initialize ESMF framework
-      call ESMF_Initialize(rc)
+      call ESMF_Initialize(rc=rc)
 
       ! ----------------------------------------------------------------------------
       ! Calendar Interval tests
@@ -1137,12 +1137,19 @@
       print *, "days = ", days
 
       ! ----------------------------------------------------------------------------
-      ! No-Calendar (Earth) Calendar Interval tests
+      ! Calendar Interval tests where days=86400 seconds
       ! ----------------------------------------------------------------------------
 
       ! ----------------------------------------------------------------------------
+
+      ! can test with any of these types
+      call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc)
+
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with s=172800 (2 days) Test"
+      write(name, *) "Day Calendar Time Interval conversion with s=172800 (2 days) Test"
       write(failMsg, *) "Days should = 2 and return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, s=172800, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, d=days, s=secs, rc=rc)
@@ -1151,7 +1158,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with d=1, s=172860 (3 days, 1 minute) Test"
+      write(name, *) "Day Calendar Time Interval conversion with d=1, s=172860 (3 days, 1 minute) Test"
       write(failMsg, *) "Days should = 3, secs = 60 and return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, d=1, s=172860, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, d=days, s=secs, rc=rc)
@@ -1160,7 +1167,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with d=1, h=48, m=2880, s=86401 (6 days, 1 second) Test"
+      write(name, *) "Day Calendar Time Interval conversion with d=1, h=48, m=2880, s=86401 (6 days, 1 second) Test"
       write(failMsg, *) "Days should = 6, secs = 1 and return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, d=1, h=48, m=2880, s=86401, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, d=days, s=secs, rc=rc)
@@ -1169,7 +1176,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with d=6, m=1, s=1 Test"
+      write(name, *) "Day Calendar Time Interval conversion with d=6, m=1, s=1 Test"
       write(failMsg, *) "Hours should = 144, secs = 61 and return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, d=6, m=1, s=1, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, h=H, s=secs, rc=rc)
@@ -1180,8 +1187,10 @@
       print *, " secs = ", secs
 
       ! ----------------------------------------------------------------------------
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc)
+
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with yy=2, mm=30, d=720 Test"
+      write(name, *) "No Calendar Time Interval conversion with yy=2, mm=30, d=720 Test"
       write(failMsg, *) "yy, mm, d should = 2,30,720 and return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, yy=2, mm=30, d=720, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, mm=months, d=days, rc=rc)
@@ -1193,7 +1202,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with yy=2, mm=30, d=720 Test"
+      write(name, *) "No Calendar Time Interval conversion with yy=2, mm=30, d=720 Test"
       write(failMsg, *) "should return ESMF_FAILURE."
       call ESMF_TimeIntervalSet(timeStep, yy=2, mm=30, d=720, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, rc=rc)
@@ -1204,7 +1213,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with yy=1, mm=48 Test"
+      write(name, *) "No Calendar Time Interval conversion with yy=1, mm=48 Test"
       write(failMsg, *) "yy, mm should = 1,48 and return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, yy=1, mm=48, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, mm=months, rc=rc)
@@ -1215,7 +1224,7 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
-      write(name, *) "Earth Calendar Time Interval conversion with yy=1, mm=48 Test"
+      write(name, *) "No Calendar Time Interval conversion with yy=1, mm=48 Test"
       write(failMsg, *) "should return ESMF_FAILURE."
       call ESMF_TimeIntervalSet(timeStep, yy=1, mm=48, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, rc=rc)
@@ -1299,7 +1308,13 @@
       print *, " Days = ", days
 
       ! ----------------------------------------------------------------------------
+      call ESMF_CalendarSetDefault(ESMF_CAL_GREGORIAN, rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_JULIANDAY, rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_NOLEAP, rc)
+      !call ESMF_CalendarSetDefault(ESMF_CAL_360DAY, rc)
+
       !NEX_UTest
+
       write(failMsg, *) "Should return ESMF_SUCCESS."
       call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
       write(name, *) "Time Step initialization with d = 1  Test"
@@ -1309,13 +1324,16 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
-      write(failMsg, *) "Seconds should = 86400."
+      write(failMsg, *) "Seconds should = 86400"
       write(name, *) "Get Time Step in seconds Test 1"
       call ESMF_TimeIntervalGet(timeStep, s=secs, rc=rc)
       call ESMF_Test((secs.eq.86400), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+
       print *, " Seconds = ", secs
+
+      call ESMF_CalendarSetDefault(ESMF_CAL_NOCALENDAR, rc)
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest

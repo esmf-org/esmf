@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.31 2004/03/19 00:37:07 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.32 2004/04/09 20:13:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMF_KIND_R8 *ns_r8=0,
                              ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                              ESMC_Time *startTime=0, ESMC_Time *endTime=0,
-                             ESMC_Calendar **calendar=0);
+                             ESMC_Calendar **calendar=0,
+                             ESMC_CalendarType *calendarType=0);
 
     int ESMC_TimeIntervalGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
                              ESMF_KIND_I4 *mm=0, ESMF_KIND_I8 *mm_i8=0,
@@ -128,8 +129,10 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                              ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                              ESMC_Time *startTime=0, ESMC_Time *endTime=0,
                              ESMC_Calendar **calendar=0,
+                             ESMC_CalendarType *calendarType=0,
                              ESMC_Time *startTimeIn=0, ESMC_Time *endTimeIn=0,
                              ESMC_Calendar **calendarIn=0,
+                             ESMC_CalendarType *calendarTypeIn=0,
                              char *timeString=0) const;
 
     // native C++ interface -- via variable argument lists
@@ -196,11 +199,13 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     ESMC_TimeInterval(ESMF_KIND_I8 s, int sN=0, int sD=1,
                       ESMF_KIND_I8 yy=0, ESMF_KIND_I8 mm=0, ESMF_KIND_I8 d=0,
                       ESMC_Time *startTime=0, ESMC_Time *endTime=0,
-                      ESMC_Calendar *calendar=0);
+                      ESMC_Calendar *calendar=0,
+                      ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
     int ESMC_TimeIntervalSet(ESMF_KIND_I8 s, int sN=0, int sD=1,
                       ESMF_KIND_I8 yy=0, ESMF_KIND_I8 mm=0, ESMF_KIND_I8 d=0,
                       ESMC_Time *startTime=0, ESMC_Time *endTime=0,
-                      ESMC_Calendar *calendar=0);
+                      ESMC_Calendar *calendar=0,
+                      ESMC_CalendarType calendarType=(ESMC_CalendarType)0);
                                    // used internally instead of constructor
                                    // to cover case of initial entry from F90,
                                    // to avoid automatic destructor invocation

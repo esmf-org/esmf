@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.49 2004/03/19 18:22:32 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.50 2004/04/09 20:13:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.49 2004/03/19 18:22:32 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.50 2004/04/09 20:13:39 eschwab Exp $'
 
 !==============================================================================
 !
@@ -208,7 +208,7 @@
       contains
 
 !==============================================================================
-!BOP    
+!BOP
 ! !IROUTINE: ESMF_AlarmCreateCopy - Create a copy of an Alarm
 
 ! !INTERFACE:

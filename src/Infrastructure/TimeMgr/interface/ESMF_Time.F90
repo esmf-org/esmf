@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.68 2004/03/19 18:22:32 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.69 2004/04/09 20:13:56 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -85,20 +85,20 @@
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
-      public ESMF_TimeInc
-      public ESMF_TimeDec
-      public ESMF_TimeDiff
-      public ESMF_TimeEQ
-      public ESMF_TimeNE
-      public ESMF_TimeLT
-      public ESMF_TimeLE
-      public ESMF_TimeGT
-      public ESMF_TimeGE
+      private ESMF_TimeInc
+      private ESMF_TimeDec
+      private ESMF_TimeDiff
+      private ESMF_TimeEQ
+      private ESMF_TimeNE
+      private ESMF_TimeLT
+      private ESMF_TimeLE
+      private ESMF_TimeGT
+      private ESMF_TimeGE
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.68 2004/03/19 18:22:32 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.69 2004/04/09 20:13:56 eschwab Exp $'
 
 !==============================================================================
 !
@@ -463,7 +463,7 @@
                                     d_r8, h_r8, m_r8, s_r8, &
                                     ms_r8, us_r8, ns_r8, &
                                     sN, sD, &
-                                    calendar,   timeZone, &
+                                    calendar, calendarType, timeZone, &
                                     timeString, dayOfWeek, midMonth, &
                                     dayOfYear,  dayOfYear_r8, &
                                     dayOfYear_intvl, rc)
@@ -493,6 +493,7 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented 
       integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
       type(ESMF_Calendar),     intent(out), optional :: calendar
+      type(ESMF_CalendarType), intent(out), optional :: calendarType
       integer,                 intent(out), optional :: timeZone
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: dayOfWeek
@@ -600,6 +601,8 @@
 !          (Not implemented yet).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}.
+!     \item[{[calendarType]}]
+!          Associated {\tt CalendarType}.
 !     \item[{[timeZone]}]
 !          Associated timezone (hours offset from UCT, e.g. EST = -5).
 !          (Not implemented yet).
@@ -647,9 +650,9 @@
       call c_ESMC_TimeGet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, calendar, timeZone, timeStringLen, &
-                          tempTimeStringLen, tempTimeString, dayOfWeek, &
-                          MidMonth, dayOfYear, dayOfYear_r8, &
+                          sN, sD, calendar, calendarType, timeZone, &
+                          timeStringLen, tempTimeStringLen, tempTimeString, &
+                          dayOfWeek, MidMonth, dayOfYear, dayOfYear_r8, &
                           dayOfYear_intvl, rc)
 
       ! copy temp time string back to given time string to restore
@@ -789,35 +792,37 @@
                                     ms, us, ns, &
                                     d_r8, h_r8, m_r8, s_r8, &
                                     ms_r8, us_r8, ns_r8, &
-                                    sN, sD, calendar, timeZone, rc)
+                                    sN, sD, calendar, calendarType, &
+                                    timeZone, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time),       intent(inout)         :: time
-      integer(ESMF_KIND_I4), intent(in),  optional :: yy
-      integer(ESMF_KIND_I8), intent(in),  optional :: yy_i8
-      integer,               intent(in),  optional :: mm
-      integer,               intent(in),  optional :: dd
-      integer(ESMF_KIND_I4), intent(in),  optional :: d
-      integer(ESMF_KIND_I8), intent(in),  optional :: d_i8
-      integer(ESMF_KIND_I4), intent(in),  optional :: h
-      integer(ESMF_KIND_I4), intent(in),  optional :: m
-      integer(ESMF_KIND_I4), intent(in),  optional :: s
-      integer(ESMF_KIND_I8), intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4), intent(in),  optional :: ms       ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: us       ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: ns       ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: d_r8     ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: h_r8     ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: m_r8     ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: s_r8     ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: ms_r8    ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: us_r8    ! not implemented
-      real(ESMF_KIND_R8),    intent(in),  optional :: ns_r8    ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: sN       ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: sD       ! not implemented
-      type(ESMF_Calendar),   intent(in)            :: calendar
-      integer,               intent(in),  optional :: timeZone ! not implemented
-      integer,               intent(out), optional :: rc
+      type(ESMF_Time),         intent(inout)         :: time
+      integer(ESMF_KIND_I4),   intent(in),  optional :: yy
+      integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
+      integer,                 intent(in),  optional :: mm
+      integer,                 intent(in),  optional :: dd
+      integer(ESMF_KIND_I4),   intent(in),  optional :: d
+      integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: h
+      integer(ESMF_KIND_I4),   intent(in),  optional :: m
+      integer(ESMF_KIND_I4),   intent(in),  optional :: s
+      integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      type(ESMF_Calendar),     intent(in),  optional :: calendar
+      type(ESMF_CalendarType), intent(in),  optional :: calendarType
+      integer,                 intent(in),  optional :: timeZone ! not implemented
+      integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Initializes an {\tt ESMF\_Time} with a set of user-specified units
@@ -900,9 +905,9 @@
 !     \item[{[s\_r8]}]
 !          Double precision seconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.  (Not implemented yet).
+!          Double precision milliseconds.  Default = 0.0. (Not implemented yet).
 !     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.  (Not implemented yet).
+!          Double precision microseconds.  Default = 0.0. (Not implemented yet).
 !     \item[{[ns\_r8]}]
 !          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
 !     \item[{[sN]}]
@@ -912,7 +917,14 @@
 !          Integer denominator portion of fractional seconds (sN/sD).
 !          Default = 1.  (Not implemented yet).
 !     \item[calendar]
-!          Associated {\tt Calendar}.  Required.
+!          Associated {\tt Calendar}.  Defaults to calendar
+!          {\tt ESMF\_CAL\_NOCALENDAR} or default specified in
+!          {\tt ESMF\_Initialize()} or {\tt ESMF\_CalendarSetDefault()}.
+!          Alternate to, and mutually exclusive with, calendarType
+!          below.  Primarily for specifying a custom calendar type.
+!     \item[{[calendarType]}]
+!          Alternate to, and mutually exclusive with, calendar above.  More
+!          convenient way of specifying a built-in calendar type.
 !     \item[{[timeZone]}]
 !          Associated timezone (hours offset from UTC, e.g. EST = -5).
 !          Default = 0 (UTC).  (Not implemented yet).
@@ -928,7 +940,7 @@
       call c_ESMC_TimeSet(time, yy, yy_i8, mm, dd, d, d_i8, &
                           h, m, s, s_i8, ms, us, ns, &
                           d_r8, h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, &
-                          sN, sD, calendar, timeZone, rc)
+                          sN, sD, calendar, calendarType, timeZone, rc)
 
       end subroutine ESMF_TimeSet
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.60 2004/03/19 18:22:32 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.61 2004/04/09 20:13:39 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,10 +105,13 @@
       public operator(/=)
       public ESMF_CalendarCreate
       public ESMF_CalendarDestroy
+      public ESMF_CalendarFinalize
       public ESMF_CalendarGet
+      public ESMF_CalendarInitialize
       public ESMF_CalendarPrint
       public ESMF_CalendarReadRestart
       public ESMF_CalendarSet
+      public ESMF_CalendarSetDefault
       public ESMF_CalendarValidate
       public ESMF_CalendarWriteRestart
 !EOPI
@@ -123,11 +126,13 @@
       private ESMF_CalendarCreateNew
       private ESMF_CalendarSetCustom
       private ESMF_CalendarSetNew
+      private ESMF_CalendarSetDefaultCal
+      private ESMF_CalendarSetDefaultType
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.60 2004/03/19 18:22:32 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.61 2004/04/09 20:13:39 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -288,7 +293,7 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      interface ESMF_CalendarCreate    
+      interface ESMF_CalendarCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_CalendarCreateCopy
@@ -305,7 +310,7 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      interface ESMF_CalendarSet    
+      interface ESMF_CalendarSet
 
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_CalendarSetCustom
@@ -314,6 +319,22 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for {\tt ESMF\_Calendar}
 !     Set methods.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_CalendarSetDefault
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarSetDefaultCal
+      module procedure ESMF_CalendarSetDefaultType
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Calendar}
+!     Set default methods.
 !
 !EOP
       end interface
@@ -548,6 +569,33 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_CalendarFinalize
+!
+! !INTERFACE:
+      subroutine ESMF_CalendarFinalize(rc)
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Releases all internal built-in calendars.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarFinalize(rc)
+
+      end subroutine ESMF_CalendarFinalize
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
 
 ! !INTERFACE:
@@ -655,6 +703,39 @@
       endif
 
       end subroutine ESMF_CalendarGet
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarInitialize - Initialize the default Calendar type
+
+! !INTERFACE:
+      subroutine ESMF_CalendarInitialize(calendarType, rc)
+
+! !ARGUMENTS:
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Initializes the default {\tt calendar} to the given type.  Subsequent
+!     Time Manager operations requiring a calendar where one isn't specified
+!     will use the default internal calendar of this type.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendarType]
+!          The calendar type to initialize the default to.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarInitialize(calendarType, rc)
+    
+      end subroutine ESMF_CalendarInitialize
     
 !------------------------------------------------------------------------------
 !BOP
@@ -898,6 +979,78 @@
       call c_ESMC_CalendarSetNew(calendar, nameLen, name, calendarType, rc)
     
       end subroutine ESMF_CalendarSetNew
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarSetDefaultCal - Set the default Calendar
+
+! !INTERFACE:
+      subroutine ESMF_CalendarSetDefaultCal(calendar, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),     intent(in)            :: calendar
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the default {\tt calendar} to the one given.  Subsequent Time
+!     Manager operations requiring a calendar where one isn't specified will
+!     use this calendar.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSetDefault()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          The object instance to set the default to.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarSetDefaultCal(calendar, rc)
+    
+      end subroutine ESMF_CalendarSetDefaultCal
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarSetDefaultType - Set the default Calendar type
+
+! !INTERFACE:
+      subroutine ESMF_CalendarSetDefaultType(calendarType, rc)
+
+! !ARGUMENTS:
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the default {\tt calendar} to the given type.  Subsequent Time
+!     Manager operations requiring a calendar where one isn't specified will
+!     use the internal calendar of this type.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSetDefault()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendarType]
+!          The calendar type to set the default to.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarSetDefaultType(calendarType, rc)
+    
+      end subroutine ESMF_CalendarSetDefaultType
     
 !------------------------------------------------------------------------------
 !BOP
