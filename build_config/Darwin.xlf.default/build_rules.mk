@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.11 2005/01/07 23:45:21 nscollins Exp $
+#  $Id: build_rules.mk,v 1.12 2005/01/10 21:26:29 jwolfe Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -152,11 +152,13 @@ C_FC			= mpif90
 C_FCV			= $(C_FC) --version
 
 CXX_LIB_PATH            =
-CXX_SYS_LIB		= $(CXX_LIB_PATH) -lxlf_r -lxlf90_r  \
-                           -lcomplex -lisode -lstdc++
-C_CXXF90LIBS		= -L. $(CXX_LIB_PATH) -lm -lxlf90_r -lstdc++
-C_F90CXXLIBS		= -L. $(CXX_LIB_PATH) -lxlf90_r -lstdc++
-
+F90_LIB_PATH            = -L/opt/ibmcmp/xlf/8.1/lib
+CXX_SYS_LIB		= $(CXX_LIB_PATH) -lcomplex -lisode -lstdc++ \
+			  $(F90_LIB_PATH) -lxlf_r -lxlf90_r
+C_CXXF90LIBS		= -L. $(CXX_LIB_PATH) -lm -lstdc++ \
+			      $(F90_LIB_PATH) -lxlf90_r -lxlfmath -lxl
+C_F90CXXLIBS		= -L. $(CXX_LIB_PATH) -lstdc++ \
+			      $(F90_LIB_PATH) -lxlf90_r
 
 else
 # non-mpich section: lam or mpiuni
@@ -168,10 +170,12 @@ C_CCV			= $(C_CC) -v
 CXX_CC			= g++
 CXX_CCV			= $(CXX_CC) -v
 CXX_LIB_PATH            =
-CXX_SYS_LIB		= $(CXX_LIB_PATH) -lxlf_r -lxlf90_r  \
-                           -lcomplex -lisode -lstdc++
-C_CXXF90LIBS		= -L. $(CXX_LIB_PATH) -lm -lxlf90_r -lstdc++
-C_F90CXXLIBS		= -L. $(CXX_LIB_PATH) -lxlf90_r -lstdc++
+F90_LIB_PATH            = -L/opt/ibmcmp/xlf/8.1/lib
+CXX_SYS_LIB		= ${MPI_LIB} -ldl -lc -lg2c -lm
+C_CXXF90LIBS		= ${MPI_LIB} -lstdc++ -L. \
+			  $(F90_LIB_PATH) -lxlf90_r -lxlfmath -lxl
+C_F90CXXLIBS		= ${MPI_LIB} -lstdc++ -L. \
+			  $(F90_LIB_PATH) -lxlf90_r
 
 else
 # if you have the ibm xlc/xlC product, setenv ESMF_C_COMPILER xlc first
@@ -180,10 +184,13 @@ C_CCV			= which $(C_CC)
 CXX_CC			= xlC_r 
 CXX_CCV			= which $(CXX_CC)
 CXX_LIB_PATH            = -L/opt/ibmcmp/vacpp/6.0/lib/
-CXX_SYS_LIB		= $(CXX_LIB_PATH) -lxlf_r -lxlf90_r  \
-                           -lcomplex -lisode -libmc++ -lstdc++
-C_CXXF90LIBS		= -L. $(CXX_LIB_PATH) -lm -lxlf90_r -libmc++ -lstdc++
-C_F90CXXLIBS		= -L. $(CXX_LIB_PATH) -lxlf90_r -libmc++ -lstdc++
+F90_LIB_PATH            = -L/opt/ibmcmp/xlf/8.1/lib
+CXX_SYS_LIB		= $(F90_LIB_PATH) -lxlf_r -lxlf90_r  \
+                          $(CXX_LIB_PATH) -lcomplex -lisode -libmc++ -lstdc++
+C_CXXF90LIBS		= -L. $(F90_LIB_PATH) -lxlf90_r -lxlfmath -lxl \
+			      $(CXX_LIB_PATH) -lm -libmc++ -lstdc++
+C_F90CXXLIBS		= -L. $(F90_LIB_PATH) -lxlf90_r \
+			      $(CXX_LIB_PATH) -libmc++ -lstdc++
 
 # end of xlc section
 endif
