@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.37 2003/04/25 22:09:50 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.38 2003/04/29 19:35:23 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.37 2003/04/25 22:09:50 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.38 2003/04/29 19:35:23 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -638,6 +638,140 @@
     return ESMF_SUCCESS;
 
  } // end ESMC_RoutePrecompute
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RoutePrecomputeHalo - initialize a a Route for a Halo
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RoutePrecomputeHalo(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rank,                    // in  - rank of data in Field
+      int my_DE,                   // in  - DE identifier in the DELayout
+      ESMC_AxisIndex *AI_exc,      // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field
+      ESMC_AxisIndex *AI_tot,      // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field
+      int AI_count,                // in  - number of sets of AI's in the rcv
+                                   //       array (should be the same as the 
+                                   //       number of DE's in the rcv layout)
+      ESMC_DELayout *layout) {     // in  - pointer to the DELayout 
+//
+// !DESCRIPTION:
+//      Initializes a Route for a Halo with send and receive RouteTables.
+//      Returns error code if problems are found.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    ESMC_AxisIndex my_AI[ESMF_MAXDIM], my_AI_tot[ESMF_MAXDIM];
+    ESMC_AxisIndex their_AI[ESMF_MAXDIM];
+    ESMC_XPacket *my_XP = new ESMC_XPacket;
+    ESMC_XPacket *their_XP = new ESMC_XPacket;
+    ESMC_XPacket *intersect_XP = NULL;
+    int i, j, k;
+    int their_de, decount;
+
+    // Calculate the sending table.
+ 
+    // get "my" AI out of the AI_exc array
+    // TODO:  this is NOT going to work for data dims which are not
+    //  equal the grid dims, e.g. a 2d grid with 4d data.
+    for (k=0; k<rank; k++) {
+      my_AI[k] = AI_exc[my_DE + k*AI_count];
+      my_AI[k].max = AI_tot[my_DE + k*AI_count].max;
+      my_AI_tot[k] = AI_tot[my_DE + k*AI_count];
+    }
+
+    // calculate "my" (local DE's) XPacket in the sense of the global data
+    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
+
+    // loop over DE's from receiving layout to calculate send table
+    layout->ESMC_DELayoutGetNumDEs(&decount);
+    for (i=0; i<decount; i++) {
+      their_de = i;
+
+      // get "their" AI out of the AI_tot array
+      for (k=0; k<rank; k++) {
+        their_AI[k] = AI_tot[their_de + k*AI_count];
+      }
+ 
+      // calculate "their" XPacket in the sense of the global data
+      their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
+
+      // calculate the intersection
+      intersect_XP = new ESMC_XPacket;
+      intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
+
+      // if there's no intersection, no need to add an entry here
+      if (intersect_XP->ESMC_XPacketEmpty()) {
+        delete intersect_XP;
+        intersect_XP = NULL;
+        continue;
+      }
+
+      // translate from global to local data space
+      intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, rank);
+
+      // load the intersecting XPacket into the sending RTable
+      sendRT->ESMC_RTableSetEntry(their_de, intersect_XP);
+      ct->ESMC_CommTableSetPartner(their_de);
+    }
+
+    // Calculate the receiving table.
+ 
+    // get "my" AI out of the AI_tot array
+    for (k=0; k<rank; k++) {
+      my_AI[k] = AI_tot[my_DE + k*AI_count];
+    }
+
+    // calculate "my" (local DE's) XPacket in the sense of the global data
+    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
+
+    // loop over DE's from layout to calculate receive table
+    for (i=0; i<decount; i++) {
+      their_de = i;
+
+      // get "their" AI out of the AI_exc array
+      for (k=0; k<rank; k++) {
+        their_AI[k] = AI_exc[their_de + k*AI_count];
+        their_AI[k].max = AI_tot[their_de + k*AI_count].max;
+      }
+ 
+      // calculate "their" XPacket in the sense of the global data
+      their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
+
+      // calculate the intersection
+      intersect_XP = new ESMC_XPacket;
+      intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
+
+      // if there's no intersection, no need to add an entry here
+      if (intersect_XP->ESMC_XPacketEmpty()) {
+        delete intersect_XP;
+        intersect_XP = NULL;
+        continue;
+      }
+
+      // translate from global to local
+      intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, rank);
+
+      // load the intersecting XPacket into the receiving RTable
+      recvRT->ESMC_RTableSetEntry(their_de, intersect_XP);
+          ct->ESMC_CommTableSetPartner(their_de);
+    }
+
+    //printf("end of RoutePrecomputeHalo:\n");
+    //this->ESMC_RoutePrint("");
+    return ESMF_SUCCESS;
+
+ } // end ESMC_RoutePrecomputeHalo
 
 
 //-----------------------------------------------------------------------------

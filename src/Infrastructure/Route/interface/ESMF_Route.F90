@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.12 2003/04/24 21:42:42 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.13 2003/04/29 19:35:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,6 +72,7 @@
       public ESMF_RouteGetCached
 
       public ESMF_RoutePrecompute
+      public ESMF_RoutePrecomputeHalo
       public ESMF_RouteRun
  
       public ESMF_RouteValidate
@@ -84,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.12 2003/04/24 21:42:42 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.13 2003/04/29 19:35:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -671,6 +672,87 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RoutePrecompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RoutePrecomputeHalo - Precompute communication paths for a halo
+
+! !INTERFACE:
+      subroutine ESMF_RoutePrecomputeHalo(route, rank, &
+                       my_DE, AI_exc, AI_tot, AI_count, layout, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: rank
+      integer, intent(in) :: my_DE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_tot
+      integer, intent(in) :: AI_count
+      type(ESMF_DELayout), intent(in) :: layout
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[ TBDocd ]  
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        integer :: i,j                     ! counters
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Translate AxisIndices from F90 to C++
+        do j=1,rank
+          do i=1,AI_count
+            AI_exc(i,j)%l = AI_exc(i,j)%l - 1
+            AI_exc(i,j)%r = AI_exc(i,j)%r - 1
+            AI_tot(i,j)%l = AI_tot(i,j)%l - 1
+            AI_tot(i,j)%r = AI_tot(i,j)%r - 1
+          enddo
+        enddo
+
+        ! Call C++  code
+        call c_ESMC_RoutePrecomputeHalo(route, rank, my_DE, AI_exc, AI_tot, &
+                                        AI_count, layout, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Precompute Halo error"
+          return  
+        endif
+
+        ! Translate AxisIndices back to  F90 from C++
+        do j=1,rank
+          do i=1,AI_count
+            AI_exc(i,j)%l = AI_exc(i,j)%l + 1
+            AI_exc(i,j)%r = AI_exc(i,j)%r + 1
+            AI_tot(i,j)%l = AI_tot(i,j)%l + 1
+            AI_tot(i,j)%r = AI_tot(i,j)%r + 1
+          enddo
+        enddo
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RoutePrecomputeHalo
 
 !------------------------------------------------------------------------------
 !BOP

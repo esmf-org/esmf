@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.6 2003/04/24 21:42:41 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.7 2003/04/29 19:34:45 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,6 +86,14 @@ extern "C" {
            *status = (*ptr)->ESMC_RoutePrecompute(*rank, 
                               *my_DE_rcv, AI_rcv, *AI_rcv_count, *layout_rcv,
                               *my_DE_snd, AI_snd, *AI_snd_count, *layout_snd);
+       }
+
+       void FTN(c_esmc_routeprecomputehalo)(ESMC_Route **ptr, int *rank, 
+                   int *my_DE, ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
+                   int *AI_count, ESMC_DELayout **layout, int *status) {
+
+           *status = (*ptr)->ESMC_RoutePrecomputeHalo(*rank, 
+                              *my_DE, AI_exc, AI_tot, *AI_count, *layout);
        }
 
        void FTN(c_esmc_routegetcached)(int *rank, 
