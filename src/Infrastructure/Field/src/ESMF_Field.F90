@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.200 2005/01/10 22:10:09 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.201 2005/02/22 15:18:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.200 2005/01/10 22:10:09 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.201 2005/02/22 15:18:12 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3061,7 +3061,7 @@
       integer :: status                           ! Error status
 
       type(ESMF_FieldType), pointer :: ftypep
-      type(ESMF_Relloc) :: horzRelloc
+      type(ESMF_Relloc) :: horzRelloc, vertRelloc
       character(len=ESMF_MAXSTR) :: msgbuf
       integer :: gridcounts(ESMF_MAXGRIDDIM)   ! how big the local grid is
       integer :: arraycounts(ESMF_MAXDIM)      ! how big the local array is
@@ -3105,6 +3105,7 @@
 
           ! get needed info from datamap. 
           call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
+                                    vertRelloc=vertRelloc, &
                                     dataRank=maprank, dataIndexList=maplist, &
                                     counts=otheraxes, rc=status)
           if (ESMF_LogMsgFoundError(status, &
@@ -3127,7 +3128,7 @@
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
-          call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, &
+          call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, vertRelloc, &
                                     localCellCountPerDim=gridcounts, rc=status)
           if (ESMF_LogMsgFoundError(status, &
                                     ESMF_ERR_PASSTHRU, &
