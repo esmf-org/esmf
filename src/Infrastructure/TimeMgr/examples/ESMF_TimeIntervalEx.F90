@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.3 2003/05/07 20:12:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.2 2003/05/07 17:37:00 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.3 2003/05/07 20:12:15 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals
@@ -54,21 +54,25 @@
 
       call ESMF_TimeIntervalGet(timeInterval1, D=D, H=H, M=M, rc=rc)
       print *, "Time Interval1 = ", D, " days, ", H, " hours, ", M, " minutes."
+      call ESMF_TimeIntervalPrint(timeInterval1, "string", rc)
 
       call ESMF_TimeIntervalGet(timeInterval2, D=D, H=H, M=M, rc=rc)
       print *, "Time Interval2 = ", D, " days, ", H, " hours, ", M, " minutes."
+      call ESMF_TimeIntervalPrint(timeInterval2, "string", rc)
 
       ! difference
       timeInterval3 = timeInterval2 - timeInterval1
       call ESMF_TimeIntervalGet(timeInterval3, D=D, S=S, rc=rc)
       print *, "Difference between TimeInterval2 and TimeInterval1 = ", &
                D, " days, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! sum
       timeInterval3 = timeInterval2 + timeInterval1
       call ESMF_TimeIntervalGet(timeInterval3, D=D, S=S, rc=rc)
       print *, "Sum of TimeInterval1 and TimeInterval2 = ", D, " days, ", &
                S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! divide
       quotient = timeInterval2 / timeInterval1
@@ -79,6 +83,7 @@
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "TimeInterval2 divided by 2 = ", D, " days, ", H, " hours, ", &
                M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! divide by double precision real
       divisor = 1.5
@@ -86,12 +91,14 @@
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "TimeInterval2 divided by 1.5 = ", D, " days, ", H, " hours, ", &
                M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! multiply by integer
       timeInterval3 = timeInterval1 * 3
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "TimeInterval1 multiplied by 3 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! multiply by double precision real
       multiplier = 2.25
@@ -99,30 +106,35 @@
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "TimeInterval1 multiplied by 2.25 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! change time interval 1 to negative value
       timeInterval1 = timeInterval1 * (-1)
       call ESMF_TimeIntervalGet(timeInterval1, D=D, H=H, M=M, rc=rc)
       print *, "Time Interval1 changed to ", D, " days, ", H, " hours, ", &
                M, " minutes."
+      call ESMF_TimeIntervalPrint(timeInterval1, "string", rc)
 
       ! absolute value
       timeInterval3 = ESMF_TimeIntervalAbsValue(timeInterval1)
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "Absolute value of TimeInterval1 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! negative absolute value of time interval 1
       timeInterval3 = ESMF_TimeIntervalNegAbsValue(timeInterval1)
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "Negative absolute value of TimeInterval1 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! negative absolute value of time interval 2
       timeInterval3 = ESMF_TimeIntervalNegAbsValue(timeInterval2)
       call ESMF_TimeIntervalGet(timeInterval3, D=D, H=H, M=M, S=S, rc=rc)
       print *, "Negative absolute value of TimeInterval2 = ", D, " days, ", H, &
                " hours, ", M, " minutes, ", S, " seconds."
+      call ESMF_TimeIntervalPrint(timeInterval3, "string", rc)
 
       ! comparison
       if (timeInterval2 > timeInterval1) then
