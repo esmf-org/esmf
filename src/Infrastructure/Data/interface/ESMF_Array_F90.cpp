@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.12 2003/02/21 21:17:26 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.13 2003/02/21 23:10:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.12 2003/02/21 21:17:26 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.13 2003/02/21 23:10:25 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -1262,6 +1262,7 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 
       integer :: status ! Error status
       logical :: rcpresent ! Return code present
+      integer :: lrank  ! Local use to get rank
 
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1286,7 +1287,8 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
       endif
 
       if (present(lengths)) then
-         call c_ESMC_ArrayGetLengths(array, lengths, status)
+         call c_ESMC_ArrayGetRank(array, lrank, status)
+         call c_ESMC_ArrayGetLengths(array, lrank, lengths, status)
       endif
 
    
