@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.4 2004/10/14 17:00:53 nscollins Exp $
+# $Id: makefile,v 1.5 2005/02/02 20:49:26 jwolfe Exp $
 
-all: demo
+all: demos
 
-LOCDIR   = src/demo/interacting_flow
+LOCDIR   = src/demo/coupled_flow
 
 include $(ESMF_DIR)/makefile
 
