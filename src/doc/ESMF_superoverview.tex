@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.19 2004/12/14 18:35:19 nscollins Exp $
+% $Id: ESMF_superoverview.tex,v 1.20 2004/12/28 18:53:38 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,11 +80,11 @@ that represents an ocean model.
 \item {\bf State}  ESMF components exchange information with other 
 components only through States.  A State is an ESMF derived
 type that can contain Fields, Bundles, Arrays, and other
-States.  A Gridded Component  is associated with two States, an 
+States.  A Component is associated with two States, an 
 {\bf Import State} and an {\bf Export State}.  Its Import State 
-holds the data that it receives from other Gridded Components.  
+holds the data that it receives from other Components.  
 Its Export State contains data that it can make available to 
-other Gridded Components. 
+other Components. 
 
 \item {\bf Application Driver} The Application Driver ({\bf AppDriver}) 
 is a small, generic driver program that contains the ``main'' 
@@ -198,7 +198,7 @@ Each PET can contain private local data, but all metadata about
 the object itself is common across all PETs.  
 ESMF can compute metadata information about objects on 
 remote PETs without making communication calls, which would 
-incur additional overhead and avoids unnecessary synchronization points.
+incur additional overhead and add unnecessary synchronization points.
 
 The scope of distributed objects is the VM of the currently 
 executing Component.  For this reason, all
