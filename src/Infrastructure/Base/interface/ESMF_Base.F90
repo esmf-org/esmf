@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.2 2002/10/08 15:27:37 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.3 2002/10/15 19:09:18 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF Base module
@@ -37,19 +37,19 @@
 ! !PUBLIC TYPES:
       implicit none
 
-      integer, parameter :: ESMF_MaxDim = 4
+      integer, parameter :: ESMF_MaxDim = 8
       integer, parameter :: ESMF_MaxStr = 128 
 
-      type ESMF_State
+      type ESMF_Status
       sequence
       private
-          integer :: state
+          integer :: status
       end type
 
-      type(ESMF_State), parameter :: ESMF_STATE_UNINIT = ESMF_State(1), &
-                                     ESMF_STATE_ALLOCATED = ESMF_State(2), &
-                                     ESMF_STATE_BUSY = ESMF_State(3), &
-                                     ESMF_STATE_INVALID = ESMF_State(4)
+      type(ESMF_Status), parameter :: ESMF_STATE_UNINIT = ESMF_Status(1), &
+                                     ESMF_STATE_ALLOCATED = ESMF_Status(2), &
+                                     ESMF_STATE_BUSY = ESMF_Status(3), &
+                                     ESMF_STATE_INVALID = ESMF_Status(4)
 
       type ESMF_DataType
       sequence
@@ -109,7 +109,7 @@
       sequence
       private
      
-          type (ESMF_State) :: basestate
+          type (ESMF_Status) :: basestatus
 
           integer :: attribute_count
           type (ESMF_Attribute), pointer :: attr_list
