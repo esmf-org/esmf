@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.46 2003/10/09 23:08:03 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.47 2003/10/09 23:17:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.46 2003/10/09 23:08:03 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.47 2003/10/09 23:17:11 nscollins Exp $'
 
 !==============================================================================
 !
@@ -832,11 +832,11 @@
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysGrid), intent(inout) :: physgrid
+      type(ESMF_PhysGrid), intent(in) :: physgrid
 
       character(*), intent(out), optional :: name ! name to assign to regions
 
-      type (ESMF_Array), dimension(:), intent(out), optional :: &
+      type (ESMF_Array), dimension(:), intent(inout), optional :: &
          location_array       ! array of ESMF_arrays containing location
                               ! coordinates in each physical dimension 
                               ! array dimension is assumed num_dims with
@@ -1131,7 +1131,7 @@
 !
 ! !ARGUMENTS:
 
-      type(ESMF_PhysGrid), intent(inout) :: physgrid
+      type(ESMF_PhysGrid), intent(in) :: physgrid
 
       type(ESMF_RegionKind), intent(inout), optional :: &
          region_type          ! type of region (polygonal, elliptical)
