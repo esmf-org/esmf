@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.36 2005/02/23 05:08:21 theurich Exp $
+// $Id: ESMC_VM.C,v 1.37 2005/04/05 23:46:00 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.36 2005/02/23 05:08:21 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.37 2005/04/05 23:46:00 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -566,6 +566,46 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetVMId()"
+//BOP
+// !IROUTINE:  ESMC_VMGetVMId - Get ID of VM object
+//
+// !INTERFACE:
+ESMC_VMId *ESMC_VM::ESMC_VMGetVMId(
+//
+// !RETURN VALUE:
+//    ID of VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the ID of the {\tt ESMC\_VM} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  pthread_t mytid = vmk_mypthid();
+  int i = matchIndex;
+  if (matchArray_tid[i] != mytid){
+    for (i=0; i<matchArray_count; i++)
+      if (matchArray_tid[i] == mytid) break;
+    if (i == matchArray_count){
+      ESMC_LogDefault.ESMC_LogWrite("could not determine VMId",
+        ESMC_LOG_ERROR);
+      return NULL;  // bail out
+    }
+  }
+  // found a match
+  *rc = ESMF_SUCCESS;
+  return &matchArray_vmID[i];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_VMSendVMId()"
 //BOP
 // !IROUTINE:  ESMC_VMSendVMId
@@ -628,6 +668,38 @@ int ESMC_VM::ESMC_VMRecvVMId(
   vmk_recv(vmID->vmKey, vmKeyWidth, source);
   vmk_recv(&(vmID->localID), sizeof(int), source);
   return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMPrint()"
+//BOP
+// !IROUTINE:  ESMC_VMPrint
+//
+// !INTERFACE:
+void ESMC_VM::ESMC_VMPrint(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+    void
+  ){
+//
+// !DESCRIPTION:
+//    Print {\tt ESMC\_VM} object and its {\\tt ESMC_VMId}
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int localrc;
+  printf("=== <ESMC_VMPrint> =============================\n");
+  ESMC_VMId *vmid = ESMC_VMGetVMId(&localrc);
+  ESMC_VMIdPrint(vmid);
+  vmk_print();
+  printf("=== </ESMC_VMPrint> ============================\n");
 }
 //-----------------------------------------------------------------------------
 
