@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.7 2003/04/02 19:51:49 flanigan Exp $
+// $Id: ESMC_HWMonitor.C,v 1.8 2003/07/03 18:10:20 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,12 +14,12 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ HWMonitor methods declared
+// The code in this file implements the C++ {\tt ESMC\_HWMonitor} methods declared
 // in the companion file ESMC\_HWMonitor.h
 //
 // Hardware monitor provides performance profiling of hardware
 // specifics for sections of user code (cache misses, floating point
-// utilization and operation counts etcetera).
+// utilization and operation counts et cetera).
 //
 // This type is implimented in C++ and a corresponding Fortran 90 
 // interface is provided for access.
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.7 2003/04/02 19:51:49 flanigan Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.8 2003/07/03 18:10:20 rstaufer Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -58,7 +58,7 @@
 //
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes HWMonitor values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_HWMonitor} values; it does not
 //      allocate any resources.
 //
 //EOP
@@ -88,8 +88,8 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a HWMonitor is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Validates that a {\tt ESMC\_HWMonitor} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -115,8 +115,8 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a HWMonitor.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      Print information about a {\tt ESMC\_HWMonitor}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
