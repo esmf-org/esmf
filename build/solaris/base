@@ -1,4 +1,4 @@
-# $Id: base,v 1.6 2003/04/09 19:18:18 flanigan Exp $ 
+# $Id: base,v 1.7 2003/04/14 21:00:23 nscollins Exp $ 
 #
 include $(ESMF_BUILD_DIR)/${ESMF_ARCH}/base_variables
 include $(ESMF_BUILD_DIR)/common
@@ -24,7 +24,8 @@ libf: ${LIBNAME}(${OBJSF})
 	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .C.o:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	echo big .C to .o rule, remove mpi_include when CFLAGS starts working
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${MPI_INCLUDE} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
 	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} -fpp -free ${ESMC_INCLUDE} $<
@@ -52,7 +53,8 @@ libf: ${LIBNAME}(${OBJSF})
 	${RM} $*.o
 
 .C.a:
-	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	echo big .C to .a rule, remove mpi_include when CFLAGS starts working
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${MPI_INCLUDE} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
