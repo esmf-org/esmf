@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.5 2003/07/17 22:46:34 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.6 2003/07/22 19:36:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ class ESMC_ArrayConfig {
 // private static data - address of fortran callback funcs
 extern "C" {
  void FTN(f_esmf_arrayf90allocate)(ESMC_Array**, int *, ESMC_DataType*,
-                                   ESMC_DataKind*, int*, int*);
+                                   ESMC_DataKind*, int*, int*, int *);
  void FTN(f_esmf_arrayf90deallocate)(ESMC_Array**, int*, ESMC_DataType*,
                                      ESMC_DataKind *, int*);
 }
@@ -166,7 +166,8 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     int ESMC_ArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
                           int *lbounds, int *ubounds, 
                           int *strides, int *offsets, 
-                          ESMC_Logical contig, ESMC_Logical dealloc);
+                          ESMC_Logical contig, ESMC_Logical dealloc,
+                          int halo_width);
     // TODO: add Get method
 
     // most important array methods
@@ -222,9 +223,6 @@ ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk,
 ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
-ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
-                                   ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
-                                   int halo_widths = 0, int *rc = NULL);
 
 
  #endif  // ESMC_Array_H

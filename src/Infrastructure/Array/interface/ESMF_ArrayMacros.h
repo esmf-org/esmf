@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.2 2003/07/17 20:02:46 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.3 2003/07/22 19:36:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -294,24 +294,24 @@
         !  return @\
         !endif @\
  @\
-        ! Always supply a halo value, setting it to 0 if not specified. @\ 
+        ! Always supply a halo value, setting it to 0 if not specified. @\
         if (present(halo_width)) then @\
           hwidth = halo_width @\
         else @\
           hwidth = 0 @\
         endif @\
- @\        
+ @\
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
-                                       ESMF_FROM_FORTRAN, hwidth, status) @\
+                                       ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
           return @\
         endif @\
  @\
         newp => f90arr    ! must be ptr assignment, => @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, newp,& @\
-                                  ESMF_DATA_SPACE, status) @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, & @\
+                                  newp, ESMF_DATA_SPACE, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -417,24 +417,24 @@
         !   does not need it for an already allocated array.  @\
         counts = shape(f90arr) @\
  @\
-        ! Always supply a halo value, setting it to 0 if not specified. @\ 
+        ! Always supply a halo value, setting it to 0 if not specified. @\
         if (present(halo_width)) then @\
           hwidth = halo_width @\
         else @\
           hwidth = 0 @\
         endif @\
- @\        
+ @\
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
-                                     ESMF_FROM_FORTRAN, hwidth, status) @\
+                                     ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
           return @\
         endif @\
  @\
         newp => f90arr    ! must be ptr assignment, => @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, newp,& @\
-                                  copy, status) @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
+                                  newp, copy, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -519,23 +519,23 @@
           return @\
         endif @\
  @\
-        ! Always supply a halo value, setting it to 0 if not specified. @\ 
+        ! Always supply a halo value, setting it to 0 if not specified. @\
         if (present(halo_width)) then @\
           hwidth = halo_width @\
         else @\
           hwidth = 0 @\
         endif @\
- @\        
+ @\
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
-                                          ESMF_FROM_FORTRAN, hwidth, status) @\
+                                          ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
           return @\
         endif @\
  @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, f90ptr,& @\
-                                  ESMF_DATA_SPACE, status) @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
+                                  f90ptr, ESMF_DATA_SPACE, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -638,23 +638,23 @@
         !   does not need it for an already allocated array.  @\
         counts = shape(f90ptr) @\
  @\
-        ! Always supply a halo value, setting it to 0 if not specified. @\ 
+        ! Always supply a halo value, setting it to 0 if not specified. @\
         if (present(halo_width)) then @\
           hwidth = halo_width @\
         else @\
           hwidth = 0 @\
         endif @\
- @\        
+ @\
         ! Call create routine @\
         call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
-                                      ESMF_FROM_FORTRAN, hwidth, status) @\
+                                      ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
           return @\
         endif @\
  @\
-        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, f90ptr,& @\
-                                  copy, status) @\
+        call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
+                                  f90ptr, copy, status) @\
         @\
  @\
 !       ! return value set by c_ESMC func above @\
@@ -680,11 +680,12 @@
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D - Create an F90 Ptr of the proper T/K/R @\
  @\
 ! !INTERFACE: @\
-      subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, f90ptr, docopy, rc) @\
+      subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, f90ptr, docopy, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_Array), intent(inout) :: array @\
       integer, dimension(:), intent(in) :: counts @\
+      integer, intent(in) :: hwidth @\
       mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer, optional :: f90ptr  @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc   @\
@@ -707,6 +708,9 @@
 ! @\
 !  \item[counts] @\
 !   An integer array of counts.  Must be the same length as the rank. @\
+! @\
+!  \item[hwidth] @\
+!   An integer halo width. Width on each edge. @\
 ! @\
 !  \item[{[f90ptr]}] @\
 !   An optional existing F90 pointer.  Will be used instead of an @\
@@ -798,7 +802,7 @@
         wrap%##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
                                  lbounds, ubounds, strides, offsets, & @\
-                                 ESMF_TF_TRUE, do_dealloc, status) @\
+                                 ESMF_TF_TRUE, do_dealloc, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array internal set info error" @\

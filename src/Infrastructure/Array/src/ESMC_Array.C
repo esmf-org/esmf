@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.6 2003/07/17 22:46:34 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.7 2003/07/22 19:36:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -226,44 +226,6 @@
  } // end ESMC_ArrayCreateNoData
 
 //-----------------------------------------------------------------------------
-//BOPI
-// !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
-//
-// !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreateNoData(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
-//
-// !ARGUMENTS:
-    int rank,                  // dimensionality
-    ESMC_DataType dt,          // int, float, etc
-    ESMC_DataKind dk,          // short/long, etc
-    ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
-    int halo_width,            // max halo depth in all dirs
-    int *rc) {                 // return code
-//
-// !DESCRIPTION:
-//      Same as above but with halo width spec.
-//
-//EOPI
-
-     ESMC_Array *a = new ESMC_Array;
-     int status;
-
-     status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
-                            NULL, ESMC_ARRAY_NO_ALLOCATE, 
-                            ESMC_DATA_NONE, ESMF_TF_FALSE, 
-                            NULL, NULL, NULL, NULL, halo_width);
-
-     if (rc != NULL)
-         *rc = status;
-
-     return a;
-
- } // end ESMC_ArrayCreateNoData
-
-//-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate_F - internal routine for fortran use
 //
@@ -437,7 +399,7 @@
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
             FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &type, &kind, 
-                                                      counts, &status);
+                                                 counts, &halo_width, &status);
     } 
 
     
@@ -621,7 +583,8 @@
     int *strides,             // in - numbytes between consecutive items/dim
     int *offsets,             // in - numbytes from base to 1st item/dim
     ESMC_Logical contig,      // in - is memory chunk contiguous?
-    ESMC_Logical dealloc) {   // in - do we need to deallocate at delete?
+    ESMC_Logical dealloc,     // in - do we need to deallocate at delete?
+    int halo_width) {         // in - halo widths for setting AIs
 //
 // !DESCRIPTION:
 //     Sets a list of values associated with an already created pointer.
@@ -633,6 +596,7 @@
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
+    int total_stride, comp_stride, excl_stride;
   
     // note - starts at 1; base includes rank 1 size
     for (i=1; i<rank; i++)
@@ -644,12 +608,28 @@
     memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
 
     base_addr = base;
+    total_stride = 1;
+    comp_stride = 1;
+    excl_stride = 1;
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
         bytestride[i] = strides ? strides[i] : 0;
-//        lbound[i] = lbounds ? lbounds[i] : 0;
+//        lbound[i] = lbounds ? lbounds[i] : 1;
 //        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        total_stride *= counts[i];
+        ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
+        if (halo_width == 0) {
+            ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
+            ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
+        } else {
+            comp_stride *= counts[i] - 2*halo_width;
+            excl_stride *= counts[i] - 4*halo_width;
+            ESMC_AxisIndexSet(ai_comp+i, halo_width, 
+                                         counts[i]-1-halo_width, comp_stride);
+            ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
+                                      counts[i]-1-(halo_width*2), excl_stride);
+        }
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
         counts[i]     = 1;
@@ -657,6 +637,9 @@
         bytestride[i] = 1;
 //        lbound[i] = 1;
 //        ubound[i] = 1;
+        ESMC_AxisIndexSet(ai_total+i, 0, 0, 1);
+        ESMC_AxisIndexSet(ai_comp+i, 0, 0, 1);
+        ESMC_AxisIndexSet(ai_excl+i, 0, 0, 1);
     }
     iscontig = contig;
     needs_dealloc = dealloc;
@@ -757,7 +740,7 @@
      int i;
 
      switch(dt) {
-       case ESMC_DOMAIN_LOCAL:
+       case ESMC_DOMAIN_TOTAL:
          for (i=0; i<this->rank; i++) 
              ai_total[i] = ai[i];
          break;
@@ -804,7 +787,7 @@
      int i;
 
      switch(dt) {
-       case ESMC_DOMAIN_LOCAL:
+       case ESMC_DOMAIN_TOTAL:
          for (i=0; i<this->rank; i++) 
              ai[i] = ai_total[i];
          break;

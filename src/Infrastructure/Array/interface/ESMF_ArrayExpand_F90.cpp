@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.2 2003/07/17 21:16:53 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.3 2003/07/22 19:36:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.2 2003/07/17 21:16:53 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.3 2003/07/22 19:36:49 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -278,13 +278,14 @@ end interface
         ! TODO: should this take the counts, or not?  for now i am going to
         !  set the counts after i have created the f90 array and not here.
         call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
-                                            ESMF_FROM_FORTRAN, hwidth, status)
+                                            ESMF_FROM_FORTRAN, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
         endif
 
-        call ESMF_ArrayConstructF90Ptr(array, counts, rank, type, kind, status)
+        call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, &
+                                                     rank, type, kind, status)
 
         ! Set return values
         ESMF_ArrayCreateByList = array 
@@ -368,11 +369,12 @@ end interface
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-     subroutine ESMF_ArrayConstructF90Ptr(array, counts, rank, type, kind, rc)
+     subroutine ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, kind, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
       integer, dimension(:), intent(in) :: counts
+      integer, intent(in) :: hwidth
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
@@ -394,6 +396,10 @@ end interface
 !  \item[counts]
 !    The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
+!
+!  \item[hwidth]
+!    The halo width on all edges.  Used to set the computational area
+!    in the array.
 !
 !  \item[rank]
 !    Array rank.
@@ -443,9 +449,9 @@ end interface
           case (1)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_ArrayConstructF90PtrI41D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrI41D(array, counts, hwidth, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_ArrayConstructF90PtrR41D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrR41D(array, counts, hwidth, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -453,9 +459,9 @@ end interface
           case (2)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_ArrayConstructF90PtrI42D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrI42D(array, counts, hwidth, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_ArrayConstructF90PtrR42D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrR42D(array, counts, hwidth, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -463,9 +469,9 @@ end interface
           case (3)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_ArrayConstructF90PtrI43D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrI43D(array, counts, hwidth, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_ArrayConstructF90PtrR43D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrR43D(array, counts, hwidth, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -473,9 +479,9 @@ end interface
           case (4)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_ArrayConstructF90PtrI44D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrI44D(array, counts, hwidth, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_ArrayConstructF90PtrR44D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrR44D(array, counts, hwidth, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -483,9 +489,9 @@ end interface
           case (5)
             select case (type%dtype)
               case (ESMF_DATA_INTEGER%dtype)
-               call ESMF_ArrayConstructF90PtrI45D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrI45D(array, counts, hwidth, rc=status)
               case (ESMF_DATA_REAL%dtype)
-               call ESMF_ArrayConstructF90PtrR45D(array, counts, rc=status)
+               call ESMF_ArrayConstructF90PtrR45D(array, counts, hwidth, rc=status)
               case default
                print *, "unsupported type"
                return
@@ -1019,7 +1025,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 ! !IROUTINE:  ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
 !
 ! !INTERFACE: 
-     subroutine ESMF_ArrayF90Allocate(array, rank, type, kind, counts, rc)
+     subroutine ESMF_ArrayF90Allocate(array, rank, type, kind, counts, hwidth, rc)
 ! 
 ! !ARGUMENTS: 
       type(ESMF_Array), intent(inout) :: array 
@@ -1027,6 +1033,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts 
+      integer, intent(in) :: hwidth 
       integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1043,6 +1050,8 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !          The {\tt Array} kind (short/2, long/8, etc).  
 !     \item[counts]  
 !          An integer array, size {\tt rank}, of each dimension length. 
+!     \item[hwidth]  
+!          An integer width, single value, applied to each dimension. 
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 

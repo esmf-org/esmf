@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.3 2003/07/17 22:46:34 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.4 2003/07/22 19:36:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.3 2003/07/17 22:46:34 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.4 2003/07/22 19:36:49 nscollins Exp $'
 !
 !==============================================================================
 
@@ -124,7 +124,7 @@
 
         ! call c routine to add index
         if (present(totalindex)) call c_ESMC_ArraySetAxisIndex(array, &
-                                         ESMF_DOMAIN_LOCAL, totalindex, status)
+                                         ESMF_DOMAIN_TOTAL, totalindex, status)
         if (status .ne. ESMF_SUCCESS) goto 10
         if (present(compindex)) call c_ESMC_ArraySetAxisIndex(array, &
                                   ESMF_DOMAIN_COMPUTATIONAL, compindex, status)
@@ -162,7 +162,7 @@
 
         ! call c routine to get index
         if (present(totalindex)) call c_ESMC_ArrayGetAxisIndex(array, &
-                                         ESMF_DOMAIN_LOCAL, totalindex, status)
+                                         ESMF_DOMAIN_TOTAL, totalindex, status)
         if (status .ne. ESMF_SUCCESS) goto 10
         if (present(compindex)) call c_ESMC_ArrayGetAxisIndex(array, &
                                   ESMF_DOMAIN_COMPUTATIONAL, compindex, status)

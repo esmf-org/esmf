@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.3 2003/07/17 22:46:34 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.4 2003/07/22 19:36:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,10 +51,9 @@ extern "C" {
 
      void FTN(c_esmc_arraycreatenodata)(ESMC_Array **ptr, int *rank, 
                                         ESMC_DataType *dt, ESMC_DataKind *dk, 
-                                        ESMC_ArrayOrigin *oflag, int *hwidth,
-                                        int *status) {
+                                        ESMC_ArrayOrigin *oflag, int *status) {
              
-             (*ptr) = ESMC_ArrayCreateNoData(*rank, *dt, *dk, *oflag, *hwidth, status);
+             (*ptr) = ESMC_ArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
@@ -64,11 +63,11 @@ extern "C" {
                                int *lbounds, int *ubounds,
                                int *strides, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
-                               int *status) {
+			       int *hwidth, int *status) {
       
          *status = (*ptr)->ESMC_ArraySetInfo(fptr, base, counts, 
                                             lbounds, ubounds, strides, offsets, 
-                                            *contig, *dealloc);
+                                            *contig, *dealloc, *hwidth);
      }
 
      void FTN(c_esmc_arraysetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
