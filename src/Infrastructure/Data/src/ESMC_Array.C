@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.45 2003/04/28 17:45:17 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.46 2003/04/29 19:33:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1062,7 +1062,7 @@
       break;
     }
 
-    gathered->ESMC_ArrayPrint();
+    //gathered->ESMC_ArrayPrint();
 
     *Array_out = gathered;
 
@@ -1169,7 +1169,7 @@
       break;
     }
 
-    gathered->ESMC_ArrayPrint();
+    //gathered->ESMC_ArrayPrint();
 
     if (thisde == deid)
        *Array_out = gathered;
@@ -1283,7 +1283,7 @@
       break;
     }
 
-    scattered->ESMC_ArrayPrint();
+    //scattered->ESMC_ArrayPrint();
 
     *Array_out = scattered;
     rc = ESMF_SUCCESS;
