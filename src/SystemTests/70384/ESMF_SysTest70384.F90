@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.12 2003/04/14 14:51:47 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.13 2003/04/24 16:43:16 nscollins Exp $
 !
 ! System test code #70384
 
@@ -96,9 +96,9 @@
     ! Create arrays, set and get axis info here before initializing
     ! the data.
 
-    array1 = ESMF_ArrayCreate(srcdata, ESMF_NO_COPY, rc)
-    array2 = ESMF_ArrayCreate(dstdata, ESMF_NO_COPY, rc)
-    array3 = ESMF_ArrayCreate(resdata, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(srcdata, ESMF_DATA_REF, rc)
+    array2 = ESMF_ArrayCreate(dstdata, ESMF_DATA_REF, rc)
+    array3 = ESMF_ArrayCreate(resdata, ESMF_DATA_REF, rc)
     print *, "Array Creates returned"
 
     ! Create axis indices  TODO:  move to an array method - ArrayDist?

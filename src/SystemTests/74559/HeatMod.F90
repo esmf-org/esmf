@@ -1,4 +1,4 @@
-! $Id: HeatMod.F90,v 1.1 2003/04/17 17:31:22 nscollins Exp $
+! $Id: HeatMod.F90,v 1.2 2003/04/24 16:43:19 nscollins Exp $
 !
 ! Example/test code which generates random injections of heat.
 
@@ -154,9 +154,9 @@
 
         ! Create Array based on an existing, allocated F90 pointer.
         ! Data is type Real, 1D.
-        array_sie = ESMF_ArrayCreate(data_sie, ESMF_NO_COPY, rc)
-        array_u   = ESMF_ArrayCreate(data_u, ESMF_NO_COPY, rc)
-        array_v   = ESMF_ArrayCreate(data_v, ESMF_NO_COPY, rc)
+        array_sie = ESMF_ArrayCreate(data_sie, ESMF_DATA_REF, rc)
+        array_u   = ESMF_ArrayCreate(data_u, ESMF_DATA_REF, rc)
+        array_v   = ESMF_ArrayCreate(data_v, ESMF_DATA_REF, rc)
         print *, "Array Create returned"
 
         field_sie = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
@@ -206,15 +206,15 @@
         ! Get the Field and Bundle data from the State
         call ESMF_StateGetData(exportstate, "SIE", field_sie, rc=status)
         call ESMF_FieldGetData(field_sie, array_sie, rc=rc) 
-        call ESMF_ArrayGetData(array_sie, data_sie, ESMF_NO_COPY, rc)
+        call ESMF_ArrayGetData(array_sie, data_sie, ESMF_DATA_REF, rc)
             
         call ESMF_StateGetData(exportstate, "U Velocity", field_u, rc=status)
         call ESMF_FieldGetData(field_u, array_u, rc=rc) 
-        call ESMF_ArrayGetData(array_u, data_u, ESMF_NO_COPY, rc)
+        call ESMF_ArrayGetData(array_u, data_u, ESMF_DATA_REF, rc)
 
         call ESMF_StateGetData(exportstate, "V Velocity", field_v, rc=status)
         call ESMF_FieldGetData(field_v, array_v, rc=rc) 
-        call ESMF_ArrayGetData(array_v, data_v, ESMF_NO_COPY, rc)
+        call ESMF_ArrayGetData(array_v, data_v, ESMF_DATA_REF, rc)
       
         ! Start with no injection anywhere
         data_sie = 0.0

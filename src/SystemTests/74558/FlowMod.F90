@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.8 2003/04/17 20:13:57 nscollins Exp $
+! $Id: FlowMod.F90,v 1.9 2003/04/24 16:43:18 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -53,13 +53,11 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
-!
-      integer :: status
+!      
       integer :: i, j
-      logical :: rcpresent
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
@@ -72,15 +70,7 @@
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
 !
 ! Query component for information.
 !
@@ -113,25 +103,25 @@
                                horz_coord_system=horz_coord_system, &
                                vert_coord_system=vert_coord_system, &
                                halo_width=halo_width, &
-                               name="source grid", rc=status)
-      if(status .NE. ESMF_SUCCESS) then
+                               name="source grid", rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
         return
       endif
 
-      call  ESMF_GridCompSet(gcomp, grid=grid, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
+      call  ESMF_GridCompSet(gcomp, grid=grid, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid comp set"
         return
       endif
 
-      call FlowInit(gcomp, clock, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call FlowInit(gcomp, clock, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine User1_Init
 
@@ -142,41 +132,34 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
       integer :: i, j, x, y, nx, ny
-      logical :: rcpresent
       double precision :: s_
       type(ESMF_Grid) :: grid
       type(ESMF_DElayout) :: layout
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+      rc = ESMF_FAILURE
 !
 ! Initialize return code
 !
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
 !
 ! get Grid from Component
 !
-      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
 !
 ! create space for global arrays
 !
-      call ArraysGlobalAlloc(grid, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ArraysGlobalAlloc(grid, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  arraysglobalalloc"
         return
       endif
@@ -212,20 +195,20 @@
 ! note: since we're operating on a five-point stencil, we don't
 !       really care out how the corners get set
 !
-      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_DELayoutGetSize(layout, nx, ny, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_DELayoutGetSize(layout, nx, ny, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
       endif
-      call ESMF_DELayoutGetDEPosition(layout, x, y, status)
+      call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
       x = x + 1
       y = y + 1
-      if(status .NE. ESMF_SUCCESS) then
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
       endif
@@ -360,24 +343,24 @@
 !
 ! initialize timestep
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
       endif
       dt = s_
       write(*,*) 'dt = ', dt
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc= ESMF_SUCCESS
 
       end subroutine FlowInit
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
     subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 
@@ -385,35 +368,28 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       double precision :: s_
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+      rc = ESMF_FAILURE
 !
 ! Initialize return code
 !
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
 ! 
 ! Get timestep from clock
 !
-      call ESMF_ClockGetTimeStep(clock, time_step, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_ClockGetTimeStep(clock, time_step, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: clock get timestep"
         return
       endif
-      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_TimeIntervalGet(time_step, s_=s_, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowSolve: time interval get"
         return
       endif
@@ -421,58 +397,49 @@
 !
 ! calculate RHOU's and RHOV's
 !
-      call FlowRhoVel
+      call FlowRhoVel(rc)
 !    
 ! calculate RHOI's
 !
-      call FlowRhoI
+      call FlowRhoI(rc)
 !    
 ! determine new densities and internal energies
 !
-      call FlowRho
+      call FlowRho(rc)
 !
 !  update velocities
 !
-      call FlowVel
+      call FlowVel(rc)
 !
 !  new p's and q's
 !
-      call FlowState
+      call FlowState(rc)
 
-!     if(status .NE. ESMF_SUCCESS) then
+!     if(rc .NE. ESMF_SUCCESS) then
 !       print *, "ERROR in FlowSolve"
 !       return
 !     endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowSolve
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowRhoVel(rc)
 
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       integer :: i, j
       real :: u_ij, u_ipj, rhouu_m, rhouu_p, v_ipjm, v_ipjp, rhouv_p, rhouv_m
       real :: v_ij, v_ijp, rhovv_m, rhovv_p, u_imjp, u_ipjp, rhovu_p, rhovu_m
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
+
 !
 ! calculate RHOU's and RHOV's
 !
@@ -507,8 +474,8 @@
                     + (dt/dx)*(p(i,j)+q(i,j)-p(i+1,j)-q(i+1,j))
         enddo
       enddo
-      call ESMF_FieldHalo(field_rhou, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_rhou, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhou halo"
         return
       endif
@@ -544,40 +511,33 @@
                     + (dt/dy)*(p(i,j)+q(i,j)-p(i,j+1)-q(i,j+1))
         enddo
       enddo
-      call ESMF_FieldHalo(field_rhov, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_rhov, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoVel:  rhov halo"
         return
       endif
   
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowRhoVel
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
  
       subroutine FlowRhoI(rc)
 
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       integer :: i, j
       real :: rhoiu_m, rhoiu_p, rhoiv_m, rhoiv_p, dsiedx2, dsiedy2
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+      rc = ESMF_FAILURE
 !
 ! Initialize return code
 !
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
 !    
 ! calculate RHOI's
 !
@@ -631,41 +591,34 @@
           endif
         enddo
       enddo
-      call ESMF_FieldHalo(field_rhoi, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_rhoi, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRhoI:  rhoi halo"
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowRhoI
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowRho(rc)
 
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       real, dimension(imax,jmax) :: rho_new  ! sloppy, but OK for now
       integer :: i, j
       real :: rhou_m, rhou_p, rhov_m, rhov_p, dsiedx2, dsiedy2
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
+      rc = ESMF_FAILURE
 !
 ! Initialize return code
 !
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
 !    
 ! determine new densities
 !
@@ -725,45 +678,36 @@
           endif
         enddo
       enddo
-      call ESMF_FieldHalo(field_rho, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_rho, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  rho halo"
         return
       endif
-      call ESMF_FieldHalo(field_sie, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_sie, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowRho:  sie halo"
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowRho
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowVel(rc)
 
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       integer :: i, j
       real :: rhoav
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
+
 !
 !  update velocities
 !
@@ -857,54 +801,45 @@
           endif
         enddo
       enddo
-      call ESMF_FieldHalo(field_u, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_u, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  u halo"
         return
       endif
-      call ESMF_FieldHalo(field_v, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_v, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  v halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhou, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_rhou, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhou halo"
         return
       endif
-      call ESMF_FieldHalo(field_rhov, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_rhov, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowVel:  rhov halo"
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowVel
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowState(rc)
 
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       integer :: i, j
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
+
 !
 !  new p's and q's
 !
@@ -940,22 +875,22 @@
         enddo
       enddo
 
-      call ESMF_FieldHalo(field_p, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_p, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  p halo"
         return
       endif
-      call ESMF_FieldHalo(field_q, status)
-      if(status .NE. ESMF_SUCCESS) then
+      call ESMF_FieldHalo(field_q, rc)
+      if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowState:  q halo"
         return
       endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine FlowState
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine User1_Final(gcomp, import_state, export_state, clock, rc)
 
@@ -963,14 +898,13 @@
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out), optional :: rc
+      integer, intent(out) :: rc
 !
 ! Local variables
 !
-      integer :: status
-      logical :: rcpresent
       integer :: ni, nj, i, j, de_id
-      type(ESMF_Array) :: array1
+      integer(kind=ESMF_IKIND_I8) :: frame
+      type(ESMF_Array) :: array2
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout
       real, dimension(:,:), pointer :: ldata
@@ -979,76 +913,57 @@
 !
 ! Set initial values
 !
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-!
-! Initialize return code
-!
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      rc = ESMF_FAILURE
 !
 ! Print out some results before finalizing
 !
-      ! TODO: need to get this from the state object, not a global, i.e.:
+      ! TODO: need to get the fields from the state object, not a global, i.e.:
       ! call ESMF_StateGetData(import_state, "U", field_u, rc)
 
-      ! Get a pointer to the data Array in the Field
-      call ESMF_FieldGetData(field_u, array1, rc=rc)
-      print *, "data back from field"
-
-      ! Get size of local array
-      call ESMF_FieldGetGrid(field_u, grid, status)
-      call ESMF_GridGetDELayout(grid, layout, status)
-      call ESMF_GridGetDE(grid, lcelltot_index=indext, &
-                          lcellexc_index=indexe, rc=rc)
+      ! Collect results on DE 0 and output to a file
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
       call ESMF_DELayoutGetDEID(layout, de_id, rc)
-      ni = indext(1)%r - indext(1)%l + 1
-      nj = indext(2)%r - indext(2)%l + 1
-      print *, "allocating", ni, " by ",nj," cells on DE", de_id
-      allocate(ldata(ni,nj))
 
-      ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array1, ldata, ESMF_NO_COPY, rc)
+      ! Frame number from computation
+      call ESMF_ClockGetAdvanceCount(clock, frame, rc)
 
-      ! output only the exclusive cells
-      ! Print results
-      print *, "------------------------------------------------------"
-      write(*,*) 'de_id = ',de_id
-      do j = indexe(2)%r,indexe(2)%l,-1
-        write(*,10) (ldata(i,j), i=indexe(1)%l,indexe(1)%r)
- 10     format(20(1x,1pe8.2))
-      enddo
-      print *, "------------------------------------------------------"
-
-      ! And now test output to a file
-      write(filename, 20)  "U_velocity", de_id+1
-      call ESMF_ArrayWrite(array1, filename=filename, rc=rc)
+      ! call ESMF_StateGetData(import_state, "U", field_u, rc)
+      call ESMF_FieldAllGather(field_u, array2, rc)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "U_velocity", frame
+        call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
+      endif
+      !call ESMF_ArrayDestroy(array2, rc)
 
       ! call ESMF_StateGetData(import_state, "V", field_v, rc)
-      call ESMF_FieldGetData(field_v, array1, rc=rc)
-      write(filename, 20)  "V_velocity", de_id+1
-      call ESMF_ArrayWrite(array1, filename=filename, rc=rc)
+      call ESMF_FieldAllGather(field_v, array2, rc)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "V_velocity", frame
+        call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
+      endif
+      !call ESMF_ArrayDestroy(array2, rc)
 
       ! call ESMF_StateGetData(import_state, "SIE", field_sie, rc)
-      call ESMF_FieldGetData(field_sie, array1, rc=rc)
-      write(filename, 20)  "SIE", de_id+1
-      call ESMF_ArrayWrite(array1, filename=filename, rc=rc)
+      call ESMF_FieldAllGather(field_sie, array2, rc)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "SIE", frame
+        call ESMF_ArrayWrite(array2, filename=filename, rc=rc)
+      endif
+      !call ESMF_ArrayDestroy(array2, rc)
 
  20   format(A,".",I0.2)
 
-      call ArraysGlobalDealloc(status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in User1_Final"
-        return
-      endif
+      !call ArraysGlobalDealloc(rc)
+      !if(rc .NE. ESMF_SUCCESS) then
+      !  print *, "ERROR in User1_Final"
+      !  return
+      !endif
 
-      if(rcpresent) rc = ESMF_SUCCESS
+      rc = ESMF_SUCCESS
 
       end subroutine User1_Final
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
     end module FlowMod
 !\end{verbatim}
     

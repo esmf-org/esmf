@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.9 2003/04/14 14:51:46 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.10 2003/04/24 16:43:15 nscollins Exp $
 !
 ! System test code #69527
 
@@ -115,7 +115,7 @@
 
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
-    array1 = ESMF_ArrayCreate(idata, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
 
     ! No deallocate() is needed for idata, it will be freed when the
     !  Array is destroyed.  TODO:  it seems delete need a 'delete data' 
@@ -152,7 +152,7 @@
     call ESMF_ArrayPrint(array2, "foo", rc)
 
     ! Get a pointer to the start of the data
-    call ESMF_ArrayGetData(array2, idata2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array2, idata2, ESMF_DATA_REF, rc)
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size

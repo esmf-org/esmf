@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.4 2003/04/17 20:06:56 nscollins Exp $
+! $Id: FlowMod.F90,v 1.5 2003/04/24 16:43:18 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1006,7 +1006,7 @@
       allocate(ldata(ni,nj))
 
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array1, ldata, ESMF_NO_COPY, rc)
+      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
 
       ! output only the exclusive cells
       ! Print results

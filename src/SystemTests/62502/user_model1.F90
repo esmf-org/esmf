@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2003/04/04 17:12:32 nscollins Exp $
+! $Id: user_model1.F90,v 1.8 2003/04/24 16:43:13 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -158,7 +158,7 @@
 
         ! Create Array based on an existing, allocated F90 pointer.
         ! Data is type Integer, 1D.
-        array1 = ESMF_ArrayCreate(idata, ESMF_NO_COPY, rc)
+        array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
         print *, "Array Create returned"
 
         humidity = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
@@ -214,7 +214,7 @@
         ! update field values here
         call ESMF_FieldGetData(humidity, array1, rc=rc) 
         ! Get a pointer to the start of the data
-        call ESMF_ArrayGetData(array1, idata, ESMF_NO_COPY, rc)
+        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 
         ! increment data values in place
         idata = idata + 10

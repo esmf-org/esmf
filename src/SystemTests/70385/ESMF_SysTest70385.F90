@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.11 2003/04/14 14:51:47 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.12 2003/04/24 16:43:16 nscollins Exp $
 !
 ! System test code #70385
 
@@ -230,7 +230,7 @@
 
       ! Create Array based on an existing, allocated F90 pointer.
       ! Data is type Integer, 2D.
-      array1 = ESMF_ArrayCreate(ldata, ESMF_NO_COPY, rc)
+      array1 = ESMF_ArrayCreate(ldata, ESMF_DATA_REF, rc)
       print *, "Array Create returned"
 
       ! No deallocate() is needed for idata, it will be freed when the
@@ -342,7 +342,7 @@
       print *, "data back from field"
 
       ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array1, ldata, ESMF_NO_COPY, rc)
+      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
 
       ! Get size of local array
       call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.2 2003/04/16 22:53:06 jwolfe Exp $
+! $Id: ArraysGlobalMod.F90,v 1.3 2003/04/24 16:43:18 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -91,52 +91,52 @@
       field_sie  = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="SIE", rc=status)
       call ESMF_FieldGetData(field_sie, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, sie, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, sie, ESMF_DATA_REF, status)
 
       field_u    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EAST, &
                    name="U", rc=status)
       call ESMF_FieldGetData(field_u, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, u, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, u, ESMF_DATA_REF, status)
 
       field_v    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_NORTH, &
                    name="V", rc=status)
       call ESMF_FieldGetData(field_v, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, v, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, v, ESMF_DATA_REF, status)
 
       field_rho  = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="RHO", rc=status)
       call ESMF_FieldGetData(field_rho, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rho, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, rho, ESMF_DATA_REF, status)
 
       field_rhoi = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="RHOI", rc=status)
       call ESMF_FieldGetData(field_rhoi, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhoi, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, rhoi, ESMF_DATA_REF, status)
 
       field_rhou = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_EAST, &
                    name="RHOU", rc=status)
       call ESMF_FieldGetData(field_rhou, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhou, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, rhou, ESMF_DATA_REF, status)
 
       field_rhov = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_NORTH, &
                    name="RHOV", rc=status)
       call ESMF_FieldGetData(field_rhov, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, rhov, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, rhov, ESMF_DATA_REF, status)
 
       field_p    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="P", rc=status)
       call ESMF_FieldGetData(field_p, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, p, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, p, ESMF_DATA_REF, status)
 
       field_q    = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="Q", rc=status)
       call ESMF_FieldGetData(field_q, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, q, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, q, ESMF_DATA_REF, status)
 
       field_flag = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    name="FLAG", rc=status)
       call ESMF_FieldGetData(field_flag, array_temp, rc=status)
-      call ESMF_ArrayGetData(array_temp, flag, ESMF_NO_COPY, status)
+      call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArraysGlobalAlloc"

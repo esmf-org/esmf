@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.5 2003/04/04 17:12:29 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.6 2003/04/24 16:43:13 nscollins Exp $
 !
 ! System test code #62501
 
@@ -131,7 +131,7 @@
        idata(i) = i + base
     enddo
 
-    array1 = ESMF_ArrayCreate(idata, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
     print *, "Array Create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc);
@@ -172,7 +172,7 @@
     call ESMF_ArrayPrint(array2, "foo", rc)
 
     ! Get a pointer to the start of the data
-    call ESMF_ArrayGetData(array2, idata2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array2, idata2, ESMF_DATA_REF, rc)
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size

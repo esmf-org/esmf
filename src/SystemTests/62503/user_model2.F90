@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.3 2003/04/04 17:12:34 nscollins Exp $
+! $Id: user_model2.F90,v 1.4 2003/04/24 16:43:15 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -140,7 +140,7 @@
 
         ! Create Array based on an existing, allocated F90 pointer.
         ! Data is type Integer, 1D, but uninitialized.
-        array1 = ESMF_ArrayCreate(idata, ESMF_NO_COPY, rc)
+        array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
         print *, "Array Create returned"
 
         humidity = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
