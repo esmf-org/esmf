@@ -1,0 +1,79 @@
+% $Id: ESMF_inframethodoverview.tex,v 1.1 2004/05/17 22:27:11 jwolfe Exp $
+
+\section{Overview of Distributed Data Methods}
+
+Bundles, Fields, and Arrays all have versions of the following
+data communication methods.  In ESMF, data is communicated 
+between DEs.  Depending on the underlying communication 
+mechanism, this may translate within the framework to a data 
+copy, an MPI call, or something else.
+
+There is a common object handle, an {\tt ESMF\_RouteHandle}, which
+allows communication patterns to be precomputed during 
+initialization and the information stored in that RouteHandle.
+By specifying a RouteHandle at execution time, only
+the source and destination data pointers must be supplied and the
+runtime overhead is minimized.
+
+\subsection{Higher Level Functions}
+The following three methods are intended to map closely to 
+needs of applications programs.  They represent higher level
+communications and are described in more detail in the following
+sections.  They are:
+
+\begin{itemize}
+
+\item {\bf Halo}
+Halo operations update ghost-cell or halo regions at the boundaries
+of a local data decomposition.
+\item {\bf Regrid}
+Regrid methods transform data from one Grid to another.
+\item {\bf Redist}
+Redistribution methods move data associated with a single Grid but
+with different decompositions.
+
+\end{itemize}
+
+\subsection{Lower Level Functions}
+The following methods correspond closely to the lower level
+MPI communications primitives.  They are:
+
+\begin{itemize}
+
+\item {\bf Gather}
+Reassembling data which is decomposed over a set of DEs into a single
+block of data on one DE.
+\item {\bf AllGather}
+Reassembling data which is decomposed over a set of DEs into multiple
+copies of a single block of data, one copy per original DE.
+\item {\bf Scatter}
+Spreading an undecomposed block of data on one DE over a set of DEs,
+decomposing that single block into smaller subsets of data, one
+data decomposition per DE.
+\item {\bf AlltoAll}
+Spreading an undecomposed block of data from multiple DEs onto
+each of the other DEs in the set, resulting in a set of multiple decomposed 
+data blocks per DE, one from each of the original source DEs.
+\item {\bf Broadcast}
+Spreading an undecomposed block of data from one DE onto all other
+DEs, where the resulting data is still undecomposed and simply
+copied to all other DEs.
+\item {\bf Reduction}
+Computing a single data value, e.g. the data maximum, minimum, sum, etc
+from a group of decomposed data blocks across a set of DEs, where the
+result is delivered to a single DE.
+\item {\bf AllReduce}
+Computing a single data value, e.g. the data maximum, minimum, sum, etc
+from a group of decomposed data blocks across a set of DEs, where the
+result is delivered to all DEs in the set.
+
+\end{itemize}
+
+\newpage
+
+
+
+
+
+
+
