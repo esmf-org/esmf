@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.18 2003/04/30 21:11:04 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.19 2003/05/01 16:24:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.18 2003/04/30 21:11:04 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.19 2003/05/01 16:24:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -218,7 +218,7 @@
                            {  9,10,11,12,13,14,15, 0, 1, 2, 3, 4, 5, 6, 7, 8},
                            {  8, 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10, 9},
                            {  7, 8, 5, 6, 3, 4, 1, 2,15, 0,13,14,11,12, 9,10},
-                           {  6, 5, 8, 7, 2, 1, 4, 3,14,13, 0,15, 1, 9,12,11},
+                           {  6, 5, 8, 7, 2, 1, 4, 3,14,13, 0,15,10, 9,12,11},
                            {  5, 6, 7, 8, 1, 2, 3, 4,13,14,15, 0, 9,10,11,12},
                            {  4, 3, 2, 1, 8, 7, 6, 5,12,11,10, 9, 0,15,14,13},
                            {  3, 4, 1, 2, 7, 8, 5, 6,11,12, 9,10,15, 0,13,14},
@@ -262,8 +262,10 @@
 //EOP
 // !REQUIREMENTS:  
 
+    delete [] commpartner;
+    delete [] commneeded;
 
-    return ESMF_FAILURE;
+    return ESMF_SUCCESS;
 
  } // end ESMC_CommTableDestruct
 
