@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.1 2004/12/08 17:53:11 nscollins Exp $
+! $Id: ESMF_Test.F90,v 1.2 2004/12/08 18:34:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.1 2004/12/08 17:53:11 nscollins Exp $'
+      '$Id: ESMF_Test.F90,v 1.2 2004/12/08 18:34:24 nscollins Exp $'
 
 !==============================================================================
 
@@ -179,6 +179,7 @@
 !EOP
 !-------------------------------------------------------------------------------
 
+      integer :: rc
       character(ESMF_MAXSTR) :: msg
 
       write(msg, *) "Number of failed tests:", result
@@ -190,6 +191,12 @@
       print *, msg
       call ESMF_LogWrite("Ending Test", ESMF_LOG_INFO, line, file)
       if (present(unit)) write(unit, *) msg
+
+      call ESMF_Finalize(rc)
+      if (rc .ne. ESMF_SUCCESS) then
+          write(msg, *) "Failure in Finalizing ESMF"
+          print *, msg
+      endif
 
       end subroutine ESMF_TestEnd
 
