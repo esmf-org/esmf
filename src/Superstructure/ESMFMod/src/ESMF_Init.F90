@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.4 2004/04/23 15:02:16 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.5 2004/04/23 17:30:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,10 +89,13 @@
 ! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
 !
 ! !INTERFACE:
-      subroutine ESMF_Initialize(defaultCalendar, vm, rc)
+      subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
+                                 defaultLogFileName, vm, rc)
 !
 ! !ARGUMENTS:
+      character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar  
+      character(len=*),        intent(in),  optional :: defaultLogFileName
       type(ESMF_VM),           intent(out), optional :: vm   
       integer,                 intent(out), optional :: rc     
 
@@ -102,9 +105,14 @@
 !
 !     The argument is:
 !     \begin{description}
+!     \item [{[defaultConfigFilename]}]
+!           Name of the default config file for the entire application.
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
+!     \item [{[defaultLogFileName]}]
+!           Name of the default log file for warning and error messages.
+!           If not specified, defaults to "ESMF_ErrorLog".
 !     \item [{[vm]}]
 !           Returns the global vm that was created during initialization.
 !     \item [{[rc]}]
@@ -114,7 +122,8 @@
 !
 !EOP
 
-      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultCalendar, rc)
+      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
+                                      defaultCalendar, defaultLogFileName, rc)
       if (present(vm)) then
         call ESMF_VMGetGlobal(vm, rc)
       endif
@@ -126,11 +135,14 @@
 ! !IROUTINE:  ESMF_FrameworkInternalInit - internal routine called by both F90 and C++
 !
 ! !INTERFACE:
-      subroutine ESMF_FrameworkInternalInit(lang, defaultCalendar, rc)
+      subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
+                                       defaultCalendar, defaultLogFileName, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
+      character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
+      character(len=*),        intent(in),  optional :: defaultLogFileName
       integer,                 intent(out), optional :: rc     
 
 !
@@ -142,9 +154,14 @@
 !     \item [lang]
 !           Flag to say whether main program is F90 or C++.  Affects things
 !           related to initialization, such as starting MPI.
+!     \item [{[defaultConfigFilename]}]
+!           Name of the default config file for the entire application.
 !     \item [{[defaultCalendar]}]
 !           Sets the default calendar to be used by ESMF Time Manager.
 !           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
+!     \item [{[defaultLogFileName]}]
+!           Name of the default log file for warning and error messages.
+!           If not specified, defaults to "ESMF_ErrorLog".
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -168,10 +185,29 @@
           return
       endif
 
+      ! Open config file if specified
+      if (present(defaultConfigFileName)) then
+          call ESMF_ConfigInitialize(defaultConfigFileName, status)
+          if (status .ne. ESMF_SUCCESS) then
+              print *, "Error opening the default config file"
+              return
+          endif
+      endif
+
       ! Initialize the default time manager calendar
       call ESMF_CalendarInitialize(defaultCalendar, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing the default time manager calendar"
+          return
+      endif
+
+      if (present(defaultLogFileName)) then
+          call ESMF_LogInitialize(defaultLogFileName, status)
+      else
+          call ESMF_LogInitialize("ESMF_LogFile", status)
+      endif
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error initializing the default log/error manager"
           return
       endif
 
@@ -188,7 +224,8 @@
           return
       endif
 
-      ! Initialize the machine model, the comms, etc.
+      ! Initialize the machine model, the comms, etc.  Old code, superceeded
+      ! by VM code.
       !call ESMF_MachineInitialize(lang, status)
       !if (status .ne. ESMF_SUCCESS) then
       !    print *, "Error initializing the machine characteristics"
@@ -243,6 +280,13 @@
 
       if (already_final) then
           if (rcpresent) rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! Shut down the log file
+      call ESMF_LogFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing log file"
           return
       endif
 
