@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.4 2003/06/26 23:05:04 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.5 2003/06/27 16:46:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@
       type ESMF_CplComp
       sequence
       private
-         type(ESMF_CompClass), pointer :: compp = ESMF_NULL_POINTER
+         type(ESMF_CompClass), pointer :: compp => NULL()
       end type
 
 
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.4 2003/06/26 23:05:04 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.5 2003/06/27 16:46:13 nscollins Exp $'
 
 !==============================================================================
 !
