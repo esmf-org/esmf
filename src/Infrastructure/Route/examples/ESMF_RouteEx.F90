@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.16 2004/05/25 11:17:39 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.17 2004/05/27 11:36:16 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -62,14 +62,14 @@
 
     mincoords = (/  0.0,  0.0 /)
     mincoords = (/ 20.0, 30.0 /)
-    srcgrid = ESMF_GridCreateHorz_XYUni((/ 90, 180 /), &
+    srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    name="srcgrid", rc=rc)
     call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
 
     ! same grid coordinates, but different layout
-    dstgrid = ESMF_GridCreateHorz_XYUni((/ 90, 180 /), &
+    dstgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
                    name="srcgrid", rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.19 2004/05/25 12:21:19 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.20 2004/05/27 11:39:17 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -58,7 +58,7 @@
     min_coord = (/  0.0,  0.0 /)
     max_coord = (/ 50.0, 60.0 /)
     delayout = ESMF_DELayoutCreate(vm, rc=rc)
-    grid = ESMF_GridCreateHorz_XYUni(counts, min_coord, max_coord, &
+    grid = ESMF_GridCreateHorzXYUni(counts, min_coord, max_coord, &
                 horzStagger=ESMF_GRID_HORZ_STAGGER_A, rc=rc)
     call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
 !EOC
