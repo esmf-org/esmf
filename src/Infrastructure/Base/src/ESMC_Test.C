@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.C,v 1.3 2003/03/06 17:33:42 eschwab Exp $
+// $Id: ESMC_Test.C,v 1.4 2003/06/20 16:45:02 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,    
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Test.C,v 1.3 2003/03/06 17:33:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Test.C,v 1.4 2003/06/20 16:45:02 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -56,11 +56,14 @@
       char *failMsg,  // in - optional message printed on test failure
       int *result,    // in/out - cumulative failure count
       char *file,     // in - test filename
-      int line) {     // in - test line number in test filename
+      int line,       // in - test line number in test filename
+      int only) {     // in - if set to 0, print on stderr also
 // 
 // !DESCRIPTION:
 //    Prints PASS/FAIL based on passed-in condition.  If FAIL, prints
-//    optional failure message and increments failure result counter
+//    optional failure message and increments failure result counter.
+//    If {\tt only} is zero, also print same message to stderr as well
+//    as the normal output on stdout.  The default for {\tt only} is 1.
 //
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
@@ -73,10 +76,15 @@
 
  if (condition) {
    cout << "PASS " << name << ", " << file << ", line " << line << endl;
+   if (!only)
+      cerr << "PASS " << name << ", " << file << ", line " << line << endl;
  }
  else {
    cout << "FAIL " << name << ", " << file << ", line " << line << 
            ", " << failMsg << endl;
+   if (!only)
+       cerr << "FAIL " << name << ", " << file << ", line " << line << 
+               ", " << failMsg << endl;
    (*result)++; // count total failures; 0 = all pass
  }
  return(ESMF_SUCCESS);
