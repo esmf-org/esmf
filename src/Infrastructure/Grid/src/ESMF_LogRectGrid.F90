@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.58 2004/04/13 22:58:07 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.59 2004/04/19 20:27:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1662,14 +1662,24 @@
       endif
 
       call ESMF_newDELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
-        logRectFlag=lrFlag, rc=status)
-      if (otoFlag /= ESMF_TRUE) stop    ! ensure this is 1-to-1 layout
-      if (ndim /= 2) stop               ! ensure this is 2D Layout
-      if (lrFlag /= ESMF_TRUE) stop     ! ensure this is logical rectangular l.
-      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs, rc=status)
-      ! now need to do some shifting to satisfy funny stuff here...
-      nDEs(2) = nDEs(1)
-      nDEs(1) = nDEs(0)
+                               logRectFlag=lrFlag, rc=status)
+
+      ! Check layout attributes
+      if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
+        print *, "ERROR in ESMF_LRGridDistribute: not a 1-to-1 layout"
+        return
+      endif
+      if (ndim .ne. 2) then               ! ensure this is 2D Layout
+        print *, "ERROR in ESMF_LRGridDistribute: not a 2D layout"
+        return
+      endif
+      ! if (lrFlag .ne. ESMF_TRUE) then     ! ensure this is logical rect layout
+      !   print *, "ERROR in ESMF_LRGridDistribute: ", &
+      !            "not a logically rectangular layout"
+      !   return
+      ! endif
+
+      call ESMF_newDELayoutGet(delayout, deCountPerDim=nDEs(1:2), rc=status)
       nDEs(0) = 1
 
       ! if there is an axis to decompose, either grab the specfied countsPerDE
@@ -1694,8 +1704,6 @@
           endif
         endif
       enddo
-
-  !print *, 'decompose: ', countsPerDEDecomp1Use, countsPerDEDecomp2Use
 
       ! Determine if the axis are decomposed and load counts arrays
       size = nDEs(decompIdsUse(1))
@@ -2416,7 +2424,7 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       integer :: i, j, i1, i2, j1, j2, gridBoundWidth, myDE(2), myDEDecomp(0:2)
-      integer :: localDe, coord(2)
+      integer :: localDE
       integer, dimension(dimCount) :: counts, compCount, localStart
       integer, dimension(:), allocatable :: cellType1, cellType2
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
@@ -2444,14 +2452,11 @@
       ! figure out the position of myDE to get local counts
       gridp%ptr => grid
       call ESMF_LRGridGet(gridp, delayout=delayout)
-      call ESMF_newDELayoutGet(delayout, localDe=localDe, rc=status)
-      call ESMF_newDELayoutGetDE(delayout, de=localDe, coord=coord, rc=status)
+      call ESMF_newDELayoutGet(delayout, localDE=localDE, rc=status)
+      call ESMF_newDELayoutGetDE(delayout, de=localDE, coord=myDEDecomp(1:2), &
+                                 rc=status)
       myDEDecomp(0) = 1
-      myDEDecomp(1) = coord(1) + 1
-      myDEDecomp(2) = coord(2) + 1
 
-      ! print *, 'myDEDecomp: ', myDEDecomp
-     
       ! modify myDE array by decompIds
       do i = 1,dimCount
         myDE(i) = myDEDecomp(decompIds(i))
