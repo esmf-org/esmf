@@ -1,35 +1,58 @@
-% $Id: Calendar_desc.tex,v 1.4 2003/08/12 18:17:33 cdeluca Exp $
+% $Id: Calendar_desc.tex,v 1.5 2003/08/12 19:04:42 cdeluca Exp $
 
 \label{sec:Calendar}
 The {\tt Calendar} class encapsulates the knowledge (attributes and
 behavior) of all required calendar types:  Gregorian, Julian, no-leap,
-360-day, generic, and no-calendar.
+360-day, generic, and no-calendar.  Brief description are provided for
+each calendar below.  For more information on standard calendars, see
+~\cite{seidelman}.
             
 \subsection{Gregorian calendar}
-{\it Valid range: 4714 BC onward}
+{\it Valid range: 4713 BC onward}
+The Gregorian calendar is the calendar currently in use throughout Western
+countries.  Named after Pope Gregory, it is a minor 
+correction to the older Julian calendar. In the Gregorian calendar every
+fourth year is a leap year in which February has 29 and not 28 days;
+however, years divisible by 100 are not leap years unless they are also 
+divisible  by 400.  As in the Julian calendar, days begin at midnight.
 
 \subsection{Julian calendar} 
-{\it Valid range: 4714 BC onward}
-The difference between the Julian and today's Gregorian calendar is that 
-the Gregorian does not make centennial years leap years unless they are 
-a multiple of 400, which leads to a year of 365.2425 days. In other words, 
-in the Gregorian calendar, 1700, 1800 and 1900 are not leap years, but 
-2000 is. All centennial years are leap years in the Julian calendar. 
+{\it Valid range: 4713 BC onward}
+The Julian calendar was introduced by Julius Caesar in 46 B.C., and 
+reached its final form in 8 B.C.  The Julian calendar differs from the 
+Gregorian only in the determination of leap years, lacking the correction 
+for years divisible
+by 100 and 400 in the Gregorian calendar. In the Julian calendar, any positive 
+year is a leap year if divisible by 4. (Negative years are leap years if, when 
+divided by 4, a remainder of 3 results.) Days are considered to begin at 
+midnight.
+
+\subsection{Julian days}
+{\it Valid range: 4713 BC onward}
+Julian days simply enumerate the days and fraction of a day which have elapsed 
+since the start of the Julian era, defined as beginning at noon on Monday, 
+1st January of year 4713 B.C. in the Julian calendar.  Julian days, 
+unlike the dates in the Julian and Gregorian calendars, begin at noon.
 
 \subsection{No-leap calendar}
-{\it Valid range: 4714 BC onward}
-The no-leap 
+{\it Valid range: machine limit}
+The no-leap calendar is the Gregorian calendar with no leap years - 
+February is always assumed to have 28 days.  Modelers sometimes use this 
+calendar as a simple, close approximation to the Gregorian calendar.
 
 \subsection{360-day calendar}
 {\it Valid range: machine limit}
+In the 360-day calendar, there are 12 months, each of which has 30 days.  
+Like the no-leap calendar, this is a simple approximation to the Gregorian
+calendar sometimes used by modelers.
 
 \subsection{Generic calendar}
 {\it Valid range: machine limit}
- 
+The user can set calendar parameters in the generic calendar.
+
 \subsection{No-calendar}
 {\it Valid range: machine limit}
-
-The machine limit is TODO:.
+The no-calendar option simply tracks the numer of elapsed timesteps.
 
 
 
