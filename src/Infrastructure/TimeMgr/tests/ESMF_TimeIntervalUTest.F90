@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.19 2004/04/21 17:52:06 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.20 2004/04/21 21:40:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.19 2004/04/21 17:52:06 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.20 2004/04/21 21:40:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -706,6 +706,19 @@
       print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
 
       ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the == operator
+      ! resultTime = ESMF_TimeOperator(==)(timestep, timestep)
+      write(name, *) "Gregorian Calendar Interval == test"
+      write(failMsg, *) " Did not return true"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=4, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=2, mm=16, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((timeStep == timeStep2), name, failMsg, result, &
+                      ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       ! No Leap calendar 2004 tests
       ! ----------------------------------------------------------------------------
       !NEX_UTest
@@ -1174,6 +1187,19 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the == operator
+      ! resultTime = ESMF_TimeOperator(==)(timestep, timestep)
+      write(name, *) "360-Day Calendar Interval == test"
+      write(failMsg, *) " Did not return true"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=4, d=730, &
+                                calendar=day360Calendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=4, mm=16, d=10, &
+                                calendar=day360Calendar, rc=rc)
+      call ESMF_Test((timeStep == timeStep2), name, failMsg, result, &
+                      ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       ! Julian Day calendar interval tests
