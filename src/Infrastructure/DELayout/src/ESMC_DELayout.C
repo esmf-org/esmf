@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.27 2004/12/03 16:19:06 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.28 2004/12/07 17:15:42 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.27 2004/12/03 16:19:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.28 2004/12/07 17:15:42 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -344,6 +344,10 @@ int ESMC_DELayout::ESMC_DELayoutConstructND(ESMC_VM &vm, int *nDEs,
     // DEtoPET mapping has been provided externally
     for (int i=0; i<ndes; i++)
       des[i].petid = DEtoPET[i];   // copy the mapping
+    // nsc - if ndes is = npets, go ahead and set the 1:1 flag
+    // even if the user supplied the mapping.   6dec04
+      if (ndes==npets) // 1:1 layout
+        oneToOneFlag = ESMF_TRUE;
   }else{
     // Use the mapper algorithm to find good DE-to-PET mapping
     ESMC_DELayoutFindDEtoPET(npets);
@@ -498,7 +502,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
   int  len_cde,           // in  - dimensions in DEcde
   int  *DEcw,             // out - DE's connection weight table
   int  len_cw,            // in  - dimensions in DEcw
-  int  *nDEc              // out - DE's number of connections
+  int  *nDEc,             // out - DE's number of connections
+  int  *pid               // out - pid for this DE
   ){              
 //
 // !DESCRIPTION:
@@ -527,6 +532,8 @@ int ESMC_DELayout::ESMC_DELayoutGetDELocalInfo(
   }
   if (nDEc != ESMC_NULL_POINTER)
     *nDEc = des[DEid].nconnect;
+  if (pid != ESMC_NULL_POINTER)
+    *pid = des[DEid].pid;
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -784,11 +791,12 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     *lp++ = logRectFlag;
     *lp++ = oneToOneFlag;
 
+    ip = (int *)lp;
     if (logRectFlag == ESMF_TRUE)
         for (i=0; i<ndim; i++) 
             *ip++ = dims[i];
 
-    cp = (char *)lp;
+    cp = (char *)ip;
 
     *offset = (cp - buffer);
    
@@ -871,6 +879,7 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     a->oneToOneFlag = *lp++;
     a->logRectFlag = *lp++;
 
+    ip = (int *)lp;
     if (a->logRectFlag == ESMF_TRUE) {
         a->dims = new int[a->ndim];
         for (i=0; i<a->ndim; i++) 
@@ -878,7 +887,7 @@ class ESMC_DELayout : public ESMC_Base {    // inherits from ESMC_Base class
     } else
         a->dims = NULL;
 
-    cp = (char *)lp;
+    cp = (char *)ip;
 
     *offset = (cp - buffer);
    

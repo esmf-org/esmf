@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.22 2004/12/02 18:45:19 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.23 2004/12/07 17:15:41 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,13 +97,14 @@ extern "C" {
 
   void FTN(c_esmc_delayoutgetdelocalinfo)(ESMC_DELayout **ptr,
     int *DEid, int *DEcoord, int *len_coord, int *DEcde, int *len_cde, 
-    int *DEcw, int *len_cw, int *nDEc, int *rc){
+    int *DEcw, int *len_cw, int *nDEc, int *pid, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_delayoutgetdelocalinfo()"
     // Call into the actual C++ method wrapped inside LogErr handling
     ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutGetDELocalInfo(
       *DEid, DEcoord, *len_coord, DEcde, *len_cde, DEcw, *len_cw,
-      ESMC_NOT_PRESENT_FILTER(nDEc)),
+      ESMC_NOT_PRESENT_FILTER(nDEc),
+      ESMC_NOT_PRESENT_FILTER(pid)), 
       ESMF_ERR_PASSTHRU,
       ESMC_NOT_PRESENT_FILTER(rc));
   }

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.42 2004/12/03 20:47:45 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.43 2004/12/07 17:15:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.42 2004/12/03 20:47:45 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.43 2004/12/07 17:15:41 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -621,7 +621,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_DELayoutGetDELocalInfo(delayout, de, coord, connectionCount, &
-    connectionList, connectionWeightList, rc)
+    connectionList, connectionWeightList, pid, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_DELayout),  intent(in)              :: delayout
@@ -630,6 +630,7 @@ contains
     integer,              intent(out),  optional  :: connectionCount
     integer, target,      intent(out),  optional  :: connectionList(:)
     integer, target,      intent(out),  optional  :: connectionWeightList(:)
+    integer,              intent(out),  optional  :: pid
     integer,              intent(out),  optional  :: rc  
 !         
 !
@@ -653,6 +654,8 @@ contains
 !     \item[{[connectionWeightList]}]
 !        Upon return this holds the list of connection weights of all the
 !        connections with the specified DE.
+!     \item[{[pid]}] 
+!          Actual memory address index.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -695,7 +698,7 @@ contains
     endif
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_DELayoutGetDELocalInfo(delayout, de, opt_DEcoord, len_coord, &
-      opt_DEcde, len_cde, opt_DEcw, len_cw, connectionCount, localrc)
+      opt_DEcde, len_cde, opt_DEcw, len_cw, connectionCount, pid, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -985,8 +988,8 @@ contains
 
     integer :: localrc
 
-    call c_ESMC_DELayoutSerialize(ESMF_DELayoutDeserialize%this, &
-                                  buffer(1), offset, localrc)
+    call c_ESMC_DELayoutDeserialize(ESMF_DELayoutDeserialize%this, &
+                                    buffer(1), offset, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
