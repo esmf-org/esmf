@@ -1,4 +1,4 @@
-% $Id: Config_refdoc.ctex,v 1.1 2003/09/17 22:59:11 cdeluca Exp $
+% $Id: Config_refdoc.ctex,v 1.2 2003/09/18 16:40:46 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,28 +44,28 @@
 %#ifdef STANDALONE
 %\input{Config_syn}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_syn}
+%\input{../Infrastructure/Config/doc/Config_syn}
 %#endif
 
 %\section{Algorithmic Description}
 %#ifdef STANDALONE
 %\input{Config_alg}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_alg}
+%\input{../Infrastructure/Config/doc/Config_alg}
 %#endif
 
 %\section{Object Model}
 %#ifdef STANDALONE
 %\input{Config_obj}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_obj}
+%\input{../Infrastructure/Config/doc/Config_obj}
 %#endif
 
 % \section{Global Parameters and Definitions}
 % #ifdef STANDALONE
 % \input{Config_param}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/ConfigAttr/doc/Config_param}
+% \input{../Infrastructure/Config/doc/Config_param}
 % #endif
 
 \section{Config Class}
@@ -74,28 +74,28 @@
 #ifdef STANDALONE
 \input{Config_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/Config_desc}
+\input{../Infrastructure/Config/doc/Config_desc}
 #endif
 
 \subsection{Usage}
 #ifdef STANDALONE
 \input{Config_usage}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/Config_usage}
+\input{../Infrastructure/Config/doc/Config_usage}
 #endif
 
 %\subsubsection{Class Definition}
 %#ifdef STANDALONE
 %\input{Config_def}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_def}
+%\input{../Infrastructure/Config/doc/Config_def}
 %#endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %\input{Config_rest}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_rest}
+%\input{../Infrastructure/Config/doc/Config_rest}
 %#endif
 
 %%\section{Config F90 Interface}
@@ -104,21 +104,21 @@
 %#ifdef STANDALONE
 %\input{Configex_fapi}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_fex}
+%\input{../Infrastructure/Config/doc/Config_fex}
 %#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE
 %\input{Config_fparam}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_fparam}
+%\input{../Infrastructure/Config/doc/Config_fparam}
 %#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Config_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/ConfigAttr/doc/ESMF_Config_fapi}
+\input{../Infrastructure/Config/doc/ESMF_Config_fapi}
 #endif
 
 %\section{Config C++ Interface}
@@ -127,21 +127,21 @@
 %#ifdef STANDALONE
 %\input{Config_ccex}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_ccex}
+%\input{../Infrastructure/Config/doc/Config_ccex}
 %#endif
 
 %\subsection{Parameters and Definitions}
 %#ifdef STANDALONE
 %\input{Config_ccparam}
 %#elif defined(CONSTITUENT)
-%\input{../Infrastructure/ConfigAttr/doc/Config_ccparam}
+%\input{../Infrastructure/Config/doc/Config_ccparam}
 %#endif
 
 % %\subsection{Class API}
 % #ifdef STANDALONE
 % \input{Config_ccapi}
 % #elif defined(CONSTITUENT)
-% \input{../Infrastructure/ConfigAttr/doc/Config_ccapi}
+% \input{../Infrastructure/Config/doc/Config_ccapi}
 % #endif
 
 %#ifdef STANDALONE
