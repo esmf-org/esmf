@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.11 2004/05/07 19:21:44 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.12 2004/05/07 20:13:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.11 2004/05/07 19:21:44 cdeluca Exp $'
+      '$Id: ESMF_VM.F90,v 1.12 2004/05/07 20:13:32 cdeluca Exp $'
 
 !==============================================================================
 
@@ -271,9 +271,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMGatherI4 - MPI-like VM wide Gather
+! !IROUTINE: ESMF_VMGather - Gather 4-byte integers
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherI4(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
@@ -335,9 +336,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMGatherR4 - MPI-like VM wide Gather
+! !IROUTINE: ESMF_VMGather - Gather 4-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR4(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
@@ -399,9 +401,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMGatherR8 - MPI-like VM wide Gather
+! !IROUTINE: ESMF_VMGather - Gather 8-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR8(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
@@ -512,6 +515,52 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetGlobal(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(out)      :: vm
+    integer, intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get Global VM
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        Global VM
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! Copy the handle to the global VM into the output variable
+    vm = GlobalVM
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_VMGetGlobal
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_VMGetPET - Get VM PET internals
 
 ! !INTERFACE:
@@ -554,51 +603,6 @@ module ESMF_VMMod
     call c_ESMC_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, rc)
  
   end subroutine ESMF_VMGetPET
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
-
-! !INTERFACE:
-  subroutine ESMF_VMGetGlobal(vm, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM), intent(out)      :: vm
-    integer, intent(out), optional  :: rc           
-!
-! !DESCRIPTION:
-!   Get Global VM
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        Global VM
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: status                     ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.  
-      rc = ESMF_FAILURE
-    endif
-
-    ! Copy the handle to the global VM into the output variable
-    vm = GlobalVM
-
-    ! Set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_VMGetGlobal
 !------------------------------------------------------------------------------
 
 
@@ -653,9 +657,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMRecvI4 - VM wide receive
+! !IROUTINE: ESMF_VMRecv - Receive 4-byte integers
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvI4(vm, message, len, source, rc)
 !
 ! !ARGUMENTS:
@@ -713,9 +718,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMRecvR4 - VM wide receive
+! !IROUTINE: ESMF_VMRecv - Receive 4-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvR4(vm, message, len, source, rc)
 !
 ! !ARGUMENTS:
@@ -773,9 +779,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMRecvR8 - VM wide receive
+! !IROUTINE: ESMF_VMRecv - Receive 8-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMRecv()
   subroutine ESMF_VMRecvR8(vm, message, len, source, rc)
 !
 ! !ARGUMENTS:
@@ -833,9 +840,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMScatterI4 - MPI-like VM wide Scatter
+! !IROUTINE: ESMF_VMScatter - Scatter 4-byte integers
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterI4(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
@@ -897,9 +905,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMScatterR4 - MPI-like VM wide Scatter
+! !IROUTINE: ESMF_VMScatter - Scatter 4-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR4(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
@@ -961,9 +970,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMScatterR8 - MPI-like VM wide Scatter
+! !IROUTINE: ESMF_VMScatter - Scatter 8-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR8(vm, input, output, len, root, rc)
 !
 ! !ARGUMENTS:
@@ -1025,9 +1035,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMSendI4 - VM wide send
+! !IROUTINE: ESMF_VMSend - Send 4-byte integers
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendI4(vm, message, len, dest, rc)
 !
 ! !ARGUMENTS:
@@ -1085,9 +1096,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMSendR4 - VM wide send
+! !IROUTINE: ESMF_VMSend - Send 4-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendR4(vm, message, len, dest, rc)
 !
 ! !ARGUMENTS:
@@ -1145,9 +1157,10 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_VMSendR8 - VM wide send
+! !IROUTINE: ESMF_VMSend - Send 8-byte reals
 
 ! !INTERFACE:
+  ! Private name; call using ESMF_VMSend()
   subroutine ESMF_VMSendR8(vm, message, len, dest, rc)
 !
 ! !ARGUMENTS:
