@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.3 2003/03/12 22:21:03 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.4 2003/03/13 22:57:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,6 +67,11 @@
       !public ESMF_RouteGet                    ! get and set values
       public ESMF_RouteSetSend
       public ESMF_RouteSetRecv
+
+      public ESMF_RouteGetCached
+
+      public ESMF_RoutePrecompute
+      public ESMF_RouteRun
  
       public ESMF_RouteValidate
       public ESMF_RoutePrint
@@ -78,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.3 2003/03/12 22:21:03 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.4 2003/03/13 22:57:04 nscollins Exp $'
 
 !==============================================================================
 !
@@ -298,12 +303,11 @@
 ! !IROUTINE: ESMF_RouteSetRecv - Set recv values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSetRecv(Route, src_de, array, rc)
+      subroutine ESMF_RouteSetRecv(Route, src_de, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: src_de
-      type(ESMF_Array), intent(in) :: array
       integer, intent(out), optional :: rc            
 
 !
@@ -316,8 +320,6 @@
 !          Route to be modified.
 !     \item[src_de]
 !          Source DE id.
-!     \item[array]
-!          Array containing data to be received.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -340,7 +342,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteSetRecv(route, src_de, array, status)
+        call c_ESMC_RouteSetRecv(route, src_de, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Set error"
           return  
@@ -355,12 +357,11 @@
 ! !IROUTINE: ESMF_RouteSetSend - Set send values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSetSend(route, dest_de, array, rc)
+      subroutine ESMF_RouteSetSend(route, dest_de, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: dest_de
-      type(ESMF_Array), intent(in) :: array
       integer, intent(out), optional :: rc            
 
 !
@@ -374,8 +375,6 @@
 !          Route to be modified.
 !     \item[dest_de]
 !          Destination DE id.
-!     \item[array]
-!          Array containing data to be send.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -398,7 +397,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteSetSend(route, dest_de, array, status)
+        call c_ESMC_RouteSetSend(route, dest_de, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Set error"
           return  
@@ -407,6 +406,208 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_RouteSetSend
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RouteGetCached - Search for a precomputed Route
+
+! !INTERFACE:
+      subroutine ESMF_RouteGetCached(rank, &
+                       my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
+                       my_DE_src, AI_src, AI_src_count, layout_src, &
+                       hascachedroute, route, rc)
+!
+! !ARGUMENTS:
+      integer, intent(in) :: rank
+      integer, intent(in) :: my_DE_dst
+      type(ESMF_AxisIndex), intent(in) :: AI_dst(:)
+      integer, intent(in) :: AI_dst_count
+      type(ESMF_DELayout), intent(in) :: layout_dst
+      integer, intent(in) :: my_DE_src
+      type(ESMF_AxisIndex), intent(in) :: AI_src(:)
+      integer, intent(in) :: AI_src_count
+      type(ESMF_DELayout), intent(in) :: layout_src
+      logical, intent(out), optional :: hascachedroute
+      type(ESMF_Route), intent(out), optional :: route
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Search for an appropriate precomputed Route.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[parentlayout] 
+!          Layout containing all DEs where data from srcfield and dstfield
+!          are located.
+!     \item[srcfield]
+!          {\tt Field} containing data to be sent.
+!     \item[dstfield]
+!          {\tt Field} containing data to be received.
+!     \item[{[hascachedroute]}]
+!          Logical return code for whether a {\tt Route} was found.
+!     \item[{[route]}]
+!          If found, the returned {\tt Route} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+        logical :: lcache
+        type(ESMF_Route) :: lroute
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteGetCached(rank, &
+                       my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
+                       my_DE_src, AI_src, AI_src_count, layout_src, &
+                       hascachedroute, route, rc)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Get Cached error"
+          return  
+        endif
+
+        if (present(hascachedroute)) hascachedroute = lcache
+        if (present(route)) route = lroute
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteGetCached
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RouteRun - Execute the communications the Route represents
+
+! !INTERFACE:
+      subroutine ESMF_RouteRun(route, srcarray, dstarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      type(ESMF_Array), intent(in), optional :: srcarray
+      type(ESMF_Array), intent(in), optional :: dstarray
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[{[srcarray]}]
+!          Local {\tt Array} containing data to be sent.
+!     \item[{[dstarray]}]
+!          Local {\tt Array} containing data to be received.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RouteRun(route, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Run error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RouteRun
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RoutePrecompute - Precompute communication paths
+
+! !INTERFACE:
+      subroutine ESMF_RoutePrecompute(route, rank, &
+                       my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
+                       my_DE_src, AI_src, AI_src_count, layout_src, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: rank
+      integer, intent(in) :: my_DE_dst
+      type(ESMF_AxisIndex), intent(in) :: AI_dst(:)
+      integer, intent(in) :: AI_dst_count
+      type(ESMF_DELayout), intent(in) :: layout_dst
+      integer, intent(in) :: my_DE_src
+      type(ESMF_AxisIndex), intent(in) :: AI_src(:)
+      integer, intent(in) :: AI_src_count
+      type(ESMF_DELayout), intent(in) :: layout_src
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[ TBD ]  
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Call C++  code
+        call c_ESMC_RoutePrecompute(route, rank, &
+                       my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
+                       my_DE_src, AI_src, AI_src_count, layout_src, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route Precompute error"
+          return  
+        endif
+
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_RoutePrecompute
 
 !------------------------------------------------------------------------------
 !BOP

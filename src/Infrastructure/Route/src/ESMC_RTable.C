@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.8 2003/03/13 15:38:34 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.9 2003/03/13 22:57:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.8 2003/03/13 15:38:34 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.9 2003/03/13 22:57:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -144,10 +144,10 @@
     // implemented to get feedback about how well it works.
 
     for (i=0; i<entrycount; i++) {
-        entry[i].dest_deid = i;
+        entry[i].deid = i;
         entry[i].xpcount = 0;
-        entry[i].base_addr = NULL;
         entry[i].xp = NULL;
+        entry[i].alloccount = 0;
     }
 
     return ESMF_SUCCESS;
@@ -219,8 +219,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-       int deid,           // in  -
-       void *base_addr,    // in  -
+       int ndeid,          // in  -
        ESMC_XPacket *xp) { // in -
 //
 // !DESCRIPTION:
@@ -230,16 +229,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (entry[deid].xpcount > 0) {
-        printf("already an entry for deid %d\n", deid);
+    if (entry[ndeid].xpcount > 0) {
+        printf("already an entry for deid %d\n", ndeid);
         printf("need to implement multiple xp's per src/dst pair\n"); 
         return ESMF_FAILURE;
     }
 
-    entry[deid].dest_deid = deid;
-    entry[deid].xpcount++;
-    entry[deid].base_addr = base_addr;
-    entry[deid].xp = xp;
+    entry[ndeid].deid = ndeid;
+    entry[ndeid].xpcount++;
+    entry[ndeid].xp = xp;
 
     return ESMF_SUCCESS;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.15 2003/03/13 22:01:52 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.16 2003/03/13 22:57:03 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,8 +73,6 @@
 
  // accessor methods for class members
     //int ESMC_RouteGet(<value type> *value) const;
-    int ESMC_RouteGetCached(ESMC_DELayout *parentlayout, int *hascachedroute, 
-                               ESMC_Route **route);
 
     int ESMC_RouteSetSend(int dst_de, ESMC_XPacket *xp);
     int ESMC_RouteSetRecv(int src_de, ESMC_XPacket *xp);
@@ -114,5 +112,10 @@
 
  ESMC_Route *ESMC_RouteCreate(ESMC_DELayout *layout, int *rc);
  int ESMC_RouteDestroy(ESMC_Route *route);
+ int ESMC_RouteGetCached(int rank, int my_DE_rcv, ESMC_AxisIndex *AI_rcv,
+                             int AI_rcv_count, ESMC_DELayout *layout_rcv,
+                             int my_DE_snd, ESMC_AxisIndex *AI_snd,
+                             int AI_snd_count, ESMC_DELayout *layout_snd,
+			     int *hascachedroute, ESMC_Route **route);
 
  #endif  // ESMC_Route_H

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.13 2003/03/13 22:04:21 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.14 2003/03/13 22:57:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.13 2003/03/13 22:04:21 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.14 2003/03/13 22:57:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -225,15 +225,33 @@
 // !IROUTINE:  ESMC_RouteGetCached - Retrieve a precomputed Route
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteGetCached(
+      int ESMC_RouteGetCached(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *parentlayout, 
-      int *hascachedroute, 
-      ESMC_Route **route) {
+      int rank,                    // in  - rank of data in both Fields
+      int my_DE_rcv,               // in  - DE identifier in the DELayout of
+                                   //       the receiving Field
+      ESMC_AxisIndex *AI_rcv,      // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field
+      int AI_rcv_count,            // in  - number of sets of AI's in the rcv
+                                   //       array (should be the same as the 
+                                   //       number of DE's in the rcv layout)
+      ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
+      int my_DE_snd,               // in  - DE identifier in the DELayout of
+                                   //       the sending Field
+      ESMC_AxisIndex *AI_snd,      // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the sending
+                                   //       Field
+      int AI_snd_count,            // in  - number of sets of AI's in the snd
+                                   //       array (should be the same as the
+                                   //       number of DE's in the snd layout)
+      ESMC_DELayout *layout_snd,   // in  - pointer to the snd DELayout 
+      int *hascachedroute,         // out - 0=false, 1=true
+      ESMC_Route **route) {        // out - if true, cached route
 
 //
 // !DESCRIPTION:
@@ -351,7 +369,7 @@
 // !RETURN VALUE:
 //    int error return code
 //
-// !ARGUMENTS:A
+// !ARGUMENTS:
       int rank,                    // in  - rank of data in both Fields
       int my_DE_rcv,               // in  - DE identifier in the DELayout of
                                    //       the receiving Field
