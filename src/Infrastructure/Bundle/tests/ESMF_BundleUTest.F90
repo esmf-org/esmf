@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.23 2004/06/14 23:45:35 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.24 2004/06/15 16:01:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.23 2004/06/14 23:45:35 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.24 2004/06/15 16:01:14 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -106,7 +106,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Requirement FLD2.4 Deletion
       ! Verify getting the name of an uninitialized Bundle is handled properly.
       call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
@@ -116,7 +116,7 @@
       !------------------------------------------------------------------------
      
 
-      !NEX_UTest
+      !EX_UTest
       !  Verify the Field count query from an uninitialized Bundle is handled
       call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc)
       write(failMsg, *) ""
@@ -124,7 +124,7 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Requirement FLD2.1.1 Creation using Field list
       ! It shall be possible to create a bundle with a field list, an optional 
       ! I/O specification, and an identifier that specifies whether the bundle 
@@ -139,7 +139,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
       bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
 				name="atmosphere data", rc=rc)
@@ -148,7 +148,7 @@
       !------------------------------------------------------------------------
 
 
-      !NEX_UTest
+      !EX_UTest
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
       write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
@@ -182,7 +182,7 @@
 
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Creating a Field Test
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
       write(failMsg, *) ""
@@ -191,7 +191,7 @@
 
       !------------------------------------------------------------------------
 
-      !NEX_UTest
+      !EX_UTest
       ! Add a field to an empty Bundle
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       write(failMsg, *) ""
