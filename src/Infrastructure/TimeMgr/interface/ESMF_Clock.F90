@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.45 2004/02/05 23:03:46 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.46 2004/02/13 00:59:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -592,19 +592,18 @@
 
       if (present(ringingAlarmList) .and. sizeofRingingAlarmList > 1) then
         ! pass address of 2nd element for C++ to calculate array step size
-        call c_ESMC_ClockAdvance(clock, timeStep, &
-                                 ringingAlarmList(1), ringingAlarmList(2), &
-                                 sizeofRingingAlarmList, ringingAlarmCount, rc)
+        call c_ESMC_ClockAdvance2(clock, timeStep, &
+                                  ringingAlarmList(1), ringingAlarmList(2), &
+                                  sizeofRingingAlarmList, ringingAlarmCount, rc)
       else if (sizeofRingingAlarmList == 1) then
         ! array has only one element
-        call c_ESMC_ClockAdvance(clock, timeStep, &
-                                 ringingAlarmList(1), ESMF_NULL_POINTER, &
-                                 sizeofRingingAlarmList, ringingAlarmCount, rc)
+        call c_ESMC_ClockAdvance1(clock, timeStep, &
+                                  ringingAlarmList(1), &
+                                  sizeofRingingAlarmList, ringingAlarmCount, rc)
       else
         ! array is not present
-        call c_ESMC_ClockAdvance(clock, timeStep, &
-                                 ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
-                                 sizeofRingingAlarmList, ringingAlarmCount, rc)
+        call c_ESMC_ClockAdvance0(clock, timeStep, &
+                                  sizeofRingingAlarmList, ringingAlarmCount, rc)
       endif
     
       end subroutine ESMF_ClockAdvance
@@ -794,13 +793,13 @@
 
       if (sizeofAlarmList > 1) then
         ! pass address of 2nd element for C++ to calculate array step size
-        call c_ESMC_ClockGetAlarmList(clock, alarmListType, &
+        call c_ESMC_ClockGetAlarmList2(clock, alarmListType, &
                                       alarmList(1), alarmList(2), &
                                       sizeofAlarmList, alarmCount, timeStep, rc)
       else
         ! array has only one element
-        call c_ESMC_ClockGetAlarmList(clock, alarmListType, &
-                                      alarmList(1), ESMF_NULL_POINTER, &
+        call c_ESMC_ClockGetAlarmList1(clock, alarmListType, &
+                                      alarmList(1), &
                                       sizeofAlarmList, alarmCount, timeStep, rc)
       endif
     
