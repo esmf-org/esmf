@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.7 2003/07/02 17:20:01 nscollins Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.8 2003/07/02 19:23:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.7 2003/07/02 17:20:01 nscollins Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.8 2003/07/02 19:23:30 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -84,6 +84,12 @@
       write(failMsg, *) "rc =", rc, ", numDEs =", numDEs
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! if uni-processor test, bail-out
+      if (numDEs.eq.1) then
+        ! print *, "uni-processor test, bailing out ..."
+        goto 10
+      endif
 
 #ifdef EXHAUSTIVE
       !EX_UTest
@@ -214,6 +220,8 @@
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
+
+10    continue
 
       !NEX_UTest
       ! entire test pass/fail result
