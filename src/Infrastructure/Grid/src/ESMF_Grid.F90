@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.142 2004/03/04 23:52:21 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.143 2004/03/05 17:16:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.142 2004/03/04 23:52:21 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.143 2004/03/05 17:16:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1284,7 +1284,7 @@
       subroutine ESMF_GridGetDE(grid, horzDistGridId, vertDistGridId, &
                                 horzPhysGridId, vertPhysGridId, &
                                 horzRelLoc, vertRelLoc, &
-                                localCellCount, localCellCountPerDim, &
+                                myDE, localCellCount, localCellCountPerDim, &
                                 globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
@@ -1295,6 +1295,7 @@
       integer, intent(in), optional :: vertPhysGridId
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
@@ -1333,10 +1334,12 @@
 !          vertical grid.
 !     \item[{[horzRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
-!          grid.          
+!          grid.
 !     \item[{[vertRelLoc]}]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
-!          grid.          
+!          grid.
+!     \item[{[myDE]}]
+!          Identifier for this {\tt ESMF\_DE}, zero-based.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
@@ -1383,7 +1386,7 @@
         call ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
                               horzPhysGridId, vertPhysGridId, &
                               horzRelLoc, vertRelLoc, &
-                              localCellCount, localCellCountPerDim, &
+                              myDE, localCellCount, localCellCountPerDim, &
                               globalStartPerDim, globalAIPerDim, total, status)
 
       !-------------
