@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.39 2003/04/14 19:42:28 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.40 2003/04/15 16:12:17 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.39 2003/04/14 19:42:28 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.40 2003/04/15 16:12:17 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -360,6 +360,120 @@
 
         end function ESMF_AppCompCreate
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AppCompGet -- Query a component for various information
+!
+! !INTERFACE:
+      subroutine ESMF_AppCompGet(component, name, layout, &
+                                           dirpath, configfile, config, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AppComp), intent(in) :: component
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DELayout), intent(out), optional :: layout
+      character(len=*), intent(out), optional :: dirpath
+      character(len=*), intent(out), optional :: configfile
+      type(ESMF_Config), intent(out), optional :: config
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns information about the component.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompGet(component%compp, name, layout, &
+                          dirpath=dirpath, configfile=configfile, &
+                          config=config, rc=rc)
+
+        end subroutine ESMF_AppCompGet
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AppCompSet -- Query a component for various information
+!
+! !INTERFACE:
+      subroutine ESMF_AppCompSet(component, name, layout, &
+                                           dirpath, configfile, config, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AppComp), intent(inout) :: component
+      character(len=*), intent(in), optional :: name
+      type(ESMF_DELayout), intent(in), optional :: layout
+      character(len=*), intent(in), optional :: dirpath
+      character(len=*), intent(in), optional :: configfile
+      type(ESMF_Config), intent(in), optional :: config
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Sets or resets information about the component.  When the caller
+!      only wants to set a single value specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompSet(component%compp, name, layout, &
+                          dirpath=dirpath, configfile=configfile, &
+                          config=config, rc=rc)
+
+        end subroutine ESMF_AppCompSet
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AppCompValidate -- Ensure the Component internal data is valid.
+!
+! !INTERFACE:
+      subroutine ESMF_AppCompValidate(component, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_AppComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to ensure a Component is valid.
+!
+!EOP
+! !REQUIREMENTS:
+
+       call ESMF_CompValidate(component%compp, options, rc)
+ 
+       end subroutine ESMF_AppCompValidate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AppCompPrint -- Print the contents of a Component
+!
+! !INTERFACE:
+      subroutine ESMF_AppCompPrint(component, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_AppComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a component.
+!
+!EOP
+! !REQUIREMENTS:
+
+       print *, "Application Component:"
+       call ESMF_CompPrint(component%compp, options, rc)
+
+       end subroutine ESMF_AppCompPrint
 
 !------------------------------------------------------------------------------
 !BOP
@@ -624,6 +738,276 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine
+
+! !INTERFACE:
+      subroutine ESMF_GridCompInitialize(component, importstate, &
+                                           exportstate, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp) :: component
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user initialization code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Initialization routine for.
+!
+!   \item[{[importstate]}]  Import data for initialization.
+!
+!   \item[{[exportstate]}]  Export data for initialization.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompInitialize(component%compp, ESMF_GRIDCOMPTYPE, &
+                    importstate, exportstate, clock=clock, phase=phase, &
+                    gcomp=component, rc=rc)
+
+        end subroutine ESMF_GridCompInitialize
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompRun -- Call the Component's run routine
+
+! !INTERFACE:
+      subroutine ESMF_GridCompRun(component, importstate, &
+                                           exportstate, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp) :: component
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user run code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Run routine for.
+!
+!   \item[{[importstate]}]  Import data for run.
+!
+!   \item[{[exportstate]}]  Export data for run.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompRun(component%compp, ESMF_GRIDCOMPTYPE, importstate, &
+                                 exportstate, clock=clock, phase=phase, &
+                                 gcomp=component, rc=rc)
+
+        end subroutine ESMF_GridCompRun
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompGet -- Query a component for various information
+!
+! !INTERFACE:
+      subroutine ESMF_GridCompGet(component, name, layout, mtype, grid, &
+                                                       configfile, config, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(in) :: component
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DELayout), intent(out), optional :: layout
+      type(ESMF_ModelType), intent(out), optional :: mtype 
+      type(ESMF_Grid), intent(out), optional :: grid
+      character(len=*), intent(out), optional :: configfile
+      type(ESMF_Config), intent(out), optional :: config
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns information about the component.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompGet(component%compp, name, layout, &
+                          mtype=mtype, grid=grid, configfile=configfile, &
+                          config=config, rc=rc)
+
+        end subroutine ESMF_GridCompGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompSet -- Query a component for various information
+!
+! !INTERFACE:
+      subroutine ESMF_GridCompSet(component, name, layout, mtype, grid, &
+                                                       configfile, config, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(inout) :: component
+      character(len=*), intent(in), optional :: name
+      type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_ModelType), intent(in), optional :: mtype 
+      type(ESMF_Grid), intent(in), optional :: grid
+      character(len=*), intent(in), optional :: configfile
+      type(ESMF_Config), intent(in), optional :: config
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Sets or resets information about the component.  When the caller
+!      only wants to set a single value specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompSet(component%compp, name, layout, &
+                          mtype=mtype, grid=grid, configfile=configfile, &
+                          config=config, rc=rc)
+
+        end subroutine ESMF_GridCompSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompValidate -- Ensure the Component internal data is valid.
+!
+! !INTERFACE:
+      subroutine ESMF_GridCompValidate(component, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to ensure a Component is valid.
+!
+!EOP
+! !REQUIREMENTS:
+
+       call ESMF_CompValidate(component%compp, options, rc)
+
+       ! TODO: also need to validate grid if it's associated here
+ 
+       end subroutine ESMF_GridCompValidate
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_GridCompPrint -- Print the contents of a Component
+!
+! !INTERFACE:
+      subroutine ESMF_GridCompPrint(component, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a component.
+!
+!EOP
+! !REQUIREMENTS:
+
+       print *, "Gridded Component:"
+       call ESMF_CompPrint(component%compp, options, rc)
+
+       end subroutine ESMF_GridCompPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompFinalize -- Call the Component's finalize routine
+
+! !INTERFACE:
+      subroutine ESMF_GridCompFinalize(component, importstate, &
+                                           exportstate, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp) :: component
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user finalize code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Finalize routine for.
+!
+!   \item[{[importstate]}]  Import data for finalize.
+!
+!   \item[{[exportstate]}]  Export data for finalize.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompFinalize(component%compp, ESMF_GRIDCOMPTYPE, importstate, &
+                                 exportstate, clock=clock, phase=phase, &
+                                 gcomp=component, rc=rc)
+
+        end subroutine ESMF_GridCompFinalize
+
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_GridCompDestroy -- Release resources for a Component
 
 ! !INTERFACE:
@@ -681,57 +1065,6 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_GridCompDestroy
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompRun -- Call the Component's run routine
-
-! !INTERFACE:
-      subroutine ESMF_GridCompRun(component, importstate, &
-                                           exportstate, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user run code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[component]
-!    Component to call Run routine for.
-!
-!   \item[{[importstate]}]  Import data for run.
-!
-!   \item[{[exportstate]}]  Export data for run.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompRun(component%compp, ESMF_GRIDCOMPTYPE, importstate, &
-                                 exportstate, clock=clock, phase=phase, &
-                                 gcomp=component, rc=rc)
-
-        end subroutine ESMF_GridCompRun
-
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -907,6 +1240,274 @@
 
         end function ESMF_CplCompCreateConf
     
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompInitialize -- Call the Component's init routine
+
+! !INTERFACE:
+      subroutine ESMF_CplCompInitialize(component, statelist, &
+                                                        clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp) :: component
+      !type (ESMF_State), intent(inout), optional :: statelist(:)
+      type (ESMF_State), intent(inout), optional :: statelist
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user initialization code for a component.
+!
+!    
+!  The arguments are: 
+!  \begin{description} 
+!  
+!   \item[component]
+!    Component to call Initialization routine for.
+!
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        !!if (present(statelist)) print *, "statelist present"
+        !!if (present(clock)) print *, "clock present"
+        !!if (present(phase)) print *, "phase present"
+        !!if (present(rc)) print *, "rc present"
+
+        !!if (present(statelist)) print *, "statelength =", size(statelist)
+
+        !!print *, "calling CompInitialize now, from cplinit"
+
+        call ESMF_CompInitialize(component%compp, ESMF_CPLCOMPTYPE, &
+                          statelist=statelist, clock=clock, phase=phase, &
+                          ccomp=component, rc=rc)
+
+        end subroutine ESMF_CplCompInitialize
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompRun -- Call the Component's run routine
+
+! !INTERFACE:
+      subroutine ESMF_CplCompRun(component, statelist, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp) :: component
+      !type (ESMF_State), intent(inout), optional :: statelist(:)
+      type (ESMF_State), intent(inout), optional :: statelist
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user run code for a component.
+!
+!    
+!  The arguments are: 
+!  \begin{description} 
+!  
+!   \item[component]
+!    Component to call Run routine for.
+!
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompRun(component%compp, ESMF_CPLCOMPTYPE, &
+                          statelist=statelist, clock=clock, phase=phase, &
+                          ccomp=component, rc=rc)
+
+        end subroutine ESMF_CplCompRun
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompGet -- Query a component for various information
+!
+! !INTERFACE:
+      subroutine ESMF_CplCompGet(component, name, layout, &
+                                                       configfile, config, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(in) :: component
+      character(len=*), intent(out), optional :: name
+      type(ESMF_DELayout), intent(out), optional :: layout
+      character(len=*), intent(out), optional :: configfile
+      type(ESMF_Config), intent(out), optional :: config
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns information about the component.  For queries where the caller
+!      only wants a single value, specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompGet(component%compp, name, layout, &
+                          configfile=configfile, config=config, rc=rc)
+
+        end subroutine ESMF_CplCompGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompSet -- Query a component for various information
+!
+! !INTERFACE:
+      subroutine ESMF_CplCompSet(component, name, layout, &
+                                                       configfile, config, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(inout) :: component
+      character(len=*), intent(in), optional :: name
+      type(ESMF_DELayout), intent(in), optional :: layout
+      character(len=*), intent(in), optional :: configfile
+      type(ESMF_Config), intent(in), optional :: config
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Sets or resets information about the component.  When the caller
+!      only wants to set a single value specify the argument by name.
+!      All the arguments after the component input are optional 
+!      to facilitate this.
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompSet(component%compp, name, layout, &
+                          configfile=configfile, config=config, rc=rc)
+
+        end subroutine ESMF_CplCompSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompValidate -- Ensure the Component internal data is valid.
+!
+! !INTERFACE:
+      subroutine ESMF_CplCompValidate(component, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to ensure a Component is valid.
+!
+!EOP
+! !REQUIREMENTS:
+
+       call ESMF_CompValidate(component%compp, options, rc)
+ 
+       end subroutine ESMF_CplCompValidate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CplCompPrint -- Print the contents of a Component
+!
+! !INTERFACE:
+      subroutine ESMF_CplCompPrint(component, options, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp) :: component
+      character (len = *), intent(in), optional :: options
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Routine to print information about a component.
+!
+!EOP
+! !REQUIREMENTS:
+
+       print *, "Coupler Component:"
+       call ESMF_CompPrint(component%compp, options, rc)
+
+       end subroutine ESMF_CplCompPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CplCompFinalize -- Call the Component's finalize routine
+
+! !INTERFACE:
+      subroutine ESMF_CplCompFinalize(component, statelist, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_CplComp) :: component
+      !type (ESMF_State), intent(inout), optional :: statelist(:)
+      type (ESMF_State), intent(inout), optional :: statelist
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user finalize code for a component.
+!
+!    
+!  The arguments are: 
+!  \begin{description} 
+!  
+!   \item[component]
+!    Component to call Finalize routine for.
+!
+!   %\item[{[statelist]}]  List of import and export states for coupling.
+!   \item[{[statelist]}]  
+!       State containing list of nested import and export states for coupling.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompFinalize(component%compp, ESMF_CPLCOMPTYPE, &
+                               statelist=statelist, clock=clock, phase=phase, &
+                               ccomp=component, rc=rc)
+
+        end subroutine ESMF_CplCompFinalize
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1181,117 +1782,6 @@
 ! This section includes the Component Init, Run, and Finalize methods
 !
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine
-
-! !INTERFACE:
-      subroutine ESMF_GridCompInitialize(component, importstate, &
-                                           exportstate, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[component]
-!    Component to call Initialization routine for.
-!
-!   \item[{[importstate]}]  Import data for initialization.
-!
-!   \item[{[exportstate]}]  Export data for initialization.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompInitialize(component%compp, ESMF_GRIDCOMPTYPE, &
-                    importstate, exportstate, clock=clock, phase=phase, &
-                    gcomp=component, rc=rc)
-
-        end subroutine ESMF_GridCompInitialize
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompInitialize -- Call the Component's init routine
-
-! !INTERFACE:
-      subroutine ESMF_CplCompInitialize(component, statelist, &
-                                                        clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      !type (ESMF_State), intent(inout), optional :: statelist(:)
-      type (ESMF_State), intent(inout), optional :: statelist
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user initialization code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Initialization routine for.
-!
-!   %\item[{[statelist]}]  List of import and export states for coupling.
-!   \item[{[statelist]}]  
-!       State containing list of nested import and export states for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        !!if (present(statelist)) print *, "statelist present"
-        !!if (present(clock)) print *, "clock present"
-        !!if (present(phase)) print *, "phase present"
-        !!if (present(rc)) print *, "rc present"
-
-        !!if (present(statelist)) print *, "statelength =", size(statelist)
-
-        !!print *, "calling CompInitialize now, from cplinit"
-
-        call ESMF_CompInitialize(component%compp, ESMF_CPLCOMPTYPE, &
-                          statelist=statelist, clock=clock, phase=phase, &
-                          ccomp=component, rc=rc)
-
-        end subroutine ESMF_CplCompInitialize
-
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
@@ -1413,56 +1903,6 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompRun -- Call the Component's run routine
-
-! !INTERFACE:
-      subroutine ESMF_CplCompRun(component, statelist, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      !type (ESMF_State), intent(inout), optional :: statelist(:)
-      type (ESMF_State), intent(inout), optional :: statelist
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user run code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Run routine for.
-!
-!   %\item[{[statelist]}]  List of import and export states for coupling.
-!   \item[{[statelist]}]  
-!       State containing list of nested import and export states for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompRun(component%compp, ESMF_CPLCOMPTYPE, &
-                          statelist=statelist, clock=clock, phase=phase, &
-                          ccomp=component, rc=rc)
-
-        end subroutine ESMF_CplCompRun
-
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
@@ -1578,107 +2018,6 @@
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompFinalize -- Call the Component's finalize routine
-
-! !INTERFACE:
-      subroutine ESMF_GridCompFinalize(component, importstate, &
-                                           exportstate, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[component]
-!    Component to call Finalize routine for.
-!
-!   \item[{[importstate]}]  Import data for finalize.
-!
-!   \item[{[exportstate]}]  Export data for finalize.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompFinalize(component%compp, ESMF_GRIDCOMPTYPE, importstate, &
-                                 exportstate, clock=clock, phase=phase, &
-                                 gcomp=component, rc=rc)
-
-        end subroutine ESMF_GridCompFinalize
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompFinalize -- Call the Component's finalize routine
-
-! !INTERFACE:
-      subroutine ESMF_CplCompFinalize(component, statelist, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_CplComp) :: component
-      !type (ESMF_State), intent(inout), optional :: statelist(:)
-      type (ESMF_State), intent(inout), optional :: statelist
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user finalize code for a component.
-!
-!    
-!  The arguments are: 
-!  \begin{description} 
-!  
-!   \item[component]
-!    Component to call Finalize routine for.
-!
-!   %\item[{[statelist]}]  List of import and export states for coupling.
-!   \item[{[statelist]}]  
-!       State containing list of nested import and export states for coupling.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompFinalize(component%compp, ESMF_CPLCOMPTYPE, &
-                               statelist=statelist, clock=clock, phase=phase, &
-                               ccomp=component, rc=rc)
-
-        end subroutine ESMF_CplCompFinalize
-
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
@@ -1799,105 +2138,6 @@
 ! Query/Set information from/in the component.
 !
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AppCompGet -- Query a component for various information
-!
-! !INTERFACE:
-      subroutine ESMF_AppCompGet(component, name, layout, &
-                                           dirpath, configfile, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_AppComp), intent(in) :: component
-      character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: layout
-      character(len=*), intent(out), optional :: dirpath
-      character(len=*), intent(out), optional :: configfile
-      type(ESMF_Config), intent(out), optional :: config
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns information about the component.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the component input are optional 
-!      to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompGet(component%compp, name, layout, &
-                          dirpath=dirpath, configfile=configfile, &
-                          config=config, rc=rc)
-
-        end subroutine ESMF_AppCompGet
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompGet -- Query a component for various information
-!
-! !INTERFACE:
-      subroutine ESMF_GridCompGet(component, name, layout, mtype, grid, &
-                                                       configfile, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(in) :: component
-      character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: layout
-      type(ESMF_ModelType), intent(out), optional :: mtype 
-      type(ESMF_Grid), intent(out), optional :: grid
-      character(len=*), intent(out), optional :: configfile
-      type(ESMF_Config), intent(out), optional :: config
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns information about the component.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the component input are optional 
-!      to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompGet(component%compp, name, layout, &
-                          mtype=mtype, grid=grid, configfile=configfile, &
-                          config=config, rc=rc)
-
-        end subroutine ESMF_GridCompGet
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompGet -- Query a component for various information
-!
-! !INTERFACE:
-      subroutine ESMF_CplCompGet(component, name, layout, &
-                                                       configfile, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(in) :: component
-      character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: layout
-      character(len=*), intent(out), optional :: configfile
-      type(ESMF_Config), intent(out), optional :: config
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns information about the component.  For queries where the caller
-!      only wants a single value, specify the argument by name.
-!      All the arguments after the component input are optional 
-!      to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompGet(component%compp, name, layout, &
-                          configfile=configfile, config=config, rc=rc)
-
-        end subroutine ESMF_CplCompGet
-
-!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
@@ -1973,105 +2213,6 @@
         end subroutine ESMF_CompGet
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AppCompSet -- Query a component for various information
-!
-! !INTERFACE:
-      subroutine ESMF_AppCompSet(component, name, layout, &
-                                           dirpath, configfile, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_AppComp), intent(inout) :: component
-      character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      character(len=*), intent(in), optional :: dirpath
-      character(len=*), intent(in), optional :: configfile
-      type(ESMF_Config), intent(in), optional :: config
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Sets or resets information about the component.  When the caller
-!      only wants to set a single value specify the argument by name.
-!      All the arguments after the component input are optional 
-!      to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompSet(component%compp, name, layout, &
-                          dirpath=dirpath, configfile=configfile, &
-                          config=config, rc=rc)
-
-        end subroutine ESMF_AppCompSet
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompSet -- Query a component for various information
-!
-! !INTERFACE:
-      subroutine ESMF_GridCompSet(component, name, layout, mtype, grid, &
-                                                       configfile, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp), intent(inout) :: component
-      character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      type(ESMF_ModelType), intent(in), optional :: mtype 
-      type(ESMF_Grid), intent(in), optional :: grid
-      character(len=*), intent(in), optional :: configfile
-      type(ESMF_Config), intent(in), optional :: config
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Sets or resets information about the component.  When the caller
-!      only wants to set a single value specify the argument by name.
-!      All the arguments after the component input are optional 
-!      to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompSet(component%compp, name, layout, &
-                          mtype=mtype, grid=grid, configfile=configfile, &
-                          config=config, rc=rc)
-
-        end subroutine ESMF_GridCompSet
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompSet -- Query a component for various information
-!
-! !INTERFACE:
-      subroutine ESMF_CplCompSet(component, name, layout, &
-                                                       configfile, config, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp), intent(inout) :: component
-      character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      character(len=*), intent(in), optional :: configfile
-      type(ESMF_Config), intent(in), optional :: config
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Sets or resets information about the component.  When the caller
-!      only wants to set a single value specify the argument by name.
-!      All the arguments after the component input are optional 
-!      to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompSet(component%compp, name, layout, &
-                          configfile=configfile, config=config, rc=rc)
-
-        end subroutine ESMF_CplCompSet
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
@@ -2154,7 +2295,7 @@
 ! This section is I/O for Components
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompCheckpoint - Save a Component's state to disk
 !
 ! !INTERFACE:
@@ -2171,7 +2312,7 @@
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -2181,7 +2322,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompRestore - Restore a Component's state from disk
 !
 ! !INTERFACE:
@@ -2200,7 +2341,7 @@
 !      Used to reinitialize
 !      all data associated with a Component from the last call to Checkpoint.
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -2216,7 +2357,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompWrite - Write a Component to disk
 !
 ! !INTERFACE:
@@ -2233,7 +2374,7 @@
 !      options specified in the IOSpec derived type. 
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -2243,7 +2384,7 @@
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CompRead - Read a Component from disk
 !
 ! !INTERFACE:
@@ -2261,7 +2402,7 @@
 !      Used to read data from persistent storage in a variety of formats.
 !
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
@@ -2276,75 +2417,6 @@
  
         end function ESMF_CompRead
 
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AppCompValidate -- Ensure the Component internal data is valid.
-!
-! !INTERFACE:
-      subroutine ESMF_AppCompValidate(component, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_AppComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to ensure a Component is valid.
-!
-!EOP
-! !REQUIREMENTS:
-
-       call ESMF_CompValidate(component%compp, options, rc)
- 
-       end subroutine ESMF_AppCompValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompValidate -- Ensure the Component internal data is valid.
-!
-! !INTERFACE:
-      subroutine ESMF_GridCompValidate(component, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to ensure a Component is valid.
-!
-!EOP
-! !REQUIREMENTS:
-
-       call ESMF_CompValidate(component%compp, options, rc)
-
-       ! TODO: also need to validate grid if it's associated here
- 
-       end subroutine ESMF_GridCompValidate
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CplCompValidate -- Ensure the Component internal data is valid.
-!
-! !INTERFACE:
-      subroutine ESMF_CplCompValidate(component, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to ensure a Component is valid.
-!
-!EOP
-! !REQUIREMENTS:
-
-       call ESMF_CompValidate(component%compp, options, rc)
- 
-       end subroutine ESMF_CplCompValidate
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -2397,78 +2469,6 @@
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_CompValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AppCompPrint -- Print the contents of a Component
-!
-! !INTERFACE:
-      subroutine ESMF_AppCompPrint(component, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_AppComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about a component.
-!
-!EOP
-! !REQUIREMENTS:
-
-       print *, "Application Component:"
-       call ESMF_CompPrint(component%compp, options, rc)
-
-       end subroutine ESMF_AppCompPrint
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_GridCompPrint -- Print the contents of a Component
-!
-! !INTERFACE:
-      subroutine ESMF_GridCompPrint(component, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_GridComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about a component.
-!
-!EOP
-! !REQUIREMENTS:
-
-       print *, "Gridded Component:"
-       call ESMF_CompPrint(component%compp, options, rc)
-
-       end subroutine ESMF_GridCompPrint
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CplCompPrint -- Print the contents of a Component
-!
-! !INTERFACE:
-      subroutine ESMF_CplCompPrint(component, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_CplComp) :: component
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Routine to print information about a component.
-!
-!EOP
-! !REQUIREMENTS:
-
-       print *, "Coupler Component:"
-       call ESMF_CompPrint(component%compp, options, rc)
-
-       end subroutine ESMF_CplCompPrint
 
 !------------------------------------------------------------------------------
 !BOPI
