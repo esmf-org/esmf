@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.20 2004/02/27 22:09:26 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.21 2004/02/28 00:14:25 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -221,7 +221,6 @@
 !EOPI
 
 
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_BundleCreate - Create a new Bundle
@@ -388,13 +387,131 @@ function ESMF_pfne(pf1, pf2)
 end function
 
 
-!
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleAddFields - Add a Field to a Bundle.
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAddFields()
+      subroutine ESMF_BundleAddField(bundle, field, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Field), intent(in) :: field
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Add a single Field reference to an existing {\tt ESMF\_Bundle}.  The Field must have the
+!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
+!      packed data, this will mean copying the data to add this field.
+! 
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [bundle]
+!           The {\tt ESMF\_Bundle} to add {\tt ESMF\_Field} to.
+!
+!     \item [field]
+!           The {\tt ESMF\_Field} to add.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  FLD2.5.2
+
+      type(ESMF_Field) :: temp_list(1)
+      type(ESMF_BundleType), pointer :: btype
+
+      ! Initialize return code in case we return early.
+      ! Otherwise, count on AddFieldList call to set rc
+      if(present(rc)) rc = ESMF_FAILURE
+
+      temp_list(1) = field
+
+      ! validate bundle before going further
+      if (.not. associated(bundle%btypep)) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+      btype => bundle%btypep
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+    
+      call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
+
+      end subroutine ESMF_BundleAddField
+
+
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleAddFields - Add a list of Fields to a Bundle.
 !
-! This section includes all the Bundle Create and Destroy routines
+! !INTERFACE:
+      ! Private name; call using ESMF_BundleAddFields()
+      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fields, rc)
 !
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle        
+      integer, intent(in) :: fieldCount
+      type(ESMF_Field), dimension(:), intent(in) :: fields
+      integer, intent(out), optional :: rc          
 !
+! !DESCRIPTION:
+!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
+!      The {\tt ESMF\_Field} must have the
+!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the 
+!      {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
+!      packed data, this will mean copying the data to add this field.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [bundle]
+!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
+!
+!     \item [fieldCount]
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
+!           Must be equal to or less than the number of 
+!           {\tt ESMF\_Field}s in the following argument.
+!
+!     \item [fields]
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
+!           items will be added to the {\tt ESMF\_Bundle}.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+! 
+!EOP
+! !REQUIREMENTS:  FLD2.5.2
+
+      type(ESMF_BundleType), pointer :: btype
+
+      ! Initialize return code in case we return early.
+      ! Otherwise, count on AddFieldList call to set rc
+      if(present(rc)) rc = ESMF_FAILURE
+
+      ! validate bundle before going further
+      if (.not. associated(bundle%btypep)) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+      btype => bundle%btypep
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+    
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
+      
+      end subroutine ESMF_BundleAddFieldList
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -423,7 +540,7 @@ end function
 !     a single contiguous memory buffer.  All {\tt ESMF\_Field}s
 !     must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
 !
-!     \newline The arguments are:
+!     The arguments are:
 !     \begin{description}
 !
 !     \item [fieldCount]
@@ -500,9 +617,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleCreateNoFields - Create an empty Bundle
+! !IROUTINE: ESMF_BundleCreate - Create a Bundle with no Fields
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_BundleCreate()
       function ESMF_BundleCreateNoFields(grid, name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -599,6 +717,50 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_BundleDeleteField - Remove a Field from a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleDeleteField(bundle, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      character (len = *), intent(in) :: name
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!      Delete a Field reference from an existing {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} 
+!      has packed data this will mean copying the data to remove this field.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [bundle]
+!           The {\tt ESMF\_Bundle} to remove {\tt ESMF\_Field} from.
+!
+!     \item [name]
+!           Name of {\tt ESMF\_Field} to remove.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:  FLD2.5.2
+
+
+!
+!  TODO: code goes here
+!
+      print *, "ESMF_BundleDeleteField not implemented yet"
+
+      end subroutine ESMF_BundleDeleteField
+
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_BundleDestroy - Free all resources associated with a Bundle.
 !
 ! !INTERFACE:
@@ -671,241 +833,11 @@ end function
 
 
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleConstructNew - Construct the internals of a Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleConstructNew(btype, fieldCount, fields, &
-                                              packflag, name, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleType), pointer :: btype 
-      integer, intent(in) :: fieldCount           
-      type(ESMF_Field), dimension (:) :: fields
-      type(ESMF_PackFlag), intent(in), optional :: packflag 
-      character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Constructs a {\tt ESMF\_Bundle} from a list of existing
-!     gridded {\tt ESMF\_Fields}.  This routine requires an existing
-!     {\tt ESMF\_Bundle} type as an input and fills in
-!     the internals.  {\tt ESMF\_BundleCreateNew()} does
-!     the allocation of an {\tt ESMF\_Bundle} type first and then
-!     calls this routine.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [btype]
-!           Pointer to a {\tt ESMF\_Bundle} object.
-!
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of
-!           {\tt ESMF\_Field}s in the following argument.
-!
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!
-!     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
-!           data in individual {\tt ESMF\_Array}s will be collected
-!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
-!           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
-!
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!
-!     \item [{[iospec]}]
-!           I/O specification.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOPI
-      
-      integer :: i                                ! temp var
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-!     Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     Initialize the derived type contents.
-      call ESMF_BundleConstructNoFields(btype, name, iospec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
-        return
-      endif
-
-!     If specified, set packflag
-      if(present(packflag)) btype%pack_flag = packflag
-
-!     Add the fields in the list, checking for consistency.
-      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
-        return
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleConstructNew
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleConstructNoFields - Construct the internals of a Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleConstructNoFields(btype, name, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleType), pointer :: btype 
-      character (len = *), intent(in), optional :: name 
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Constructs the internals of a {\tt ESMF\_Bundle}, given an existing
-!     {\tt ESMF\_Bundle} type as an input.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [btype]
-!           An existing {\tt ESMF\_Bundle} to be initialized.
-!
-!     \item [{[name]}]
-!           {\tt ESMF\_Bundle} name.  A default name will be generated if
-!           one is not specified.
-!
-!     \item [{[iospec]}]
-!           I/O specification.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOPI
-      
-      integer :: status                            ! Error status
-      logical :: rcpresent                         ! Return code present
-      character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
-
-      ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      rcpresent =.FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-
-      ! Initialize the base object
-      call ESMF_BaseCreate(btype%base, "Bundle", name, 0, status)
-      if(status .NE. 0) then
-        print *, "ERROR in ESMF_BundleConstructNoFields: BaseCreate"
-        return
-      endif
-
-
-      ! Initialize bundle contents
-      
-      btype%localbundle%gridstatus = ESMF_STATE_UNINIT
-      btype%localbundle%arraystatus = ESMF_STATE_UNINIT
-      btype%gridstatus = ESMF_STATE_UNINIT
-   
-      btype%field_count = 0
-      nullify(btype%flist)
-      
-      btype%pack_flag = ESMF_NO_PACKED_DATA
-!     nullify(btype%localbundle%packed_data)
-      btype%bundlestatus = ESMF_STATE_READY
-  
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleConstructNoFields
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleDestruct - Free contents of a Bundle 
-!
-! !INTERFACE:
-      subroutine ESMF_BundleDestruct(btype, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleType), pointer :: btype 
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Releases all resources except the {\tt ESMF\_Bundle} itself.
-!
-!     \begin{description}
-!
-!     \item [btype]
-!           Pointer to a {\tt ESMF\_Bundle} object.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOPI
-
-      logical :: rcpresent                        ! Return code present
-      integer :: status
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-     btype%bundlestatus = ESMF_STATE_INVALID
-     call ESMF_BaseDestroy(btype%base, status)
-
-     !
-     ! TODO: code goes here
-     !
-
-
-     if (rcpresent) rc = status
-
-
-     end subroutine ESMF_BundleDestruct
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section includes the Field related routines.
-!
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleGetFieldByName - Retrieve a Field by name
+! !IROUTINE: ESMF_BundleGetFields - Retrieve a Field by name
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetFields()
       subroutine ESMF_BundleGetFieldByName(bundle, name, field, rc)
 !
 ! !ARGUMENTS:
@@ -1002,9 +934,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleGetFieldByNum - Retrieve a Field by index number
+! !IROUTINE: ESMF_BundleGetFields - Retrieve a Field by index number
 !
 ! !INTERFACE:
+      ! Private name; call using ESMF_BundleGetFields()
       subroutine ESMF_BundleGetFieldByNum(bundle, index, field, rc)
 !
 ! !ARGUMENTS:
@@ -1128,326 +1061,6 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleAddField - Add a Field to a Bundle.
-!
-! !INTERFACE:
-      subroutine ESMF_BundleAddField(bundle, field, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_Field), intent(in) :: field
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Add a single Field reference to an existing {\tt ESMF\_Bundle}.  The Field must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
-! 
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [bundle]
-!           The {\tt ESMF\_Bundle} to add {\tt ESMF\_Field} to.
-!
-!     \item [field]
-!           The {\tt ESMF\_Field} to add.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  FLD2.5.2
-
-      type(ESMF_Field) :: temp_list(1)
-      type(ESMF_BundleType), pointer :: btype
-
-      ! Initialize return code in case we return early.
-      ! Otherwise, count on AddFieldList call to set rc
-      if(present(rc)) rc = ESMF_FAILURE
-
-      temp_list(1) = field
-
-      ! validate bundle before going further
-      if (.not. associated(bundle%btypep)) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
-      btype => bundle%btypep
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
-    
-      call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
-
-      end subroutine ESMF_BundleAddField
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleAddFieldList - Add a list of Fields to a Bundle.
-!
-! !INTERFACE:
-      subroutine ESMF_BundleAddFieldList(bundle, fieldCount, fields, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle        
-      integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
-      integer, intent(out), optional :: rc          
-!
-! !DESCRIPTION:
-!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
-!      The {\tt ESMF\_Field} must have the
-!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the 
-!      {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [bundle]
-!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
-!
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
-!
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-! 
-!EOP
-! !REQUIREMENTS:  FLD2.5.2
-
-      type(ESMF_BundleType), pointer :: btype
-
-      ! Initialize return code in case we return early.
-      ! Otherwise, count on AddFieldList call to set rc
-      if(present(rc)) rc = ESMF_FAILURE
-
-      ! validate bundle before going further
-      if (.not. associated(bundle%btypep)) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
-      btype => bundle%btypep
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
-        return
-      endif
-    
-      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
-      
-      end subroutine ESMF_BundleAddFieldList
-
-
-!------------------------------------------------------------------------------
-!TODO: decide how to document this.  it's internal only.
-!BOPI
-! !IROUTINE: ESMF_BundleTypeAddFieldList - Add a list of Fields to a Bundle.
-!
-! !INTERFACE:
-      subroutine ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleType), pointer :: btype        
-      integer, intent(in) :: fieldCount
-      type(ESMF_Field), dimension(:), intent(in) :: fields
-      integer, intent(out), optional :: rc          
-!
-! !DESCRIPTION:
-!      Add a Field reference to an existing {\tt ESMF\_Bundl}.  The {\tt ESMF\_Field} must have the
-!      same Grid as the rest of the {\tt ESMF\_Fields} in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
-!      packed data, this will mean copying the data to add this field.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [btype]
-!           {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
-!
-!     \item [fieldCount]
-!           Number of fields to be added to the {\tt ESMF\_Bundle}.
-!           Must be equal to or less than the number of 
-!           {\tt ESMF\_Field}s in the following argument.
-!
-!     \item [fields]
-!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
-!           items will be added to the {\tt ESMF\_Bundle}.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-! 
-!EOPI
-      
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: i                                ! temp var
-      type(ESMF_Field), dimension(:), pointer :: temp_flist  
-                                                  ! list of fields
-      type(ESMF_Grid) :: grid
-
-      ! Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Initial values
-      nullify(temp_flist)
-    
-      ! early exit.
-      if (fieldCount .le. 0) then
-          print *, "ERROR in ESMF_BundleAddFields: called with 0 Fields"
-          return
-      endif
-      
-   
-! TODO: add consistency checks below
-!       loop over field count, get grid and check to see it's the same
-
-      ! Add the fields in the list, checking for consistency.
-      if (btype%field_count .eq. 0) then
-        
-          allocate(btype%flist(fieldCount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
-            return
-          endif
-         
-          ! now add the fields to the new list
-          do i=1, fieldCount
-            btype%flist(i) = fields(i)
-          enddo
-
-          btype%field_count = fieldCount
-      else
-          ! make a list the right length
-          allocate(temp_flist(btype%field_count + fieldCount), stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
-            return
-          endif
-
-          ! preserve old contents
-          do i = 1, btype%field_count
-            temp_flist(i) = btype%flist(i)
-          enddo
-
-          ! and append the new fields to the list
-          do i=1, fieldCount
-            temp_flist(btype%field_count+i) = fields(i)
-          enddo
-
-          ! delete old list
-          deallocate(btype%flist, stat=status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
-          endif
-
-          ! and now make this the permanent list
-          btype%flist => temp_flist
-          btype%field_count = btype%field_count + fieldCount
-
-      endif
-
-      ! If no grid set yet, loop and set the first grid we find to be
-      !  associated with the bundle.  Note that Fields can be created
-      !  that don't have associated grids yet, so we have to be able to
-      !  deal consistently with that.
-      if (btype%gridstatus .eq. ESMF_STATE_UNINIT) then
-          do i=1, fieldCount
-            call ESMF_FieldGetGrid(btype%flist(i), grid, status)
-            if (status .ne. ESMF_SUCCESS) cycle
-
-            btype%grid = grid
-            btype%gridstatus = ESMF_STATE_READY
-            status = ESMF_SUCCESS
-            exit
-          enddo
-      endif
-
-      ! If packed data buffer requested, create or update it here.
-      if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
-
-         call ESMF_BundleTypeRepackData(btype, rc=rc)
-
-      endif
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleTypeAddFieldList
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleDeleteField - Remove a Field from a Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleDeleteField(bundle, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      character (len = *), intent(in) :: name
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!      Delete a Field reference from an existing {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} 
-!      has packed data this will mean copying the data to remove this field.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [bundle]
-!           The {\tt ESMF\_Bundle} to remove {\tt ESMF\_Field} from.
-!
-!     \item [name]
-!           Name of {\tt ESMF\_Field} to remove.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:  FLD2.5.2
-
-
-!
-!  TODO: code goes here
-!
-      print *, "ESMF_BundleDeleteField not implemented yet"
-
-      end subroutine ESMF_BundleDeleteField
-
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section includes all the interfaces which manipulate the
-!  packed data.  The functions are implemented in the ESMF_Data code.
-!
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_BundlePackData - Pack Field data into a single Array
 !
 ! !INTERFACE:
@@ -1520,68 +1133,6 @@ end function
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_BundlePackData
-
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_BundleTypeRepackData - Pack Field data into a single Array
-!
-! !INTERFACE:
-      subroutine ESMF_BundleTypeRepackData(btype, datamap, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_BundleType), pointer :: btype
-      type(ESMF_DataMap), intent(in), optional :: datamap 
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
-!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
-!      have to be copied into a new {\tt ESMF\_Array}.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item [btype]
-!           {\tt ESMF\_BundleType} pointer.
-!
-!     \item [{[datamap]}]
-!           Ordering and Interleaving information.
-!
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: i                                ! temp var
-      type(ESMF_Array) :: pkarray                 ! Array for packed data
-
-!     Initialize return code.  Assume failure until success assured.
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-!     pkarray = ESMF_ArrayCreate(arrayspec, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_BundlePackData: packed Array create"
-        return
-      endif
-
-      btype%pack_flag = ESMF_PACKED_DATA
-!     btype%localbundle%packed_data = pkarray
-
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_BundleTypeRepackData
 
 
 !------------------------------------------------------------------------------
@@ -1898,16 +1449,6 @@ end function
 !  TODO: code goes here
 !
       end subroutine ESMF_BundleDataDropCopy
-
-
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section includes all the interfaces which deal with the Grid
-!  which is common to all Fields in the bundle.  These are interfaces
-!  to code which is actually implemented in the Grid class.
-!
-!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2276,15 +1817,6 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section contains the Get routines for finding out information
-!  about characteristics of a Bundle.
-!
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_BundleGetName - Return the name of the Bundle
 !
@@ -2513,9 +2045,8 @@ end function
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleGetIntAttr - Retrieve an Attribute from a Bundle
+! !IROUTINE: ESMF_BundleGetAttribute - Retrieve an integer Attribute
 !
 ! !INTERFACE:
       subroutine ESMF_BundleGetIntAttr(bundle, name, value, rc)
@@ -3941,6 +3472,433 @@ end function
       ! TODO: add more code here for printing more info
 
       end subroutine ESMF_BundlePrint
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleTypeAddFieldList - Add a list of Fields to a Bundle.
+!
+! !INTERFACE:
+      subroutine ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleType), pointer :: btype        
+      integer, intent(in) :: fieldCount
+      type(ESMF_Field), dimension(:), intent(in) :: fields
+      integer, intent(out), optional :: rc          
+!
+! !DESCRIPTION:
+!      Add a Field reference to an existing {\tt ESMF\_Bundl}.  The {\tt ESMF\_Field} must have the
+!      same Grid as the rest of the {\tt ESMF\_Fields} in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
+!      packed data, this will mean copying the data to add this field.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [btype]
+!           {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
+!
+!     \item [fieldCount]
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
+!           Must be equal to or less than the number of 
+!           {\tt ESMF\_Field}s in the following argument.
+!
+!     \item [fields]
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
+!           items will be added to the {\tt ESMF\_Bundle}.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+! 
+!EOPI
+      
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: i                                ! temp var
+      type(ESMF_Field), dimension(:), pointer :: temp_flist  
+                                                  ! list of fields
+      type(ESMF_Grid) :: grid
+
+      ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Initial values
+      nullify(temp_flist)
+    
+      ! early exit.
+      if (fieldCount .le. 0) then
+          print *, "ERROR in ESMF_BundleAddFields: called with 0 Fields"
+          return
+      endif
+      
+   
+! TODO: add consistency checks below
+!       loop over field count, get grid and check to see it's the same
+
+      ! Add the fields in the list, checking for consistency.
+      if (btype%field_count .eq. 0) then
+        
+          allocate(btype%flist(fieldCount), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleAddFields: Fieldlist allocate"
+            return
+          endif
+         
+          ! now add the fields to the new list
+          do i=1, fieldCount
+            btype%flist(i) = fields(i)
+          enddo
+
+          btype%field_count = fieldCount
+      else
+          ! make a list the right length
+          allocate(temp_flist(btype%field_count + fieldCount), stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleConstructNew: temporary Fieldlist allocate"
+            return
+          endif
+
+          ! preserve old contents
+          do i = 1, btype%field_count
+            temp_flist(i) = btype%flist(i)
+          enddo
+
+          ! and append the new fields to the list
+          do i=1, fieldCount
+            temp_flist(btype%field_count+i) = fields(i)
+          enddo
+
+          ! delete old list
+          deallocate(btype%flist, stat=status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleConstructNew: Fieldlist deallocate"
+          endif
+
+          ! and now make this the permanent list
+          btype%flist => temp_flist
+          btype%field_count = btype%field_count + fieldCount
+
+      endif
+
+      ! If no grid set yet, loop and set the first grid we find to be
+      !  associated with the bundle.  Note that Fields can be created
+      !  that don't have associated grids yet, so we have to be able to
+      !  deal consistently with that.
+      if (btype%gridstatus .eq. ESMF_STATE_UNINIT) then
+          do i=1, fieldCount
+            call ESMF_FieldGetGrid(btype%flist(i), grid, status)
+            if (status .ne. ESMF_SUCCESS) cycle
+
+            btype%grid = grid
+            btype%gridstatus = ESMF_STATE_READY
+            status = ESMF_SUCCESS
+            exit
+          enddo
+      endif
+
+      ! If packed data buffer requested, create or update it here.
+      if (btype%pack_flag .eq. ESMF_PACKED_DATA) then
+
+         call ESMF_BundleTypeRepackData(btype, rc=rc)
+
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleTypeAddFieldList
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleTypeRepackData - Pack Field data into a single Array
+!
+! !INTERFACE:
+      subroutine ESMF_BundleTypeRepackData(btype, datamap, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleType), pointer :: btype
+      type(ESMF_DataMap), intent(in), optional :: datamap 
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
+!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
+!      have to be copied into a new {\tt ESMF\_Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [btype]
+!           {\tt ESMF\_BundleType} pointer.
+!
+!     \item [{[datamap]}]
+!           Ordering and Interleaving information.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  FLD2.1.1, FLD2.2, FLD2.5.9
+
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: i                                ! temp var
+      type(ESMF_Array) :: pkarray                 ! Array for packed data
+
+!     Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     pkarray = ESMF_ArrayCreate(arrayspec, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_BundlePackData: packed Array create"
+        return
+      endif
+
+      btype%pack_flag = ESMF_PACKED_DATA
+!     btype%localbundle%packed_data = pkarray
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleTypeRepackData
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleConstructNew - Construct the internals of a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleConstructNew(btype, fieldCount, fields, &
+                                              packflag, name, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleType), pointer :: btype 
+      integer, intent(in) :: fieldCount           
+      type(ESMF_Field), dimension (:) :: fields
+      type(ESMF_PackFlag), intent(in), optional :: packflag 
+      character (len = *), intent(in), optional :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Constructs a {\tt ESMF\_Bundle} from a list of existing
+!     gridded {\tt ESMF\_Fields}.  This routine requires an existing
+!     {\tt ESMF\_Bundle} type as an input and fills in
+!     the internals.  {\tt ESMF\_BundleCreateNew()} does
+!     the allocation of an {\tt ESMF\_Bundle} type first and then
+!     calls this routine.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [btype]
+!           Pointer to a {\tt ESMF\_Bundle} object.
+!
+!     \item [fieldCount]
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
+!           Must be equal to or less than the number of
+!           {\tt ESMF\_Field}s in the following argument.
+!
+!     \item [fields]
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldCount}
+!           items will be added to the {\tt ESMF\_Bundle}.
+!
+!     \item [{[packflag]}]
+!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
+!           data in individual {\tt ESMF\_Array}s will be collected
+!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
+!           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
+!
+!     \item [{[name]}]
+!           {\tt ESMF\_Bundle} name.  A default name will be generated if
+!           one is not specified.
+!
+!     \item [{[iospec]}]
+!           I/O specification.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOPI
+      
+      integer :: i                                ! temp var
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+!     Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Initialize the derived type contents.
+      call ESMF_BundleConstructNoFields(btype, name, iospec, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
+        return
+      endif
+
+!     If specified, set packflag
+      if(present(packflag)) btype%pack_flag = packflag
+
+!     Add the fields in the list, checking for consistency.
+      call ESMF_BundleTypeAddFieldList(btype, fieldCount, fields, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_BundleConstructNew: Bundle construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleConstructNew
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleConstructNoFields - Construct the internals of a Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleConstructNoFields(btype, name, iospec, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleType), pointer :: btype 
+      character (len = *), intent(in), optional :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Constructs the internals of a {\tt ESMF\_Bundle}, given an existing
+!     {\tt ESMF\_Bundle} type as an input.
+!
+!     The arguments are:
+!     \begin{description}
+!
+!     \item [btype]
+!           An existing {\tt ESMF\_Bundle} to be initialized.
+!
+!     \item [{[name]}]
+!           {\tt ESMF\_Bundle} name.  A default name will be generated if
+!           one is not specified.
+!
+!     \item [{[iospec]}]
+!           I/O specification.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOPI
+      
+      integer :: status                            ! Error status
+      logical :: rcpresent                         ! Return code present
+      character (len = ESMF_MAXSTR) :: defaultname ! Bundle name if not given
+
+      ! Initialize return code.  Assume failure until success assured.
+      status = ESMF_FAILURE
+      rcpresent =.FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+
+      ! Initialize the base object
+      call ESMF_BaseCreate(btype%base, "Bundle", name, 0, status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_BundleConstructNoFields: BaseCreate"
+        return
+      endif
+
+
+      ! Initialize bundle contents
+      
+      btype%localbundle%gridstatus = ESMF_STATE_UNINIT
+      btype%localbundle%arraystatus = ESMF_STATE_UNINIT
+      btype%gridstatus = ESMF_STATE_UNINIT
+   
+      btype%field_count = 0
+      nullify(btype%flist)
+      
+      btype%pack_flag = ESMF_NO_PACKED_DATA
+!     nullify(btype%localbundle%packed_data)
+      btype%bundlestatus = ESMF_STATE_READY
+  
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_BundleConstructNoFields
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_BundleDestruct - Free contents of a Bundle 
+!
+! !INTERFACE:
+      subroutine ESMF_BundleDestruct(btype, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_BundleType), pointer :: btype 
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Releases all resources except the {\tt ESMF\_Bundle} itself.
+!
+!     \begin{description}
+!
+!     \item [btype]
+!           Pointer to a {\tt ESMF\_Bundle} object.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOPI
+
+      logical :: rcpresent                        ! Return code present
+      integer :: status
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+     btype%bundlestatus = ESMF_STATE_INVALID
+     call ESMF_BaseDestroy(btype%base, status)
+
+     !
+     ! TODO: code goes here
+     !
+
+
+     if (rcpresent) rc = status
+
+
+     end subroutine ESMF_BundleDestruct
+
+
+
 
 
       end module ESMF_BundleMod
