@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.4 2003/03/24 17:41:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.4 2003/03/24 17:41:38 eschwab Exp $'
 
 !==============================================================================
 
@@ -149,8 +149,8 @@
 !     TMG3.1, TMG3.4.4
 !EOP
 
-      call c_ESMC_ClockInit(clock, TimeStep, StartTime, StopTime, &
-                            RefTime, rc)
+!      call c_ESMC_ClockInit(clock, TimeStep, StartTime, StopTime, &
+!                            RefTime, rc)
     
       end subroutine ESMF_ClockInit
 
@@ -183,7 +183,7 @@
 !     TMG4.1, TMG4.2
 !EOP
     
-      call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
+!      call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
     
       end subroutine ESMF_ClockAddAlarm
 
@@ -216,7 +216,7 @@
 !     TMG4.3
 !EOP
 
-      call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
+!      call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
     
       end subroutine ESMF_ClockGetAlarmList
 
@@ -249,7 +249,7 @@
 !     TMG4.3
 !EOP
 
-      call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
+!      call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
     
       end subroutine ESMF_ClockGetNumAlarms
 
@@ -279,7 +279,7 @@
 !     TMG3.4.5
 !EOP
 
-      call c_ESMC_ClockSyncToWallClock(clock, rc)
+!      call c_ESMC_ClockSyncToWallClock(clock, rc)
     
       end subroutine ESMF_ClockSyncToWallClock
 
@@ -316,11 +316,11 @@
 !     TMG3.4.1
 !EOP
 
-      if (present(RingingAlarmList)) then
-        call c_ESMC_ClockAdvance(clock, RingingAlarmList, NumRingingAlarms, rc)
-      else
-        call c_ESMC_ClockAdvance(clock, rc)
-      end if
+!      if (present(RingingAlarmList)) then
+!        call c_ESMC_ClockAdvance(clock, RingingAlarmList, NumRingingAlarms, rc)
+!      else
+!        call c_ESMC_ClockAdvance(clock, rc)
+!      end if
     
       end subroutine ESMF_ClockAdvance
 
@@ -353,7 +353,8 @@
 !     TMG3.5.6
 !EOP
 
-      call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
+       ESMF_ClockIsStopTime = .false.
+!      call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
     
       end function ESMF_ClockIsStopTime
 
@@ -387,7 +388,7 @@
 !     TMG3.5.1
 !EOP
 
-      call c_ESMC_ClockGetAdvanceCount(clock, AdvanceCount, rc)
+!      call c_ESMC_ClockGetAdvanceCount(clock, AdvanceCount, rc)
     
       end subroutine ESMF_ClockGetAdvanceCount
 
@@ -420,7 +421,7 @@
 !     TMG3.5.2
 !EOP
 
-      call c_ESMC_ClockGetTimeInterval(clock, TimeInterval, rc)
+!      call c_ESMC_ClockGetTimeInterval(clock, TimeInterval, rc)
     
       end subroutine ESMF_ClockGetTimeInterval
 
@@ -453,7 +454,7 @@
 !     TMG3.4.2
 !EOP
 
-      call c_ESMC_ClockSetTimeInterval(clock, TimeInterval, rc)
+!      call c_ESMC_ClockSetTimeInterval(clock, TimeInterval, rc)
 
       end subroutine ESMF_ClockSetTimeInterval
 
@@ -486,7 +487,7 @@
 !     TMG3.5.4
 !EOP
 
-      call c_ESMC_ClockGetCurrTime(clock, CurrTime, rc)
+!      call c_ESMC_ClockGetCurrTime(clock, CurrTime, rc)
     
       end subroutine ESMF_ClockGetCurrTime
 
@@ -519,7 +520,7 @@
 !     TMG3.4.3
 !EOP
 
-      call c_ESMC_ClockSetCurrTime(clock, CurrTime, rc)
+!      call c_ESMC_ClockSetCurrTime(clock, CurrTime, rc)
     
       end subroutine ESMF_ClockSetCurrTime
 
@@ -552,7 +553,7 @@
 !     TMG3.5.3
 !EOP
 
-      call c_ESMC_ClockGetStartTime(clock, StartTime, rc)
+!      call c_ESMC_ClockGetStartTime(clock, StartTime, rc)
     
       end subroutine ESMF_ClockGetStartTime
 
@@ -585,7 +586,7 @@
 !     TMG3.5.3
 !EOP
 
-      call c_ESMC_ClockGetStopTime(clock, StopTime, rc)
+!      call c_ESMC_ClockGetStopTime(clock, StopTime, rc)
     
       end subroutine ESMF_ClockGetStopTime
 
@@ -618,7 +619,7 @@
 !     TMG3.5.3
 !EOP
 
-      call c_ESMC_ClockGetRefTime(clock, RefTime, rc)
+!      call c_ESMC_ClockGetRefTime(clock, RefTime, rc)
     
       end subroutine ESMF_ClockGetRefTime
 
@@ -651,7 +652,7 @@
 !     TMG3.5.4
 !EOP
 
-      call c_ESMC_ClockGetPrevTime(clock, PrevTime, rc)
+!      call c_ESMC_ClockGetPrevTime(clock, PrevTime, rc)
     
       end subroutine ESMF_ClockGetPrevTime
 
@@ -684,7 +685,7 @@
 !     TMG3.5.5
 !EOP
 
-      call c_ESMC_ClockGetCurrSimTime(clock, CurrSimTime, rc)
+!      call c_ESMC_ClockGetCurrSimTime(clock, CurrSimTime, rc)
     
       end subroutine ESMF_ClockGetCurrSimTime
 
@@ -717,7 +718,7 @@
 !     TMG3.5.5
 !EOP
 
-      call c_ESMC_ClockGetPrevSimTime(clock, PrevSimTime, rc)
+!      call c_ESMC_ClockGetPrevSimTime(clock, PrevSimTime, rc)
    
       end subroutine ESMF_ClockGetPrevSimTime
 
@@ -752,7 +753,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BaseValidate(clock, rc)
+!      call c_ESMC_BaseValidate(clock, rc)
     
       end subroutine ESMF_BaseValidate
 
@@ -783,7 +784,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BasePrint(clock, rc)   
+!      call c_ESMC_BasePrint(clock, rc)   
 
       end subroutine ESMF_BasePrint
 

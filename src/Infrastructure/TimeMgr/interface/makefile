@@ -1,10 +1,9 @@
-# $Id: makefile,v 1.12 2003/03/22 05:46:48 eschwab Exp $ 
+# $Id: makefile,v 1.13 2003/03/24 17:41:39 eschwab Exp $ 
 ALL: lib 
 
 CFLAGS    = 
 FFLAGS    =
-SOURCEC	  = ESMC_BaseTime_F.C ESMC_Time_F.C ESMC_Alarm_F.C
-#SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
+SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
             ESMC_Calendar_F.C ESMC_TimeInterval_F.C ESMC_Time_F.C \
             ESMC_Alarm_F.C ESMC_Clock_F.C
 

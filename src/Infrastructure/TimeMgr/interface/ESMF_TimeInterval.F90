@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.4 2003/03/24 17:41:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.4 2003/03/24 17:41:38 eschwab Exp $'
 
 !==============================================================================
 !
@@ -239,9 +239,9 @@
 !EOP
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalInit(timeinterval, D, H, M, S, MS, US, NS, &
-                                   d_, h_, m_, s_, ms_, us_, ns_, &
-                                   Sn, Sd, cal, rc)
+!      call c_ESMC_TimeIntervalInit(timeinterval, D, H, M, S, MS, US, NS, &
+!                                   d_, h_, m_, s_, ms_, us_, ns_, &
+!                                   Sn, Sd, cal, rc)
 
       end subroutine ESMF_TimeIntervalInit
 
@@ -330,8 +330,8 @@
 !EOP
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalGet(timeinterval, D, H, M, S, MS, US, NS, &
-                                  d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+!      call c_ESMC_TimeIntervalGet(timeinterval, D, H, M, S, MS, US, NS, &
+!                                  d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeIntervalGet
 
@@ -412,8 +412,8 @@
 !EOP
     
       ! use optional args for any subset
-       call c_ESMC_TimeIntervalSet(timeinterval, D, H, M, S, MS, US, NS, &
-                                   d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+!       call c_ESMC_TimeIntervalSet(timeinterval, D, H, M, S, MS, US, NS, &
+!                                   d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeIntervalSet
 
@@ -446,7 +446,7 @@
 !     TMGn.n.n
 !EOP
 
-      call c_ESMC_TimeIntervalGetCalendar(timeinterval, cal, rc)
+!      call c_ESMC_TimeIntervalGetCalendar(timeinterval, cal, rc)
     
       end subroutine ESMF_TimeIntervalGetCalendar
 
@@ -479,7 +479,7 @@
 !     TMGn.n.n
 !EOP
 
-      call c_ESMC_TimeIntervalSetCalendar(timeinterval, cal, rc)
+!      call c_ESMC_TimeIntervalSetCalendar(timeinterval, cal, rc)
     
       end subroutine ESMF_TimeIntervalSetCalendar
 
@@ -516,8 +516,9 @@
 !     TMGn.n.n
 !EOP
 
-      call c_ESMC_TimeIntervalIsSameCal(timeinterval1, timeinterval2, &
-                                             ESMF_TimeIntervalIsSameCal, rc)
+       ESMF_TimeIntervalIsSameCal = .true.
+!      call c_ESMC_TimeIntervalIsSameCal(timeinterval1, timeinterval2, &
+!                                             ESMF_TimeIntervalIsSameCal, rc)
     
       end function ESMF_TimeIntervalIsSameCal
 
@@ -550,7 +551,7 @@
 !     TMG1.5.9
 !EOP
 
-      call c_ESMC_TimeIntervalGetString(timeinterval, Ts, rc)
+!      call c_ESMC_TimeIntervalGetString(timeinterval, Ts, rc)
 
       end subroutine ESMF_TimeIntervalGetString
 
@@ -582,7 +583,7 @@
 !     TMG1.5.8
 !EOP
     
-      call c_ESMC_TimeIntervalGetAbsValue(timeinterval, rc)
+!      call c_ESMC_TimeIntervalGetAbsValue(timeinterval, rc)
 
       end subroutine ESMF_TimeIntervalGetAbsValue
 
@@ -614,7 +615,7 @@
 !     TMG1.5.8
 !EOP
     
-      call c_ESMC_TimeIntervalGetNegAbsVal(timeinterval, rc)
+!      call c_ESMC_TimeIntervalGetNegAbsVal(timeinterval, rc)
 
       end subroutine ESMF_TimeIntervalGetNegAbsVal
 
@@ -652,8 +653,10 @@
 !     TMG1.5.5
 !EOP
 
-      call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
-                                    ESMF_TimeIntervalFQuot, rc)
+       type(ESMF_Fraction) :: temp
+       ESMF_TimeIntervalFQuot = temp
+!      call c_ESMC_TimeIntervalFQuot(timeinterval1, timeinterval2, &
+!                                    ESMF_TimeIntervalFQuot, rc)
 
       end function ESMF_TimeIntervalFQuot
 
@@ -693,8 +696,9 @@
 !     TMG1.5.5
 !EOP
 
-      call c_ESMC_TimeIntervalRQuot(timeinterval1, timeinterval2, &
-                                    ESMF_TimeIntervalRQuot)
+       ESMF_TimeIntervalRQuot = 0.0
+!      call c_ESMC_TimeIntervalRQuot(timeinterval1, timeinterval2, &
+!                                    ESMF_TimeIntervalRQuot)
 
       end function ESMF_TimeIntervalRQuot
 
@@ -728,8 +732,10 @@
 !     TMG1.5.6, TMG5.3, TMG7.2
 !EOP
 
-      call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
-                                    ESMF_TimeIntervalQuotI)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalQuotI = temp
+!      call c_ESMC_TimeIntervalQuotI(timeinterval, divisor, &
+!                                    ESMF_TimeIntervalQuotI)
 
       end function ESMF_TimeIntervalQuotI
 
@@ -763,8 +769,10 @@
 !     TMG1.5.6, TMG5.3, TMG7.2
 !EOP
 
-      call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
-                                    ESMF_TimeIntervalQuotR)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalQuotR = temp
+!      call c_ESMC_TimeIntervalQuotR(timeinterval, divisor, &
+!                                    ESMF_TimeIntervalQuotR)
 
       end function ESMF_TimeIntervalQuotR
 
@@ -798,8 +806,10 @@
 !     TMG1.5.7, TMG7.2
 !EOP
 
-      call c_ESMC_TimeIntervalProdI(timeinterval, multiplier, &
-                                    ESMF_TimeIntervalProdI)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalProdI = temp
+!      call c_ESMC_TimeIntervalProdI(timeinterval, multiplier, &
+!                                    ESMF_TimeIntervalProdI)
 
       end function ESMF_TimeIntervalProdI
 
@@ -833,8 +843,10 @@
 !     TMG1.5.7, TMG7.2
 !EOP
 
-      call c_ESMC_TimeIntervalProdF(timeinterval, multiplier, &
-                                    ESMF_TimeIntervalProdF)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalProdF = temp
+!      call c_ESMC_TimeIntervalProdF(timeinterval, multiplier, &
+!                                    ESMF_TimeIntervalProdF)
 
       end function ESMF_TimeIntervalProdF
 !------------------------------------------------------------------------------
@@ -867,8 +879,10 @@
 !     TMG1.5.7, TMG7.2
 !EOP
 
-      call c_ESMC_TimeIntervalProdR(timeinterval, multiplier, &
-                                    ESMF_TimeIntervalProdR)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalProdR = temp
+!      call c_ESMC_TimeIntervalProdR(timeinterval, multiplier, &
+!                                    ESMF_TimeIntervalProdR)
 
       end function ESMF_TimeIntervalProdR
 
@@ -912,8 +926,10 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeSum(timeinterval1%basetime, timeinterval2%basetime, &
-                              ESMF_TimeIntervalSum%basetime, rc)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalSum = temp
+!      call c_ESMC_BaseTimeSum(timeinterval1%basetime, timeinterval2%basetime, &
+!                              ESMF_TimeIntervalSum%basetime, rc)
 
       end function ESMF_TimeIntervalSum
 
@@ -953,8 +969,10 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeDiff(timeinterval1%basetime, timeinterval2%basetime, &
-                               ESMF_TimeIntervalDiff%basetime, rc)
+       type(ESMF_TimeInterval) :: temp
+       ESMF_TimeIntervalDiff = temp
+!      call c_ESMC_BaseTimeDiff(timeinterval1%basetime, timeinterval2%basetime, &
+!                               ESMF_TimeIntervalDiff%basetime, rc)
 
       end function ESMF_TimeIntervalDiff
 
@@ -993,8 +1011,9 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeEQ(timeinterval1%basetime, timeinterval2%basetime, &
-                             ESMF_TimeIntervalEQ, rc)
+       ESMF_TimeIntervalEQ = .true.
+!      call c_ESMC_BaseTimeEQ(timeinterval1%basetime, timeinterval2%basetime, &
+!                             ESMF_TimeIntervalEQ, rc)
 
       end function ESMF_TimeIntervalEQ
 
@@ -1033,8 +1052,9 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeNE(timeinterval1%basetime, timeinterval2%basetime, &
-                             ESMF_TimeIntervalNE, rc)
+       ESMF_TimeIntervalNE = .true.
+!      call c_ESMC_BaseTimeNE(timeinterval1%basetime, timeinterval2%basetime, &
+!                             ESMF_TimeIntervalNE, rc)
 
       end function ESMF_TimeIntervalNE
 
@@ -1074,8 +1094,9 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLT(timeinterval1%basetime, timeinterval2%basetime, &
-                             ESMF_TimeIntervalLT, rc)
+       ESMF_TimeIntervalLT = .true.
+!      call c_ESMC_BaseTimeLT(timeinterval1%basetime, timeinterval2%basetime, &
+!                             ESMF_TimeIntervalLT, rc)
 
       end function ESMF_TimeIntervalLT
 
@@ -1115,8 +1136,9 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGT(timeinterval1%basetime, timeinterval2%basetime, &
-                             ESMF_TimeIntervalGT, rc)
+       ESMF_TimeIntervalGT = .true.
+!      call c_ESMC_BaseTimeGT(timeinterval1%basetime, timeinterval2%basetime, &
+!                             ESMF_TimeIntervalGT, rc)
 
       end function ESMF_TimeIntervalGT
 
@@ -1156,8 +1178,9 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLE(timeinterval1%basetime, timeinterval2%basetime, &
-                             ESMF_TimeIntervalLE, rc)
+       ESMF_TimeIntervalLE = .true.
+!      call c_ESMC_BaseTimeLE(timeinterval1%basetime, timeinterval2%basetime, &
+!                             ESMF_TimeIntervalLE, rc)
 
       end function ESMF_TimeIntervalLE
 
@@ -1197,8 +1220,9 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGE(timeinterval1%basetime, timeinterval2%basetime, &
-                             ESMF_TimeIntervalGE, rc)
+       ESMF_TimeIntervalGE = .true.
+!      call c_ESMC_BaseTimeGE(timeinterval1%basetime, timeinterval2%basetime, &
+!                             ESMF_TimeIntervalGE, rc)
 
       end function ESMF_TimeIntervalGE
 
@@ -1233,7 +1257,7 @@
 !     TMGn.n.n
 !EOP
     
-      call c_ESMC_BaseValidate(timeinterval, rc)
+!      call c_ESMC_BaseValidate(timeinterval, rc)
 
       end subroutine ESMF_BaseValidate
 
@@ -1264,7 +1288,7 @@
 !     TMGn.n.n
 !EOP
     
-      call c_ESMC_BasePrint(timeinterval, rc)
+!      call c_ESMC_BasePrint(timeinterval, rc)
 
       end subroutine ESMF_BasePrint
 

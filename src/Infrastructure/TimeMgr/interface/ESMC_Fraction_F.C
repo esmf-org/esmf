@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.2 2003/03/22 05:46:04 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.3 2003/03/24 17:41:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
+#if 0
        // keep these for deep classes, or see init below for shallow
        void FTN(c_esmc_fractioncreate)(ESMC_Fraction **ptr, int *arg1, int *arg2,
                                                    int *arg3, int *status) {
@@ -76,7 +77,7 @@ extern "C" {
        void FTN(c_esmc_fractionprint)(ESMC_Fraction **ptr, char *opts, int *status) {
            *status = (*ptr)->ESMC_FractionPrint(opts);
        }
-
+#endif
 };
 
 

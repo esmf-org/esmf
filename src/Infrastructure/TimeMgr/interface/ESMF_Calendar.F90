@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.4 2003/03/14 21:56:49 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.5 2003/03/24 17:41:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.4 2003/03/14 21:56:49 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.5 2003/03/24 17:41:38 eschwab Exp $'
 
 !==============================================================================
 
@@ -213,9 +213,9 @@
 !EOP
 
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarInitGeneric(calendar, DaysPerMonth, &
-                                      SecondsPerDay, DaysPerYear, &
-                                      DaysPerYearDn, DaysPerYearDd, rc)
+!      call c_ESMC_CalendarInitGeneric(calendar, DaysPerMonth, &
+!                                      SecondsPerDay, DaysPerYear, &
+!                                      DaysPerYearDn, DaysPerYearDd, rc)
     
       end subroutine ESMF_CalendarInitGeneric
     
@@ -308,10 +308,10 @@
 
       ! invoke C to C++ entry point
       ! use optional args for any subset
-       call c_ESMC_CalendarConvertToTime(YY, MM, DD, D, H, M, S, &
-                                         MS, US, NS, &
-                                         d_, h_, m_, s_, ms_, us_, ns_, &
-                                         Sn, Sd, basetime, rc)
+!       call c_ESMC_CalendarConvertToTime(YY, MM, DD, D, H, M, S, &
+!                                         MS, US, NS, &
+!                                         d_, h_, m_, s_, ms_, us_, ns_, &
+!                                         Sn, Sd, basetime, rc)
     
       end subroutine ESMF_CalendarConvertToTime
 
@@ -404,10 +404,10 @@
 
 !     invoke C to C++ entry point
       ! use optional args for any subset
-       call c_ESMC_CalendarConvertToDate(basetime, YY, MM, DD, D, H, &
-                                         M, S, MS, US, NS, &
-                                         d_, h_, m_, s_, ms_, us_, ns_, &
-                                         Sn, Sd, rc)
+!       call c_ESMC_CalendarConvertToDate(basetime, YY, MM, DD, D, H, &
+!                                         M, S, MS, US, NS, &
+!                                         d_, h_, m_, s_, ms_, us_, ns_, &
+!                                         Sn, Sd, rc)
     
       end subroutine ESMF_CalendarConvertToDate
 
@@ -442,7 +442,7 @@
 !     TMGn.n.n
 !EOP
       
-      call c_ESMC_BaseValidate(calendar, rc)
+!      call c_ESMC_BaseValidate(calendar, rc)
 
       end subroutine ESMF_BaseValidate
 
@@ -473,7 +473,7 @@
 !     TMGn.n.n
 !EOP
   
-      call c_ESMC_BasePrint(calendar, rc)
+!      call c_ESMC_BasePrint(calendar, rc)
 
       end subroutine ESMF_BasePrint
       

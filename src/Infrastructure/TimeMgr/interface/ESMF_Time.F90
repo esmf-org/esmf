@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.6 2003/03/24 17:41:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.5 2003/03/22 05:46:04 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.6 2003/03/24 17:41:38 eschwab Exp $'
 
 !==============================================================================
 
@@ -205,9 +205,9 @@
 !EOP
 
       ! use optional args for any subset
-      call c_ESMC_TimeInit(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
-                           d_, h_, m_, s_, ms_, us_, ns_, &
-                           Sn, Sd, cal, rc)
+!      call c_ESMC_TimeInit(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+!                           d_, h_, m_, s_, ms_, us_, ns_, &
+!                           Sn, Sd, cal, rc)
 
       end subroutine ESMF_TimeInit
 
@@ -305,8 +305,8 @@
 !EOP
 
       ! use optional args for any subset
-      call c_ESMC_TimeGet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
-                          d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+!      call c_ESMC_TimeGet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+!                          d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeGet
 
@@ -396,8 +396,8 @@
 !EOP
     
       ! use optional args for any subset
-       call c_ESMC_TimeSet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
-                           d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
+!       call c_ESMC_TimeSet(time, YY, MM, DD, D, H, M, S, MS, US, NS, &
+!                           d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeSet
 
