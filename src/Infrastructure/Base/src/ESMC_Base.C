@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.4 2003/04/08 22:48:14 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.5 2003/04/28 21:39:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.4 2003/04/08 22:48:14 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.5 2003/04/28 21:39:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -294,8 +294,83 @@ static int globalCount = 0;
 }  // end ESMC_BaseGetStatus
 
 //-----------------------------------------------------------------------------
+// Misc Utility methods
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AxisIndexInit - Initialize an AxisIndex object
+//
+// !INTERFACE:
+    int ESMC_AxisIndexInit(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+     ESMC_AxisIndex *ai,
+     int l,
+     int r,
+     int max,
+     int decomp, 
+     int gstart) {
+// 
+// !DESCRIPTION:
+//     Initialize an AxisIndex object.
+//
+//EOP
+
+     if (ai == NULL) 
+         return ESMF_FAILURE;
+
+     ai->l = l;
+     ai->r = r;
+     ai->max = max;
+     ai->decomp = decomp;
+     ai->gstart = gstart;
+
+     return ESMF_SUCCESS;
+};
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AxisIndexGet - Retrieve values from an AxisIndex object
+//
+// !INTERFACE:
+    int ESMC_AxisIndexGet(
+//
+// !RETURN VALUE:
+//    int return code
+// 
+// !ARGUMENTS:
+     ESMC_AxisIndex *ai,
+     int *l,
+     int *r,
+     int *max,
+     int *decomp, 
+     int *gstart) {
+// 
+// !DESCRIPTION:
+//     Get values from an AxisIndex object.
+//
+//EOP
+
+     if (ai == NULL) 
+        return ESMF_FAILURE;
+
+     if (l) *l = ai->l;
+     if (r) *r = ai->r;
+     if (max) *max = ai->max;
+     if (decomp) *decomp = ai->decomp;
+     if (gstart) *gstart = ai->gstart;
+
+     return ESMF_SUCCESS;
+};
+
+//-----------------------------------------------------------------------------
 // Attribute methods
 //-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
 //BOP

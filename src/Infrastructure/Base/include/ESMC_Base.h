@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.14 2003/04/28 17:40:21 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.15 2003/04/28 21:39:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -228,25 +228,8 @@ int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, char *name,
                                 ESMC_DataValue *valuelist);
 
 int ESMC_AxisIndexInit(ESMC_AxisIndex *ai, int l, int r, int max, 
-                           int decomp, int gstart) { 
-     if (ai == NULL) return ESMF_FAILURE;
-     ai->l = l;
-     ai->r = r;
-     ai->max = max;
-     ai->decomp = decomp;
-     ai->gstart = gstart;
-     return ESMF_SUCCESS;
-};
-
+                           int decomp, int gstart);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *l, int *r, int *max, 
-                           int *decomp, int *gstart) { 
-     if (ai == NULL) return ESMF_FAILURE;
-     if (l) *l = ai->l;
-     if (r) *r = ai->r;
-     if (max) *max = ai->max;
-     if (decomp) *decomp = ai->decomp;
-     if (gstart) *gstart = ai->gstart;
-     return ESMF_SUCCESS;
-};
+                           int *decomp, int *gstart);
 
 #endif  // ESMC_BASE_H
