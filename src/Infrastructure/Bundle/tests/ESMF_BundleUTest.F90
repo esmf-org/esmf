@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.33 2004/10/05 15:26:36 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.34 2004/10/27 00:04:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !------------------------------------------------------------------------------
 !
-#include <ESMF_Macros.inc>
+#include <ESMF.h>
 
 !==============================================================================
 !BOP
@@ -36,42 +36,31 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.33 2004/10/05 15:26:36 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.34 2004/10/27 00:04:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 
-      ! cumulative result: count failures; no failures equals "all pass"
-      integer :: result = 0, number, npets
 !     ! Local variables
-      integer :: i, x, y, rc, mycell, fieldcount, count, countlist(2)
+      integer :: rc, fieldcount, count, countlist(2)
+      integer :: number, npets
       type(ESMF_Grid) :: grid, grid2
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
-      type(ESMF_ArraySpec) :: arrayspec
-      type(ESMF_Array) :: arraya, arrayb
-      type(ESMF_FieldDataMap) :: datamap
-      type(ESMF_RelLoc) :: relativelocation
-      character (len = ESMF_MAXSTR) :: bname1, bname2, fname1, fname2, fname3
-      type(ESMF_IOspec) :: iospec
-      type(ESMF_Field) :: fields(10), returnedfield1, returnedfield2, returnedfield3, simplefield
-      type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4
-      real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
+      character (len = ESMF_MAXSTR) :: bname1, fname1, fname2, fname3
+      type(ESMF_Field) :: fields(10)
+      type(ESMF_Field) :: returnedfield1, returnedfield2, returnedfield3
+      type(ESMF_Field) :: simplefield, nofield
+      type(ESMF_Bundle) :: bundle1, bundle2, bundle3, nobundle
+      real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr2
       real (ESMF_KIND_R8) :: mincoord(2)
 
 
-
-      ! individual test result code
-
-      ! individual test name
-      character(ESMF_MAXSTR) :: named
-
+      ! cumulative result: count failures; no failures equals "all pass"
+      integer :: result = 0
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
 
-
-      ! instantiate a Bundle 
-      type(ESMF_Bundle) :: bundle
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -84,8 +73,7 @@
 
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
-      
+      call ESMF_TestStart(npets, ESMF_SRCLINE)
 
       !NEX_UTest
       !  Verify that an empty Bundle can be created
@@ -107,13 +95,19 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
+
+      ! set these up for use later
+      nobundle = ESMF_BundleCreate()
+      call ESMF_BundleDestroy(nobundle)
+      nofield = ESMF_FieldCreateNoData()
+      call ESMF_FieldDestroy(nofield)
+
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test Requirement FLD2.4 Deletion
       ! Verify getting the name of an uninitialized Bundle is handled properly.
-#if !defined(ESMF_NO_INITIALIZERS)
-      bundle1 = ESMF_BundleCreate()
-      call ESMF_BundleDestroy(bundle1)
+#if ESMF_NO_INITIALIZERS
+      bundle1 = nobundle
 #endif
       call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
       write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
@@ -121,7 +115,6 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
      
-
       !EX_UTest
       !  Verify the Field count query from an uninitialized Bundle is handled
       call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc)
@@ -155,9 +148,8 @@
 
 
       !EX_UTest
-#if !defined(ESMF_NO_INITIALIZERS)
-      simplefield = ESMF_FieldCreateNoData()
-      call ESMF_FieldDestroy(simplefield)
+#if ESMF_NO_INITIALIZERS
+      simplefield = nofield
 #endif
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc)
       write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
@@ -511,6 +503,7 @@
 
 #endif
 
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
       call ESMF_Finalize(rc)
 
       end program ESMF_BundleUTest
