@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.96 2004/02/20 00:02:30 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.97 2004/02/24 21:30:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1365,13 +1365,11 @@
 ! !REQUIREMENTS: 
 
       integer :: i, j, de
-      integer :: local                              ! increment counter
       integer :: globalStart, globalEnd             ! global counters
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       type(ESMF_DistGridGlobal), pointer :: glob
       integer :: bnd
-      integer, dimension(:), allocatable :: countsPerDE1Use, countsPerDE2Use
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -1392,73 +1390,53 @@
         endif
       endif
 
-      allocate(countsPerDE1Use(nDE(1)))
-      if (dgtype%decompIds(1).eq.0) then
-        countsPerDE1Use(:) = countsPerDEDim1(1)
-      else
-        countsPerDE1Use(:) = countsPerDEDim1(:)
-      endif
-      if (numDims.eq.2) then
-        allocate(countsPerDE2Use(nDE(2)))
-        if (dgtype%decompIds(2).eq.0) then
-          countsPerDE2Use(:) = countsPerDEDim2(1)
-        else
-          countsPerDE2Use(:) = countsPerDEDim2(:)
-        endif
-      endif
-
-      ! Calculate number of local counts on each DE, respecting the setting
-      ! of the total parameter - if set, this includes boundary cells. 
-      do i = 1,nDE(1)
-        do j = 1,nDE(2)
-          de = (j-1)*nDE(1) + i
-          glob%cellCountPerDE(de) = countsPerDE1Use(i) + bnd
-          glob%cellCountPerDEPerDim(de,1) = countsPerDE1Use(i) + bnd
-          if (numDims.eq.2) then
-            glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
-                                    * (countsPerDE2Use(j) + bnd)
-            glob%cellCountPerDEPerDim(de,2) = countsPerDE2Use(j) + bnd
-          endif
-        enddo
-      enddo
+      glob%cellCountPerDE(:) = 1
 
       ! Set extent counts per axis from the number of de's and number of cells
       ! First in the 1 direction
 
-      if (dgtype%decompIds(1).eq.0) then
+      ! break out here by decompId value
+      select case(dgtype%decompIds(1))
+
+      !-------------
+      case(0) ! not a decomposed axis
+
         globalStart = 1
-        globalEnd   = bnd + countsPerDE1Use(1)
-      
+        globalEnd   = bnd + countsPerDEDim1(1)
+ 
         do i = 1,nDE(1)
           do j = 1,nDE(2)
             de = (j-1)*nDE(1) + i
+            glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
+                                    * (countsPerDEDim1(1) + bnd)
+            glob%cellCountPerDEPerDim(de,1) = countsPerDEDim1(1) + bnd
             glob%globalStartPerDEPerDim(de,1) = globalStart - 1
             glob%AIPerDEPerDim(de,1)%min = globalStart
             glob%AIPerDEPerDim(de,1)%max = globalEnd
-          enddo
-        enddo
-        do i = 1,nDE(1)
-          do j = 1,nDE(2)
-            de = (j-1)*nDE(1) + i
             glob%AIPerDEPerDim(de,1)%stride = globalEnd
             if (present(periodic)) then
               if (periodic(1).eq.ESMF_TRUE) &
               glob%AIPerDEPerDim(de,1)%stride = globalEnd &
-                                              + countsPerDE1Use(1) &
-                                              + countsPerDE1Use(nDE(1))
+                                              + countsPerDEDim1(1) &
+                                              + countsPerDEDim1(1)
              ! TODO: check this
             endif
           enddo
         enddo
 
-      else
+      !-------------
+      case(1,2) ! a decomposed axis
+
         globalStart = 1
         globalEnd   = bnd
       
         do i = 1,nDE(1)
-          globalEnd = globalEnd + countsPerDE1Use(i)
+          globalEnd = globalEnd + countsPerDEDim1(i)
           do j = 1,nDE(2)
             de = (j-1)*nDE(1) + i
+            glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
+                                    * (countsPerDEDim1(i) + bnd)
+            glob%cellCountPerDEPerDim(de,1) = countsPerDEDim1(i) + bnd
             glob%globalStartPerDEPerDim(de,1) = globalStart - 1
             glob%AIPerDEPerDim(de,1)%min = globalStart
             glob%AIPerDEPerDim(de,1)%max = globalEnd
@@ -1472,81 +1450,99 @@
             if (present(periodic)) then
               if (periodic(1).eq.ESMF_TRUE) &
               glob%AIPerDEPerDim(de,1)%stride = globalEnd &
-                                              + countsPerDE1Use(1) &
-                                              + countsPerDE1Use(nDE(1))
+                                              + countsPerDEDim1(1) &
+                                              + countsPerDEDim1(nDE(1))
             endif
           enddo
         enddo
-      endif
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_DistGridSetCountsInternal: Invalid decompIds(1)"
+        status = ESMF_FAILURE
+      end select
+
 
       ! Then the 2 decomposition if applicable
+
       if (numDims.eq.2) then
-        if (dgtype%decompIds(2).eq.0) then
+
+        ! break out here by decompId value
+        select case(dgtype%decompIds(2))
+
+        !-------------
+        case(0) ! not a decomposed axis
+
           globalStart = 1
-          globalEnd   = bnd + countsPerDE2Use(1)
-        
+          globalEnd   = bnd + countsPerDEDim2(1)
+ 
           do i = 1,nDE(1)
             do j = 1,nDE(2)
               de = (j-1)*nDE(1) + i
+              glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
+                                      * (countsPerDEDim2(1) + bnd)
+              glob%cellCountPerDEPerDim(de,2) = countsPerDEDim2(1) + bnd
               glob%globalStartPerDEPerDim(de,2) = globalStart - 1
               glob%AIPerDEPerDim(de,2)%min = globalStart
               glob%AIPerDEPerDim(de,2)%max = globalEnd
-            enddo
-          enddo
-          do i = 1,nDE(1)
-            do j = 1,nDE(2)
-              de = (j-1)*nDE(1) + i
               glob%AIPerDEPerDim(de,2)%stride = globalEnd
               if (present(periodic)) then
                 if (periodic(2).eq.ESMF_TRUE) &
                 glob%AIPerDEPerDim(de,2)%stride = globalEnd &
-                                                + countsPerDE2Use(1) &
-                                                + countsPerDE2Use(nDE(1))
+                                                + countsPerDEDim2(1) &
+                                                + countsPerDEDim2(1)
                ! TODO: check this
               endif
             enddo
           enddo
 
-        else
+        !-------------
+        case(1,2) ! a decomposed axis
+  
           globalStart = 1
           globalEnd   = bnd
-          ! TODO: this code was removed from the 1 decomp case above.  should it be
-          !  removed from here as well?
+          ! TODO: this code was removed from the 1 decomp case above.  should it
+          !       be removed from here as well?
           if (present(periodic)) then
             if (periodic(2).eq.ESMF_TRUE) then
-              globalStart = countsPerDE2Use(nDE(2)) + 1
-              globalEnd   = countsPerDE2Use(nDE(2))
+              globalStart = countsPerDEDim2(nDE(2)) + 1
+              globalEnd   = countsPerDEDim2(nDE(2))
             endif
           endif
-
+      
           do j = 1,nDE(2)
-            globalEnd = globalEnd + countsPerDE2Use(j)
+            globalEnd = globalEnd + countsPerDEDim2(j)
             do i = 1,nDE(1)
               de = (j-1)*nDE(1) + i
+              glob%cellCountPerDE(de) = glob%cellCountPerDE(de) &
+                                      * (countsPerDEDim2(j) + bnd)
+              glob%cellCountPerDEPerDim(de,2) = countsPerDEDim2(j) + bnd
               glob%globalStartPerDEPerDim(de,2) = globalStart - 1
               glob%AIPerDEPerDim(de,2)%min = globalStart
               glob%AIPerDEPerDim(de,2)%max = globalEnd
             enddo
             globalStart = globalEnd - bnd + 1
           enddo
-          do j = 1,nDE(2)
-            do i = 1,nDE(1)
+          do i = 1,nDE(1)
+            do j = 1,nDE(2)
               de = (j-1)*nDE(1) + i
               glob%AIPerDEPerDim(de,2)%stride = globalEnd
               if (present(periodic)) then
                 if (periodic(2).eq.ESMF_TRUE) &
                 glob%AIPerDEPerDim(de,2)%stride = globalEnd &
-                                                + countsPerDE2Use(1) &
-                                                + countsPerDE2Use(nDE(2))
+                                                + countsPerDEDim2(1) &
+                                                + countsPerDEDim2(nDE(2))
               endif
             enddo
           enddo
-        endif
-      endif
 
-      ! Clean up
-      deallocate(countsPerDE1Use)
-      if (numDims.eq.2) deallocate(countsPerDE2Use)
+        !-------------
+        case default
+          print *, "ERROR in ESMF_DistGridSetCountsInternal: Invalid decompIds(2)"
+          status = ESMF_FAILURE
+        end select
+
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
