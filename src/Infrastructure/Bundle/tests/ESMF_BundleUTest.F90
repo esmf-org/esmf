@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.24 2004/06/15 16:01:14 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.25 2004/06/18 21:31:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,13 +36,13 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.24 2004/06/15 16:01:14 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.25 2004/06/18 21:31:14 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0, number
 !     ! Local variables
-      integer :: i, x, y, rc, mycell, fieldcount
+      integer :: i, x, y, rc, mycell, fieldcount, count
       type(ESMF_Grid) :: grid, grid2
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
@@ -155,7 +155,6 @@
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !  Verify that a Field can be added to a Bundle
       !  Verify that an empty Bundle can be created
       !EX_UTest
       bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
@@ -176,7 +175,7 @@
       !EX_UTest
       ! Creating a Grid
       grid = ESMF_GridCreate(name="Grid", rc=rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Create a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -185,10 +184,18 @@
       !EX_UTest
       ! Creating a Field Test
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
-      write(failMsg, *) ""
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Create a Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Bundle Set Grid Test
+      call ESMF_BundleSetGrid(bundle2, grid, rc=rc)
+      write(failMsg, *) "Did not Return ESMF_SUCCESS"
+      write(name, *) "Bundle Set Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -200,6 +207,22 @@
       !------------------------------------------------------------------------
 
 
+      !EX_UTest
+      ! Getting Attribute Count from a Bundle
+      call ESMF_BundleGetAttributeCount(bundle2, count, rc=rc)
+      write(failMsg, *) "Did not retrun ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify Attribute Count Test
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a Bundle "
+      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       !  Verify that recreating a created Bundle is handled properly
       bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc)
@@ -276,6 +299,7 @@
       write(name, *) "Getting first Field by name from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldGet(returnedfield1, name=fname1, rc=rc)
+      !------------------------------------------------------------------------
 
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS or incorrect name returned"
@@ -346,7 +370,34 @@
       write(name, *) "Getting an integer attribute from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Get an integer attribute to a Bundle Test
+      call ESMF_BundleGetAttributeInfo(bundle1, name="Sides", count=number, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
+      write(name, *) "Getting an attribute info from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+
+
+      !EX_UTest
+      ! Getting Attribute Count from a Bundle
+      call ESMF_BundleGetAttributeCount(bundle1, count, rc=rc)
+      write(failMsg, *) "Did not retrun ESMF_SUCCESS"
+      write(name, *) "Getting Attribute Count from a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      
+      !------------------------------------------------------------------------
+      
+      !EX_UTest
+      ! Verify Attribute Count Test
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a Bundle "
+      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      
       !------------------------------------------------------------------------
 
 
