@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/09 20:56:13 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2004/01/30 00:34:29 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -28,6 +28,8 @@ SYSTEM_TESTS_RUN      = RUN_FlowComp
 SYSTEM_TESTS_RUN_UNI  = RUN_FlowCompUNI
 
 SYSTEM_TESTS_RM       = FlowComp.rm
+
+ESMF_FlowCompSTest.o : $(SYSTEM_TESTS_OBJ)
 
 include $(ESMF_DIR)/makefile
 

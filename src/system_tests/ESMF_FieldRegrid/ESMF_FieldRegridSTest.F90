@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.10 2004/01/29 04:51:38 eschwab Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.11 2004/01/30 00:34:29 nscollins Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -168,11 +168,8 @@
       call ESMF_GridCompInitialize(comp2, importstate=c2imp, clock=clock, rc=rc)
       print *, "Comp 2 Initialize finished, rc =", rc
  
-      cplstate = ESMF_StateCreate("coupler list", ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstate, c1exp, rc=rc)
-      call ESMF_StateAddData(cplstate, c2imp, rc=rc)
-
-      call ESMF_CplCompInitialize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      ! note that the coupler's import is comp1's export
+      call ESMF_CplCompInitialize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
  
 !-------------------------------------------------------------------------
@@ -186,7 +183,7 @@
         call ESMF_GridCompRun(comp1, exportstate=c1exp, clock=clock, rc=rc)
         print *, "Comp 1 Run returned, rc =", rc
   
-        call ESMF_CplCompRun(cpl, statelist=cplstate, clock=clock, rc=rc)
+        call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
         print *, "Coupler Run returned, rc =", rc
   
         call ESMF_GridCompRun(comp2, importstate=c2imp, clock=clock, rc=rc)
@@ -210,7 +207,7 @@
       call ESMF_GridCompFinalize(comp2, importstate=c2imp, clock=clock, rc=rc)
       print *, "Comp 2 Finalize finished, rc =", rc
 
-      call ESMF_CplCompFinalize(cpl, statelist=cplstate, clock=clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       print *, "Coupler Finalize finished, rc =", rc
 
 
