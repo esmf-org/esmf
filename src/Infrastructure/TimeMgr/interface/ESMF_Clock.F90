@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.34 2003/10/30 20:08:12 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.35 2003/11/06 19:08:08 eschwab Exp $'
 
 !==============================================================================
 !
@@ -332,7 +332,7 @@
 !     
 !EOP
 ! !REQUIREMENTS:
-!     TMG3.1, TMG3.4.4
+!     TMG3.5.1 - TMG3.5.5
 
       ! temp name for C++ to fill
       character (len=ESMF_MAXSTR) :: tempName
