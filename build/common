@@ -1,4 +1,4 @@
-# $Id: common,v 1.23 2003/03/25 00:17:40 flanigan Exp $ 
+# $Id: common,v 1.24 2003/03/25 00:39:23 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -104,7 +104,7 @@ clean:
 	$(MAKE) ACTION=tree_clean tree
 
 
-clobber4: clean
+clobber: clean
 	@for DIR in $(CLOBBERDIRS) foo ; do \
 	   if [ $$DIR != "foo" ] ; then \
 	      rm -rf $$DIR ;\
