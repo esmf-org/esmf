@@ -1,6 +1,33 @@
-% $Id: CommMem_background.tex,v 1.1 2002/03/14 05:11:12 cnh Exp $
+% $Id: CommMem_background.tex,v 1.2 2002/06/17 16:57:19 cnh Exp $
 
 \section{Background}
+
+The communication and memory kernels elements of ESMF provide a set of
+services that shield the upper levels of ESMF from system
+level functions. Two related ares are addressed. The basic communication
+primitives that are building blocks for both the 
+data communication between and within components and the
+control messages that components may need to exchange.
+
+
+One reason for isolating this section of ESMF is to help
+absract the communication primitives to allow highly optimized code,
+targeted to specific platforms and to specific framework functions
+to be easliy inserted into ESMF. The {\bf \shortname}
+layer will allow specialized forms of performance critical
+primitives to be employed without impacting application
+code or upper layers of ESMF code.
+
+Channeling communication and ESMF memory allocation through a single 
+layer is also designed to support detiled application-level 
+monitoring.
+
+Infiniband, LAPI example, IPC + LAPI, Myrinet global sum v.
+GM sum. Overlapping co-processor v. non-co-proc. overlap
+VIA, Giganet, Servernet -> convergence
+FDDI
+
+
 
 <Desciption of this class, module or utility set.>
 
@@ -13,6 +40,7 @@ and other software modules that it interacts with.>
 
 <Discussion of scope and restrictions.>
 
+\subsection{Related Material}
 
 
 
