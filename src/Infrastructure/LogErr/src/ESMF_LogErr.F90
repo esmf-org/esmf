@@ -72,34 +72,37 @@ end type ESMF_LOGENTRY
 type ESMF_Log
     private
     sequence       
-    type(ESMF_Logical)                      :: FileIsOpen            
-    integer unitNumber                                                   
-    type(ESMF_Logical)                      :: verbose
-    type(ESMF_Logical)                      :: flush
-    type(ESMF_Logical)                      :: rootOnly
-    integer halt
-    type(ESMF_LogFileType)                  :: logtype
-    integer stream 
-    integer maxElements
-    type(ESMF_LOGENTRY), dimension(1)       ::LOG_ENTRY
-    character(len=32) nameLogErrFile      
+                                            
+    type(ESMF_Logical)                      ::  FileIsOpen
+    type(ESMF_Logical)                      ::  flush
+    integer                                     halt
+    type(ESMF_LOGENTRY), dimension(1)       ::  LOG_ENTRY
+    type(ESMF_LogFileType)                  ::  logtype
+    integer                                     maxElements
+    character(len=32)                           nameLogErrFile 
+    type(ESMF_Logical)                      ::  rootOnly
+    integer                                     stream 
+    integer                                     unitNumber 
+    type(ESMF_Logical)                      ::  verbose
+    
 !If standardout not unit 6, must be changed here.
 #ifndef ESMF_NO_INITIALIZERS
-    integer :: maxTryOpen=100000
-    integer :: stdOutUnitNumber=6
-    type(ESMF_Logical)                      :: fileIO=ESMF_FALSE
+    type(ESMF_Logical)                      ::  fileIO=ESMF_FALSE
+    integer                                 ::  maxTryOpen=100000
+    integer                                 ::  stdOutUnitNumber=6
+    
 #else
-    integer :: maxTryOpen
-    integer :: stdOutUnitNumber
-    type(ESMF_Logical)                      :: fileIO
+    type(ESMF_Logical)                      ::  fileIO
+    integer                                 ::  maxTryOpen
+    integer                                 ::  stdOutUnitNumber
 #endif
 end type ESMF_Log
 
 
-   public ESMF_Log,ESMF_LogOpen, ESMF_LogClose, ESMF_LogWrite,&
-   ESMF_LogInitialize, ESMF_LogFinalize,ESMF_LogFoundError,& 
-   ESMF_LogFoundAllocError,ESMF_LogSet, ESMF_LogGet,&
-   ESMF_LogMsgFoundError,ESMF_LogMsgFoundAllocError
+   public ESMF_Log,ESMF_LogClose,ESMF_LogFinalize,,ESMF_LogFoundAllocError&
+   ESMF_LogFoundError,ESMF_LogGet,ESMF_LogInitialize,&
+   ESMF_LogMsgFoundAllocError,ESMF_LogMsgFoundError,ESMF_LogOpen,&
+   ESMF_LogSet,ESMF_LogWrite
 
 type(ESMF_Log),SAVE::ESMF_LogDefault	
 !----------------------------------------------------------------------------
@@ -150,274 +153,38 @@ contains
 end subroutine ESMF_LogClose
 
 !--------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogOpen - Open Log file(s)
+!BOPI
+! !IROUTINE: ESMF_LogFinalize - Finalizes the Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogOpen(aLog, filename, rc)
+	subroutine ESMF_LogFinalize(rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)			        :: aLog
-    character(len=*)			    :: filename
     integer, intent(out),optional	:: rc
 
 ! !DESCRIPTION:
-!      This routine opens the file(s) associated with {\tt aLog}.
+!      This routine finalizes the global log
 !
 !      The arguments are:
 !      \begin{description}
 ! 
-!      \item [aLog]
-!            Log object.
-!      \item [filename]
-!            Name of file.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOP
-	
-	integer 				:: status, i
-	character(len=10) 			:: t
-	character(len=8) 			:: d
-	
-	if (present(rc)) rc=ESMF_FAILURE
-	aLog%FileIsOpen=ESMF_FALSE
-	if (aLog%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
-	aLog%nameLogErrFile=filename
-	aLog%unitnumber=aLog%stdOutUnitNumber
-	do i=aLog%unitnumber, ESMF_LOG_UPPER
-        inquire(unit=i,iostat=status)
-        if (status .eq. 0) then
-            aLog%FileIsOpen = ESMF_TRUE
-            exit
-        endif
-   	enddo 
-	if (aLog%FileIsOpen .eq. ESMF_FALSE) return
-	aLog%unitNumber = i  
-	if (present(rc)) rc=ESMF_SUCCESS	
-    
-end subroutine ESMF_LogOpen	
-
-!--------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
-
-! !INTERFACE: 
-	function ESMF_LogWrite(msg,logtype,line,file,method)
-!
-!
-! !RETURN VALUE:
-	logical                                 ::ESMF_LogWrite
-! !ARGUMENTS:
-	character(len=*), intent(in)            :: msg
-	type(ESMF_LogFileType), intent(in)      :: logtype
-	integer, intent(in), optional           :: line
-	character(len=*), intent(in), optional  :: file
-	character(len=*), intent(in), optional	:: method
-
-! !DESCRIPTION:
-!      This routine writes to the file(s) associated with {\tt aLog}.
-!
-!      The arguments are:
-!      \begin{description}
-! 
-!      \item [msg]
-!            User-provided context string.
-!      \item [logtype]
-!            The type of message (info(0), warning(1), error(2))..
-!      \item [method]
-!            User-provided method string.
-!      \item [{[rc]}]
-!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
-! 
-!EOP
-	
-   	character(len=10)               :: t
-	character(len=8)                :: d
-	character(len=7)                :: lt
-	character(len=32)               :: f
-	character(len=32)               ::tmethod,tfile
-	integer			      	        ::status,tline
-	integer                         ::ok
-	integer	                        ::i
-	integer                         ::h,m,s,ms,y,mn,dy
-	
-	ESMF_LogWrite=.FALSE.
-	if (present(method)) tmethod=adjustl(method)
-	if (present(line)) tline=line 
-	if (present(file)) then
-	    tfile=adjustl(file)
-	else
-	    tfile=""
+!EOPI
+	if (present(rc)) then
+	  	rc=ESMF_FAILURE
 	endif
-	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
-	
-		if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
-			call DATE_AND_TIME(d,t)	
-			select case (logtype%ftype)
-				case (1)
-					lt="INFO"
-				case (2)
-					lt="WARNING"
-				case default
-					lt="ERROR"
-			end select				
-			ok=0
-			do i=1, 100000
-				OPEN(UNIT=ESMF_LogDefault%unitnumber,File=ESMF_LogDefault%nameLogErrFile,POSITION="APPEND", &
-				ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
-				if (status.eq.0) then
-					if (present(line)) then								
-						if (present(method)) then
-							WRITE(ESMF_LogDefault%unitnumber,122) d," ",h,m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
-							tline," ",trim(tmethod)," ",trim(msg)
-							122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ",tfile,tline,"  ",tmethod,msg
-						else
-							WRITE(ESMF_LogDefault%unitnumber,123) d," ",h,m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
-							tline," ",trim(msg)
-							123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ",tfile,tline,"  ",msg
-						endif	
-					else
-						if (present(method)) then
-							WRITE(ESMF_LogDefault%unitnumber,132) d," ",h,m,s,".",ms," ",trim(lt)," ",&
-							" ",trim(tmethod)," ",trim(msg)
-							132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ","  ",tmethod,msg
-						else
-							WRITE(ESMF_LogDefault%unitnumber,133) d," ",h,m,s,".",ms," ",trim(lt)," ",&
-							" ",trim(msg)
-							133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
-							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-							!lt,"    ","  ",msg
-						endif	
-					endif
-					CLOSE(UNIT=ESMF_LogDefault%stdOutUnitNumber)
-					ESMF_LogWrite=.TRUE.
-					ok=1
-				endif	
-				if (ok.eq.1) exit
-			enddo
+	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
+!	FLUSH	
+		ESMF_LogDefault%FileIsOpen=ESMF_FALSE
+		if (present(rc)) then
+			rc=ESMF_SUCCESS
 		endif
-end function ESMF_LogWrite
-
-!--------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogFoundError - Returns logical associated with finding an error
-
-! !INTERFACE: 
-	function ESMF_LogFoundError(rcToCheck,line,file,method,rcToReturn)
-!
-! !RETURN VALUE:
-	logical                                         ::ESMF_LogFoundError
-! !ARGUMENTS:
-!	
-	integer, intent(in)                             :: rcToCheck
-	integer, intent(in), optional                   :: line
-	character(len=*), intent(in), optional          :: file
-	character(len=*), intent(in), optional	        :: method
-	integer, intent(out), optional                  :: rcToReturn
-	
-
-! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate an error
-!
-!      The arguments are:
-!      \begin{description}
-! 	
-!      \item [rcToCheck]
-!            Return code to check.
-!      \item [{[line]}]
-!            Integer source line number.  Expected to be set by
-!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
-!      \item [{[file]}]
-!            User-provided source file name.  Expected to be set by
-!            using the preprocessor {\tt \_\_FILE\_\_} macro.
-!      \item [{[method]}]
-!            User-provided method string.
-!      \item [{[rcToReturn]}]
-!            If specified, copy the {\tt status} value to {\tt rc}.
-!            This is not the return code for this function; it allows
-!            the calling code to do an assignment of the error code
-!            at the same time it is testing the value.
-!      
-!      \end{description}
-! 
-!EOP
-    logical :: logrc
-	
-    ESMF_LogFoundError = .FALSE.
-    if (present(rcToReturn)) rcToReturn = rcToCheck
-    if (rcToCheck .NE. ESMF_SUCCESS) then
-        logrc = ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method)
-        if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-       endif
-       ESMF_LogFoundError = .TRUE.
-    endif	
-       
-end function ESMF_LogFoundError
-
-!--------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogMsgFoundError - Returns logical associated with finding an error
-
-! !INTERFACE: 
-	function ESMF_LogMsgFoundError(rcToCheck,msg,line,file,method,rcToReturn)
-!
-! !RETURN VALUE:
-	logical                                         ::ESMF_LogMsgFoundError
-! !ARGUMENTS:
-!	
-	integer, intent(in)                             :: rcToCheck
-	character(len=*), intent(in)                    :: msg
-	integer, intent(in), optional                   :: line
-	character(len=*), intent(in), optional          :: file
-	character(len=*), intent(in), optional	        :: method
-	integer, intent(out),optional                    :: rcToReturn
-	
-
-! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate an error
-!
-!      The arguments are:
-!      \begin{description}
-! 	
-!      \item [rc]
-!            Return code to check.
-!      \item [string]
-!            User-provided context string.
-!      \item [logtype]
-!            The type of message (info(0), warning(1), error(2)).
-!      \item [method]
-!            User-provided method string.
-!      
-!      \end{description}
-! 
-!EOP
-    logical :: logrc
-	
-    ESMF_LogMsgFoundError=.FALSE.
-	if (present(rcToReturn)) rcToReturn = rcToCheck
-	if (rcToCheck .NE. ESMF_SUCCESS) then
-	    logrc = ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method)
-        if (.not. logrc) then
-            print *, "Error writing previous error to log file"
-            ! what now?  we're already in the error code...
-            ! just fall through and return i guess.
-       endif
-	   ESMF_LogMsgFoundError=.TRUE.
 	endif	
-       
-end function ESMF_LogMsgFoundError
+	
+end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
 !BOP
@@ -433,8 +200,8 @@ end function ESMF_LogMsgFoundError
 	integer, intent(in)                     :: rcToCheck
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
-	character(len=*), intent(in), optional	:: method
-	integer, intent(out),optional            :: rcToReturn
+	character(len=*), intent(in), optional  :: method
+	integer, intent(out),optional           :: rcToReturn
 
 ! !DESCRIPTION:
 !      This function returns a logical true for return codes that indicate an error
@@ -476,6 +243,64 @@ end function ESMF_LogMsgFoundError
     endif	
        
 end function ESMF_LogFoundAllocError
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogFoundError - Returns logical associated with finding an error
+
+! !INTERFACE: 
+	function ESMF_LogFoundError(rcToCheck,line,file,method,rcToReturn)
+!
+! !RETURN VALUE:
+	logical                                         ::ESMF_LogFoundError
+! !ARGUMENTS:
+!	
+	integer, intent(in)                             :: rcToCheck
+	integer, intent(in), optional                   :: line
+	character(len=*), intent(in), optional          :: file
+	character(len=*), intent(in), optional	        :: method
+	integer, intent(out), optional                  :: rcToReturn
+	
+! !DESCRIPTION:
+!      This function returns a logical true for return codes that indicate an error
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [rcToCheck]
+!            Return code to check.
+!      \item [{[line]}]
+!            Integer source line number.  Expected to be set by
+!            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
+!      \item [{[file]}]
+!            User-provided source file name.  Expected to be set by
+!            using the preprocessor {\tt \_\_FILE\_\_} macro.
+!      \item [{[method]}]
+!            User-provided method string.
+!      \item [{[rcToReturn]}]
+!            If specified, copy the {\tt status} value to {\tt rc}.
+!            This is not the return code for this function; it allows
+!            the calling code to do an assignment of the error code
+!            at the same time it is testing the value.
+!      
+!      \end{description}
+! 
+!EOP
+    logical :: logrc
+	
+    ESMF_LogFoundError = .FALSE.
+    if (present(rcToReturn)) rcToReturn = rcToCheck
+    if (rcToCheck .NE. ESMF_SUCCESS) then
+        logrc = ESMF_LogWrite("StandardError",ESMF_LOG_ERROR,line,file,method)
+        if (.not. logrc) then
+            print *, "Error writing previous error to log file"
+            ! what now?  we're already in the error code...
+            ! just fall through and return i guess.
+       endif
+       ESMF_LogFoundError = .TRUE.
+    endif	
+       
+end function ESMF_LogFoundError
 
 !--------------------------------------------------------------------------
 !BOP
@@ -537,61 +362,6 @@ end function ESMF_LogFoundAllocError
     endif	
        
 end function ESMF_LogMsgFoundAllocError
-
-!--------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogSet - Sets Log Parameters
-
-! !INTERFACE: 
-	subroutine ESMF_LogSet(aLog,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
-!
-! !ARGUMENTS:
-!	
-	type(ESMF_Log)		 				:: aLog
-	type(ESMF_Logical), intent(in),optional			:: verbose
-	type(ESMF_Logical), intent(in),optional			:: flush
-	type(ESMF_Logical), intent(in),optional			:: rootOnly
-	integer, intent(in),optional			        :: halt
-	type(ESMF_LogFileType), intent(in),optional             :: logtype
-	integer, intent(in),optional			        :: stream  
-	integer, intent(in),optional			        :: maxElements
-	integer, intent(out),optional			        :: rc
-	
-! !DESCRIPTION:
-!      This subroutine sets the various options for the log object.
-!
-!      The arguments are:
-!      \begin{description}
-!
-!      \item [aLog]
-!            Log object.
-!      \item [verbose]
-!            Verbose flag.
-!      \item [rootOnly]
-!	     Root only flag
-!      \item [halt]
-!	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
-!      \item [filetype]
-!            The type of file (singlelog(0), multilog(1)).
-!      \item [stream]
-!            The type of stream (free(0), preordered(1))
-!      \item [maxElements]
-!            Maximum number of elements in the log.
-!      \item [{[rc]}]
-!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
-! 
-!EOP 
-	if (present(rc)) rc=ESMF_FAILURE
-	if (present(verbose)) aLog%verbose=verbose
-	if (present(flush)) aLog%flush=flush
-	if (present(rootOnly)) aLog%rootOnly=rootOnly
-	if (present(halt)) aLog%halt=halt
-	if (present(logtype)) aLog%logtype=logtype
-	if (present(stream)) aLog%stream=stream
-	if (present(maxElements)) aLog%maxElements=maxElements
-	if (present(rc)) rc=ESMF_SUCCESS 
-end subroutine ESMF_LogSet
 
 !--------------------------------------------------------------------------
 !BOP
@@ -714,37 +484,269 @@ end subroutine ESMF_LogGet
 end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_LogFinalize - Finalizes the Log file(s)
+!BOP
+! !IROUTINE: ESMF_LogMsgFoundError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
-	subroutine ESMF_LogFinalize(rc)
+	function ESMF_LogMsgFoundError(rcToCheck,msg,line,file,method,rcToReturn)
 !
+! !RETURN VALUE:
+	logical                                         ::ESMF_LogMsgFoundError
 ! !ARGUMENTS:
-      integer, intent(out),optional	:: rc
+!	
+	integer, intent(in)                             :: rcToCheck
+	character(len=*), intent(in)                    :: msg
+	integer, intent(in), optional                   :: line
+	character(len=*), intent(in), optional          :: file
+	character(len=*), intent(in), optional	        :: method
+	integer, intent(out),optional                    :: rcToReturn
+	
 
 ! !DESCRIPTION:
-!      This routine finalizes the global log
+!      This function returns a logical true for return codes that indicate an error
+!
+!      The arguments are:
+!      \begin{description}
+! 	
+!      \item [rc]
+!            Return code to check.
+!      \item [string]
+!            User-provided context string.
+!      \item [logtype]
+!            The type of message (info(0), warning(1), error(2)).
+!      \item [method]
+!            User-provided method string.
+!      
+!      \end{description}
+! 
+!EOP
+    logical :: logrc
+	
+    ESMF_LogMsgFoundError=.FALSE.
+	if (present(rcToReturn)) rcToReturn = rcToCheck
+	if (rcToCheck .NE. ESMF_SUCCESS) then
+	    logrc = ESMF_LogWrite(msg,ESMF_LOG_ERROR,line,file,method)
+        if (.not. logrc) then
+            print *, "Error writing previous error to log file"
+            ! what now?  we're already in the error code...
+            ! just fall through and return i guess.
+       endif
+	   ESMF_LogMsgFoundError=.TRUE.
+	endif	
+       
+end function ESMF_LogMsgFoundError
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogOpen - Open Log file(s)
+
+! !INTERFACE: 
+    subroutine ESMF_LogOpen(aLog, filename, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_Log)			        :: aLog
+    character(len=*)			    :: filename
+    integer, intent(out),optional	:: rc
+
+! !DESCRIPTION:
+!      This routine opens the file(s) associated with {\tt aLog}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 
+!      \item [aLog]
+!            Log object.
+!      \item [filename]
+!            Name of file.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOPI
-	if (present(rc)) then
-	  	rc=ESMF_FAILURE
-	endif
-	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
-!	FLUSH	
-		ESMF_LogDefault%FileIsOpen=ESMF_FALSE
-		if (present(rc)) then
-			rc=ESMF_SUCCESS
-		endif
-	endif	
+!EOP
 	
-end subroutine ESMF_LogFinalize
+	integer 				:: status, i
+	character(len=10) 			:: t
+	character(len=8) 			:: d
+	
+	if (present(rc)) rc=ESMF_FAILURE
+	aLog%FileIsOpen=ESMF_FALSE
+	if (aLog%stdOutUnitNumber .gt. ESMF_LOG_UPPER) return
+	aLog%nameLogErrFile=filename
+	aLog%unitnumber=aLog%stdOutUnitNumber
+	do i=aLog%unitnumber, ESMF_LOG_UPPER
+        inquire(unit=i,iostat=status)
+        if (status .eq. 0) then
+            aLog%FileIsOpen = ESMF_TRUE
+            exit
+        endif
+   	enddo 
+	if (aLog%FileIsOpen .eq. ESMF_FALSE) return
+	aLog%unitNumber = i  
+	if (present(rc)) rc=ESMF_SUCCESS	
+    
+end subroutine ESMF_LogOpen	
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogSet - Sets Log Parameters
+
+! !INTERFACE: 
+	subroutine ESMF_LogSet(aLog,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
+!
+! !ARGUMENTS:
+!	
+	type(ESMF_Log)		 				:: aLog
+	type(ESMF_Logical), intent(in),optional			:: verbose
+	type(ESMF_Logical), intent(in),optional			:: flush
+	type(ESMF_Logical), intent(in),optional			:: rootOnly
+	integer, intent(in),optional			        :: halt
+	type(ESMF_LogFileType), intent(in),optional             :: logtype
+	integer, intent(in),optional			        :: stream  
+	integer, intent(in),optional			        :: maxElements
+	integer, intent(out),optional			        :: rc
+	
+! !DESCRIPTION:
+!      This subroutine sets the various options for the log object.
+!
+!      The arguments are:
+!      \begin{description}
+!
+!      \item [aLog]
+!            Log object.
+!      \item [verbose]
+!            Verbose flag.
+!      \item [rootOnly]
+!	     Root only flag
+!      \item [halt]
+!	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
+!      \item [filetype]
+!            The type of file (singlelog(0), multilog(1)).
+!      \item [stream]
+!            The type of stream (free(0), preordered(1))
+!      \item [maxElements]
+!            Maximum number of elements in the log.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP 
+	if (present(rc)) rc=ESMF_FAILURE
+	if (present(verbose)) aLog%verbose=verbose
+	if (present(flush)) aLog%flush=flush
+	if (present(rootOnly)) aLog%rootOnly=rootOnly
+	if (present(halt)) aLog%halt=halt
+	if (present(logtype)) aLog%logtype=logtype
+	if (present(stream)) aLog%stream=stream
+	if (present(maxElements)) aLog%maxElements=maxElements
+	if (present(rc)) rc=ESMF_SUCCESS 
+end subroutine ESMF_LogSet
+
+!--------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
+
+! !INTERFACE: 
+	function ESMF_LogWrite(msg,logtype,line,file,method)
+!
+!
+! !RETURN VALUE:
+	logical                                 ::ESMF_LogWrite
+! !ARGUMENTS:
+	character(len=*), intent(in)            :: msg
+	type(ESMF_LogFileType), intent(in)      :: logtype
+	integer, intent(in), optional           :: line
+	character(len=*), intent(in), optional  :: file
+	character(len=*), intent(in), optional	:: method
+
+! !DESCRIPTION:
+!      This routine writes to the file(s) associated with {\tt aLog}.
+!
+!      The arguments are:
+!      \begin{description}
+! 
+!      \item [msg]
+!            User-provided context string.
+!      \item [logtype]
+!            The type of message (info(0), warning(1), error(2))..
+!      \item [method]
+!            User-provided method string.
+!      \item [{[rc]}]
+!            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
+! 
+!EOP
+	
+   	character(len=10)               :: t
+	character(len=8)                :: d
+	character(len=7)                :: lt
+	character(len=32)               :: f
+	character(len=32)               ::tmethod,tfile
+	integer			      	        ::status,tline
+	integer                         ::ok
+	integer	                        ::i
+	integer                         ::h,m,s,ms,y,mn,dy
+	
+	ESMF_LogWrite=.FALSE.
+	if (present(method)) tmethod=adjustl(method)
+	if (present(line)) tline=line 
+	if (present(file)) then
+	    tfile=adjustl(file)
+	else
+	    tfile=""
+	endif
+	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
+	
+		if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
+			call DATE_AND_TIME(d,t)	
+			select case (logtype%ftype)
+				case (1)
+					lt="INFO"
+				case (2)
+					lt="WARNING"
+				case default
+					lt="ERROR"
+			end select				
+			ok=0
+			do i=1, 100000
+				OPEN(UNIT=ESMF_LogDefault%unitnumber,File=ESMF_LogDefault%nameLogErrFile,POSITION="APPEND", &
+				ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
+				if (status.eq.0) then
+					if (present(line)) then								
+						if (present(method)) then
+							WRITE(ESMF_LogDefault%unitnumber,122) d," ",h,m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
+							tline," ",trim(tmethod)," ",trim(msg)
+							122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
+							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+							!lt,"    ",tfile,tline,"  ",tmethod,msg
+						else
+							WRITE(ESMF_LogDefault%unitnumber,123) d," ",h,m,s,".",ms," ",trim(lt)," ",trim(tfile)," ",&
+							tline," ",trim(msg)
+							123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
+							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+							!lt,"    ",tfile,tline,"  ",msg
+						endif	
+					else
+						if (present(method)) then
+							WRITE(ESMF_LogDefault%unitnumber,132) d," ",h,m,s,".",ms," ",trim(lt)," ",&
+							" ",trim(tmethod)," ",trim(msg)
+							132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
+							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+							!lt,"    ","  ",tmethod,msg
+						else
+							WRITE(ESMF_LogDefault%unitnumber,133) d," ",h,m,s,".",ms," ",trim(lt)," ",&
+							" ",trim(msg)
+							133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
+							!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+							!lt,"    ","  ",msg
+						endif	
+					endif
+					CLOSE(UNIT=ESMF_LogDefault%stdOutUnitNumber)
+					ESMF_LogWrite=.TRUE.
+					ok=1
+				endif	
+				if (ok.eq.1) exit
+			enddo
+		endif
+end function ESMF_LogWrite
 
 end module ESMF_LogErrMod
