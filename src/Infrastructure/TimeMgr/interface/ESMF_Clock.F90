@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.12 2003/04/09 21:33:29 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.13 2003/04/23 18:46:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,22 +49,34 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_Clock
 !     
-!     ! F90 class to match C++ Clock class in size and sequence
+!     ! F90 class type to match C++ Clock class in size only;
+!     !  all dereferencing within class is performed by C++ implementation
 
       type ESMF_Clock
       sequence
       private
-        type(ESMF_TimeInterval) :: TimeStep
-        type(ESMF_Time)  :: StartTime
-        type(ESMF_Time)  :: StopTime
-        type(ESMF_Time)  :: RefTime
-        type(ESMF_Time)  :: CurrTime
-        type(ESMF_Time)  :: PrevTime
-        integer(ESMF_IKIND_I8) :: AdvanceCount
-        type(ESMF_Alarm), dimension(MAX_ALARMS) :: AlarmList
-        integer :: NumAlarms
-!        integer :: ClockMutex
+        ! keep dimensions even to avoid compiler alignment warnings
+        integer(ESMF_IKIND_I8), &
+                 dimension(8+4*(MAX_ALARMS+mod(MAX_ALARMS,2)))   :: memoryBlock1
+        integer, dimension(38+28*(MAX_ALARMS+mod(MAX_ALARMS,2))) :: memoryBlock2
       end type
+
+!      ! Equivalent sequence and kind to C++:
+!
+!      type ESMF_Clock
+!      sequence
+!      private
+!        type(ESMF_TimeInterval) :: TimeStep
+!        type(ESMF_Time)  :: StartTime
+!        type(ESMF_Time)  :: StopTime
+!        type(ESMF_Time)  :: RefTime
+!        type(ESMF_Time)  :: CurrTime
+!        type(ESMF_Time)  :: PrevTime
+!        integer(ESMF_IKIND_I8) :: AdvanceCount
+!        type(ESMF_Alarm), dimension(MAX_ALARMS) :: AlarmList
+!        integer :: NumAlarms
+!        integer :: ClockMutex
+!      end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -102,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.12 2003/04/09 21:33:29 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.13 2003/04/23 18:46:58 eschwab Exp $'
 
 !==============================================================================
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTime.F90,v 1.4 2003/04/11 20:49:13 eschwab Exp $
+! $Id: ESMF_BaseTime.F90,v 1.5 2003/04/23 18:46:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,18 +44,28 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_BaseTime
 !
-!     ! Base class to match C++ BaseTime class in size and sequence
+!     ! Base class type to match C++ BaseTime class in size only;
+!     !  all dereferencing within class is performed by C++ implementation
 
       type ESMF_BaseTime
-      sequence                        ! for C++ interoperability
-      private
-        integer(ESMF_IKIND_I8) :: S   ! whole seconds
-        integer                :: Sn  ! fractional seconds, numerator
-        integer                :: Sd  ! fractional seconds, denominator
-!TODO: pad all F90 structs up to next 64 bit boundary ?
-        integer                :: pad1  ! to match halem C++ <vtbl> long[4]*
-        integer                :: pad2  ! to match halem C++ <vtbl> long[6]*
+      sequence                        ! match C++ storage order
+      private                         !   (members opaque on F90 side)
+        ! keep dimensions even to avoid compiler alignment warnings
+        integer(ESMF_IKIND_I8) :: memoryBlock1
+        integer, dimension(4)  :: memoryBlock2
       end type
+
+!      ! Equivalent sequence and kind to C++:
+!
+!      type ESMF_BaseTime
+!      sequence                        ! for C++ interoperability
+!      private
+!        integer(ESMF_IKIND_I8) :: S   ! whole seconds
+!        integer                :: Sn  ! fractional seconds, numerator
+!        integer                :: Sd  ! fractional seconds, denominator
+!        integer                :: pad1  ! to match halem C++ <vtbl> long[4]*
+!        integer                :: pad2  ! to match halem C++ <vtbl> long[6]*
+!      end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -72,7 +82,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BaseTime.F90,v 1.4 2003/04/11 20:49:13 eschwab Exp $'
+      '$Id: ESMF_BaseTime.F90,v 1.5 2003/04/23 18:46:57 eschwab Exp $'
 
 !------------------------------------------------------------------------------
 
