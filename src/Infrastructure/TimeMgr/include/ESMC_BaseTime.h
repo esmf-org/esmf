@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.26 2004/11/05 04:02:45 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.27 2004/11/24 22:40:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,8 +81,10 @@
 // the common comparison logic between {\tt TimeIntervals} and {\tt Time} and
 // hence are defined here for sharing.
 //
-// Methods or possibly a separate class will be included to handle fractional
-// arithmetic.  An pre-developed open source package would be preferable.
+// The separate class ESMC_Fraction is inherited to handle fractional
+// arithmetic.  ESMC_BaseTime encapsulates common time-specific knowledge,
+// whereas ESMC_Fraction is time-knowledge independent; it simply performs
+// generic fractional arithmetic, manipulations and comparisons.
 //
 // For ease in calendar conversions, a time value of zero (both whole and
 // numerator) will correspond to the Julian date of zero.
