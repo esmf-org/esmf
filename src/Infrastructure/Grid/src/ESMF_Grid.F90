@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.118 2003/12/08 18:34:21 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.119 2003/12/09 15:50:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.118 2003/12/08 18:34:21 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.119 2003/12/09 15:50:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3749,7 +3749,7 @@
       integer, intent(out), dimension(:,:), optional :: global_start
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
                             optional :: local_cell_max_dim
-      integer, intent(out), dimension(:,:), pointer, &
+      integer,              dimension(:,:), pointer, &
                             optional :: local_axis_length
       type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
