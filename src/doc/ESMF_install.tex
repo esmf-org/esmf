@@ -1,8 +1,10 @@
-% $Id: ESMF_install.tex,v 1.14 2003/02/27 17:55:14 flanigan Exp $
+% $Id: ESMF_install.tex,v 1.15 2003/03/17 21:15:55 btwomack Exp $
 
 \section{Installation}
+\label{Installation}
 
 \subsection{Procedures}
+\label{InstallProcedures}
 
 Currently the following environment variables need to be set:
 \begin{verbatim}
@@ -21,7 +23,8 @@ Currently the following environment variables need to be set:
 Simultaneous multiple architecture builds are supported, with
 one restriction; the test cases may only be run on one platform at a time. 
 
-\smallskip
+\subsubsection{Building the ESMF Library}
+\label{BuildESMF}
 
 Build the library with the command:
 \begin{verbatim}
@@ -33,6 +36,8 @@ Build the library with the command:
 \end{verbatim}
   for an optimized version.
 
+\subsubsection{Building the ESMF Test Suites}
+\label{BuildTestSuite}
 A test suite is included with the library.  Tests are provided for both MPI
 and uniprocessor builds. 
 
@@ -66,7 +71,10 @@ Exhaustive tests exist that may be activated by setting the environment variable
 {\tt ESMF\_EXHTEST} to {\tt on}.  While this activation will test the library more thoroughly,
 it will take significantly longer to complete than the basic tests.
 
-\smallskip
+See Section~\ref{TestingProcedures} for instruction on running ESMF tests.
+
+\subsubsection{Building the ESMF Documentation}
+\label{BuildDocumentation}
 
 \noindent To build documentation:
 \begin{verbatim}
@@ -96,8 +104,8 @@ cd ${ESMF_DIR}/src/Infrastructure/TimeMgmt/doc
 \noindent The output from this local documentation build is in the top level {\tt doc}
 directory, as with the previous commands.
 
-\smallskip
-
+\subsubsection{Using the ESMF library}
+\label{UsingLibrary}
 To use the library from C/C++, link with the library executable and include
 the {\tt ``ESMC.h''} file.
 To use the library from Fortran, link with the library executable and

@@ -1,0 +1,147 @@
+% $Id: ESMF_testing.tex,v 1.1 2003/03/17 21:15:59 btwomack Exp $
+
+\section{Testing}
+\label{testing}
+
+\subsection{Description}
+\label{TestDescription}
+Robust high quality software is a primary goal of the ESMF development effort. To ensure that goal is met, the ESMF includes a comprehesive suite of tests. They allow test and validation of everything from individual functions to complete system tests. These test suites are used by the ESMF development team as part of their regular development process. Model developers can also use the testing suites to verify that the software was built and installed properly. It can also assist them in the debugging process when integrating user supplied model components. 
+
+\subsubsection{Unit Test Description}
+\label{UnitTestDescription}
+The Unit tests provided with the ESMF library evaluate the following:
+\begin{itemize}
+\item correctness of individual functions
+\item behavior of individual modules or classes
+\end{itemize}
+
+\subsubsection{System Test Description}
+\label{SystemTestDescription}
+
+The System tests provided with the ESMF library evaluate the following:
+\begin{itemize}
+\item interface agreement between parts of the system
+\item behavior of the system as a whole
+\end{itemize}
+
+The current system test suite includes tests that perform layout reduction operations, redistribution-transpose, halo operations, component creation, intra-grid communication, etc. A complete description of each available system test can be found at the ESMF website on the developers page. 
+
+\subsubsection{EVA Test Suite Description}
+\label{EVATestDescription}
+
+The ESMF VAlidation(EVA) Suite is a collection of seven codes representative of those used in climate, weather, and data assimulation. These codes are currently used for ESMF prototyping. They will eventually provide the basis for ESMF tutorial examples.
+
+\subsection{Procedures}
+\label{TestingProcedures}
+
+The following test procedures assume that ESMF library source code has been built and installed. Please ensure that the build and install steps are completed before proceeding. See Section~\ref{InstallProcedures} for installation procedures and Section~\ref{BuildTestSuite} for information on building ESMF tests.  
+
+\subsubsection{Running ESMF Unit Tests}
+\label{RunUnitTests}
+
+The following commands are used to build and run the unit tests provided with the ESMF:
+\begin{verbatim}
+        gmake BOPT=<g,O> [EXHAUSTIVE=<ON,OFF>] tests
+        gmake BOPT=<g,O> [EXHAUSTIVE=<ON,OFF>] tests_uni
+\end{verbatim}
+
+The results of the test can be found in the following location:
+\begin{verbatim}
+       ${ESMF_DIR/test/test${BOPT}/${ESMF_ARCH}
+\end{verbatim}
+
+For example: 
+
+If your esmf source files have been placed in: 
+\begin{verbatim}
+       /usr/local/esmf
+\end{verbatim}
+
+and your platform and compiler configuration is:
+\begin{verbatim}
+       Linux uni-processor using the LF95 compiler
+\end{verbatim}
+
+and you want to run a debug version of exhaustive unit tests,
+then you use the command:
+\begin{verbatim}
+       gmake BOPT=g EXHAUSTIVE=ON tests_uni
+\end{verbatim}
+
+and will find the results in:
+\begin{verbatim}
+       /usr/local/esmf/test/testg/linux_lf95/
+\end{verbatim}
+
+\subsubsection{Running ESMF System Tests}
+\label{RunSystemTests}
+
+The following commands are used to build and run the system tests:
+
+\begin{verbatim}
+        gmake BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests
+        gmake BOPT=<g,O> [SYSTEM_TEST=NNNNN] system_tests_uni
+\end{verbatim}
+
+If SYSTEM\_TEST is not specified, then all available system tests will be built and run.
+
+The results of the test can be found in the following location:
+\begin{verbatim}
+       ${ESMF_DIR/test/test${BOPT}/${ESMF_ARCH}
+\end{verbatim}
+
+For example: 
+
+If your esmf source files have been placed in your home directory:
+\begin{verbatim}
+       ~/esmf
+\end{verbatim}
+
+and your platform and compiler configuration is:
+\begin{verbatim}
+       Alpha multi-processor using the native compiler
+\end{verbatim}
+
+and you want to run an optimized version of system test number 62502,
+then you use the command:
+\begin{verbatim}
+       gmake BOPT=O SYSTEM_TEST=62502 system_tests
+\end{verbatim}
+
+and will find the results in:
+\begin{verbatim}
+       ~/esmf/test/testO/alpha/62502 
+\end{verbatim}
+
+\subsubsection{Running EVA Suite Tests}
+\label{RunEVATests}
+
+The EVA Suite User's Guide (http://www.esmf.ucar.edu/esmf\_docs/EVA\_usrdoc/index.html) describes how to compile and run these codes, which can be downloaded from SourceForge (http://cvs.sourceforge.net/cgi-bin/viewcvs.cgi/esmf/eva\_src/). 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
