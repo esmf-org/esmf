@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.5 2004/06/12 15:27:24 cdeluca Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.6 2004/06/12 18:07:22 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,8 @@
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_FieldSetDataPointer() @\
-!      subroutine ESMF_FieldSetDataPtr<rank><type><kind>(field, dataPointer, copyflag, indexflag, rc) @\
+!      subroutine ESMF_FieldSetDataPtr<rank><type><kind>(field, & @\
+!                                 dataPointer, copyflag, indexflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Field), intent(inout) :: field @\
@@ -87,7 +88,8 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetDataPointer" @\
-      subroutine ESMF_FieldSetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, haloWidth, indexflag, rc) @\
+      subroutine ESMF_FieldSetDataPointer##mrank##D##mtypekind(field, & @\
+                        dataPointer, copyflag, haloWidth, indexflag, rc) @\
  @\
       type(ESMF_Field), intent(inout) :: field @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: dataPointer @\
@@ -135,6 +137,9 @@
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
+
+
+
 
 
 
