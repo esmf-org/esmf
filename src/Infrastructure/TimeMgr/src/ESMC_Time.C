@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.28 2003/04/29 08:01:11 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.29 2003/04/29 23:05:26 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.28 2003/04/29 08:01:11 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.29 2003/04/29 23:05:26 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -137,10 +137,8 @@
     // set timezone
     Timezone = (tz != ESMC_NULL_POINTER) ? *tz : ESMC_NULL_POINTER;
 
-    ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS, US, NS, d_, h_, m_, s_,
-                 ms_, us_, ns_, Sn, Sd);
-
-    return(ESMF_SUCCESS);
+    return(ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS, US, NS, d_, h_, m_, s_,
+                        ms_, us_, ns_, Sn, Sd));
 
  }  // end ESMC_TimeInit
 
@@ -278,7 +276,8 @@
         DD != ESMC_NULL_POINTER || D  != ESMC_NULL_POINTER ||
         d_ != ESMC_NULL_POINTER) {
       if (Calendar != ESMC_NULL_POINTER) {
-        Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D, d_);
+        if (Calendar->ESMC_CalendarConvertToDate(this, YR, MM, DD, D, d_) ==
+            ESMF_FAILURE) return(ESMF_FAILURE);
       }
       else {
         return (ESMF_FAILURE);
@@ -292,10 +291,8 @@
     }
 
     // use base class to get sub-day values
-    ESMC_BaseTimeGet(secPerDay, H, M, S, MS, US, NS,
-                     h_, m_, s_, ms_, us_, ns_, Sn, Sd);
-
-    return(ESMF_SUCCESS);
+    return(ESMC_BaseTimeGet(secPerDay, H, M, S, MS, US, NS,
+                            h_, m_, s_, ms_, us_, ns_, Sn, Sd));
 
  }  // end ESMC_TimeGet
 
@@ -377,9 +374,8 @@
     }
     
     // use base class for sub-day values
-    ESMC_BaseTimeSet(H, M, S, MS, US, NS, h_, m_, s_, ms_, us_, ns_, Sd, Sn);
-    
-    return(ESMF_SUCCESS);
+    return(ESMC_BaseTimeSet(H, M, S, MS, US, NS,
+                            h_, m_, s_, ms_, us_, ns_, Sd, Sn));
 
  }  // end ESMC_TimeSet
 
@@ -571,10 +567,22 @@
 
     // validate inputs
     if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
-    // TODO: validate for month calendars ?
+    ESMF_IKIND_I8 YR, S;
+    int MM, DD, H, M; 
+    // TODO: use native C++ Get, not F90 entry point, when ready
+    ESMC_TimeGet(&YR, &MM, &DD, ESMC_NULL_POINTER, &H, &M, &S,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
 
-    // TODO
+    // ISO 8601 format CCYY-MM-DD HH:MM:SS
+    sprintf(timeString, "%lld-%02d-%02d %02d:%02d:%02lld\0",
+            YR, MM, DD, H, M, S);
 
     return(ESMF_SUCCESS);
 
@@ -1012,11 +1020,23 @@
 // !REQUIREMENTS:  
 
     cout << "Time -----------------------------------" << endl;
-    ESMC_BaseTime::ESMC_BaseTimePrint(options);
-    if (Calendar != ESMC_NULL_POINTER) {
-      Calendar->ESMC_CalendarPrint(options);
+
+    // parse options
+    if (options != ESMC_NULL_POINTER) {
+      if (strncmp(options, "string", 6) == 0) {
+        char timeString[ESMF_MAXSTR];
+        ESMC_TimeGetString(timeString);
+        cout << timeString << endl;
+      }
+    // default
+    } else {
+      ESMC_BaseTime::ESMC_BaseTimePrint(options);
+      if (Calendar != ESMC_NULL_POINTER) {
+        Calendar->ESMC_CalendarPrint(options);
+      }
+      cout << "Timezone = " << Timezone << endl;
     }
-    cout << "Timezone = " << Timezone << endl;
+
     cout << "end Time -------------------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
