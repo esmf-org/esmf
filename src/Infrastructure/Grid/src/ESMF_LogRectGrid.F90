@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.24 2004/02/19 22:40:17 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.25 2004/03/01 17:32:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.24 2004/02/19 22:40:17 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.25 2004/03/01 17:32:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -122,7 +122,7 @@
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_LRGridSetCoord
 
@@ -136,11 +136,11 @@
 !     This interface provides a single entry point for methods that set
 !     coordinates as part of a {\tt ESMF\_Grid}.
 
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_LRGridSetMask
 
@@ -154,11 +154,11 @@
 !     This interface provides a single entry point for methods that set
 !     logical masks as part of a {\tt ESMF\_Grid}.
 
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_LRGridSetMetric
 
@@ -172,7 +172,7 @@
 !     This interface provides a single entry point for methods that set
 !     metrics as part of a {\tt Grid}.
 
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
@@ -266,8 +266,13 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer to
-!     the new {\tt ESMF\_Grid}.
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer
+!     to the new {\tt ESMF\_Grid}.  This routine is specific for uniformly spaced
+!     Grids, and can create Grids from two different sets of arguments:
+!        (1). given min, max, and count (variables minGlobalCoordPerDim, 
+!             maxGlobalCoordPerDim, and counts);
+!        (2). given min, delta, and count (variables minGlobalCoordPerDim, 
+!             deltaPerDim, and counts).
 !
 !     The arguments are:
 !     \begin{description}
@@ -282,13 +287,13 @@
 !     \item[{[deltaPerDim]}]
 !          Array of constant physical increments in each direction.
 !     \item[{[horzGridKind]}]
-!          Integer specifier to denote horizontal grid type.
+!          {\tt ESMF\_GridKind} specifier to denote horizontal grid type.
 !     \item[{[vertGridKind]}]
-!          Integer specifier to denote vertical grid type.
+!          {\tt ESMF\_GridKind} specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal grid stagger.
+!          {\tt ESMF\_GridStagger} specifier to denote horizontal grid stagger.
 !     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridStagger} specifier to denote vertical grid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -297,10 +302,17 @@
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
+!     \item[{[dimNames]}]
+!          Array of dimension names.
+!     \item[{[dimUnits]}]
+!          Array of dimension units.
 !     \item[{[coordOrder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
 !     \item[{[coordIndex]}]
+!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate axes.
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
 !     \item[{[layout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[decompIds]}]
@@ -400,14 +412,14 @@
 ! !ARGUMENTS:
       integer, intent(in) :: numDims
       integer, dimension(numDims), intent(in) :: counts
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                  minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta3
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
       type(ESMF_GridKind), intent(in), optional :: horzGridKind
       type(ESMF_GridKind), intent(in), optional :: vertGridKind
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
@@ -428,8 +440,13 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer to
-!     the new {\tt ESMF\_Grid}.
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer
+!     to the new {\tt ESMF\_Grid}.  This routine is for Grids with user-specified
+!     spaceing, and can create Grids from two different sets of arguments:
+!        (1). given min and arrays of deltas (variables minGlobalCoordPerDim and
+!             delta1, delta2, and delta3, if applicable);
+!        (2). given arrays of coordinates (variables coords1, coords2, and
+!             coords3, if applicable).
 !
 !     The arguments are:
 !     \begin{description}
@@ -439,8 +456,6 @@
 !          Array of number of grid increments in each dimension.
 !     \item[{[minGlobalCoordsPerDim]}]
 !          Array of minimum physical coordinate in each direction.
-!     \item[{[layout]}]
-!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[delta1]}]
 !          Array of physical increments between nodes in the first direction.
 !     \item[{[delta2]}]
@@ -453,26 +468,14 @@
 !          Array of physical coordinates in the second direction.
 !     \item[{[coord3]}]
 !          Array of physical coordinates in the third direction.
-!     \item[{[decompIds]}]
-!          Identifier for which Grid axes are decomposed.
-!     \item[{[countsPerDEDecomp1]}]
-!          Array of number of grid increments per DE in the first decomposition
-!          direction.
-!     \item[{[countsPerDEDecomp2]}]
-!          Array of number of grid increments per DE in the second decomposition
-!          direction.
-!     \item[{[dimNames]}]
-!          Array of dimension names.
-!     \item[{[dimUnits]}]
-!          Array of dimension units.
 !     \item[{[horzGridKind]}]
-!          Integer specifier to denote horizontal grid type.
+!          {\tt ESMF\_GridKind} specifier to denote horizontal grid type.
 !     \item[{[vertGridKind]}]
-!          Integer specifier to denote vertical grid type.
+!          {\tt ESMF\_GridKind} specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
-!          Integer specifier to denote horizontal grid stagger.
+!          {\tt ESMF\_GridStagger} specifier to denote horizontal grid stagger.
 !     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical grid stagger.
+!          {\tt ESMF\_GridStagger} specifier to denote vertical grid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
@@ -481,6 +484,27 @@
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the vertical grid.
+!     \item[{[dimNames]}]
+!          Array of dimension names.
+!     \item[{[dimUnits]}]
+!          Array of dimension units.
+!     \item[{[coordOrder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!     \item[{[coordIndex]}]
+!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
+!     \item[{[layout]}]
+!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[decompIds]}]
+!          Identifier for which Grid axes are decomposed.
+!     \item[{[countsPerDEDecomp1]}]
+!          Array of number of grid increments per DE in the first decomposition
+!          direction.
+!     \item[{[countsPerDEDecomp2]}]
+!          Array of number of grid increments per DE in the second decomposition
+!          direction.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -552,7 +576,7 @@
       end function ESMF_GridCreateLogRect
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridCreateRead - Create a new Grid read in from a file
 
 ! !INTERFACE:
@@ -582,7 +606,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -622,7 +646,7 @@
       end function ESMF_LRGridCreateRead
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridCreateCopy - Create a new Grid by copying another Grid
 
 ! !INTERFACE:
@@ -652,7 +676,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -692,7 +716,7 @@
       end function ESMF_LRGridCreateCopy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridCreateCutout - Create a new Grid as a subset of an existing Grid
 
 ! !INTERFACE:
@@ -728,7 +752,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -768,7 +792,7 @@
       end function ESMF_LRGridCreateCutout
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridCreateDiffRes - Create a new Grid by coarsening or refining an existing Grid
 
 ! !INTERFACE:
@@ -808,7 +832,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -848,7 +872,7 @@
       end function ESMF_LRGridCreateDiffRes
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridCreateExchange - Create a new Grid from the intersection of two existing grids
 
 ! !INTERFACE:
@@ -881,7 +905,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status                           ! Error status
@@ -921,7 +945,7 @@
       end function ESMF_LRGridCreateExchange
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridConstructSpecificNew - Construct a new empty logRectGrid specific type
 
 ! !INTERFACE:
@@ -947,7 +971,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: i
 
@@ -2798,7 +2822,7 @@
       end subroutine ESMF_LRGridAddVertPhysGrid
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridGetCoord - Get the coordinates of a Grid
 
 ! !INTERFACE:
@@ -2851,7 +2875,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2926,7 +2950,7 @@
       end subroutine ESMF_LRGridGetCoord
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetCoordFromArray - Set the coordinates of a Grid from an existing ESMF array
 
 ! !INTERFACE:
@@ -2961,7 +2985,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2969,7 +2993,7 @@
       end subroutine ESMF_LRGridSetCoordFromArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
@@ -3016,7 +3040,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -3051,7 +3075,7 @@
       end subroutine ESMF_LRGridGetDE
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridGetAllAxisIndex - Get all axis indices for a DistGrid
 
 ! !INTERFACE:
@@ -3084,7 +3108,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -3118,7 +3142,7 @@
       end subroutine ESMF_LRGridGetAllAxisIndex
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
@@ -3178,7 +3202,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -3216,7 +3240,7 @@
       end subroutine ESMF_LRGridGlobalToLocalIndex
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridLocalToGlobalIndex - translate global indexing to local
 
 ! !INTERFACE:
@@ -3274,7 +3298,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -3311,7 +3335,7 @@
       end subroutine ESMF_LRGridLocalToGlobalIndex
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetCoordFromBuffer - Set the coordinates of a Grid from an existing data buffer
 
 ! !INTERFACE:
@@ -3346,7 +3370,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -3354,7 +3378,7 @@
       end subroutine ESMF_LRGridSetCoordFromBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetCoordCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
@@ -3405,7 +3429,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -3594,7 +3618,7 @@
       end subroutine ESMF_LRGridSetCoordCompute
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetCoordCopy - Copies coordinates from one grid to another
 
 ! !INTERFACE:
@@ -3628,7 +3652,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -3636,7 +3660,7 @@
       end subroutine ESMF_LRGridSetCoordCopy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridGet - Gets a variety of information about the grid
 
 ! !INTERFACE:
@@ -3723,7 +3747,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -3825,7 +3849,7 @@
       end subroutine ESMF_LRGridGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSet - Sets a variety of information about the grid
 
 ! !INTERFACE:
@@ -3887,7 +3911,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -4085,7 +4109,7 @@
       end subroutine ESMF_LRGridSetMaskFromArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMaskFromBuffer - Set a mask in a Grid from an existing data buffer
 
 ! !INTERFACE:
@@ -4114,7 +4138,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4122,7 +4146,7 @@
       end subroutine ESMF_LRGridSetMaskFromBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMaskFromMask - Set a mask in a Grid from an existing  mask of different type
 
 ! !INTERFACE:
@@ -4151,7 +4175,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4159,7 +4183,7 @@
       end subroutine ESMF_LRGridSetMaskFromMask
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMaskCopy - Copies a mask from one grid to another.
 
 ! !INTERFACE:
@@ -4190,7 +4214,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4198,7 +4222,7 @@
       end subroutine ESMF_LRGridSetMaskCopy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
 
 ! !INTERFACE:
@@ -4227,7 +4251,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4235,7 +4259,7 @@
       end subroutine ESMF_LRGridSetMetricFromArray
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
 
 ! !INTERFACE:
@@ -4264,7 +4288,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4272,7 +4296,7 @@
       end subroutine ESMF_LRGridSetMetricFromBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMetricCompute - Compute a metric for a Grid
 
 ! !INTERFACE:
@@ -4301,7 +4325,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4309,7 +4333,7 @@
       end subroutine ESMF_LRGridSetMetricCompute
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridSetMetricCopy - Copies a metric from one grid to another
 
 ! !INTERFACE:
@@ -4340,7 +4364,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -4477,7 +4501,7 @@
       end subroutine ESMF_LRGridSetBoundingBoxes
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LRGridValidate - Check internal consistency of a Grid
 
 ! !INTERFACE:
@@ -4501,7 +4525,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       character(len=ESMF_MAXSTR) :: name, str
       type(ESMF_GridType), pointer :: gp
@@ -4901,7 +4925,7 @@
       end subroutine ESMF_LRGridBoxIntersectSend
 
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !IROUTINE: ESMF_LRGridSearchPoint - Search the grid for a cell containing point
 !
 ! !INTERFACE:
@@ -4948,7 +4972,7 @@
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
 !!
-!!EOP
+!!EOPI
 !! !REQUIREMENTS:  SSSn.n, GGGn.n
 !
 !!
