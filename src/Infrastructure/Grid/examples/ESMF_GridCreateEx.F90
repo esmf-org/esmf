@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.27 2005/01/05 17:06:55 jwolfe Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.28 2005/01/29 00:11:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
       implicit none
     
       ! instantiate two grids
-      type(ESMF_Grid) :: grid1, grid2
+      type(ESMF_Grid) :: grid1, grid2, grid3
 
       ! instantiate horizontal and vertical grid staggerings
       type(ESMF_GridHorzStagger) :: horz_stagger
@@ -36,6 +36,8 @@
 
       ! local variables for Create routines
       integer :: counts(2), countsPerDE1(2), countsPerDE2(2)
+      integer :: myCount
+      integer, dimension(:,:), allocatable :: myIndices
       character(len=ESMF_MAXSTR) :: name
       real(ESMF_KIND_R8), dimension(2) :: min, max
       real(ESMF_KIND_R8) :: delta1(40), delta2(50), delta3(10)
@@ -48,6 +50,7 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_VM) :: vm
 
+      integer :: i, j, j1, myDE, n, npets
       integer :: finalrc
       finalrc = ESMF_SUCCESS
 
@@ -59,6 +62,7 @@
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
       call ESMF_VMGetGlobal(vm, rc)
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
 
 !BOE
 !\subsubsection{Uniform 2D Grid Creation}
@@ -193,6 +197,100 @@
       call ESMF_GridDestroy(grid2, rc)
 
       print *, "Grid example 2 destroyed"
+
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOE
+!\subsubsection{3D Grid Creation}
+
+! This example shows how to create the same non-uniform 3D {\tt ESMF\_Grid} as
+! from the previous example but distributed in an arbitrary fashion as one might
+! for a column model.  In ESMF, this is known as vector storage.
+!EOE
+
+!BOC
+      ! Use the same parameters to create the Grid as before
+      min(1)       = 0.0
+      min(2)       = 0.0
+
+      delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
+                  1.4, 1.5, 1.6, 1.6, 1.6, 1.8, 1.8, 1.7, 1.7, 1.6, &
+                  1.6, 1.6, 1.8, 1.8, 2.0, 2.0, 2.2, 2.2, 2.2, 2.2, &
+                  2.0, 1.7, 1.5, 1.3, 1.2, 1.1, 1.0, 1.0, 1.0, 0.9 /)
+      delta2 = (/ 0.8, 0.8, 0.8, 0.8, 0.8, 0.7, 0.7, 0.6, 0.7, 0.8, &
+                  0.9, 0.9, 0.9, 0.9, 1.0, 1.0, 1.0, 1.0, 0.9, 1.0, &
+                  1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
+                  1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
+                  1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
+      delta3 = (/ 1.0, 1.0, 1.0, 0.5, 0.5, 0.6, 0.8, 1.0, 1.0, 1.0 /)
+
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      vert_stagger = ESMF_GRID_VERT_STAGGER_CENTER
+
+      name         = "test grid 3"
+
+      ! initialize the grid with the above values
+      grid3 = ESMF_GridCreateHorzLatLon(minGlobalCoordPerDim=min, &
+                                        delta1=delta1, delta2=delta2, &
+                                        horzstagger=horz_stagger, &
+                                        name=name, rc=rc)
+
+!EOC
+ 
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+!BOC
+      ! as before, add a vertical subgrid to the horizontal grid
+      call ESMF_GridAddVertHeight(grid3, delta3, vertstagger=vert_stagger, &
+                                  rc=rc)
+!EOC
+ 
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      ! allocate myIndices to an appropriate size
+      counts(1) = size(delta1)
+      counts(2) = size(delta2)
+      i = int((counts(1)*counts(2) + npets -1)/npets)
+      allocate (myIndices(i,2))
+
+     ! and get our local DE number from the layout
+     call ESMF_DELayoutGet(layout, localDE=myDE, rc=rc)
+
+!BOC
+
+      ! Calculate myIndices based on DE number.
+      ! This is just a simple algorithm to create a semi-regular distribution
+      ! of points to the pets.   It starts at point (1,1+myDE) and go up in the
+      ! j-direction first, and creates a 2D array of point indices that looks
+      ! like:  for n = 1, myCount
+      !        myIndices(n,1) = global i-index of the nth local point
+      !        myIndices(n,2) = global j-index of the nth local point
+      j1 = 1 + myDE
+      n  = 0
+      do i   =  1,counts(1)
+        do j = j1,counts(2),npets
+          n = n + 1
+          myIndices(n,1) = i
+          myIndices(n,2) = j
+        enddo
+        j1 = j - counts(2)
+      enddo
+      myCount = n
+
+      ! The distribute call is similar to the block distribute but with
+      ! a couple of different arguments
+      call ESMF_GridDistribute(grid3, delayout=layout, myCount=myCount, &
+                               myIndices=myIndices, rc=rc)
+
+!EOC
+ 
+      if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+      print *, "Grid example 3 returned"
+
+      deallocate(myIndices)
+      call ESMF_GridDestroy(grid3, rc)
+
+      print *, "Grid example 3 destroyed"
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
