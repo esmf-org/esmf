@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/20 20:33:18 flanigan Exp $ 
+# $Id: makefile,v 1.11 2003/03/21 17:22:56 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    = 
@@ -40,17 +40,17 @@ ESMC_Clock_F.o:	ESMC.h ESMC_Base.h ESMC_Clock.h makefile
 
 ESMF_Fraction.o:	makefile
 
-ESMF_BaseTime.o:	ESMF_BaseMod.mod makefile
+ESMF_BaseTime.o:	ESMF_Base.o makefile
 
-ESMF_Calendar.o:	ESMF_BaseMod.mod ESMF_BaseTimeMod.mod makefile
+ESMF_Calendar.o:	ESMF_Base.o ESMF_BaseTime.o makefile
 
-ESMF_TimeInterval.o:	ESMF_BaseMod.mod ESMF_FractionMod.mod \
-			ESMF_BaseTimeMod.mod ESMF_CalendarMod.mod makefile
+ESMF_TimeInterval.o:	ESMF_Base.o ESMF_Fraction.o \
+			ESMF_BaseTime.o ESMF_Calendar.o makefile
 
-ESMF_Time.o:	ESMF_BaseTimeMod.mod ESMF_TimeIntervalMod.mod makefile
+ESMF_Time.o:	ESMF_BaseTime.o ESMF_TimeInterval.o makefile
 
-ESMF_Alarm.o:	ESMF_BaseMod.mod ESMF_TimeIntervalMod.mod ESMF_TimeMod.mod \
+ESMF_Alarm.o:	ESMF_Base.o ESMF_TimeInterval.o ESMF_Time.o \
 		makefile
 
-ESMF_Clock.o:	ESMF_BaseMod.mod ESMF_TimeIntervalMod.mod ESMF_TimeMod.mod \
-		ESMF_AlarmMod.mod makefile
+ESMF_Clock.o:	ESMF_Base.o ESMF_TimeInterval.o ESMF_Time.o \
+		ESMF_Alarm.o makefile
