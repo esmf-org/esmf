@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.10 2004/06/08 06:45:59 nscollins Exp $ 
+# $Id: makefile,v 1.11 2004/06/08 07:20:08 nscollins Exp $ 
 
 ALL: build_here 
 
-CFLAGS    += -I../../LogErr/include
+CFLAGS    += -I$(ESMF_DIR)/src/Infrastructure/LogErr/include
 FFLAGS    =
 SOURCEC	  = ESMC_Base_F.C
 SOURCEF	  = ESMF_Base.F90 ESMF_Base_C.F90
