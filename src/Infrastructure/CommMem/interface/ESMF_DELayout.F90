@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.10 2003/04/04 15:11:51 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.11 2003/04/04 18:03:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.10 2003/04/04 15:11:51 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.11 2003/04/04 18:03:24 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -304,7 +304,7 @@
       type(ESMF_DELayout) :: ESMF_DELayoutCreateCartFromDEList
 !
 ! !ARGUMENTS:
-      integer, intent(inout) :: delist              ! list of processing elements
+      integer, intent(inout) :: delist(:)           ! list of processing elements
       integer, intent(in) :: ndim                   ! number of dimensions
       integer, intent(in) :: lengths(:)             ! number of des in each dim
       integer, intent(in) :: commtypes(:)           ! comm types in each dim
@@ -358,8 +358,8 @@
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-!      call c_ESMC_DELayoutCreateCartDE(layout, delist, ndim, &
-!           lengths, commtypes, status)
+      call c_ESMC_DELayoutCreateCartDE(layout, delist, ndim, &
+                 lengths, commtypes, status)
 
       if (status .ne. ESMF_SUCCESS) then
         print *, "DELayout creation error"
