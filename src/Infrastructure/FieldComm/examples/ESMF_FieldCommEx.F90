@@ -1,31 +1,36 @@
-! $Id: ESMF_FieldCommEx.F90,v 1.3 2004/06/11 19:47:44 svasquez Exp $
+! $Id: ESMF_FieldCommEx.F90,v 1.4 2004/06/21 10:01:43 nscollins Exp $
 !
-! Example/test code which does communication operations on Fields.
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+!
+    program ESMF_FieldCommEx
 
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
-!-------------------------------------------------------------------------
-
-!BOP
+!==============================================================================
+!BOC
+! !PROGRAM: ESMF_FieldCommEx - Field level communication routines
 !
 ! !DESCRIPTION:
-! See the following code fragments for examples of how to call Redist,
-!  Halo, and Regrid on a Field.
+!
+! Example/test code which does communication operations on Fields,
+! including examples of using Redist, Halo, and Regrid on a Field.
 ! Also see the Programming Model section of this document.
-!
-!
-!\begin{verbatim}
-
-!   ! Example program showing various ways to call the communications
-!   ! routines on a Field object
-    program ESMF_FieldCommEx
+!-----------------------------------------------------------------------------
 
     ! ESMF Framework module
     use ESMF_Mod
 
     implicit none
     
-!   ! Local variables
+    ! Local variables
     integer :: x, y, rc, mycell, finalrc, numdes
     integer :: i, j
     type(ESMF_Grid) :: srcgrid, dstgrid
@@ -40,6 +45,7 @@
     type(ESMF_Field) :: field1, field2, field3, field4
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
+!EOC
 
     finalrc = ESMF_SUCCESS
         
@@ -102,75 +108,131 @@
  
     ! fields all ready to go
 
-!-------------------------------------------------------------------------
-!   ! Example 1:
-!   !
-!   !  Calling Field Halo
+!------------------------------------------------------------------------------
+!BOE
+!\subsubsection{Field Halo operation}
+      
+!  The user has already created an {\tt ESMF\_Grid}, an
+!  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
+!
+!  Now that field is used in the store call which precomputes the
+!  data movement which is required.  The {\tt ESMF_FieldHalo()} call
+!  actually performs the operation.
+!EOE
 
 
-    !halo_rh = ESMF_RouteHandleCreate(rc)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    halo_rh = ESMF_RouteHandleCreate(rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldHaloStore(field1, routehandle=halo_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldHalo(field1, halo_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldHaloRelease(halo_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    !call ESMF_RouteHandleDestroy(halo_rh)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_RouteHandleDestroy(halo_rh)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Halo example 1 returned"
 
-!-------------------------------------------------------------------------
-!   ! Example 2:
-!   !
-!   !  Calling Field Redist
 
+!------------------------------------------------------------------------------
+!BOE
+!\subsubsection{Field Data Redistribution operation}
+      
+!  The user has already created an {\tt ESMF\_Grid}, an 
+!  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
+!
+!  The data redistribution operation does not do interpolation; it 
+!  is used when the same grid is decomposed differently - perhaps along
+!  different indices, or on different numbers of PETs.
+!
+!  The store call will precompute the data movement necessary, and the
+!  call to {\tt ESMF\_FieldRedist()} will perform the actual movement.
+!EOE
 
-    !redist_rh = ESMF_RouteHandleCreate(rc)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    redist_rh = ESMF_RouteHandleCreate(rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRedistStore(field1, field2, layout1, &
                                                 routehandle=redist_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRedist(field1, field2, routehandle=redist_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRedistRelease(redist_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    !call ESMF_RouteHandleDestroy(redist_rh)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_RouteHandleDestroy(redist_rh)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Redist example 2 returned"
 
 !-------------------------------------------------------------------------
-!   ! Example 3:
-!   !
-!   !  Calling Field Regrid
+!BOE
+!\subsubsection{Field Regridding operation}
+      
+!  The user has already created an {\tt ESMF\_Grid}, an
+!  {\tt ESMF\_Array} with data, and used them to create an {\tt ESMF\_Field}.
+!
+!  The regridding operation can interpolate data values to move data
+!  from one grid to another.
+!
+!  The store call will precompute the data movement necessary, and the
+!  call to {\tt ESMF\_FieldRegrid()} will perform the actual movement.
+!EOE
 
 
-    !regrid_rh = ESMF_RouteHandleCreate(rc)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    regrid_rh = ESMF_RouteHandleCreate(rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRegridStore(field1, field2, layout1, &
                                routehandle=regrid_rh, &
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+!BOC
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
+!EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    !call ESMF_RouteHandleDestroy(redist_rh)
-    !if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+    call ESMF_RouteHandleDestroy(regrid_rh)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Regrid example 3 returned"
 
