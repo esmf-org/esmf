@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.41 2004/05/21 09:24:09 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.42 2004/05/24 12:48:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -290,7 +290,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.41 2004/05/21 09:24:09 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.42 2004/05/24 12:48:18 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -630,15 +630,22 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt Array} reference to an existing {\tt State}.
-!      The {\tt Array} name must be unique within the {\tt State}
+!      Add a single {\tt ESMF\_Array} reference to an existing 
+!      {\tt ESMF\_State}.
+!      The {\tt ESMF\_Array} name must be unique within the {\tt ESMF\_State}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[array]
-!      The {\tt ESMF\_Fields} to be added.
+!      The {\tt ESMF\_Array} to be added.  This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Array} cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -670,16 +677,23 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple arrays to an {\tt ESMF\_State}.
+!     Add multiple {\tt ESMF\Array}s to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[acount]
-!      The number of {\tt ESMF\_Arrays} to be added.
+!      The number of {\tt ESMF\_Array}s to be added.
 !     \item[arrays]
-!      The array of {\tt ESMF\_Arrays} to be added.
+!      The list (fortran array) of {\tt ESMF\_Array}s to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Array}s cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1094,8 +1108,9 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt Bundle} reference to an existing {\tt State}.
-!      The {\tt Bundle} name must be unique within the {\tt State}
+!      Add a single {\tt ESMF\_Bundle} reference to an existing 
+!      {\tt ESMF\_State}.
+!      The {\tt ESMF\_Bundle} name must be unique within the {\tt ESMF\_State}
 !
 !     The arguments are:
 !     \begin{description}
@@ -1103,6 +1118,13 @@ end function
 !      The {\tt ESMF\_State} object.
 !     \item[bundle]
 !      The {\tt ESMF\_Bundle} to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Bundle} cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1134,16 +1156,23 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple bundles to a {\tt State}.
+!      Add multiple {\tt ESMF\_Bundle}s to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[bcount]
-!      The number of {\tt ESMF\_Bundles} to be added.
+!      The number of {\tt ESMF\_Bundle}s to be added.
 !     \item[bundles]
-!      The array of {\tt ESMF\_Bundles} to be added.
+!      The list (fortran array) of {\tt ESMF\_Bundle}s to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Bundle}s cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1170,15 +1199,23 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt Field} reference to an existing {\tt State}.
-!      The {\tt Field} name must be unique within the {\tt State}
+!      Add a single {\tt ESMF\_Field} reference to an existing 
+!      {\tt ESMF\_State}.
+!      The {\tt ESMF\_Field} name must be unique within the {\tt ESMF\_State}
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[field]
 !      The {\tt ESMF\_Field} to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Field} cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1210,16 +1247,23 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple fields to an {\tt ESMF\_State}.
+!      Add multiple {\tt ESMF\_Field}s to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[fcount]
-!      The number of {\tt ESMF\_Fields} to be added.
+!      The number of {\tt ESMF\_Field}s to be added.
 !     \item[fields]
-!      The array {\tt ESMF\_Fields} to be added.
+!      The list (fortran array) of {\tt ESMF\_Field}s to be added.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, the {\tt ESMF\_Field}s cannot be safely 
+!      destroyed before the {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1246,19 +1290,21 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a {\tt name} to an existing {\tt state}.
-!      The {\tt name} must be unique within the {\tt state}
+!      Add the character string {\tt name} to an existing {\tt ESMF\_State}.
+!      It can subsequently be replaced by an actual object with the
+!      same name.
+!      The {\tt name} must be unique within the {\tt ESMF\_State}
 !      It is available to be marked {\tt needed} by the
-!      consumer of the export {\tt state}. Then the data 
+!      consumer of the export {\tt ESMF\_State}. Then the data 
 !      provider can replace the name with the actual {\tt ESMF\_Bundle},
 !      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[name]
-!      The name to be added.
+!      The name to be added as a placeholder for a data object.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1290,22 +1336,26 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a {\tt name} to an existing {\tt State}.
-!      The {\tt name} must be unique within the {\tt State}
+!      Add a list of names to an existing {\tt ESMF\_State}.
+!      They can subsequently be replaced by actual objects with 
+!      the same name.
+!      Each name in the {\tt namelist} must be unique within 
+!      the {\tt ESMF\_State}
 !      It is available to be marked {\tt needed} by the
-!      consumer of the export {\tt State}. Then the data 
-!      provider can replace the name with the actual {\tt Bundle},
-!      {\tt Field}, or {\tt Array} which carries the needed data.
+!      consumer of the export {\tt ESMF\_State}. Then the data 
+!      provider can replace the name with the actual {\tt ESMF\_Bundle},
+!      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
 !      Unneeded data need not be generated.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item[namecount]
-!      The number of names.
+!      The count of names in the {\tt namelist}.
 !     \item[namelist]
-!      The list of names
+!      A list (fortran array) of character strings to be added
+!      as placeholders for data objects.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1332,15 +1382,24 @@ end function
       integer, intent(out), optional :: rc
 !     
 ! !DESCRIPTION:
-!      Add a single {\tt State} reference to an existing {\tt State}.
-!      The {\tt State} name must be unique within the {\tt State}
+!      Add an {\tt ESMF\_State} reference to an existing 
+!      {\tt ESMF\_State}.
+!      The nested {\tt ESMF\_State} name must be unique within the 
+!      container {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.  This is the container object.
 !     \item[nestedstate]
-!      The {\tt ESMF\_State} to be added.
+!      The {\tt ESMF\_State} to be added.  This is the nested object.
+!      This is a reference only; when
+!      the {\tt ESMF\_State} is destroyed the objects contained in it will
+!      not be destroyed.   Also, nested {\tt ESMF\_State}s cannot be safely 
+!      destroyed before the container {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1372,16 +1431,25 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple states to an {\tt ESMF\_State}.
+!     Add multiple nested {\tt ESMF\_State}s to a container {\tt ESMF\_State}.
+!     The nested {\tt ESMF\_State} names must be unique within the 
+!     container {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.  This is the container object.
 !     \item[scount]
-!      The number of {\tt ESMF\_States} to be added.
+!      The number of {\tt ESMF\_State}s to be added.
 !     \item[nestedstate]
-!      The array of {\tt ESMF\_States} to be added.
+!      The list (fortran array) of {\tt ESMF\_State}s to be added.
+!      This is a reference only; when the container {\tt ESMF\_State} is 
+!      destroyed the objects contained in it will
+!      not be destroyed.   Also, the nested {\tt ESMF\_State}s cannot be safely 
+!      destroyed before the container {\tt ESMF\_State} is destroyed.
+!      Since objects can be added to multiple containers, it remains
+!      the user's responsibility to manage the
+!      destruction of objects when they are no longer in use.
 !     \item[{[rc]}]
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1422,7 +1490,8 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new {\tt ESMF\_State} and optionally add initial objects to it.
+!  Create a new {\tt ESMF\_State}, set default characteristics for
+!   objects added to it, and optionally add initial objects to it.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -1445,10 +1514,12 @@ end function
 !   \item[{[names]}]
 !    A list (fortran array) of character string name placeholders.
 !   \item[{[itemcount]}]
-!    The total number of Bundles, Fields, Arrays, States, and Names to be added.
-!    If not specified the lengths of each array will be used to compute the
-!    actual number of items added to the State.  If the count is specified
-!    it will do an error check to verify the total number of items found
+!    The total number of things -- Bundles, Fields, 
+!    Arrays, States, and Names -- to be added.
+!    If {\tt itemcount} is not specified, it will be computed internally based
+!    on the length of each object list.
+!    If {\tt itemcount} is specified this routine
+!    will do an error check to verify the total number of items found
 !    in the argument lists matches this count of the expected number of items.
 !   \item[{[dataneeded]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
@@ -1477,7 +1548,6 @@ end function
 !   \end{description}
 !
 !EOP
-
 
         ! local vars
         type (ESMF_StateType), pointer :: stypep
@@ -1523,6 +1593,13 @@ end function
 !
 ! !DESCRIPTION:
 !     Releases all resources associated with this {\tt ESMF\_State}.
+!     {\tt ESMF\_States contain references only to other objects;
+!     when the {\tt ESMF\_State} is destroyed objects contained in it will
+!     not be destroyed.  Objects inside a {\tt ESMF\_State} cannot be
+!     destroyed before the container {\tt ESMF\_State} is destroyed.
+!     Since objects can be added to multiple containers, it remains
+!     the user's responsibility to manage the
+!     destruction of objects when they are no longer in use.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1558,8 +1635,8 @@ end function
         ! Call Destruct to release resources
         call ESMF_StateDestruct(state%statep, localrc)
         if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Release space
  	deallocate(state%statep, stat=localrc)
@@ -1593,28 +1670,33 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the requested information about this {\tt ESMF\_State}.
+!     Returns the requested information about this {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}     
 !     \item[state]
-!       {\tt ESMF\_State} object.
+!       An {\tt ESMF\_State} object to be queried.
 !      \item[{[name]}]
 !       Name of this {\tt ESMF\_State}.
 !      \item[{[stateType]}]
-!       Import or Export {\tt ESMF\_State}.  Returns either {\tt ESMF\_STATEIMPORT},
+!       Import or Export {\tt ESMF\_State}.  Returns either 
+!       {\tt ESMF\_STATEIMPORT},
 !       {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.
 !      \item[{[itemCount]}]
-!        Count of items in this {\tt ESMF\_State}, including placeholder names.
+!        Count of items in {\tt state}, including all objects
+!        as well as placeholder names.
 !      \item[{[itemNames]}]
-!        Array of item names in this {\tt ESMF\_State}, including placeholder names,
+!        Array of item names in {\tt state}, 
+!        including placeholder names.  {\tt itemNames} must be at least
 !        {\tt itemCount} long.
 !      \item[{[objtypes]}]
-!        Array of item object types in this {\tt state}, including placeholder 
-!        names, {\tt itemCount} long.  State object types include
-!        {\tt ESMF\_STATEBUNDLE}, {\tt ESMF\_STATEFIELD}, {\tt ESMF\_STATEARRAY}, 
-!        {\tt ESMF\_STATESTATE}, {\tt ESMF\_STATEDATANAME}, or
-!        {\tt ESMF\_STATEOBJTYPEUNKNOWN}.
+!        Array of item object types in {\tt state}, including placeholder 
+!        names. Must be at least {\tt itemCount} long.  
+!        Object types include
+!        {\tt ESMF\_STATEBUNDLE}, {\tt ESMF\_STATEFIELD}, 
+!        {\tt ESMF\_STATEARRAY}, {\tt ESMF\_STATESTATE}, 
+!        {\tt ESMF\_STATEDATANAME}.  {\tt ESMF\_STATEOBJTYPEUNKNOWN} is 
+!        returned if the object type is invalid.
 !       \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -1684,30 +1766,29 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Array} from an {\tt ESMF\_State} by name.  
-!      If the {\tt State} is a simple {\tt ESMF\_State}, only the
+!      If the {\tt ESMF\_State} contains the object directly, only
 !      {\tt arrayname} is required.
-!      If the {\tt ESMF\_State} contains multiple {\tt States}, 
-!      an additional argument, the {\tt statename}, is required to 
-!      specify which nested State to select.  {\tt ESMF\_State}s can
-!      be nested to any depth, but this routine only searches for immediate
-!      descendents.  It is an error to specify a {\tt statename} if the
-!      {\tt state} contains no nested {\tt ESMF\_States}.
-!
-!      Returns a {\tt Array} from a {\tt State} by name.
-!
+!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
+!      and the object is one level down, this routine can return the object
+!      in a single call by specifing the proper {\tt statename}.
+!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
+!      only searches in immediate descendents.  
+!      It is an error to specify a {\tt statename} if the
+!      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
 !     The arguments are:
 !  \begin{description}     
 !  \item[state]
-!   State to query for a {\tt Array} named {\tt name}.
+!   State to query for an {\tt ESMF\_Array} named {\tt arrayname}.
 !  \item[arrayname]
-!    Name of {\tt ESMF\_Array} to return.
+!    Name of {\tt ESMF\_Array} to be returned.
 !  \item[array]
-!    Returned {\tt ESMF\_Array}.
+!    Returned reference to the {\tt ESMF\_Array}.
 !  \item[{[statename]}]
-!    Optional.  An error if specified when the {\tt state} argument is a
-!    a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
-!    multiple nested {\tt ESMF\_State}s, and therefore the exact 
+!    Optional.  An error if specified when the {\tt state} argument contains
+!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s and the object being requested is
+!    in one level down in one of the nested {\tt ESMF\_State}.
 !    {\tt ESMF\_State} must be selected by this {\tt statename}.
 !  \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1726,7 +1807,7 @@ end function
        
       ! Assume failure until we know we will succeed
       if (present(rc)) rc=ESMF_FAILURE
-      ! TODO: do we need an empty array to mark failure?
+      ! TODO: do we need an empty (or invalid) array to mark failure?
 
       if (present(statename)) then
           exists = ESMF_StateTypeFindData(state%statep, statename, .true., &
@@ -1798,12 +1879,11 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an integer attribute from an {\tt ESMF\_State}.
-!
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [value]
@@ -1849,7 +1929,6 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an integer list attribute from an {\tt ESMF\_State}.
-!
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1858,9 +1937,11 @@ end function
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [count]
-!      The number of values to be retrieved.
+!      The number of values in the Attribute.
 !     \item [value]
 !      The integer values of the named Attribute.
+!      The list (fortran array)
+!      must be at least {\tt count} long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1962,7 +2043,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from an {\tt ESMF\_State}.
+!      Returns a list of real attributes from an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1971,9 +2052,11 @@ end function
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [count]
-!      The number of values to be set.
+!      The number of values in the Attribute.
 !     \item [value]
-!      The real values of the named Attribute.
+!      The real values of the named Attribute.  
+!      The list (fortran array)
+!      must be at least {\tt count} long.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2084,9 +2167,11 @@ end function
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [count]
-!      The number of values to be set.
+!      The number of values in the Attribute.
 !     \item [value]
 !      The logical values of the named Attribute.
+!      The list (fortran array)
+!      must be at least {\tt count} long.
 !     \item [{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2192,7 +2277,7 @@ end function
 !     \item [state]
 !      An {\tt ESMF\_State} object.
 !     \item [count]
-!      The number of attributes on this object.
+!      The number of attributes attached to this object.
 !     \item [{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2294,7 +2379,9 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the number of values associated with the given attribute.
+!     Returns information about an attribute by specifying 
+!     an ordinal index number.   Attributes with unknown names
+!     can be queried using this routine.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2357,31 +2444,33 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Bundle} from an {\tt ESMF\_State} by name.  
-!      If the {\tt state} is a simple {\tt ESMF\_State} only the
+!      If the {\tt ESMF\_State} contains the object directly, only
 !      {\tt bundlename} is required.
-!      If the {\tt state} contains multiple {\tt ESMF\_States} 
-!      an additional argument, the {\tt statename}, is required to 
-!      specify which nested State to select.  {\tt ESMF\_State}s can
-!      be nested to any depth, but this routine only searches immediate
-!      descendents.  It is an error to specify a {\tt statename} if the
-!      {\tt state} contains no nested {\tt ESMF\_States}.
+!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
+!      and the object is one level down, this routine can return the object
+!      in a single call by specifing the proper {\tt statename}.
+!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
+!      only searches in immediate descendents.  
+!      It is an error to specify a {\tt statename} if the
+!      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
 !     The arguments are:
-!      \begin{description}     
-!      \item[state]
-!       {\tt ESMF\_State} to query.
-!      \item[bundlename]
-!       Name of {\tt ESMF\_Bundle} to return.
-!      \item[bundle]
-!       Returned {\tt ESMF\_Bundle}.
-!      \item[{[statename]}]
-!       Optional.  An error if specified when the {\tt state} argument is a
-!       a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
-!       multiple nested {\tt ESMF\_State}s, and therefore the exact 
-!       {\tt ESMF\_State} must be selected by this {\tt statename}.
-!      \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!      \end{description}
+!  \begin{description}     
+!  \item[state]
+!   State to query for a {\tt ESMF\_Bundle} named {\tt bundlename}.
+!  \item[bundlename]
+!    Name of {\tt ESMF\_Bundle} to be returned.
+!  \item[bundle]
+!    Returned reference to the {\tt ESMF\_Bundle}.
+!  \item[{[statename]}]
+!    Optional.  An error if specified when the {\tt state} argument contains
+!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s and the object being requested is
+!    in one level down in one of the nested {\tt ESMF\_State}.
+!    {\tt ESMF\_State} must be selected by this {\tt statename}.
+!  \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
 !
 !EOP
 
@@ -2466,31 +2555,33 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns an {\tt ESMF\_Field} from an {\tt ESMF\_State} by name.  
-!      If {\tt state} is a simple {\tt ESMF\_State}, only the
+!      If the {\tt ESMF\_State} contains the object directly, only
 !      {\tt fieldname} is required.
-!      If {\tt state} contains nested {\tt ESMF\_States} 
-!      an additional argument, the {\tt statename}, is required to 
-!      specify which nested State to select.  {\tt ESMF\_State}s can
-!      be nested to any depth, but this routine only searches for immediate
-!      descendents.  It is an error to specify a {\tt statename} if the
-!      {\tt state} contains no nested {\tt ESMF\_States}.
+!      If the {\tt state} contains multiple nested {\tt ESMF\_State}s
+!      and the object is one level down, this routine can return the object
+!      in a single call by specifing the proper {\tt statename}.
+!      {\tt ESMF\_State}s can be nested to any depth, but this routine 
+!      only searches in immediate descendents.  
+!      It is an error to specify a {\tt statename} if the
+!      {\tt state} contains no nested {\tt ESMF\_State}s.
 !
 !     The arguments are:
-!     \begin{description}     
-!     \item[state]
-!       {\tt ESMF\_State} to query.
-!     \item[fieldname]
-!       Name of {\tt ESMF\_Field} to return.
-!     \item[field]
-!       Returned {\tt ESMF\_Field}.
-!     \item[{[statename]}]
-!       Optional.  An error if specified when the {\tt state} argument is a
-!       a simple {\tt ESMF\_State}.  Required if the {\tt state} contains 
-!       multiple nested {\tt ESMF\_State}s, and therefore the exact 
-!       {\tt ESMF\_State} must be selected by this {\tt statename}.
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
+!  \begin{description}     
+!  \item[state]
+!   State to query for an {\tt ESMF\_Field} named {\tt fieldname}.
+!  \item[fieldname]
+!    Name of {\tt ESMF\_Field} to be returned.
+!  \item[field]
+!    Returned reference to the {\tt ESMF\_Field}.
+!  \item[{[statename]}]
+!    Optional.  An error if specified when the {\tt state} argument contains
+!    no nested {\tt ESMF\_State}s.  Required if the {\tt state} contains 
+!    multiple nested {\tt ESMF\_State}s and the object being requested is
+!    in one level down in one of the nested {\tt ESMF\_State}.
+!    {\tt ESMF\_State} must be selected by this {\tt statename}.
+!  \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
 !
 !EOP
 
@@ -2673,19 +2764,17 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt State}.
+!      named by {\tt dataname} in the {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}     
 !     \item[state]
-!       {\tt ESMF\_State} to query.
+!       The {\tt ESMF\_State} to query.
 !      \item[dataname]
 !       Name of the data item to query.
 !      \item[needed]
 !       Status of data item.  Returns either {\tt ESMF\_STATEDATAISNEEDED},
 !       or {\tt ESMF\_STATEDATANOTNEEDED}.
-!       When data is added to a {\tt State} the default status of this flag
-!       is {\tt ESMF\_STATEDATANOTNEEDED}.
 !      \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -2743,10 +2832,10 @@ end function
 !     The arguments are:
 !     \begin{description}     
 !     \item[state]
-!       {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
+!       The {\tt ESMF\_State} to query for a nested {\tt ESMF\_State} 
 !       named {\tt statename}.
 !     \item[statename]
-!       Name of {\tt ESMF\_State} to return.
+!       Name of nested {\tt ESMF\_State} to return.
 !     \item[nestedstate]
 !       Returned {\tt ESMF\_State}.
 !     \item[{[rc]}]
@@ -2810,10 +2899,10 @@ end function
 !
 ! !DESCRIPTION:
 !      Returns true if the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt State} is 
-!      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no state found 
-!      with the specified name or state unknown or not needed.  Sets error
-!      code tt {\tt ESMF\_FAILURE} if name not found.
+!      named by {\tt dataname} in the {\tt ESMF\_State} is 
+!      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no item found 
+!      with the specified name or item marked not needed.  Also sets error
+!      code if {\tt dataname} not found.
 !
 !     The arguments are:
 !     \begin{description}     
@@ -2877,7 +2966,7 @@ end function
 !     \item[state]
 !       The {\tt ESMF\_State} to print.
 !     \item[{[options]}]
-!       Print options
+!       Print options.  See {\ref xxx} for standard options.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -2994,15 +3083,15 @@ end function
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!      Used to reinitialize
-!      all data associated with a State from the last call to WriteRestart.
+!      Used to reinitialize all data associated with an
+!      {\tt ESMF\_State} from the last call to WriteRestart.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[name]
 !       Name of {\tt ESMF\_State} to reinitialize.
 !     \item[iospec]
-!       {\tt IOSpec} to restart from.
+!       An {\tt ESMF\_IOSpec} which specifies I/O information.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3041,12 +3130,12 @@ end function
 !
 ! !DESCRIPTION:
 !      Sets the status of the {\tt needed} flag for the data item
-!      named by {\tt dataname} in the {\tt State}.
+!      named by {\tt dataname} in the {\tt ESMF\_State}.
 !
 !     The arguments are:
 !      \begin{description}     
 !      \item[state]
-!        {\tt ESMF\_State} to set.
+!        The {\tt ESMF\_State} to set.
 !       \item[dataname]
 !        Name of the data item to set.
 !       \item[needed]
@@ -3102,7 +3191,7 @@ end function
 !     \item[state]
 !       The {\tt ESMF\_State} to validate.
 !     \item[{[options]}]
-!       Validation options
+!       Validation options.  See {\ref XX} for standard options.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3154,26 +3243,29 @@ end function
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!  Apply a {\tt Transform} to a {\tt State}.  
+!  Apply an {\tt ESMF\_Transform} to an {\tt ESMF\_State}.  
 !  This routine is intended to be called
-!  from within a {\tt Component} when it is not practical to return to the
-!  calling layer in order to do the coupling directly.  This call 
+!  from within an {\tt ESMF\_Component} when it is not practical 
+!  to return to the
+!  calling layer in order to do the coupling directly.  
+!  This call 
 !  passes through the framework back into user-written coupling code
-!  to allow exchange of data between {\tt Component}s.  It returns back to
-!  the calling location and allows the {\tt Component} to continue 
-!  executionfrom that place.  
-!  {\tt Component}s which run in sequential mode have no need to use
-!  this routine; Coupling code is called directly from the Application
-!  level code.
+!  to allow exchange of data between {\tt ESMF\_Component}s.  
+!  It returns back to
+!  the calling location and allows the {\tt ESMF\_Component} to continue 
+!  execution from that place.  
+!  {\tt ESMF\_Component}s which run in sequential mode have no need to use
+!  this routine; Coupling code is called after an {\tt ESMF\_Component}
+!  returns to the calling code.
 !
 !     The arguments are:
 !     \begin{description}     
 !     \item[state]
-!       {\tt State} to apply {\tt ESMF\_Xform} to.
+!       {\tt ESMF\_State} to apply {\tt ESMF\_Xform} to.
 !     \item[xformname]
-!       {\tt Xform} name to be called.
+!       {\tt ESMF\_Xform} name to be called.
 !     \item[xform]
-!       {\tt Xform} object to be called.
+!       {\tt ESMF\_Xform} object to be applied..
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3213,7 +3305,7 @@ end function
 !     \item[state]
 !       The {\tt ESMF\_State} to write.
 !     \item[{[iospec]}]
-!       {\tt ESMF\_IOSpec} to write to.
+!       An {\tt ESMF\_IOSpec} object which specifies I/O information.
 !     \item[{[itemname]}]
 !       Item to be written.
 !     \item[{[rc]}]
@@ -3259,7 +3351,7 @@ end function
 !     \item[state]
 !       {\tt ESMF\_State} to save contents of.
 !     \item[{[iospec]}]
-!       {\tt ESMF\_IOSpec} to be used.
+!       An {\tt ESMF\_IOSpec} object which contains I/O information and options.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3324,7 +3416,7 @@ end function
 !   \item[{[arrays]}]
 !    An array of {\tt Arrays}.
 !   \item[{[states]}]
-!    An array of nested {\tt ESMF\_States}.
+!    An array of nested {\tt ESMF\_State}s.
 !   \item[{[names]}]
 !    An array of name placeholders.
 !   \item[{[itemcount]}]
@@ -4405,9 +4497,9 @@ end function
 !     \item[stypep]
 !       Pointer to {\tt StateType}.
 !     \item[scount]
-!       The number of {\tt ESMF\_States} to be added.
+!       The number of {\tt ESMF\_State}s to be added.
 !     \item[nestedstate]
-!       The array of {\tt ESMF\_States} to be added.
+!       The array of {\tt ESMF\_State}s to be added.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
