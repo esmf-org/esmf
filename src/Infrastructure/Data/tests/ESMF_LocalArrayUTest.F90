@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.3 2003/08/15 22:58:31 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.4 2003/08/18 20:18:18 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -32,7 +32,7 @@
     type(ESMF_ArraySpec) :: arrayspec
     integer :: counts(ESMF_MAXDIM)
     type(ESMF_LocalArray) :: array1, array2, array3, array4
-    real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: real3dptr
+    real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
     real(ESMF_IKIND_R8), dimension(:,:), pointer :: realptr, realptr2
     integer(ESMF_IKIND_I4), dimension(:), pointer :: intptr, intptr2
     integer(ESMF_IKIND_I4), dimension(:,:), pointer :: int2Dptr
@@ -361,6 +361,7 @@
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
     call ESMF_LocalArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
 
@@ -375,7 +376,7 @@
         end if
      enddo
     enddo
-    write(failMsg, *) "Array data should not compare."
+    write(failMsg, *) "Array data should not be the same."
     write(name, *) "Compare Local Array 2D Real Data Test"
     call ESMF_Test((result.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
@@ -386,7 +387,7 @@
 !-------------------------------------------------------------------------------
 !   ! Test 6:
 !   !  Create based on an existing, allocated F90 pointer. 
-!   !  Data is type Real, 2D.  DATA_COPY set
+!   !  Data is type Real, 3D.  DATA_COPY set
     print *, ">>> Test 6:"
  
  
@@ -403,8 +404,81 @@
      enddo
     enddo
 
+   !NEX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
     array4 = ESMF_LocalArrayCreate(real3dptr, ESMF_DATA_COPY, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
     print *, "array 4 create returned"
+
+#ifdef ESMF_EXHAUSTIVE
+    ! The following test is commented out because it crashes.
+    ! Bug report 790766 has been filed. When the bug report is
+    ! closed this code will be uncommented.
+    !write(failMsg, *) "Did not return ESMF_SUCCESS"
+    !write(name, *) "Getting Local Array 3D Real Data with wrong dimension array Test"
+    !call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+   !EX_UTest
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting Local Array 3D Real Data without allocating array size Test"
+    call ESMF_LocalArrayGetData(array4, real3d2ptr, ESMF_DATA_COPY, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *, "array 4 getdata returned"
+
+    ni = 15
+    nj = 13
+    nk = 9
+    do i=1,ni
+     do j=1,nj
+       do k=1,nk
+        if (real3dptr(i,j,k).eq.real3d2ptr(i,j,k)) then
+                result = 0
+        else
+                result = 1
+                exit
+        end if
+       enddo
+     enddo
+    enddo
+
+   !EX_UTest
+    write(failMsg, *) "Array data should be the same."
+    write(name, *) "Compare Local Array 3D Real Data without allocating array size Test"
+    call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+
+   !NEX_UTest
+    allocate(real3d2ptr(ni,nj,nk))
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Getting Local Array 3D Real Data Test"
+    call ESMF_LocalArrayGetData(array4, real3d2ptr, ESMF_DATA_COPY, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *, "array 4 getdata returned"
+
+    ni = 15
+    nj = 13
+    nk = 9
+    do i=1,ni
+     do j=1,nj
+       do k=1,nk
+        if (real3dptr(i,j,k).eq.real3d2ptr(i,j,k)) then
+                result = 0
+        else
+                result = 1
+                exit
+        end if
+       enddo
+     enddo
+    enddo
+
+   !NEX_UTest
+    write(failMsg, *) "Array data should be the same."
+    write(name, *) "Compare Local Array 3D Real Data Test"
+    call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
     ! with do copy, the original can go now
     deallocate(real3dptr)
