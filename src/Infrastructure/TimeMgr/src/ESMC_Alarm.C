@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.47 2004/06/08 21:46:40 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.48 2004/06/15 21:31:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.47 2004/06/08 21:46:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.48 2004/06/15 21:31:10 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -308,6 +308,12 @@ int ESMC_Alarm::count=0;
 
     int rc = ESMF_SUCCESS;
  
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // save current values to restore in case of failure
     ESMC_Alarm saveAlarm = *this;
 
@@ -419,6 +425,12 @@ int ESMC_Alarm::count=0;
 
     int rc = ESMF_SUCCESS;
 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // TODO: use inherited methods from ESMC_Base
     if (nameLen > 0) {
       if (strlen(this->name) < nameLen) {
@@ -500,6 +512,17 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmEnable()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     enabled = true;
 
     return(ESMF_SUCCESS);
@@ -524,6 +547,17 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmDisable()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     ringing = false;
     enabled = false;
@@ -550,6 +584,15 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmIsEnabled()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -579,6 +622,14 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmRingerOn()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     if(!enabled) {
       char logMsg[ESMF_MAXSTR];
@@ -615,6 +666,17 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmRingerOff()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     ringing = false;
 
     return(ESMF_SUCCESS);
@@ -642,6 +704,15 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmIsRinging()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
 
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
@@ -679,6 +750,12 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmWillRingNext()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
@@ -740,6 +817,15 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmWasPrevRinging()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
+
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(ringingOnPrevTimeStep);
@@ -764,6 +850,17 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmSticky()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     sticky = true;
 
@@ -795,6 +892,14 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmNotSticky()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     sticky = false;
 
@@ -839,6 +944,15 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmIsSticky()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
+
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     return(sticky);
@@ -868,6 +982,12 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmCheckRingTime()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", rc);
+      return(false);
+    }
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
@@ -933,6 +1053,15 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Alarm::operator==()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
+
     return(id == alarm.id);
 
 }  // end ESMC_Alarm::operator==
@@ -957,6 +1086,15 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Alarm::operator!=()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
 
     return(id != alarm.id);
 
@@ -986,6 +1124,9 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmReadRestart()"
+
     // TODO:  read alarm state from iospec/name, then allocate/restore
     //        (share code with ESMC_AlarmCreate()).
 
@@ -1012,6 +1153,17 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmWriteRestart()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // TODO:  save alarm state using iospec/name.  Default to disk file.
 
@@ -1042,6 +1194,14 @@ int ESMC_Alarm::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_AlarmValidate()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // must have a ring time; ringDuration, stopTime, prevRingTime optional
     if (ringTime.ESMC_TimeValidate() != ESMF_SUCCESS) {
@@ -1083,6 +1243,17 @@ int ESMC_Alarm::count=0;
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_AlarmPrint()"
+
+    int rc = ESMF_SUCCESS;
+ 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     cout << "Alarm ----------------------------------" << endl;
 

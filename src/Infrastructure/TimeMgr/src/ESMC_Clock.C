@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.65 2004/06/14 23:20:47 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.66 2004/06/15 21:31:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.65 2004/06/14 23:20:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.66 2004/06/15 21:31:11 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -253,6 +253,12 @@ int ESMC_Clock::count=0;
 
     int rc = ESMF_SUCCESS;
 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // save current values to restore in case of failure;
     ESMC_Clock saveClock = *this;
 
@@ -345,6 +351,12 @@ int ESMC_Clock::count=0;
  #define ESMC_METHOD "ESMC_ClockGet()"
 
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // TODO: use inherited methods from ESMC_Base
     if (nameLen > 0) {
@@ -485,6 +497,12 @@ int ESMC_Clock::count=0;
 
     int rc = ESMF_SUCCESS;
 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // save current time, then advance it
     prevTime = currTime;
 
@@ -575,11 +593,14 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockIsStopTime()"
+
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_SUCCESS;
 
     if (this == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
-         "; this pointer is NULL.", rc);
+         "; 'this' pointer is NULL.", rc);
       return(false);
     }
 
@@ -620,6 +641,17 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockGetNextTime()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     if (timeStep != ESMC_NULL_POINTER) {
       // use passed-in timeStep if specified
       *nextTime = currTime + *timeStep;
@@ -655,6 +687,14 @@ int ESMC_Clock::count=0;
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_ClockGetAlarm()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     if (nameLen >= ESMF_MAXSTR) {
       char logMsg[ESMF_MAXSTR];
@@ -720,6 +760,12 @@ int ESMC_Clock::count=0;
  #define ESMC_METHOD "ESMC_ClockGetAlarmList()"
 
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     *alarmCount = 0;
 
@@ -946,8 +992,17 @@ int ESMC_Clock::count=0;
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_ClockSyncToRealTime()"
 
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // set current time to wall clock time
-    int rc = currTime.ESMC_TimeSyncToRealTime();
+    // TODO:  ensure current time is within startTime and stopTime
+    rc = currTime.ESMC_TimeSyncToRealTime();
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
       return(rc);
     return(ESMC_ClockValidate());
@@ -974,6 +1029,15 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Clock::operator==()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
+
     return(id == clock.id);
 
 }  // end ESMC_Clock::operator==
@@ -998,6 +1062,15 @@ int ESMC_Clock::count=0;
 //   
 //EOP
 // !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Clock::operator!=()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
 
     return(id != clock.id);
 
@@ -1027,6 +1100,9 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockReadRestart()"
+
     // TODO:  read clock state from iospec/name, then allocate/restore
     //        (share code with ESMC_ClockCreate()).
 
@@ -1053,6 +1129,17 @@ int ESMC_Clock::count=0;
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockWriteRestart()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // TODO:  save clock state using iospec/name.  Default to disk file.
 
@@ -1085,6 +1172,12 @@ int ESMC_Clock::count=0;
  #define ESMC_METHOD "ESMC_ClockValidate()"
 
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // validate required individual properties
     if(ESMC_LogDefault.ESMC_LogMsgFoundError(timeStep.ESMC_TimeIntervalValidate(),
@@ -1225,6 +1318,17 @@ int ESMC_Clock::count=0;
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_ClockPrint()"
+
+    int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     cout << "Clock ----------------------------------" << endl;
 
@@ -1442,6 +1546,12 @@ int ESMC_Clock::count=0;
  #define ESMC_METHOD "ESMC_ClockAddAlarm()"
 
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // validate inputs
     if (alarmCount == MAX_ALARMS) {

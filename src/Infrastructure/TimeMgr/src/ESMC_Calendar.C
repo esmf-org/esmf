@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.69 2004/06/08 00:28:55 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.70 2004/06/15 21:31:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.69 2004/06/08 00:28:55 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.70 2004/06/15 21:31:11 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -561,6 +561,12 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS; // return code 
 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // save current values to restore in case of failure;
     ESMC_Calendar saveCalendar = *this;
 
@@ -695,6 +701,12 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS; // return code 
 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // save current values to restore in case of failure;
     ESMC_Calendar saveCalendar = *this;
 
@@ -823,6 +835,12 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS; // return code 
 
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
+
     // TODO: replace MONTHS_PER_YEAR with monthsPerYear
 
     // must have at least one non-null pointer
@@ -928,6 +946,12 @@ int ESMC_Calendar::count=0;
  #define ESMC_METHOD "ESMC_CalendarConvertToTime()"
 
     int rc = ESMF_SUCCESS; // return code 
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     switch (this->calendarType)
     {
@@ -1134,6 +1158,12 @@ int ESMC_Calendar::count=0;
 //       during arithmetic operations
 
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     switch (this->calendarType)
     {
@@ -1425,6 +1455,14 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
+    ESMC_Time zero;
+
+    if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer or time argument is NULL.", ESMC_NULL_POINTER);
+      return(zero);
+    }
+
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) increment
     //    (copies calendar & timezone properties)
@@ -1564,6 +1602,14 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
+    ESMC_Time zero;
+
+    if (this == ESMC_NULL_POINTER || time == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer or time argument is NULL.", ESMC_NULL_POINTER);
+      return(zero);
+    }
+
 // TODO: share common code with Increment method
 // TODO: check for overflow/underflow, return 0 with LogErr message
 
@@ -1698,6 +1744,15 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Calendar::operator==()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
+
     return(calendarType == calendar.calendarType);
 
 }  // end ESMC_Calendar::operator==
@@ -1721,6 +1776,15 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 // !REQUIREMENTS:
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Calendar::operator!=()"
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", ESMC_NULL_POINTER);
+      return(false);
+    }
 
     return(calendarType != calendar.calendarType);
 
@@ -1750,6 +1814,9 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarReadRestart()"
+
     // TODO:  read calendar state from iospec/name, then allocate/restore
     //        (share code with ESMC_CalendarCreate()).
 
@@ -1776,7 +1843,16 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarWriteRestart()"
+
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     // TODO:
 
@@ -1807,6 +1883,12 @@ int ESMC_Calendar::count=0;
  #define ESMC_METHOD "ESMC_CalendarValidate()"
 
     int rc = ESMF_SUCCESS;
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     if (this->calendarType < 1 ||
         this->calendarType > CALENDAR_TYPE_COUNT) {
@@ -1854,6 +1936,17 @@ int ESMC_Calendar::count=0;
 //
 //EOP
 // !REQUIREMENTS: 
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarPrint()"
+
+    int rc = ESMF_SUCCESS; // return code 
+
+    if (this == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+         "; 'this' pointer is NULL.", &rc);
+      return(rc);
+    }
 
     cout << "Calendar -------------------------------" << endl;
 
