@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.7 2004/04/01 15:15:16 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.8 2004/04/02 21:25:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.7 2004/04/01 15:15:16 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.8 2004/04/02 21:25:02 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -351,7 +351,9 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
   int  *ndim,             // out - Number of dimensions in coordinate tuple
   int  *nmyDEs,           // out - number of DEs for my PET instance
   int  *myDEs,            // out - list DEs for my PET instance
-  int  len){              // in  - number of elements in myDEs list
+  int  len,               // in  - number of elements in myDEs list
+  int *localDe,           // out - local DE id for 1-to-1 layouts
+  ESMC_Logical *oneToOneFlag){    // out - 1-to-1 layout flag
 //
 // !DESCRIPTION:
 //    Get information about a DELayout object
@@ -367,6 +369,11 @@ int ESMC_newDELayout::ESMC_newDELayoutGet(
   if (len >= nmydes)
     for (int i=0; i<nmydes; i++)
       myDEs[i] = mydes[i];
+  if (oneToOneFlag != ESMC_NULL_POINTER){
+    *oneToOneFlag = this->oneToOneFlag;
+    if (localDe != ESMC_NULL_POINTER)
+      *localDe = mydes[0];
+  }
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
@@ -762,10 +769,12 @@ int ESMC_newDELayout::ESMC_newDELayoutFindDEtoPET(int npets){
 // For now I simply connect in sequence...
   if (ndes==npets){
     // 1:1 layout
+    oneToOneFlag = ESMF_TRUE;
     for (int i=0; i<ndes; i++)
       des[i].petid = i;   // default 1:1 DE-to-PET mapping
   }else{
     // not a 1:1 layout
+    oneToOneFlag = ESMF_FALSE;
     // first find how many DEs will be placed onto a certain PET
     int *ndepet = new int[npets];
     for (int i=0; i<npets; i++)

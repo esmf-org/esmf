@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.7 2004/04/02 19:58:43 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.8 2004/04/02 21:25:02 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,8 @@ extern "C" {
   }
        
   void FTN(c_esmc_newdelayoutget)(ESMC_newDELayout **ptr,
-    int *nDEs, int *ndim, int *nmyDEs, int *myDEs, int *len, int *status){
+    int *nDEs, int *ndim, int *nmyDEs, int *myDEs, int *len, int *localDe,
+    ESMC_Logical *oneToOneFlag, int *status){
     // Sort out the non-present F90 optional arguments. 
     // The detection of non-present F90 optional arguemtns is compiler/platform
     // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
@@ -60,8 +61,12 @@ extern "C" {
     (void*)nDEs      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : nDEs;
     (void*)ndim      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : ndim;
     (void*)nmyDEs   == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : nmyDEs;
+    (void*)localDe   == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : localDe;
+    (void*)oneToOneFlag == 
+      (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : oneToOneFlag;
     // Done sorting out non-present F90 optional arguments.
-    int rc = (*ptr)->ESMC_newDELayoutGet(nDEs, ndim, nmyDEs, myDEs, *len);
+    int rc = (*ptr)->ESMC_newDELayoutGet(nDEs, ndim, nmyDEs, myDEs, *len,
+      localDe, oneToOneFlag);
     if (status != ESMC_NULL_POINTER) 
       *status = rc;
   }

@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.15 2004/04/02 19:58:44 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.16 2004/04/02 21:25:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -140,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.15 2004/04/02 19:58:44 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.16 2004/04/02 21:25:02 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -392,7 +392,7 @@ contains
 
 ! !INTERFACE:
   subroutine ESMF_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
-    localDeList, rc)
+    localDeList, localDe, oneToOneFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_newDELayout), intent(in)            :: delayout
@@ -400,6 +400,8 @@ contains
     integer,                intent(out), optional :: dimCount
     integer,                intent(out), optional :: localDeCount
     integer,                intent(out), optional :: localDeList(:)
+    integer,                intent(out), optional :: localDe
+    type(ESMF_Logical),     intent(out), optional :: oneToOneFlag
     integer,                intent(out), optional :: rc  
 !         
 !
@@ -445,10 +447,10 @@ contains
     ! Routine which interfaces to the C++ creation routine.
     if (len==0) then
       call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
-        dummy, len, status)
+        dummy, len, localDe, oneToOneFlag, status)
     else
       call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
-        localDeList, len, status)
+        localDeList, len, localDe, oneToOneFlag, status)
     endif
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGet error"
