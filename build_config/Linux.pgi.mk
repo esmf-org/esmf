@@ -1,4 +1,4 @@
-# $Id: Linux.pgi.mk,v 1.3 2003/09/09 21:17:43 nscollins Exp $ 
+# $Id: Linux.pgi.mk,v 1.4 2003/09/09 21:35:10 nscollins Exp $ 
 #
 ESMF_PREC = 32
 
@@ -83,6 +83,14 @@ OCOMP_FOPTFLAGS	   = -O
 ##################################################################################
 
 PARCH		   = linux
+
+SL_SUFFIX   =
+SL_LIBOPTS  =
+SL_LINKOPTS =
+SL_F_LINKER = $(F90CXXLD)
+SL_C_LINKER = $(CXXF90LD)
+SL_LIB_LINKER = $(CXXF90LD)
+SL_LIBS_TO_MAKE = libesmf liboldworld
 
 
 #########
