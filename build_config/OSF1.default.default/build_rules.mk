@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.17 2005/01/26 22:57:09 theurich Exp $
+#  $Id: build_rules.mk,v 1.18 2005/01/26 23:03:26 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -122,6 +122,8 @@ C_F90CXXLIBS       = -L/usr/ccs/lib/cmplrs/cxx -lcxx
 C_F90CXXLD         = f90
 C_CXXF90LD         = cxx
 C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor
+# for older Fortran compilers (551, 551A - 551F) the previous line must be replaced by:
+#C_CXXF90LIBS       = -L/usr/opt/F551/usr/shlib -lfor
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS		= -g  -qfullpath
 GCXX_FOPTFLAGS		= -g  -qfullpath 
