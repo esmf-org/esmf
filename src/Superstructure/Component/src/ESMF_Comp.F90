@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.126 2005/03/22 04:33:35 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.127 2005/03/29 19:34:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -151,8 +151,8 @@
          type(ESMF_VM)      :: vm                 ! component VM
          type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
 
-         integer, pointer   :: petlist(:)         ! list of usble parent PETs 
-
+         integer, pointer   :: petlist(:)         ! list of usable parent PETs 
+         
          type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlan
          type(ESMF_Pointer) :: vm_info            ! holding pointer to info
          type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
@@ -174,6 +174,10 @@
 
          logical            :: isdel, esdel
          integer            :: status
+
+! gjt - I added this new member at the end as to not desturb the above order
+         type(ESMF_ContextFlag) :: contextflag    ! contextflag
+
       end type
 
 !------------------------------------------------------------------------------
@@ -254,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.126 2005/03/22 04:33:35 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.127 2005/03/29 19:34:47 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -327,7 +331,7 @@ end function
 ! !INTERFACE:
       subroutine ESMF_CompConstruct(compp, ctype, name, gridcomptype, &
                           dirPath, configFile, config, grid, clock, parent, &
-                          vm, petlist, rc)
+                          vm, petlist, contextflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -342,6 +346,7 @@ end function
       type(ESMF_CompClass), pointer, optional :: parent
       type(ESMF_VM), intent(in), optional :: vm
       integer,       intent(in), optional :: petlist(:)
+      type(ESMF_ContextFlag), intent(in), optional :: contextflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -375,7 +380,11 @@ end function
 !   \item[{[vm]}]
 !    Parent virtual machine.
 !   \item[{[petlist]}]
-!    List of {\tt PET}s for this component.
+!    List of {\tt PET}s for this component. The default is to use all PETs.
+!   \item[{[contextflag]}]
+!    Specify the component's VM context. The default context is
+!    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
+!    complete list of options.
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -386,7 +395,8 @@ end function
         logical :: rcpresent                         ! did user specify rc?
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
         character(len=ESMF_MAXSTR) :: msgbuf
-        integer, pointer :: petlist_loc(:) 
+        integer, pointer :: petlist_loc(:)
+        integer :: npets
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -506,9 +516,24 @@ end function
           allocate(compp%petlist(0))
         endif
 
+        call ESMF_VMGet(compp%vm_parent, petCount=npets)
+        if (present(contextflag)) then
+          if (contextflag==ESMF_CHILD_IN_PARENT_VM) then
+            if (compp%npetlist>0 .and. compp%npetlist<npets) then
+              ! conflict between contextflag and petlist -> bail out
+              if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                "Conflict between contextflag and petlist arguments", &
+                ESMF_CONTEXT, rc)) return
+            endif
+          endif
+          compp%contextflag = contextflag
+        else
+          compp%contextflag = ESMF_CHILD_IN_NEW_VM    ! default
+        endif
+
         ! instantiate a default VMPlan
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
-                                  compp%npetlist, compp%petlist)
+          compp%npetlist, compp%petlist, compp%contextflag, status)
                                   
         ! Initialize the remaining vm members in compp
         compp%vm_info = ESMF_NULL_POINTER
@@ -1279,7 +1304,7 @@ end function
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CompGet(compp, name, vm, vm_parent, vmplan, &
-        vm_info, gridcomptype, grid, clock, dirPath, configFile, &
+        vm_info, contextflag, gridcomptype, grid, clock, dirPath, configFile, &
         config, ctype, rc)
 !
 ! !ARGUMENTS:
@@ -1289,6 +1314,7 @@ end function
       type(ESMF_VM), intent(out), optional :: vm_parent
       type(ESMF_VMPlan), intent(out), optional :: vmplan
       type(ESMF_Pointer), intent(out), optional :: vm_info
+      type(ESMF_ContextFlag), intent(out), optional :: contextflag
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
@@ -1352,6 +1378,10 @@ end function
 
         if (present(vm_info)) then
           vm_info = compp%vm_info
+        endif
+
+        if (present(contextflag)) then
+          contextflag = compp%contextflag
         endif
 
         if (present(gridcomptype)) then
@@ -1742,6 +1772,13 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
 
+    ! ensure that this is not a child_in_parent_vm plan
+    if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+        "xxxCompSetVMxxx() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rc)) return
+    endif
+
     ! call CompClass method
     call ESMF_VMPlanMaxThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
@@ -1812,6 +1849,13 @@ end function
                                   ESMF_CONTEXT, rc)) return
         endif
 
+    ! ensure that this is not a child_in_parent_vm plan
+    if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+        "xxxCompSetVMxxx() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rc)) return
+    endif
+
     ! call CompClass method
     call ESMF_VMPlanMinThreads(compp%vmplan, compp%vm_parent, max, &
       pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
@@ -1881,6 +1925,13 @@ end function
                                   "Uninitialized or destroyed component", &
                                   ESMF_CONTEXT, rc)) return
         endif
+
+    ! ensure that this is not a child_in_parent_vm plan
+    if (compp%contextflag == ESMF_CHILD_IN_PARENT_VM) then
+      if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+        "xxxCompSetVMxxx() calls are incompatible with CHILD_IN_PARENT_VM component", &
+        ESMF_CONTEXT, rc)) return
+    endif
 
     ! call CompClass method
     call ESMF_VMPlanMaxPEs(compp%vmplan, compp%vm_parent, max, &
