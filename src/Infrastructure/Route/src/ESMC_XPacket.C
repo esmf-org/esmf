@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.1 2003/03/05 17:04:54 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,8 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_XPacket.C,v 1.1 2003/03/05 17:04:54 nscollins Exp $";
+ static const char *const version = 
+              "$Id: ESMC_XPacket.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -53,15 +54,12 @@
 //
 // !ARGUMENTS:
       int arg1,            // in
-      int arg2,            // in
-      const char *arg3     // in
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
 //      Create a new XPacket from ... Allocates memory for a new XPacket
 //      object and uses the internal routine ESMC_XPacketContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_XPacketInit.
+//      initialize it. 
 //      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
@@ -92,7 +90,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a XPacket object previously allocated
-//      via an ESMC_XPacketCreate routine.  Define for deep classes only.
+//      via an ESMC_XPacketCreate routine. 
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_XPacket.h)
@@ -117,9 +115,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      int arg1) {          // in
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -166,36 +162,6 @@
 //
 
  } // end ESMC_XPacketDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketInit - initializes a XPacket object
-//
-// !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
-//      ESMF routine which only initializes XPacket values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_XPacketCreate.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
- } // end ESMC_XPacketInit
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -252,13 +218,13 @@
 // !IROUTINE:  ESMC_XPacketGet<Value> - get <Value> for a XPacket
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketGet<Value>(
+      //int ESMC_XPacket::ESMC_XPacketGet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> *value) const {     // out - value
+      //<value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
 //     Returns the value of XPacket member <Value>.
@@ -271,20 +237,20 @@
 //  code goes here
 //
 
- } // end ESMC_XPacketGet<Value>
+ //} // end ESMC_XPacketGet
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_XPacketSet<Value> - set <Value> for a XPacket
+// !IROUTINE:  ESMC_XPacketSet - set <Value> for a XPacket
 //
 // !INTERFACE:
-      int ESMC_XPacket::ESMC_XPacketSet<Value>(
+      //int ESMC_XPacket::ESMC_XPacketSet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> value) {     // in - value
+      //<value type> value) {     // in - value
 //
 // !DESCRIPTION:
 //     Sets the XPacket member <Value> with the given value.
@@ -297,7 +263,7 @@
 //  code goes here
 //
 
- } // end ESMC_XPacketSet<Value>
+ //} // end ESMC_XPacketSet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -363,9 +329,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      void) {  // in
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.1 2003/03/05 17:04:54 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.1 2003/03/05 17:04:54 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,15 +52,12 @@
 //
 // !ARGUMENTS:
       int arg1,            // in
-      int arg2,            // in
-      const char *arg3     // in
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
 //      Create a new Route from ... Allocates memory for a new Route
 //      object and uses the internal routine ESMC_RouteContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_RouteInit.
+//      initialize it.
 //      There can be multiple overloaded methods with the same name, but
 //      different argument lists.
 //
@@ -91,7 +88,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Route object previously allocated
-//      via an ESMC_RouteCreate routine.  Define for deep classes only.
+//      via an ESMC_RouteCreate routine.
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_Route.h)
@@ -116,9 +113,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      int arg1) {          // in
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -166,35 +161,6 @@
 
  } // end ESMC_RouteDestruct
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_RouteInit - initializes a Route object
-//
-// !INTERFACE:
-      int ESMC_Route::ESMC_RouteInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
-//      ESMF routine which only initializes Route values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_RouteCreate.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-
- } // end ESMC_RouteInit
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -248,16 +214,16 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_RouteGet<Value> - get <Value> for a Route
+// !IROUTINE:  ESMC_RouteGet - get <Value> for a Route
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteGet<Value>(
+      //int ESMC_Route::ESMC_RouteGet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> *value) const {     // out - value
+      //<value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
 //     Returns the value of Route member <Value>.
@@ -270,20 +236,20 @@
 //  code goes here
 //
 
- } // end ESMC_RouteGet<Value>
+ //} // end ESMC_RouteGet
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_RouteSet<Value> - set <Value> for a Route
+// !IROUTINE:  ESMC_RouteSet - set <Value> for a Route
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteSet<Value>(
+      //int ESMC_Route::ESMC_RouteSet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> value) {     // in - value
+      //<value type> value) {     // in - value
 //
 // !DESCRIPTION:
 //     Sets the Route member <Value> with the given value.
@@ -296,7 +262,7 @@
 //  code goes here
 //
 
- } // end ESMC_RouteSet<Value>
+ // } // end ESMC_RouteSet
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -362,9 +328,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      void) {  // in
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization

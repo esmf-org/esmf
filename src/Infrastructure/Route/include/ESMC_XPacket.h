@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.1 2003/03/05 17:04:53 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.2 2003/03/05 20:58:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -70,7 +70,7 @@
      // linked list of these, one per chunk:
      void *base_addr;
      int rank;
-     the memaxis stuff, based on rank
+     //the memaxis stuff, based on rank
      int destid;
      
      ESMC_XPacket *nextp;
@@ -87,28 +87,24 @@
  // the following methods apply to deep classes only
  // ESMC_XPacketCreate and ESMC_XPacketDestroy are declared below,
  // outside the ESMC_XPacket declaration
-    int ESMC_XPacketConstruct(args);          // internal only, deep class
+    int ESMC_XPacketConstruct(int arg1);      // internal only, deep class
     int ESMC_XPacketDestruct(void);           // internal only, deep class
-
- // or
- // the following method applies to a shallow class
-    int ESMC_XPacketInit(args);         // shallow class only
 
  // optional configuration methods
     int ESMC_XPacketGetConfig(ESMC_XPacketConfig *config) const;
     int ESMC_XPacketSetConfig(const ESMC_XPacketConfig *config);
 
  // accessor methods for class members
-    int ESMC_XPacketGet<Value>(<value type> *value) const;
-    int ESMC_XPacketSet<Value>(<value type>  value);
+    //int ESMC_XPacketGet(<value type> *value) const;
+    //int ESMC_XPacketSet(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_XPacketValidate(const char *options) const;
     int ESMC_XPacketPrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_XPacket(args);
-	~ESMC_XPacket(args);
+	ESMC_XPacket(void);
+	~ESMC_XPacket(void);
   
  // < declare the rest of the public interface methods here >
   
@@ -130,7 +126,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_XPacket object.
 
- ESMC_XPacket *ESMC_XPacketCreate(args, int *rc);// interface only, deep class
+ ESMC_XPacket *ESMC_XPacketCreate(int arg1, int *rc);// interface only, deep class
  int ESMC_XPacketDestroy(ESMC_XPacket *xpacket); // interface only, deep class
 
  #endif  // ESMC_XPacket_H
