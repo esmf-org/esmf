@@ -251,20 +251,20 @@ These utilities, described in parts {\bf \ref{part:Infrastructure_Utilities:_Tim
 {\bf \ref{part:Infrastructure Utilities:_I/O}},
 include but are not limited to:
 \begin{enumerate}
-\item communication primitives;
-\item a generic machine interface;
-\item I/O utilities;
-\item general message logging;
-\item mechanisms for publishing and querying component attributes;
+\item communication primitives (see part {\bf \ref{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}});
+\item a generic machine interface (see part {\bf \ref{part:Infrastructure_Utilities:_Communication_and_Memory_Kernels}});
+\item I/O utilities (see part {\bf \ref{part:Infrastructure Utilities:_I/O}};
+\item general message logging (see part {\bf \ref{part:Infrastructure_Utilities:_Log}});
+\item mechanisms for publishing and querying component attributes (see part {\bf \ref{part:Infrastructure_Utilities:_Configuration_Attributes}});
 \footnote{Like many other elements under
 {\it Utility infrastructure}, the querying and publishing functions will be 
 fundamental to the superstructure control and coupling areas. Isolating the
 requirements here does not imply a particular system design organization
 or ranking.
 }
-\item performance profiling;
-\item time management; and
-\item error handling (see \ref{req:gr:error_handling}).
+\item performance profiling (see part {\bf \ref{part:Infrastructure_Utilities:_Performance_Profiling}});
+\item time management (see part {\bf \ref{part:Infrastructure_Utilities:_Time_Management}}); and
+\item error handling (see \ref{req:gr:error_handling} and part {\bf \ref{part:Infrastructure_Utilities:_Log}}).
 \end{enumerate}
 
 \subsubsection{Communication primitives}

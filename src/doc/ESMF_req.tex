@@ -340,7 +340,10 @@ and managing product quality.
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Milestone demonstrations.
+{\bf Verification:} Milestone demonstrations.\\
+{\bf Notes:} In this mode, all input and output data are read and stored
+directly from file. This will be the standard mode of operations used by
+many ESMF applications.
 \end{reqlist}
 
 \sreq{Compatability with interactive execution}
@@ -348,7 +351,13 @@ and managing product quality.
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Milestone demonstrations.
+{\bf Verification:} Milestone demonstrations.\\
+{\bf Notes} This mode allows rapid testing of new features and debugging.
+A trace mode which allows program excution to be logges in detail,
+but at the expense of reduved performance, is useful in this mode.
+Future extensions could include elements of computatinal steering
+in which program progress can be monitored and directed
+interactively.
 \end{reqlist}
 
 \sreq{Compatability with ensemble methods}
@@ -356,7 +365,13 @@ and managing product quality.
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Milestone demonstrations.
+{\bf Verification:} Milestone demonstrations.\\
+{\bf Notes:} Ensemble methods require multiple instances of
+the same base component, generally with slight parametric variations.
+The ability to spawn numerous ensembles and then collect together
+results for automated processing, such as covariance calculation, 
+is a basic requirement. A general mix of concurrent and sequential ensemble 
+member execution must be supported.
 \end{reqlist}
 
 \sreq{Compatability with multi-institution, multi-component simulations}
@@ -364,7 +379,10 @@ and managing product quality.
 {\bf Priority:} 1. \\
 {\bf Source:} All codes\\
 {\bf Status:} Approved-1. \\
-{\bf Verification:} Milestone demonstrations.
+{\bf Verification:} Milestone demonstrations.\\
+{\bf Notes:} Some form of component versioning, labeling and naming
+is required that enables experiment configuration logs
+to include information of which components were used.
 \end{reqlist}
 
 \sreq{Ease of adoption}
