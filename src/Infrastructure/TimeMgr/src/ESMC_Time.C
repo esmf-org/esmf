@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.13 2003/04/05 01:50:47 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.14 2003/04/08 20:02:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,6 +22,7 @@
  // higher level, 3rd party or system includes
  #include <iostream.h>
  #include <math.h>     // modf()
+ #include <ESMC_TimeInterval.h>
 
  // associated class definition file
  #include <ESMC_Time.h>
@@ -29,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.13 2003/04/05 01:50:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.14 2003/04/08 20:02:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -662,7 +663,53 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
+    // get year of our (this) time
+    int YR, MM, DD;
+    // TODO: use native C++ Get, not F90 entry point
+    ESMC_TimeGet(&YR, &MM, &DD, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+
+    // create time for 1/1/YR
+    ESMC_Time dayOne;
+    MM=1, DD=1;
+    // TODO: use native C++ Init, not F90 entry point
+    dayOne.ESMC_TimeInit(&YR, &MM, &DD,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         this->Calendar, (int*) &this->Timezone);
+
+    // calculate difference between 1/1/YR and our (this) time
+    ESMC_TimeInterval dayofYear;
+    dayofYear = *this - dayOne;
+    
+    // get difference in floating point days
+    double diffDays;
+    // TODO: use native C++ Get, not F90 entry point
+    dayofYear.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+
+                                   ESMC_NULL_POINTER, &diffDays,
+
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER);
+
+    // day-of-year is one-based count; i.e. day-of-year for 1/1/YR is 1
+    *dayOfYear = diffDays + 1;
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetDayOfYear
@@ -762,6 +809,32 @@
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetRealTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Time(=) - copy or assign from BaseTime expression
+//
+// !INTERFACE:
+      ESMC_Time& ESMC_Time::operator=(
+//
+// !RETURN VALUE:
+//    ESMC_Time& result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime to copy
+//
+// !DESCRIPTION:
+//    Assign {\tt BaseTime} expression to this time.  Supports inherited
+//    operators from {\tt ESMC_BaseTime}
+//
+// !REQUIREMENTS:  
+
+    // invoke base class default assignment operator
+    ESMC_BaseTime::operator=(baseTime);
+
+    return(*this);
+
+}  // end ESMC_Time::operator=
 
 //-------------------------------------------------------------------------
 //BOP
