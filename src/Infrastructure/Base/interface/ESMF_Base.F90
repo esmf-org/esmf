@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.20 2003/01/27 17:24:43 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.21 2003/01/28 16:59:41 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -235,7 +235,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.20 2003/01/27 17:24:43 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.21 2003/01/28 16:59:41 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -387,8 +387,8 @@ end function
 !     !   be unique within that namespace.  Example namespaces could
 !     !   be: Applications, Components, Fields/Bundles, Grids.
 !      
-!     !Construct a default name if one is not given
-      if(.not. present(name)) then
+!     ! Construct a default name if one is not given
+      if((.not. present(name)) .or. (name .eq. "")) then
           defaultname = "default_name"
           anytype%name = defaultname
       else
