@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.10 2004/03/08 20:02:00 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.11 2004/03/19 00:40:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.10 2004/03/08 20:02:00 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.11 2004/03/19 00:40:00 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, YY, days, totalDays, &
+      integer :: rc, H, M, S, MM, DD, YY, days, months, totalDays, &
                  secs, testResults, ans
 
       ! individual test name
@@ -320,6 +320,18 @@
       print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
 
       ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (1 year to days) Test"
+      write(failMsg, *) " Did not return 366 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2004, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, startTimeIn=startTime, rc=rc)
+      call ESMF_Test((days==366.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
       ! Gregorian Non-leap year 2003 tests
       ! ----------------------------------------------------------------------------
       !NEX_UTest
@@ -450,6 +462,30 @@
       call ESMF_Test((YY==2008 .and. MM==2 .and. DD==29 .and. &
                       H==12 .and. M==17 .and. S==58 .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (1 year to days) Test"
+      write(failMsg, *) " Did not return 365 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, startTimeIn=startTime, rc=rc)
+      call ESMF_Test((days==365.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval conversion (2 years to months) Test"
+      write(failMsg, *) " Did not return 24 months or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=2, calendar=gregorianCalendar, &
+                                rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, rc=rc)
+      call ESMF_Test((months==24 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
 
       ! ----------------------------------------------------------------------------
       ! General Gregorian Calendar tests
@@ -710,6 +746,18 @@
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "No Leap Calendar Interval conversion (1 year to days) Test"
+      write(failMsg, *) " Did not return 365 days or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, &
+                                calendarIn=noLeapCalendar, rc=rc)
+      call ESMF_Test((days==365 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
       ! 360 Day calendar 2004 tests
       ! ----------------------------------------------------------------------------
       !NEX_UTest
@@ -894,6 +942,18 @@
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "360 Day Calendar Interval conversion (1 year to days) Test"
+      write(failMsg, *) " Did not return 360 days or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, &
+                                calendarIn=day360Calendar, rc=rc)
+      call ESMF_Test((days==360 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
 
       ! ----------------------------------------------------------------------------
       ! Julian Day calendar interval tests
