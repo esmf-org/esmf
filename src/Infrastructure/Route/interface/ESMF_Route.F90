@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.24 2003/08/06 23:05:11 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.25 2003/08/07 16:20:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,8 +73,9 @@
 
       public ESMF_RouteGetCached
 
-      public ESMF_RoutePrecompute
       public ESMF_RoutePrecomputeHalo
+      public ESMF_RoutePrecomputeRedist
+      public ESMF_RoutePrecomputeRegrid
       public ESMF_RouteRun
  
       public ESMF_RouteValidate
@@ -87,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.24 2003/08/06 23:05:11 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.25 2003/08/07 16:20:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -600,114 +601,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RoutePrecompute - Precompute communication paths
-
-! !INTERFACE:
-      subroutine ESMF_RoutePrecompute(route, rank, &
-               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-               dst_global_start, dst_global_count, layout_dst, &
-               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-               src_global_start, src_global_count, layout_src, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Route), intent(in) :: route
-      integer, intent(in) :: rank
-      integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
-      integer, intent(in) :: AI_dst_count
-      integer, dimension(:,:), intent(in) :: dst_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
-      type(ESMF_DELayout), intent(in) :: layout_dst
-      integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
-      integer, intent(in) :: AI_src_count
-      integer, dimension(:,:), intent(in) :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
-      type(ESMF_DELayout), intent(in) :: layout_src
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Execute the communications a Route represents.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[route] 
-!          Route to be executed.
-!     \item[ TBDocd ]  
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-        ! local variables
-        integer :: status                  ! local error status
-        integer :: i,j                     ! counters
-        logical :: rcpresent               ! did user specify rc?
-
-        ! Set initial values
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.   
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Translate AxisIndices from F90 to C++
-        do j=1,rank
-          do i=1,AI_dst_count
-            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
-            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
-            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
-            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
-          enddo
-          do i=1,AI_src_count
-            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
-            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
-            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
-            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
-          enddo
-        enddo
-
-        ! Call C++  code
-        call c_ESMC_RoutePrecompute(route, rank, &
-           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
-           dst_global_start, dst_global_count, layout_dst, &
-           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-           src_global_start, src_global_count, layout_src, status)
-        if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route Precompute error"
-          ! don't return before adding 1 back to AIs
-        endif
-
-        ! Translate AxisIndices back to  F90 from C++
-        do j=1,rank
-          do i=1,AI_dst_count
-            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
-            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
-            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
-            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
-          enddo
-          do i=1,AI_src_count
-            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
-            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
-            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
-            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
-          enddo
-        enddo
-
-        if (rcpresent) rc = status
-
-        end subroutine ESMF_RoutePrecompute
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_RoutePrecomputeHalo - Precompute communication paths for a halo
 
 ! !INTERFACE:
@@ -791,6 +684,222 @@
         if (rcpresent) rc = status
 
         end subroutine ESMF_RoutePrecomputeHalo
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RoutePrecomputeRedist - Precompute communication paths
+
+! !INTERFACE:
+      subroutine ESMF_RoutePrecomputeRedist(route, rank, &
+               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+               dst_global_start, dst_global_count, layout_dst, &
+               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+               src_global_start, src_global_count, layout_src, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: rank
+      integer, intent(in) :: my_DE_dst
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
+      integer, intent(in) :: AI_dst_count
+      integer, dimension(:,:), intent(in) :: dst_global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
+      type(ESMF_DELayout), intent(in) :: layout_dst
+      integer, intent(in) :: my_DE_src
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
+      integer, intent(in) :: AI_src_count
+      integer, dimension(:,:), intent(in) :: src_global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
+      type(ESMF_DELayout), intent(in) :: layout_src
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[ TBDocd ]  
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        integer :: i,j                     ! counters
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Translate AxisIndices from F90 to C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
+          enddo
+          do i=1,AI_src_count
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
+          enddo
+        enddo
+
+        ! Call C++  code
+        call c_ESMC_RoutePrecomputeRedist(route, rank, &
+           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+           dst_global_start, dst_global_count, layout_dst, &
+           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+           src_global_start, src_global_count, layout_src, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route PrecomputeRedist error"
+          ! don't return before adding 1 back to AIs
+        endif
+
+        ! Translate AxisIndices back to  F90 from C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
+          enddo
+          do i=1,AI_src_count
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
+          enddo
+        enddo
+
+        if (rcpresent) rc = status
+
+        end subroutine ESMF_RoutePrecomputeRedist
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RoutePrecomputeRegrid - Precompute communication paths
+
+! !INTERFACE:
+      subroutine ESMF_RoutePrecomputeRegrid(route, rank, &
+               my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+               dst_global_start, dst_global_count, layout_dst, &
+               my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+               src_global_start, src_global_count, layout_src, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: rank
+      integer, intent(in) :: my_DE_dst
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst_tot
+      integer, intent(in) :: AI_dst_count
+      integer, dimension(:,:), intent(in) :: dst_global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: dst_global_count
+      type(ESMF_DELayout), intent(in) :: layout_dst
+      integer, intent(in) :: my_DE_src
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src_tot
+      integer, intent(in) :: AI_src_count
+      integer, dimension(:,:), intent(in) :: src_global_start
+      integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
+      type(ESMF_DELayout), intent(in) :: layout_src
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[ TBDocd ]  
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        integer :: i,j                     ! counters
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Translate AxisIndices from F90 to C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min - 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max - 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min - 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max - 1
+          enddo
+          do i=1,AI_src_count
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min - 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max - 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min - 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max - 1
+          enddo
+        enddo
+
+        ! Call C++  code
+        call c_ESMC_RoutePrecomputeRegrid(route, rank, &
+           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+           dst_global_start, dst_global_count, layout_dst, &
+           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+           src_global_start, src_global_count, layout_src, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route PrecomputeRegrid error"
+          ! don't return before adding 1 back to AIs
+        endif
+
+        ! Translate AxisIndices back to  F90 from C++
+        do j=1,rank
+          do i=1,AI_dst_count
+            AI_dst_exc(i,j)%min = AI_dst_exc(i,j)%min + 1
+            AI_dst_exc(i,j)%max = AI_dst_exc(i,j)%max + 1
+            AI_dst_tot(i,j)%min = AI_dst_tot(i,j)%min + 1
+            AI_dst_tot(i,j)%max = AI_dst_tot(i,j)%max + 1
+          enddo
+          do i=1,AI_src_count
+            AI_src_exc(i,j)%min = AI_src_exc(i,j)%min + 1
+            AI_src_exc(i,j)%max = AI_src_exc(i,j)%max + 1
+            AI_src_tot(i,j)%min = AI_src_tot(i,j)%min + 1
+            AI_src_tot(i,j)%max = AI_src_tot(i,j)%max + 1
+          enddo
+        enddo
+
+        if (rcpresent) rc = status
+
+        end subroutine ESMF_RoutePrecomputeRegrid
 
 !------------------------------------------------------------------------------
 !BOP

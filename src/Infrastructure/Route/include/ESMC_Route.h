@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.25 2003/08/06 23:03:35 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.26 2003/08/07 16:20:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,7 +104,11 @@
     int ESMC_RouteSetRecv(int src_de, ESMC_XPacket *xp);
     
  // initialize the communication routines in this route object
-    int ESMC_RoutePrecompute(int rank, int my_DE_rcv, 
+    int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
+                       ESMC_AxisIndex *AI_tot, int AI_count, 
+                       int *global_start, int *global_count,
+                       ESMC_DELayout *layout, ESMC_Logical *periodic = NULL);
+    int ESMC_RoutePrecomputeRedist(int rank, int my_DE_rcv, 
                        ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
                        int AI_rcv_count, int *global_start_rcv,
                        int *global_count_rcv, ESMC_DELayout *layout_rcv,
@@ -112,10 +116,14 @@
                        ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
                        int AI_snd_count, int *global_start_snd,
                        int *global_count_snd, ESMC_DELayout *layout_snd);
-    int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
-                                 ESMC_AxisIndex *AI_tot, int AI_count, 
-                                 int *global_start, int *global_count,
-                                 ESMC_DELayout *layout, ESMC_Logical *periodic = NULL);
+    int ESMC_RoutePrecomputeRegrid(int rank, int my_DE_rcv, 
+                       ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
+                       int AI_rcv_count, int *global_start_rcv,
+                       int *global_count_rcv, ESMC_DELayout *layout_rcv,
+                       int my_DE_snd, 
+                       ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot,
+                       int AI_snd_count, int *global_start_snd,
+                       int *global_count_snd, ESMC_DELayout *layout_snd);
 
  // execute the communication routines set up in this route object
     int ESMC_RouteRun(void *srcaddr, void *dstaddr);
