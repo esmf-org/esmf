@@ -1,4 +1,4 @@
-// $Id: ESMC_Regrid.h,v 1.4 2003/04/01 21:54:25 flanigan Exp $
+// $Id: ESMC_Regrid.h,v 1.5 2003/12/03 23:14:59 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,15 +88,16 @@
 
  // or
  // the following method applies to a shallow class
-    int ESMC_RegridInit(args);         // shallow class only
+    int ESMC_RegridInit(int *arg1, int *arg2, const char *arg3,
+                        int *rc);         // shallow class only
 
  // optional configuration methods
     int ESMC_RegridGetConfig(ESMC_RegridConfig *config) const;
     int ESMC_RegridSetConfig(const ESMC_RegridConfig *config);
 
  // accessor methods for class members
-    int ESMC_RegridGet(<value type> *value) const;
-    int ESMC_RegridSet(<value type>  value);
+  //  int ESMC_RegridGet(<value type> *value) const;
+  //  int ESMC_RegridSet(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RegridValidate(const char *options) const;
@@ -126,7 +127,8 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Regrid object.
 
- ESMC_Regrid *ESMC_RegridCreate(args, int *rc);// interface only, deep class
+ ESMC_Regrid *ESMC_RegridCreate(int *arg1, int *arg2, const char *arg3,
+                                int *rc);// interface only, deep class
  int ESMC_RegridDestroy(ESMC_Regrid *regrid); // interface only, deep class
 
  #endif  // ESMC_Regrid_H
