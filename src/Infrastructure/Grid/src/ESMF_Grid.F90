@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.110 2003/10/16 23:14:35 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.111 2003/10/17 22:42:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.110 2003/10/16 23:14:35 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.111 2003/10/17 22:42:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1364,6 +1364,9 @@
 
 !     Create vertical physgrid if requested  TODO
 
+      ! clean up
+      deallocate(countsPerAxis)
+
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridConstructUniform
@@ -1913,6 +1916,10 @@
         print *, "ERROR in ESMF_GridAddPhysGridUniform: Grid set cell mask"
         return
       endif
+
+      ! clean up
+      deallocate(cellType1)
+      deallocate(cellType2)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -5380,7 +5387,6 @@
 
       deallocate(grid_ai)
       deallocate(localAI)
-    !  deallocate(boxes)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -5462,11 +5468,6 @@
       rank = counts(3)
 
       ! allocate arrays now
-   !   allocate(boxes(nDEs,2**rank,rank), stat=status)
-   !   if (status .ne. 0) then
-   !      print *, "allocation error"
-   !      return
-   !   endif
       allocate(myLocalAI(rank), stat=status)
       if (status .ne. 0) then
          print *, "allocation error"
@@ -5558,7 +5559,6 @@
       !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
       !   endif ! Spherical coords
 
-   !   deallocate(boxes)
       deallocate(myLocalAI)
 
       if(rcpresent) rc = ESMF_SUCCESS
