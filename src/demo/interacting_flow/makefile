@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.1 2004/10/14 17:00:54 nscollins Exp $
+# $Id: makefile,v 1.2 2005/02/02 20:57:43 jwolfe Exp $
 
-all: demo
+all: demos
 
 LOCDIR   = src/demo/interacting_flow
 
