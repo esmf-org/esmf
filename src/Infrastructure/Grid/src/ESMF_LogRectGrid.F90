@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.111 2004/11/23 00:41:33 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.112 2004/11/24 19:19:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -117,7 +117,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.111 2004/11/23 00:41:33 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.112 2004/11/24 19:19:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8336,13 +8336,13 @@
           i1 = (i-1)*2 + 1
           hasMin = .false.
           hasMax = .false.
-          if (globalMinIndex(i1  ).lt.globalMaxIndex(i1  ) .AND. &
-              globalMinIndex(i1+1).lt.globalMaxIndex(i1+1) .AND. &
+          if (globalMinIndex(i1  ).le.globalMaxIndex(i1  ) .AND. &
+              globalMinIndex(i1+1).le.globalMaxIndex(i1+1) .AND. &
               globalMinIndex(i1  ).ne.12345678             .AND. &
               globalMinIndex(i1+1).ne.12345678) &
               hasMin = .true.
-          if (globalMaxIndex(i1  ).gt.globalMinIndex(i1  ) .AND. &
-              globalMaxIndex(i1+1).gt.globalMinIndex(i1+1) .AND. &
+          if (globalMaxIndex(i1  ).ge.globalMinIndex(i1  ) .AND. &
+              globalMaxIndex(i1+1).ge.globalMinIndex(i1+1) .AND. &
               globalMaxIndex(i1  ).ne.0                    .AND. &
               globalMaxIndex(i1+1).ne.0) &
               hasMax = .true.
@@ -8601,13 +8601,13 @@
           i1 = (i-1)*2 + 1
           hasMin = .false.
           hasMax = .false.
-          if (globalMinIndex(i1  ).lt.globalMaxIndex(i1  ) .AND. &
-              globalMinIndex(i1+1).lt.globalMaxIndex(i1+1) .AND. &
+          if (globalMinIndex(i1  ).le.globalMaxIndex(i1  ) .AND. &
+              globalMinIndex(i1+1).le.globalMaxIndex(i1+1) .AND. &
               globalMinIndex(i1  ).ne.12345678             .AND. &
               globalMinIndex(i1+1).ne.12345678) &
               hasMin = .true.
-          if (globalMaxIndex(i1  ).gt.globalMinIndex(i1  ) .AND. &
-              globalMaxIndex(i1+1).gt.globalMinIndex(i1+1) .AND. &
+          if (globalMaxIndex(i1  ).ge.globalMinIndex(i1  ) .AND. &
+              globalMaxIndex(i1+1).ge.globalMinIndex(i1+1) .AND. &
               globalMaxIndex(i1  ).ne.0                    .AND. &
               globalMaxIndex(i1+1).ne.0) &
               hasMax = .true.
