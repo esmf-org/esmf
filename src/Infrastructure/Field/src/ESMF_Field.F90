@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.27 2003/06/12 17:51:27 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.28 2003/06/19 15:13:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,8 @@
       type ESMF_Mask
       sequence
       private
-        type (ESMF_Array), pointer :: maskvals   ! same size as data array
+        ! same size as data array
+        type (ESMF_Array), pointer :: maskvals = 0
       end type
 
 !------------------------------------------------------------------------------
@@ -122,10 +123,10 @@
       private
        
         type (ESMF_Base) :: base                 ! base class object
-        type (ESMF_Status) :: fieldstatus        ! uninitialized, init ok, etc
+        type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
         type (ESMF_Grid) :: grid                 ! save to satisfy query routines
-        type (ESMF_GridType), pointer :: gridp   ! pointer directly to grid
-        type (ESMF_Status) :: gridstatus         ! uninit, grid ok, etc
+        type (ESMF_GridType), pointer :: gridp => NULL()
+        type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
         type (ESMF_LocalField) :: localfield     ! this differs per DE
         type (ESMF_Status) :: datastatus         ! uninit, array ok, etc
         type (ESMF_DataMap) :: mapping           ! mapping of array indicies to grid
@@ -143,7 +144,7 @@
       type ESMF_Field
       sequence
       !private       
-        type (ESMF_FieldType), pointer :: ftypep    ! pointer to a field type
+        type (ESMF_FieldType), pointer :: ftypep => NULL()
       end type
 
 !------------------------------------------------------------------------------
@@ -212,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.27 2003/06/12 17:51:27 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.28 2003/06/19 15:13:35 nscollins Exp $'
 
 !==============================================================================
 !

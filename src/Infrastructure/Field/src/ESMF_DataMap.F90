@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.7 2003/05/07 04:34:30 cdeluca Exp $
+! $Id: ESMF_DataMap.F90,v 1.8 2003/06/19 15:13:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,8 +35,6 @@
 !------------------------------------------------------------------------------
 !
 #include "ESMF_Macros.inc"
-! if needed, add this here
-!#include "ESMF_Field.h"
 
 ! module definition
 
@@ -165,7 +163,7 @@
       type ESMF_DataMap
       sequence
       private
-        type(ESMF_DataMapType), pointer :: dmp
+        type(ESMF_DataMapType), pointer :: dmp => NULL()
       end type
 
 
@@ -208,7 +206,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.7 2003/05/07 04:34:30 cdeluca Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.8 2003/06/19 15:13:35 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
