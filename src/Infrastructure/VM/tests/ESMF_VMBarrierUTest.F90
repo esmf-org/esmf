@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.2 2005/01/25 18:40:00 jwolfe Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.3 2005/01/26 18:00:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.2 2005/01/25 18:40:00 jwolfe Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.3 2005/01/26 18:00:45 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -48,7 +48,7 @@
       character(len=8) :: strvalue
 
       ! local variables
-      integer:: i, rc
+      integer:: i, rc, loop_rc, loop_rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
       integer:: count,root  
@@ -76,6 +76,8 @@
       allocate(delay_time(0:petCount-1))
 
       !Loop to test delaying each of the processors in turn
+      ! Preset loop_rc to ESMF_SUCCESS
+      loop_rc=ESMF_SUCCESS 
       do i=0,petCount-1
         delay_time=0.
         delay_time(i)=1.
@@ -103,21 +105,23 @@
         !In case count_max was reached in the system_clock routine...
         if (t_b-t_a < -100.) t_b=t_b+get_time_max()
       !----------------------------------------------------------------
-      !EX_UTest
       ! Test Barrier method 
         write(failMsg, *) "Barrier did not hold. Slow PET=", i
         write(name, *) "Barrier Test"
 
-        if ((t_b - t_a) >= max_time) then
-          rc=ESMF_SUCCESS
+        if ((t_b - t_a) < max_time) then
+          loop_rc=ESMF_FAILURE
         end if
 
-         call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
            delay= t_b - t_a
            print*, 'slow Pet=', i,'Pet=', localPet,'time delay = ', &
          &         delay,'[  -- should be >= ',max_time,'--  ]'
       end do   !Loop over i -- "slow" Pet's
+
+      !EX_UTest
+      !Verify loop test results
+      call ESMF_Test((loop_rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_TestEnd(result, ESMF_SRCLINE)
 
