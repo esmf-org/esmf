@@ -1,4 +1,4 @@
-% $Id: State_implnotes.tex,v 1.1 2003/10/23 13:22:07 cdeluca Exp $
+% $Id: State_implnotes.tex,v 1.2 2004/12/28 22:53:47 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,4 +16,32 @@ Bundles, Fields, and/or Arrays.  The objects must be named and have
 the proper attributes so they can be identified by the receiver of
 the data.  For example, units and other detailed information
 may need to be associated with the data as an Attribute.  
+
+Data contained in States must be created in unison on each
+PET of the current VM.  This allows the creation process to avoid
+doing communications since each PET can compute any information
+it needs to know about any remote PET (for example, the grid
+distribute method can compute the decomposition of the grid on
+not only the local PET but also the remote PETs since it knows
+each PET is making the identical call).  For all PETs to have a
+consistent view of the data this means objects must be given
+unique names when created, or all objects must be created in
+the same order on all PETs so ESMF can generate consistent
+default names for the objects.
+
+When running components on subsets of the original VM all the
+PETs can create consistent objects but then when they are put
+into a State and passed to a component with a different VM and
+a different set of PETs, a communication call (reconcile) must be 
+made to communicate the missing information to the PETs which were 
+not involved in the original object creation.  The reconcile call
+broadcasts object lists; those PETs which are missing any objects
+in the total list can receive enough information to
+reconstruct a proxy object which contains all necessary information
+about that object, with no local data, on that PET.  These proxy
+objects can be queried by ESMF routines to determine the amount
+of data and what PETs contain data which is destined to be moved
+to the local PET (for receiving data) and conversely, can determine
+which other PETs are going to receive data and how much (for
+sending data).
 
