@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.11 2003/04/09 21:33:04 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.12 2003/04/11 23:02:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +47,7 @@
       private
 !------------------------------------------------------------------------------
 
-      integer, parameter :: MONTHSPERYEAR = 12
+      integer, parameter :: MONTHS_PER_YEAR = 12
 
 !------------------------------------------------------------------------------
 !     ! ESMF_CalendarType
@@ -96,14 +96,15 @@
       sequence
       private
         type(ESMF_CalendarType) :: Type
-        integer, dimension(MONTHSPERYEAR) :: DaysPerMonth
+        integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
         integer :: SecondsPerDay
+        integer :: SecondsPerYear
         type(ESMF_DaysPerYear) :: DaysPerYear
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public MONTHSPERYEAR
+      public MONTHS_PER_YEAR
       public ESMF_CalendarType
       public ESMF_CAL_GREGORIAN, ESMF_CAL_JULIAN, ESMF_CAL_NOLEAP, &
              ESMF_CAL_360DAY, ESMF_CAL_GENERIC, ESMF_CAL_NOCALENDAR
@@ -128,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.11 2003/04/09 21:33:04 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.12 2003/04/11 23:02:08 eschwab Exp $'
 
 !==============================================================================
 
@@ -168,7 +169,7 @@
 !EOP
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarInit(calendar, Type%caltype, rc)
+      call c_ESMC_CalendarInit(calendar, Type, rc)
     
       end subroutine ESMF_CalendarInit
     
@@ -182,7 +183,7 @@
                                           DaysPerYearDn, DaysPerYearDd, rc)
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(out) :: calendar
-      integer, dimension(MONTHSPERYEAR), intent(in) :: DaysPerMonth
+      integer, dimension(MONTHS_PER_YEAR), intent(in) :: DaysPerMonth
       integer, intent(in) :: SecondsPerDay
       integer, intent(in) :: DaysPerYear
       integer, intent(in) :: DaysPerYearDn
@@ -430,7 +431,7 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(out) :: calendar
       type(ESMF_CalendarType), intent(in) :: Type
-      integer, dimension(MONTHSPERYEAR), intent(in) :: DaysPerMonth
+      integer, dimension(MONTHS_PER_YEAR), intent(in) :: DaysPerMonth
       integer, intent(in) :: SecondsPerDay
       integer, intent(in) :: DaysPerYear
       integer, intent(in) :: DaysPerYearDn
@@ -482,7 +483,7 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(in) :: calendar
       type(ESMF_CalendarType), intent(out) :: Type
-      integer, dimension(MONTHSPERYEAR), intent(out) :: DaysPerMonth
+      integer, dimension(MONTHS_PER_YEAR), intent(out) :: DaysPerMonth
       integer, intent(out) :: SecondsPerDay
       integer, intent(out) :: DaysPerYear
       integer, intent(out) :: DaysPerYearDn
