@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.1 2001/11/13 18:35:47 dneckels Exp $ 
+# $Id: makefile,v 1.2 2003/01/07 21:31:58 nscollins Exp $ 
 
-DIRS     = Superstructure Infrastructure doc
+DIRS     = Infrastructure Superstructure doc
 LOCDIR   = src
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
