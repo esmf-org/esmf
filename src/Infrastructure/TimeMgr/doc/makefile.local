@@ -1,0 +1,133 @@
+
+DESTEX = TimeMgr_desdoc.ctex \
+         TimeMgr_syn.tex TimeMgr_obj1.tex TimeMgr_obj2.tex TimeMgr_obj3.tex \
+         TimeMgr_obj4.tex TimeMgr_obj5.tex TimeMgr_param.tex \
+         TimeMgr_desrev.tex TimeMgr_glos.tex \
+         BaseTime_desc.tex BaseTime_design.tex BaseTime_def.tex \
+         BaseTime_rest.tex BaseTime_fex.tex \
+#BaseTime_fparam.tex \
+         BaseTime_ccex.tex \
+#BaseTime_ccparam.tex \
+         TimeInterval_desc.tex TimeInterval_design.tex TimeInterval_def.tex \
+#TimeInterval_rest.tex \
+         TimeInterval_fex.tex \
+#TimeInterval_fparam.tex \
+         TimeInterval_ccex.tex \
+#TimeInterval_ccparam.tex \
+         Time_desc.tex Time_design.tex Time_def.tex \
+#Time_rest.tex \
+         Time_fex.tex \
+#Time_fparam.tex \
+         Time_ccex.tex 
+#Time_ccparam.tex \
+         Calendar_desc.tex Calendar_design.tex Calendar_def.tex \
+         Calendar_rest.tex Calendar_fex.tex Calendar_fparam.tex \
+         Calendar_ccex.tex Calendar_ccparam.tex \
+         Clock_desc.tex Clock_design.tex Clock_def.tex \
+         Clock_rest.tex Clock_fex.tex Clock_fparam.tex \
+         Clock_ccex.tex Clock_ccparam.tex \
+         Alarm_desc.tex Alarm_design.tex Alarm_def.tex \
+#Alarm_rest.tex \
+         Alarm_fex.tex \
+#Alarm_fparam.tex \
+         Alarm_ccex.tex \
+#Alarm_ccparam.tex \
+
+DESEPS = TimeMgrClass.EPS TimeMgrObject.EPS TimeMgrOCD1.EPS TimeMgrOCD2.EPS \
+         TimeMgrOCD3.EPS
+
+REQTEX = TimeMgr_reqdoc.ctex \
+         TimeMgr_auth.tex TimeMgr_background.tex TimeMgr_terms.tex \
+         TimeMgr_sumreq.tex TimeMgr_abbr.tex TimeMgr_req.tex TimeMgr_glos.tex \
+
+FSRC = ../interface/ESMF_BaseTime.F90 ../interface/ESMF_TimeInterval.F90 \
+       ../interface/ESMF_Time.F90 ../interface/ESMF_Calendar.F90 \
+       ../interface/ESMF_Clock.F90 ../interface/ESMF_Alarm.F90
+
+CSRC = ../include/ESMC_BaseTime.h ../include/ESMC_TimeInterval.h \
+       ../include/ESMC_Time.h ../include/ESMC_Calendar.h \
+       ../include/ESMC_Clock.h ../include/ESMC_Alarm.h
+
+
+all: doc
+
+
+doc: des req
+#doc: des req fig
+
+des: TimeMgr_desdoc.ps TimeMgr_desdoc.pdf TimeMgr_desdoc.html
+req: TimeMgr_reqdoc.ps TimeMgr_reqdoc.pdf TimeMgr_reqdoc.html
+#fig: figs.ps figs.pdf
+
+# design doc
+TimeMgr_desdoc.html: TimeMgr_desdoc.dvi
+	rm -f TimeMgr_desdoc/*.gif
+	do_l2h TimeMgr des
+	rm -f TimeMgr_desdoc.html
+	ln -s TimeMgr_desdoc/TimeMgr_desdoc.html .
+
+TimeMgr_desdoc.ps:  TimeMgr_desdoc.dvi
+	dvips -o TimeMgr_desdoc.ps TimeMgr_desdoc.dvi
+
+TimeMgr_desdoc.pdf:  TimeMgr_desdoc.dvi
+	dvipdf TimeMgr_desdoc.dvi TimeMgr_desdoc.pdf
+
+TimeMgr_desdoc.dvi: ${DESTEX} ${DESEPS} fsrc ccsrc
+	do_latex TimeMgr des
+
+# requirements doc
+TimeMgr_reqdoc.html: TimeMgr_reqdoc.dvi
+	rm -f TimeMgr_reqdoc/*.gif
+	do_l2h TimeMgr req
+	rm -f TimeMgr_reqdoc.html
+	ln -s TimeMgr_reqdoc/TimeMgr_reqdoc.html .
+
+TimeMgr_reqdoc.ps:  TimeMgr_reqdoc.dvi
+	dvips -o TimeMgr_reqdoc.ps TimeMgr_reqdoc.dvi
+
+TimeMgr_reqdoc.pdf:  TimeMgr_reqdoc.dvi
+	dvipdf TimeMgr_reqdoc.dvi TimeMgr_reqdoc.pdf
+
+TimeMgr_reqdoc.dvi: ${REQTEX}
+	do_latex TimeMgr req
+
+# figures
+#figs.ps:  figs.dvi
+#	dvips -o figs.ps figs.dvi
+
+#figs.pdf:  figs.dvi
+#	dvipdf figs.dvi figs.pdf
+
+#figs.dvi: figs.tex
+#	latex figs.tex
+#	latex figs.tex
+
+
+# source files which gen input for design doc
+ccsrc: ${CSRC}
+	do_chprotex BaseTime ../include/ESMC_BaseTime.h
+	do_chprotex TimeInterval ../include/ESMC_TimeInterval.h
+	do_chprotex Time ../include/ESMC_Time.h
+	do_chprotex Calendar ../include/ESMC_Calendar.h
+	do_chprotex Clock ../include/ESMC_Clock.h
+	do_chprotex Alarm ../include/ESMC_Alarm.h
+
+	do_ccprotex BaseTime ../include/ESMC_BaseTime.C
+	do_ccprotex TimeInterval ../include/ESMC_TimeInterval.C
+	do_ccprotex Time ../include/ESMC_Time.C
+	do_ccprotex Calendar ../include/ESMC_Calendar.C
+	do_ccprotex Clock ../include/ESMC_Clock.C
+	do_ccprotex Alarm ../include/ESMC_Alarm.C
+	touch ccsrc
+
+fsrc:  ${FSRC}
+	do_fprotex BaseTime ../interface/ESMF_BaseTime.F90
+	do_fprotex TimeInterval ../interface/ESMF_TimeInterval.F90
+	do_fprotex Time ../interface/ESMF_Time.F90
+	do_fprotex Calendar ../interface/ESMF_Calendar.F90
+	do_fprotex Clock ../interface/ESMF_Clock.F90
+	do_fprotex Alarm ../interface/ESMF_Alarm.F90
+	touch fsrc
+
+clean:
+	rm -f *.dvi *.ps TimeMgr_reqdoc/* TimeMgr_desdoc/* fsrc ccsrc
