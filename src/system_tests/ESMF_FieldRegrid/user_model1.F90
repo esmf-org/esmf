@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.22 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: user_model1.F90,v 1.23 2004/05/24 23:06:07 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,9 +99,7 @@
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: npets, de_id
-        type(ESMF_GridType) :: horz_gridtype
-        type(ESMF_GridStagger) :: horz_stagger
-        type(ESMF_CoordSystem) :: horz_coord_system
+        type(ESMF_GridHorzStagger) :: horz_stagger
         integer :: status
 
         ! Query component for VM and create a layout with the right breakdown
@@ -125,18 +123,15 @@
         max(1) = 60.0
         min(2) = 0.0
         max(2) = 50.0
-        horz_gridtype = ESMF_GridType_XY
-        horz_stagger = ESMF_GridStagger_A
-        horz_coord_system = ESMF_CoordSystem_Cartesian
+        horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
-        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+        grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                delayout=delayout, &
-                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_GridDistribute(grid1, delayout=delayout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D real array

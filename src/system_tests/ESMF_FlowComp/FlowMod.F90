@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.11 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: FlowMod.F90,v 1.12 2004/05/24 23:09:01 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -64,9 +64,7 @@
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: myde, npets, halo_width
 !
 ! Set initial values
@@ -89,27 +87,27 @@
 !
 ! Create the Grid
 !
-        counts(1) = 40
-        counts(2) = 20
-        g_min(1) = 0.0
-        g_max(1) = 200.0
-        g_min(2) = 0.0
-        g_max(2) = 50.0
-        horz_gridtype = ESMF_GridType_XY
-        horz_stagger = ESMF_GridStagger_D_NE
-        horz_coord_system = ESMF_CoordSystem_Cartesian
-        halo_width = 1
+      counts(1) = 40
+      counts(2) = 20
+      g_min(1) = 0.0
+      g_max(1) = 200.0
+      g_min(2) = 0.0
+      g_max(2) = 50.0
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
+      halo_width = 1
 
-        grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                               minGlobalCoordPerDim=g_min, &
-                               maxGlobalCoordPerDim=g_max, &
-                               delayout=layout, &
-                               horzGridType=horz_gridtype, &
-                               horzStagger=horz_stagger, &
-                               horzCoordSystem=horz_coord_system, &
-                               name="source grid", rc=rc)
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                             minGlobalCoordPerDim=g_min, &
+                             maxGlobalCoordPerDim=g_max, &
+                             horzStagger=horz_stagger, &
+                             name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
+        return
+      endif
+      call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
+      if(rc .NE. ESMF_SUCCESS) then
+        print *, "ERROR in User1_init:  grid distribute"
         return
       endif
 

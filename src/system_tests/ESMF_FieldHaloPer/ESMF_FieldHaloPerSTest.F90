@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.24 2004/04/29 16:59:00 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.25 2004/05/24 23:05:22 jwolfe Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -229,9 +229,7 @@
       type(ESMF_DELayout) :: layout1
       integer, dimension(2) :: shape
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
@@ -295,9 +293,7 @@
       max(1) = 15.0
       min(2) = 0.0
       max(2) = 12.0
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
       print *, "Grid 1 is Periodic along the 1st dimension"
       periodic(1) = ESMF_TRUE
@@ -305,15 +301,14 @@
 
       gname = "test grid 1"
 
-      grid(1) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                delayout=layout1, &
-                                horzGridType=horz_gridtype, &
-                                horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
-                                periodic=periodic, &
-                                name=gname, rc=rc)
+      grid(1) = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          horzStagger=horz_stagger, &
+                                          periodic=periodic, &
+                                          name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_GridDistribute(grid(1), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       if (verbose) print *, "Grid Create returned"
@@ -324,15 +319,14 @@
 
       gname = "test grid 2"
 
-      grid(2) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                delayout=layout1, &
-                                horzGridType=horz_gridtype, &
-                                horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
-                                periodic=periodic, &
-                                name=gname, rc=rc)
+      grid(2) = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          horzStagger=horz_stagger, &
+                                          periodic=periodic, &
+                                          name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_GridDistribute(grid(2), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       if (verbose) print *, "Grid Create returned"
@@ -343,15 +337,14 @@
 
       gname = "test grid 3"
 
-      grid(3) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                delayout=layout1, &
-                                horzGridType=horz_gridtype, &
-                                horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
-                                periodic=periodic, &
-                                name=gname, rc=rc)
+      grid(3) = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          horzStagger=horz_stagger, &
+                                          periodic=periodic, &
+                                          name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_GridDistribute(grid(3), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       if (verbose) print *, "Grid Create returned"
@@ -362,15 +355,14 @@
 
       gname = "test grid 4"
 
-      grid(4) = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                minGlobalCoordPerDim=min, &
-                                maxGlobalCoordPerDim=max, &
-                                delayout=layout1, &
-                                horzGridType=horz_gridtype, &
-                                horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
-                                periodic=periodic, &
-                                name=gname, rc=rc)
+      grid(4) = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          horzStagger=horz_stagger, &
+                                          periodic=periodic, &
+                                          name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_GridDistribute(grid(4), delayout=layout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       if (verbose) print *, "Grid Create returned"

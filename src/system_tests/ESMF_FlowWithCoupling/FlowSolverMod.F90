@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.14 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.15 2004/05/24 23:09:20 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -113,9 +113,7 @@
       real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(kind=ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: npets
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
                        uin, rhoin, siein, &
@@ -160,20 +158,20 @@
 !
 ! Create the Grid
 !
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_C_NE
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_C_NE
 
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
-                             delayout=layout, &
-                             horzGridType=horz_gridtype, &
                              horzStagger=horz_stagger, &
-                             horzCoordSystem=horz_coord_system, &
                              name="source grid", rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_init:  grid create"
+        return
+      endif
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in Flow_init:  grid distribute"
         return
       endif
 !

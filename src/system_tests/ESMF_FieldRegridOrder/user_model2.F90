@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.11 2004/05/10 15:50:48 nscollins Exp $
+! $Id: user_model2.F90,v 1.12 2004/05/24 23:08:23 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -94,9 +94,7 @@
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
       integer :: npets, de_id
-      type(ESMF_GridType) :: horzGridtype
-      type(ESMF_GridStagger) :: horzStagger
-      type(ESMF_CoordSystem) :: horzCoordSystem
+      type(ESMF_GridHorzStagger) :: horzStagger
       type(ESMF_CoordOrder) :: coordOrder
       integer :: status
 
@@ -130,25 +128,22 @@
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
 
-      horzGridtype    = ESMF_GridType_XY
-      horzStagger     = ESMF_GridStagger_D_NE
-      horzCoordSystem = ESMF_CoordSystem_Cartesian
-      coordOrder      = ESMF_CoordOrder_YXZ
+      horzStagger     = ESMF_GRID_HORZ_STAGGER_D_NE
+      coordOrder      = ESMF_COORD_ORDER_YXZ
 
       call ESMF_FieldDataMapInit(datamap, ESMF_INDEX_IJ, rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
-                                     countsPerDEDecomp1=countsPerDE1, &
-                                     countsPerDEDecomp2=countsPerDE2, &
-                                     minGlobalCoordPerDim=min, &
+      grid1 = ESMF_GridCreateHorz_XY( minGlobalCoordPerDim=min, &
                                      delta1=delta1, delta2=delta2, &
-                                     delayout=delayout, &
-                                     horzGridType=horzGridtype, &
                                      horzStagger=horzStagger, &
-                                     horzCoordSystem=horzCoordSystem, &
                                      coordOrder=coordOrder, &
                                      name="source grid", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridDistribute(grid1, delayout=delayout, &
+                               countsPerDEDim1=countsPerDE1, &
+                               countsPerDEDim2=countsPerDE2, &
+                               rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 2D real array

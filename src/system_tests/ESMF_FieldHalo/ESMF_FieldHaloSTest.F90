@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.26 2004/04/28 23:12:13 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.27 2004/05/24 23:04:59 jwolfe Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -221,9 +221,7 @@
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
@@ -256,19 +254,16 @@
       max(1) = 15.0
       min(2) = 0.0
       max(2) = 12.0
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                              minGlobalCoordPerDim=min, &
-                              maxGlobalCoordPerDim=max, &
-                              delayout=delayout1, &
-                              horzGridType=horz_gridtype, &
-                              horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              name=gname, rc=rc)
+      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                        minGlobalCoordPerDim=min, &
+                                        maxGlobalCoordPerDim=max, &
+                                        horzStagger=horz_stagger, &
+                                        name=gname, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       print *, "Grid Create returned"

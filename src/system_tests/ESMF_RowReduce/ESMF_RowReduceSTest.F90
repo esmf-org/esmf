@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.24 2004/05/24 17:40:03 theurich Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.25 2004/05/24 23:09:55 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -30,9 +30,7 @@
     integer :: rowlen, rstart, rend
     integer :: result, pet_id, npets, rightvalue 
     integer :: counts(2)
-    type(ESMF_GridType) :: horz_gridtype
-    type(ESMF_GridStagger) :: horz_stagger
-    type(ESMF_CoordSystem) :: horz_coord_system
+    type(ESMF_GridHorzStagger) :: horz_stagger
     real(ESMF_KIND_R8) :: min(2), max(2)
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(2) :: index
@@ -98,21 +96,18 @@
       max(1) = 20.5
       min(2) = 0.0
       max(2) = 5.0
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              delayout=delayout1, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
                               name=gname, rc=rc)
-
       print *, "Grid Create returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
+
+      call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
+      print *, "Grid Distribute returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
 
 
     ! figure out our local processor id

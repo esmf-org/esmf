@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.9 2004/04/29 17:11:43 nscollins Exp $
+! $Id: user_model1.F90,v 1.10 2004/05/24 23:08:10 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,9 +99,7 @@
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: npets, pet_id
-        type(ESMF_GridType) :: horzGridtype
-        type(ESMF_GridStagger) :: horzStagger
-        type(ESMF_CoordSystem) :: horzCoordSystem
+        type(ESMF_GridHorzStagger) :: horzStagger
         integer :: status
 
         ! Query component for VM and create a layout with the right breakdown
@@ -121,18 +119,15 @@
         max(1) = 60.0
         min(2) = 0.0
         max(2) = 50.0
-        horzGridtype = ESMF_GridType_XY
-        horzStagger = ESMF_GridStagger_A
-        horzCoordSystem = ESMF_CoordSystem_Cartesian
+        horzStagger = ESMF_GRID_HORZ_STAGGER_A
 
-        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                              minGlobalCoordPerDim=min, &
-                                              maxGlobalCoordPerDim=max, &
-                                              delayout=delayout, &
-                                              horzGridType=horzGridtype, &
-                                              horzStagger=horzStagger, &
-                                              horzCoordSystem=horzCoordSystem, &
-                                              name="source grid", rc=status)
+        grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          horzStagger=horzStagger, &
+                                          name="source grid", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_GridDistribute(grid1, delayout=delayout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D real array

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.22 2004/04/28 23:12:13 cdeluca Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.23 2004/05/24 23:05:43 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -42,9 +42,7 @@
     real(ESMF_KIND_R8), dimension(2) :: min, max
     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
-    type(ESMF_GridType)    :: horzGridType
-    type(ESMF_GridStagger) :: horzStagger
-    type(ESMF_CoordSystem) :: horzCoordSystem
+    type(ESMF_GridHorzStagger) :: horzStagger
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
     type(ESMF_Array), dimension(:), pointer :: coordArray
@@ -110,23 +108,20 @@
     max(1)          = 60.0
     min(2)          = 0.0
     max(2)          = 50.0
-    horzGridType    = ESMF_GridType_XY
-    horzStagger     = ESMF_GridStagger_A
-    horzCoordSystem = ESMF_CoordSystem_Cartesian
+    horzStagger     = ESMF_GRID_HORZ_STAGGER_A
     call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                             kind=ESMF_R8)
 
     decompids1(1) = 1
     decompids1(2) = 2
-    grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          delayout=delayout1, &
-                                          decompIds=decompids1, &
-                                          horzGridType=horzGridType, &
-                                          horzStagger=horzStagger, &
-                                          horzCoordSystem=horzCoordSystem, &
-                                          name="source grid", rc=rc)
+    grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                      minGlobalCoordPerDim=min, &
+                                      maxGlobalCoordPerDim=max, &
+                                      horzStagger=horzStagger, &
+                                      name="source grid", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDistribute(grid1, delayout=delayout1, &
+                             decompIds=decompids1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     field1 = ESMF_FieldCreate(grid1, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field1", rc=rc)
@@ -137,15 +132,14 @@
 
     decompids2(1) = 2
     decompids2(2) = 1
-    grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
-                                          minGlobalCoordPerDim=min, &
-                                          maxGlobalCoordPerDim=max, &
-                                          delayout=delayout1, &
-                                          decompIds=decompids2, &
-                                          horzGridType=horzGridType, &
-                                          horzStagger=horzStagger, &
-                                          horzCoordSystem=horzCoordSystem, &
-                                          name="destination grid", rc=rc)
+    grid2 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+                                      minGlobalCoordPerDim=min, &
+                                      maxGlobalCoordPerDim=max, &
+                                      horzStagger=horzStagger, &
+                                      name="destination grid", rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDistribute(grid2, delayout=delayout1, &
+                             decompIds=decompids2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     field2 = ESMF_FieldCreate(grid2, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                               haloWidth=hWidth, name="field2", rc=rc)

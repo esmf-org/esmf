@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.18 2004/05/10 15:50:23 nscollins Exp $
+! $Id: user_model1.F90,v 1.19 2004/05/24 23:07:15 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -100,9 +100,7 @@
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(3), order(3)
         integer :: de_id, npets
-        type(ESMF_GridType) :: horz_gridtype
-        type(ESMF_GridStagger) :: horz_stagger
-        type(ESMF_CoordSystem) :: horz_coord_system
+        type(ESMF_GridHorzStagger) :: horz_stagger
         integer :: status
 
         print *, "User Comp Init starting"
@@ -128,18 +126,15 @@
         max(1) = 60.0
         min(2) = 0.0
         max(2) = 50.0
-        horz_gridtype = ESMF_GridType_XY
-        horz_stagger = ESMF_GridStagger_A
-        horz_coord_system = ESMF_CoordSystem_Cartesian
+        horz_stagger = ESMF_GRID_HORZ_STAGGER_A
 
-        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts(2:3), &
+        grid1 = ESMF_GridCreateHorz_XYUni(counts=counts(2:3), &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                delayout=delayout, &
-                                horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
-                                horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_GridDistribute(grid1, delayout=delayout, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 3D real array

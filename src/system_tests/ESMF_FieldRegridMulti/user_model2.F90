@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.19 2004/05/10 15:50:23 nscollins Exp $
+! $Id: user_model2.F90,v 1.20 2004/05/24 23:07:26 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -94,9 +94,7 @@
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2), order(3), counts(3)
       integer :: npets, de_id
-      type(ESMF_GridType) :: horz_gridtype
-      type(ESMF_GridStagger) :: horz_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system
+      type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: status
 
       print *, "User Comp Init starting"
@@ -130,20 +128,17 @@
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
 
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_D_NE
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
 
-      grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
-                              countsPerDEDecomp1=countsPerDE1, &
-                              countsPerDEDecomp2=countsPerDE2, &
-                              minGlobalCoordPerDim=min, &
-                              delta1=delta1, delta2=delta2, &
-                              delayout=delayout, &
-                              horzGridType=horz_gridtype, &
-                              horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              name="source grid", rc=status)
+      grid1 = ESMF_GridCreateHorz_XY(minGlobalCoordPerDim=min, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzStagger=horz_stagger, &
+                                     name="source grid", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_GridDistribute(grid1, delayout=delayout, &
+                               countsPerDEDim1=countsPerDE1, &
+                               countsPerDEDim2=countsPerDE2, &
+                               rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 3D real array
