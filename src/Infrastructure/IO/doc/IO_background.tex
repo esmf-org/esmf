@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.3 2002/04/23 01:16:58 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.4 2002/04/24 00:33:38 lzaslavsky Exp $
 
 \section{Background}
 
@@ -117,6 +117,24 @@ definitions within a message, one will just write a number identifying
 a parameter with its descriptions \cite{WMO-BUFR-CREX}.
 \end{itemize}
 
+The processes of receiving observational data and data assimilation
+may require complex access to data. To do it efficiently, a complex
+database software can be used. For example ECMWF currently exploits
+Observational Data Base (ODB) software based on SQL. It allows
+parallel quiery processing as well as use of {\em virtual data base}
+concept -- use of multiple data bases as one big virtual database
+\cite{ODB}. 
+
+An optimized indexing can provide very fast access to data in the
+process of data assimilation.
+
+
+An alternative/complimentary approach may be based on use of {\em
+point data structure} in HDF-EOS. In this case, optimized indexing can
+significantly accelerate access to data as well.
+
+
+
 \subsection{IO optimization}
 
 The future development of ESMF IO facility will require further
@@ -126,7 +144,33 @@ increase of time spent to input observational data. On the other hand,
 a customer's desire to download simulation results more frequently leads
 to significant increase in the amount of gridded data IO.
 
+There are two aspects of  parallel IO:
 
+\begin{itemize}
+\item[-] How dataset distributed among multiple processors can be
+written to a single file efficiently;
+
+\item[-] How single file can be distributed accross multiple physical
+discs and IO channels.
+\end{itemize}
+ 
+there several possibilities to perform IO in parallel:
+\begin{itemize}
+\item {\bf Single-threaded IO.} A single process acquires all the data and
+                                writes them out; 
+\item {\bf Multithreaded/Single-fileset IO.} Many process write to a
+single file;
+
+\item {\bf Multithreaded, multi-fileset IO} Many processors write to
+multiple independent files. These fileas are later assembled. 
+\end{itemize}
+
+Multithreaded IO offers a simple way to stipe the data accross as many
+IO channels and disk channels as are available \cite{
+Balaji_Parallel_IO_1999, Balaji_Parallel_IO_2000}.
+
+Parallel IO implemented in GFDL (\cite{mpp_io}) has features described
+above.
 
 \subsection{Location}
 
@@ -135,12 +179,15 @@ efficient utilities to input/output gridded data and observation data
 to and from the disk. A standard API will allow manipulate with multiple
 standard formats.
 
+
 \subsection{Scope}
 
 ESMF IO is meant to be used for standard API and underlying
 implementation, providing input and outut of gridded data and
 observational data streams to and from the disk in multiple standard
-formats.
+formats. Sequential IO and different versions of parallel IO have to
+be provided.  
+
 
 
 
