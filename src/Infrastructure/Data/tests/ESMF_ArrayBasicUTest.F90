@@ -8,7 +8,7 @@
 
     integer :: i, j, nx, ny, items, rc
     type(ESMF_Array) :: array1
-    type(ESMF_CopyFlag) :: docopy = ESMF_NO_COPY
+    type(ESMF_CopyFlag) :: docopy = ESMF_DATA_REF
     integer (ESMF_IKIND_I4),dimension(:,:),pointer :: intptr, intptr2
 
     nx = 3

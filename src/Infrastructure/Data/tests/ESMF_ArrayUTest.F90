@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.2 2003/04/17 20:39:43 nscollins Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.3 2003/04/24 16:44:36 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -50,13 +50,13 @@
     enddo
     print *, "intptr data = ", intptr
 
-    array1 = ESMF_ArrayCreate(intptr, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
     print *, "array 1 create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc)
     print *, "array 1 print returned"
 
-    call ESMF_ArrayGetData(array1, intptr2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
     print *, "array 1 getdata returned"
     print *, "intptr2 data = ", intptr2
 
@@ -78,7 +78,7 @@
        intptr(i) = i
     enddo
 
-    array1 = ESMF_ArrayCreate(intptr, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
     print *, "array 1 create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc)
@@ -102,7 +102,7 @@
        intptr(i) = i
     enddo
 
-    array1 = ESMF_ArrayCreate(intptr, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
     print *, "array 1 create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc)
@@ -130,7 +130,7 @@
     enddo
     print *, "partial print of realptr data = ", realptr(1:3,1:3)
 
-    array2 = ESMF_ArrayCreate(realptr, ESMF_NO_COPY, rc)
+    array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc)
     print *, "array 2 create returned"
 
     call ESMF_ArrayPrint(array2, "foo", rc)
@@ -143,7 +143,7 @@
     enddo
     print *, "realptr data changed after nocopy set, now = ", realptr
 
-    call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
     print *, "array 2 getdata returned"
     print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
 
@@ -168,7 +168,7 @@
      enddo
     enddo
 
-    array2 = ESMF_ArrayCreate(realptr, ESMF_NO_COPY, rc)
+    array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc)
     print *, "array 2 create returned"
 
     call ESMF_ArrayPrint(array2, "foo", rc)
@@ -181,7 +181,7 @@
 !-------------------------------------------------------------------------------
 !   ! Test 5:
 !   !  Create based on an existing, allocated F90 pointer. 
-!   !  Data is type Real, 2D.  DO_COPY set
+!   !  Data is type Real, 2D.  DATA_COPY set
     print *, ">>> Test 5:"
  
  
@@ -195,7 +195,7 @@
      enddo
     enddo
 
-    array2 = ESMF_ArrayCreate(realptr, ESMF_DO_COPY, rc)
+    array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_COPY, rc)
     print *, "array 2 create returned"
 
     call ESMF_ArrayPrint(array2, "foo", rc)
@@ -208,7 +208,7 @@
     enddo
     print *, "realptr data changed after docopy set, now = ", realptr(1:3,1:3)
 
-    call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
 
@@ -219,7 +219,7 @@
 !-------------------------------------------------------------------------------
 !   ! Test 6:
 !   !  Create based on an existing, allocated F90 pointer. 
-!   !  Data is type Real, 2D.  DO_COPY set
+!   !  Data is type Real, 2D.  DATA_COPY set
     print *, ">>> Test 6:"
  
  
@@ -236,7 +236,7 @@
      enddo
     enddo
 
-    array4 = ESMF_ArrayCreate(real3dptr, ESMF_DO_COPY, rc)
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_DATA_COPY, rc)
     print *, "array 4 create returned"
 
     ! with do copy, the original can go now
@@ -257,7 +257,7 @@
     nk = 60
     allocate(real3dptr(ni,nj,nk))
 
-    array4 = ESMF_ArrayCreate(real3dptr, ESMF_NO_COPY, rc)
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_DATA_REF, rc)
     print *, "array 4 create returned"
 
     call ESMF_ArrayPrint(array4, "foo", rc)
@@ -273,7 +273,7 @@
     nk = 40
     allocate(real3dptr(ni,nj,nk))
 
-    array4 = ESMF_ArrayCreate(real3dptr, ESMF_NO_COPY, rc)
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_DATA_REF, rc)
     print *, "array 4 create returned"
 
     call ESMF_ArrayPrint(array4, "foo", rc)
@@ -290,7 +290,7 @@
     nk = 40
     allocate(real3dptr(ni,nj,nk))
 
-    array4 = ESMF_ArrayCreate(real3dptr, ESMF_NO_COPY, rc)
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_DATA_REF, rc)
     print *, "array 4 create returned"
 
     call ESMF_ArrayPrint(array4, "foo", rc)
@@ -333,7 +333,7 @@
       enddo
     enddo
 
-    array1 = ESMF_ArrayCreate(int2Dptr, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(int2Dptr, ESMF_DATA_REF, rc)
     print *, "array 1 create returned"
 
     call ESMF_ArrayWrite(array1, filename="./foo", rc=rc)
