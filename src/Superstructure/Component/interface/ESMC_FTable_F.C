@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.8 2003/09/12 18:59:04 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.9 2003/09/23 15:18:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,6 +24,7 @@
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 #include "ESMC_Array.h"
+#include "trim.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -35,42 +36,6 @@
 //
 //
 //EOP
-
-// make a copy of a string, trim off trailing blanks, and make sure
-// it's null terminated.  if phase > 0, add it as a 0 filled 3 digit
-// number. this char string must be deleted when finished.
-static void newtrim(char *c, int clen, int *phase, char **newc) {
-     char *cp, *ctmp, *ctmpp;
-     int hasphase = 0;
-     int pad=4;
-
-     //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
-     // warning - on the intel compiler, optional args come in
-     // as -1, not 0.  check for both before dereferencing.
-     if ((phase != NULL) && (phase != (int *)-1) && (*phase > 0))  {
-         pad = 8;
-         hasphase++;
-         //printf("in newtrim, phase = %d\n", *phase);
-     }
-
-     ctmp = new char[clen+pad];
-     strncpy(ctmp, c, clen);
-     (ctmp)[clen] = '\0';
-     for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
-         *cp = '\0';
-   
-     if (hasphase) {
-         ctmpp = new char[strlen(ctmp) + pad];
-         sprintf(ctmpp, "%s%03d", ctmp, *phase);
-         delete[] ctmp;
-         *newc = ctmpp;
-     } else
- 	 *newc = ctmp;
-
-     //printf("out newtrim, newc = '%s'\n", *newc);
-     return;
-
-}
 
 
 // these interface subroutine names MUST be in lower case
@@ -91,12 +56,12 @@ extern "C" {
   
      // call a function 
      void FTN(c_esmc_ftablecallentrypoint)(ESMC_FTable **ptr, char *type, 
-                                         int *phase, int *status, int slen) {
+                              int *phase, int *nstate, int *status, int slen) {
          int funcrc;
          int localrc;
          char *name;
 
-         newtrim(type, slen, phase, &name);
+         newtrim(type, slen, phase, nstate, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          // TODO: two return codes here - one is whether we could find
@@ -116,7 +81,7 @@ extern "C" {
                        void **func, enum ftype *ftype, int *status, int slen) {
          char *name;
 
-         newtrim(type, slen, NULL, &name);
+         newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          *status = (*ptr)->ESMC_FTableGetFuncPtr(name, func, ftype);
@@ -128,7 +93,7 @@ extern "C" {
                                            void *func, int *status, int slen) {
          char *name;
 
-         newtrim(type, slen, NULL, &name);
+         newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          *status = (*ptr)->ESMC_FTableSetFuncPtr(name, func);
@@ -140,7 +105,7 @@ extern "C" {
                             int *acount, void **alist, int *status, int slen) {
          char *name;
 
-         newtrim(type, slen, NULL, &name);
+         newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          *status = (*ptr)->ESMC_FTableSetFuncArgs(name, *acount, alist);
@@ -148,16 +113,40 @@ extern "C" {
          delete[] name;
      }
 
-     void FTN(c_esmc_ftablesetgridargs)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftableset1stateargs)(ESMC_FTable **ptr, char *type,
+                                      int *phase, void *comp, 
+                                      void **statelist, void *clock, 
+                                      int *status, int slen) {
+
+         char *fname;
+         int acount = 4;
+         int scount = 1;
+         void *alist[4];
+
+         newtrim(type, slen, phase, &scount, &fname);
+         //printf("after newtrim, name = '%s'\n", fname);
+
+         alist[0] = (void *)comp;
+         alist[1] = (void *)statelist;
+         alist[2] = (void *)clock;
+         alist[3] = (void *)status;
+
+         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
+
+         delete[] fname;
+     }
+
+     void FTN(c_esmc_ftableset2stateargs)(ESMC_FTable **ptr, char *type,
                          int *phase, void *comp, 
                          void *importstate, void *exportstate,
 	                 void *clock, int *status, int slen) {
 
          char *fname;
          int acount = 5;
+         int scount = 2;
          void *alist[5];
 
-         newtrim(type, slen, phase, &fname);
+         newtrim(type, slen, phase, &scount, &fname);
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;
@@ -165,28 +154,6 @@ extern "C" {
          alist[2] = (void *)exportstate;
          alist[3] = (void *)clock;
          alist[4] = (void *)status;
-
-         *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
-
-         delete[] fname;
-     }
-
-     void FTN(c_esmc_ftablesetcplargs)(ESMC_FTable **ptr, char *type,
-                                      int *phase, void *comp, 
-                                      void **statelist, void *clock, 
-                                      int *status, int slen) {
-
-         char *fname;
-         int acount = 4;
-         void *alist[4];
-
-         newtrim(type, slen, phase, &fname);
-         //printf("after newtrim, name = '%s'\n", fname);
-
-         alist[0] = (void *)comp;
-         alist[1] = (void *)statelist;
-         alist[2] = (void *)clock;
-         alist[3] = (void *)status;
 
          *status = (*ptr)->ESMC_FTableSetFuncArgs(fname, acount, alist);
 
@@ -201,9 +168,10 @@ extern "C" {
 
          char *fname;
          int acount = 4;
+         int scount = 1;
          void *alist[4];
 
-         newtrim(type, slen, phase, &fname);
+         newtrim(type, slen, phase, &scount, &fname);
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;
@@ -221,7 +189,7 @@ extern "C" {
                         void *data, enum dtype *dtype, int *status, int slen) {
          char *name;
 
-         newtrim(type, slen, NULL, &name);
+         newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          *status = (**ptr)->ESMC_FTableSetDataPtr(name, data, *dtype);
@@ -233,7 +201,7 @@ extern "C" {
                        void **data, enum dtype *dtype, int *status, int slen) {
          char *name;
 
-         newtrim(type, slen, NULL, &name);
+         newtrim(type, slen, NULL, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
          *status = (**ptr)->ESMC_FTableGetDataPtr(name, data, dtype);

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.11 2003/04/28 17:37:34 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.12 2003/09/23 15:18:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.11 2003/04/28 17:37:34 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.12 2003/09/23 15:18:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -149,7 +149,8 @@
 // !REQUIREMENTS:  
 
 //
-//  TODO: add call to f_esmf_compinit() here
+//  TODO: call directly into jump table?
+//    and need 2 flavors based on state count
 //
     printf("ComponentInit method called \n");
     return ESMF_FAILURE;
@@ -175,7 +176,8 @@
 // !REQUIREMENTS:  
 
 //
-//  TODO: add call to f_esmf_comprun() here
+//  TODO: call directly into jump table?
+//    and need 2 flavors based on state count
 //
     printf("ComponentRun method called \n");
     return ESMF_FAILURE;
@@ -201,7 +203,8 @@
 // !REQUIREMENTS:  
 
 //
-//  TODO: add call to f_esmf_compfinal() here
+//  TODO: call directly into jump table?
+//    and need 2 flavors based on state count
 //
     printf("ComponentFinal method called \n");
     return ESMF_FAILURE;
@@ -210,107 +213,55 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CompGetConfig - get configuration info from a Component
+// !IROUTINE:  ESMC_CompGet - get info from a Component
 //
 // !INTERFACE:
-      int ESMC_Comp::ESMC_CompGetConfig(
+      int ESMC_Comp::ESMC_CompGet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CompConfig *config) const {  // out - resources
+      char *name) const {     // out -  etc - all add queries
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Component object was configured with.
+//    Returns information about the Component object.
 //
 //EOP
 // !REQUIREMENTS:  
 
 //
-//  code goes here
+//  TODO: code goes here
 //
     return ESMF_FAILURE;
 
- } // end ESMC_CompGetConfig
+ } // end ESMC_CompGet
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CompSetConfig - set configuration info for a Component
+// !IROUTINE:  ESMC_CompSet - set info for a Component
 //
 // !INTERFACE:
-      int ESMC_Comp::ESMC_CompSetConfig(
+      int ESMC_Comp::ESMC_CompSet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_CompConfig *config) {     // in - resources
+      const char *name) {     // in - what exactly is reasonable here?
 //
 // !DESCRIPTION:
-//    Configures the Component object with set of resources given.
+//    Sets information associated with the Component object.
 //
 //EOP
 // !REQUIREMENTS:  
 
 //
-//  code goes here
+//  TODO: code goes here
 //
     return ESMF_FAILURE;
 
- } // end ESMC_CompSetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CompGet<Value> - get <Value> for a Component
-//
-// !INTERFACE:
-      //int ESMC_Comp::ESMC_CompGet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      //<value type> *value) const {     // out - value
-//
-// !DESCRIPTION:
-//     Returns the value of Component member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- //} // end ESMC_CompGet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CompSet<Value> - set <Value> for a Component
-//
-// !INTERFACE:
-      //int ESMC_Comp::ESMC_CompSet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      //<value type> value) {     // in - value
-//
-// !DESCRIPTION:
-//     Sets the Component member <Value> with the given value.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- //} // end ESMC_CompSet<Value>
+ } // end ESMC_CompSet
 
 
 //-----------------------------------------------------------------------------
@@ -418,3 +369,54 @@
 //
 
  } // end ~ESMC_Comp
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FrameworkInitialize - Initialize the ESMF Framework
+//
+// !INTERFACE:
+      int ESMC_FrameworkInitialize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void) {
+//
+// !DESCRIPTION:
+//
+//EOP
+
+    int rc;
+
+    FTN(f_esmf_frameworkinitialize)(&rc);
+
+    return rc;
+
+ } // end ESMC_FrameworkInitialize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_FrameworkFinalize - Finalize the ESMF Framework
+//
+// !INTERFACE:
+      int ESMC_FrameworkFinalize(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void) {
+//
+// !DESCRIPTION:
+//
+//EOP
+
+    int rc;
+
+    FTN(f_esmf_frameworkfinalize)(&rc);
+
+    return rc;
+
+ } // end ESMC_FrameworkFinallize
+

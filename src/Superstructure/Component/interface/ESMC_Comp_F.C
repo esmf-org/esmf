@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.12 2003/09/12 18:59:04 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.13 2003/09/23 15:18:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,7 @@
 #include "ESMC_Base.h"
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
+#include "trim.h"
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -38,49 +39,15 @@
 //
 //EOP
 
-// make a copy of a string, trim off trailing blanks, and make sure 
-// it's null terminated.  if phase > 0, add it as a 0 filled 3 digit
-// number. this char string must be deleted when finished.
-static void newtrim(char *c, int clen, int *phase, char **newc) {
-     char *cp, *ctmp, *ctmpp;
-     int hasphase = 0;
-     int pad=4;
-
-     //printf("in newtrim, c = '%s', clen = %d\n", c, clen);
-     // warning - on the intel compiler, optional args come in
-     // as -1, not 0.  check for both before dereferencing.
-     if ((phase != NULL) && (phase != (int *)-1) && (*phase > 0))  {
-         pad = 8;
-         hasphase++;
-     }
-
-     ctmp = new char[clen+pad];
-     strncpy(ctmp, c, clen);
-     (ctmp)[clen] = '\0';
-     for (cp = &ctmp[clen-1]; *cp == ' '; cp--)   // trim() trailing blanks
-         *cp = '\0';
-  
-     if (hasphase) {
-         ctmpp = new char[strlen(ctmp) + pad];
-         sprintf(ctmpp, "%s%03d", ctmp, *phase);
-         delete[] ctmp;
-         *newc = ctmpp;
-     } else
-         *newc = ctmp;
-
-     //printf("out newtrim, newc = '%s'\n", *newc);
-     return;
-
-}
 
 static void ESMC_SetTypedEP(void *ptr, char *tname, int slen, int *phase, 
-                                  enum ftype ftype, void *func, int *status) {
+                        int nstate, enum ftype ftype, void *func, int *status) {
      char *name;
      int *tablerc = new int;
      void *f90comp = ptr;
      ESMC_FTable *tabptr = **(ESMC_FTable***)ptr;
 
-     newtrim(tname, slen, phase, &name);
+     newtrim(tname, slen, phase, &nstate, &name);
          
      //printf("SetTypedEP: setting function name = '%s'\n", name);
      if (ftype == FT_VOIDPINTP)
@@ -181,16 +148,18 @@ extern "C" {
      // ---------- Set Entry Point ---------------
      void FTN(esmf_gridcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
-         ESMC_SetTypedEP(ptr, tname, slen, phase, FT_GRID, func, status);
+        ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
+        ESMC_SetTypedEP(ptr, tname, slen, phase, 2, FT_COMP2STAT, func, status);
      }
      void FTN(esmf_cplcompsetentrypoint)(void *ptr, char *tname,
                                void *func, int *phase, int *status, int slen) {
-         ESMC_SetTypedEP(ptr, tname, slen, phase, FT_CPL, func, status);
+        ESMC_SetTypedEP(ptr, tname, slen, phase, 1, FT_COMP1STAT, func, status);
+        ESMC_SetTypedEP(ptr, tname, slen, phase, 2, FT_COMP2STAT, func, status);
      }
 
      void FTN(esmf_usercompsetentrypoint)(void *ptr, char *tname,
                              void *func, int *phase, int *status, int slen) {
-         ESMC_SetTypedEP(ptr, tname, slen, phase, FT_VOIDPINTP, func,  status);
+       ESMC_SetTypedEP(ptr, tname, slen, phase, 0, FT_VOIDPINTP, func,  status);
      }
 
 
@@ -209,7 +178,7 @@ extern "C" {
          char *tbuf; 
          enum dtype dtype = DT_VOIDP;
 
-         newtrim(name, slen, NULL, &tbuf);
+         newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
          *status = (**ptr)->ESMC_FTableSetDataPtr(tbuf, *datap, dtype);
@@ -232,7 +201,7 @@ extern "C" {
          char *tbuf; 
          enum dtype dtype;
 
-         newtrim(name, slen, NULL, &tbuf);
+         newtrim(name, slen, NULL, NULL, &tbuf);
          //printf("after newtrim, name = '%s'\n", tbuf);
 
          *status = (**ptr)->ESMC_FTableGetDataPtr(tbuf, datap, &dtype);
