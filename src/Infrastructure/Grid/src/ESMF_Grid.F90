@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.104 2003/10/13 23:07:10 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.105 2003/10/14 23:20:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -141,6 +141,8 @@
     public ESMF_GridLocalToGlobalIndex
     public ESMF_GridGet
     public ESMF_GridSet
+    public ESMF_GridGetCellMask
+    public ESMF_GridSetCellMask
     !public ESMF_GridGetLMask
     public ESMF_GridSetLMask
     !public ESMF_GridGetMMask
@@ -229,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.104 2003/10/13 23:07:10 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.105 2003/10/14 23:20:38 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1853,11 +1855,20 @@
                                    dim_order=i, rc=status)
       enddo
 
+      ! set coordinates using total cell count
       countsPlus(1) = localCounts(1) + 2*gridBoundWidth
       countsPlus(2) = localCounts(2) + 2*gridBoundWidth
       call ESMF_GridSetCoord(grid, physgridId, numDims, countsPlus, &
                              gridBoundWidth, relloc, delta, localMinCoord, &
-                             status)
+                             total=.true., rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGridUniform: Grid set coord"
+        return
+      endif
+      ! set coordinates using computational cell count
+      call ESMF_GridSetCoord(grid, physgridId, numDims, localCounts, &
+                             0, relloc, delta, localMinCoord, &
+                             total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridAddPhysGridUniform: Grid set coord"
         return
@@ -1932,14 +1943,14 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, j, gridBoundWidth, myDE(2)
-      integer, dimension(numDims) :: counts, localStart
+      integer :: i, j, i1, i2, j1, j2, gridBoundWidth, myDE(2)
+      integer, dimension(numDims) :: counts, compCount, localStart
+      integer, dimension(:), allocatable :: cellType1, cellType2
       character(len=ESMF_MAXSTR), dimension(numDims) :: coordNames, coordUnits
       logical, dimension(numDims) :: coordAligned, coordEqualSpaced, coordCyclic
       real(ESMF_KIND_R8) :: last
       real(ESMF_KIND_R8), dimension(numDims) :: localMin, localMax
       real(ESMF_KIND_R8), dimension(:), allocatable :: coord1, coord2
-      real(ESMF_KIND_R8), dimension(:), allocatable :: deltaUse1, deltaUse2
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: gridp
@@ -1992,6 +2003,11 @@
           localStart(1) = localStart(1) + countsPerDE1(j)
         enddo
       endif
+      localMax(1) = localMin(1)
+      do i = 1,countsPerDE1(myDE(1))
+        localMax(1) = localMax(1) + delta1(i+localStart(1))
+      enddo
+
       if(myDE(2).ge.2) then
         do j = 1,myDE(2)-1
           do i = 1,countsPerDE2(j)
@@ -2000,43 +2016,18 @@
           localStart(2) = localStart(2) + countsPerDE2(j)
         enddo
       endif
-
-      ! The following is a bit rough and should be replaced by functionality
-      ! that creates local coordinate arrays and halos them
+      localMax(2) = localMin(2)
+      do i = 1,countsPerDE2(myDE(2))
+        localMax(2) = localMax(2) + delta2(i+localStart(2))
+      enddo
 
       ! modify global counts to include ghost region
-      counts(1) = size(delta1) + 2*gridBoundWidth
-      counts(2) = size(delta2) + 2*gridBoundWidth
+      compCount(1) = size(delta1)
+      compCount(2) = size(delta2)
+      counts(1) = compCount(1) + 2*gridBoundWidth
+      counts(2) = compCount(2) + 2*gridBoundWidth
 
-      ! allocate and load delta arrays with ghost region
-      allocate(deltaUse1(counts(1)), stat=status)
-      if (status .ne. 0) then
-        print *, "allocation error, counts(1) =", counts(1)
-        return
-      endif
-      allocate(deltaUse2(counts(2)), stat=status)
-      if (status .ne. 0) then
-        print *, "allocation error, counts(2) =", counts(2)
-        return
-      endif
-      do i = 1,size(delta1)
-        deltaUse1(i+gridBoundWidth) = delta1(i)
-      enddo
-      do i = 1,size(delta2)
-        deltaUse2(i+gridBoundWidth) = delta2(i)
-      enddo
-      do i = 1,gridBoundWidth
-        deltaUse1(i) = delta1(1)
-        deltaUse2(i) = delta2(1)
-        deltaUse1(i+size(delta1)+gridBoundWidth) = delta1(size(delta1))
-        deltaUse2(i+size(delta2)+gridBoundWidth) = delta2(size(delta2))
-      enddo
-
-      ! modify local counts to include ghost/halo region
-      counts(1) = countsPerDE1(myDE(1)) + 2*gridBoundWidth
-      counts(2) = countsPerDE2(myDE(2)) + 2*gridBoundWidth
-
-      ! allocate and load local coords -- plus one for extra vertex
+      ! allocate and load coords -- plus one for extra vertex
       allocate(coord1(counts(1)+1), stat=status)
       if (status .ne. 0) then
         print *, "allocation error, counts(1) =", counts(1)+1
@@ -2048,24 +2039,46 @@
         return
       endif
 
-      last = localMin(1)
-      do i = 1,gridBoundWidth+1
-        last = last - deltaUse1(i+localStart(1))
+      coord1(gridBoundWidth+1) = min(1)
+      do i = 1,compCount(1)
+        coord1(i+1+gridBoundWidth) = coord1(i+gridBoundWidth) + delta1(i)
       enddo
-      coord1(1) = last
-      do i = 1,counts(1)
-        coord1(i+1) = last + deltaUse1(i+localStart(1))
+      do i = gridBoundWidth,1,-1
+        coord1(i) = coord1(i+1) - delta1(1)
       enddo
-      localMax(1) = coord1(counts(1)+1-gridBoundWidth)
-      last = localMin(2)
-      do i = 1,gridBoundWidth+1
-        last = last - deltaUse2(i+localStart(2))
+      do i = compCount(1),compCount(1)+gridBoundWidth
+        coord1(i+1) = coord1(i) + delta1(compCount(1))
       enddo
-      coord2(1) = last
-      do i = 1,counts(2)
-        coord2(i+1) = last + deltaUse2(i+localStart(2))
+      coord2(gridBoundWidth+1) = min(2)
+      do i = 1,compCount(2)
+        coord2(i+1+gridBoundWidth) = coord2(i+gridBoundWidth) + delta2(i)
       enddo
-      localMax(2) = coord2(counts(2)+1-gridBoundWidth)
+      do i = gridBoundWidth,1,-1
+        coord2(i) = coord2(i+1) - delta2(1)
+      enddo
+      do i = compCount(2),compCount(2)+gridBoundWidth
+        coord2(i+1) = coord2(i) + delta2(compCount(2))
+      enddo
+
+      ! allocate and load cell type masks
+      allocate(cellType1(counts(1)), stat=status)
+      if (status .ne. 0) then
+        print *, "allocation error, counts(1) =", counts(1)
+        return
+      endif
+      allocate(cellType2(counts(2)), stat=status)
+      if (status .ne. 0) then
+        print *, "allocation error, counts(2) =", counts(2)
+        return
+      endif
+      cellType1 = 0
+      cellType2 = 0
+      do i = 1,gridBoundWidth
+        cellType1(i) = 1
+        cellType2(i) = 1
+        cellType1(compCount(1)+i) = 1
+        cellType2(compCount(2)+i) = 1
+      enddo
 
       ! set parameters based on grid type
       select case (grid%horz_gridtype)
@@ -2110,17 +2123,55 @@
                                    dim_order=i, rc=status) 
       enddo
 
-      call ESMF_GridSetCoord(grid, physgridId, numDims, counts, gridBoundWidth, &
-                             relloc, coord1, coord2, localMin, status)
+      ! set coordinates using total cell count
+      counts(1) = countsPerDE1(myDE(1)) + 2*gridBoundWidth
+      counts(2) = countsPerDE2(myDE(2)) + 2*gridBoundWidth
+      i1 = localStart(1) + 1
+      i2 = localStart(1) + counts(1)
+      j1 = localStart(2) + 1
+      j2 = localStart(2) + counts(2)
+      call ESMF_GridSetCoord(grid, physgridId, numDims, counts, &
+                             gridBoundWidth, relloc, coord1(i1:i2), &
+                             coord2(j1:j2), localMin, &
+                             total=.true., rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGridSpecd: Grid set coord"
+        return
+      endif
+      ! set coordinates using computational cell count
+      counts(1) = countsPerDE1(myDE(1))
+      counts(2) = countsPerDE2(myDE(2))
+      i1 = localStart(1) + 1 + gridBoundWidth
+      i2 = i1 + counts(1) - 1
+      j1 = localStart(2) + 1 + gridBoundWidth
+      j2 = j1 + counts(2) - 1
+      call ESMF_GridSetCoord(grid, physgridId, numDims, counts, 0, relloc, &
+                             coord1(i1:i2), coord2(j1:j2), localMin, &
+                             total=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridAddPhysGridSpecd: Grid set coord"
         return
       endif
 
+      ! set mask using total cell count
+      counts(1) = countsPerDE1(myDE(1)) + 2*gridBoundWidth
+      counts(2) = countsPerDE2(myDE(2)) + 2*gridBoundWidth
+      i1 = localStart(1) + 1
+      i2 = localStart(1) + counts(1)
+      j1 = localStart(2) + 1
+      j2 = localStart(2) + counts(2)
+      call ESMF_GridSetCellMask(grid, physgridId, numDims, counts, &
+                                gridBoundWidth, relloc, cellType1(i1:i2), &
+                                cellType2(j1:j2), status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridAddPhysGridSpecd: Grid set cell mask"
+        return
+      endif
+
       deallocate(coord1)
       deallocate(coord2)
-      deallocate(deltaUse1)
-      deallocate(deltaUse2)
+      deallocate(cellType1)
+      deallocate(cellType2)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -2422,7 +2473,7 @@
 
       ! If there is a relloc but no physgrid id, then get the id from the relloc
       if (rellocIsValid .and. .not.(physIdIsValid)) then
-        call ESMF_GridGetPhysGridID(grid, relloc, physIdUse, status)
+        call ESMF_GridGetPhysGridID(grid%ptr, relloc, physIdUse, status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGetCoord: get physgrid id"
           return
@@ -2506,8 +2557,8 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, MyDE, local_cell_count, &
-                                local_axis_length, global_start, ai_global, rc)
+      subroutine ESMF_GridGetDE(grid, MyDE, local_cell_count, local_axis_length, &
+                                global_start, ai_global, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -2517,6 +2568,7 @@
       integer, dimension(:,:), intent(inout), optional :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
                         optional :: ai_global
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2536,6 +2588,9 @@
 !          Global index of starting counts for each dimension.
 !     \item[{[ai\_global]}]
 !          Global axis indices for each dimension.
+!     \item[{[total]}]
+!          Logical flag to indicate getting DistGrid information for total cells.
+!          The default is the computational regime.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2558,7 +2613,7 @@
 !     to the application level
       call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, local_cell_count, &
                               local_axis_length, global_start, ai_global, &
-                              rc=status)
+                              total=total, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
         return
@@ -2866,7 +2921,7 @@
       subroutine ESMF_GridGetPhysGridID(grid, relloc, physgridId, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid 
+      type(ESMF_GridType), intent(in) :: grid 
       type(ESMF_RelLoc), intent(in) :: relloc
       integer, intent(out) :: physgridId
       integer, intent(out), optional :: rc
@@ -2907,8 +2962,8 @@
       physgridId = -1
 
 !     Loop through physgrids comparing rellocs  TODO: make part of the Grid obj?
-      do i = 1,grid%ptr%num_physgrids
-        call ESMF_PhysGridGet(grid%ptr%physgrids(i), relloc=thisRelloc, &
+      do i = 1,grid%num_physgrids
+        call ESMF_PhysGridGet(grid%physgrids(i), relloc=thisRelloc, &
                               rc=status)
         if (relloc.eq.thisRelloc) then
           physgridId = i
@@ -3139,7 +3194,7 @@
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordSpecd(grid, physgridId, numDims, counts, &
                                         gridBoundWidth, relloc, coord1, coord2, &
-                                        min, rc)
+                                        min, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -3151,6 +3206,7 @@
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in) :: coord2
       real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3175,6 +3231,9 @@
 !          Array of specified grid coordinates in the second dimension.
 !     \item[{[min]}]
 !          Array of minimum local physical coordinates in each dimension.
+!     \item[{[total]}]
+!          Logical flag to optionally set physical coordinate arrays of total cells.
+!          Default is to set computational cells.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3222,9 +3281,9 @@
         status = ESMF_FAILURE
 
       elseif (relloc .eq. ESMF_CELL_CENTER) then
-        do i = 1,counts(1)
+        do i = 1,counts(1)-1
           coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)
+          do j = 1,counts(2)-1
             coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3232,9 +3291,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_NFACE) then
-        do i = 1,counts(1)
+        do i = 1,counts(1)-1
           coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)
+          do j = 1,counts(2)-1
             coordUse2 = coord2(j+1)
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3242,9 +3301,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_SFACE) then
-        do i = 1,counts(1)
+        do i = 1,counts(1)-1
           coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)
+          do j = 1,counts(2)-1
             coordUse2 = coord2(j)
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3252,9 +3311,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_EFACE) then
-        do i = 1,counts(1)
+        do i = 1,counts(1)-1
           coordUse1 = coord1(i+1)
-          do j = 1,counts(2)
+          do j = 1,counts(2)-1
             coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3262,9 +3321,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_WFACE) then
-        do i = 1,counts(1)
+        do i = 1,counts(1)-1
           coordUse1 = coord1(i)
-          do j = 1,counts(2)
+          do j = 1,counts(2)-1
             coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3272,9 +3331,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_NECORNER) then
-        do i = 1,counts(1)
+        do i = 1,counts(1)-1
           coordUse1 = coord1(i+1)
-          do j = 1,counts(2)
+          do j = 1,counts(2)-1
             coordUse2 = coord2(j+1)
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3290,12 +3349,9 @@
       endif
 
       ! now set the location array in PhysGrid
-      arrayTemp(1) = ESMF_ArrayCreate(temp1, ESMF_DATA_COPY, halo_width=1, &
-                                      rc=status)
-      arrayTemp(2) = ESMF_ArrayCreate(temp2, ESMF_DATA_COPY, halo_width=1, &
-                                      rc=status)
       call ESMF_PhysGridSetLocations(grid%physgrids(physgridId), &
-                                     location_array=arrayTemp, rc=status)
+                                     location_array=arrayTemp, total=total, &
+                                     rc=status)
             ! TODO: add name to set call
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordSpecd: PhysGrid set locations"
@@ -3312,7 +3368,8 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridSetCoordUniform(grid, physgridId, numDims, counts, &
-                                          gridBoundWidth, relloc, delta, min, rc)
+                                          gridBoundWidth, relloc, delta, min, &
+                                          total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -3323,6 +3380,7 @@
       type(ESMF_RelLoc), intent(in) :: relloc
       real(ESMF_KIND_R8), dimension(numDims), intent(in) :: delta
       real(ESMF_KIND_R8), dimension(numDims), intent(in) :: min
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3345,6 +3403,9 @@
 !          Array of uniform grid increments in each dimension.
 !     \item[{[min]}]
 !          Array of minimum physical coordinates in each dimension.
+!     \item[{[total]}]
+!          Logical flag to optionally set physical coordinate arrays of total cells.
+!          Default is to set computational cells.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -3473,7 +3534,8 @@
 
       ! now set the location array in PhysGrid
       call ESMF_PhysGridSetLocations(grid%physgrids(physgridId), &
-                                     location_array=arrayTemp, rc=status)
+                                     location_array=arrayTemp, total=total, &
+                                     rc=status)
             ! TODO: add name to set call
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordUnifrom: PhysGrid set locations"
@@ -3786,6 +3848,229 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetCellMask(grid, maskArray, physgridId, relloc, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_Array), intent(inout) :: maskArray
+      integer, intent(in), optional :: physgridId
+      type(ESMF_RelLoc), intent(in), optional :: relloc
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of get retrieves an ESMF_Array of cell types for an
+!     {\tt ESMF\_Grid} from a corresponding {\tt ESMF\_PhysGrid}.
+!     This mask is intended for internal use to indicate which cells are in
+!     the computational regime (cellType=0), a ghost region (cellType=1), or a
+!     halo region (cellType=2).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
+!     \item[physgridId]
+!          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
+!     \item[numDims]
+!          Number of grid dimensions.
+!     \item[counts]
+!          Array of number of grid increments in each dimension.
+!     \item[gridBoundWidth]
+!          Width, in cells, of the ficticious boundary around the grid for
+!          halo and ghost regions.
+!     \item[relloc]
+!          Relative location in grid cell for which this PhysGrid.
+!     \item[cellType1]
+!          Array of cell type identifiers in the first dimension.
+!     \item[cellType2]
+!          Array of cell type identifiers in the second dimension.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
+      character(len=ESMF_MAXSTR) :: name
+      integer :: physIdUse
+      logical :: rellocIsValid, physIdIsValid
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Initialize other variables
+      physIdUse = -1
+      rellocIsValid = .false.
+      physIdIsValid = .false.
+
+      ! Either the relative location or physgridId must be present and valid
+      if (present(relloc)) then
+!        rellocIsValid = ESMF_RelLocIsValid(relloc)  TODO: assume OK if there for now
+        rellocIsValid = .true.
+      endif
+      if (present(physgridId)) then
+        if ((physgridId.ge.1) .and. (physgridId.le.grid%ptr%num_physgrids)) then
+          physIdIsValid = .true.
+          physIdUse = physgridId
+       endif
+      endif
+      if (.not.(rellocIsValid .or. physIdIsValid)) then
+        print *, "ERROR in ESMF_GridGetCoord: need either relloc or physgridId"
+        return
+      endif
+
+      ! If there is a relloc but no physgrid id, then get the id from the relloc
+      if (rellocIsValid .and. .not.(physIdIsValid)) then
+        call ESMF_GridGetPhysGridID(grid%ptr, relloc, physIdUse, status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridGetCoord: get physgrid id"
+          return
+        endif
+        if (physIdUse.eq.-1) then
+          print *, "ERROR in ESMF_GridGetCoord: no physgrid corresponding", &
+                   " to relloc"
+          return
+        endif
+      endif
+
+      ! call PhysGrid with the valid Id
+      name = 'cell type total'
+      call ESMF_PhysGridGetMask(grid%ptr%physgrids(physgridId), maskArray, name, &
+                                rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetCellMask: PhysGrid get mask"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetCellMask
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridSetCellMask - Compute cell identifier mask for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetCellMask(grid, physgridId, numDims, counts, &
+                                      gridBoundWidth, relloc, cellType1, &
+                                      cellType2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridType) :: grid
+      integer, intent(in) :: physgridId
+      integer, intent(in) :: numDims
+      integer, dimension(numDims), intent(in) :: counts
+      integer, intent(in) :: gridBoundWidth
+      type(ESMF_RelLoc), intent(in) :: relloc
+      integer, dimension(:), intent(in) :: cellType1
+      integer, dimension(:), intent(in) :: cellType2
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set internally computes cell types for an {\tt ESMF\_Grid}
+!     and sets them as an integer mask in a corresponding {\tt ESMF\_PhysGrid}.
+!     This mask is intended for internal use to indicate which cells are in
+!     the computational regime (cellType=0), a ghost region (cellType=1), or a
+!     halo region (cellType=2).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Pointer to a {\tt ESMF\_Grid} to be modified.
+!     \item[physgridId]
+!          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
+!     \item[numDims]
+!          Number of grid dimensions.
+!     \item[counts]
+!          Array of number of grid increments in each dimension.
+!     \item[gridBoundWidth]
+!          Width, in cells, of the ficticious boundary around the grid for
+!          halo and ghost regions.
+!     \item[relloc]
+!          Relative location in grid cell for which this PhysGrid.
+!     \item[cellType1]
+!          Array of cell type identifiers in the first dimension.
+!     \item[cellType2]
+!          Array of cell type identifiers in the second dimension.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
+      character(len=ESMF_MAXSTR) :: name
+      integer :: i, j, iMax1, jMax1, iType, jType
+      integer, dimension(:,:), pointer :: temp
+      type(ESMF_Array), pointer :: arrayTemp
+      type(ESMF_DataKind) :: kind
+      type(ESMF_DataType) :: type
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! TODO: different subroutines for different numDims?  or case?
+
+      ! create ESMF_Array
+      kind = ESMF_I4
+      type = ESMF_DATA_INTEGER
+      arrayTemp = ESMF_ArrayCreate(numDims, type, kind, counts, &
+                                   halo_width=gridBoundWidth, rc=status)
+      call ESMF_ArrayGetData(arrayTemp, temp, ESMF_DATA_REF, status)
+
+!     TODO: should this be different for different relative locations?
+      iMax1 = counts(1) - gridBoundWidth + 1
+      jMax1 = counts(2) - gridBoundWidth + 1
+      do i = 1,counts(1)
+        iType = cellType1(i)
+        do j = 1,counts(2)
+          jType = cellType2(j)
+          ! default is computational
+          temp(i,j) = 0
+          ! identify ghost cells
+          if(iType.eq.1 .or. jType.eq.1) then
+            temp(i,j) = 1
+          ! identify halo cells
+          elseif (i.le.gridBoundWidth .or. j.le.gridBoundWidth .or. &
+                  i.ge.iMax1          .or. j.ge.jMax1) then
+            temp(i,j) = 2
+          endif
+        enddo
+      enddo
+
+      ! now set the mask array in PhysGrid
+      name = 'cell type total'
+      call ESMF_PhysGridSetMask(grid%physgrids(physgridId), &
+                                mask_array=arrayTemp, &
+                                mask_type=ESMF_GridMaskKind_RegionID, &
+                                name=name, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridSetCellMask: PhysGrid set mask"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetCellMask
 
 !------------------------------------------------------------------------------
 !BOP
