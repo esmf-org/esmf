@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.35 2004/04/13 22:54:48 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.36 2004/04/14 14:58:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.35 2004/04/13 22:54:48 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.36 2004/04/14 14:58:16 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -190,9 +190,8 @@
         endif
  
 ! extract necessary information from the grid
-      call ESMF_GridGet(grid, dimCount=gridrank, rc=status)
-      call ESMF_GridGet(grid, delayout=delayout, rc=status)
-      call ESMF_newDELayoutGet(delayout, deCount=nDEs, status)
+      call ESMF_GridGet(grid, dimCount=gridrank, delayout=delayout, rc=status)
+      call ESMF_newDELayoutGet(delayout, deCount=nDEs, rc=status)
       allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
       allocate( tempMLCCPD(     gridrank), stat=status)
       allocate(  tempGCCPD(     gridrank), stat=status)
