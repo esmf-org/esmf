@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.12 2003/04/14 14:51:37 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.13 2003/04/14 22:53:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.12 2003/04/14 14:51:37 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.13 2003/04/14 22:53:10 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1339,6 +1339,9 @@ end interface
       !ftypep%localfield%datastatus = ESMF_STATE_UNINIT
       ftypep%gridstatus = ESMF_STATE_UNINIT
       ftypep%datastatus = ESMF_STATE_UNINIT
+
+      ! Set the mapping as unknown/invalid
+      call ESMF_DataMapSetInvalid(ftypep%mapping, status)
 
       ftypep%fieldstatus = ESMF_STATE_READY
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.3 2003/04/14 14:51:36 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.4 2003/04/14 22:53:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -189,6 +189,7 @@
 !
       public ESMF_DataMapCreate, ESMF_DataMapDestroy
       !public ESMF_DataMapConstruct, ESMF_DataMapDestruct
+      public ESMF_DataMapSetInvalid
 
       public ESMF_DataMapGet, ESMF_DataMapSet
 
@@ -207,7 +208,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.3 2003/04/14 14:51:36 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.4 2003/04/14 22:53:10 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -724,6 +725,50 @@ end function
 
         end subroutine ESMF_DataMapConstructMatchGrid
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_DataMapSetInvalid(datamap, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DataMap), intent(inout) :: datamap
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+!      ESMF routine to set the contents of a {\tt ESMF\_DataMap} type
+!      to an uninitialized value.
+!
+!EOP
+! !REQUIREMENTS: internal
+
+
+!       local vars
+        integer :: rank, i
+        integer :: status                     ! local error status
+        logical :: rcpresent                  ! did user specify rc?
+
+        ! Init return code
+        status = ESMF_FAILURE
+        if (present(rc)) then
+            rcpresent=.TRUE.
+            rc = ESMF_FAILURE    
+        else
+          rcpresent = .FALSE.
+        endif
+
+        ! If this contained a previous datamap, deallocate it
+        if (associated(datamap%dmp)) then
+           deallocate(datamap%dmp, stat=status)
+        endif
+
+        ! Make sure it's invalid
+        nullify(datamap%dmp)
+
+        ! If user asked for it, return error code
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_DataMapSetInvalid
 
 
 !------------------------------------------------------------------------------
