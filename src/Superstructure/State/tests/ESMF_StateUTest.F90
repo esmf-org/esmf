@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.2 2003/10/25 12:37:37 cdeluca Exp $
+! $Id: ESMF_StateUTest.F90,v 1.3 2003/12/19 21:49:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,14 +34,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.2 2003/10/25 12:37:37 cdeluca Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.3 2003/12/19 21:49:38 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
       integer :: x, y, rc
       logical :: IsNeeded
       character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname, bname
-      character(ESMF_MAXSTR) :: fieldname, fname
+      character(ESMF_MAXSTR) :: fieldname, fname, aname
       type(ESMF_Field) :: field1, field2, field3(3), field4
       type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5, bundle6
       type(ESMF_State) :: state1, state2, state3, state4
@@ -152,6 +152,9 @@
       write(name, *) "Creating an Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_ArrayGetName(array1, aname, rc)  ! get the name for later
+
       !NEX_UTest
       call ESMF_StateAddData(state1,array1, rc)
       write(name, *) "Adding an Array to a State Test"
@@ -234,7 +237,7 @@
 
       !NEX_UTest
       ! Test State for Array being needed
-      IsNeeded = ESMF_StateIsNeeded(state1, "default array name", rc)
+      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
       write(failMsg, *) ""
       write(name, *) "Query if Array is needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(IsNeeded), &
@@ -259,13 +262,13 @@
 
       !NEX_UTest
       ! Test setting Array as not needed in a State
-      call ESMF_StateSetNeeded(state1, "default array name", ESMF_STATEDATANOTNEEDED, rc)
+      call ESMF_StateSetNeeded(state1, aname, ESMF_STATEDATANOTNEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Array as not needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      IsNeeded = ESMF_StateIsNeeded(state1, "default array name", rc)
+      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
       write(name, *) "Test if Array is not needed in a State Test"
       call ESMF_Test((.not.IsNeeded), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -321,13 +324,13 @@
 
       !NEX_UTest
       ! Test setting Array as needed in a State
-      call ESMF_StateSetNeeded(state1, "default array name", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(state1, aname, ESMF_STATEDATAISNEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Array as needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      IsNeeded = ESMF_StateIsNeeded(state1, "default array name", rc)
+      IsNeeded = ESMF_StateIsNeeded(state1, aname, rc)
       write(name, *) "Test if Array is needed in a State Test"
       call ESMF_Test((IsNeeded), &
                       name, failMsg, result, ESMF_SRCLINE)
