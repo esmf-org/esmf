@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.103 2004/03/23 17:54:20 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.104 2004/03/24 23:57:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -758,8 +758,11 @@
       ! indirect addressing for nDEs due to decompIds -- nDEs should match
       ! the ordering of countsPerDE arrays, which have beed changed due to
       ! the decompositions
+      do i = 1,2
+        nDEsUse(i) = nDEs(i)
+      enddo
       do i = 1,size(decompIds)
-        nDEsUse(i) = nDEs(decompIds(i))
+        if (decompIds(i).ne.0) nDEsUse(i) = nDEs(decompIds(i))
       enddo
 
       ! call internal routine to set counts per DE
