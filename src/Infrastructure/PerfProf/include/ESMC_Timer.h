@@ -1,4 +1,4 @@
-// $Id: ESMC_Timer.h,v 1.4 2003/04/02 19:51:48 flanigan Exp $
+// $Id: ESMC_Timer.h,v 1.5 2003/04/03 22:40:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_PerfProf.h> 
+ //#include <ESMC_PerfProf.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
