@@ -1,0 +1,121 @@
+\section{Terminology}
+
+The computers on which large Earth system models run are complex, multi-part
+systems that vary considerably in structure, as are Earth system applications 
+themselves.  Thus as we begin the task of composing a modular software
+infrastructure that incorporates constructs from both computer hardware 
+and physical systems, we find that there are a multitude of ways to impose 
+categories and layers.  In this section we define a set of terms -- some standard,
+some not -- describing alternative ways of deconstructing Earth system applications
+and the ESMF.  These terms will help to clarify subsequent discussions.
+
+\subsection{Object-Oriented Design}
+
+The ESMF will be designed using object-oriented (OO) principles.  OO design
+is characterized by the use of {\it classes}, and the related strategies of
+{\it encapsulation}, {\it inheritance}, and {\it polymorphism}.  Classes 
+organize data, attributes, and associated methods into well-defined structures.
+Encapsulation means making class data inaccessible so that the underlying representation
+can be changed or extended without changing the user interface to the class.
+Inheritance allows specialized classes to inherit basic behaviors from generic
+classes.  Polymorphism allows a single method to be overloaded for use 
+when performing conceptually similar operations.  Together these OO
+strategies help to organize and streamline codes, making them more flexible,
+maintainable, and extensible.
+
+\subsection{Modes of Parallelism}
+
+We use the term {\bf data parallel} to describe an operation performed
+on data that is distributed over multiple memory locations and that typically
+represents portions of a single physical quantity.  Roughly the same
+calculation occurs on all processors at the same time.  Most individual 
+model components are run in a data-parallel fashion.
+
+By {\bf task parallel} we mean operations performed on multiple data sets 
+distributed over non-overlapping sets of memory locations.  Typically 
+each data 
+set represents a different physical system, and the calculations performed
+on each set are different as well.
+
+\subsection{Sequencing}
+
+Sequential execution of model components describes the case in which 
+one component waits for the other to finish before it begins
+to execute.  Components may be in the same or different executables
+and may have identical or non-overlapping memory distributions.
+
+Concurrent execution of model components occurs when two components,
+whether in the same or different executables, execute simultaneously.
+
+\subsection{Layering Methodologies}
+
+Layering generally refers to a calling hierarchy, in which upper layers 
+call lower layers.  While this explains how layers {\it work}, it doesn't 
+explain what a layer {\it is}.  In this section we describe some common 
+layering approaches.  
+
+We use the term {\bf hardware layering} to refer to a strategy to encapsulate 
+programming constructs and tools that reflect the structure of the underlying 
+computing environment.  In hardware layering, a bottom layer typically includes 
+vendor-specific constructs.  A representative higher layer may automatically 
+handle standard operations, such as distributed transposes, that are not  
+vendor-specific but still reflect architectural details.  At the application layer 
+the user handles objects that represent the application 
+domain and not the computing environment.  
+
+Hardware layering is one form of {\bf layering by generality}; general 
+tools that can apply to many domains are relegated to bottom layers, 
+while domain-specific constructs are in top layers.  This paradigm is
+common even in systems running on simpler hardware architectures, where vendor-specific
+constructs and other threats to portability and ease of use are not a concern.
+Its pervasiveness is simply a reflection of the fact that general tools 
+enable a variety of applications to be built upon them.
+
+An alternative view of layers results from combining multiple modes of parallelism 
+in a single application.  In Earth system models individual model 
+components typically run as data parallel operations.  When a number of 
+these are combined in an application such as a coupled climate model, individual 
+components or sets of individual components may run as task parallel operations 
+on non-overlapping sets of nodes.  Data parallel operations can be viewed
+as residing in a lower layer, while the task parallel constructs that 
+synchronize and referee data transfers occur at a higher level. We refer to 
+this as {\bf task layering}.
+
+Closely related to task layering is the data structure layering used 
+in the Weather Research and Forecast (WRF) model.  The top ``driver'' layer 
+in this approach specifies data decompositions and controls
+the flow of execution.  The lowest ``model'' layer consists of physics routines that
+operate on simple arrays.  The middle ``mediation''layer is responsible for 
+extracting these simple arrays from the data structures in the driver.
+While task layering places domain-specific constructs in lower layers, hardware 
+layering place domain-specific constructs in the upper layers.  
+
+Different layering strategies may merely be alternative ways of viewing the same
+application; a coupled model can without inconsistency 
+be developed both as an application with task layering and with hardware 
+layering.  However, some layering strategies are more difficult to reconcile. 
+Layering by generality encourages application developers to employ high-level 
+data structures in the computational portions of their application codes.  In 
+contrast, data structure layering prohibits the application developer from 
+incorporating advanced data structures into application codes; instead the
+user
+programs computations using simple arrays.  The latter approach can simplify coding
+when computations are free from communications.  When communications or other
+operations that reflect hardware are required within model computations, it 
+can be helpful to work with more complex data objects that can encapsulate some
+of these details.  POOMA and Overture are examples of frameworks that 
+provide such data objects.
+
+The ESMF utility infrastructure and superstructure will utilize hardware layering, and multi-component applications running under ESMF can be viewed as being task-layered.
+ESMF does not impose a particular form of layering on component models; both
+the WRF model and the POOMA model are supported.
+
+
+
+
+
+
+
+
+
+
