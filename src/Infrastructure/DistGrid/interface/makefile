@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2002/11/01 19:42:17 jwolfe Exp $
+# $Id: makefile,v 1.3 2002/11/03 19:16:02 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -10,7 +10,7 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_DistGrid.C
+SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
@@ -20,8 +20,6 @@ SOURCEH	  =
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
-
-# is MANSEC something about documentation?
 MANSEC	  = DistGridobj
 LIBBASE	  = libesmf
 
