@@ -1,4 +1,4 @@
-% $Id: CommMem_refdoc.ctex,v 1.3 2003/04/11 04:30:11 cdeluca Exp $
+% $Id: CommMem_refdoc.ctex,v 1.4 2003/04/28 20:13:45 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -380,32 +380,32 @@
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-%\input{ESMC_DELayout_rest}
+\input{ESMC_DELayout_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_rest}
+\input{../Infrastructure/CommMem/doc/ESMC_DELayout_rest}
 #endif
 
 \section{DELayout Class F90 Interface}
 
-\subsection{Use and Examples}
-#ifdef STANDALONE
+%\subsection{Use and Examples}
+%#ifdef STANDALONE
 %\input{ESMC_DELayout_fex}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fex}
-#endif
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/CommMem/doc/ESMF_DELayout_fex}
+%#endif
 
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
+%\subsection{Parameters and Definitions}
+%#ifdef STANDALONE
 %\input{ESMC_DELayout_fparam}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fparam}
-#endif
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/CommMem/doc/ESMF_DELayout_fparam}
+%#endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
 %\input{ESMC_DELayout_fapi}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fapi}
+%\input{../Infrastructure/CommMem/doc/ESMF_DELayout_fapi}
 #endif
 
 %\section{DELayout Class C++ Interface}
