@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.112 2004/02/27 22:25:08 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.113 2004/03/03 17:47:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.112 2004/02/27 22:25:08 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.113 2004/03/03 17:47:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3672,7 +3672,8 @@
         print *, "ERROR in ESMF_GridGet"
         return
       endif 
-      call ESMF_GridGetDE(grid, localCellCountPerDim=gridcounts, rc=status)
+      call ESMF_GridGetDE(grid, horzRelLoc=horizRelLoc, vertRelLoc=vertRelLoc, &
+                          localCellCountPerDim=gridcounts(1:gridRank), rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE"
         return
@@ -3692,7 +3693,6 @@
             arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
          endif
       enddo
-
 
       array = ESMF_ArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
       if(status .NE. ESMF_SUCCESS) then 
@@ -4233,7 +4233,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: my_DE, my_dst_DE, my_src_DE
+      integer :: my_DE, my_dst_DE, my_src_DE, gridrank
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: src_min, src_max
       logical :: hassrcdata        ! does this DE contain localdata from src?
@@ -4243,6 +4243,7 @@
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Grid) :: src_grid, dst_grid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc 
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -4281,7 +4282,11 @@
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
-        call ESMF_GridGetDE(stypep%grid, globalAIPerDim=myAI, rc=status)
+        call ESMF_GridGet(stypep%grid, numDims=gridrank, rc=status)
+        call ESMF_FieldGetRelLoc(src_field, horzRelLoc, vertRelLoc, rc)
+        call ESMF_GridGetDE(stypep%grid, horzRelLoc=horzRelLoc, &
+                            vertRelLoc=vertRelLoc, &
+                            globalAIPerDim=myAI(1:gridrank), rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
