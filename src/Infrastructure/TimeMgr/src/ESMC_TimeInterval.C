@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.39 2003/12/19 19:20:22 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.40 2004/01/07 18:00:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.39 2003/12/19 19:20:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.40 2004/01/07 18:00:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -450,35 +450,6 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalDiv - Divide two time intervals, return fraction result
-//
-// !INTERFACE:
-      ESMC_Fraction ESMC_TimeInterval::ESMC_TimeIntervalDiv(
-//
-// !RETURN VALUE:
-//    ESMC_Fraction result
-//
-// !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
-                                                      //        to divide by
-//
-// !DESCRIPTION:
-//    Returns this time interval divided by given time interval as a fractional
-//    quotient.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    ESMC_Fraction quotient;
-
-    // TODO:
-
-    return(quotient);
-
-}  // end ESMC_TimeInterval::ESMC_TimeIntervalDiv
-
-//-------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_TimeInterval(/) - Divide two time intervals, return double precision result
 //
 // !INTERFACE:
@@ -510,71 +481,6 @@
     return(quotient);
 
 }  // end ESMC_TimeInterval::operator/
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeInterval(\%) - Divide two time intervals, return time interval remainder
-//
-// !INTERFACE:
-      ESMC_TimeInterval ESMC_TimeInterval::operator%(
-//
-// !RETURN VALUE:
-//    ESMC_TimeInterval result
-//
-// !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
-                                                      //        to modulo by
-//
-// !DESCRIPTION:
-//    Returns this time interval modulo by given time interval as a 
-//    {\tt ESMC\_TimeInterval}
-//
-//EOP
-// !REQUIREMENTS:  
-
-    ESMC_TimeInterval remainder;
-
-    // TODO: fractional & calendar interval parts
-
-    if (timeInterval.s != 0) {
-      remainder.s = this->s % timeInterval.s;
-    }
-    // TODO:  else throw exception ?
-
-    return(remainder);
-
-}  // end ESMC_TimeInterval::operator%
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeInterval(\%=) - Takes the modulus of two time intervals
-//
-// !INTERFACE:
-      ESMC_TimeInterval& ESMC_TimeInterval::operator%=(
-//
-// !RETURN VALUE:
-//    ESMC_TimeInterval& result
-//
-// !ARGUMENTS:
-      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
-                                                //        to modulo by
-//
-// !DESCRIPTION:
-//    Returns this time interval modulo by given time interval
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO: fractional & calendar interval parts
-
-    if (timeInterval.s != 0) {
-      this->s %= timeInterval.s;
-    }
-    // TODO:  else throw exception ?
-
-    return(*this);
-
-}  // end ESMC_TimeInterval::operator%=
 
 //-------------------------------------------------------------------------
 //BOP
@@ -701,6 +607,100 @@
     return(*this);
 
 }  // end ESMC_TimeInterval::operator/=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalDiv - Divide two time intervals, return fraction result
+//
+// !INTERFACE:
+      ESMC_Fraction ESMC_TimeInterval::ESMC_TimeIntervalDiv(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //        to divide by
+//
+// !DESCRIPTION:
+//    Returns this time interval divided by given time interval as a fractional
+//    quotient.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_Fraction quotient;
+
+    // TODO:
+
+    return(quotient);
+
+}  // end ESMC_TimeInterval::ESMC_TimeIntervalDiv
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(\%) - Divide two time intervals, return time interval remainder
+//
+// !INTERFACE:
+      ESMC_TimeInterval ESMC_TimeInterval::operator%(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) const {  // in - ESMC_TimeInterval
+                                                      //        to modulo by
+//
+// !DESCRIPTION:
+//    Returns this time interval modulo by given time interval as a 
+//    {\tt ESMC\_TimeInterval}
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_TimeInterval remainder;
+
+    // TODO: fractional & calendar interval parts
+
+    if (timeInterval.s != 0) {
+      remainder.s = this->s % timeInterval.s;
+    }
+    // TODO:  else throw exception ?
+
+    return(remainder);
+
+}  // end ESMC_TimeInterval::operator%
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInterval(\%=) - Takes the modulus of two time intervals
+//
+// !INTERFACE:
+      ESMC_TimeInterval& ESMC_TimeInterval::operator%=(
+//
+// !RETURN VALUE:
+//    ESMC_TimeInterval& result
+//
+// !ARGUMENTS:
+      const ESMC_TimeInterval &timeInterval) {  // in - ESMC_TimeInterval
+                                                //        to modulo by
+//
+// !DESCRIPTION:
+//    Returns this time interval modulo by given time interval
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: fractional & calendar interval parts
+
+    if (timeInterval.s != 0) {
+      this->s %= timeInterval.s;
+    }
+    // TODO:  else throw exception ?
+
+    return(*this);
+
+}  // end ESMC_TimeInterval::operator%=
 
 //-------------------------------------------------------------------------
 //BOP

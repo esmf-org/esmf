@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.23 2003/12/19 19:21:21 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.24 2004/01/07 18:00:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,23 +178,10 @@ extern "C" {
            *timeIntervalNegAbsValue = (ptr)->ESMC_TimeIntervalNegAbsValue();
        }
 
-       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeInterval1,
-                                          ESMC_TimeInterval *timeInterval2,
-                                          ESMC_Fraction *timeIntervalFQuot) {
-           *timeIntervalFQuot = 
-                        timeInterval1->ESMC_TimeIntervalDiv(*timeInterval2);
-       }
-
        void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeInterval1,
                                           ESMC_TimeInterval *timeInterval2,
                                           ESMF_KIND_R8 *timeIntervalRQuot) {
            *timeIntervalRQuot = (*timeInterval1 / *timeInterval2);
-       }
-
-       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeInterval1,
-                                              ESMC_TimeInterval *timeInterval2,
-                                    ESMC_TimeInterval *timeIntervalRemainder) {
-           *timeIntervalRemainder = (*timeInterval1 % *timeInterval2);
        }
 
        void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeInterval,
@@ -207,6 +194,19 @@ extern "C" {
                                         ESMF_KIND_R8 *divisor,
                                         ESMC_TimeInterval *timeIntervalQuotR) {
            *timeIntervalQuotR = (*timeInterval / *divisor);
+       }
+
+       void FTN(c_esmc_timeintervalfquot)(ESMC_TimeInterval *timeInterval1,
+                                          ESMC_TimeInterval *timeInterval2,
+                                          ESMC_Fraction *timeIntervalFQuot) {
+           *timeIntervalFQuot = 
+                        timeInterval1->ESMC_TimeIntervalDiv(*timeInterval2);
+       }
+
+       void FTN(c_esmc_timeintervalremainder)(ESMC_TimeInterval *timeInterval1,
+                                              ESMC_TimeInterval *timeInterval2,
+                                    ESMC_TimeInterval *timeIntervalRemainder) {
+           *timeIntervalRemainder = (*timeInterval1 % *timeInterval2);
        }
 
        void FTN(c_esmc_timeintervalprodti)(ESMC_TimeInterval *timeInterval,

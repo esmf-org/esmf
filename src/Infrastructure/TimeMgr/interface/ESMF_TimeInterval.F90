@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.43 2004/01/06 22:23:42 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.44 2004/01/07 17:59:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,16 +94,16 @@
  
 ! overloaded operator functions
  
+      public operator(/)
+      private ESMF_TimeIntervalRQuot
+      private ESMF_TimeIntervalQuotI
+      private ESMF_TimeIntervalQuotR
+
       public operator(.DIV.)
       private ESMF_TimeIntervalFQuot
 
       public MOD
       private ESMF_TimeIntervalRemainder
-
-      public operator(/)
-      private ESMF_TimeIntervalRQuot
-      private ESMF_TimeIntervalQuotI
-      private ESMF_TimeIntervalQuotR
 
       public operator(*)
       private ESMF_TimeIntervalProdTI
@@ -143,94 +143,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.43 2004/01/06 22:23:42 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.44 2004/01/07 17:59:53 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(.DIV.) - Divide two TimeIntervals, return fraction quotient
-!
-! !INTERFACE:
-      interface operator(.DIV.)
-!     quotient = timeInterval1 .DIV. timeInterval2
-!
-! !RETURN VALUE:
-!     type(ESMF_Fraction) :: quotient
-!
-! !ARGUMENTS: 
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
-!
-! !DESCRIPTION:
-!     Defines a new operator (.DIV.) for the {\tt ESMF\_TimeInterval} class
-!     which returns {\tt timeInterval1} divided by {\tt timeInterval2} as a 
-!     fraction quotient.
-!
-!     Implementation note:  This cannot be overloaded with (/) because the
-!     arguments are the same as "Divide two TimeIntervals, return double
-!     precision quotient" (see below).  The difference is in the return type
-!     ({\tt ESMF\_Fraction} vs. real), which F90 does not use to distinguish
-!     among multiple overloaded methods.  Since the {\tt ESMF\_Fraction} return
-!     type is less likely to be used, it was selected for the new
-!     .DIV. operator.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The dividend.
-!     \item[timeInterval2]
-!          The divisor.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalFQuot   ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMG1.5.5
-!
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedFunction(MOD) - Divide two TimeIntervals, return time interval remainder
-!
-! !INTERFACE:
-      interface MOD
-!     remainder = MOD(timeInterval1, timeInterval2)
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: remainder
-!
-! !ARGUMENTS: 
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
-!
-! !DESCRIPTION:
-!     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
-!     class to return the remainder of {\tt timeInterval1} divided by
-!     {\tt timeInterval2} as an {\tt ESMF\_TimeInterval}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The dividend.
-!     \item[timeInterval2]
-!          The divisor.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalRemainder   ! internal implementation
-!
-! !REQUIREMENTS:
-!     Time Manager API review 6/2003, TMG7.2
-!
-      end interface
-!
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide two TimeIntervals, return double precision quotient
@@ -332,6 +252,88 @@
 !EOP
 ! !PRIVATE MEMBER FUNCTIONS:
       module procedure ESMF_TimeIntervalQuotR   ! internal implementation
+!
+! !REQUIREMENTS:
+!     Time Manager API review 6/2003, TMG7.2
+!
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(.DIV.) - Divide two TimeIntervals, return fraction quotient
+!
+! !INTERFACE:
+      interface operator(.DIV.)
+!     quotient = timeInterval1 .DIV. timeInterval2
+!
+! !RETURN VALUE:
+!     type(ESMF_Fraction) :: quotient
+!
+! !ARGUMENTS: 
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+! !DESCRIPTION:
+!     Defines a new operator (.DIV.) for the {\tt ESMF\_TimeInterval} class
+!     which returns {\tt timeInterval1} divided by {\tt timeInterval2} as a 
+!     fraction quotient.
+!
+!     Implementation note:  This cannot be overloaded with (/) because the
+!     arguments are the same as "Divide two TimeIntervals, return double
+!     precision quotient" (see below).  The difference is in the return type
+!     ({\tt ESMF\_Fraction} vs. real), which F90 does not use to distinguish
+!     among multiple overloaded methods.  Since the {\tt ESMF\_Fraction} return
+!     type is less likely to be used, it was selected for the new
+!     .DIV. operator.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The dividend.
+!     \item[timeInterval2]
+!          The divisor.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalFQuot   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.5
+!
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedFunction(MOD) - Divide two TimeIntervals, return time interval remainder
+!
+! !INTERFACE:
+      interface MOD
+!     remainder = MOD(timeInterval1, timeInterval2)
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: remainder
+!
+! !ARGUMENTS: 
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+! !DESCRIPTION:
+!     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
+!     class to return the remainder of {\tt timeInterval1} divided by
+!     {\tt timeInterval2} as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The dividend.
+!     \item[timeInterval2]
+!          The divisor.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalRemainder   ! internal implementation
 !
 ! !REQUIREMENTS:
 !     Time Manager API review 6/2003, TMG7.2
@@ -1202,57 +1204,6 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two TimeIntervals, return fraction quotient
-
-! !INTERFACE:
-      function ESMF_TimeIntervalFQuot(timeInterval1, timeInterval2)
-
-! !RETURN VALUE:
-      type(ESMF_Fraction) :: ESMF_TimeIntervalFQuot
-
-! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
-
-! !DESCRIPTION:
-!     This method defines the (.DIV.) operator for the {\tt ESMF\_TimeInterval}
-!     class.  See "interface operator(.DIV.)" above for complete description.
-!
-!EOPI
-
-      call c_ESMC_TimeIntervalFQuot(timeInterval1, timeInterval2, &
-                                    ESMF_TimeIntervalFQuot)
-
-      end function ESMF_TimeIntervalFQuot
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_TimeIntervalRemainder - Divide two TimeIntervals, return time interval remainder
-
-! !INTERFACE:
-      function ESMF_TimeIntervalRemainder(timeInterval1, timeInterval2)
-
-! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalRemainder
-
-! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
-
-! !DESCRIPTION:
-!     This method overloads the pre-defined MOD function for the
-!     {\tt ESMF\_TimeInterval} class.  See "interface MOD" above for complete
-!     description.
-!
-!EOPI
-
-      call c_ESMC_TimeIntervalRemainder(timeInterval1, timeInterval2, &
-                                        ESMF_TimeIntervalRemainder)
-
-      end function ESMF_TimeIntervalRemainder
-
-!------------------------------------------------------------------------------
-!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two TimeIntervals, return double precision quotient
 
 ! !INTERFACE:
@@ -1325,6 +1276,57 @@
                                     ESMF_TimeIntervalQuotR)
 
       end function ESMF_TimeIntervalQuotR
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two TimeIntervals, return fraction quotient
+
+! !INTERFACE:
+      function ESMF_TimeIntervalFQuot(timeInterval1, timeInterval2)
+
+! !RETURN VALUE:
+      type(ESMF_Fraction) :: ESMF_TimeIntervalFQuot
+
+! !ARGUMENTS: 
+      type(ESMF_TimeInterval), intent(in) :: timeInterval1
+      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+
+! !DESCRIPTION:
+!     This method defines the (.DIV.) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(.DIV.)" above for complete description.
+!
+!EOPI
+
+      call c_ESMC_TimeIntervalFQuot(timeInterval1, timeInterval2, &
+                                    ESMF_TimeIntervalFQuot)
+
+      end function ESMF_TimeIntervalFQuot
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_TimeIntervalRemainder - Divide two TimeIntervals, return time interval remainder
+
+! !INTERFACE:
+      function ESMF_TimeIntervalRemainder(timeInterval1, timeInterval2)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalRemainder
+
+! !ARGUMENTS: 
+      type(ESMF_TimeInterval), intent(in) :: timeInterval1
+      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+
+! !DESCRIPTION:
+!     This method overloads the pre-defined MOD function for the
+!     {\tt ESMF\_TimeInterval} class.  See "interface MOD" above for complete
+!     description.
+!
+!EOPI
+
+      call c_ESMC_TimeIntervalRemainder(timeInterval1, timeInterval2, &
+                                        ESMF_TimeIntervalRemainder)
+
+      end function ESMF_TimeIntervalRemainder
 
 !------------------------------------------------------------------------------
 !BOPI

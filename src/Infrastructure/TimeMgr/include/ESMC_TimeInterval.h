@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.26 2003/12/19 19:19:08 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.27 2004/01/07 18:00:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,6 +137,12 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // return negative value (TMG 1.5.8)
     ESMC_TimeInterval ESMC_TimeIntervalNegAbsValue(void) const;
 
+    // subdivision (TMG 1.5.6, 5.3, 7.2)
+    ESMC_TimeInterval  operator/ (const ESMF_KIND_I4 &) const;
+    ESMC_TimeInterval& operator/=(const ESMF_KIND_I4 &);
+    ESMC_TimeInterval  operator/ (const ESMF_KIND_R8 &) const;
+    ESMC_TimeInterval& operator/=(const ESMF_KIND_R8 &);
+
     // division (TMG 1.5.5)
     ESMC_Fraction ESMC_TimeIntervalDiv(const ESMC_TimeInterval &) const;
     ESMF_KIND_R8 operator/(const ESMC_TimeInterval &) const;
@@ -144,12 +150,6 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // modulus
     ESMC_TimeInterval  operator% (const ESMC_TimeInterval &) const;
     ESMC_TimeInterval& operator%=(const ESMC_TimeInterval &);
-
-    // subdivision (TMG 1.5.6, 5.3, 7.2)
-    ESMC_TimeInterval  operator/ (const ESMF_KIND_I4 &) const;
-    ESMC_TimeInterval& operator/=(const ESMF_KIND_I4 &);
-    ESMC_TimeInterval  operator/ (const ESMF_KIND_R8 &) const;
-    ESMC_TimeInterval& operator/=(const ESMF_KIND_R8 &);
 
     // multiplication (TMG 1.5.7, 7.2)
     ESMC_TimeInterval  operator* (const ESMF_KIND_I4 &) const;
