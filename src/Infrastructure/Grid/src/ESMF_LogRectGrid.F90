@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.127 2004/12/21 01:25:39 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.128 2004/12/22 00:22:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.127 2004/12/21 01:25:39 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.128 2004/12/22 00:22:28 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -6220,15 +6220,25 @@
         elseif (relloc.eq.ESMF_CELL_CENTER .or. relloc.eq.ESMF_CELL_CELL) then  ! TODO:?
           do i = 1,counts(1)
             center(  i) = 0.5d0*(coord1(i)+coord1(i+1))
-            corner(1,i) = coord1(i  )
-            corner(2,i) = coord1(i+1)
           enddo
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              corner(1,i1) = coord1(i  )
+              corner(2,i1) = coord1(i+1)
+            enddo
+          endif
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,counts(1)
             center(  i) = coord1(i+1)
-            corner(1,i) = 0.5d0*(coord1(i  )+coord1(i+1))
-            corner(2,i) = 0.5d0*(coord1(i+1)+coord1(i+2))
           enddo
+          if (total) then
+            do i = 1+hWidth,counts(1)-hWidth
+              i1 = i - hWidth
+              corner(1,i1) = 0.5d0*(coord1(i  )+coord1(i+1))
+              corner(2,i1) = 0.5d0*(coord1(i+1)+coord1(i+2))
+            enddo
+          endif
 
         else
           if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
