@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.18 2003/07/24 19:54:08 dneckels Exp $
+! $Id: ESMF_LogErr.F90,v 1.19 2003/07/25 23:17:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -232,7 +232,7 @@ subroutine ESMF_LogSet(aLog, verbose, flush, haltOnErr, haltOnWarn)
     if (verbose .eq. ESMF_TF_TRUE) then
       call c_esmf_logsetverbose(aLog)
     else
-      call c_esmf_lognotsetverbose(aLog)
+      call c_esmf_logsetnotverbose(aLog)
     end if
   end if
 
