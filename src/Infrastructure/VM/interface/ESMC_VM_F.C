@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.36 2005/03/02 06:24:33 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.37 2005/03/29 19:18:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -292,11 +292,13 @@ extern "C" {
 
   
   void FTN(c_esmc_vmplanconstruct)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
-    int *npetlist, int *petlist, int *rc){
+    int *npetlist, int *petlist, ESMC_ContextFlag *contextflag, int *rc){
 #undef  ESMC_METHOD
 #define ESMC_METHOD "c_esmc_vmplanconstruct()"
     (*ptr) = new ESMC_VMPlan;
-    if (npetlist > 0)
+    if (*contextflag==ESMF_CHILD_IN_PARENT_VM)
+      (*ptr)->vmkplan_useparentvm(**ptr_vm);
+    else if (npetlist > 0)
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
     else
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1);

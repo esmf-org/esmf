@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.57 2005/01/28 22:47:11 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.58 2005/03/29 19:18:43 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -174,7 +174,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.57 2005/01/28 22:47:11 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.58 2005/03/29 19:18:43 theurich Exp $'
 
 !==============================================================================
 
@@ -3986,13 +3986,15 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMPlanConstruct - Construct a default plan
 
 ! !INTERFACE:
-  subroutine ESMF_VMPlanConstruct(vmplan, vm, npetlist, petlist, rc)
+  subroutine ESMF_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
+    rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VMPlan), intent(inout)         :: vmplan
     type(ESMF_VM),     intent(in)            :: vm
     integer,           intent(in)            :: npetlist
     integer,           intent(in)            :: petlist(:)
+    type(ESMF_ContextFlag), intent(in)       :: contextflag
     integer,           intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -4021,7 +4023,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, localrc)
+    call c_ESMC_VMPlanConstruct(vmplan, vm, npetlist, petlist, contextflag, &
+      localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
