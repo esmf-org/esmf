@@ -1,0 +1,28 @@
+% $Id: PerfProf_obj.tex,v 1.1 2002/11/13 22:08:46 ekluz Exp $
+
+%\section{Object Model}
+
+The following section describes design considerations for
+the performance profiler and code timer, and the relationship 
+between and subdivison of responsibilities into separate objects.
+
+\subsection{Performance}
+
+A Performance object when instantiated creates an array of
+InstrumentedSegment objects that will be used to time individual
+code sections.
+
+\subsection{InstrumentedSegment}
+
+A InstrumentedSegment object is made up of a ProfileClock object
+and a HW\_monitor object.
+
+\subsection{ProfileClock}
+
+The ProfileClock object takes care of general timing to return
+both wall-clock time and CPU time.
+
+\subsection{HW\_monitor}
+
+The HW\_monitor object takes care of hardware monitoring of code
+sections.
