@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.7 2004/11/12 21:12:58 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.8 2004/11/30 15:53:30 rfaincht Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.7 2004/11/12 21:12:58 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.8 2004/11/30 15:53:30 rfaincht Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,6 +57,9 @@
       integer::  func_results, myresults
       integer:: nsize, i, j
 
+      real(ESMF_KIND_R8), allocatable:: farray1(:)
+      real(ESMF_KIND_R8), dimension(:,:), allocatable:: farray2
+      real(ESMF_KIND_R8):: float_results, my_float_results
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -138,6 +141,44 @@
       write(failMsg, *) "Returned wrong results"
       write(name, *) "Verify All Full Reduce ESMF_SUM Results Test"
       call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+
+      ! allocate data arrays
+      nsize = 2
+      allocate(farray1(nsize))
+
+      ! prepare data farray1
+      do i=1, nsize
+        farray1(i) = localPet * 100. + real(i)
+      enddo
+
+
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Full Reduce ESMF_SUM Test: ESMF_KIND_R8"
+      call ESMF_VMAllFullReduce(vm, sendData=farray1, recvData=float_results, count=nsize, &
+      reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! Populate farray2
+      allocate(farray2(nsize,npets))
+      do j=1, npets
+        do i=1, nsize
+                farray2(i,j) = real((j-1) * 100 + i)
+        enddo
+      enddo
+
+      ! print the scatter result
+      my_float_results = SUM(farray2)
+      print *, 'Global sum:'
+      print *, localPet,' float_results: ', float_results, ' my_float_results:', my_float_results
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify Reduce ESMF_SUM Results Test: ESMF_KIND_R8"
+      call ESMF_Test((float_results.eq.my_float_results), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
