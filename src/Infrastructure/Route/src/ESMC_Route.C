@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.106 2004/11/05 08:14:50 theurich Exp $
+// $Id: ESMC_Route.C,v 1.107 2004/11/15 16:37:07 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.106 2004/11/05 08:14:50 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.107 2004/11/15 16:37:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -363,8 +363,8 @@ static int maxroutes = 10;
         //printf("Info: this route added to Cache, entry %d\n", 
         //                                       routetable.nroutes-1);
     } else {
-        ESMC_LogDefault.ESMC_LogWrite(
-        "Warning: this route not Cached - Cache table full\n", ESMC_LOG_WARN);
+        //ESMC_LogDefault.ESMC_LogWrite(
+        //"Warning: this route not Cached - Cache table full\n", ESMC_LOG_WARN);
         // not an error - this can be recomputed later.
     }
     
