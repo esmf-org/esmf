@@ -34,7 +34,6 @@
 
       use ESMF_Mod
 
-      type(ESMF_DELayout) :: layout  
       type (ESMF_Config) cf 
       
 
