@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.71 2004/06/15 23:31:19 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.72 2004/06/16 20:19:44 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.71 2004/06/15 23:31:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.72 2004/06/16 20:19:44 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -738,7 +738,15 @@ int ESMC_Calendar::count=0;
     // TODO: replace MONTHS_PER_YEAR with dynamic daysPerMonth[monthsPerYear]
     if (monthsPerYear <= MONTHS_PER_YEAR && monthsPerYear >= 0) {
       this->monthsPerYear = monthsPerYear;
-    } 
+    } else {
+      // error, restore previous state
+      *this = saveCalendar;
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "; monthsPerYear %d negative or > MONTHS_PER_YEAR %d.",
+                      this->daysPerYear.d, MONTHS_PER_YEAR);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, logMsg, &rc);
+      return(rc);
+    }
 
     this->daysPerYear.d = 0;
     if (daysPerMonth != ESMC_NULL_POINTER) {
@@ -764,7 +772,13 @@ int ESMC_Calendar::count=0;
 
     this->secondsPerYear = this->secondsPerDay * this->daysPerYear.d;
 
-    return(ESMC_CalendarValidate());
+    if ((rc = ESMC_CalendarValidate()) != ESMF_SUCCESS) {
+      // error, restore previous state
+      *this = saveCalendar;
+      ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc);
+    }
+
+    return(rc);
 
 }  // end ESMC_CalendarSet (custom)
 
