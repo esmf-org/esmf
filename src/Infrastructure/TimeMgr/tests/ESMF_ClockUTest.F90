@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.38 2003/09/08 17:00:25 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.39 2003/09/08 19:15:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.38 2003/09/08 17:00:25 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.39 2003/09/08 19:15:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,6 +64,7 @@
       type(ESMF_TimeInterval) :: timeStep, timeStep2
       type(ESMF_Time) :: startTime, stopTime, startTime2
       type(ESMF_Time) :: currentTime, previousTime
+      type(ESMF_TimeInterval) :: currentSimTime, previousSimTime
 
 
       ! perform exhaustive tests here;
@@ -392,6 +393,18 @@
 
       ! ----------------------------------------------------------------------------
  
+
+       !EX_UTest
+       write(name, *) "Get previous SimTime and verify Test"
+       call ESMF_ClockGet(clock, currSimTime=currentSimTime, rc=rc)
+       call ESMF_ClockAdvance(clock, rc=rc)
+       write(failMsg, *) " Returned ESMF_FAILURE and/or currSimTime != prevTime"
+       call ESMF_ClockGet(clock, prevSimTime=previousSimTime, rc=rc)
+       call ESMF_Test(((rc.eq.ESMF_SUCCESS).and.(currentSimTime.eq.previousSimTime)), &
+                       name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
       !EX_UTest
       write(name, *) "Clock Initialization with stop time set before start time Test"
       call ESMF_TimeSet(stopTime, yr=2002, mm=3, dd=14, &
@@ -402,8 +415,6 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
- 
-
      !EX_UTest
       write(name, *) "Clock Initialization with stop time & start time with different calendars Test" 
       call ESMF_TimeSet(startTime, yr=2000, mm=3, dd=13, &
