@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.137 2004/02/06 18:02:50 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.138 2004/02/10 16:32:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.137 2004/02/06 18:02:50 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.138 2004/02/10 16:32:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1950,6 +1950,7 @@
       if(present(minLocalCoordPerDim) .or. present(maxLocalCoordPerDim)) then
 ! TODO: add code to get physgridId from relloc, test for the presence of at least
 !       one of these optional arguments
+        physGridIdUse = 1            ! default
         if (present(physGridId)) physGridIdUse = physGridId
       endif
 
