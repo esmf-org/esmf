@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.79 2004/03/19 20:32:39 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.80 2004/03/26 15:27:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.79 2004/03/19 20:32:39 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.80 2004/03/26 15:27:00 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1535,6 +1535,21 @@ end function
           return
       endif
 
+#ifdef ESMF_ENABLE_VM
+      ! Initialize the VM. This creates the GlobalVM      
+      ! Note that ESMF_VMInitialize _must_ be called before any other
+      ! mechanism calls MPI_Init. This is because MPI_Init on some systems
+      ! will spawn helper threads which, might have signal handlers installed
+      ! incompatible with vmachine. ESMF_VMInitialize must install correct
+      ! signal handlers _before_ possible helper threads are spawned by 
+      ! MPI_Init.
+      call ESMF_VMInitialize(status);
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error initializing VM"
+          return
+      endif
+#endif
+
       ! Initialize the machine model, the comms, etc.
       call ESMF_MachineInitialize(lang, status)
       if (status .ne. ESMF_SUCCESS) then
@@ -1548,15 +1563,6 @@ end function
           print *, "Error creating global delayout"
           return
       endif
-
-#ifdef ESMF_ENABLE_VM
-      ! Initialize the VM. This creates the GlobalVM      
-      call ESMF_VMInitialize(status);
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing VM"
-          return
-      endif
-#endif
 
       already_init = .true.
 
