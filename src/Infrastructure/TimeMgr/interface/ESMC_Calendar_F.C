@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.20 2003/12/19 19:21:21 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.21 2004/01/29 04:44:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,22 +35,44 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_calendarset)(ESMC_Calendar *ptr,
+       void FTN(c_esmc_calendarcreate)(ESMC_Calendar **ptr,
+                                       int *nameLen,
+                                       const char *name,
+                                       ESMC_CalendarType *type, 
+                                       int *status) {
+          *ptr = ESMC_CalendarCreate(
+                    *nameLen,   // always present internal argument.
+
+                    ((void*) name     == (void*)ESMC_BAD_POINTER ?
+                                                ESMC_NULL_POINTER : name),
+                    *type,   // required
+
+                    ((void*) status   == (void*)ESMC_BAD_POINTER ?
+                                                ESMC_NULL_POINTER : status) );
+       }
+
+       void FTN(c_esmc_calendardestroy)(ESMC_Calendar **ptr, int *status) {
+          int rc = ESMC_CalendarDestroy(*ptr);
+          if (status != ESMC_NULL_POINTER &&
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+       }
+
+       void FTN(c_esmc_calendarset)(ESMC_Calendar **ptr,
                                     ESMC_CalendarType *type, 
                                     int *status) {
-           int rc = (ptr)->ESMC_CalendarSet(*type);
+           int rc = (*ptr)->ESMC_CalendarSet(*type);
            if (status != ESMC_NULL_POINTER &&
                (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_calendarsetcustom)(ESMC_Calendar *ptr,
+       void FTN(c_esmc_calendarsetcustom)(ESMC_Calendar **ptr,
                                     int          *monthsPerYear,
                                     int          *daysPerMonth,
                                     ESMF_KIND_I4 *secondsPerDay,
                                     ESMF_KIND_I4 *daysPerYear,
                                     ESMF_KIND_I4 *daysPerYearDn,
                                     ESMF_KIND_I4 *daysPerYearDd, int *status) {
-           int rc = (ptr)->ESMC_CalendarSetCustom(
+           int rc = (*ptr)->ESMC_CalendarSetCustom(
                        monthsPerYear,    // always present internal argument.
 
               ((void*) daysPerMonth   == (void*)ESMC_BAD_POINTER ?
@@ -67,7 +89,7 @@ extern "C" {
                (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_calendarget)(ESMC_Calendar *ptr,
+       void FTN(c_esmc_calendarget)(ESMC_Calendar **ptr,
                                     ESMC_CalendarType *type,
                                     int          *monthsPerYear,
                                     int          *daysPerMonth,
@@ -76,7 +98,7 @@ extern "C" {
                                     ESMF_KIND_I4 *daysPerYear,
                                     ESMF_KIND_I4 *daysPerYearDn,
                                     ESMF_KIND_I4 *daysPerYearDd, int *status) {
-           int rc = (ptr)->ESMC_CalendarGet(
+           int rc = (*ptr)->ESMC_CalendarGet(
               ((void*) type           == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : type),
               ((void*) monthsPerYear  == (void*)ESMC_BAD_POINTER ?
@@ -97,42 +119,42 @@ extern "C" {
                (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar *ptr, int *nameLen,
+       void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar **ptr, int *nameLen,
                                             const char *name,
                                             ESMC_IOSpec *iospec,
                                             int *status) {
-          int rc = (ptr)->ESMC_CalendarReadRestart(
+          *ptr = ESMC_CalendarReadRestart(
                  *nameLen,  // always present internal argument.
                  name,      // required.
                  ((void*)iospec == (void*)ESMC_BAD_POINTER ?      
-                                                  ESMC_NULL_POINTER : iospec) );
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+                                                  ESMC_NULL_POINTER : iospec),
+                 ((void*)status == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : status) );
        }
 
-       void FTN(c_esmc_calendarwriterestart)(ESMC_Calendar *ptr,
+       void FTN(c_esmc_calendarwriterestart)(ESMC_Calendar **ptr,
                                              ESMC_IOSpec *iospec,
                                              int *status) {
-          int rc = (ptr)->ESMC_CalendarWriteRestart(
+          int rc = (*ptr)->ESMC_CalendarWriteRestart(
               ((void*)iospec == (void*)ESMC_BAD_POINTER ?
                                                   ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;  
        }
 
-       void FTN(c_esmc_calendarvalidate)(ESMC_Calendar *ptr,
+       void FTN(c_esmc_calendarvalidate)(ESMC_Calendar **ptr,
                                          const char *options,
                                          int *status) {
-           int rc = (ptr)->ESMC_CalendarValidate(
+           int rc = (*ptr)->ESMC_CalendarValidate(
                ((void*)options == (void*)ESMC_BAD_POINTER ?
                                          ESMC_NULL_POINTER : options) );
            if (status != ESMC_NULL_POINTER &&
                (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_calendarprint)(ESMC_Calendar *ptr, const char *options,
+       void FTN(c_esmc_calendarprint)(ESMC_Calendar **ptr, const char *options,
                                       int *status) {
-           int rc = (ptr)->ESMC_CalendarPrint(
+           int rc = (*ptr)->ESMC_CalendarPrint(
                ((void*)options == (void*)ESMC_BAD_POINTER ?
                                          ESMC_NULL_POINTER : options) );
            if (status != ESMC_NULL_POINTER &&

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.44 2003/12/23 00:33:52 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.45 2004/01/29 04:44:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,38 +80,10 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_Calendar
 !
-!     ! F90 class type to match C++ Calendar class in size only;
-!     !  all dereferencing within class is performed by C++ implementation
-!
-!     ! Equivalent sequence and kind to C++:
-!------------------------------------------------------------------------------
-!
-!     ! ESMF_DaysPerYear
-!
-      type ESMF_DaysPerYear
-      sequence
-      private
-        integer(ESMF_KIND_I4) :: days  ! whole days per year
-        integer(ESMF_KIND_I4) :: daysN ! fractional days per year numerator
-        integer(ESMF_KIND_I4) :: daysD ! fractional days per year denominator
-                                       ! e.g. for Venus,
-                                       !   days=0, daysN=926, daysD=1000
-        integer               :: pad1  ! to match C++ alignment
-      end type
-!
-!------------------------------------------------------------------------------
-!     ! ESMF_Calendar
-!
-!     ! F90 class to match C++ Calendar class in size and sequence
-!
       type ESMF_Calendar
       sequence
       private
-        type(ESMF_CalendarType)             :: type
-        integer, dimension(MONTHS_PER_YEAR) :: daysPerMonth
-        integer(ESMF_KIND_I4)               :: secondsPerDay
-        integer(ESMF_KIND_I4)               :: secondsPerYear
-        type(ESMF_DaysPerYear)              :: daysPerYear
+        type(ESMF_Pointer) :: this       ! opaque pointer to the C++ class data
       end type
 !
 !------------------------------------------------------------------------------
@@ -124,6 +96,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
+      public ESMF_CalendarCreate
+      public ESMF_CalendarDestroy
       public ESMF_CalendarSet
       public ESMF_CalendarSetCustom
       public ESMF_CalendarGet
@@ -139,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.44 2003/12/23 00:33:52 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.45 2004/01/29 04:44:35 eschwab Exp $'
 
 !==============================================================================
 
@@ -149,6 +123,89 @@
 !
 ! This section includes the Set methods.
 !
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarCreate - Create a Calendar
+
+! !INTERFACE:
+      function ESMF_CalendarCreate(name, type, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Calendar) :: ESMF_CalendarCreate
+
+! !ARGUMENTS:
+      character (len=*),       intent(in),  optional :: name
+      type(ESMF_CalendarType), intent(in)            :: type
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates and sets a {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[name]}]
+!          The name for the newly created calendar.  If not specified, a
+!          default unique name will be generated: "CalendarNNN" where NNN
+!          is a unique sequence number from 001 to 999.
+!     \item[type]
+!          The {\tt CalendarType}.  Valid values are:
+!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
+!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
+!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
+!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!          See the "Time Manager Reference" document for a description of
+!          each calendar type.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarCreate(ESMF_CalendarCreate, nameLen, name, type, rc)
+    
+      end function ESMF_CalendarCreate
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarDestroy
+!
+! !INTERFACE:
+      subroutine ESMF_CalendarDestroy(calendar, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Calendar) :: calendar
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Releases all resources associated with this {\tt ESMF\_Calendar}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!       Destroy contents of this {\tt ESMF\_Calendar}.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarDestroy(calendar, rc)
+
+      end subroutine ESMF_CalendarDestroy
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CalendarSet - Initialize or set the Calendar type
@@ -338,10 +395,12 @@
 ! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarReadRestart(calendar, name, iospec, rc)
+      function ESMF_CalendarReadRestart(name, iospec, rc)
+! 
+! !RETURN VALUE:
+      type(ESMF_Calendar) :: ESMF_CalendarReadRestart
 !
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
       character (len=*),   intent(in)            :: name
       type(ESMF_IOSpec),   intent(in),  optional :: iospec
       integer,             intent(out), optional :: rc
@@ -352,10 +411,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[calendar]
-!          Restore into this {\tt ESMF\_Calendar}.
 !     \item[name]
-!          Restore from this object name.
+!          The name of the object instance to restore.
 !     \item[{[iospec]}]
 !          The IO specification of the restart file.
 !     \item[{[rc]}]
@@ -370,10 +427,11 @@
       integer :: nameLen
       nameLen = len_trim(name)
 
-!     invoke C to C++ entry point to restore calendar
-      call c_ESMC_CalendarReadRestart(calendar, nameLen, name, iospec, rc)
+!     invoke C to C++ entry point to allocate and restore calendar
+      call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
+                                      iospec, rc)
 
-      end subroutine ESMF_CalendarReadRestart
+      end function ESMF_CalendarReadRestart
 
 !------------------------------------------------------------------------------
 !BOP

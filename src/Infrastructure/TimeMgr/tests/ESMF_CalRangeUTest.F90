@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.15 2004/01/26 21:29:35 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.16 2004/01/29 04:44:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,12 +34,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.15 2004/01/26 21:29:35 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.16 2004/01/29 04:44:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
       type(ESMF_Calendar) :: gregorianCalendar
-      type(ESMF_Calendar) :: julianCalendar
+      type(ESMF_Calendar) :: julianDayCalendar
 
       ! instantiate time instant
       type(ESMF_Time) :: Time
@@ -80,12 +80,14 @@
       ! Julian Calendar
 
       ! initialize calendar to be Julian type
-      call ESMF_CalendarSet(julianCalendar, ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
+                                              ESMF_CAL_JULIANDAY, rc)
 
       ! Gregorian Calendar
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 
       ! Calendar months table
       DaysPerMonth(1) = 31
@@ -150,7 +152,7 @@
         ! check calculated dates against ESMF dates
         broken = ESMF_CheckTime(Time, YYl=YYl, MM=MM, DD=DD, Dl=Dl, &
                                 gregCal=gregorianCalendar, &
-                                julCal=julianCalendar, rc=rc)
+                                julCal=julianDayCalendar, rc=rc)
       end do
       !EX_UTest
       write(failMsg, *) "Low range endpoint not -4800/2/29 or rc=ESMF_FAILURE"
@@ -279,7 +281,7 @@
           ! check calculated dates against ESMF dates
           broken = ESMF_CheckTime(Time, YYl=YYl, MM=MM, DD=DD, Dl=Dl, &
                                   gregCal=gregorianCalendar, &
-                                  julCal=julianCalendar, rc=rc)
+                                  julCal=julianDayCalendar, rc=rc)
         end do
 
         ! test section ended, check results
@@ -315,6 +317,10 @@
         end if
 
       end do
+
+      ! destroy calendars
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc)
 
       ! finalize ESMF framework
       call ESMF_Finalize(rc)

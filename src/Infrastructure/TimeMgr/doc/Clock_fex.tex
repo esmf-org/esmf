@@ -1,4 +1,4 @@
-% $Id: Clock_fex.tex,v 1.11 2004/01/26 21:28:16 eschwab Exp $
+% $Id: Clock_fex.tex,v 1.12 2004/01/29 04:44:34 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -8,16 +8,16 @@ type(ESMF_Clock) :: modelTime
 
 ! Declare and set type of a Calendar
 type(ESMF_Calendar) :: gregorian
-call ESMF_CalendarSet(gregorian, ESMF_CAL_GREGORIAN)
+gregorian = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN)
 
 ! Declare and set Clock TimeIntervals and Time instants
 type(ESMF_TimeInterval) :: timeStep
 type(ESMF_Time) :: startTime, stopTime, refTime
 
 call ESMF_TimeIntervalSet(timeStep, d=1)
-call ESMF_TimeSet(startTime, yy=2002, mm=8, dd=1, gregorian)
-call ESMF_TimeSet(stopTime, yy=2003, mm=7, dd=31, gregorian)
-call ESMF_TimeSet(refTime, yy=2000, mm=1, dd=1, gregorian)
+call ESMF_TimeSet(startTime, yy=2002, mm=8, dd=1, calendar=gregorian)
+call ESMF_TimeSet(stopTime, yy=2003, mm=7, dd=31, calendar=gregorian)
+call ESMF_TimeSet(refTime, yy=2000, mm=1, dd=1, calendar=gregorian)
 
 ! Create and initialize the Clock
 modelTime = ESMF_ClockCreate("Model Time", timeStep, startTime, stopTime, &
@@ -25,6 +25,9 @@ modelTime = ESMF_ClockCreate("Model Time", timeStep, startTime, stopTime, &
 
 ! Start time advance
 call ESMF_ClockAdvance(modelTime)
+
+! Destroy calendar
+call ESMF_CalendarDestroy(gregorian)
 
 ! Destroy clock
 call ESMF_ClockDestroy(modelTime)

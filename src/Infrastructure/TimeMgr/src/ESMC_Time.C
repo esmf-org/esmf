@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.51 2004/01/27 20:53:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.52 2004/01/29 04:44:35 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -237,7 +237,7 @@
       ESMF_KIND_R8 *ns_r8,        // out - floating point nanoseconds
       ESMF_KIND_I4 *sN,           // out - fractional seconds numerator
       ESMF_KIND_I4 *sD,           // out - fractional seconds denominator
-      ESMC_Calendar *calendar,    // out - associated calendar
+      ESMC_Calendar **calendar,   // out - associated calendar
       int           *timeZone,    // out - timezone (hours offset from UTC)
       int            timeStringLen,     // in  - F90 time string size
       int           *tempTimeStringLen, // out - temp F90 time string size
@@ -286,7 +286,7 @@
         ESMF_FAILURE) return(ESMF_FAILURE);
 
     if (calendar != ESMC_NULL_POINTER) {
-      *calendar = *(this->calendar);  // gets a full copy of the calendar
+      *calendar = this->calendar;
     }
     if (timeZone != ESMC_NULL_POINTER) {
       *timeZone = this->timeZone;

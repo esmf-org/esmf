@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.21 2004/01/26 21:29:56 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.22 2004/01/29 04:44:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,8 @@
       !
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 !\end{verbatim}
 !EOP
 
@@ -668,6 +669,16 @@
       ! destroy clock
       call ESMF_ClockDestroy(clock, rc)
 !\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+!\end{verbatim}    
 !EOP
 
       if (rc.NE.ESMF_SUCCESS) then

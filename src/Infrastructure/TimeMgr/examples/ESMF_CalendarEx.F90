@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.20 2004/01/26 21:29:55 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.21 2004/01/29 04:44:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
       type(ESMF_Calendar) :: gregorianCalendar
       type(ESMF_Calendar) :: noLeapCalendar
       type(ESMF_Calendar) :: day360Calendar
-      type(ESMF_Calendar) :: julianCalendar
+      type(ESMF_Calendar) :: julianDayCalendar
 
       ! temp variables for Get functions
       integer(ESMF_KIND_I8) :: yyl, dl, sl
@@ -48,10 +48,11 @@
 !BOP
 !\begin{verbatim}
       !
-      ! Julian Calendar
+      ! Julian Day Calendar
       !
       ! initialize calendar to be Julian type
-      call ESMF_CalendarSet(JulianCalendar, ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
+                                              ESMF_CAL_JULIANDAY, rc)
 !\end{verbatim}
 !EOP
 
@@ -65,7 +66,8 @@
       ! Gregorian Calendar
       !
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 !\end{verbatim}
 !EOP
 
@@ -233,7 +235,7 @@
       dl = 1067519911  ! break up initialization,
       dl = dl * 100000  !   since F90 constants
       dl = dl + 67300   !     are 32-bit
-      call ESMF_TimeSet(checkTime, d_i8=dl, calendar=julianCalendar, rc=rc)
+      call ESMF_TimeSet(checkTime, d_i8=dl, calendar=julianDayCalendar, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -282,7 +284,7 @@
       dl = 1067519911  ! break up initialization,
       dl = dl * 100000  !   since F90 constants
       dl = dl + 67301   !     are 32-bit
-      call ESMF_TimeSet(checkTime, d_i8=dl, calendar=julianCalendar, rc=rc)
+      call ESMF_TimeSet(checkTime, d_i8=dl, calendar=julianDayCalendar, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -329,7 +331,7 @@
       !
       ! No Leap Calendar examples
       !
-      call ESMF_CalendarSet(noLeapCalendar, ESMF_CAL_NOLEAP, rc)
+      noLeapCalendar = ESMF_CalendarCreate("NoLeap", ESMF_CAL_NOLEAP, rc)
 !\end{verbatim}
 !EOP
 
@@ -425,7 +427,7 @@
       !
       ! 360 Day Calendar examples
       !
-      call ESMF_CalendarSet(day360Calendar, ESMF_CAL_360DAY, rc)
+      day360Calendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
 !\end{verbatim}
 !EOP
 
@@ -508,6 +510,46 @@
 
       print *, "Check Time1 360 Day = ", &
                yy, "/", mm, "/", dd, " ", h, ":", m, ":", s
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+     call ESMF_CalendarDestroy(julianDayCalendar, rc)
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+     call ESMF_CalendarDestroy(noLeapCalendar, rc)
+!\end{verbatim}
+!EOP
+
+      if (rc.NE.ESMF_SUCCESS) then
+          finalrc = ESMF_FAILURE
+      end if
+
+!BOP
+!\begin{verbatim}
+     call ESMF_CalendarDestroy(day360Calendar, rc)
 !\end{verbatim}
 !EOP
 

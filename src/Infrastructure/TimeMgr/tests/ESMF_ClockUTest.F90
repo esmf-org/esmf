@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.57 2004/01/26 21:29:37 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.58 2004/01/29 04:44:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.57 2004/01/26 21:29:37 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.58 2004/01/29 04:44:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,8 @@
 
       logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, clock_no_leap, clock_360day
+      type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, &
+                          clock_no_leap, clock_360day
 
       ! Random number
       real :: ranNum
@@ -62,7 +63,8 @@
       integer :: timevals(8)
 
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, no_leapCalendar, esmf_360dayCalendar
+      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
+                             no_leapCalendar, esmf_360dayCalendar
       type(ESMF_CalendarType) :: cal_type
 
       ! instantiate timestep, start and stop times
@@ -78,28 +80,26 @@
       call ESMF_Initialize(rc)
 
       ! initialize one calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 
       ! initialize secand calendar to be Julian type
-      call ESMF_CalendarSet(julianCalendar, ESMF_CAL_JULIANDAY, rc)
-
+      julianCalendar = ESMF_CalendarCreate("Julian", ESMF_CAL_JULIANDAY, rc)
 
       ! initialize third calendar to be No Leap type
-      call ESMF_CalendarSet(no_leapCalendar, ESMF_CAL_NOLEAP, rc)
-
+      no_leapCalendar = ESMF_CalendarCreate("NoLeap", ESMF_CAL_NOLEAP, rc)
 
       ! initialize third calendar to be 360 day type
-      call ESMF_CalendarSet(esmf_360dayCalendar, ESMF_CAL_360DAY, rc)
+      esmf_360dayCalendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
-
+!-------------------------------------------------------------------------------
+!    The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!    always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!    the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!    to OFF, then only the sanity unit tests.
+!    Special strings (Non-exhaustive and exhaustive) have been
+!    added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
 
 
       ! initialize clock time intervals and instants
@@ -1362,6 +1362,13 @@
 #endif
 
       ! ----------------------------------------------------------------------------
+
+      ! destroy calendars
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(julianCalendar, rc)
+      call ESMF_CalendarDestroy(no_leapCalendar, rc)
+      call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
+
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
   

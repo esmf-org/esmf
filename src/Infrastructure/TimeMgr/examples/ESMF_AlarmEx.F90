@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.7 2004/01/26 21:29:54 eschwab Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.8 2004/01/29 04:44:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,7 +62,8 @@
 !  Setup clock
 !
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
 !\end{verbatim}
 !EOP
 
@@ -641,6 +642,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       else
          print *, "FAIL: ESMF_AlarmEx.F90"
       end if
+
+     call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
 !BOP 
 !\begin{verbatim}

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.25 2004/01/27 20:53:11 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.26 2004/01/29 04:44:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,7 +49,7 @@ extern "C" {
                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                 ESMF_KIND_R8 *ns_r8,
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                ESMC_Calendar *calendar, int *timeZone,
+                                ESMC_Calendar **calendar, int *timeZone,
                                 int *status) {
           int rc = (ptr)->ESMC_TimeSet(
                     ((void*)yy       == (void*)ESMC_BAD_POINTER ?
@@ -96,7 +96,7 @@ extern "C" {
                                                ESMC_NULL_POINTER : sN),
                     ((void*)sD       == (void*)ESMC_BAD_POINTER ?
                                                ESMC_NULL_POINTER : sD),
-                    calendar,    // required
+                    *calendar,    // required
                             
                     ((void*)timeZone == (void*)ESMC_BAD_POINTER ?
                                                ESMC_NULL_POINTER : timeZone) );
@@ -118,7 +118,7 @@ extern "C" {
                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
                                 ESMF_KIND_R8 *ns_r8,
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                ESMC_Calendar *calendar, int *timeZone,
+                                ESMC_Calendar **calendar, int *timeZone,
                                 int *timeStringLen, int *tempTimeStringLen, 
                                 char *tempTimeString, int *dayOfWeek,
                                 ESMC_Time *midMonth,

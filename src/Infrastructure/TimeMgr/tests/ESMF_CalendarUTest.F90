@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.10 2004/01/26 21:29:37 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.11 2004/01/29 04:44:35 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.10 2004/01/26 21:29:37 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.11 2004/01/29 04:44:35 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,7 +56,8 @@
 
       logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, clock_no_leap, clock_360day
+      type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, &
+                          clock_no_leap, clock_360day
       type(ESMF_Time) :: startTime, stopTime
 
       ! Random number
@@ -65,24 +66,26 @@
       integer :: timevals(8)
 
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, no_leapCalendar, esmf_360dayCalendar
+      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
+                             no_leapCalendar, esmf_360dayCalendar
       type(ESMF_Calendar) :: customCalendar
       type(ESMF_CalendarType) :: cal_type
-      integer, dimension(MONTHS_PER_YEAR) :: days_per_month =(/30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30/)
-      integer, dimension(MONTHS_PER_YEAR) :: dayspermonth =(/1000, 0, 8900, -120, 930, 70, 80, 90, 0, -70, 90, 60/)
+      integer, dimension(MONTHS_PER_YEAR) :: &
+             days_per_month =(/30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30/)
+      integer, dimension(MONTHS_PER_YEAR) :: &
+         dayspermonth =(/1000, 0, 8900, -120, 930, 70, 80, 90, 0, -70, 90, 60/)
 
       ! instantiate Time Intervals
       type(ESMF_TimeInterval) :: timeStep
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
+
+!-------------------------------------------------------------------------------
+!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests
+!     are always run.  When the environment variable, EXHAUSTIVE, is set to ON
+!     then the EXHAUSTIVE and sanity tests both run.  If the EXHAUSTIVE
+!     variable is set to OFF, then only the sanity unit tests.
 !     Special strings (Non-exhaustive and exhaustive) have been
 !     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
-
-
+!-------------------------------------------------------------------------------
 
       ! initialize ESMF framework
       call ESMF_Initialize(rc)
@@ -116,7 +119,8 @@
       ! initialize one calendar to be Gregorian type
       write(name, *) "Initialize Gregorian Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
+                                              ESMF_CAL_GREGORIAN, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -150,7 +154,8 @@
       ! initialize secand calendar to be Julian Day type
       write(name, *) "Initialize Julian Day Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      call ESMF_CalendarSet(julianDayCalendar, ESMF_CAL_JULIANDAY, rc)
+      julianDayCalendar = ESMF_CalendarCreate("JulianDay", &
+                                              ESMF_CAL_JULIANDAY, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -181,7 +186,7 @@
       ! initialize third calendar to be No Leap type
       write(name, *) "Initialize No Leap Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      call ESMF_CalendarSet(no_leapCalendar, ESMF_CAL_NOLEAP, rc)
+      no_leapCalendar = ESMF_CalendarCreate("No_Leap", ESMF_CAL_NOLEAP, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -203,7 +208,7 @@
       ! Test that validate subroutine returns ESMF_SUCESS
       write(failMsg, *) " Should return ESMF_SUCCESS"
       write(name, *) "Validate No Leap Calendar Test"
-      call ESMF_CalendarValidate(julianDayCalendar, rc=rc)
+      call ESMF_CalendarValidate(no_leapCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -213,7 +218,7 @@
       ! initialize third calendar to be 360 day type
       write(name, *) "Initialize 360 Day Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      call ESMF_CalendarSet(esmf_360dayCalendar, ESMF_CAL_360DAY, rc)
+      esmf_360dayCalendar = ESMF_CalendarCreate("360Day", ESMF_CAL_360DAY, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -742,7 +747,10 @@
 
 #endif 
 
-
+      call ESMF_CalendarDestroy(gregorianCalendar, rc)
+      call ESMF_CalendarDestroy(julianDayCalendar, rc)
+      call ESMF_CalendarDestroy(no_leapCalendar, rc)
+      call ESMF_CalendarDestroy(esmf_360dayCalendar, rc)
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.38 2004/01/26 21:29:01 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.39 2004/01/29 04:44:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,8 +29,12 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.38 2004/01/26 21:29:01 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.39 2004/01/29 04:44:35 eschwab Exp $";
 //-------------------------------------------------------------------------
+
+// initialize static calendar instance counter
+// TODO: inherit from ESMC_Base class
+int ESMC_Calendar::count=0;
 
 //
 //-------------------------------------------------------------------------
@@ -39,6 +43,105 @@
 // This section includes all the ESMC_Calendar routines
 //
 //
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarCreate - Allocates and Initializes a Calendar object
+//
+// !INTERFACE:
+      ESMC_Calendar *ESMC_CalendarCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Alarm
+//
+// !ARGUMENTS:
+      int                nameLen,    // in
+      const char        *name,       // in
+      ESMC_CalendarType  type,       // in
+      int               *rc) {       // out - return code
+
+// !DESCRIPTION:
+//      Allocates and Initializes a {\tt ESMC\_Calendar} with given type
+//
+//EOP
+// !REQUIREMENTS:
+
+    int returnCode;
+    ESMC_Calendar *calendar;
+
+    try {
+      calendar = new ESMC_Calendar;
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_CalendarCreate() memory allocation failed\n";
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
+      return(ESMC_NULL_POINTER);
+    }
+
+    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    if (name != ESMC_NULL_POINTER) {
+      if (nameLen < ESMF_MAXSTR) {
+        strncpy(calendar->name, name, nameLen);
+        calendar->name[nameLen] = '\0';  // null terminate
+      } else {
+        // TODO: error, delete and return null calendar?
+        if (rc != ESMC_NULL_POINTER) {
+          *rc = ESMF_FAILURE;
+        }
+        return(calendar);
+      }
+    } else {
+      // create default name "CalendarNNN"
+      sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
+    }
+
+    if((returnCode = calendar->ESMC_CalendarSet(type)) != ESMF_SUCCESS) {
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = returnCode;
+      }
+      return(calendar);
+    }
+
+    returnCode = calendar->ESMC_CalendarValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
+
+    return(calendar);
+
+ } // end ESMC_CalendarCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarDestroy - free a Calendar created with Create
+//
+// !INTERFACE:
+      int ESMC_CalendarDestroy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Calendar *calendar) {  // in - ESMC_Calendar to destroy
+//
+// !DESCRIPTION:
+//      ESMF routine which destroys a Calendar object previously allocated
+//      via an {\tt ESMC\_CalendarCreate} routine. Define for deep classes only.
+//
+//EOP
+
+  if (calendar != ESMC_NULL_POINTER) {
+    //calendar->ESMC_CalendarDestruct(); constructor calls it!
+    delete calendar;
+    calendar = ESMC_NULL_POINTER;
+    return(ESMF_SUCCESS);
+  } else {
+    return(ESMF_FAILURE);
+  }
+
+ } // end ESMC_CalendarDestroy
 
 //-------------------------------------------------------------------------
 //BOP
@@ -666,31 +769,32 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarReadRestart - restore Calendar state
+// !IROUTINE:  ESMC_CalendarReadRestart - restore contents of a Calendar 
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarReadRestart(
+      ESMC_Calendar *ESMC_CalendarReadRestart(
 //
 // !RETURN VALUE:
-//    int error return code
+//    pointer to newly allocated and restored ESMC_Calendar
 //
 // !ARGUMENTS:
-      int          nameLen,   // in
-      const char  *name,      // in
-      ESMC_IOSpec *iospec) {  // in
+      int          nameLen,  // in
+      const char  *name,     // in
+      ESMC_IOSpec *iospec,   // in
+      int         *rc ) {    // out - return code
+
 //
 // !DESCRIPTION:
-//      restore {\tt Calendar} state for persistence/checkpointing.
+//      Restore information about a {\tt Calendar}. 
+//      For persistence/checkpointing.
 //
 //EOP
-// !REQUIREMENTS:
+// !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    int rc = ESMF_SUCCESS;
+    // TODO:  read calendar state from iospec/name, then allocate/restore
+    //        (share code with ESMC_CalendarCreate()).
 
-    // TODO:  read calendar state from iospec/name, then restore
-    //        (share code with ESMC_CalendarSet()).
-
-    return(rc);
+    return(ESMC_NULL_POINTER);
 
 }  // end ESMC_CalendarReadRestart
 
@@ -801,6 +905,9 @@
 //EOP
 // !REQUIREMENTS: 
 
+    name[0] = '\0';
+    id = ++count;  // TODO: inherit from ESMC_Base class
+
     type           = ESMC_CAL_NOCALENDAR;
     monthsPerYear  = 0;
     // TODO: daysPerMonth   = ESMC_NULL_POINTER;
@@ -832,6 +939,7 @@
 //EOP
 // !REQUIREMENTS: 
 
+    ESMC_Calendar();  // invoke default constructor
     ESMC_CalendarSet(type);
 
 }   // end ESMC_Calendar
@@ -861,6 +969,7 @@
 //EOP
 // !REQUIREMENTS: 
 
+    ESMC_Calendar();  // invoke default constructor
     ESMC_CalendarSetCustom(monthsPerYear, daysPerMonth, secondsPerDay, 
                            daysPerYear, daysPerYeardN, daysPerYeardD);
 }  // end ESMC_Calendar
