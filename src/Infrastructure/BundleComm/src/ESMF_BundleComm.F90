@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.28 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.29 2004/06/08 22:37:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.28 2004/06/08 09:27:15 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.29 2004/06/08 22:37:18 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1053,7 +1053,7 @@
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
       call ESMF_FieldDataMapGet(btypep%flist(1)%ftypep%mapping, &
-                           dataIndices=dimorder, rc=status)
+                           dataIndexList=dimorder, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.12 2004/06/08 18:32:42 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.13 2004/06/08 22:37:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.12 2004/06/08 18:32:42 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.13 2004/06/08 22:37:18 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -322,13 +322,13 @@ end function
 ! !IROUTINE: ESMF_ArrayDataMapGet - Get values from an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapGet(datamap, dataRank, dataIndices, &
+      subroutine ESMF_ArrayDataMapGet(datamap, dataRank, dataIndexList, &
                                       counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArrayDataMap), intent(in) :: datamap  
       integer, intent(out), optional :: dataRank    
-      integer, dimension(:), intent(out), optional :: dataIndices
+      integer, dimension(:), intent(out), optional :: dataIndexList
       integer, dimension(:), intent(out), optional :: counts 
       integer, intent(out), optional :: rc       
 !
@@ -341,7 +341,7 @@ end function
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [{[datarank]}]
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
-!     \item [{[dataIndices]}] 
+!     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
 !           the mapping between rank numbers in the {\tt ESMF\_Grid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
@@ -375,16 +375,16 @@ end function
 
         if (present(dataRank)) dataRank = datamap%dataRank
 
-        if (present(dataIndices)) then
-           dimlength = size(dataIndices,1)
+        if (present(dataIndexList)) then
+           dimlength = size(dataIndexList,1)
            if (dimlength .lt. datamap%dataRank) then
               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "dataIndices array too short for dataRank", &
+                                "dataIndexList array too short for dataRank", &
                                  ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
-             dataIndices(i) = datamap%dataDimOrder(i)
+             dataIndexList(i) = datamap%dataDimOrder(i)
            enddo
         endif
 
@@ -468,12 +468,12 @@ end function
 ! !IROUTINE: ESMF_ArrayDataMapSet - Set values in an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapSet(datamap, dataRank, dataIndices, counts, rc)
+      subroutine ESMF_ArrayDataMapSet(datamap, dataRank, dataIndexList, counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArrayDataMap), intent(inout) :: datamap  
       integer, intent(in), optional :: dataRank    
-      integer, dimension(:), intent(in), optional :: dataIndices
+      integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts 
       integer, intent(out), optional :: rc       
 !
@@ -486,7 +486,7 @@ end function
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [{[datarank]}]
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
-!     \item [{[dataIndices]}] 
+!     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
 !           the mapping between rank numbers in the {\tt ESMF\_Grid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
@@ -525,16 +525,16 @@ end function
 
         if (present(dataRank)) datamap%dataRank = dataRank
 
-        if (present(dataIndices)) then
-           dimlength = size(dataIndices,1)
+        if (present(dataIndexList)) then
+           dimlength = size(dataIndexList,1)
            if (dimlength .lt. datamap%dataRank) then
               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
-                                "dataIndices array too short for dataRank", &
+                                "dataIndexList array too short for dataRank", &
                                  ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
-             datamap%dataDimOrder(i) = dataIndices(i)
+             datamap%dataDimOrder(i) = dataIndexList(i)
            enddo
         endif
 
@@ -558,12 +558,12 @@ end function
 !BOP
 ! !INTERFACE:
       subroutine ESMF_ArrayDataMapSetDefExplicit(datamap, dataRank, &
-                                                 dataIndices, counts, rc)
+                                                 dataIndexList, counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArrayDataMap) :: datamap
       integer, intent(in) :: dataRank
-      integer, dimension(:), intent(in), optional :: dataIndices
+      integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts
       integer, intent(out), optional :: rc  
 !
@@ -577,7 +577,7 @@ end function
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [datarank]
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
-!     \item [{[dataIndices]}] 
+!     \item [{[dataIndexList]}] 
 !           An integer array, {\tt datarank} long, which specifies
 !           the mapping between rank numbers in the {\tt ESMF\_Grid}
 !           and the {\tt ESMF\_Array}.  If there is no correspondance
@@ -622,7 +622,7 @@ end function
 
         ! now overwrite with what the user passed in
         datamap%dataRank = dataRank
-        datamap%dataDimOrder(1:size(dataIndices)) = dataIndices
+        datamap%dataDimOrder(1:size(dataIndexList)) = dataIndexList
 
         ! counts for dimensions not aligned with the grid
         datamap%dataNonGridCounts(:) = 1

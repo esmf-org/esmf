@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapEx.F90,v 1.2 2004/06/08 13:15:00 nscollins Exp $
+! $Id: ESMF_FieldDataMapEx.F90,v 1.3 2004/06/08 22:37:19 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
       type(ESMF_FieldDataMap) :: fieldDM
       type(ESMF_IndexOrder) :: indexOrder
       type(ESMF_RelLoc) :: relativeLocation
-      integer :: dataRank, dataIndices(ESMF_MAXDIM), counts(ESMF_MAXDIM)
+      integer :: dataRank, dataIndexList(ESMF_MAXDIM), counts(ESMF_MAXDIM)
 
 
 
@@ -130,11 +130,11 @@
 !EOP
 
 !BOC
-      call ESMF_FieldDataMapGet(fieldDM, dataRank, dataIndices, &
+      call ESMF_FieldDataMapGet(fieldDM, dataRank, dataIndexList, &
                                 horzRelloc=relativeLocation, rc=rc)
       print *, "Returned values from Field DataMap:"
       print *, "data rank: ", dataRank
-      print *, "mapping of grid to data indices: ", dataIndices
+      print *, "mapping of grid to data indices: ", dataIndexList
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE

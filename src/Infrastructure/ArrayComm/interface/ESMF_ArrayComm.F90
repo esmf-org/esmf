@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.48 2004/06/08 09:27:14 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.49 2004/06/08 22:37:17 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.48 2004/06/08 09:27:14 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.49 2004/06/08 22:37:17 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -316,7 +316,7 @@
 
     ! Query the datamap and set info for grid so it knows how to match up the
     ! array indices and the grid indices.
-    call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
+    call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
                               horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                               rc=status)
     if (ESMF_LogMsgFoundError(status, &
@@ -429,7 +429,7 @@
 
       ! allocate dimOrder array and get from datamap
       allocate(dimOrder(datarank), stat=status)
-      call ESMF_FieldDataMapGet(datamap, dataIndices=dimOrder, &
+      call ESMF_FieldDataMapGet(datamap, dataIndexList=dimOrder, &
                            horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
                            rc=status)
 
@@ -759,7 +759,7 @@
       ! match up the array indicies and the grid indicies.
       call ESMF_FieldDataMapGet(datamap, horzRelLoc=horzRelLoc, &
                            vertRelLoc=vertRelLoc, &
-                           dataIndices=dimorder, rc=status)
+                           dataIndexList=dimorder, rc=status)
        if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1122,13 +1122,13 @@
       ! match up the array indicies and the grid indicies.
       call ESMF_FieldDataMapGet(dstDataMap, horzRelLoc=dstHorzRelLoc, &
                            vertRelLoc=dstVertRelLoc, &
-                           dataIndices=dstDimOrder, rc=status)
+                           dataIndexList=dstDimOrder, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
       call ESMF_FieldDataMapGet(srcDataMap, horzRelLoc=srcHorzRelLoc, &
                            vertRelLoc=srcVertRelLoc, &
-                           dataIndices=srcDimOrder, rc=status)
+                           dataIndexList=srcDimOrder, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return

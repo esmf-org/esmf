@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap_C.F90,v 1.4 2004/06/08 09:27:14 nscollins Exp $
+! $Id: ESMF_ArrayDataMap_C.F90,v 1.5 2004/06/08 22:37:18 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !   character(*), parameter, private :: version = &
-!     '$Id: ESMF_ArrayDataMap_C.F90,v 1.4 2004/06/08 09:27:14 nscollins Exp $'
+!     '$Id: ESMF_ArrayDataMap_C.F90,v 1.5 2004/06/08 22:37:18 cdeluca Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -40,19 +40,19 @@
 !! for shallow classes, use init instead of create and destroy
 !
 !------------------------------------------------------------------------------
-    subroutine f_esmf_arraydatamapsetdefault(admp, dataRank, dataIndices, counts, rc)
+    subroutine f_esmf_arraydatamapsetdefault(admp, dataRank, dataIndexList, counts, rc)
       use ESMF_BaseTypesMod    ! ESMF base class
       use ESMF_BaseMod       ! ESMF_Base class
       use ESMF_ArrayDataMapMod
 
       type(ESMF_ArrayDataMap) :: admp
       integer, intent(in) :: dataRank 
-      integer, dimension(:), intent(in) :: dataIndices
+      integer, dimension(:), intent(in) :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts
       integer, optional, intent(out) :: rc
      
 
-      call ESMF_ArrayDataMapSetDefault(admp, dataRank, dataIndices, counts, rc)
+      call ESMF_ArrayDataMapSetDefault(admp, dataRank, dataIndexList, counts, rc)
     
     end subroutine f_esmf_arraydatamapsetdefault
   

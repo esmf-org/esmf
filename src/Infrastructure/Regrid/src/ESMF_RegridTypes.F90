@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.52 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.53 2004/06/08 22:37:19 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.52 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.53 2004/06/08 22:37:19 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -530,7 +530,7 @@
         else
           call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=localrc)
         endif
-        call ESMF_FieldDataMapGet(srcDataMap, dataIndices=dimOrder, rc=localrc)
+        call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=dimOrder, rc=localrc)
         do i = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
             myAI(j) = sendDomainList%domains(i)%ai(j)
