@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.96 2003/09/09 20:28:22 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.97 2003/09/12 20:07:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -219,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.96 2003/09/09 20:28:22 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.97 2003/09/12 20:07:17 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1285,7 +1285,8 @@
       call ESMF_DELayoutGetSize(layout, numDE1, numDE2, status)
       allocate(countsPerAxis(numDE1*numDE2, ESMF_MAXGRIDDIM), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, countsperaxis(DE1*DE2,maxgrid) =", &
+                              numDE1, numDE2, ESMF_MAXGRIDDIM
          return
       endif
       call ESMF_DistGridGetAllCounts(grid%distgrid%ptr, countsPerAxis, status)
@@ -1977,12 +1978,12 @@
       ! allocate and load local deltas
       allocate(delta1_local(counts(1)), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, counts(1) =", counts(1)
          return
       endif
       allocate(delta2_local(counts(2)), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, counts(2) =", counts(2)
          return
       endif
       local_min(1) = global_min(1)
@@ -2093,6 +2094,7 @@
       if (alloccount .eq. 0) then
         allocate(gridp%physgrids(CHUNK), stat=allocrc)
         if(allocrc .ne. 0) then
+          print *, "cannot allocate physgrids, first try"
           print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
           rc = ESMF_FAILURE
           return
@@ -2113,6 +2115,7 @@
      ! make larger temp space
      allocate(temp_pgrids(alloccount), stat=allocrc)
      if(allocrc .ne. 0) then
+       print *, "cannot allocate temp_pgrids, alloc=", alloccount
        print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
        return
      endif
@@ -4046,7 +4049,7 @@
 !                     8. (Xmin,Ymax,Zmax)
       allocate(boxes(numDEs,npts,rank), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, boxes(nDE,npt,rank) = ", numDEs,npts,rank
          return
       endif
       
@@ -4168,7 +4171,7 @@
 !                     8. (Xmin,Ymax,Zmax)
       allocate(boxes(numDEs,npts,rank), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, boxes(nDE,npt,rank) = ", numDEs,npts,rank
          return
       endif
 
@@ -4488,12 +4491,12 @@
       ! allocate arrays now
       allocate(grid_ai(nDEs,rank), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, grid_ai(nDE,rank) =", nDEs, rank
          return
       endif
       allocate(boxes(nDEs,2**rank,rank), stat=status)
       if (status .ne. 0) then
-         print *, "allocation error"
+         print *, "allocation error, boxes(nDE,2^rank,rank) =", nDEs,2**rank,rank
          return
       endif
 
