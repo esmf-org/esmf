@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.27 2005/02/11 22:49:09 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.28 2005/02/25 05:31:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -198,7 +198,6 @@
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
       type(ESMF_LogType) :: defaultLogTypeUse
-      type(ESMF_VM) :: testVM
 
       ! Initialize return code
       rcpresent = .FALSE.

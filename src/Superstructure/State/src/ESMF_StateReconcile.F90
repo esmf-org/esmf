@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.20 2005/01/25 23:34:14 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.21 2005/02/25 05:31:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.20 2005/01/25 23:34:14 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.21 2005/02/25 05:31:26 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -253,7 +253,6 @@
     type(ESMF_StateItemInfo), pointer :: si
     type(ESMF_State) :: wrapper
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
-    type(ESMF_VMId) :: temp_vmid
     integer :: offset, mypet
 
     ! get total num pets.  this is not needed by the code, just the debug
