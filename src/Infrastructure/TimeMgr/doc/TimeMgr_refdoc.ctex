@@ -110,7 +110,7 @@
 \input{../Infrastructure/TimeMgr/doc/TimeInterval_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{TimeInterval_usage}
 \input{TimeInterval_fex}
@@ -119,19 +119,12 @@
 \input{../Infrastructure/TimeMgr/doc/TimeInterval_fex}
 #endif
 
-%\subsection{Restrictions}
-%#ifdef STANDALONE
-%\input{TimeInterval_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
-%#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%%\input{TimeInterval_fparam}
-%#elif defined(CONSTITUENT)
-%%\input{../Infrastructure/TimeMgr/doc/TimeInterval_fparam}
-%#endif
+\subsection{Restrictions}
+#ifdef STANDALONE
+\input{TimeInterval_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
@@ -153,40 +146,21 @@
 \input{../Infrastructure/TimeMgr/doc/Time_desc}
 #endif
 
-\subsection{Usage}
-#ifdef STANDALONE
-\input{Time_usage}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_usage}
-#endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{Time_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Time_def}
-%#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{Time_rest}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Time_rest}
-#endif
-
 \subsection{Use and Examples}
 #ifdef STANDALONE
+\input{Time_usage}
 \input{Time_fex}
 #elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Time_usage}
 \input{../Infrastructure/TimeMgr/doc/Time_fex}
 #endif
 
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Time_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Time_fparam}
-%#endif
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{Time_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Time_rest}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
@@ -208,39 +182,20 @@
 \input{../Infrastructure/TimeMgr/doc/Calendar_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Calendar_usage}
+\input{Calendar_fex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Calendar_usage}
+\input{../Infrastructure/TimeMgr/doc/Calendar_fex}
 #endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{Calendar_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Calendar_def}
-%#endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %\input{Calendar_rest}
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
-%#endif
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{Calendar_fex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_fex}
-#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Calendar_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Calendar_fparam}
 %#endif
 
 \subsection{Class API}
@@ -264,19 +219,14 @@
 \input{../Infrastructure/TimeMgr/doc/Clock_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Clock_usage}
+\input{Clock_fex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Clock_usage}
+\input{../Infrastructure/TimeMgr/doc/Clock_fex}
 #endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{Clock_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Clock_def}
-%#endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
@@ -284,21 +234,6 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Clock_rest}
 #endif
-
-\subsection{Use and Examples}
-\label{sec:ClockEx}
-#ifdef STANDALONE
-\input{Clock_fex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_fex}
-#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Clock_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Clock_fparam}
-%#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
@@ -321,39 +256,20 @@
 \input{../Infrastructure/TimeMgr/doc/Alarm_desc}
 #endif
 
-\subsection{Usage}
+\subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Alarm_usage}
+\input{Alarm_fex}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Alarm_usage}
+\input{../Infrastructure/TimeMgr/doc/Alarm_fex}
 #endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{Alarm_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Alarm_def}
-%#endif
 
 %\subsubsection{Restrictions}
 %#ifdef STANDALONE
 %%\input{Alarm_rest}
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/Alarm_rest}
-%#endif
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{Alarm_fex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Alarm_fex}
-#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{Alarm_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Alarm_fparam}
 %#endif
 
 \subsection{Class API}

@@ -1,8 +1,12 @@
-% $Id: Clock_rest.tex,v 1.2 2003/02/11 18:58:55 eschwab Exp $
+% $Id: Clock_rest.tex,v 1.3 2003/08/12 18:17:33 cdeluca Exp $
 
-The maximum number of alarms that can be associated with a clock is hard-coded
+\begin{enumerate}
+
+\item {\bf Limit on number of Alarms.}  The maximum number of alarms that 
+can be associated with a clock is hard-coded
 at 20.  This is done in both F90 and  C++ with a \#define for ease of
-modification.  See the F90 and C++ "Parameters and Definitions" sections below.
-If needed, this can be changed in a future release to a dynamic value passed
-in during runtime initialization.  But the requirement for no dynamic memory
-allocation would have to be relaxed.
+modification.  If needed, this can be changed in a future release to a 
+dynamic value passed in during runtime initialization.  But the requirement 
+for no dynamic memory allocation would have to be relaxed.
+
+\end{enumerate}

@@ -1,9 +1,9 @@
-% $Id: TimeMgr_implnotes.tex,v 1.2 2003/08/12 14:02:07 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.3 2003/08/12 18:17:33 cdeluca Exp $
 
 \subsection{Implementation Notes}
 \begin{enumerate}
 
-\item {\bf Base TimeIntervals and Times on the same internal representation.} 
+\item {\bf Base TimeIntervals and Times on the same integer representation.} 
 It is useful to allow both TimeIntervals and Times to 
 inherit from a single class, BaseTime.  In C++, this can be
 implemented by using inheritance.  In F90, it can be implemented
@@ -51,14 +51,12 @@ between any two {\tt TimeIntervals} or {\tt Times}.  These methods capture
 the common comparison logic between {\tt TimeIntervals} and {\tt Times} and
 hence are defined here for sharing.
 
-\item {\bf Time and TimeInterval dependence on the calendar.} The TimeInterval 
+\item {\bf Time and TimeInterval depend on a calendar.} The TimeInterval 
 and Time classes contain an internal Calendar class.  
 Upon demand by a user, the results of an increment or decrement operation are 
 converted to user units, which may be calendar-dependent, via methods 
 obtained from their internal {\tt Calendar}.
 
-For ease in calendar conversions, a time value of zero (both whole and
-numerator) can correspond to the Julian date of zero. 
 \end{enumerate}
 
 
