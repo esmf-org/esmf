@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.1 2003/05/07 06:58:53 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.2 2003/07/09 17:53:18 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -288,6 +288,7 @@
         print *, "Coupler Final starting"
   
         ! Nothing to do here.
+        rc = ESMF_SUCCESS
     
         print *, "Coupler Final returning"
    
