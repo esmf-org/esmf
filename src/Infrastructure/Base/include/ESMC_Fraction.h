@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.h,v 1.5 2004/11/19 00:27:11 eschwab Exp $
+// $Id: ESMC_Fraction.h,v 1.6 2004/11/24 22:38:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,10 @@
 // !CLASS: ESMC_Fraction - represent and manipulate rational fractions
 //
 // !DESCRIPTION:
-//      ESMF C++ {\tt ESMC_Fraction} class
+//      ESMF C++ {\tt ESMC_Fraction} class.  While this class was developed
+//      to support fractional seconds functionality in the ESMF Time Manager,
+//      it is time-knowledge independent; it simply performs generic fractional
+//      arithmetic, manipulations and comparisons. 
 //
 //-------------------------------------------------------------------------
 //
