@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.8 2003/07/07 20:09:28 eschwab Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.9 2003/07/28 21:47:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.8 2003/07/07 20:09:28 eschwab Exp $'
+      '$Id: ESMF_CalendarEx.F90,v 1.9 2003/07/28 21:47:20 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -67,38 +67,38 @@
       !
       ! Gregorian Calendar examples
       !
-      call ESMF_TimeSet(timeZero, S=0, Sn=0, Sd=1, &
-                        cal=gregorianCalendar, rc=rc)
-      call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeSet(timeZero, s_i4=0, sN=0, sD=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(timeZero, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Time Zero Gregorian = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       YR = -4713
-      call ESMF_TimeSet(timeZero, YR=YR, MM=11, DD=24, rc=rc)
+      call ESMF_TimeSet(timeZero, yr_i4=YR, mm_i4=11, dd_i4=24, rc=rc)
       print *, "Time Zero Gregorian -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 
       YR = 2003
-      call ESMF_TimeSet(checkTime, YR=YR, MM=4, DD=17, &
-                        cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(checkTime, yr_i4=YR, mm_i4=4, dd_i4=17, &
+                        calendar=gregorianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeGet(checkTime, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time1 Gregorian = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       ! oldest date for which Fliegel algorithm works
       YR = -4800
-      call ESMF_TimeSet(checkTime, YR=YR, MM=3, DD=1, rc=rc)
+      call ESMF_TimeSet(checkTime, yr_i4=YR, mm_i4=3, dd_i4=1, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeGet(checkTime, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time2 Gregorian = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       ! Fliegel algorithm breaks at 2/29/-4800
       YR = -4800 
-      call ESMF_TimeSet(checkTime, YR=YR, MM=2, DD=29, rc=rc)
+      call ESMF_TimeSet(checkTime, yr_i4=YR, mm_i4=2, dd_i4=29, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeGet(checkTime, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time3 Gregorian = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
@@ -107,10 +107,10 @@
       Dl = 1067519911  ! break up initialization,
       Dl = Dl * 100000  !   since F90 constants
       Dl = Dl + 67300   !     are 32-bit
-      call ESMF_TimeSet(checkTime, Dl=Dl, cal=julianCalendar, rc=rc)
+      call ESMF_TimeSet(checkTime, d_i8=Dl, calendar=julianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
       call ESMF_TimeSetCalendar(checkTime, gregorianCalendar, rc)
-      call ESMF_TimeGet(checkTime, YRl=YRl, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i8=YRl, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time4 Gregorian = ", &
                YRl, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
@@ -118,10 +118,10 @@
       Dl = 1067519911  ! break up initialization,
       Dl = Dl * 100000  !   since F90 constants
       Dl = Dl + 67301   !     are 32-bit
-      call ESMF_TimeSet(checkTime, Dl=Dl, cal=julianCalendar, rc=rc)
+      call ESMF_TimeSet(checkTime, d_i8=Dl, calendar=julianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
       call ESMF_TimeSetCalendar(checkTime, gregorianCalendar, rc)
-      call ESMF_TimeGet(checkTime, YRl=YRl, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i8=YRl, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time5 Gregorian = ", &
                YRl, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
@@ -129,21 +129,21 @@
       ! No Leap Calendar examples
       !
       call ESMF_CalendarSet(noLeapCalendar, ESMF_CAL_NOLEAP, rc)
-      call ESMF_TimeSet(timeZero, S=0, Sn=0, Sd=1, &
-                        cal=noLeapCalendar, rc=rc)
-      call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeSet(timeZero, s_i4=0, sN=0, sD=1, &
+                        calendar=noLeapCalendar, rc=rc)
+      call ESMF_TimeGet(timeZero, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Time Zero No Leap = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       YR = -4713
-      call ESMF_TimeSet(timeZero, YR=YR, MM=11, DD=24, rc=rc)
+      call ESMF_TimeSet(timeZero, yr_i4=YR, mm_i4=11, dd_i4=24, rc=rc)
       print *, "Time Zero No Leap -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 
       YR = 2004
-      call ESMF_TimeSet(checkTime, YR=YR, MM=5, DD=18, rc=rc)
+      call ESMF_TimeSet(checkTime, yr_i4=YR, mm_i4=5, dd_i4=18, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeGet(checkTime, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time1 No Leap = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
@@ -151,21 +151,21 @@
       ! 360 Day Calendar examples
       !
       call ESMF_CalendarSet(day360Calendar, ESMF_CAL_360DAY, rc)
-      call ESMF_TimeSet(timeZero, S=0, Sn=0, Sd=1, &
-                        cal=day360Calendar, rc=rc)
-      call ESMF_TimeGet(timeZero, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeSet(timeZero, s_i4=0, sN=0, sD=1, &
+                        calendar=day360Calendar, rc=rc)
+      call ESMF_TimeGet(timeZero, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Time Zero 360 Day = ", &
                 YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       YR = -4713
-      call ESMF_TimeSet(timeZero, YR=YR, MM=11, DD=24, rc=rc)
+      call ESMF_TimeSet(timeZero, yr_i4=YR, mm_i4=11, dd_i4=24, rc=rc)
       print *, "Time Zero 360 Day -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 
       YR = 2005
-      call ESMF_TimeSet(checkTime, YR=YR, MM=6, DD=19, rc=rc)
+      call ESMF_TimeSet(checkTime, yr_i4=YR, mm_i4=6, dd_i4=19, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
-      call ESMF_TimeGet(checkTime, YR=YR, MM=MM, DD=DD, H=H, M=M, S=S, rc=rc)
+      call ESMF_TimeGet(checkTime, yr_i4=YR, mm_i4=MM, dd_i4=DD, h_i4=H, m_i4=M, s_i4=S, rc=rc)
       print *, "Check Time1 360 Day = ", &
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
