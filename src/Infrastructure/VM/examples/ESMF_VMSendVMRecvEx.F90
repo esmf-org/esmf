@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvEx.F90,v 1.1 2004/06/17 18:36:20 theurich Exp $
+! $Id: ESMF_VMSendVMRecvEx.F90,v 1.2 2004/06/17 19:02:39 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,14 +46,15 @@ program ESMF_VMSendVMRecvEx
   call ESMF_Initialize(vm=vm, rc=rc)
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+  call ESMF_VMGet(vm, localPet, petCount, rc=rc)
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
   count = 10
   allocate(localData(count))
   do i=1, count
-    localData(i) = i
+    localData(i) = localPet*100 + i
   enddo 
  
-  call ESMF_VMGet(vm, localPet, petCount, rc=rc)
-  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
   src = 0
   dst = petCount - 1
 !BOC
@@ -66,6 +67,10 @@ program ESMF_VMSendVMRecvEx
     call ESMF_VMRecv(vm, recvData=localData, count=count, src=src, rc=rc)
 !EOC
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+  do i=1, count
+    print *, 'localData for PET ',localPet,': ', localData(i)
+  enddo 
 
   call ESMF_Finalize(rc)
   if (finalrc==ESMF_SUCCESS) then
