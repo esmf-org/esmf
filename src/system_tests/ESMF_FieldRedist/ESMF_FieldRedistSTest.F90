@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.2 2004/03/04 23:56:43 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.3 2004/03/06 00:04:15 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -146,15 +146,9 @@
     field2 = ESMF_FieldCreate(grid2, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                               haloWidth=2, name="field2", rc=rc)
 
-    ! create the routehandles
-    rh12 = ESMF_RouteHandleCreate(status)
-    rh23 = ESMF_RouteHandleCreate(status)
-
     ! precompute redist patterns
-    call ESMF_FieldRedistStore(field1, field2, layout1, rh12, total=.false., &
-                               rc=status)
-    call ESMF_FieldRedistStore(field2, field3, layout1, rh23, total=.false., &
-                               rc=status)
+    call ESMF_FieldRedistStore(field1, field2, layout1, rh12, rc=status)
+    call ESMF_FieldRedistStore(field2, field3, layout1, rh23, rc=status)
 
     ! Get pointers to the data and set it up
     call ESMF_FieldGetData(field1, array1, rc)
