@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.24 2004/08/19 16:52:21 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.25 2004/10/26 19:25:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.24 2004/08/19 16:52:21 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.25 2004/10/26 19:25:03 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -280,17 +280,17 @@
         call ESMF_ArrayDataMapPrint(fielddatamap%adm, options, rc)
 
         call ESMF_RelLocString(fielddatamap%horzRelloc, str, rc)
-      !jw  write (msgbuf, *)  "  Horizontal Relative location = ", trim(str)
+      !jw  write (msgbuf, *)  "Horizontal Relative location = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-        write (*, *)  "  Horizontal Relative location = ", trim(str)
+        write (*, *)  "Horizontal Relative location = ", trim(str)
         call ESMF_RelLocString(fielddatamap%vertRelloc, str, rc)
-      !jw  write (msgbuf, *)  "  Vertical Relative location = ", trim(str)
+      !jw  write (msgbuf, *)  "Vertical Relative location = ", trim(str)
       !jw  call ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)
-        write (*, *)  "  Vertical Relative location = ", trim(str)
+        write (*, *)  "Vertical Relative location = ", trim(str)
         call ESMF_InterleaveTypeString(fielddatamap%interleave, str, rc)
-        write (*, *)  "  Interleave type = ", trim(str)
+        write (*, *)  "Interleave type = ", trim(str)
         ! TODO: need methods
-      !nsc write (msgbuf, *)  "  Interleave type = ", trim(str), &
+      !nsc write (msgbuf, *)  "Interleave type = ", trim(str), &
         !         ".  Interleave Start,end,stride = ",  &
         !         fielddatamap%interleave%il_start, & 
         !         fielddatamap%interleave%il_end, & 
