@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.26 2005/02/08 20:23:05 nscollins Exp $
+# $Id: build_rules.mk,v 1.23.2.1 2005/02/08 23:53:06 nscollins Exp $
 #
 # Linux.intel.default.mk
 #

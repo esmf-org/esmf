@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.8 2005/02/07 22:31:23 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.4.2.1 2005/02/08 23:53:06 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
