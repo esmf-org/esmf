@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.51 2003/08/04 23:13:57 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.52 2003/08/05 14:17:09 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.51 2003/08/04 23:13:57 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.52 2003/08/05 14:17:09 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -921,14 +921,13 @@ static int maxroutes = 10;
       intersect_XP = new ESMC_XPacket;
       for (j=0; j<my_XPcount; j++) {
         for (i=0; i<their_XPcount; i++) {
+
+          // reuse the same XP for the entire loop.
           intersect_XP->ESMC_XPacketIntersect(&my_XP[j], &their_XP[i]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-            delete intersect_XP;
-            intersect_XP = NULL;
+          if (intersect_XP->ESMC_XPacketEmpty()) 
             continue;
-          }
 
           // translate from global to local data space
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot, 
@@ -983,11 +982,9 @@ static int maxroutes = 10;
           intersect_XP->ESMC_XPacketIntersect(&my_XP[j], &their_XP[i]);
 
           // if there's no intersection, no need to add an entry here
-          if (intersect_XP->ESMC_XPacketEmpty()) {
-            delete intersect_XP;
-            intersect_XP = NULL;
+          if (intersect_XP->ESMC_XPacketEmpty()) 
             continue;
-          }
+          
 
           // translate from global to local
           intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI_tot,
