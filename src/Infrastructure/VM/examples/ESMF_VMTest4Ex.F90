@@ -49,7 +49,7 @@ program vm_test4
     print *, localPet,' array1: ', array1(i)
   enddo
 
-  ! do some VM communication (does not require layout)
+  ! Scatter/Gather
   call ESMF_VMScatter(vm, array1, array2, nsize, scatterRoot, rc=rc)
   call ESMF_VMGather(vm, array2, array1, nsize, gatherRoot, rc=rc)
   
