@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.2 2003/10/14 20:32:05 nscollins Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.3 2003/10/14 20:49:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -164,7 +164,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.2 2003/10/14 20:32:05 nscollins Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.3 2003/10/14 20:49:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -945,7 +945,7 @@
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
-      real (ESMF_KIND_R8) ::i minlon, maxlon, pi   
+      real (ESMF_KIND_R8) :: i, minlon, maxlon, pi   
                                 ! for treating double-value issue in longitude
 
 !     Initialize return code
