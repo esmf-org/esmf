@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.14 2003/04/02 15:52:35 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.15 2003/04/02 20:33:17 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.14 2003/04/02 15:52:35 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.15 2003/04/02 20:33:17 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1587,15 +1587,22 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   // If we're both sending and receiving from our own process,
   // then do a straight memory copy and don't call message passing.
-  if (rde_index == sde_index) {
-     if (snum != rnum) { 
-        printf("sending bytes != receiving bytes in DELayoutSendRecv\n");
-        return ESMF_FAILURE;
-     }
-     memcpy(rbuf, sbuf, snum*sizeof(float));
-     rc = ESMF_SUCCESS;
+  
+  // TODO: this is not the right test - we need to test our current
+  // address space against the address spaces of both the send and 
+  // receive index numbers, not the indicies against each other.
+  // so this is commented out for now, but it can be a bit performance
+  // win if the source and destination are local, so it should be
+  // revisited again.
+  //if (rde_index == sde_index) {
+  //   if (snum != rnum) { 
+  //      printf("sending bytes != receiving bytes in DELayoutSendRecv\n");
+  //      return ESMF_FAILURE;
+  //   }
+  //   memcpy(rbuf, sbuf, snum*sizeof(float));
+  //   rc = ESMF_SUCCESS;
     
-  } else {
+  //} else {
       if (MPI_Sendrecv(sbuf, snum, mpidatatype, rde_index, ESMF_MPI_TAG, 
 		       rbuf, rnum, mpidatatype, sde_index, MPI_ANY_TAG, 
 		       decomm.mpicomm, &status) == MPI_SUCCESS) {
@@ -1605,7 +1612,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         printf("Failure in MPI_Sendrecv \n");
         return ESMF_FAILURE;
       }
-  }
+  //}
 
   return(rc);
 
