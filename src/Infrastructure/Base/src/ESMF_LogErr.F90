@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.30 2004/09/13 19:41:27 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.31 2004/09/21 16:23:42 nscollins Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -583,7 +583,7 @@ end subroutine ESMF_LogGet
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
     ESMF_LogDefault%flushImmediately = ESMF_TRUE
-    ESMF_LogDefault%flushed = ESMF_FALSE
+    ESMF_LogDefault%flushed = ESMF_TRUE
     ESMF_LogDefault%fIndex = 1
     ESMF_LogDefault%maxElements = 1
     allocate(ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%maxElements),stat=status)
