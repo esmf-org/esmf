@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockEx.C,v 1.13 2004/02/05 21:30:16 eschwab Exp $
+// $Id: ESMC_ClockEx.C,v 1.14 2004/02/18 01:48:53 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockEx.C,v 1.13 2004/02/05 21:30:16 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_ClockEx.C,v 1.14 2004/02/18 01:48:53 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -123,13 +123,13 @@
        finalrc = ESMF_FAILURE;
    }
 
-   rc = ESMC_ClockDestroy(clock);
+   rc = ESMC_ClockDestroy(&clock);
 
    if (rc != ESMF_SUCCESS) {
        finalrc = ESMF_FAILURE;
    }
 
-   rc = ESMC_CalendarDestroy(gregorianCalendar);
+   rc = ESMC_CalendarDestroy(&gregorianCalendar);
 
    if (rc != ESMF_SUCCESS) {
        finalrc = ESMF_FAILURE;
