@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.38 2003/10/22 01:15:10 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.39 2003/10/22 15:20:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.38 2003/10/22 01:15:10 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.39 2003/10/22 15:20:34 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -850,7 +850,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
 !     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to ESMF_TimeIntervalProdIT.
+!     Commutative complement to {\tt ESMF\_TimeIntervalProdIT}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -886,7 +886,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
 !     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to ESMF_TimeIntervalProdTI.
+!     Commutative complement to {\tt ESMF\_TimeIntervalProdTI}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -922,7 +922,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
 !     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to ESMF_TimeIntervalProdFT.
+!     Commutative complement to {\tt ESMF\_TimeIntervalProdFT}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -958,7 +958,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
 !     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to ESMF_TimeIntervalProdTF.
+!     Commutative complement to {\tt ESMF\_TimeIntervalProdTF}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -994,7 +994,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a double precision 
 !     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to ESMF_TimeIntervalProdRT.
+!     Commutative complement to {\tt ESMF\_TimeIntervalProdRT}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1030,7 +1030,7 @@
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a double precision 
 !     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to ESMF_TimeIntervalProdTR.
+!     Commutative complement to {\tt ESMF\_TimeIntervalProdTR}.
 !
 !     The arguments are:
 !     \begin{description}

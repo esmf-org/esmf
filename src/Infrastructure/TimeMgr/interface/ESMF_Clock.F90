@@ -24,7 +24,7 @@
 ! !MODULE: ESMF_ClockMod
 !     
 ! !DESCRIPTION:
-! Part of Time Manager F90 API wrapper of C++ implemenation.
+! Part of Time Manager F90 API wrapper of C++ implementation.
 !
 ! Defines F90 wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Time} implementation.
@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.32 2003/10/22 01:06:28 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.33 2003/10/22 15:20:34 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -377,24 +377,24 @@
 !   
 ! !DESCRIPTION:
 !     Advances the {\tt clock}'s current time by one time step:  either the
-!     {\tt ESMF_Clock}'s, or the passed-in timeStep (see below).  This
+!     {\tt clock}'s, or the passed-in {\tt timeStep} (see below).  This
 !     method optionally returns a list and number of ringing {\tt ESMF\_Alarm}s.
-!     See also method ESMF_ClockGetRingingAlarms().
+!     See also method {\tt ESMF\_ClockGetRingingAlarms}.
 !  
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to advance.
 !     \item[{[timeStep]}]
-!          Optional:  Time step is performed with given timeStep, instead of
-!          the {\tt ESMF_Clock}'s.  Does not replace the {\tt ESMF_Clock}'s 
-!          timeStep; use ESMF_ClockSet(clock, timeStep, ...) for this purpose.
+!          Time step is performed with given timeStep, instead of
+!          the {\tt ESMF\_Clock}'s.  Does not replace the {\tt ESMF\_Clock}'s 
+!          timeStep; use {\tt ESMF\_ClockSet(clock, timeStep, ...)} for this purpose.
 !          Supports applications with variable time steps.
 !     \item[{[ringingAlarmList]}]
-!          Optional:  Returns the array of alarms that are ringing after the
+!          Returns the array of alarms that are ringing after the
 !          time step.
 !     \item[{[numRingingAlarms]}]
-!          Optional:  The number of alarms ringing after the time step.
+!          The number of alarms ringing after the time step.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -480,8 +480,8 @@
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
-!     Calculates what the next time of the {\tt ESMF\_Clock} will be, based on
-!     the clock's current timestep or an optionally passed-in timestep.
+!     Calculates what the next time of the {\tt clock} will be, based on
+!     the {\tt clock}'s current time step or an optionally passed-in {\tt timeStep}.
 !     
 !     The arguments are:
 !     \begin{description}
@@ -563,42 +563,42 @@
       integer,                        intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
-!     Gets a {\tt ESMF_Clock}'s list of alarms.
+!     Gets the {\tt clock}'s list of alarms.
 !  
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance from which to get an {\tt ESMF_Alarm} list.
+!          The object instance from which to get an {\tt ESMF\_Alarm} list.
 !     \item[alarmListType]
 !          The type of list to get:
-!            ESMF_ALARMLIST_ALL :
-!                Returns the {\tt ESMF_Clock}'s entire list of alarms.
+!            {\tt ESMF\_ALARMLIST\_ALL} :
+!                Returns the {\tt ESMF\_Clock}'s entire list of alarms.
 !
-!            ESMF_ALARMLIST_RINGING :
-!                Returns only those {\tt ESMF_Clock} alarms that are currently
-!                ringing.  See also method ESMF_ClockAdvance() for getting the
+!            {\tt ESMF\_ALARMLIST\_RINGING} :
+!                Returns only those {\tt clock} alarms that are currently
+!                ringing.  See also method {\tt ESMF\_ClockAdvance()} for getting the
 !                list of ringing alarms subsequent to a time step.  See also
-!                method ESMF_AlarmIsRinging() for checking a single alarm.
+!                method {\tt ESMF\_AlarmIsRinging()} for checking a single alarm.
 !
-!            ESMF_ALARMLIST_NEXTRINGING :
+!            {\tt ESMF\_ALARMLIST\_NEXTRINGING} :
 !                Return only those alarms that will ring upon the next
-!                {\tt ESMF_Clock} time step.  Can optionally specify argument
-!                timeStep (see below) to use instead of the {\tt ESMF_Clock}'s.
-!                See also method ESMF_AlarmWillRingNext() for checking a
+!                {\tt clock} time step.  Can optionally specify argument
+!                timeStep (see below) to use instead of the {\tt clock}'s.
+!                See also method {\tt ESMF\_AlarmWillRingNext()} for checking a
 !                single alarm.
 !
-!            ESMF_ALARMLIST_PREVRINGING :
+!            {\tt ESMF\_ALARMLIST\_PREVRINGING} :
 !                Return only those alarms that were ringing on the previous
-!                {\tt ESMF_Clock} time step.  See also method
-!                ESMF_AlarmWasPrevRinging() for checking a single alarm.
+!                {\tt ESMF\_Clock} time step.  See also method
+!                {\tt ESMF\_AlarmWasPrevRinging()} for checking a single alarm.
 !     \item[alarmList]
 !          The array of returned alarms. 
 !     \item[numAlarms]
-!          The number of {\tt ESMF_Alarm}s in the returned list.
+!          The number of {\tt ESMF\_Alarm}s in the returned list.
 !     \item[{[timeStep]}]
-!          Optional time step to be used instead of the {\tt ESMF_Clock}'s.
-!          Only used with ESMF_ALARMLIST_NEXTRINGING alarmListType (see above);
-!          ignored if specified with other alarmListTypes.
+!          Optional time step to be used instead of the {\tt clock}'s.
+!          Only used with {\tt ESMF\_ALARMLIST\_NEXTRINGING alarmListType} (see above);
+!          ignored if specified with other {\tt alarmListTypes}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.33 2003/10/22 01:03:48 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.34 2003/10/22 15:20:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -103,7 +103,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.33 2003/10/22 01:03:48 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.34 2003/10/22 15:20:34 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -139,7 +139,7 @@
 !BOP
 ! !IROUTINE: ESMF_AlarmCreate - Create an Alarm
 
-! !INTERFACE
+! !INTERFACE:
       function ESMF_AlarmCreate(name, clock, ringTime, ringInterval, &
                                 stopTime, ringDuration, &
                                 nRingDurationTimeSteps, &
@@ -429,7 +429,7 @@
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
 !     \item[{[ringingOnPrevTimeStep]}]
 !          Gets the ringing state upon the previous time step. Same as
-!          ESMF_AlarmWasPrevRinging().
+!          {\tt ESMF\_AlarmWasPrevRinging()}.
 !     \item[{[enabled]}]
 !          Gets the enabled state.
 !          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
@@ -640,13 +640,13 @@
 !     Check if {\tt ESMF\_Alarm} is ringing.
 !
 !     See also method
-!           ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_RINGING, ...)
-!     to get a list of all ringing alarms belonging to a {\tt ESMF_Clock}.
+!           {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_RINGING, ...)}
+!     to get a list of all ringing alarms belonging to an {\tt ESMF\_Clock}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          The object instance to check for ringing state.
+!          The alarm to check for ringing state.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -679,14 +679,14 @@
 !     the current clock timestep or a passed-in timestep.
 !
 !     See also method
-!           ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_NEXTRINGING, ...)
-!     to get a list of all alarms belonging to a {\tt ESMF_Clock} that will
+!           {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_NEXTRINGING, ...)}
+!     to get a list of all alarms belonging to a {\tt ESMF\_Clock} that will
 !     ring on the next time step.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          The object instance to check for next ringing state.
+!          The alarm to check for next ringing state.
 !     \item[{[timeStep]}]
 !          Optional timestep to use instead of the clock's.
 !     \item[{[rc]}]
@@ -719,8 +719,8 @@
 !     Check if {\tt ESMF\_Alarm} was ringing on the previous clock timestep.
 !
 !     See also method
-!           ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_PREVRINGING, ...)
-!     get a list of all alarms belonging to a {\tt ESMF_Clock} that were
+!           {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_PREVRINGING, ...)}
+!     get a list of all alarms belonging to a {\tt ESMF\_Clock} that were
 !     ringing on the previous time step.
 !
 !     The arguments are:
