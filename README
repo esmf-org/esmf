@@ -1,4 +1,4 @@
- $Id: README,v 1.13 2003/05/28 21:23:05 flanigan Exp $
+ $Id: README,v 1.14 2003/05/30 22:44:00 flanigan Exp $
 ================================================================================
                                    README
 
@@ -29,6 +29,16 @@ On an Alpha machine, test and demo applications are run using
 the bsub command.  The value of ESMF_PROJECT is used as the 
 argument for bsub's -P option. The -P option assigns a job to 
 a specific project.  
+
+Environment variables must be set in the user's shell and not inside
+an ESMF makefile or build system file.  Here is an example of setting
+an environment variable in tcsh and csh shells:
+
+	setenv ESMF_ARCH rs6000_sp
+
+In Ksh shell environment variables are set this way:
+
+	export ESMF_ARCH=rs6000_sp
 
 
 GNU make is required to build the library.  On most
