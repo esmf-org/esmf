@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.43 2004/02/06 22:47:21 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.44 2004/02/09 07:06:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.43 2004/02/06 22:47:21 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.44 2004/02/09 07:06:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -206,27 +206,24 @@
 
     // TODO: fractional, sub-seconds
 
+    // inititialize time value to pass to base time class get
+    ESMF_KIND_I8 baseTimeToDivide = this->s;
+
     // calendar interval
 
     if (yy != ESMC_NULL_POINTER) {
-      if (this->yy >= INT_MIN && this->yy <= INT_MAX) {
-        *yy = (ESMF_KIND_I4) this->yy;  // >= 32-bit
-      } else {
-        // too large to fit in given int
-        return(ESMF_FAILURE);
-      }
+      // ensure fit in given int
+      if (this->yy < INT_MIN || this->yy > INT_MAX) return(ESMF_FAILURE);
+      *yy = (ESMF_KIND_I4) this->yy;  // >= 32-bit
     }
     if (yy_i8 != ESMC_NULL_POINTER) {
       *yy_i8 = this->yy;  // >= 64-bit
     }
 
     if (mm != ESMC_NULL_POINTER) {
-      if (this->mm >= INT_MIN && this->mm <= INT_MAX) {
-        *mm = (ESMF_KIND_I4) this->mm;  // >= 32-bit
-      } else {
-        // too large to fit in given int
-        return(ESMF_FAILURE);
-      }
+      // ensure fit in given int
+      if (this->mm < INT_MIN || this->mm > INT_MAX) return(ESMF_FAILURE);
+      *mm = (ESMF_KIND_I4) this->mm;  // >= 32-bit
     }
     if (mm_i8 != ESMC_NULL_POINTER) {
       *mm_i8 = this->mm;   // >= 64-bit
@@ -234,12 +231,9 @@
 
       // TODO: use when Calendar Intervals implemented
 //    if (d != ESMC_NULL_POINTER) {
-//      if (this->d >= INT_MIN && this->d <= INT_MAX) {
-//        *d = (ESMF_KIND_I4) this->d;  // >= 32-bit
-//      } else {
-//        // too large to fit in given int
-//        return(ESMF_FAILURE);
-//      }
+//      // ensure fit in given int
+//      if (this->d < INT_MIN || this->d > INT_MAX) return(ESMF_FAILURE);
+//      *d = (ESMF_KIND_I4) this->d;  // >= 32-bit
 //    }
 //    if (d_i8 != ESMC_NULL_POINTER) {
 //      *d_i8 = this->d;  // >= 64-bit
@@ -254,12 +248,9 @@
 
     if (d != ESMC_NULL_POINTER) {
       ESMF_KIND_I8 days = this->s / secPerDay;
-      if (days >= INT_MIN && days <= INT_MAX) {
-        *d = days;
-      } else {
-        // too large to fit in given int
-        return(ESMF_FAILURE);
-      }
+      // ensure fit in given int
+      if (days < INT_MIN || days > INT_MAX) return(ESMF_FAILURE);
+      *d = days;
     }
     if (d_i8 != ESMC_NULL_POINTER) {
       *d_i8 = this->s / secPerDay;
@@ -268,10 +259,16 @@
       *d_r8 = (ESMF_KIND_R8) this->s / (ESMF_KIND_R8) secPerDay;
     }
 
-    // use base class to get sub-day values
-    if (ESMC_BaseTimeGet(secPerDay, h, m, s, s_i8, ms, us, ns,
-                           h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD) ==
-        ESMF_FAILURE) return(ESMF_FAILURE);
+    // if any type of day was requested, remove days from baseTimeToDivide
+    if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER ||
+        d_r8 != ESMC_NULL_POINTER) {
+      baseTimeToDivide %= secPerDay;
+    }
+
+    // use base class to get sub-day values on remaining unconverted base time
+    if (ESMC_BaseTimeGet(baseTimeToDivide, h, m, s, s_i8, ms, us, ns,
+                         h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD) ==
+                         ESMF_FAILURE) return(ESMF_FAILURE);
 
     if (timeString != ESMC_NULL_POINTER) {
       if (ESMC_TimeIntervalGetString(timeString) == ESMF_FAILURE)
@@ -1227,22 +1224,22 @@
     // validate input
     if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
 
-    ESMF_KIND_I8 d_i8, s_i8;
-    ESMF_KIND_I4 h, m;
+    ESMF_KIND_I8 d_i8;
+    ESMF_KIND_I4 h, m, s;
 
     // TODO: use native C++ Get, not F90 entry point, when ready
     ESMC_TimeIntervalGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                           ESMC_NULL_POINTER, &d_i8, &h, &m,
-                          ESMC_NULL_POINTER, &s_i8);
-    //ESMC_TimeIntervalGet(&yy_i8, &MM, &d_i8, &h, &m, &s_i8); // TODO: when
+                          &s, ESMC_NULL_POINTER);
+    //ESMC_TimeIntervalGet(&yy_i8, &mm, &d, &h, &m, &s); // TODO: when
                                                      // calendar intervals
                                                      //  implemented
 
     // ISO 8601 format PyYmMdDThHmMsS
-    sprintf(timeString, "P%lldDT%dH%dM%lldS\0", d_i8, h, m, s_i8);
-    //sprintf(timeString, "P%lldY%dM%lldDT%dH%dM%lldS\0", // TODO: when calendar
-    //        yy_i8, mm_i8, d_i8, h, m, s_i8);         //  intervals implemented
+    sprintf(timeString, "P%lldDT%dH%dM%dS\0", d_i8, h, m, s);
+    //sprintf(timeString, "P%lldY%dM%dDT%dH%dM%dS\0", // TODO: when calendar
+    //        yy_i8, mm, d, h, m, s);                 //  intervals implemented
 
     return(ESMF_SUCCESS);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.27 2004/02/06 00:27:47 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.28 2004/02/09 07:06:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.27 2004/02/06 00:27:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.28 2004/02/09 07:06:06 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -158,7 +158,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeGet - get sub-day units of a basetime
+// !IROUTINE:  ESMC_BaseTimeGet - get units of a basetime
 //
 // !INTERFACE:
       int ESMC_BaseTime::ESMC_BaseTimeGet(
@@ -167,7 +167,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I4 secondsPerDay,  // in  - seconds per day
+      ESMF_KIND_I8 timeToDivide,   // in  - the time to divide into 
+                                   //         requested units
       ESMF_KIND_I4 *h,             // out - integer hours
       ESMF_KIND_I4 *m,             // out - integer minutes
       ESMF_KIND_I4 *s,             // out - integer seconds (>= 32-bit)
@@ -186,7 +187,7 @@
 
 //
 // !DESCRIPTION:
-//      Get sub-day (non-calendar dependent) values of a {\tt ESMC\_BaseTime}
+//      Get non-calendar dependent values of a {\tt ESMC\_BaseTime}
 //      converted to user units.  Primarily to support F90 interface
 //
 //EOP
@@ -196,18 +197,22 @@
 
     // TODO: fractional seconds
 
-    // for sub-day units, start with number of seconds into the date
-    ESMF_KIND_I4 remainder = this->s % secondsPerDay;
+    ESMF_KIND_I8 remainder = timeToDivide;
 
     if (h != ESMC_NULL_POINTER) {
-      *h = remainder / SECONDS_PER_HOUR;
+      ESMF_KIND_I8 hours = remainder / SECONDS_PER_HOUR;
+      if (hours < INT_MIN || hours > INT_MAX) return(ESMF_FAILURE);
+      *h = hours;
       remainder %= SECONDS_PER_HOUR;
     }
     if (m != ESMC_NULL_POINTER) {
-      *m = remainder / SECONDS_PER_MINUTE;
+      ESMF_KIND_I8 minutes = remainder / SECONDS_PER_MINUTE;
+      if (minutes < INT_MIN || minutes > INT_MAX) return(ESMF_FAILURE);
+      *m = minutes;
       remainder %= SECONDS_PER_MINUTE;
     }
     if (s != ESMC_NULL_POINTER) {
+      if (remainder < INT_MIN || remainder > INT_MAX) return(ESMF_FAILURE);
       *s = remainder;    // >= 32 bit
     }
     if (s_i8 != ESMC_NULL_POINTER) {
@@ -218,8 +223,8 @@
     // floating point units
     //
 
-    // for sub-day units, start with number of seconds into the date
-    remainder = this->s % secondsPerDay;
+    // reset remainder
+    remainder = timeToDivide;
 
     if (h_r8 != ESMC_NULL_POINTER) {
       *h_r8 = (ESMF_KIND_R8) remainder / (ESMF_KIND_R8) SECONDS_PER_HOUR;

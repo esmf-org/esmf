@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.54 2004/02/06 22:46:15 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.55 2004/02/09 07:06:07 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -285,15 +285,22 @@
         mm != ESMC_NULL_POINTER || dd  != ESMC_NULL_POINTER ||
         d  != ESMC_NULL_POINTER || d_i8  != ESMC_NULL_POINTER ||
         d_r8 != ESMC_NULL_POINTER) {
-      if (this->calendar != ESMC_NULL_POINTER) {
-        if (this->calendar->ESMC_CalendarConvertToDate(this, yy, yy_i8, mm, dd,
-                                                 d, d_i8, d_r8) ==
-            ESMF_FAILURE) return(ESMF_FAILURE);
-      }
-      else {
-        return (ESMF_FAILURE);
-      }
+      if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+      if (this->calendar->ESMC_CalendarConvertToDate(this, yy, yy_i8, mm, dd,
+                                                     d, d_i8, d_r8) ==
+                          ESMF_FAILURE) return(ESMF_FAILURE);
     }
+
+    // get seconds based date (64-bit s_i8 or real s_r8) if requested;
+    //   base time get needs to convert entire base time.  Requirements: TMG2.1
+    if (ESMC_BaseTimeGet(this->s, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, s_i8, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, s_r8,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                  ESMC_NULL_POINTER) ==
+                         ESMF_FAILURE) return(ESMF_FAILURE);
 
     // get number of seconds in a day
     int secPerDay = SECONDS_PER_DAY;  // default
@@ -301,10 +308,11 @@
       secPerDay = this->calendar->secondsPerDay;
     }
 
-    // use base class to get sub-day values
-    if (ESMC_BaseTimeGet(secPerDay, h, m, s, s_i8, ms, us, ns,
-                         h_r8, m_r8, s_r8, ms_r8, us_r8, ns_r8, sN, sD) ==
-        ESMF_FAILURE) return(ESMF_FAILURE);
+    // use base class to get all other sub-day values (within date's day)
+    if (ESMC_BaseTimeGet((this->s % secPerDay), h, m, s, ESMC_NULL_POINTER,
+                         ms, us, ns, h_r8, m_r8, ESMC_NULL_POINTER, ms_r8,
+                         us_r8, ns_r8, sN, sD) ==
+                     ESMF_FAILURE) return(ESMF_FAILURE);
 
     if (calendar != ESMC_NULL_POINTER) {
       *calendar = this->calendar;
@@ -540,7 +548,7 @@
     int          dd    = wallClock.tm_mday;
     int          h     = wallClock.tm_hour;
     int          m     = wallClock.tm_min;
-    ESMF_KIND_I8 s_i8  = wallClock.tm_sec;
+    int          s     = wallClock.tm_sec;
 
     // set this time to wall clock time
     // TODO: use native C++ Set() version when ready
@@ -548,7 +556,7 @@
     int tz = this->timeZone;
     ESMC_TimeSet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, &h, &m,
-                 ESMC_NULL_POINTER, &s_i8, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 &s, ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -938,17 +946,17 @@
         return (ESMF_FAILURE);
     }
 
-    ESMF_KIND_I8 yy_i8, s_i8;
+    ESMF_KIND_I8 yy_i8;
     int mm, dd;
-    ESMF_KIND_I4 h, m; 
+    ESMF_KIND_I4 h, m, s; 
     // TODO: use native C++ Get, not F90 entry point, when ready
     ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                  &h, &m, ESMC_NULL_POINTER, &s_i8);
+                  &h, &m, &s, ESMC_NULL_POINTER);
 
     // ISO 8601 format YYYY-MM-DDThh:mm:ss
-    sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:%02lld\0",
-            yy_i8, mm, dd, h, m, s_i8);
+    sprintf(timeString, "%lld-%02d-%02dT%02d:%02d:%02d\0",
+            yy_i8, mm, dd, h, m, s);
 
     return(ESMF_SUCCESS);
 
