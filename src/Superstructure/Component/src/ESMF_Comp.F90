@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.53 2003/09/23 15:20:56 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.54 2003/10/16 20:23:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -166,6 +166,7 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 
       public ESMF_FrameworkInitialize, ESMF_FrameworkFinalize
+      public ESMF_FrameworkInternalInit   ! should be private to framework
 
       ! These have to be public so other component types can call them,
       !  but they are not intended to be used outside the Framework code.
@@ -184,7 +185,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.53 2003/09/23 15:20:56 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.54 2003/10/16 20:23:29 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1374,11 +1375,41 @@ end function
 !
 !EOP
 
+      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, rc)
+
+      end subroutine ESMF_FrameworkInitialize
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_FrameworkInternalInit - internal routine called by both F90 and C++
+!
+! !INTERFACE:
+      subroutine ESMF_FrameworkInternalInit(lang, rc)
+!
+! !ARGUMENTS:
+      integer, intent(in) :: lang     
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Initialize the ESMF framework.
+!
+!     \begin{description}
+!     \item [lang]
+!           Flag to say whether main program is F90 or C++.  Affects things
+!           related to initialization, such as starting MPI.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOPI
+
       logical :: rcpresent                       ! Return code present   
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
 
-      !Initialize return code
+      ! Initialize return code
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
@@ -1391,7 +1422,7 @@ end function
       endif
 
       ! Initialize the machine model, the comms, etc.
-      call ESMF_MachineInitialize(status)
+      call ESMF_MachineInitialize(lang, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing the machine characteristics"
           return

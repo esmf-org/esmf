@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.6 2003/09/23 15:18:31 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.7 2003/10/16 20:23:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.6 2003/09/23 15:18:31 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.7 2003/10/16 20:23:29 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -39,12 +39,13 @@
 ! 
 !EOP
 !------------------------------------------------------------------------------
-   subroutine f_esmf_frameworkinitialize(rc)
+   subroutine f_esmf_frameworkinitialize(lang, rc)
        use ESMF_CompMod
 
+       integer :: lang
        integer :: rc
 
-       call ESMF_FrameworkInitialize(rc)
+       call ESMF_FrameworkInternalInit(lang, rc)
 
    end subroutine f_esmf_frameworkinitialize
 
