@@ -1,7 +1,7 @@
-# $Id: makefile,v 1.15 2003/01/16 18:46:20 jwolfe Exp $ 
+# $Id: makefile,v 1.16 2003/01/21 01:14:58 nscollins Exp $ 
 
 DIRS     = Base BasicUtil IO ConfigAttr Error Log Machine TimeMgr TimeMgmt  \
-	   CommMem PerfProf Data DistGrid PhysGrid Grid Fields App \
+	   CommMem PerfProf Data DistGrid PhysGrid Grid Fields Regrid App \
 	   mpiuni
 
 LOCDIR   = src/Infrastructure
