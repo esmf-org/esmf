@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.21 2003/07/17 20:02:47 nscollins Exp $ 
+# $Id: makefile,v 1.22 2003/09/22 21:08:21 svasquez Exp $ 
 
 ALL:  tests
 
@@ -16,20 +16,16 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Field/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldUTest \
-		$(ESMC_TESTDIR)/ESMF_FRouteUTest \
-		$(ESMC_TESTDIR)/ESMF_BundleUTest
+		$(ESMC_TESTDIR)/ESMF_FRouteUTest 
 
 TESTS_RUN     = RUN_ESMF_FieldUTest \
-		RUN_ESMF_FRouteUTest \
-		RUN_ESMF_BundleUTest 
+		RUN_ESMF_FRouteUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
-		RUN_ESMF_BundleUTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI 
 # Don't run ESMF_FRouteUtest on one processor
 
 TESTS_RM      = ESMF_FieldUTest.rm \
-		ESMF_FRouteUTest.rm \
-		ESMF_BundleUTest.rm 
+		ESMF_FRouteUTest.rm 
 
 include ${ESMF_DIR}/makefile
 
@@ -37,20 +33,6 @@ CLEANDIRS   = coredir.*
 CLEANFILES  = *.o *.mod NULL *.txt stdoutfiles core $(TESTS_BUILD)
 CLOBBERDIRS =
 
-
-#
-#  Bundles
-#
-RUN_ESMF_BundleUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
-
-RUN_ESMF_BundleUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
-
-ESMF_BundleUTest.rm:
-	echo "ESMF_BundleUTest.rm target called here."
 
 #
 # Field
