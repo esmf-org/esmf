@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.80 2003/08/22 21:55:26 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.81 2003/08/26 22:42:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.80 2003/08/22 21:55:26 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.81 2003/08/26 22:42:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3983,6 +3983,47 @@
           domainList%domains(num_domains)%ai(i) = grid_ai(j,i)
         enddo
       enddo
+
+      ! TODO:  the code below is taken from Phil's regrid routines and needs
+      !        to be incorporated at some point
+      !
+      ! if spherical coordinates, set up constants for longitude branch cut
+      !
+
+      !if (dst_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
+      !   if (units = 'degrees') then
+      !      lon_thresh = 270.0
+      !      lon_cycle  = 360.0
+      !   else if (units = 'radians') then
+      !      lon_thresh = 1.5*pi
+      !      lon_cycle  = 2.0*pi
+      !   endif
+      !endif
+      !
+      ! correct for longitude crossings if spherical coords
+      ! assume degrees and x is longitude
+      !
+      !if (dst_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
+      !   if (dst_DE_bbox(2) - dst_DE_bbox(1) >  lon_thresh) &
+      !      dst_DE_bbox(2) = dst_DE_bbox(2) - lon_cycle
+      !   if (dst_DE_bbox(2) - dst_DE_bbox(1) < -lon_thresh) &
+      !      dst_DE_bbox(2) = dst_DE_bbox(2) + lon_cycle
+      !endif
+      !
+      ! make sure src bbox is in same longitude range as dst bbox
+      ! assume degrees and x is longitude
+      !
+      !   if (src_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
+      !      if (src_DE_bbox(1) - dst_DE_bbox(1) >  lon_thresh) &
+      !         src_DE_bbox(1) = src_DE_bbox(1) - lon_cycle
+      !      if (src_DE_bbox(1) - dst_DE_bbox(1) < -lon_thresh) &
+      !         src_DE_bbox(1) = src_DE_bbox(1) + lon_cycle
+      !      if (src_DE_bbox(2) - dst_DE_bbox(1) >  lon_thresh) &
+      !         src_DE_bbox(2) = src_DE_bbox(2) - lon_cycle
+      !      if (src_DE_bbox(2) - dst_DE_bbox(1) < -lon_thresh) &
+      !         src_DE_bbox(2) = src_DE_bbox(2) + lon_cycle
+      !   endif ! Spherical coords
+
 
       if(rcpresent) rc = ESMF_SUCCESS
 
