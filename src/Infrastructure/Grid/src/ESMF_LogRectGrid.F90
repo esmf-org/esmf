@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.54 2004/03/25 23:27:21 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.55 2004/04/05 17:29:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2867,8 +2867,8 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_Array), intent(out), dimension(:), optional :: centerCoord
-      type(ESMF_Array), intent(out), dimension(:,:), optional :: cornerCoord
-      type(ESMF_Array), optional :: faceCoord
+      type(ESMF_Array), intent(out), dimension(:), optional :: cornerCoord
+      type(ESMF_Array), intent(out), optional :: faceCoord
       logical, intent(in), optional :: reorder
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
@@ -2923,8 +2923,8 @@
       integer, dimension(3) :: order
       logical :: reorderUse
       type(ESMF_Array) :: tempArray
-      type(ESMF_Array), dimension(:), pointer :: coord
-      type(ESMF_Array), dimension(:,:), pointer :: coord2, tempArray2
+      type(ESMF_Array), dimension(:), pointer :: coord, coord2
+      type(ESMF_Array), dimension(:,:), pointer :: tempArray2
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -3027,12 +3027,12 @@
 
       if (present(cornerCoord)) then
         index = 1
-        aSize = min(gridRank, size(cornerCoord,2))
-        allocate(coord2(size(cornerCoord,1),aSize))
+        aSize = min(gridRank, size(cornerCoord))
+        allocate(coord2(aSize))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           call ESMF_PhysGridGetRegions(grid%ptr%physGrids(horzPhysIdUse), &
-                                       vertexArray=coord2(:,1:2), rc=status)
+                                       vertexArray=coord2(1:2), rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetCoord: PhysGrid get regions"
             return
@@ -3040,7 +3040,7 @@
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           call ESMF_PhysGridGetRegions(grid%ptr%physGrids(horzPhysIdUse), &
-                                       vertexArray=coord2(:,index:index), &
+                                       vertexArray=coord2(index:index), &
                                        rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetCoord: PhysGrid get regions"
@@ -3050,11 +3050,11 @@
         if (reorderUse) then
           order(:) = gridOrder(:,grid%ptr%coordOrder%order,aSize)
           do i = 1,aSize
-            cornerCoord(:,order(i)) = coord2(:,i)
+            cornerCoord(order(i)) = coord2(i)
           enddo
         else
           do i = 1,aSize
-            cornerCoord(:,i) = coord2(:,i)
+            cornerCoord(i) = coord2(i)
           enddo
         endif
         deallocate(coord2)
