@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.11 2004/03/23 17:58:16 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.12 2004/03/24 16:05:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.11 2004/03/23 17:58:16 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.12 2004/03/24 16:05:58 jwolfe Exp $'
 
 !==============================================================================
 
@@ -183,7 +183,8 @@
         return
       endif
       call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
-                          localCellCountPerDim=dstCounts, rc=status)
+                          localCellCountPerDim=dstCounts, &
+                          reorder=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetDE ", &
                  "returned failure"
@@ -191,7 +192,8 @@
       endif
 
 !      call ESMF_GridGetCoord(dstGrid, relloc=dstRelLoc, &
-!                             vertCoord=dstLocalCoordArray, rc=status)
+!                             vertCoord=dstLocalCoordArray, &
+!                             reorder=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetCoord ", &
                  "returned failure"
@@ -208,7 +210,8 @@
         return
       endif
       call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
-                          localCellCountPerDim=srcCounts, rc=status)
+                          localCellCountPerDim=srcCounts, &
+                          reorder=.false., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetDE ", &
                  "returned failure"
@@ -217,7 +220,7 @@
 
 !      call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
 !                             vertCoord=srcLocalCoordArray, &
-!                             total=.true., rc=status)
+!                             reorder=.false., total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetCoord ", &
                  "returned failure"
