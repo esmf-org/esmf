@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.42 2003/12/23 00:33:52 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.43 2004/01/06 22:23:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,29 +121,29 @@
       public operator(-)
       private ESMF_TimeIntervalDiff
 
-      public operator(.EQ.)
+      public operator(==)
       private ESMF_TimeIntervalEQ
 
-      public operator(.NE.)
+      public operator(/=)
       private ESMF_TimeIntervalNE
 
-      public operator(.LT.)
+      public operator(<)
       private ESMF_TimeIntervalLT
 
-      public operator(.LE.)
+      public operator(<=)
       private ESMF_TimeIntervalLE
 
-      public operator(.GT.)
+      public operator(>)
       private ESMF_TimeIntervalGT
 
-      public operator(.GE.)
+      public operator(>=)
       private ESMF_TimeIntervalGE
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.42 2003/12/23 00:33:52 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.43 2004/01/06 22:23:42 eschwab Exp $'
 
 !==============================================================================
 !
@@ -151,196 +151,723 @@
 !
 !==============================================================================
 !BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(.DIV.) - Divide two TimeIntervals, return fraction quotient
+!
 ! !INTERFACE:
       interface operator(.DIV.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalFQuot
-
-! !DESCRIPTION:
-!     This interface defines a new .DIV. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+!     quotient = timeInterval1 .DIV. timeInterval2
 !
-!     Implementation note:  This cannot be overloaded with (/) because
-!     the arguments are the same as {\\t ESMF\_TimeIntervalRQuot} (see below).
-!     The difference is in the return type ({\\t ESMF\_Fraction} vs. real),
-!     which F90 does not use to distinguish among multiple overloaded methods.
-!     Since the {\\t ESMF\_Fraction} return type is less likely to be used, it
-!     was selected for the new .DIV. operator.
+! !RETURN VALUE:
+!     type(ESMF_Fraction) :: quotient
+!
+! !ARGUMENTS: 
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+! !DESCRIPTION:
+!     Defines a new operator (.DIV.) for the {\tt ESMF\_TimeInterval} class
+!     which returns {\tt timeInterval1} divided by {\tt timeInterval2} as a 
+!     fraction quotient.
+!
+!     Implementation note:  This cannot be overloaded with (/) because the
+!     arguments are the same as "Divide two TimeIntervals, return double
+!     precision quotient" (see below).  The difference is in the return type
+!     ({\tt ESMF\_Fraction} vs. real), which F90 does not use to distinguish
+!     among multiple overloaded methods.  Since the {\tt ESMF\_Fraction} return
+!     type is less likely to be used, it was selected for the new
+!     .DIV. operator.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The dividend.
+!     \item[timeInterval2]
+!          The divisor.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalFQuot   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.5
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedFunction(MOD) - Divide two TimeIntervals, return time interval remainder
+!
 ! !INTERFACE:
       interface MOD
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalRemainder
-
+!     remainder = MOD(timeInterval1, timeInterval2)
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: remainder
+!
+! !ARGUMENTS: 
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
 ! !DESCRIPTION:
-!     This interface overloads the pre-defined MOD() function for the
-!     {\tt ESMF\_TimeInterval} class.
+!     Overloads the pre-defined MOD() function for the {\tt ESMF\_TimeInterval}
+!     class to return the remainder of {\tt timeInterval1} divided by
+!     {\tt timeInterval2} as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The dividend.
+!     \item[timeInterval2]
+!          The divisor.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalRemainder   ! internal implementation
+!
+! !REQUIREMENTS:
+!     Time Manager API review 6/2003, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide two TimeIntervals, return double precision quotient
+!
 ! !INTERFACE:
       interface operator(/)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalRQuot
-      module procedure ESMF_TimeIntervalQuotI
-      module procedure ESMF_TimeIntervalQuotR
-
+!     quotient = timeInterval1 / timeInterval2
+!
+! !RETURN VALUE:
+!     real(ESMF_KIND_R8) :: quotient
+!
+! !ARGUMENTS: 
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
 ! !DESCRIPTION:
-!     This interface overloads the / operator for the {\tt ESMF\_TimeInterval}
-!     class.
+!     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
+!     return {\tt timeInterval1} divided by {\tt timeInterval2} as a
+!     double precision quotient.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The dividend.
+!     \item[timeInterval2]
+!          The divisor.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalRQuot   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.5, TMG7.2
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide a TimeInterval by an integer, return TimeInterval quotient 
+!
+! !INTERFACE:
+!     interface operator(/)
+!     quotient = timeInterval / divisor
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: quotient
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     integer(ESMF_KIND_I4),   intent(in) :: divisor
+!
+! !DESCRIPTION:
+!     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
+!     divide a {\tt timeInterval} by an integer {\tt divisor}, and
+!     return the quotient as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          The dividend.
+!     \item[divisor]
+!          Integer divisor.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalQuotI   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.6, TMG5.3, TMG7.2
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide a TimeInterval by a double precision divisor, return TimeInterval quotient 
+!
+! !INTERFACE:
+!     interface operator(/)
+!     quotient = timeInterval / divisor
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: quotient
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     real(ESMF_KIND_R8),      intent(in) :: divisor
+!
+! !DESCRIPTION:
+!     Overloads the (/) operator for the {\tt ESMF\_TimeInterval} class to
+!     divide a {\tt timeInterval} by a double precision {\tt divisor}, 
+!     and return the quotient as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          The dividend.
+!     \item[divisor]
+!          Double precision divisor.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalQuotR   ! internal implementation
+!
+! !REQUIREMENTS:
+!     Time Manager API review 6/2003, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:   ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by an integer
+!
 ! !INTERFACE:
       interface operator(*)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalProdTI
-      module procedure ESMF_TimeIntervalProdIT
-      module procedure ESMF_TimeIntervalProdTF
-      module procedure ESMF_TimeIntervalProdFT
-      module procedure ESMF_TimeIntervalProdTR
-      module procedure ESMF_TimeIntervalProdRT
-
+!     product = timeInterval * multiplier
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: product
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     integer(ESMF_KIND_I4),   intent(in) :: multiplier
+!
 ! !DESCRIPTION:
-!     This interface overloads the * operator for the {\tt ESMF\_TimeInterval}
-!     class.
+!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
+!     multiply a {\tt timeInterval} by an integer {\tt multiplier},
+!     and return the product as an {\tt ESMF\_TimeInterval}.
+!
+!     Commutative complement to overloaded operator (*) below.
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]        
+!          The multiplicand.
+!     \item[mutliplier]
+!          The integer multiplier.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdTI   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2     
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:   ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by an integer
+!
+! !INTERFACE:
+!     interface operator(*)
+!     product = multiplier * timeInterval
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: product
+!
+! !ARGUMENTS:
+!     integer(ESMF_KIND_I4),   intent(in) :: multiplier
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!
+! !DESCRIPTION:
+!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to      
+!     multiply a {\tt timeInterval} by an integer {\tt multiplier},
+!     and return the product as an {\tt ESMF\_TimeInterval}. 
+!
+!     Commutative complement to overloaded operator (*) above.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mutliplier]
+!          The integer multiplier.
+!     \item[timeInterval]
+!          The multiplicand.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdIT   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2     
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a fraction
+!
+! !INTERFACE:
+!     interface operator(*)
+!     product = timeInterval * multiplier
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: product
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     type(ESMF_Fraction),     intent(in) :: multiplier
+!
+! !DESCRIPTION:
+!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
+!     multiply a {\tt timeInterval} by a fraction {\tt multiplier},
+!     and return the product as an {\tt ESMF\_TimeInterval}.
+!
+!     Commutative complement to overloaded operator (*) below.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          The multiplicand.
+!     \item[mutliplier]
+!          The fraction multiplier.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdTF   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a fraction
+!
+! !INTERFACE:
+!     interface operator(*)
+!     product = multiplier * timeInterval
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: product
+!
+! !ARGUMENTS:
+!     type(ESMF_Fraction),     intent(in) :: multiplier
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!
+! !DESCRIPTION:
+!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
+!     multiply a {\tt timeInterval} by a fraction {\tt multiplier},
+!     and return the product as an {\tt ESMF\_TimeInterval}.
+!
+!     Commutative complement to overloaded operator (*) above.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mutliplier]
+!          The fraction multiplier.
+!     \item[timeInterval]
+!          The multiplicand.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdFT   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a double precision multiplier
+!
+! !INTERFACE:
+!     interface operator(*)
+!     product = timeInterval * multiplier
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: product
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!     real(ESMF_KIND_R8),      intent(in) :: multiplier
+!
+! !DESCRIPTION:
+!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
+!     multiply a {\tt timeInterval} by a double precision {\tt multiplier},
+!     and return the product as an {\tt ESMF\_TimeInterval}.
+!
+!     Commutative complement to overloaded operator (*) below.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          The multiplicand.
+!     \item[mutliplier]
+!          The double precision multiplier.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdTR   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a double precision multiplier
+!
+! !INTERFACE:
+!     interface operator(*)
+!     product = multiplier * timeInterval
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: product
+!
+! !ARGUMENTS:
+!     real(ESMF_KIND_R8),      intent(in) :: multiplier
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval
+!
+! !DESCRIPTION:
+!     Overloads the (*) operator for the {\tt ESMF\_TimeInterval} class to
+!     multiply a {\tt timeInterval} by a double precision {\tt multiplier},
+!     and return the product as an {\tt ESMF\_TimeInterval}.
+!
+!     Commutative complement to overloaded operator (*) above.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[mutliplier]
+!          The double precision multiplier.
+!     \item[timeInterval]
+!          The multiplicand.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalProdRT   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.7, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(+) - Add two TimeIntervals
+!
 ! !INTERFACE:
       interface operator(+)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalSum
-
-! !DESCRIPTION:
-!     This interface overloads the + operator for the
-!     {\tt ESMF\_TimeInterval} class.
+!     sum = timeInterval1 + timeInterval2
 !
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: sum
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+! !DESCRIPTION:
+!     Overloads the (+) operator for the {\tt ESMF\_TimeInterval} class to
+!     add {\tt timeInterval1} to {\tt timeInterval2} and return the
+!     sum as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The augend.
+!     \item[timeInterval2]
+!          The addend.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalSum   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG5.1, TMG7.2
+!
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(-) - Subtract one TimeInterval from another
+!
 ! !INTERFACE:
       interface operator(-)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalDiff
-
+!     difference = timeInterval1 - timeInterval2
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: difference
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
 ! !DESCRIPTION:
-!     This interface overloads the - operator for the
-!     {\tt ESMF\_TimeInterval} class.
+!     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
+!     subtract {\tt timeInterval2} from {\tt timeInterval1} and return
+!     the difference as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The minuend.
+!     \item[timeInterval2]
+!          The subtrahend.
+!     \end{description}
 !
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalDiff   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG5.1, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.EQ.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalEQ
-
-! !DESCRIPTION:
-!     This interface overloads the .EQ. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(==) - Test if TimeInterval 1 is equal to TimeInterval 2
 !
+! !INTERFACE:
+      interface operator(==)
+!     if (timeInterval1 == timeInterval2) then ... endif
+!                  OR
+!     result = (timeInterval1 == timeInterval2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:     
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+!DESCRIPTION:
+!     Overloads the (==) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeInterval1} and {\tt timeInterval2} are equal,
+!     and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          First {\tt ESMF\_TimeInterval} in comparison.
+!     \item[timeInterval2]
+!          Second {\tt ESMF\_TimeInterval} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalEQ   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.NE.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalNE
-
-! !DESCRIPTION:
-!     This interface overloads the .NE. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(/=) - Test if TimeInterval 1 is not equal to TimeInterval 2
 !
+! !INTERFACE:
+      interface operator(/=)
+!     if (timeInterval1 /= timeInterval2) then ... endif
+!                  OR
+!     result = (timeInterval1 /= timeInterval2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:     
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+!DESCRIPTION:
+!     Overloads the (/=) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeInterval1} and {\tt timeInterval2} are not equal,
+!     and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          First {\tt ESMF\_TimeInterval} in comparison.
+!     \item[timeInterval2]
+!          Second {\tt ESMF\_TimeInterval} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalNE   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.LT.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalLT
-
-! !DESCRIPTION:
-!     This interface overloads the .LT. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(<) - Test if TimeInterval 1 is less than TimeInterval 2
 !
+! !INTERFACE:
+      interface operator(<)
+!     if (timeInterval1 < timeInterval2) then ... endif
+!                  OR
+!     result = (timeInterval1 < timeInterval2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:     
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+!DESCRIPTION:
+!     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeInterval1} is less than {\tt timeInterval2},
+!     and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          First {\tt ESMF\_TimeInterval} in comparison.
+!     \item[timeInterval2]
+!          Second {\tt ESMF\_TimeInterval} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalLT   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.LE.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalLE
-
-! !DESCRIPTION:
-!     This interface overloads the .LE. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(<=) - Test if TimeInterval 1 is less than or equal to TimeInterval 2
 !
+! !INTERFACE:
+      interface operator(<=)
+!     if (timeInterval1 <= timeInterval2) then ... endif
+!                  OR
+!     result = (timeInterval1 <= timeInterval2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:     
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+!DESCRIPTION:
+!     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeInterval1} is less than or equal to
+!     {\tt timeInterval2}, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          First {\tt ESMF\_TimeInterval} in comparison.
+!     \item[timeInterval2]
+!          Second {\tt ESMF\_TimeInterval} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalLE   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.GT.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalGT
-
-! !DESCRIPTION:
-!     This interface overloads the .GT. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(>) - Test if TimeInterval 1 is greater than TimeInterval 2
 !
+! !INTERFACE:
+      interface operator(>)
+!     if (timeInterval1 > timeInterval2) then ... endif
+!                  OR
+!     result = (timeInterval1 > timeInterval2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:     
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+!DESCRIPTION:
+!     Overloads the (<) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeInterval1} is greater than {\tt timeInterval2},
+!     and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          First {\tt ESMF\_TimeInterval} in comparison.
+!     \item[timeInterval2]
+!          Second {\tt ESMF\_TimeInterval} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalGT   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !INTERFACE:
-      interface operator(.GE.)
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalGE
-
-! !DESCRIPTION:
-!     This interface overloads the .GE. operator for the
-!     {\tt ESMF\_TimeInterval} class.
+! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(>=) - Test if TimeInterval 1 is greater than or equal to TimeInterval 2
 !
+! !INTERFACE:
+      interface operator(>=)
+!     if (timeInterval1 >= timeInterval2) then ... endif
+!                  OR
+!     result = (timeInterval1 >= timeInterval2)
+!
+! !RETURN VALUE:
+!     logical :: result
+!
+! !ARGUMENTS:     
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+!DESCRIPTION:
+!     Overloads the (<=) operator for the {\tt ESMF\_TimeInterval} class to
+!     return true if {\tt timeInterval1} is greater than or equal to
+!     {\tt timeInterval2}, and false otherwise.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          First {\tt ESMF\_TimeInterval} in comparison.
+!     \item[timeInterval2]
+!          Second {\tt ESMF\_TimeInterval} in comparison.
+!     \end{description}
+! 
 !EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalGE   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.3, TMG7.2
+
       end interface
 !
 !------------------------------------------------------------------------------
@@ -674,7 +1201,7 @@
 ! than 2 arguments for arithmetic overloaded operators
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two TimeIntervals, return fraction quotient
 
 ! !INTERFACE:
@@ -688,20 +1215,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns {\tt timeInterval1} divided by {\tt timeInterval2} as a 
-!     fraction quotient.
+!     This method defines the (.DIV.) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(.DIV.)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The dividend.
-!     \item[timeInterval2]
-!          The divisor.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.5
+!EOPI
 
       call c_ESMC_TimeIntervalFQuot(timeInterval1, timeInterval2, &
                                     ESMF_TimeIntervalFQuot)
@@ -709,42 +1226,7 @@
       end function ESMF_TimeIntervalFQuot
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two TimeIntervals, return double precision quotient
-
-! !INTERFACE:
-      function ESMF_TimeIntervalRQuot(timeInterval1, timeInterval2)
-
-! !RETURN VALUE:
-      real(ESMF_KIND_R8) :: ESMF_TimeIntervalRQuot
-
-! !ARGUMENTS: 
-      type(ESMF_TimeInterval), intent(in) :: timeInterval1
-      type(ESMF_TimeInterval), intent(in) :: timeInterval2
-
-! !DESCRIPTION:
-!     Returns {\tt timeInterval1} divided by {\tt timeInterval2} as a
-!     double precision quotient.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The dividend.
-!     \item[timeInterval2]
-!          The divisor.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.5
-
-      call c_ESMC_TimeIntervalRQuot(timeInterval1, timeInterval2, &
-                                    ESMF_TimeIntervalRQuot)
-
-      end function ESMF_TimeIntervalRQuot
-
-!------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalRemainder - Divide two TimeIntervals, return time interval remainder
 
 ! !INTERFACE:
@@ -758,20 +1240,11 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns the remainder of {\tt timeInterval1} divided by {\tt timeInterval2} 
-!     as an {\tt ESMF\_TimeInterval}.
+!     This method overloads the pre-defined MOD function for the
+!     {\tt ESMF\_TimeInterval} class.  See "interface MOD" above for complete
+!     description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The dividend.
-!     \item[timeInterval2]
-!          The divisor.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!
+!EOPI
 
       call c_ESMC_TimeIntervalRemainder(timeInterval1, timeInterval2, &
                                         ESMF_TimeIntervalRemainder)
@@ -779,7 +1252,32 @@
       end function ESMF_TimeIntervalRemainder
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
+! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two TimeIntervals, return double precision quotient
+
+! !INTERFACE:
+      function ESMF_TimeIntervalRQuot(timeInterval1, timeInterval2)
+
+! !RETURN VALUE:
+      real(ESMF_KIND_R8) :: ESMF_TimeIntervalRQuot
+
+! !ARGUMENTS: 
+      type(ESMF_TimeInterval), intent(in) :: timeInterval1
+      type(ESMF_TimeInterval), intent(in) :: timeInterval2
+
+! !DESCRIPTION:
+!     This method overloads the (/) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(/)" above for complete description.
+!
+!EOPI
+
+      call c_ESMC_TimeIntervalRQuot(timeInterval1, timeInterval2, &
+                                    ESMF_TimeIntervalRQuot)
+
+      end function ESMF_TimeIntervalRQuot
+
+!------------------------------------------------------------------------------
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalQuotI - Divide TimeInterval by an integer, return TimeInterval quotient 
 
 ! !INTERFACE:
@@ -793,20 +1291,10 @@
       integer(ESMF_KIND_I4),   intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides {\tt timeInterval} by an integer {\tt divisor}, and returns
-!     the quotient as an {\tt ESMF\_TimeInterval}.
+!     This method overloads the (/) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(/)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          The dividend.
-!     \item[divisor]
-!          Integer divisor.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.6, TMG5.3, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalQuotI(timeInterval, divisor, &
                                     ESMF_TimeIntervalQuotI)
@@ -814,7 +1302,7 @@
       end function ESMF_TimeIntervalQuotI
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalQuotR - Divide TimeInterval by a double precision, return TimeInterval quotient 
 
 ! !INTERFACE:
@@ -828,20 +1316,10 @@
       real(ESMF_KIND_R8),      intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides {\tt timeInterval} by a double precision {\tt divisor}, 
-!     and returns the quotient as an {\tt ESMF\_TimeInterval}.
+!     This method overloads the (/) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(/)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          The dividend.
-!     \item[divisor]
-!          Double precision divisor.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.6, TMG5.3, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalQuotR(timeInterval, divisor, &
                                     ESMF_TimeIntervalQuotR)
@@ -849,7 +1327,7 @@
       end function ESMF_TimeIntervalQuotR
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_TimeIntervalProdTI - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
@@ -863,21 +1341,10 @@
       integer(ESMF_KIND_I4),   intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
-!     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to {\tt ESMF\_TimeIntervalProdIT}.
+!     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(*)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          The multiplicand.
-!     \item[mutliplier]
-!          The integer multiplier.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalProdTI(timeInterval, multiplier, &
                                      ESMF_TimeIntervalProdTI)
@@ -885,7 +1352,7 @@
       end function ESMF_TimeIntervalProdTI
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_TimeIntervalProdIT - Multiply a TimeInterval by an integer
 
 ! !INTERFACE:
@@ -899,21 +1366,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 
 ! !DESCRIPTION:
-!     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
-!     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to {\tt ESMF\_TimeIntervalProdTI}.
+!     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(*)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[mutliplier]
-!          The integer multiplier.
-!     \item[timeInterval]
-!          The multiplicand.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalProdIT(multiplier, timeInterval, &
                                      ESMF_TimeIntervalProdIT)
@@ -921,7 +1377,7 @@
       end function ESMF_TimeIntervalProdIT
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalProdTF - Multiply a TimeInterval by a fraction
 
 ! !INTERFACE:
@@ -935,21 +1391,10 @@
       type(ESMF_Fraction),     intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
-!     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to {\tt ESMF\_TimeIntervalProdFT}.
+!     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(*)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          The multiplicand.
-!     \item[mutliplier]
-!          The fraction multiplier.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalProdTF(timeInterval, multiplier, &
                                      ESMF_TimeIntervalProdTF)
@@ -957,7 +1402,7 @@
       end function ESMF_TimeIntervalProdTF
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalProdFT - Multiply a TimeInterval by a fraction
 
 ! !INTERFACE:
@@ -971,21 +1416,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 
 ! !DESCRIPTION:
-!     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
-!     and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to {\tt ESMF\_TimeIntervalProdTF}.
+!     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(*)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[mutliplier]
-!          The fraction multiplier.
-!     \item[timeInterval]
-!          The multiplicand.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalProdFT(multiplier, timeInterval, &
                                      ESMF_TimeIntervalProdFT)
@@ -993,7 +1427,7 @@
       end function ESMF_TimeIntervalProdFT
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_TimeIntervalProdTR - Multiply a TimeInterval by a double precision
 
 ! !INTERFACE:
@@ -1007,21 +1441,10 @@
       real(ESMF_KIND_R8),      intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiplies {\tt timeInterval} by a double precision 
-!     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to {\tt ESMF\_TimeIntervalProdRT}.
+!     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(*)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          The multiplicand.
-!     \item[mutliplier]
-!          The double precision multiplier.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalProdTR(timeInterval, multiplier, &
                                      ESMF_TimeIntervalProdTR)
@@ -1029,7 +1452,7 @@
       end function ESMF_TimeIntervalProdTR
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:   ESMF_TimeIntervalProdRT - Multiply a TimeInterval by a double precision
 
 ! !INTERFACE:
@@ -1043,21 +1466,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 
 ! !DESCRIPTION:
-!     Multiplies {\tt timeInterval} by a double precision 
-!     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
-!     Commutative complement to {\tt ESMF\_TimeIntervalProdTR}.
+!     This method overloads the (*) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(*)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[mutliplier]
-!          The double precision multiplier.
-!     \item[timeInterval]
-!          The multiplicand.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.7, TMG7.2
+!EOPI
 
       call c_ESMC_TimeIntervalProdRT(multiplier, timeInterval, &
                                      ESMF_TimeIntervalProdRT)
@@ -1067,9 +1479,12 @@
 !------------------------------------------------------------------------------
 !
 ! This section includes the inherited ESMF_BaseTime class overloaded operators
+! internal, private implementation methods
+! Note:  these functions do not have a return code, since F90 forbids more
+! than 2 arguments for arithmetic overloaded operators
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalSum - Add two TimeIntervals 
 
 ! !INTERFACE:
@@ -1083,22 +1498,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Adds {\tt timeInterval1} to {\tt timeInterval2} and returns the
-!     sum as an {\tt ESMF\_TimeInterval}.  This method is overloaded 
-!     with the (+) operator.
+!     This method overloads the (+) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(+)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The augend.
-!     \item[timeInterval2]
-!          The addend.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, 
-!                 TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeSum(timeInterval1, timeInterval2, &
@@ -1107,7 +1510,7 @@
       end function ESMF_TimeIntervalSum
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalDiff - Subtract one TimeInterval from another
    
 ! !INTERFACE:
@@ -1121,21 +1524,11 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Subtract {\tt timeInterval2} from {\tt timeInterval1} and returns
-!     the remainder as an {\tt ESMF\_TimeInterval}.  This method is 
-!     overloaded with the (-) operator.
+!     This method overloads the (-) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(-)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The minuend.
-!     \item[timeInterval2]
-!          The subtrahend.
-!     \end{description}
-!
-!EOP
+!EOPI
 ! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeDiff(timeInterval1, timeInterval2, &
@@ -1144,7 +1537,7 @@
       end function ESMF_TimeIntervalDiff
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_TimeIntervalEQ - Test if TimeInterval 1 is equal to TimeInterval 2
 
 ! !INTERFACE:
@@ -1158,20 +1551,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 !DESCRIPTION:
-!     Returns true if {\tt timeInterval1} and {\tt timeInterval2} are equal, 
-!     false otherwise.  This method is overloaded with the (==) operator.
+!     This method overloads the (==) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(==)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
-!          Second {\tt ESMF\_TimeInterval} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeEQ(timeInterval1, timeInterval2, ESMF_TimeIntervalEQ)
@@ -1179,7 +1562,7 @@
       end function ESMF_TimeIntervalEQ
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalNE - Test if TimeInterval 1 is not equal to TimeInterval 2
 
 ! !INTERFACE:
@@ -1193,21 +1576,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns true if {\tt timeInterval1} and {\tt timeInterval2} are
-!     not equal, false otherwise.  This method is overloaded with the
-!     (!=) operator.
+!     This method overloads the (/=) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(/=)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
-!          Second {\tt ESMF\_TimeInterval} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeNE(timeInterval1, timeInterval2, ESMF_TimeIntervalNE)
@@ -1215,7 +1587,7 @@
       end function ESMF_TimeIntervalNE
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalLT - Test if TimeInterval 1 is less than TimeInterval 2
 
 ! !INTERFACE:
@@ -1229,20 +1601,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns true if {\tt timeInterval1} is less than {\tt timeInterval2},
-!     false otherwise. This method is overloaded with the (<) operator.
+!     This method overloads the (<) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(<)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
-!          Second {\tt ESMF\_TimeInterval} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLT(timeInterval1, timeInterval2, ESMF_TimeIntervalLT)
@@ -1250,7 +1612,7 @@
       end function ESMF_TimeIntervalLT
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalLE - Test if TimeInterval 1 is less than or equal to TimeInterval 2
 
 ! !INTERFACE:
@@ -1264,21 +1626,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns true if {\tt timeInterval1} is less than or equal to 
-!     {\tt timeInterval2}, false otherwise.  This method is overloaded
-!     with the (<=) operator.
+!     This method overloads the (<=) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(<=)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
-!          Second {\tt ESMF\_TimeInterval} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeLE(timeInterval1, timeInterval2, ESMF_TimeIntervalLE)
@@ -1286,7 +1637,7 @@
       end function ESMF_TimeIntervalLE
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalGT - Test if TimeInterval 1 is greater than TimeInterval 2
 
 ! !INTERFACE:
@@ -1300,20 +1651,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns true if {\tt timeInterval1} is greater than {\tt timeInterval2},
-!     false otherwise.  This method is overloaded with the (>) operator.
+!     This method overloads the (>) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(>)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
-!          Second {\tt ESMF\_TimeInterval} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGT(timeInterval1, timeInterval2, ESMF_TimeIntervalGT)
@@ -1321,7 +1662,7 @@
       end function ESMF_TimeIntervalGT
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE:  ESMF_TimeIntervalGE - Test if TimeInterval1 is greater than or equal to TimeInterval2
 
 ! !INTERFACE:
@@ -1335,21 +1676,10 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns true if {\tt timeInterval1} is greater than or equal to 
-!     {\tt timeInterval2}, false otherwise.  This method is overloaded
-!     with the (>=) operator.
+!     This method overloads the (>=) operator for the {\tt ESMF\_TimeInterval}
+!     class.  See "interface operator(>=)" above for complete description.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          First {\tt ESMF\_TimeInterval} in comparison.
-!     \item[timeInterval2]
-!          Second {\tt ESMF\_TimeInterval} in comparison.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.3, TMG2.4.3, TMG7.2
+!EOPI
 
       ! call ESMC_BaseTime base class function
       call c_ESMC_BaseTimeGE(timeInterval1, timeInterval2, ESMF_TimeIntervalGE)
