@@ -1,4 +1,4 @@
-% $Id: AppDriver_usage.tex,v 1.4 2004/04/22 22:22:09 cdeluca Exp $
+% $Id: AppDriver_usage.tex,v 1.5 2004/06/15 23:23:54 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,13 +10,32 @@
 
 %\subsection{Usage}
 
-The Application Driver directory contains subdirectories with sample
-source files, each of which shows an example of using ESMF in a
-different way.  The user decides on which strategy they want to follow
-and then copies the files from the corresponding subdirectory into
-their own directory. Some of the files can be used unchanged, but others
-are template files which have the rough outline of the code but
-need significant amounts of application-specific code added in order 
-to perform the desired function.
+ESMF encourages application organization in which there is a single 
+top-level Gridded Component.  This provides a simple, clear sequence
+of operations at the highest level, and also enables the entire 
+application to be treated as a sub-Gridded Component of another, larger 
+application if desired.  When an application is organized in this fashion 
+the standard AppDriver can probably be used without much modification.  
 
+Examples of program organization using the AppDriver can be found in the 
+{\tt src/Superstructure/AppDriver} directory.  A set of subdirectories 
+within the AppDriver directory follows the naming convention:
+\begin{verbatim}
+<seq|conc>\_<pairwise|hub>\_<f|c>driver\_<spmd|mpmd>
+\end{verbatim}
 
+The example that is currently implemented is 
+{\tt seq\_pairwise\_fdriver\_spmd}, which
+has sequential component execution, a pairwise coupler, a main program
+in Fortran, and all processors launching the same executable.
+
+This simple example is also copied automatically into a top-level 
+{\tt quick\_start} directory at compilation time.  
+
+The user can copy the AppDriver files into
+their own local directory. Some of the files can be used unchanged.
+Others are template files which have the rough outline of the code but
+need additional application-specific code added in order to perform a
+meaningful function.  The {\tt README} file in the AppDriver 
+subdirectory or quick\_start directory contains instructions about 
+which files to change.

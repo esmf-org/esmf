@@ -1,4 +1,4 @@
-% $Id: AppDriver_rest.tex,v 1.4 2004/03/22 19:18:03 cdeluca Exp $
+% $Id: AppDriver_rest.tex,v 1.5 2004/06/15 23:23:54 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,13 +10,9 @@
 
 %\subsubsection{Restrictions and Future Work}
 
-It would be possible for the main program to directly
-create subcomponents and execute the main time loop.
-This would result in one less source file.  But then the program
-is not structured with a single top level Component that could be
-embedded into some higher level application at some future time.
-The requirement that there be a single top level Component is not 
-too onerous since the main program can in most cases be an exact 
-copy of the AppDriver code, and the user can think of the top
-level Component as in some sense the main program code.
+\begin{enumerate}
 
+\item {\bf Concurrent components not supported.}  Only applications in 
+which components are executed sequentially are supported at this time. 
+
+\end{enumerate}

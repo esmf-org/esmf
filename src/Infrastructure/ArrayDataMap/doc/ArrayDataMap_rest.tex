@@ -1,11 +1,15 @@
-% $Id: ArrayDataMap_rest.tex,v 1.1 2004/06/04 12:29:18 nscollins Exp $
+% $Id: ArrayDataMap_rest.tex,v 1.2 2004/06/15 23:23:52 cdeluca Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 
-\item Native C++ vs Fortran index ordering not supported yet.
-\item Complex interleave not supported yet.
+\item {\bf Native C++ vs. Fortran index ordering is not supported yet.}
+ESMF currently assumes that all arrays are allocated from Fortran.
+\item {\bf Complex interleave is not supported yet.}
+ESMF does not yet support a complex type.  When we do, we expect that the
+user will be able to specify either an all-real followed by all-imaginary
+format or a real/imaginary interleaved format.
 
 \end{enumerate}
 
