@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.15 2003/02/13 22:43:09 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.16 2003/02/13 23:39:43 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
 // 
 // !USES:
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+#include <ESMC_Layout.h>  //
  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 
@@ -214,6 +215,12 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
     //enum ESMC_Logical iscontig;    // optimization possible if all contig
     // int lbounds[ESMF_MAXDIM];      // real lower indicies
     // int ubounds[ESMF_MAXDIM];      // real upper indicies
+
+ // misc methods that act on arrays
+    int ESMC_ArrayRedist(ESMC_Layout *layout,
+                         int rank_trans[], int size_rank_trans,
+                         int decompids[], int size_decomp,
+                         ESMC_Array *RedistArray);
     
  // < declare the rest of the public interface methods here >
   
