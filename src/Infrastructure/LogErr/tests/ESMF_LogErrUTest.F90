@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.10 2005/03/09 16:17:36 nscollins Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.11 2005/03/25 00:21:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.10 2005/03/09 16:17:36 nscollins Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.11 2005/03/25 00:21:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -48,12 +48,16 @@
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
-      character(ESMF_MAXSTR) :: name
+      character(ESMF_MAXSTR) :: name, msg_type, Pet_num
+      character :: random_char
+      character (5) :: random_string, msg_string
 
 !     !LOCAL VARIABLES:
-      integer :: rc2
+      integer :: rc2, ran_num, i, todays_date, input_status
+      real :: r1, real_number 
       logical :: is_error
-      type(ESMF_Log) :: log1
+      type(ESMF_Log) :: log1, log2
+
 
 !------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -261,6 +265,108 @@
       write(name, *) " Verify rcToReturn Value Test"
       call ESMF_Test((rc2.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc2 = ", rc2
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test LogFlush of new non-opened log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogFlush of non-opened log Test"
+      call ESMF_LogFlush(log2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !This test crashes, 1170027 bug open, commented out
+      ! Test Log Write without opening log file
+      !write(failMsg, *) "Did not return ESMF_SUCCESS"
+      !call ESMF_LogWrite(log=log2, msg="Log Write One",msgtype=ESMF_LOG_INFO)
+      !write(name, *) "Write without opening log file Test"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Log Open
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogOpen(log2, "Log Test File 2", rc=rc)
+      write(name, *) "Open Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test Log reopenOpen 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogOpen(log2, "Log_Test_File_3", rc=rc)
+      write(name, *) "Open Already Open Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      ! Generate a random string and write it to log file
+      call random_seed
+      do i=1, 5
+      	call random_number(r1)
+      	ran_num = int(26*r1) + 65
+      	random_char  = achar(ran_num)
+	random_string(i:i) = random_char
+      end do
+	print *, "Random string is ", random_string
+
+      !NEX_UTest
+      ! Test Log Write 
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      call ESMF_LogWrite(log=log2, msg=random_string,msgtype=ESMF_LOG_INFO)
+      write(name, *) "Write to log file Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test LogFlush of log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogFlush Test"
+      call ESMF_LogFlush(log2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! Verify that the correct string was written to the file
+      !EX_UTest
+      rc = ESMF_FAILURE
+      input_status = 0
+      open (unit=1, file = "Log_Test_File_3", action = "read", form = "formatted")
+      do
+      	read (1, *) todays_date, real_number, msg_type, Pet_num, msg_string
+        if (input_status < 0) then
+		exit
+        else 
+	    if (msg_string.eq.random_string) then
+	    	rc = ESMF_SUCCESS
+		exit
+	    endif
+	endif
+      end do
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " Verify LogFlush Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
+      print *, "msg_string is ", msg_string
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Log Close
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      !call ESMF_LogClose(log2, rc)
+      write(name, *) "Close Log Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, " rc = ", rc
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      ! Test LogFlush of new non-opened log
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) " LogFlush of non-opened log Test"
+      !call ESMF_LogFlush(log2, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #endif
 
