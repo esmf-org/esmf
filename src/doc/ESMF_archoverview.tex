@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.13 2004/06/22 20:56:59 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.14 2005/01/10 23:55:33 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -8,38 +8,39 @@ and the lower layer the {\bf infrastructure} layer. The role of the superstructu
 data streams between components. The key elements of the superstructure are described in Section \ref{sec:superstructure}.
 These elements include classes that wrap user code, ensuring that all
 components present consistent interfaces. The infrastructure layer provides a foundation that developers of
-user components can use to speed construction and to ensure consistent, guaranteed behavior of components.
+science components can use to speed construction and to ensure consistent, guaranteed behavior.
 The elements of the infrastructure include constructs to support parallel processing with data types tailored
 to Earth science applications, specialized libraries to support consistent time and calendar management and
-performance, error handling and scalable I/O tools. The infrastructure layer is described in Section \ref{sec:infrastructure}.
-A hierarchical combination of superstructure, user code components, and infrastructure are joined together to form an ESMF application.
-
-
+performance, error handling and scalable I/O tools. The infrastructure layer is described in 
+Section \ref{sec:infrastructure}.
+A hierarchical combination of superstructure, user code components, and infrastructure are joined 
+together to form an ESMF application.
 
 \subsection{Key Concepts}
 
 The ESMF architecture and programming paradigm are based upon 
-five key concepts:  modularity, flexibility, scalability, local 
-communication, and a uniform communication API.  
+five key concepts:  modularity, flexibility, hierarchical 
+organization, communication within components, and a uniform 
+communication API.  
 
 \subsubsection{Modularity}
 
 The ESMF design is based upon modular components.  There
 are two types of components, one of which represents models 
-(GridComp) and one which represents couplers (CplComp).  Data
-are always passed between components using a data structure 
+(Gridded Components) and one which represents couplers (Coupler Components).  
+Data are always passed between components using a data structure 
 called a State, which can store Fields, Bundles of Fields,
-and Arrays.  A GridComp stores no information about the internals 
-of the GridComps that it interacts with; this information is 
-passed in through the argument lists of its initialize, run, 
+Arrays, and other States.  A Gridded Component stores no information about 
+the internals of the Gridded Components that it interacts with; this information 
+is passed in through the argument lists of its initialize, run, 
 and finalize methods.  The information that is 
 passed in through the argument list can be a State from 
-another GridComp, or it can be a function pointer that performs
+another Gridded Component, or it can be a function pointer that performs
 a computation or communication on a State.  These function 
 pointers (not yet implemented) are called Transforms, and they 
-are created by CplComps.  They are called inside the GridComp they 
-are passed into.  Although Transforms add some complexity to the 
-framework (and their use is not required), they are what will
+are created by Coupler Components.  They are called inside the 
+Gridded Component they are passed into.  Although Transforms add 
+some complexity to the framework (and their use is not required), they are what will
 enable ESMF to accommodate virtually any model of communication 
 between components. 
 
@@ -48,31 +49,30 @@ the internals of other components.  This allows components to be
 used more easily in multiple contexts.}
 
 \subsubsection{Flexibility}
-The ESMF does not dictate how models should be coupled, it
+The ESMF does not dictate how models should be coupled; it
 simply provides tools for creating couplers.  For example, 
 both a hub-and-spokes type coupling strategy and  
 pairwise strategies are supported.  The ESMF also allows model
 communications to occur mid-timestep, if desired.  Sequential, 
-concurrent, and mixed
-modes of execution are supported.  
+concurrent, and mixed modes of execution are supported.  
 
 {\bf The ESMF does not impose restrictions on how data flows through 
 an application.  This accommodates scientific innovation - if you 
 want your atmospheric model to communicate with your sea ice model
-mid-timestep, ESMF will not stop you.  It may, in fact, make
-it easier.}
+mid-timestep, ESMF will not stop you.}
 
-\subsubsection{Scalability}
+\subsubsection{Hierarchical Organization}
+\label{sec:principles-hierarchy}
 The ESMF allows applications to be composed hierarchically.
 For example, physics and dynamics modules can be defined as 
-separate GridComps, coupled together with a CplComp, and this 
-whole system can be nested within a single atmospheric GridComp.
-The atmospheric GridComp can be run standalone, or can be included
+separate Gridded Components, coupled together with a Coupler Component, and all
+of these nested within a single atmospheric Gridded Component.
+The atmospheric Gridded Component can be run standalone, or can be included
 in a larger climate or data assimilation application.  See Figure
 \ref{fig:appunit} for an illustrative example.
 
 The data structure that enables scalability in ESMF is the
-derived type GridComp.  Fortran alone doesn't allow you to create
+derived type Gridded Component.  Fortran alone doesn't allow you to create
 generic components - you'd have to create derived types for
 PhysComp, and DynComp, and PhysDynCouplerComp, and AtmComp.  In 
 ESMF, these are always of type GridComp or CplComp, so they 
@@ -82,36 +82,40 @@ without having to overload them with many specific derived
 types.  It's the same idea when you want to support different 
 implementations of the same component, like multiple dynamics.
 
-{\bf In short, the ESMF defines a sensible scalable 
-architecture for organizing very complex applications, and
+{\bf The ESMF defines a hierarchical, scalable architecture 
+that is natural for organizing very complex applications, and
 for allowing exchangeable components.}
 
 \begin{figure}
-\caption{A typical building block for an ESMF application consists of a 
-parent GridComp, two or more child GridComps, and 
-a CplComp.  The parent GridComp is called by an 
-AppDriver.  All ESMF components have initialize, run, and 
-finalize methods.  The diagram shows that when the AppDriver calls 
-initialize on a parent GridComp, the call cascades down to
+\caption{A typical building block for an ESMF application consists 
+of a parent Gridded Component, two or more child Gridded Components, and 
+a Coupler Component.  The parent Gridded Component is called by an 
+Application Driver.  All ESMF components have initialize, run, and 
+finalize methods.  The diagram shows that when the Application Driver calls 
+initialize on a parent Gridded Component, the call cascades down to
 all of its children, so that the result is that the entire ``tree''
 of components is initialized.  The run and finalize methods work the
 same way.  In this example a hurricane simulation is built 
-from ocean and atmosphere GridComps.  The data exchange between 
-the ocean and atmosphere is handled by an ocean-atmosphere CplComp.  
-Since the whole hurricane simulation is a GridComp,
+from ocean and atmosphere Gridded Components.  The data exchange between 
+the ocean and atmosphere is handled by an ocean-atmosphere Coupler Component.  
+Since the whole hurricane simulation is a Gridded Component,
 it could be easily be treated as a child and coupled to another
-GridComp, rather than being driven directly by the AppDriver.}
+Gridded Component, rather than being driven directly by the Application 
+Driver.  A similar diagram could be drawn for an atmospheric model containing
+physics and dynamics components, as described in Section 
+\ref{sec:principles-hierarchy}.}
 \label{fig:appunit}
 \scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
 \end{figure}
 
-\subsubsection{Local Communication}
+\subsubsection{Communication Within Components}
 Communication in ESMF always occurs within a component.  It
-can occur internal to a GridComp, and have nothing to do 
+can occur internal to a Gridded Component, and have nothing to do 
 with interactions with other components (setting aside 
-synchronization issues), or it can occur within a CplComp
-or a Transform generated by a CplComp.  This means that
-CplComps must always be defined on the union of all the
+synchronization issues), or it can occur within a Coupler Component
+or a Transform generated by a Coupler Component.  A result of the rule 
+that all communication happens within a component is that 
+Coupler Components must always be defined on the union of all the
 components that they couple together.  Models can choose to 
 use whatever mechanism they want for intra-model communications.  
 
@@ -119,11 +123,12 @@ use whatever mechanism they want for intra-model communications.
 for communication, the communication mechanism that the 
 framework uses is not hardwired into its architecture -
 the sends and receives or puts and gets are enclosed within 
-the CplComps and Transforms. This is designed to accommodate 
+Gridded Components, Coupler Components and Transforms. The intent
+is to accommodate 
 multiple models of communication and technical innovations.}
 
 \subsubsection{Uniform Communication API}
-We are trying to create a single API for shared and distributed
+ESMF is developing a single API for shared and distributed
 memory that, unlike MPI, accounts for NUMA achitectures and 
 does not treat all processes as being identical.  It's possible for
 users to set ESMF communications to a strictly message passing 
