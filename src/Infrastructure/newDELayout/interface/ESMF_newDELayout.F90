@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.22 2004/04/14 20:46:05 nscollins Exp $
+! $Id: ESMF_newDELayout.F90,v 1.23 2004/04/19 20:29:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -165,7 +165,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.22 2004/04/14 20:46:05 nscollins Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.23 2004/04/19 20:29:24 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -616,7 +616,7 @@ contains
 
     integer :: status       ! local error status
     logical :: rcpresent
-    integer :: len_coord, len_cde, len_cw
+    integer :: i, len_coord, len_cde, len_cw
     integer, target :: dummy(0)     ! used to satisfy the C interface...
     integer, pointer:: opt_DEcoord(:), opt_DEcde(:), opt_DEcw(:)
 
@@ -658,6 +658,12 @@ contains
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_nDELayoutGet error"
       return
+    endif
+
+    if (present(coord)) then
+      do i = 1, len_coord
+        coord(i) = coord(i) + 1
+      enddo
     endif
 
     ! set return values
