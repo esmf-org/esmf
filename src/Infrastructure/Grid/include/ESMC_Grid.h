@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid.h,v 1.2 2003/03/11 03:00:51 cdeluca Exp $
+// $Id: ESMC_Grid.h,v 1.3 2003/07/17 22:24:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,28 +29,30 @@
 //
 //-----------------------------------------------------------------------------
 //
+#include "ESMC_Base.h"
 
 
 // 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section contains ...
+// This section contains the code to store a pointer to
+//  the fortran derived type for a Grid.
 //
 //
 
-#define ESMC_GridMACRO1(arg1, arg2)  foo(arg1, arg2)
+class ESMC_Grid :: public ESMC_Base {
+    private:
+     void *this;   // pointer to fortran derived type
+}
 
 
 // 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //
-// This section contains ...
 //
 //
-
-#define ESMC_GridCONSTANT_FRED   23
 
 
 #endif  // ESMC_Grid_H
