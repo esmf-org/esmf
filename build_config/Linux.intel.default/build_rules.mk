@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.14 2004/09/21 23:31:57 nscollins Exp $
+# $Id: build_rules.mk,v 1.15 2004/10/05 22:49:18 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -176,12 +176,14 @@ CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CCV		   = ${CXX_CC} -V -c -w -x c++
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
-#CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
+ifeq ($(ESMF_COMPILER_VERSION),81)
+C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_81/lib -L/opt/intel_cc_81/lib \
+                     -L/usr/lib/gcc-lib/ia64-redhat-linux/3.2.3 -lstdc++ -lrt
+else
 C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_80/lib -L/opt/intel_cc_80/lib \
                      -lcprts -lrt
-#C_F90CXXLIBS       = -lcprts
+endif
 C_CXXF90LIBS       =  -lrt
-#C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
