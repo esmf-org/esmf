@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.51 2005/03/01 00:06:01 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.52 2005/03/10 17:38:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,6 +101,10 @@
 
     int ESMC_RouteSetRecvItems(int nitems);
     int ESMC_RouteGetRecvItems(void);
+
+ // a couple very specialized count routines - see the actual code for details.
+    int ESMC_RouteGetSumMaxXPsPerPET(int *count);
+    int ESMC_RouteGetSumMaxRegionsPerXP(int *count);
 
     // initialize the communication routines in this route object
     int ESMC_RoutePrecomputeHalo(int rank, int my_DE, ESMC_AxisIndex *AI_exc,
