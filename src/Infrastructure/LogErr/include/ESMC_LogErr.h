@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.15 2003/09/04 22:24:21 cdeluca Exp $
+// $Id: ESMC_LogErr.h,v 1.16 2003/10/09 16:31:44 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-//!CLASS: ESMC\_Log - C++ interface to Log
+// !CLASS: ESMC_Log - C++ interface to Log
 //
 // !DESCRIPTION:
 //
@@ -30,7 +30,6 @@
 
 
 #include <ESMC_Base.h>
-//#include <ESMC_LogErr.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,7 +43,7 @@
 
 class ESMC_Log {
   private:
-// !PRIVATE MEMBER FUNCIONS
+// !PRIVATE MEMBER FUNCIONS:
     void ESMC_LogFormName();
     void ESMC_LogPrintHeader(int fortIO);
     void ESMC_LogPrint(int fortIO, int errCode, int line, char file[],
@@ -53,17 +52,17 @@ class ESMC_Log {
     bool ESMC_LogNameValid(char name[], int FortIO);
 // !PRIVATE TYPES:
 
-    ESMC_Logical oneLogErrFile; // if log data written to one log file,
-                                // this is set to
-                                // true.  Otherwise set to false.
-			        // ESMC_OpenFile can override
-			        // this value
+    ESMC_Logical oneLogErrFile;
+                                // If log data written to one log file,
+                                // this is set to true.  Otherwise set to false.
+                                // ESMC_OpenFile can override
+                                // this value
 
     ESMC_Logical  standardOut;  // if log data written to standard out,
                                 // this variable
                                 // is set to true. Otherwise set to false.
-			        // ESMC_OpenFile
-			        // can over-ride this value.
+                                // ESMC_OpenFile
+                                // can over-ride this value.
 
     ESMC_Logical fortIsOpen;    // used to to a file with Fortran
                                 // I/O libraries 
@@ -71,11 +70,11 @@ class ESMC_Log {
     int unitNumber;             // fortran unit number for log/err file when
                                 // ESMC\_LogGetUnit
                                 // is used  Can be overwritten by
-			        // ESMC_OpenFileFortran
+                                // ESMC_OpenFileFortran
 
 
     int numFilePtr;             // index into global array of File pointers
-			        // for C++ I/O.
+                                // for C++ I/O.
 
 
     int numFileFort;            // index into global array of unit numbers for 
@@ -94,18 +93,24 @@ class ESMC_Log {
 
 
     char nameLogErrFile[32];    // name of logfile.
-			        // If multiple files are written out,
-			        // PE rank is automatically
-				// appended to name.
+                                // If multiple files are written out,
+                                // PE rank is automatically
+                                // appended to name.
+		
+    ESMC_Logical fileI0;        // If true, output written to files
+
+    int stdOutUnitNumber;       // Unit number corresponding to standard 
+                                // out
   public:
-// !PUBLIC MEMBER FUNCTIONS (see ESMC\_LogErr.C for a description of these methods)
+// !PUBLIC MEMBER FUNCTIONS:
+// (see ESMC\_LogErr.C for a description of these methods)
     void ESMC_LogInfo(char* fmt,...);   
     void ESMC_LogInfoFortran(char fmt[],
     char charData[],char strData[][32],int intData[], double floatData[]);
-    void ESMC_LogOpenCFile(int numLogFile,char name[]);
+    void ESMC_LogOpenFile(int numLogFile,char name[]);
     void ESMC_LogOpenFortFile(int numLogFile, char name[]);
     int ESMC_LogGetUnit();
-    void ESMC_LogCloseCFile();
+    void ESMC_LogCloseFile();
     void ESMC_LogCloseFortFile();
     void ESMC_LogSetFlush();
     ESMC_Logical ESMC_LogGetFlush() const;
@@ -130,19 +135,40 @@ class ESMC_Log {
                      char dir[], char msg[]);
     void ESMC_LogErrFortran(int errCode,int line,char file[],char dir[],char msg[]);
     void ESMC_LogExit();
+    void ESMC_LogSet(char* option, ESMC_Logical value, ...);
+    void ESMC_LogGet(char* option, ESMC_Logical value, ...);
+    FILE* ESMC_Log::ESMC_GetFileHandle();
     ESMC_Log();
 };
+//EOP
 
-// private static data - address of fortran callback funcs
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_Log() - constructor
+// !INTERFACE:
 
-extern "C" {
- void FTN(f_esmf_logopenfortran)(ESMC_Logical*, int *, char*, int );
- void FTN(f_esmf_logclosefortran)(int *);
- void FTN(f_esmf_logprintstring)(int *, char*, ESMC_Logical*, int );
- void FTN(f_esmf_logprintnewline)(int *, ESMC_Logical*);
+inline ESMC_Log::ESMC_Log(
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
+// none
+   
+  )
+
+// !DESCRIPTION:
+// This is the constructor.  Sets verbose, flush, haltOnErr and haltOnWarn
+// to their default values.
+//
+//EOP
+{
+  verbose=ESMF_TRUE
+  flush=ESMF_FALSE
+  haltOnErr=ESMF_TRUE
+  haltOnWarn=ESMF_FALSE
 }
-
-
+ 
 //---------------------------------------------------------------------------
 //BOP
 //
@@ -150,8 +176,10 @@ extern "C" {
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetFlush(
-
-// !ARGUMENTS
+//
+// !RETURN VALUE:
+//  none
+// !ARGUMENTS:
 //   none
 
    ) 
@@ -171,9 +199,11 @@ inline void ESMC_Log::ESMC_LogSetFlush(
 // !IROUTINE: ESMC_LogGetFlush() - returns the flush variable 
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
-
-// !ARGUMENTS
+ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
+//
+// !RETURN VALUE
+//  Value of flush
+// !ARGUMENTS:
 //   none
 
    ) const 
@@ -196,7 +226,9 @@ inline ESMC_Logical ESMC_Log::ESMC_LogGetFlush (
 // !INTERFACE:       
 	     
 inline void ESMC_Log::ESMC_LogSetNotFlush(
-				  
+//
+// !RETUN VALUE:
+//  none
 // !ARGUMENTS        
 //   none   
 
@@ -219,7 +251,9 @@ inline void ESMC_Log::ESMC_LogSetNotFlush(
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetVerbose(
-
+//
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS
 //   none
   )
@@ -239,8 +273,10 @@ inline void ESMC_Log::ESMC_LogSetVerbose(
 //
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
-
+ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
+//
+// !RETURN VALUE:
+//  value of verbose
 // !ARGUMENTS
 //   none
   ) const
@@ -262,7 +298,8 @@ inline ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetNotVerbose(
-
+// RETURN VALUE:
+//  none
 // !ARGUMENTS
 //   none
   )
@@ -285,7 +322,8 @@ inline void ESMC_Log::ESMC_LogSetNotVerbose(
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetHaltOnErr(
-
+// RETURN VALUE:
+//  none
 // !ARGUMENTS
 //   none
   )
@@ -306,8 +344,10 @@ inline void ESMC_Log::ESMC_LogSetHaltOnErr(
 //
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
-
+ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
+//
+// !RETURN VALUE
+//  haltOnErr
 // !ARGUMENTS
 //   none
   ) const
@@ -329,7 +369,9 @@ inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
-
+//
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS
 //   none
   )
@@ -352,7 +394,9 @@ inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
-
+//
+// !RETURN VALUE:
+// none
 // !ARGUMENTS
 //   none
   )
@@ -374,8 +418,10 @@ inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
 //
 // !INTERFACE:
 
-inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
-
+ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
+//
+// !RETURN VALUE
+//  Value of HaltOnWarn
 // !ARGUMENTS
 //   none
   ) const
@@ -398,7 +444,9 @@ inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
 // !INTERFACE:
 
 inline void ESMC_Log::ESMC_LogSetNotHaltOnWarn(
-
+//
+// !RETURN VALUE:
+//  none
 // !ARGUMENTS
 //   none
   )
