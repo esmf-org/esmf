@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.23 2004/03/03 00:26:26 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.24 2004/03/03 18:15:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1595,17 +1595,17 @@ end function
 
 !     Validate bundle before using it.
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
         return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
         return
       endif
 
 !     Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
-        print *, "ERROR in ESMF_BundleGetFields: Empty Bundle"
+        print *, "ERROR in ESMF_BundleGetField: Empty Bundle"
         return
       endif
 
@@ -1614,7 +1614,7 @@ end function
   
        call ESMF_FieldGetName(btype%flist(i), temp_name, status)
        if (status .eq. ESMF_FAILURE) then
-         print *, "ERROR in ESMF_BundleGetFields: Error getting Field name from Field ", i
+         print *, "ERROR in ESMF_BundleGetField: Error getting Field name from Field ", i
          return
        endif
 
@@ -1627,7 +1627,7 @@ end function
       enddo
 
       if (.not. found) then
-        print *, "ERROR in ESMF_BundleGetFields: Field not found with name ", name
+        print *, "ERROR in ESMF_BundleGetField: Field not found with name ", name
         return
       endif
 
@@ -1692,23 +1692,23 @@ end function
 
 !     Validate bundle before using it.
       if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
         return
       endif
       if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        print *, "ERROR in ESMF_BundleGetField: bad Bundle object"
         return
       endif
 
 !     Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
-        print *, "ERROR in ESMF_BundleGetFields: Empty Bundle"
+        print *, "ERROR in ESMF_BundleGetField: Empty Bundle"
         return
       endif
 
 !     Check for out of range index number
       if ((index .lt. 1) .or. (index .gt. btype%field_count)) then
-        print *, "ERROR in ESMF_BundleGetFields: Index ", index, &
+        print *, "ERROR in ESMF_BundleGetField: Index ", index, &
                         "out of range. Min=1, max=", btype%field_count
         return
       endif
