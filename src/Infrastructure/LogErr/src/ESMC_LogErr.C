@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.34 2004/04/28 20:14:23 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.35 2004/04/29 19:40:18 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.34 2004/04/28 20:14:23 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.35 2004/04/29 19:40:18 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -253,7 +253,7 @@ int ESMC_Log::ESMC_LogWrite(
 	ti=*localtime(&tm);
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
-	int msec=tv.tv_usec/1000;
+	int msec=tv.tv_usec;
     //return ESMF_FAILURE;
     puts("Write Log");
 	do
@@ -272,17 +272,17 @@ int ESMC_Log::ESMC_LogWrite(
 	switch(logtype)
 	{
 		case ESMC_LOG_INFO:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"INFO",__FILE__,__LINE__,msg);
 			break;
 		case ESMC_LOG_WARN:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"WARNING",__FILE__,__LINE__,msg);
 			break;
 		case ESMC_LOG_ERROR:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"ERROR",__FILE__,__LINE__,msg);
 			break;
@@ -332,17 +332,17 @@ int ESMC_Log::ESMC_LogWrite(
 	switch(logtype)
 	{
 		case ESMC_LOG_INFO:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"INFO",__FILE__,__LINE__,modmeth,msg);
 			break;
 		case ESMC_LOG_WARN:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"WARNING",__FILE__,__LINE__,modmeth,msg);
 			break;
 		case ESMC_LOG_ERROR:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"ERROR",__FILE__,__LINE__,modmeth,msg);
 			break;
@@ -394,17 +394,17 @@ int ESMC_Log::ESMC_LogWrite(
 	switch(logtype)
 	{
 		case ESMC_LOG_INFO:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"INFO",__FILE__,__LINE__,module,method,msg);
 			break;
 		case ESMC_LOG_WARN:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"WARNING",__FILE__,__LINE__,module,method,msg);
 			break;
 		case ESMC_LOG_ERROR:
-			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.3d %s %s %d %s %s %s\n",
+			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d.%.6d %s %s %d %s %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,msec,"ERROR",__FILE__,__LINE__,module,method,msg);
 			break;
