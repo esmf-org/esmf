@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.30 2004/01/29 20:44:34 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.31 2004/01/29 23:53:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.30 2004/01/29 20:44:34 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.31 2004/01/29 23:53:32 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: x, y, intattr, intattr2
+      integer :: x, y
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
@@ -62,6 +62,11 @@
       type(ESMF_IOSpec) :: ios
       type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, f2, f3, f4, f5
+      integer :: intattr, intattr2
+      real :: rattr
+      character (len=32) :: lattrstr
+      type(ESMF_Logical) :: lattr
+      character (len=512) :: cattr, cattr2
 
 !-------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -425,10 +430,41 @@
 
       !NEX_UTest
       ! getting a non-existant attribute
+      call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
       write(failMsg, *) ""
       write(name, *) "Getting an non-existant Integer Attribute from a Field"
-      call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+      ! test setting a real attribute
+      call ESMF_FieldSetAttribute(f3, "Pi", 3.14159, rc)
+      rattr = 0.0
+      call ESMF_FieldGetAttribute(f3, "Pi", rattr, rc)
+      print *, "Pi should be 3.14159, is: ", rattr
+      write(failMsg, *) ""
+      write(name, *) "Getting a real Attribute back from a Field"
+      call ESMF_Test((rattr.eq.3.14159999), name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+      ! test setting a logical attribute
+      call ESMF_FieldSetAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
+      lattr = ESMF_FALSE
+      call ESMF_FieldGetAttribute(f3, "Sky is Blue", lattr, rc)
+      call ESMF_LogicalString(lattr, lattrstr, rc)
+      print *, "Sky is Blue  should be true, is: ", lattrstr
+      write(failMsg, *) ""
+      write(name, *) "Getting a logical Attribute back from a Field"
+      call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+      ! test setting a character attribute
+      cattr = "It was a dark and stormy night"
+      call ESMF_FieldSetAttribute(f3, "Book", cattr, rc)
+      call ESMF_FieldGetAttribute(f3, "Book", cattr2, rc)
+      print *, "Book  should be drivel, is: ", cattr2
+      write(failMsg, *) ""
+      write(name, *) "Getting a logical Attribute back from a Field"
+      call ESMF_Test((cattr.eq.cattr2), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
