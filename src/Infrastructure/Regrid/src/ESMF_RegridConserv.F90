@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.2 2003/06/11 23:08:29 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.3 2003/06/12 14:56:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.2 2003/06/11 23:08:29 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.3 2003/06/12 14:56:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1117,7 +1117,7 @@
 
 ! !INTERFACE:
       function ESMF_RegridConsByBundleConserv(src_bundle, dst_bundle, &
-                                                      name, rc)
+                                                   name, order, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RegridType) :: ESMF_RegridConsByBundleConserv
@@ -1129,6 +1129,8 @@
          dst_bundle            ! destination (incl grid) of resulting regridded bundle
 
       character (len = *), intent(in) :: name
+
+      integer, intent(in) :: order ! order (numerical accuracy) of regrid
 
       integer, intent(out) :: rc
 !

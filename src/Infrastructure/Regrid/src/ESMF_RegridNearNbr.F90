@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.2 2003/06/11 23:08:29 nscollins Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.3 2003/06/12 14:56:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.2 2003/06/11 23:08:29 nscollins Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.3 2003/06/12 14:56:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -150,10 +150,10 @@
          jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
          status             ! error flag
 
-      integer, dimension(:,3), allocatable :: &
+      integer, dimension(:,:), allocatable :: &
          src_add            ! src neighbor addresses (nnbr,3)
 
-      integer, dimension(3) :: &
+      integer, dimension(:,:,:), allocatable :: &
          dst_add            ! address in dest grid (i,j,DE)
          
       real(ESMF_IKIND_R8), dimension(:), allocatable :: &

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.15 2003/06/11 23:08:29 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.16 2003/06/12 14:56:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -49,9 +49,9 @@
       use ESMF_PhysGridMod     ! ESMF physical grid class
       use ESMF_DistGridMod     ! ESMF distributed grid class
       use ESMF_RegridTypesMod  ! ESMF regrid data types and utilities
-      use ESMF_RegridBilinMod  ! ESMF regrid methods related to bilinear regrid
-      use ESMF_RegridNearNbrMod  ! ESMF regrid methods related to nearest-nbr regrid
-      use ESMF_RegridConservMod ! ESMF regrid methods related to conservative regrid
+      use ESMF_RegridBilinearMod  ! ESMF rg methods related to bilinear regrid
+      use ESMF_RegridNearNbrMod  ! ESMF rg methods related to nearest-nbr regrid
+      use ESMF_RegridConservMod ! ESMF rg methods related to conservative regrid
 
       implicit none
 
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.15 2003/06/11 23:08:29 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.16 2003/06/12 14:56:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -221,7 +221,7 @@
       integer :: stat = ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
       type (ESMF_RegridType), pointer :: regrid
-      character (*) :: regrid_name
+      character (len=ESMF_MAXSTR) :: regrid_name
 
 !     Initialize return code
       if(present(rc)) then
@@ -244,25 +244,25 @@
 !     Call the appropriate create routine based on method choice
       select case(method)
       case(ESMF_RegridMethod_Bilinear) ! bilinear
-         regrid = ESMF_RegridConstructBilin(src_field, dst_field, &
-                                            regrid_name, stat)
+         regrid = ESMF_RegridConstructBilinear(src_field, dst_field, &
+                                            regrid_name, rc=stat)
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Bicubic not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_Conserv1)
          regrid = ESMF_RegridConstructConserv(src_field, dst_field, &
-                                              regrid_name, order=1, stat)
+                                              regrid_name, order=1, rc=stat)
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
          regrid = ESMF_RegridConstructConserv(src_field, dst_field, &
-                                              regrid_name, order=2, stat)
+                                              regrid_name, order=2, rc=stat)
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Raster method not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_NearNbr) ! nearest-neighbor dist-weighted avg
          regrid = ESMF_RegridConstructNearNbr(src_field, dst_field, &
-                                              regrid_name, stat)
+                                              regrid_name, rc=stat)
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
          print *, "ERROR in ESMF_RegridCreateFromField: ", &
                   "Fourier transforms not yet supported"
@@ -370,7 +370,7 @@
       integer :: stat = ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
       type (ESMF_RegridType), pointer :: regrid
-      character (*) :: regrid_name
+      character (len=ESMF_MAXSTR) :: regrid_name
 
 !     Initialize return code
       if(present(rc)) then
@@ -394,28 +394,28 @@
 
       select case(method)
       case(ESMF_RegridMethod_Bilinear) ! bilinear
-         regrid = ESMF_RegridConstructBilin(src_bundle, dst_bundle, &
-                                            regrid_name, stat)
+         regrid = ESMF_RegridConstructBilinear(src_bundle, dst_bundle, &
+                                            regrid_name, rc=stat)
       case(ESMF_RegridMethod_Bicubic)  ! bicubic
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "Bicubic not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_Conserv1)
          regrid = ESMF_RegridConstructConserv(src_bundle, dst_bundle, &
-                                              regrid_name, order=1, stat)
+                                              regrid_name, order=1, rc=stat)
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "1st-order conservative not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
          regrid = ESMF_RegridConstructConserv(src_bundle, dst_bundle, &
-                                              regrid_name, order=2, stat)
+                                              regrid_name, order=2, rc=stat)
       case(ESMF_RegridMethod_Raster) ! regrid by rasterizing domain
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "Raster method not yet supported"
          stat = ESMF_FAILURE
       case(ESMF_RegridMethod_NearNbr) ! nearest-neighbor dist-weighted avg
          regrid = ESMF_RegridConstructNearNbr(src_bundle, dst_bundle, &
-                                              regrid_name, stat)
+                                              regrid_name, rc=stat)
       case(ESMF_RegridMethod_Fourier) ! Fourier transform
          print *, "ERROR in ESMF_RegridCreateFromBundle: ", &
                   "Fourier transforms not yet supported"
@@ -850,7 +850,7 @@
       subroutine ESMF_RegridDestroy(regrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
+      type(ESMF_Regrid), intent(inout) :: regrid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -879,8 +879,7 @@
 
 !     Call destruct method to free up internally-allocated memory
 
-      ! write one first
-      !call ESMF_RegridDestruct(regrid%ptr, status)
+      call ESMF_RegridDestruct(regrid%ptr, status)
       if (status /= ESMF_SUCCESS) then
         ! Use error function eventually...
         print *, "ERROR in ESMF_RegridDestroy: Regrid destruct"
