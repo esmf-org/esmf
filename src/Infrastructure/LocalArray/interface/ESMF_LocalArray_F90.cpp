@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.14 2004/03/09 23:00:06 svasquez Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.15 2004/03/11 16:25:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -187,7 +187,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.14 2004/03/09 23:00:06 svasquez Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.15 2004/03/11 16:25:27 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -648,13 +648,13 @@ end function
               case (1)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI21D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr1DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI41D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr1DI4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI81D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr1DI8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -662,13 +662,13 @@ end function
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI22D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr2DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI42D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr2DI4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI82D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr2DI8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -676,13 +676,13 @@ end function
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI23D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr3DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI43D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr3DI4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI83D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr3DI8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -690,13 +690,13 @@ end function
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI24D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr4DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI44D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr4DI4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI84D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr4DI8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -704,13 +704,13 @@ end function
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_LocalArrConstrF90PtrI25D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr5DI2(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I4%dkind)
-                    call ESMF_LocalArrConstrF90PtrI45D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr5DI4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_I8%dkind)
-                    call ESMF_LocalArrConstrF90PtrI85D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr5DI8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -723,10 +723,10 @@ end function
               case (1)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR41D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr1DR4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR81D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr1DR8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -734,10 +734,10 @@ end function
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR42D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr2DR4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR82D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr2DR8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -745,10 +745,10 @@ end function
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR43D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr3DR4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR83D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr3DR8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -756,10 +756,10 @@ end function
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR44D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr4DR4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR84D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr4DR8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
@@ -767,10 +767,10 @@ end function
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_LocalArrConstrF90PtrR45D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr5DR4(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case (ESMF_R8%dkind)
-                    call ESMF_LocalArrConstrF90PtrR85D(array, counts, &
+                    call ESMF_LocalArrConstrF90Ptr5DR8(array, counts, &
                                     lbounds=lbounds, ubounds=ubounds, rc=status)
                   case default
                 end select
