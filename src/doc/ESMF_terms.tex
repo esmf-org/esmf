@@ -3,111 +3,133 @@
 
 This glossary defines terms used in Earth system modeling to describe 
 parallel computer architectures, grids and grid decompositions, and 
-numerical and computational methods.  While some of the concepts in 
-the glossary may eventually appear as computational objects, many 
-will not.  The goal here is not to define a framework design or an 
-object model but simply to achieve a common language.
+numerical and computational methods.
 
 \begin{description}
 
-\item[Accumulator] \label{glos:Accumulator} A facility for collecting and 
-  averaging data values.  Generally accumulators are associated with 
+\label{glos:360DayCal}
+\item[360-day calendar] A calendar in which 
+  every one of twelve months has thirty days.  See also \htmlref{Calendar}
+  {glos:Calendar}, \htmlref{no-leap calendar}{glos:NoLeap}.
+
+\label{glos:Accumulator}
+\item[Accumulator] A facility for collecting 
+  and averaging data values.  Generally accumulators are associated with 
   temporal averaging, although they might be associated with 
-  other weighted averaging operations.    
+  other weighted averaging operations.  ESMF does not yet have accumulators.
   
-\item[Address space (ASP)] \label{glos:ASP}A standard term to refer to the memory
-  seen by a computer program that it can write to directly using
+\label{glos:ASP}
+\item[Address space (ASP)] A term that refers to 
+  the memory that a computer program can write to directly using
   simple language primitives. 
 
-\item[Alarm] \label{glos:Alarm} An event that occurs at a particular 
+\label{glos:Alarm}
+\item[Alarm] The ESMF Alarm class represents an event that occurs at a particular 
   time (or set of times).  It is like an alarm on a real alarm clock 
-  except that in order to determine whether it is "ringing", an alarm 
-  is "read" by an explicit application action.
-  See also \htmlref{clock}{glos:Clock}.
+  except that in order to determine whether it is "ringing", an ESMF Alarm 
+  is "read" by an explicit application action.  An Alarm is associated
+  with a particular \htmlref{Clock}{glos:Clock}.
 
-\item[Addressable node] \label{glos:Anode} A set of processors that are
-  capable of addressing the same set of blocks of physical memory.
-
-\item[Application] \label{glos:Application} A coherent computational 
+\label{glos:Application}
+\item[Application] A coherent computational 
   entity run as a single executable or set of communicating executables.  
   It typically consists of a set of interacting components.  
   See also \htmlref{component}{glos:Component}.
 
-\item[Background grid] \label{glos:BackGrid} 
-  A background grid associates each point in a location stream with a 
-  location on a grid. A single grid cell may contain zero or more location 
-  stream points. See also \htmlref{location stream}{glos:LocStream}, \htmlref{cell}{glos:Cell}. 
+\label{glos:Array}
+\item[Array] An ESMF class that represents a multi-dimensional
+  data array.  Unlike a native Fortran or C++ array, an ESMF Array can store information about its halo.  See also \htmlref{halo}{glos:Halo}.
 
-\item[Bundle] \label{glos:Bundle} A bundle refers to a set of fields that 
-  are associated with the same physical grid and distributed in a similar 
-  fashion across the same physical axes.  Fields within a bundle may be
+\label{glos:BackGrid}
+\item[Background grid] 
+  A background grid associates each point in an observational data stream 
+  (Location Stream) with a location on a grid. A single grid cell may contain 
+  zero or more Location Stream points. See also \htmlref{Location Stream}{glos:LocStream}, \htmlref{cell}{glos:Cell}. 
+
+\label{glos:Bundle}
+\item[Bundle] The ESMF Bundle class represents a set of fields that 
+  are associated with the same physical grid and are distributed in a similar 
+  fashion across the same physical axes.  Fields within a Bundle may be
   staggered differently and may have different dimensions. 
-  See also \htmlref{fields}{glos:Field}. 
+  See also \htmlref{Field}{glos:Field}. 
 
-\item[Calendar interval] \label{glos:CalInt} A period of time specified
-  in calendar-based units that may be used to increment or decrement time instants.  
-  One year and three months is an example of a calendar interval.  Since 
-  mathematical operations involving calendar intervals may be ambiguously 
-  defined -- for example, incrementing January 31 in the Gregorian calendar by 
-  one month -- default behavior must be carefully specified.  
-  See also \htmlref{time instant}{glos:TimeInstant}, \htmlref{time interval}{glos:TimeInterval}.
+\label{glos:Calendar}
+\item[Calendar] Calendar is an ESMF class that 
+  stores a representation of a particular calendar type, such as Gregorian.
+  In this glossary we list calendars specific to modeling, 
+  such as \htmlref{360-day}
+  {glos:360DayCal} and \htmlref{no-leap}{glos:NoLeap}.
 
-\item[Cell] \label{glos:Cell} A physical location that is specified by both 
+\label{glos:Cell}
+\item[Cell] A physical location that is specified by both 
   its extent (vertices) and nominal central location, and is associated with 
   a single integer index value or a set of integer index values ( e.g.
   (i) for 1-d, (i,j) for 2-d, (i,j,k) for 3d ). 
   See also \htmlref{index}{glos:Index}.
 
-\item[Clock] \label{glos:Clock} A clock tracks the passage of time and 
-  reports the current time instant, like a real clock.  However, most clocks 
-  used in ESMF components have a key difference to a real clock. Clocks 
-  in an ESMF component are generally stepped forward by the component, as an 
-  explicitly coded time step within the overall component.
-  See also \htmlref{calendar interval}{glos:CalInt}, 
-  \htmlref{time instant}{glos:TimeInstant}, \htmlref{time interval}{glos:TimeInterval}.
+\label{glos:Clock}
+\item[Clock] Clock is an ESMF class that tracks the passage of time and 
+  reports the current time instant, like a real clock.  An ESMF Clock 
+  is stepped forward in increments of a time step, and can be associated
+  with one or more Alarms.
+  See also \htmlref{Time}{glos:TimeInstant}, \htmlref{Time Interval}{glos:TimeInterval}, \htmlref{Alarm}{glos:Alarm}.
 
-\item[Component] \label{glos:Component} A large-scale computational entity 
+\label{glos:Component}
+\item[Component] A large-scale computational entity 
   associated with a particular physical process or computational function, 
-  such as a land model.  Components may be \htmlref{generic}{glos:GenericComp} 
-  or \htmlref{user-supplied}{glos:UserComp}.  
-  See also \htmlref{gridded component}{glos:GridComp}, 
-  \htmlref{coupler component}{glos:Couper}.
+  such as a land model.  A component is also an ESMF class that represents
+  a large-scale computational entity; currently ESMF supports \htmlref{Gridded 
+  Component}{glos:GridComp} and \htmlref{Coupler Component}{glos:Coupler} classes.
+  Components may be \htmlref{generic}{glos:GenericComp} or 
+  \htmlref{user-supplied}{glos:UserComp}.  
 
-\item[Compute resource] \label{glos:CompResource} Something that appears as a
+\label{glos:CompDomain}
+\item[Computational domain] For a given DE, the data points that 
+  have unique global indices and are updated by the DE.  
+  See also \htmlref{exclusive domain}{glos:ExcDomain}, \htmlref{total domain}
+  {glos:TotDomain}, \htmlref{halo}{glos:Halo}.
+
+\label{glos:CompResource}
+\item[Compute resource] Something that appears as a
   physical or virtual computer resource. Example of compute resources
   are a CPU, a network connection, a communication API, a protocol, a 
   particular network fabric or a piece of computer memory. 
 
-\item[Concurrent execution] \label{glos:ConcurrentExecution} 
-  Concurrent execution of model components occurs when two components,
+\label{glos:ConcurrentExecution}
+\item[Concurrent execution] 
+  Concurrent execution of model components occurs when two or more components,
   whether in the same or different executables, run simultaneously.
-  Components executing concurrently may be in the same or different 
-  executables and may have coincident or non-overlapping memory 
-  distributions.  See also \htmlref{sequential execution}
+  Components executing concurrently may have coincident or 
+  non-overlapping distributions.  See also \htmlref{sequential execution}
   {glos:SequentialExecution}.
 
-\item[Coupler component] \label{glos:Coupler}
-  A component that includes all data and actions needed to enable 
-  communication between two or more other components. 
-  See also \htmlref{component}{glos:Component}. 
+\label{glos:Coupler}
+\item[Coupler Component]
+  An ESMF component that includes all data and actions needed to enable 
+  communication between two or more Gridded Components. 
+  See also \htmlref{component}{glos:Component}, \htmlref{Gridded Component}
+  {glos:GridComp}.
 
-\item[Data dependency] \label{glos:DataDep} The property of a computational
+\label{glos:DataDep}
+\item[Data dependency] The property of a computational
   operator that defines the data indices required to perform
-  the computation at a point.  For instance, a forward differencing
-  operation in X at $(i,j)$ has a dependency on $(i+1,j)$.
+  the computation at a point.  
 
-\item[Data parallel] \label{glos:DataParallel} In a data parallel operation,
-  roughly the same calculation is performed by all processors at the same 
+\label{glos:DataParallel}
+\item[Data parallel] The quality of an application that allows roughly 
+  the same calculation to be performed by all processors at the same 
   time on the same data set, which is partitioned among multiple memory 
-  locations.  Operations within many model components are essentially data 
-  parallel.  
+  locations.  Single components that do not contain nested components
+  are often data parallel.  See also 
+  \htmlref{task parallel}{glos:TaskParallel}, \htmlref{SPMD}{glos:SPMD}, 
+  \htmlref{MPMD}{glos:MPMD}.   
 
-\item[Data transpose] \label{glos:DataTranspose} Rearrangement of data arrays 
-  between two distributed grids sharing the same global domain.
-  See also \htmlref{distributed grid}{glos:DistGrid}, 
-  \htmlref{global domain}{glos:GlobDomain}.
+\label{glos:DataTranspose}
+\item[Data transpose] Rearrangement of data arrays that share the 
+  same \htmlref{global domain}{glos:GlobDomain}.  
 
-\item[Day of year] \label{glos:DayOfYear} The day number in the calendar year. 
+\label{glos:DayOfYear}
+\item[Day of year] The day number in the calendar year. 
   January 1 is day 1 of the year. Day of year expressed in a floating point 
   format is used to express the day number plus the time of day. 
   For example, assuming a Gregorian calendar:
@@ -119,340 +141,440 @@ object model but simply to achieve a common language.
   31 December 2000, 18Z   & 366.75 
 \end{tabular}
 
-\item[DE] \label{glos:DE} 
-  Short for \htmlref{decomposition element}{glos:Decomp_Element}.
+\label{glos:DE}
+\item[DE] 
+  Short for \htmlref{Decomposition Element}{glos:Decomp_Element}.
 
-\item[DELayout] \label{glos:DELayout} A DELayout defines a topology on top of
-  the decomposition elements and specifies DE-to-PET against an ESMF  
-  \htmlref{VM}{glos:VM}. 
+\label{glos:DELayout}
+\item[DELayout] DELayout is the ESMF class that
+  defines the topology of a set of DEs and specifies 
+  how the DEs are assigned to PETs in an ESMF  
+  \htmlref{Virtual Machine}{glos:VM}. 
 
-\item[Decomposition element (DE)] \label{glos:Decomp_Element}
-  A decomposition element is a virtual portion of a computational
-  task into which the application writer divides the problem.
-  DELayouts assign a topology to decomposition elements.
-  See also \htmlref{DELayout}{glos:DELayout}
+\label{glos:Decomp_Element}
+\item[Decomposition Element (DE)]
+  Decomposition Elements represent a 
+  virtual portion of a computational task.
+  A DELayout assigns a topology to Decomposition Elements.
+  See also \htmlref{DELayout}{glos:DELayout}.
 
-\item[Deep objects] \label{glos:DeepObjects} In an environment
+\label{glos:DeepObjects}
+\item[Deep object] In an environment
   in which the calling and implementation language of a library are
   different, deep objects are defined as those whose memory is 
   allocated by the implementation language. 
-  See also \htmlref{shallow objects}{glos:ShallowObjects}. 
+  See also \htmlref{shallow object}{glos:ShallowObjects}. 
 
-\item[Distributed grid] \label{glos:DistGrid}
-  A distributed grid defines the decomposition of the global index space 
-  across the layout and methods on the indexed data.
+\label{glos:DistGrid}
+\item[Distributed Grid]
+  Distributed Grid is a private ESMF class that defines the 
+  decomposition of a Grid's global index space across a DELayout.
+  Distributed Grid objects are contained in an ESMF Grid. 
+  See also \htmlref{Grid}{glos:Grid}, \htmlref{Physical Grid}{glos:PhysGrid},
+  \htmlref{DELayout}{glos:DELayout}.
 
-\item[Distribution] \label{glos:Distribution} The function that expresses
-  the relationship between the indices in a distributed grid and the elements 
-  in a layout. See also \htmlref{distributed grid}{glos:DistGrid}, 
-  \htmlref{layout}{glos:DELayout}. 
+\label{glos:Distribution}
+\item[Distribution] The function that expresses
+  the relationship between the indices in a Distributed Grid and the elements 
+  in a DELayout. See also \htmlref{Distributed Grid}{glos:DistGrid}, 
+  \htmlref{DELayout}{glos:DELayout}. 
 
-\item[Domain decomposition] \label{glos:DomainDecomp} The act of grid 
-  distribution: creating a layout; and associating gridpoints with the layout. 
-  The dimensionality of the domain decomposition is the dimensionality of 
-  the associated layout.
+\label{glos:DomainDecomp}
+\item[Domain decomposition] The act of grid 
+  distribution: creating a DELayout; and associating grid points with 
+  the DELayout.  The dimensionality of the domain decomposition is the 
+  same as the dimensionality of the associated DELayout.
 
-\item [Exact] \label{glos:Exact} The word exact is used
+\label{glos:Exact}
+\item [Exact] The word exact is used
   to denote entities, such as time instants and time intervals, for 
   which truncation-free arithmetic is required. 
 
-\item[Exchange grid] \label{glos:ExchangeGrid} A grid whose vertices are
+\label{glos:ExchangeGrid}
+\item[Exchange grid] A grid whose vertices are
   formed by the intersection of the vertices of two overlying grids.  Each 
   cell in the exchange grid overlies exactly one cell in each grid of the 
-  exhange. See also \htmlref{grid}{glos:Grid}, \htmlref{cell}{glos:Cell}.
+  exchange. See also \htmlref{grid}{glos:Grid}, \htmlref{cell}{glos:Cell}.
 
-\item[Exchange packets] \label{glos:EP} The data exchanged by components.  
-  Exchange packets may or may not contain contiguous data, and may contain 
-  both field and other forms of data. See also \htmlref{fields}{glos:Field}.
+\label{glos:EP}
+\item[Exchange Packets] Exchange Packets are a private
+  ESMF class that contains data in an optimal form for data transfers.
 
-\item[Exclusive domain] \label{glos:ExcDomain} The set of indices whose 
-  data is exclusively and definitively updated by a particular PE. 
-  See also \htmlref{processing element}{glos:Processing_Element}, 
-  \htmlref{local domain}{glos:LocalDomain}.
+\label{glos:ExcDomain}
+\item[Exclusive domain] For a given DE, the 
+  set of data points that are not replicated on any other DE.  See also 
+  \htmlref{total domain}{glos:TotDomain},
+  \htmlref{computational domain}{glos:CompDomain}, \htmlref{halo}{glos:Halo}.
 
-\item[Executable] \label{glos:Exec} 
-  A parallel program that is under independent control by the operating 
+\label{glos:Exec} 
+\item[Executable] 
+  A program that is under independent control by the operating 
   system.
-%NOTE:should this be exclusively parallel programs?
 
-\item[Export state] \label{glos:ExportState} The data and metadata that 
+\label{glos:ExportState} 
+\item[Export State] 
+  The data and metadata that 
   a component can make available for exchange with other components. 
   This may be data at a physical boundary (e.g land-atmosphere interface) 
   or in other cases, it might be the entire model state.  
-  See also \htmlref{restart state}{glos:RestartState}, 
-  \htmlref{import state}{glos:ImportState}.
+  See also \htmlref{State}{glos:State}, \htmlref{import State}{glos:ImportState}.
 
-\item[Field] \label{glos:Field} A field is a physical quantity
-  defined within a region of space.  A field includes a grid 
-  and any metadata necessary for a full description of the field data.
-  See also \htmlref{grid}{glos:Grid}.
+\label{glos:Field} 
+\item[Field] The ESMF Field class represents a physical quantity
+  defined within a region of space.  A Field includes a Grid 
+  and any metadata necessary for a full description of its data.
+  See also \htmlref{Grid}{glos:Grid}.
 
-\item[Framework] \label{glos:Framework} We use the term framework to 
+\label{glos:Framework} 
+\item[Framework] We use the term framework to 
   refer to a structured collection of software building blocks that can be used 
   and customized to develop components, assemble them into an application, and 
   run the application.
 
-\item[Generic component] \label{glos:GenericComp} A generic component
+\label{glos:GenericComp} 
+\item[Generic component] A generic component
   is one supplied by the framework.  The user is not expected to 
-  customize or otherwise modify it.  See also \htmlref{user component}{glos:UserComp}, 
+  customize or otherwise modify it.  ESMF does not currently contain any
+  generic components.  See also \htmlref{user component}{glos:UserComp}, 
   \htmlref{component}{glos:Component}. 
 
-\item[Generic transform] \label{glos:GenericTrans} A generic transform 
-  is a operation supplied by the framework, for example, a method 
-  that converts gridded data from one supported physical grid and/or 
+\label{glos:GenericTrans} 
+\item[Generic transform] A generic transform 
+  is an operation supplied by the framework, for example, a method 
+  that converts gridded data from one supported Physical Grid and/or 
   decomposition to another using a specified technique.  See also \htmlref{user 
   transform}{glos:UserTrans}.
 
-\item[Global physical grid] \label{glos:GlobPhysGrid} 
-  A global physical grid contains physical information about the entire, 
-  undecomposed domain.  No distributed grid need be associated with a global 
-  physical grid. See also \htmlref{distributed grid}{glos:DistGrid}.  
+\label{glos:GlobDomain}
+\item[Global domain] 
+  A global domain refers to the full extent of a DELayout or Grid.
 
-\item[Global domain] \label{glos:GlobDomain}
-  The global range of indices of data points.
+\label{glos:GlobReduction} 
+\item[Global reduction] 
+  Reduction operations (sum, max, min, etc.) that condense data distributed
+  over a \htmlref{global domain}{glos:GlobDomain}.
+  See also \htmlref{global broadcast}{glos:GlobBroadcast}.
 
-\item[Global reduction] \label{glos:GlobReduction} 
-  Reduction operations (sum, max, min, etc.) on data defined on a distributed 
-  grid.  See also \htmlref{global broadcast}{gloss:GlobBroadcast}.
-
-\item[Global broadcast] \label{glos:GlobBroadcast}
-  Scatter operations on data defined on a distributed grid.
+\label{glos:GlobBroadcast}
+\item[Global broadcast] 
+  Scatter operations on data distributed over a 
+  \htmlref{global domain}{glos:GlobDomain}.
   See also \htmlref{global reduction}{glos:GlobReduction}.
 
-\item[Grid] \label{glos:Grid} The discrete division of space associated with
-  a particular coordinate system.  A grid contains all physical grid and memory 
-  organization information (via distributed grid and layout) required to manipulate 
-  fields, as well as to create and execute grid transforms. 
-  See also \htmlref{physical grid}{term:PhysGrid}. 
+\label{glos:Grid} 
+\item[Grid] 
+  The discrete division of space associated with
+  a particular coordinate system.  The ESMF Grid class contains all 
+  Physical Grid and memory 
+  organization information (via Distributed Grid and DELayout) required 
+  to manipulate 
+  Fields, as well as to create and execute Grid transforms. 
+  See also \htmlref{Physical Grid}{glos:PhysGrid}, \htmlref{Distributed Grid}
+  {glos:DistGrid}, \htmlref{DELayout}{glos:DELayout}.
 
-\item[Grid metrics] \label{glos:GridMetrics} Terms relating measurements 
-  in index space to physical grid quantities like distances and areas.
+\label{glos:GridMetrics} 
+\item[Grid metrics] 
+  Terms relating measurements 
+  in index space to Physical Grid quantities like distances and areas.
 
-\item[Grid staggering] \label{glos:GridStagger} 
+\label{glos:GridStagger} 
+\item[Grid staggering] 
   A descriptor of relative locations
   of scalar and vector data on a structured grid. On different
   staggered grids, vector data may lie at cell faces or vertices,
-  while scalar data may lie in the interior. The staggered locations
-  are often written in a notation like $(i+\frac12,j+\frac12)$ to
-  describe the offset of a corner with respect to the cell $(i,j)$.
+  while scalar data may lie in the interior. 
 
-\item[Grid topology] \label{glos:GridTopo} Description of data 
-  connectivities in index space.
+\label{glos:GridTopo} 
+\item[Grid topology] 
+  Description of data connectivities for a grid.
 
-\item[Grid union] \label{glos:GridUnion} The formation of a new grid
+\label{glos:GridUnion} 
+\item[Grid union] 
+  The formation of a new grid
   by taking the union of the vertices of two input grids.
-  See also \htmlref{grid}{glos:Grid}. 
+  See also \htmlref{Grid}{glos:Grid}. 
 
-\item[Gridded component] \label{glos:GridComp}
-  A component that is associated with one or more grids.  No requirements 
-  may be placed on the physical content of a gridded component's data or 
-  on the nature of its computations. See also \htmlref{component}{glos:Component}
-  , \htmlref{grid}{glos:Grid}. 
+\label{glos:GridComp}
+\item[Gridded Component] 
+  An ESMF class that represents a component that is associated with one 
+  or more grids.  No requirements 
+  may be placed on the physical content of a Gridded Component's data or 
+  on the nature of its computations. See also \htmlref{component}{glos:Component},
+  \htmlref{Coupler Component}{glos:Coupler}. 
 
-\item[Halo] \label{glos:Halo} 
-  The points in the data domain outside the local domain. 
-  See also \htmlref{local domain}{glos:LocalDomain}. %\htmlref{data domain}{glos:DataDomain}.
+\label{glos:Halo} 
+\item[Halo] 
+  For a given DE, a halo is a set of data points from the computational 
+  domains of neighboring DEs that are replicated locally for computational
+  convenience.  A halo can be defined as all the data points 
+  in a DE's total domain excluding those in its computational domain. 
+  See also \htmlref{computational domain}{glos:CompDomain}, \htmlref{total domain}
+  {glos:TotDomain}, \htmlref{exclusive domain}{glos:ExcDomain}.
 
-\item[Halo update] \label{glos:HaloUpdate}
-  Halo points are associated with other PEs'
-  local domains, and the halo update operation involves
-  synchronization of some or all halo points with other PEs. 
+\label{glos:HaloUpdate}
+\item[Halo update] 
+  A halo update operation involves synchronization of the values of some 
+  or all halo points with the current values of those points on other DEs.
+  See also \htmlref{halo}{glos:Halo}.
 
-\item[Import state] \label{glos:ImportState} The data and metadata 
+\label{glos:ImportState} 
+\item[Import State] 
+  The data and metadata 
   that a component requires from other components in order to run.  
-  See also \htmlref{export state}{ExportState}, \htmlref{restart state}{glos:RestartState}.
+  See also \htmlref{State}{glos:State}, \htmlref{export State}{glos:ExportState}.
 
-\item[Index] \label{glos:Index} An integer value associated with a set
-  of coordinates that describe a cell or location in physical space.
+\label{glos:Index} 
+\item[Index] 
+  An integer value associated with a set of coordinates.
 
-\item[Index space] \label{glos:IndexSpace} The space implied 
+\label{glos:IndexSpace} 
+\item[Index space] 
+  The space implied 
   by a set of indices.  An index space has a defined dimensionality and 
   connectivity.
 
-\item[Index space location] \label{glos:IndexSpaceloc} 
-  A location within index space.  A index space location may be fractional.
+\label{glos:IndexSpaceLoc} 
+\item[Index space location] 
+  A location within an index space.  A index space location may be fractional.
   See also \htmlref{physical location}{glos:PhysLoc}.
 
-\item[Instantiate] \label{glos:Instantiate}
-  To create an actual instance of a software class.
+\label{glos:Instantiate}
+\item[Instantiate] 
+  To create an actual instance of a software class.  For example, each 
+  variable of derived type Field in an ESMF Fortran application is an 
+  instance of the Field class.
 
-\item[Interface] \label{glos:Interface}
-  A named set of operations that characterize the behavior of a class
-  or a component.
+\label{glos:Interface}
+\item[Interface] 
+  Used generally to refer to a set of operations that characterize 
+  the behavior of a class or a component.  Also used to refer to the
+  name and argument list of a particular method.
 
-\item[JMC] \label{glos:JMC} 
+\label{glos:JMC} 
+\item[JMC] 
   Joint Milestone Codeset.  This is the set of climate, weather and
   data assimilation applications that will be used as ESMF testbeds 
-  during the initial NASA-funded phase of framework development.
+  during the initial NASA-funded phase of ESMF development.
 
-\item[Local domain] \label{glos:LocalDomain} This includes the exclusive 
-  domain, as well as the points with whom the exclusive points have data 
-  dependencies. See also \htmlref{exclusive domain}{glos:ExcDomain}.
+\label{glos:LocStream} 
+\item[Location Stream] 
+  An ESMF class that represents
+  a list of locations with no assumed relationship between these locations.  
+  The elements of a Location Stream are not assumed to share the same 
+  metadata. Location Streams are not yet implemented.
+  See also \htmlref{background grid}{glos:BackGrid}.
 
-\item[Local physical grid] \label{glos:LocPhysGrid} The portion of a 
-  physical grid associated with a local domain.
-  See also \htmlref{physical grid}{glos:PhysGrid}.  
-
-\item[Location stream] \label{glos:LocStream} A list of
-  locations with no assumed relationship between these locations.  The
-  elements of a location stream are assumed to share the same data
-  items and metadata, though some elements may have blank entries for
-  particular data or attributes. See also \htmlref{background grid}{glos:BackGrid}.
-
-\item[Logically rectangular grid] \label{glos:RecGrid} A grid in 
+\label{glos:RecGrid} 
+\item[Logically rectangular grid] 
+  A grid in 
   which sequential indices are physically adjacent, and in which the 
   extent of each index is independent of the other indices.
-  See also \htmlref{grid}{glos:Grid}.
+  See also \htmlref{Grid}{glos:Grid}.
 
-\item[Loose bundle] \label{glos:LooseBundle} A loose bundle consists of 
-  fields whose data is not contiguous in memory.
+\label{glos:LooseBundle} 
+\item[Loose Bundle] 
+  A loose Bundle 
+  is an ESMF Bundle object that contains fields whose data is 
+  not contiguous in memory.  See also \htmlref{Bundle}{glos:Bundle},
+  \htmlref{packed Bundle}{glos:PackedBundle}.
 
 \item[Machine model] A generic representation of the computing 
   platform architecture.
 
-\item[Mask] \label{glos:Mask} A field marking a span within a larger grid.
+\label{glos:Mask} 
+\item[Mask] 
+  A data field marking a span within a larger data field.
 
-\item[Memory domain] \label{glos:MemDomain} The portion of memory 
-  associated with a local domain.  The memory domain is always at least 
-  as large as the local domain.
+\label{glos:MemDomain} 
+\item[Memory domain] 
+  The portion of memory associated with the data on a given DE.  
+  The memory domain is always at least 
+  as large as the total domain.  See also \htmlref{total domain}{glos:TotDomain}.
 
-\item[Memory node] \label{glos:Mnode} A set of processors
-  sharing equal flat access to a block of physical memory.
-
-\item[MPMD] \label{glos:MPMD} Multiple Program Multiple Datastream.
+\label{glos:MPMD} 
+\item[MPMD] 
+  Multiple Program Multiple Datastream.
   Multiple executables, any of which could itself be an SPMD
   executable, executing independently within an application. 
   See also \htmlref{SPMD}{glos:SPMD}
 
-\item[Node] \label{glos:Node} A node is a set of computational resources
+\label{glos:Node} 
+\item[Node] 
+  A node is a set of computational resources
   that is typically located in close proximity on a computing platform
   and that is associated with a single shared memory buffer.
 
-\item [No-leap calendar] \label{glos:NoLeap} Every year uses the same months 
-  and days per month as in a non-leap year of a Gregorian calendar.
+\label{glos:NoLeap} 
+\item [No-leap calendar] 
+  In this calendar every year uses the same months 
+  and days per month as in a non-leap year of a Gregorian calendar.  See
+  also \htmlref{Calendar}{glos:Calendar}, \htmlref{360-day calendar}{glos:360DayCal}.
 
-\item[Packed bundle] \label{glos:PackedBundle} A packed bundle is arranged
-  so that field data is contiguous in memory. See also \htmlref{bundle}{glos:Bundle}.
+\label{glos:PackedBundle} 
+\item[Packed Bundle] 
+  A packed Bundle is an 
+  ESMF Bundle object that contains
+  a data buffer with field data arranged contiguously in memory. See 
+  also \htmlref{Bundle}{glos:Bundle}, \htmlref{loose Bundle}{glos:LooseBundle}.
 
-\item[Partition] \label{glos:Partition} In a multi-threaded application, the subset of a
-  computational domain that is associated with a logically independent
-  sequence of operations. The logical independence requirement is so
-  that partitions may be scheduled as separable concurrent tasks.
+\label{glos:PE} 
+\item[PE] 
+Short for \htmlref{Processing Element}{glos:Processing_Element}.
 
-\item[PE] \label{glos:PE} Short for \htmlref{processing element}{glos:Process_Element}.
+\label{glos:PET} 
+\item[PET] 
+  Short for \htmlref{Persistent Execution Thread}{glos:PermET}.
 
-\item[PET] \label{glos:PET} Short for 
-  \htmlref{permanent execution thread}{glos:PermET}.
-
-\item[Permanent execution thread (PET)] \label{glos:PermET} Provides a
+\label{glos:PermET} 
+\item[Persistent Execution Thread (PET)] 
+  Provides a
   path for executing an instruction sequence. A PET has a lifetime at least 
-  as long as the associated data objects. The PET is the central concept of
-  abstraction provided by the ESMF virtual machine. See also  
-  \htmlref{VM}{glos:VM}
+  as long as the associated data objects. The PET is a key abstraction 
+  used in the ESMF \htmlref{Virtual Machine}{glos:VM}.
 
-\item[Physical grid] \label{term:PhysGrid} 
-  A physical grid contains a variety of information on the location 
+\label{glos:PhysGrid} 
+\item[Physical Grid] 
+  Physical Grid is a private ESMF class that contains a variety of information on the location 
   in physical space and physical metrics (area, grid lengths, etc.) 
-  of various grid points. See also \htmlref{grid}{glos:Grid}. 
+  of various grid points.  Physical Grid objects are contained in an 
+  ESMF Grid.  See also \htmlref{Grid}{glos:Grid}, 
+  \htmlref{Distributed Grid}{glos:DistGrid}.  
 
-\item[Physical location] \label{glos:PhysLoc} The point in physical space 
-  to which data pertain. 
+\label{glos:PhysLoc} 
+\item[Physical location] 
+  A point in physical space to which a data point pertains.  See also
+  \htmlref{index space location}{glos:IndexSpaceLoc}.   
 
-\item[Platform] \label{glos:Platform} 
+\label{glos:Platform} 
+\item[Platform] 
   The processor hardware, operating system, compiler and
   parallel library that together form a unique compilation target.
 
-\item[Process] \label{glos:Process}
-  A process is a computational workspace that is associated with a single,
-  private address space.
-
-\item[Processing element (PE)] \label{glos:Processing_Element}
-  A processing element (PE) is the smallest physical processing unit available
+\label{glos:Processing_Element}
+\item[Processing Element (PE)] 
+  A Processing Element (PE) is the smallest physical processing unit available
   on a particular hardware platform.
 
-\item[Processing node] \label{glos:Pnode} A set of processors to which an
-  operating system scheduler is capable of assigning to a single job.
-
-\item[Realization] \label{glos:Realization} A realization is the 
-  implementation of a specification.  It doesn't imply that any kind
-  of structure from a base class is inherited.
-
-\item[Restart state] \label{glos:RestartState} The component 
-  data that is needed for an exact restart. This can include, 
-  in addition to a physical state, time information, static field data,
-  metadata and control information. 
-
-\item[Scheduler] \label{glos:Scheduler} An operating system component 
+\label{glos:Scheduler} 
+\item[Scheduler] 
+  An operating system component 
   that assigns system resources (processors, memory, CPU time, 
   I/O channels, etc.) to executables.
 
-\item[Sequential execution] \label{glos:SequentialExecution}
+\label{glos:SequentialExecution}
+\item[Sequential execution] 
   Sequential execution of model components describes the case in which 
-  one component waits for the other to finish before it begins
+  one component waits for another to finish before it begins
   to run.  Components executing sequentially may be in the same or 
-  different executables and may have conincident or non-overlapping 
-  memory distributions.  See \htmlref{concurrent execution}
+  different executables and may have coincident or non-overlapping 
+  memory distributions.  See \htmlref{concurrent execution}.
   {glos:ConcurrentExecution}.
 
-\item[Shallow objects] \label{glos:ShallowObjects} In an environment
+\label{glos:ShallowObjects} 
+\item[Shallow object] 
+  In an environment
   in which the calling and implementation language of a library are
   different, shallow objects are defined as those whose memory is 
   allocated by the calling language. 
-  See also \htmlref{deep objects}{glos:DeepObjects}.
+  See also \htmlref{deep object}{glos:DeepObjects}.
 
-\item[Span] \label{glos:Span} The physical extent associated with a grid.
+\label{glos:Span} 
+\item[Span] 
+  The physical extent associated with a grid.
 
-\item[SPMD] \label{glos:SPMD} Single Program Multiple Datastream. 
+\label{glos:SPMD} 
+\item[SPMD] 
+  Single Program Multiple Datastream. 
   A single executable, possibly with many components (representing 
   for example the atmosphere, the ocean, land surface) executing 
   serially or concurrently. See also \htmlref{MPMD}{glos:MPMD}. 
 
-\item [System time] \label{glos:SysTime}Time spent doing system tasks 
+\label{glos:State} 
+\item [State] 
+  The ESMF State class may 
+  contain Arrays, Bundles, Fields, or other States.  It is used to 
+  transfer data between components.  See also \htmlref{import State}
+  {glos:ImportState}, \htmlref{export State}{glos:ExportState}.
+
+\label{glos:SysTime} 
+\item [System time] 
+  Time spent doing system tasks 
   such as I/O or in system calls.  May also include time spent running 
   other processes on a multiprocessor system. See also \htmlref{user 
   time}{glos:UserTime}, \htmlref{wall clock time}{glos:WallClockTime}.
 
-\item[Task parallel] \label{glos:TaskParallel}  In a task parallel operation,
-  different calculations are performed by different processors at the same time
-  on what are usually different data sets.  Operations on different model 
-  components running within either a SPMD or MPMD application may be task 
-  parallel. See also \htmlref{SPMD}{glos:SPMD}, \htmlref{MPMD}{glos:MPMD}. 
+\label{glos:TaskParallel}  
+\item[Task parallel] 
+  The quality of an application that allows
+  different calculations to be performed by different processors at the same 
+  time on what are usually different data sets.  Large-scale task parallelism 
+  is often associated with multi-component applications in which each component
+  represents a separate domain or function.  Task parallel applications 
+  may be run with components executing either sequentially or concurrently, 
+  and either in a SPMD or MPMD mode. See also 
+  \htmlref{data parallel}{glos:DataParallel}, 
+  \htmlref{SPMD}{glos:SPMD}, \htmlref{MPMD}{glos:MPMD}, 
+  \htmlref{sequential execution}{glos:SequentialExecution}, 
+  \htmlref{concurrent execution}{glos:ConcurrentExecution}.
 
-\item [Time instant] \label{glos:TimeInstant}
-  Generic name for an absolute time and date specification. A time instant is made 
-  up of a time and date and an associated calendar. It may include a time zone.
-  \emph{Jan 3rd 1999, 03:30:24.56s, UTC} is one example of a time instant.
-  See also \htmlref{calendar}{glos:Calendar}.
+\label{glos:TimeInstant}
+\item [Time] 
+  Time is an ESMF class that is made up of a time and date and an 
+  associated calendar. It may include a time zone.
+  \emph{Jan 3rd 1999, 03:30:24.56s, UTC} is one example of a Time.
+  See also \htmlref{Calendar}{glos:Calendar}.
 
-\item [Time interval] \label{glos:TimeInterval} A time interval is the
+\label{glos:TimeInterval} 
+\item [Time Interval] 
+  Time Interval is an ESMF class that represents the
   period between any two time instants, measured in units, such as days, 
-  seconds, and fractions of a second, that are not associated with a specific
-  calendar.  Time intervals may be negative.  The periods \emph{2 days and 10 seconds}, 
-  \emph{86400 and 1/3 seconds} and \emph{31104000.75 seconds} are all examples of time intervals.  
-  Mathematical operations such as addition, multiplication and subdivision 
-  can be applied to time intervals. See also \htmlref{time instant}{glos:TimeInstant}
+  seconds, and fractions of a second.  The periods \emph{2 days and 10 seconds}, 
+  \emph{86400 and 1/3 seconds} and \emph{31104000.75 seconds} are all 
+  possible values for Time Intervals.  
+  Mathematical operations such as addition, multiplication, and subdivision 
+  can be applied to Time Intervals, and they can have negative values. 
+  See also \htmlref{Time}{glos:TimeInstant}
 
-\item[User component] \label{UserComp} A component that is customized or
-  written by the user.  See also \htmlref{generic component}{glos:GenericComp}.
+\label{glos:TotDomain} 
+\item[Total domain] 
+  For a given DE, the entirety 
+  of the data points allocated, included replicated points from neighboring
+  DEs.  See also \htmlref{computational domain}{glos:CompDomain}, 
+  \htmlref{exclusive domain}{glos:ExcDomain}, \htmlref{halo}{glos:Halo}
 
-\item[User time] \label{UserTime} Processor time actually spent executing 
-  a process's code. See also \htmlref{system time}{glos:SysTime}, 
+\label{glos:UserComp} 
+\item[User component] 
+  A component that is customized or
+  written by the user.  All ESMF components are currently user components.
+  See also \htmlref{generic component}{glos:GenericComp}.
+
+\label{glos:UserTime} 
+\item[User time] 
+  Processor time actually spent executing 
+  a PET's code. See also \htmlref{system time}{glos:SysTime}, 
   \htmlref{wall clock time}{glos:WallClockTime}.
 
-\item[User transform] \label{glos:UserTrans} A user-supplied 
+\label{glos:UserTrans} 
+\item[User transform] 
+  A user-supplied 
   method that is used to extend framework capabilities beyond generic 
   transforms. See also \htmlref{generic transform}{glos:GenericTrans}. 
 
-\item[VM] \label{glos:VM} Short for 
-  \htmlref{virutal machine}{glos:VMachine}.
+\label{glos:VM} 
+\item[VM] 
+  Short for \htmlref{Virtual Machine}{glos:VMachine}.
 
-\item[Virtual machine (VM)] \label{glos:VMachine} Abstracts hardware and 
-  operation system details. The VM's responsibilities are resource management
+\label{glos:VMachine} 
+\item[Virtual Machine (VM)] 
+  An ESMF class that abstracts hardware and 
+  operating system details. The VM's responsibilities are resource management
   and topological description of the underlying compute resources in terms of 
   \htmlref{PETs}{glos:PET}. In addition the VM provides a transparent, low level
   communication API. 
 
-\item [Wall clock time] \label{WallClockTime} Elapsed real-world time 
+\label{glos:WallClockTime} 
+\item [Wall clock time] 
+  Elapsed real-world time 
   (i.e. difference between start time minus stop time).
   See also \htmlref{system time}{glos:SysTime}, \htmlref{user time}{glos:UserTime}.
 
