@@ -1,4 +1,4 @@
-// $Id: ESMC_RouteEx.C,v 1.4 2004/04/23 21:58:06 nscollins Exp $
+// $Id: ESMC_RouteEx.C,v 1.5 2004/11/03 23:25:49 nscollins Exp $
 //
 // Example/test code which creates a new field.
 
@@ -112,6 +112,12 @@ main(int argc, char **argv) {
      //ESMC_FieldDestroy(field5);
 
      rc = ESMC_Finalize();
+
+     if (rc == ESMF_SUCCESS)
+        printf("PASS: ESMC_RouteEx.F90\n");
+     else
+        printf("FAIL: ESMC_RouteEx.F90\n");
+
 }
 
     
