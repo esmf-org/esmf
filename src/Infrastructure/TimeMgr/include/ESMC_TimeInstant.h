@@ -1,10 +1,14 @@
-// $Id: ESMC_TimeInstant.h,v 1.2 2002/10/10 18:48:37 eschwab Exp $
+// $Id: ESMC_TimeInstant.h,v 1.3 2002/10/11 01:50:13 eschwab Exp $
 //
 // ESMF TimeInstant C++ definition include file
 //
 // < Something here from legal about the status of the code, like:
 //  This code developed by NASA/NCAR/ESMF whatever, and is covered by
 //  the terms of the GNU public license.  See license file for more details. >
+//
+// (all lines below between the !BOP and !EOP markers will be included in
+//  the automated document processing.)
+//-------------------------------------------------------------------------
 //
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
@@ -13,8 +17,20 @@
 #define ESMC_TIME_INSTANT_H
 
 //-------------------------------------------------------------------------
+
+// put any constants or macros which apply to the whole component in this file.
+// anything public or esmf-wide should be up higher at the top level
+// include files.
+#include <ESMC_TimeMgr.h>
+#include <ESMC_Types.h>
+
+//-------------------------------------------------------------------------
+//BOP
+// !CLASS: ESMC_TimeInstant - represents a specific point in time
+
+//-------------------------------------------------------------------------
 //
-// !PURPOSE:
+// !DESCRIPTION:
 //
 // The code in this file defines the C++ TimeInstant members and method
 // signatures (prototypes).  The companion file ESMC_TimeInstant.C contains
@@ -37,25 +53,14 @@
 // to the Julian date of zero UTC.  This will ease conversions 
 // between Julian and Gregorian calendars.
 //
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
-//
-//-------------------------------------------------------------------------
-
-// put any constants or macros which apply to the whole component in this file
-#include <ESMC_TimeMgr.h>
-#include <ESMC_Types.h>
-
-//-------------------------------------------------------------------------
-//BOP
-// !CLASS: ESMC_TimeInstant
-
-// this include section corresponds to the USES: section in F90 modules
+// !USES:
 #include <ESMC_Time.h>           // inherited Time class
 #include <ESMC_Calendar.h>       // associated Calendar class
 
-// ! PUBLIC TYPES:
+// !PUBLIC TYPES:
+class ESMC_TimeInstant;
 
+// !PRIVATE TYPES:
 // class configuration type:  not needed for TimeInstant
 
 // class definition type
@@ -70,15 +75,9 @@ class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
-	// native C++ constructors/destructors
-    ESMC_TimeInstant(void);
-	ESMC_TimeInstant(int64 S, int32 Sn, int32 Sd, ESMC_Calendar *Cal,
-					 int Timezone);
-    ~ESMC_TimeInstant(void);
-
     // TimeInstant is a shallow class, so only Init methods are needed
 	int ESMC_TimeInstInit(int64 S, int32 Sn, int32 Sd,
-                  ESMC_Calendar *Cal, int Timezone);
+                          ESMC_Calendar *Cal, int Timezone);
     int ESMC_TimeInstInit(const char *TimeList, ...);
 
     // TimeInstant doesn't need configuration, hence GetConfig/SetConfig
@@ -90,18 +89,19 @@ class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
     //   direct, one-to-one access to core time elements is provided by the
     //   ESMC_Time base class
 
-    int ESMC_TimeInstGetCalendar(ESMC_Calendar *Calendar);	// (TMG 2.5.1)
+    int ESMC_TimeInstGetCalendar(ESMC_Calendar *Calendar) const;
+                                                            // (TMG 2.5.1)
     int ESMC_TimeInstSetCalendar(ESMC_Calendar  Calendar);
 
-    int ESMC_TimeInstGetTimeZone(int *Timezone);  // (TMG 2.5.1)
+    int ESMC_TimeInstGetTimeZone(int *Timezone) const;  // (TMG 2.5.1)
     int ESMC_TimeInstSetTimeZone(int  Timezone);
 
     // shortcut interfaces (TMG 2.1, 2.4.1, 2.5.1)
-    int ESMC_TimeInstGetYR_MM_DD_S(int32 *YR, int *MM, int *DD, int *S);
+    int ESMC_TimeInstGetYR_MM_DD_S(int32 *YR, int *MM, int *DD, int *S) const;
     int ESMC_TimeInstSetYR_MM_DD_S(int32  YR, int  MM, int  DD, int  S);
 
     int ESMC_TimeInstGetYR_MM_DD_H_M_S(int32 *YR, int *MM, int *DD,
-                                       int   *H,  int *M,  int *S);
+                                       int   *H,  int *M,  int *S) const;
     int ESMC_TimeInstSetYR_MM_DD_H_M_S(int32  YR, int  MM, int  DD,
                                        int    H,  int  M,  int  S);
 
@@ -114,29 +114,36 @@ class ESMC_TimeInstant : public ESMC_Time  // inherits ESMC_Time & Base classes
     int ESMC_TimeInstSet(const char *TimeList, ...);
     // e.g. ESMC_TimeInstSet("s" , (double) s);
 
-    int ESMC_TimeInstGetDayOfYear(double *DayOfYear);	// (TMG 2.5.2)
+    int ESMC_TimeInstGetDayOfYear(double *DayOfYear) const;	// (TMG 2.5.2)
 
-    int ESMC_TimeInstGetDayOfWeek(int *DayOfWeek);	    // (TMG 2.5.3)
+    int ESMC_TimeInstGetDayOfWeek(int *DayOfWeek) const;	// (TMG 2.5.3)
 
-    int ESMC_TimeInstGetMiddleOfMonth(ESMC_TimeInstant *MiddleOfMonth);
-                                                        // (TMG 2.5.4)
+    int ESMC_TimeInstGetMiddleOfMonth(ESMC_TimeInstant *MiddleOfMonth) const;
+                                                            // (TMG 2.5.4)
     // return in string format (TMG 2.4.7)
-    int ESMC_TimeInstGetString(char *Ts);
+    int ESMC_TimeInstGetString(char *Ts) const;
 
     // standalone method, not class method
     //  (see ESMC_Clock::SyncToWallClock() )
-    int ESMC_TimeInstGetRealTime(ESMC_TimeInstant *RealTime);	// (TMG 2.5.7)
+    int ESMC_TimeInstGetRealTime(ESMC_TimeInstant *RealTime) const;
+                                                             // (TMG 2.5.7)
 
     // required methods inherited and overridden from the ESMC_Base class
 
     // internal validation
-	int ESMC_TimeInstValidate(const char *options);
+	int ESMC_TimeInstValidate(const char *options) const;
 
 	// for persistence/checkpointing
-	int ESMC_TimeInstPrint(int64 *S, int32 *Sn, int32 *Sd);
+	int ESMC_TimeInstPrint(int64 *S, int32 *Sn, int32 *Sd) const;
 
 	// for testing/debugging
-	int ESMC_TimeInstPrint(void);
+	int ESMC_TimeInstPrint(void) const;
+
+	// native C++ constructors/destructors
+    ESMC_TimeInstant(void);
+	ESMC_TimeInstant(int64 S, int32 Sn, int32 Sd, ESMC_Calendar *Cal,
+					 int Timezone);
+    ~ESMC_TimeInstant(void);
 
 // < list the rest of the public interface methods here >
 
