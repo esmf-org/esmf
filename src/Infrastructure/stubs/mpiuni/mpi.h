@@ -1,4 +1,4 @@
-/* $Id: mpi.h,v 1.1 2004/06/04 15:48:02 nscollins Exp $ */
+/* $Id: mpi.h,v 1.2 2005/03/22 22:02:45 theurich Exp $ */
 
 /*
    This is a special set of bindings for uni-processor use of MPI by the PETSc library.
@@ -127,6 +127,12 @@ typedef int MPI_Op;
 #define MPI_MAX           2
 #define MPI_ANY_TAG     (-1)
 
+/* the following values _must_ be monotonic according to MPI standard */
+#define MPI_THREAD_SINGLE     0
+#define MPI_THREAD_FUNNELED   1
+#define MPI_THREAD_SERIALIZED 2
+#define MPI_THREAD_MULTIPLE   3
+
 /*
   Prototypes of some functions which are implemented in mpi.c
 */
@@ -171,6 +177,12 @@ extern int    Petsc_MPI_Finalized(int *);
 #define MPI_Init(argc,argv) \
      (MPIUNI_TMP = (void*)(long) (argc),\
       MPIUNI_TMP = (void*)(long) (argv),\
+      MPI_SUCCESS)
+#define MPI_Init_thread(argc,argv,required,provided) \
+     (MPIUNI_TMP = (void*)(long) (argc),\
+      MPIUNI_TMP = (void*)(long) (argv),\
+      MPIUNI_TMP = (void*)(long) (required),\
+      MPIUNI_TMP = (void*)(long) (provided),\
       MPI_SUCCESS)
 #define MPI_Send(buf,count,datatype,dest,tag,comm)  \
      (MPIUNI_TMP = (void*)(long) (buf),\
