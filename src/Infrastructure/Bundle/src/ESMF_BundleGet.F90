@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleGet.F90,v 1.2 2004/02/05 22:29:17 nscollins Exp $
+! $Id: ESMF_BundleGet.F90,v 1.3 2004/03/03 18:09:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,37 +33,27 @@
       use ESMF_FieldMod
       use ESMF_BundleMod
       implicit none
-
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
-
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
-
       public ESMF_BundleGetDataPointer
-
 !EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleGet.F90,v 1.2 2004/02/05 22:29:17 nscollins Exp $'
-
+      '$Id: ESMF_BundleGet.F90,v 1.3 2004/03/03 18:09:50 jwolfe Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
-
 !------------------------------------------------------------------------------
-
 !BOP
 ! !IROUTINE: ESMF_BundleGetDataPointer -- Get an F90 pointer to the data contents
-
 ! !INTERFACE:
      interface ESMF_BundleGetDataPointer
-
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
@@ -97,25 +87,18 @@
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
-
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 ! types of {\tt ESMF\_BundleGetDataPointer} subroutines.
 !
 !EOP
 end interface
-
 !==============================================================================
-
       contains
-
 !==============================================================================
-
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-
 !! < start of macros which become actual subroutine bodies after expansion >
-
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -187,9 +170,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -211,7 +194,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -284,9 +266,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -308,7 +290,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -381,9 +362,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -405,7 +386,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -478,9 +458,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -502,7 +482,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -575,9 +554,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -599,7 +578,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -672,9 +650,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -696,7 +674,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -769,9 +746,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -793,7 +770,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -866,9 +842,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -890,7 +866,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -963,9 +938,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -987,7 +962,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1060,9 +1034,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1084,7 +1058,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1157,9 +1130,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1181,7 +1154,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1254,9 +1226,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1278,7 +1250,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1351,9 +1322,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1375,7 +1346,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1448,9 +1418,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1472,7 +1442,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1545,9 +1514,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1569,7 +1538,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1642,9 +1610,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1666,7 +1634,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1739,9 +1706,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1763,7 +1730,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1836,9 +1802,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1860,7 +1826,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1933,9 +1898,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -1957,7 +1922,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2030,9 +1994,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -2054,7 +2018,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2127,9 +2090,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -2151,7 +2114,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2224,9 +2186,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -2248,7 +2210,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2321,9 +2282,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -2345,7 +2306,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2418,9 +2378,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -2442,7 +2402,6 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2515,9 +2474,9 @@ end interface
  ! return 
  !endif 
  
- call ESMF_BundleGetFields(bundle, fieldname, field, status) 
+ call ESMF_BundleGetField(bundle, fieldname, field, status) 
  if (status .ne. ESMF_SUCCESS) then 
- print *, "Error: BundleGetFields failed" 
+ print *, "Error: BundleGetField failed" 
  return 
  endif 
  
@@ -2539,7 +2498,5 @@ end interface
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
-
-
 
         end module ESMF_BundleGetMod
