@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutEx.F90,v 1.3 2004/06/21 19:57:56 theurich Exp $
+! $Id: ESMF_DELayoutEx.F90,v 1.4 2004/06/21 20:14:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,6 +25,7 @@ program ESMF_DELayoutEx
   type(ESMF_VM):: vm
   integer:: localPet, petCount, peCount, ssiId
   type(ESMF_DELayout):: delayout
+  type(ESMF_Logical):: otoflag
   ! result code
   integer :: finalrc
   finalrc = ESMF_SUCCESS
@@ -72,6 +73,16 @@ program ESMF_DELayoutEx
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC  
+  call ESMF_DELayoutGet(delayout, oneToOneFlag=otoflag, rc=rc)
+!EOC  
+  if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
+  if (otoflag==ESMF_TRUE) then
+    print *, 'This is a 1-to-1 DELayout'
+  else 
+    print *, 'This is a DELayout with virutal DEs'
+  endif
+    
   call ESMF_DELayoutDestroy(delayout, rc=rc)
 !EOC  
   if (rc/=ESMF_SUCCESS) finalrc = ESMF_FAILURE
