@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.27 2003/04/24 22:30:50 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.28 2003/04/24 23:23:15 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.27 2003/04/24 22:30:50 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.28 2003/04/24 23:23:15 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -220,6 +220,11 @@ static int verbose = 1;
 //
 //EOP
 
+//  TODO:  This is a malformed function, in that it needs to be a DE list
+//   *relative* to another layout, or maybe by simple implication to a 1xN
+//   layout which is a global or something.   for now that is what is assumed,
+//   but create by PE list or by DE numbers relative to another layout are
+//   the preferred ways to create another layout.
 
   ESMC_DELayout *layout;
 
@@ -445,6 +450,9 @@ static int verbose = 1;
   }
   //cout << "user wants " << userwants << " which is ok." << endl;
 
+  // TODO: This is NOT right - it should be a true child communicator.
+  decomm.mpicomm = MPI_COMM_WORLD;
+
   this->length = new int[ESMF_MAXDECOMPDIM];
   this->commType = new ESMC_CommType[ESMF_MAXDECOMPDIM];
   for(ii=0; ii<ndim; ii++) {
@@ -625,6 +633,9 @@ static int verbose = 1;
     return ESMF_FAILURE;
   }
   //cout << "user wants " << userwants << " which is ok." << endl;
+
+  // TODO: This is NOT right - it should be a true child communicator.
+  decomm.mpicomm = MPI_COMM_WORLD;
 
   // make space for the lists
   this->length = new int[ESMF_MAXDECOMPDIM];
@@ -812,8 +823,10 @@ static int verbose = 1;
   peList = pelist;
   commHint = ESMC_XFAST;
 
-  // construct 3D array of ESMC_DE's
+  // TODO: This is NOT right - it should be a true child communicator.
+  decomm.mpicomm = MPI_COMM_WORLD;
 
+  // construct 3D array of ESMC_DE's
 
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
 #if 1
