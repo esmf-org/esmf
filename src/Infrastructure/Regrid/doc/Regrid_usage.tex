@@ -1,4 +1,4 @@
-% $Id: Regrid_usage.tex,v 1.4 2004/04/22 21:28:32 jwolfe Exp $
+% $Id: Regrid_usage.tex,v 1.5 2004/04/29 21:09:45 cdeluca Exp $
 
 %\subsection{Design}
 
@@ -358,7 +358,7 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
 \end{picture}
 \end{figure}
 
-\section{Search algorithms}\label{sec:search}
+\subsubsection{Search algorithms}\label{sec:search}
 
      As mentioned in the previous section, the algorithm for computing the
      remapping weights is relatively simple.  The process amounts to finding the
@@ -391,7 +391,7 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      every cell side, the point is enclosed by the cell.  This test is not
      completely robust and will fail for grid cells that are non-convex.
 
-\section{Intersections}\label{sec:intersect}
+\subsubsection{Intersections}\label{sec:intersect}
 
      Once the location of an initial endpoint is found, it is necessary to check
      to see if the segment intersects with the cell side.  If the segment is
@@ -427,7 +427,7 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      used to compute intersections rather than using a previous or next
      intersection as an endpoint.
 
-\section{Coincidences}
+\subsubsection{Coincidences}
 
      Often, pairs of grids will share common lines (e.g. the Equator).  When
      this is the case, the method described above will double-count the
@@ -440,7 +440,7 @@ w_{3nk} & = & {1\over{A_k}}\int\int_{A_{nk}}\cos\theta(\phi-\phi_n)dA \nonumber 
      contribution of the coincident segment can be computed during the
      first sweep and ignored during the second sweep.
 
-\section{Spherical coordinates}\label{sec-sphere}
+\subsubsection{Spherical coordinates}\label{sec-sphere}
 
      Some aspects of the spherical coordinate system introduce additional
      problems for the method described above.  Longitude is multiple valued
@@ -482,7 +482,7 @@ Y &=& 2\sin\left({\pi \over 4} - {\theta \over 2}\right)\sin\phi
      are detected and used as a normal grid intersection to provide a clean break
      between the two coordinate systems.
 
-\section{Conclusion}
+\subsubsection{Conclusion}
 
      The implementation in ESMF follows closely the description above.  The user
      should be able to follow and understand the process based on this
