@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.67 2003/07/22 15:46:12 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.68 2003/07/28 19:36:58 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.67 2003/07/22 15:46:12 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.68 2003/07/28 19:36:58 dneckels Exp $'
 
 !==============================================================================
 !
@@ -2844,11 +2844,12 @@
 
       character(len=ESMF_MAXSTR) :: name, str
       type(ESMF_GridType), pointer :: gp
+      integer :: i
       integer :: status
 
       if (present(rc)) rc = ESMF_FAILURE
 
-      print *, "Grid Print:"
+      print *, "********Begin Grid Print:"
       if (.not. associated(grid%ptr)) then
         print *, "Empty or Uninitialized Grid"
         if (present(rc)) rc = ESMF_SUCCESS
@@ -2871,9 +2872,17 @@
       endif
       print *, "  Name = '",  trim(name), "'"
 
-      ! TODO: add calls to physgrid and distgrid prints
+      ! TODO: add calls to //physgrid-Done\\ and distgrid prints
+
+      ! Print the Associated physgrids
+
+      do i=1, gp%num_physgrids
+        call ESMF_PhysGridPrint(gp%physgrids(i), 'no-opt')
+      enddo
 
       print *, "  (more details coming soon)"
+
+      print *, "*********End Grid Print"
 
       if (present(rc)) rc = ESMF_SUCCESS
 
