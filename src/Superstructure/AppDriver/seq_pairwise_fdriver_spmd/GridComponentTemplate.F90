@@ -1,4 +1,4 @@
-! $Id: GridComponentTemplate.F90,v 1.2 2003/11/06 21:05:51 nscollins Exp $
+! $Id: GridComponentTemplate.F90,v 1.3 2003/11/06 23:56:46 nscollins Exp $
 !
 ! Template code for a child Grid Component, which has no subcomponents
 !  below it.  This is where the bulk of the computation is expected to be
@@ -21,7 +21,7 @@
 !
 !\begin{verbatim}
 
-    module UserGridCompMod
+    module UserGridComp1Mod
     
     ! ESMF Framework module
     use ESMF_Mod
@@ -82,7 +82,7 @@
 
     end subroutine my_final
 
-    end module UserGridCompMod
+    end module UserGridComp1Mod
 
 !\end{verbatim}
     

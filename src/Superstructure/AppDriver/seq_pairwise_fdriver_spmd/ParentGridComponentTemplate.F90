@@ -1,4 +1,4 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.2 2003/11/06 21:05:51 nscollins Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.3 2003/11/06 23:56:46 nscollins Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -23,10 +23,21 @@
     ! ESMF Framework module
     use ESMF_Mod
     
+    ! User Component registration routines
+    use UserGridComp1Mod, only : UserGrid1_SetServices => UserGrid_SetServices
+    use UserGridComp2Mod, only : UserGrid2_SetServices => UserGrid_SetServices
+    use UserCplCompMod, only : UserCpl_SetServices
+
+
     implicit none
     private
     
     public UserPComp_SetServices
+
+    type(ESMF_GridComp), save :: comp1Grid, comp2Grid
+    type(ESMF_CplComp), save :: compCoupler
+    character(len=ESMF_MAXSTR), save :: gname1, gname2, cname
+    type(ESMF_State), save :: G1imp, G1exp, G2imp, G2exp
 
     contains
 
@@ -44,38 +55,88 @@
     end subroutine UserPComp_SetServices
 
 
-    subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
+    subroutine my_init(gcomp, importstate, exportstate, parentclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importstate
       type(ESMF_State) :: exportstate
-      type(ESMF_Clock) :: externalclock
+      type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      print *, "User initialize routine called"
+      type(ESMF_DELayout) :: parentlayout
+      type(ESMF_Grid) :: parentgrid
+
+      ! call ESMF_LogErrMsg("Parent Gridded Component initialize routine called")
+      print *, "Parent Gridded Component initialize routine called"
+
+      ! Get the layout and grid associated with this component
+      call ESMF_GridCompGet(gcomp, layout=parentlayout, grid=parentgrid, rc=rc)
+
+      ! Create the first child Gridded component
+      gname1 = "ESMF Gridded Child Component 1"
+      comp1Grid = ESMF_GridCompCreate(name=gname1, layout=parentlayout, &
+                                         grid=parentgrid, rc=rc)
+
+      ! Create the second child Gridded component
+      gname2 = "ESMF Gridded Child Component 2"
+      comp2Grid = ESMF_GridCompCreate(name=gname2, layout=parentlayout, &
+                                         grid=parentgrid, rc=rc)
+
+      ! Create the Coupler component
+      cname = "ESMF Coupler Component"
+      compCoupler = ESMF_CplCompCreate(name=cname, layout=parentlayout, rc=rc)
+
+      ! call ESMF_LogErrMsg("Component Creates finished")
+      print *, "Component Creates finished"
+
+      ! Now call the SetServices routine for each so they can register their
+      ! subroutines for Init, Run, and Finalize
+      call ESMF_GridCompSetServices(comp1Grid, UserGrid1_SetServices, rc)
+      call ESMF_GridCompSetServices(comp2Grid, UserGrid2_SetServices, rc)
+      call ESMF_CplCompSetServices(compCoupler, UserCpl_SetServices, rc)
+
+
+      ! Now create Import and Export State objects in order to pass data
+      ! between the Coupler and the Gridded Components
+      G1imp = ESMF_StateCreate("GComp1 Import", ESMF_STATEIMPORT, gname1)
+      G1exp = ESMF_StateCreate("GComp1 Export", ESMF_STATEEXPORT, gname1)
+
+      G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATEIMPORT, gname2)
+      G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATEEXPORT, gname2)
+
+      ! Now give each of the subcomponents a chance to initialize themselves.
+      call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)
+      call ESMF_GridCompInitialize(comp1Grid, G2imp, G2exp, parentclock, rc=rc)
+
+      call ESMF_CplCompInitialize(compCoupler, G1exp, G2imp, parentclock, rc=rc)
+
+      ! call ESMF_LogErrMsg("Parent Component Init finished")
+      print *, "Parent Component Init finished"
 
     end subroutine my_init
 
 
-    subroutine my_run(gcomp, importstate, exportstate, externalclock, rc)
+    subroutine my_run(gcomp, importstate, exportstate, parentclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importstate
       type(ESMF_State) :: exportstate
-      type(ESMF_Clock) :: externalclock
+      type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      print *, "User run routine called"
+      ! call ESMF_ErrLogErrMsg("Parent Gridded Component run routine called")
+      print *, "Parent Gridded Component run routine called"
 
     end subroutine my_run
 
 
-    subroutine my_final(gcomp, importstate, exportstate, externalclock, rc)
+    subroutine my_final(gcomp, importstate, exportstate, parentclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importstate
       type(ESMF_State) :: exportstate
-      type(ESMF_Clock) :: externalclock
+      type(ESMF_Clock) :: parentclock
       integer :: rc
      
-      print *, "User finalize routine called"
+      ! call ESMF_ErrLogErrMsg("Parent Gridded Component finalize routine called")
+      print *, "Parent Gridded Component finalize routine called"
 
     end subroutine my_final
 

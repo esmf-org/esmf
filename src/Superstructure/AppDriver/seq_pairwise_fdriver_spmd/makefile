@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/11/06 21:25:50 nscollins Exp $ 
+# $Id: makefile,v 1.5 2003/11/06 23:56:46 nscollins Exp $ 
 
 ALL:  executable
 
@@ -19,10 +19,10 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod 
+CLEANFILES  = *.o *.mod loadmap.txt
 CLOBBERDIRS =
 
-APPOBJS = CouplerComponentTemplate.o GridComponentTemplate.o \
+APPOBJS = CouplerComponentTemplate.o GridComponentTemplate.o GridComp2.o \
           ParentGridComponentTemplate.o AppDriver.o
 
 #

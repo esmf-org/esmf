@@ -91,13 +91,12 @@
     !  ndays = ESMF_ConfigGetInt( config, label ='Number_of_Days:', &
     !                             default=30, rc = rc )
     !
-    i_max = 20
-    j_max = 40  
-    x_min = 0.0
-    y_min = 0.0
-    x_max = 180.0
-    y_max = 90.0
-
+    i_max = ESMF_ConfigGetInt(config, label='I Counts:', default=20, rc=rc)
+    j_max = ESMF_ConfigGetInt(config, label='J Counts:', default=80, rc=rc)
+    x_min = ESMF_ConfigGetFloat(config, label='X Min:', default=0.0, rc=rc)
+    y_min = ESMF_ConfigGetFloat(config, label='Y Min:', default=-180.0, rc=rc)
+    x_max = ESMF_ConfigGetFloat(config, label='X Max:', default=90.0, rc=rc)
+    y_max = ESMF_ConfigGetFloat(config, label='Y Max:', default=180.0, rc=rc)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -109,9 +108,6 @@
     ! Create a default layout, which is 1xN in topology, where N is the
     !  number of DEs this program was started on.
     defaultlayout = ESMF_DELayoutCreate(rc=rc)
-    print *, "rc = ", rc
-    print *, "default layout:"
-    call ESMF_DELayoutPrint(defaultlayout, "", rc)
 
 
     ! Create the top Gridded component, passing in the default layout.
@@ -227,7 +223,7 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-      stop 0
+      call ESMF_Finalize(rc)
 
       end program ESMF_ApplicationDriver
     
