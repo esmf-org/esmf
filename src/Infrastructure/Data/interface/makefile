@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/11/04 22:16:58 nscollins Exp $
+# $Id: makefile,v 1.2 2002/11/05 17:43:23 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -12,7 +12,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Array.F90 ESMF_ArrayMap.F90
+SOURCEF	  =  ESMF_Array.F90 ESMF_ArrayMap.F90 ESMF_Alloc.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 

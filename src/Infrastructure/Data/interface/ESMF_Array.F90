@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.1 2002/11/04 22:16:58 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.2 2002/11/05 17:43:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -15,7 +15,7 @@
 !
 !==============================================================================
 !
-! This file contains the Array class definition and all Field
+! This file contains the Array class definition and all Array
 ! class methods.
 !
 !------------------------------------------------------------------------------
@@ -87,14 +87,7 @@
       type ESMF_Array
       sequence
       private
-   
-        integer :: rank                    ! number of dimensions
-        type(ESMF_DataType) :: type        ! real/float, integer, etc enum
-        type(ESMF_DataKind) :: kind        ! fortran "kind" enum/integer
-        integer, dimension(ESMF_MAXDIM, 3) :: rinfo ! (lower/upper/stride) per rank
-        type(ESMF_Pointer) :: base_address ! addr for: arraystart or 1st elem?
-        logical :: allcontig       ! optimizations possible if all strides=1
-
+        type(ESMF_Pointer) :: cstruct      ! the dope vector in the C class
       end type
 
 !------------------------------------------------------------------------------
@@ -125,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.1 2002/11/04 22:16:58 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.2 2002/11/05 17:43:23 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -615,30 +608,20 @@ end function
         endif
 
 
-!       set array contents
+!       extract any info needed to pass into C++ interface
       
-        array%rank = rank   
-        array%type = type
-        array%kind = kind
-
-        do i=1,rank
-          array%rinfo(i, 1) = lbounds(i)
-          array%rinfo(i, 2) = ubounds(i)
-          array%rinfo(i, 3) = strides(i)
-        enddo
-
         if (copyflag .eq. ESMF_DO_COPY) then
             ! compute array size
             ! allocate that amount of space
             ! copy contents from bufaddr into new space
         else
-            array%base_address = bufaddr
+            ! array%base_address = bufaddr
         endif
-
-        ! add code here which looks at the strides and sets this
-        ! if the array contents are contiguous.  assume not, for now.
-        array%allcontig = .FALSE.
-
+!     
+!
+!       call C++ Construct routine here
+!
+!
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -731,9 +714,9 @@ end function
           rc = ESMF_FAILURE
         endif
 
-!       free the data buffer
-!       how do we do this???  the compiler is complaining.
-        !deallocate(array%base_address, stat=status)
+!       get the real F90 pointer back from struct, and call deallocate
+!       this will need one interface per type/kind/rank
+        !deallocate(base_address, stat=status)
         if (status .ne. 0) then         ! this is a fortran rc, NOT an ESMF rc
           print *, "Array allocation error"
           return
@@ -1077,8 +1060,6 @@ end function
 !
         type (ESMF_Array) :: a
 
-        a%rank = 0
-
         ESMF_ArrayRestore = a 
  
         end function ESMF_ArrayRestore
@@ -1133,8 +1114,6 @@ end function
 ! code goes here
 !
         type (ESMF_Array) :: a
-
-        a%rank = 0
 
         ESMF_ArrayRead = a 
  
