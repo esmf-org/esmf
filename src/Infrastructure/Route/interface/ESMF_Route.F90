@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.15 2003/04/30 21:11:37 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.16 2003/05/01 16:42:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.15 2003/04/30 21:11:37 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.16 2003/05/01 16:42:59 nscollins Exp $'
 
 !==============================================================================
 !
@@ -222,7 +222,7 @@
         ! Call C++ destroy code
         call c_ESMC_RouteDestroy(route, status)
         if (status .ne. ESMF_SUCCESS) then  
-          print *, "Route create error"
+          print *, "Route destroy error"
           return  
         endif
 
