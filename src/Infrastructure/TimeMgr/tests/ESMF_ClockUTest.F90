@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.84 2004/12/15 00:47:11 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.85 2004/12/22 19:44:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.84 2004/12/15 00:47:11 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.85 2004/12/22 19:44:05 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1676,6 +1676,7 @@
       write(name, *) "Nanosecond time string test 2"
       call ESMF_TimeGet(startTime, timeString=timeString, rc=rc)
       write(failMsg, *) "Nanosecond time string not 2004-09-28T00:00:00:1/100000 or not ESMF_SUCCESS."
+      ! TODO: this print * is a workaround to a split-line anomaly on babyblue
       call ESMF_Test((timeString=="2004-09-28T00:00:00:1/100000" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_TimePrint(startTime)
