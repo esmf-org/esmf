@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/09/17 17:33:20 svasquez Exp $
+# $Id: makefile,v 1.14 2003/09/17 20:45:53 flanigan Exp $
 
 ALL:  examples
 
@@ -64,28 +64,22 @@ run_ESMF_CalendarEx:
 	-$(ESMF_EXDIR)/ESMF_CalendarEx > $(ESMF_EXDIR)/ESMF_CalendarEx.stdout
 
 
-
+#
 # ESMF_ClockEx
 #
 run_ESMF_ClockEx:
 	-$(ESMF_EXDIR)/ESMF_ClockEx > $(ESMF_EXDIR)/ESMF_ClockEx.stdout
 
-
 #
 # ESMC_ClockEx
 #
-$(ESMF_EXDIR)/ESMC_ClockEx: ESMC_ClockEx.o  chkopts
-	-${SL_C_LINKER} -g -o $(ESMF_EXDIR)/ESMC_ClockEx ESMC_ClockEx.o \
-        -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
-        $(SL_LINKOPTS)
-
 run_ESMC_ClockEx:
-	-$(ESMF_EXDIR)/ESMC_ClockEx > ESMC_ClockEx.stdout
+	-$(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
 
 #
 # ESMF_ClockAdvEx
 #
 run_ESMF_ClockAdvEx:
-	-$(ESMF_EXDIR)/ESMF_ClockAdvEx > ESMF_ClockAdvEx.stdout
+	-$(ESMF_EXDIR)/ESMF_ClockAdvEx > $(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
 
 
