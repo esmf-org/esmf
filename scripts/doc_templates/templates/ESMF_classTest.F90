@@ -1,4 +1,4 @@
-! $Id: ESMF_classTest.F90,v 1.3 2003/03/06 17:32:09 eschwab Exp $
+! $Id: ESMF_classTest.F90,v 1.4 2003/03/11 18:25:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_classTest.F90,v 1.3 2003/03/06 17:32:09 eschwab Exp $'
+      '$Id: ESMF_classTest.F90,v 1.4 2003/03/11 18:25:45 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,6 +52,12 @@
 
       ! instantiate a <Class> 
       type(ESMF_<Class>) :: <class>
+
+#ifdef EXHAUSTIVE
+
+      ! perform exhaustive tests here;
+      !   see #else below for non-exhaustive tests
+      ! future release will use run-time switching mechanism
 
       ! test dynamic allocation of ESMF_<Class>
       <class> = ESMF_<Class>Create(args, rc)
@@ -141,6 +147,13 @@
       write(failMsg, *) "rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+#else
+
+      ! perform non-exhaustive tests here;
+      !   use same templates as above
+
+#endif
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?

@@ -1,4 +1,4 @@
-// $Id: ESMC_classTest.C,v 1.4 2003/03/11 03:00:36 cdeluca Exp $
+// $Id: ESMC_classTest.C,v 1.5 2003/03/11 18:25:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_classTest.C,v 1.4 2003/03/11 03:00:36 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_classTest.C,v 1.5 2003/03/11 18:25:45 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -59,6 +59,12 @@
    // for statically allocated <Class>'s
    //  tests default constructor; add args to test other constructors
    ESMC_<Class> <class>;
+
+#ifdef EXHAUSTIVE
+
+   // perform exhaustive tests here;
+   //   see #else below for non-exhaustive tests
+   // future release will use run-time switching mechanism
 
    // test dynamic allocation of ESMC_<Class>
    //   also tests default constructor
@@ -150,6 +156,13 @@
    sprintf(failMsg, "rc = %d, <class>_ptr = %p", rc, <class>_ptr);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
+
+#else
+
+   // perform non-exhaustive tests here;
+   //   use same templates as above
+
+#endif
 
    // return number of failures to environment; 0 = success (all pass)
    return(result);
