@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.3 2003/06/12 14:56:34 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.4 2003/06/12 19:17:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.3 2003/06/12 14:56:34 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.4 2003/06/12 19:17:06 nscollins Exp $'
 
 !==============================================================================
 !
@@ -199,11 +199,11 @@
       ! Set name and field pointers
       !
       
+      ! method needs to be set based on order parm
       call ESMF_RegridTypeSet(ESMF_RegridConsByFieldConserv,          &
                               name=name, src_field = src_field,               &
                                          dst_field = dst_field,               &
-                                         method = ESMF_RegridMethod_Conserv1, &
-                                       &!method = ESMF_RegridMethod_Conserv2, &
+                                         method = ESMF_RegridMethod_Conserv2, &
                                          rc=status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
       
