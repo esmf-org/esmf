@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.112 2004/06/14 13:57:27 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.113 2004/06/14 14:01:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -153,7 +153,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.112 2004/06/14 13:57:27 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.113 2004/06/14 14:01:06 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       contains
@@ -863,7 +863,8 @@
 
       if (base%this .eq. ESMF_NULL_POINTER) then
         dummy=ESMF_LogWrite("Uninitialized Base object", &
-                             ESMF_LOG_INFO)) return
+                             ESMF_LOG_INFO) 
+        return
       endif
 
       call c_ESMC_BasePrint(base, opts, status)
