@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.26 2004/09/03 17:15:28 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.27 2004/09/03 17:24:28 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -1017,7 +1017,7 @@ end subroutine ESMF_LogFlush
     endif
     if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) then
         call ESMF_LogFlush(ESMF_LogDefault, rc=rc2) 
-	ESMF_LogDefault%findex
+	ESMF_LogDefault%findex = 1
     else
         ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
