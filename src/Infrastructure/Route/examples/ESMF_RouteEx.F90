@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.12 2004/03/20 03:55:02 cdeluca Exp $
+! $Id: ESMF_RouteEx.F90,v 1.13 2004/04/15 15:52:13 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -32,7 +32,8 @@
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DataMap) :: datamap
-    type(ESMF_DELayout) :: layout1, layout2
+    type(ESMF_newDELayout) :: layout1, layout2
+    type(ESMF_VM) :: vm
     type(ESMF_RouteHandle) :: halo_rh, redist_rh, regrid_rh
     character (len = ESMF_MAXSTR) :: fname
     type(ESMF_IOSpec) :: iospec
@@ -52,11 +53,12 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    layout1 = ESMF_DELayoutCreate(rc=rc)
-    call ESMF_DELayoutGetNumDEs(layout1, numdes, rc)
-    layout2 = ESMF_DELayoutCreate((/ (i,i=0,numdes-1) /), 2, (/ numdes, 1 /), &
-                                  (/ ESMF_COMMTYPE_MP, ESMF_COMMTYPE_MP /), rc)
+    call ESMF_VMGetGlobal(vm, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
+    layout1 = ESMF_newDELayoutCreate(vm, rc=rc)
+    call ESMF_newDELayoutGet(layout1, deCount=numdes, rc=rc)
+    layout2 = ESMF_newDELayoutCreate(vm, (/ numdes, 1 /), rc=rc)
 
     mincoords = (/  0.0,  0.0 /)
     mincoords = (/ 20.0, 30.0 /)
@@ -65,7 +67,7 @@
                    horzGridType=ESMF_GridType_XY, &
                    horzStagger=ESMF_GridStagger_A, &
                    horzCoordSystem=ESMF_CoordSystem_Cartesian, &
-                   layout=layout1, name="srcgrid", rc=rc)
+                   delayout=layout1, name="srcgrid", rc=rc)
 
     ! same grid coordinates, but different layout
     dstgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
@@ -73,7 +75,7 @@
                    horzGridType=ESMF_GridType_XY, &
                    horzStagger=ESMF_GridStagger_A, &
                    horzCoordSystem=ESMF_CoordSystem_Cartesian, &
-                   layout=layout2, name="srcgrid", rc=rc)
+                   delayout=layout2, name="srcgrid", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -97,7 +99,7 @@
     call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
 
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                                    name="dst pressure", rc=rc)
+                                                   name="dst pressure", rc=rc)
 
  
     ! fields all ready to go
