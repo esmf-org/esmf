@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.4 2004/11/03 23:34:05 nscollins Exp $
+! $Id: ESMF_RegridEx.F90,v 1.5 2004/12/09 00:29:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
 !BOC
-    call ESMF_FieldRegridStore(field1, field2, layout2, &
+    call ESMF_FieldRegridStore(field1, field2, vm, &
                                routehandle=regrid_rh, &
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
 !EOC
