@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.87 2005/01/28 18:15:30 jwolfe Exp $
+#  $Id: common.mk,v 1.88 2005/02/02 20:18:33 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -177,7 +177,7 @@ OBJS		= ${OBJSC} ${OBJSF}
 
 ESMF_TESTSCRIPTS    = ${ESMF_TOP_DIR}/scripts/test_scripts
 DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -d $(ESMF_TESTDIR) 
-DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR)
+DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
 DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -d $(ESMF_TESTDIR)
 DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary.pl -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR)
 
