@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.99 2004/10/14 16:55:27 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.100 2004/10/19 21:58:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.99 2004/10/14 16:55:27 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.100 2004/10/19 21:58:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3768,7 +3768,7 @@
           enddo
         endif
         j1 = localStart(1) + 1
-        j2 = localStart(1) + countsPerDEDim1(myDE(1))
+        j2 = localStart(1) + 1 + countsPerDEDim1(myDE(1))
         localMin(1) = minval(coord1(j1:j2))
         localMax(1) = maxval(coord1(j1:j2))
 
@@ -3778,7 +3778,7 @@
           enddo
         endif
         j1 = localStart(2) + 1
-        j2 = localStart(2) + countsPerDEDim2(myDE(2))
+        j2 = localStart(2) + 1 + countsPerDEDim2(myDE(2))
         localMin(2) = minval(coord2(j1:j2))
         localMax(2) = maxval(coord2(j1:j2))
   
@@ -8021,8 +8021,8 @@
       stop  = 0.0
       i1    = 0
       do j = 1,numDE1
-        start = minval(coord1(i1+1:i1+countsPerDEDim1(j)))
-        stop  = maxval(coord1(i1+1:i1+countsPerDEDim1(j)))
+        start = minval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
+        stop  = maxval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
         if (countsPerDEDim1(j).eq.0) then
           start = -huge
           stop  = -huge
@@ -8043,8 +8043,8 @@
       stop  = 0.0
       i1    = 0
       do j = 1,numDE2
-        start = minval(coord2(i1+1:i1+countsPerDEDim2(j)))
-        stop  = maxval(coord2(i1+1:i1+countsPerDEDim2(j)))
+        start = minval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
+        stop  = maxval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
         if (countsPerDEDim2(j).eq.0) then
           start = -huge
           stop  = -huge
