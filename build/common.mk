@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.24 2003/10/27 22:26:56 jwolfe Exp $
+#  $Id: common.mk,v 1.25 2003/11/10 22:37:21 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -36,31 +36,31 @@ endif
 # -------------------------------------------------------------------------------
 
 ifndef ESMF_COMPILER
-export ESMF_COMPILER := default
+export ESMF_COMPILER = default
 endif
 
 ifeq ($(ESMF_COMPILER),default)
 
 ifeq ($(ESMF_ARCH),Darwin)
-export ESMF_COMPILER := absoft
+export ESMF_COMPILER = absoft
 endif
 
 ifeq ($(ESMF_ARCH),Linux)
-export ESMF_COMPILER := lahey
+export ESMF_COMPILER = lahey
 endif
 
 endif
 
 ifndef ESMF_PREC
-export ESMF_PREC := 64
+export ESMF_PREC = 64
 endif
 ifeq ($(ESMF_PREC),default)
-export ESMF_PREC := 64
+export ESMF_PREC = 64
 endif
 
 # This is ok to remain as default
 ifndef ESMF_SITE
-export ESMF_SITE := default
+export ESMF_SITE = default
 endif
 
 #
@@ -68,10 +68,10 @@ endif
 #
 
 ifndef ESMF_BOPT
-export ESMF_BOPT := O
+export ESMF_BOPT = O
 endif
 ifeq ($(ESMF_BOPT),default)
-export ESMF_BOPT := O
+export ESMF_BOPT = O
 endif
 
 
@@ -95,7 +95,9 @@ endif
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #-------------------------------------------------------------------------------
 
-ESMF_BUILD	= $(ESMF_TOP_DIR)
+ifndef ESMF_BUILD
+export ESMF_BUILD := $(ESMF_TOP_DIR)
+endif
 
 
 LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
