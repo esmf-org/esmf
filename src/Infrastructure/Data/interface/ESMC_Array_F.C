@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.26 2003/02/25 20:15:45 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.27 2003/02/26 20:20:13 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,10 +116,10 @@ extern "C" {
 
      void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_Layout **layout,
                                 int *decompids,  int *size_decomp,
-                                ESMC_AxisIndex **AI_exc, ESMC_AxisIndex **AI_tot,
+                                ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
                                 int *status) {
           *status = (*ptr)->ESMC_ArrayHalo(*layout, decompids, *size_decomp,
-                                           *AI_exc, *AI_tot);
+                                           AI_exc, AI_tot);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
