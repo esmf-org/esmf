@@ -169,7 +169,7 @@
 
 !''''''''''''''''''''''''''''
 
-      nDE = ESMF_ConfigGetInt( cf, label ='Number_of_DEs:', & 
+      call ESMF_ConfigGetAttribute( cf, nDE, label ='Number_of_DEs:', & 
            default=7, rc = rc )
 !''''''''''''''''''''''''''''
       
@@ -191,7 +191,7 @@
       rc = 0
 !''''''''''''''''''''''''''''
    
-      tau = ESMF_ConfigGetFloat(cf, &
+      call ESMF_ConfigGetAttribute(cf, tau, &
            label = 'Relaxation_time_scale_in_days:', rc = rc)
 !''''''''''''''''''''''''''''
    
@@ -213,7 +213,7 @@
       rc = 0
 !''''''''''''''''''''''''''''
 
-      answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', &
+      call ESMF_ConfigGetChar ( cf, answer, 'Do_you_want_quality_control:', &
                                     rc = rc )
 !''''''''''''''''''''''''''''
 
@@ -234,7 +234,7 @@
      rc = 0
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetString ( cf, restart_file ,'restart_file_name:', &
+      call ESMF_ConfigGetAttribute ( cf, restart_file ,'restart_file_name:', &
            rc = rc )
 !''''''''''''''''''''''''''''
 
@@ -281,7 +281,7 @@
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetString ( cf, u_dataType, rc =rc )  ! first token   
+      call ESMF_ConfigGetAttribute ( cf, u_dataType, rc =rc )  ! first token   
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -301,7 +301,7 @@
 
 !''''''''''''''''''''''''''''
 
-      nu = ESMF_ConfigGetInt ( cf, rc = rc )                 ! second token
+      call ESMF_ConfigGetAttribute ( cf, nu, rc = rc )            ! second token
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -320,7 +320,7 @@
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetFloats ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8
+      call ESMF_ConfigGetAttribute ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -365,7 +365,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetString ( cf, v_dataType, rc = rc )
+      call ESMF_ConfigGetAttribute ( cf, v_dataType, rc = rc )
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -384,7 +384,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      nv = ESMF_ConfigGetInt ( cf, rc = rc )
+      call ESMF_ConfigGetAttribute ( cf, nv, rc = rc )
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -403,7 +403,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetFloats ( cf, sigV, nsize=nv, rc=rc )
+      call ESMF_ConfigGetAttribute ( cf, sigV, nsize=nv, rc=rc )
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -464,7 +464,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetString ( cf, u_dataType, rc=rc )  ! first token
+      call ESMF_ConfigGetAttribute ( cf, u_dataType, rc=rc )  ! first token
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -483,7 +483,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      nu = ESMF_ConfigGetInt ( cf, rc=rc )                 ! second token
+      call ESMF_ConfigGetAttribute ( cf, nu, rc=rc )              ! second token
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -502,7 +502,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetFloats ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8
+      call ESMF_ConfigGetAttribute ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8
 !''''''''''''''''''''''''''''
 
      counter_total =counter_total + 1
@@ -537,7 +537,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetString ( cf, v_dataType, rc=rc )
+      call ESMF_ConfigGetAttribute ( cf, v_dataType, rc=rc )
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -556,7 +556,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      nv = ESMF_ConfigGetInt ( cf, rc=rc )
+      call ESMF_ConfigGetAttribute ( cf, nv, rc=rc )
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
@@ -575,7 +575,7 @@ subroutine MultPar_SingleLine_V
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigGetFloats ( cf, sigV, nsize=6,rc=rc )
+      call ESMF_ConfigGetAttribute ( cf, sigV, nsize=6,rc=rc )
 !''''''''''''''''''''''''''''
 
      counter_total =counter_total + 1
@@ -721,7 +721,7 @@ subroutine MultPar_SingleLine_V
 !               -----------------------
          counter_total =counter_total + 1
 !''''''''''''''''''''''''''''
-            plev(line) = ESMF_ConfigGetFloat ( cf, rc=rc )
+            call ESMF_ConfigGetAttribute ( cf, plev(line), rc=rc )
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
@@ -742,7 +742,7 @@ subroutine MultPar_SingleLine_V
          counter_total =counter_total + 1
 !''''''''''''''''''''''''''''
          do col =1, ncol(line)
-            temp = ESMF_ConfigGetFloat ( cf, rc=rc)
+            call ESMF_ConfigGetAttribute ( cf, temp, rc=rc)
             if (rc == 0) then 
                vCorr(line,col) = temp 
             end if
@@ -762,7 +762,7 @@ subroutine MultPar_SingleLine_V
                return
             endif
          end do
-         counter_success =counter_success + 1
+         counter_success = counter_success + 1
 
 !''''''''''''''''''''''''''''    
       end do

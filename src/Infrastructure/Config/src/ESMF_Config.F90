@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.4 2004/03/03 00:18:46 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.5 2004/03/08 16:44:07 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -104,8 +104,8 @@
 !       real    r
 !       integer i
 !       call {\tt ESMF\_ConfigFindLabel( cf, 'constants:', rc = rc)}
-!       r = {\tt ESMF\_ConfigGetFloat( cf, rc = rc )}       ! results in r = 3.1415
-!       i = {\tt ESMF\_ConfigGetInt( cf, rc = rc )}         ! results in i = 25
+!       call {\tt ESMF\_ConfigGetFloat( cf, r, rc = rc )}       ! results in r = 3.1415
+!       call {\tt ESMF\_ConfigGetInt( cf, i, rc = rc )}         ! results in i = 25
 ! \end{verbatim}
 !
 !  The file names above can be retrieved with the following
@@ -136,9 +136,9 @@
 !       integer       rc
 !       call  {\tt ESMF\_ConfigFindLabel(cf, 'my_table_name::', rc = rc)}
 !       do i = 1, 7
-!          call  call {\tt ESMF\_ConfigNextLine( cf, rc = rc )
+!          call {\tt ESMF\_ConfigNextLine( cf, rc = rc )
 !          do j = 1, 3
-!             table(i,j) = ESMF_ConfigGetFloat( cf, rc = rc )
+!             call ESMF_ConfigGetFloat( cf, table(i, j), rc = rc )
 !          end do                   
 !       end do
 ! \end{verbatim}
@@ -195,7 +195,8 @@
        public :: ESMF_ConfigLoadFile   ! loads resource file into memory
        public :: ESMF_ConfigFindLabel  ! selects a label (key)
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
-       public :: ESMF_ConfigGetAttribute ! returns next number 
+       public :: ESMF_ConfigGetAttribute ! returns next value
+       public :: ESMF_ConfigGetChar    ! returns only a single character
        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
@@ -219,7 +220,9 @@
    
 ! !PRIVATE MEMBER FUNCTIONS:
         module procedure ESMF_ConfigGetString
+        module procedure ESMF_ConfigGetFloat
         module procedure ESMF_ConfigGetFloats
+        module procedure ESMF_ConfigGetInt
         module procedure ESMF_ConfigGetInts
 
 ! !DESCRIPTION:
@@ -286,17 +289,21 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigCreate - Create a Config 
+! !IROUTINE: ESMF_ConfigCreate - Create a Configuration object
 !
 ! !INTERFACE:
+      type(ESMF_Config) function ESMF_ConfigCreate( rc )
 
-       type(ESMF_Config) function ESMF_ConfigCreate( rc )
-
-      implicit none
-
-      integer,intent(out), optional              :: rc       ! error code
+! !ARGUMENTS:
+      integer,intent(out), optional              :: rc 
 !
-! !DESCRIPTION: Create ESMF configuration for a given layout.
+! !DESCRIPTION: 
+!   Create an {\tt ESMF\_Config} configuration object for use in
+!   subsequent query calls.
+!   \begin{description}
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigCreate'
@@ -327,14 +334,20 @@
 ! !IROUTINE: ESMF_ConfigDestroy - Destroy a Config
 !
 ! !INTERFACE:
-
     subroutine ESMF_ConfigDestroy( cf, rc )
 
-      implicit none
-      type(ESMF_Config), intent(inout) :: cf       ! ESMF Configuration
-      integer,intent(out), optional    :: rc       ! error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout) :: cf
+      integer,intent(out), optional    :: rc
 !
-! !DESCRIPTION: Destroys an ESMF configuration.
+! !DESCRIPTION: 
+!    Destroys an ESMF configuration.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'::ESMF_ConfigDestroy'
@@ -362,20 +375,12 @@
 ! !IROUTINE: ESMF_ConfigFindLabel - Find a label
 !
 ! !INTERFACE:
-
     subroutine ESMF_ConfigFindLabel( cf, label, rc )
 
-      implicit none
-
-      type(ESMF_Config), intent(inout)  :: cf    ! ESMF Configuration
-      character(len=*), intent(in)   :: label    ! label
-      integer, intent(out), optional  :: rc      ! Error code
-                                                 !   0  no error
-                                                 !  -1  buffer not loaded
-                                                 !  -2  could not find label
-                                                 !  -3  invalid operation
-                                                 !      with index_
-      
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)  :: cf 
+      character(len=*), intent(in)   :: label
+      integer, intent(out), optional  :: rc 
 
 ! !DESCRIPTION: Finds the label (key) in the resource file. 
 !
@@ -385,6 +390,16 @@
 !               in the resource files. The DAO convention is to finish 
 !               line labels by : and table labels by ::..
 !
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [label]
+!     Identifing label. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     Equals -1 if buffer could not be loaded, -2 if label not found,
+!     and -3 if invalid operation with index.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
 	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
@@ -431,25 +446,33 @@
 !
 ! !IROUTINE: ESMF_ConfigGetAttribute - Get a character string
 !
-! !DESCRIPTION: Gets a sequence of characters (string, word). It will be 
-!               terminated by the first white space.
-
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
       subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
 
-      implicit none
-      
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(out)          :: string    ! string (word)
-      
-      character(len=*), intent(in), optional :: label    ! label
-      
-      character(len=*), intent(in), optional :: default  ! default value
-      
-      integer, intent(out), optional         :: rc       ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf     
+      character(len=*), intent(out)          :: string
+      character(len=*), intent(in), optional :: label 
+      character(len=*), intent(in), optional :: default 
+      integer, intent(out), optional         :: rc     
 !
+! !DESCRIPTION: Gets a sequence of characters (string, word). It will be 
+!               terminated by the first white space.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [string]
+!     Returned value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+
 !EOP -------------------------------------------------------------------
       character*1   ch
       integer       ib, ie, iret
@@ -516,18 +539,32 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      real function ESMF_ConfigGetFloat( cf, label, default, rc )
+      subroutine ESMF_ConfigGetFloat( cf, r, label, default, rc )
 
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label 
-      real, intent(in), optional             :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf    
+      real, intent(out)                      :: r    
+      character(len=*), intent(in), optional :: label
+      real, intent(in), optional             :: default 
+      integer, intent(out), optional         :: rc     
 !
-! !DESCRIPTION: Gets a floating point number
+! !DESCRIPTION: 
+!   Gets a floating point number from the configuration object.
 !
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [r]
+!     Returned value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+
 !EOP -------------------------------------------------------------------
 !
       integer:: iret
@@ -538,9 +575,9 @@
 
 ! Default setting
       if( present( default ) ) then 
-         ESMF_ConfigGetFloat = default
+         r = default
       else
-         ESMF_ConfigGetFloat = 0.0
+         r = 0.0
       endif
 
 ! Processing
@@ -556,13 +593,13 @@
       end if
 
       if ( iret .eq. 0 ) then
-         ESMF_ConfigGetFloat = x
+         r = x
       endif
 
       if( present( rc )) rc = iret 
       return
 
-    end function ESMF_ConfigGetFloat
+    end subroutine ESMF_ConfigGetFloat
 
 
 
@@ -576,19 +613,31 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
       subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
-                                    default, rc )
-      
-      implicit none
-      real, intent(inout)                 :: array(*)    ! real array 
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in)                    :: nsize    ! number of floating 
-                                                         ! point numbers
-      real, intent(in), optional             :: default  ! default value
+                                       default, rc )
 
-      integer, intent(out), optional         :: rc       ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf    
+      real, intent(inout)                 :: array(*) 
+      character(len=*), intent(in), optional :: label 
+      integer, intent(in)                    :: nsize 
+      real, intent(in), optional             :: default
+      integer, intent(out), optional         :: rc    
 !
 ! !DESCRIPTION: Gets a floating point array of a given size.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [array]
+!     Returned values. 
+!   \item [nsize]
+!     Number of returned values expected. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
@@ -618,15 +667,15 @@
          
          if (present( label )) then
             if(present( default )) then
-              array(i) = ESMF_ConfigGetFloat( cf, label, default, iret)
+               call ESMF_ConfigGetFloat( cf, array(i), label, default, iret)
             else
-               array(i) = ESMF_ConfigGetFloat( cf, label, rc = iret)
+               call ESMF_ConfigGetFloat( cf, array(i), label, rc = iret)
             endif
          else
             if(present( default )) then
-               array(i) = ESMF_ConfigGetFloat( cf, default=default, rc=iret )
+               call ESMF_ConfigGetFloat( cf, array(i), default=default, rc=iret )
             else
-               array(i) = ESMF_ConfigGetFloat( cf, rc = iret)
+               call ESMF_ConfigGetFloat( cf, array(i), rc = iret)
             endif
          endif
       enddo
@@ -644,18 +693,29 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      integer function ESMF_ConfigGetInt( cf, label, default, rc )
-      
-      implicit none
+      subroutine ESMF_ConfigGetInt( cf, i, label, default, rc )
 
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in), optional          :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf     
+      integer, intent(out)                   :: i
+      character(len=*), intent(in), optional :: label 
+      integer, intent(in), optional          :: default
+      integer, intent(out), optional         :: rc   
 
 !
 ! !DESCRIPTION: Gets an integer number
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [i]
+!     Returned integer value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
       character*256 string
@@ -666,9 +726,9 @@
 
 ! Default setting
       if( present( default ) ) then 
-         ESMF_ConfigGetInt = default
+         i = default
       else
-         ESMF_ConfigGetInt = 0
+         i = 0
       endif
 
 ! Processing
@@ -693,13 +753,13 @@
       endif
 
       if ( iret .eq. 0 ) then
-         ESMF_ConfigGetInt = n
+         i = n
       endif
 
       if( present( rc )) rc = iret
       
       return
-    end function ESMF_ConfigGetInt
+    end subroutine ESMF_ConfigGetInt
 
 
 !-----------------------------------------------------------------------
@@ -712,18 +772,30 @@
       ! Private name; call using ESMF_ConfigGetAttribute()
       subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
                                    default, rc )
-      
-      implicit none
-      integer, intent(inout)              :: array(*)    ! real array 
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in)                    :: nsize    ! number of integer 
-                                                         ! numbers
-      integer, intent(in), optional          :: default  ! default value
 
-      integer, intent(out), optional         :: rc       ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf      
+      integer, intent(inout)              :: array(*)  
+      character(len=*), intent(in), optional :: label 
+      integer, intent(in)                    :: nsize  
+      integer, intent(in), optional          :: default
+      integer, intent(out), optional         :: rc    
 !
 ! !DESCRIPTION: Gets an integer array of given size.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [array]
+!     Returned values. 
+!   \item [nsize]
+!     Number of returned values expected. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
       character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
@@ -750,15 +822,15 @@
          
          if (present( label )) then
             if(present( default )) then
-              array(i) = ESMF_ConfigGetInt( cf, label, default, iret)
+               call ESMF_ConfigGetInt( cf, array(i), label, default, iret)
             else
-               array(i) = ESMF_ConfigGetInt( cf, label, rc = iret)
+               call ESMF_ConfigGetInt( cf, array(i), label, rc = iret)
             endif
          else
             if(present( default )) then
-               array(i) = ESMF_ConfigGetInt( cf, default = default, rc = iret)
+               call ESMF_ConfigGetInt( cf, array(i), default = default, rc = iret)
             else
-               array(i) = ESMF_ConfigGetInt( cf, rc = iret)
+               call ESMF_ConfigGetInt( cf, array(i), rc = iret)
             endif
          endif
       enddo
@@ -778,18 +850,28 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ConfigGetAttribute()
-      function ESMF_ConfigGetChar( cf, label, default, rc )
+      subroutine ESMF_ConfigGetChar( cf, c, label, default, rc )
 
-      implicit none
-      character ESMF_ConfigGetChar
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-!      integer, intent(in), optional          :: nsize   ! number of  
-!                                                        ! characters
-      character, intent(in), optional        :: default  ! default value
-      integer, intent(out), optional         :: rc       ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf 
+      character, intent(out)                 :: c
+      character(len=*), intent(in), optional :: label   
+      character, intent(in), optional        :: default
+      integer, intent(out), optional         :: rc    
 !
 ! !DESCRIPTION: Gets a character.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [c]
+!     Returned value. 
+!   \item [{[label]}]
+!     Identifing label. 
+!   \item [{[default]}]
+!     Default value if label is not found in configuration object. 
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !
 !EOP -------------------------------------------------------------------
@@ -800,9 +882,9 @@
 
 ! Default setting
       if( present( default ) ) then 
-         ESMF_ConfigGetChar = default
+         c = default
       else
-         ESMF_ConfigGetChar = BLK
+         c = BLK
       endif
 
 ! Processing
@@ -813,14 +895,14 @@
       endif
 
       if ( iret .eq. 0 ) then
-         ESMF_ConfigGetChar = string(1:1)
+         c = string(1:1)
       end if
 
       if (present( rc )) rc = iret
 
       return
 
-    end function ESMF_ConfigGetChar
+    end subroutine ESMF_ConfigGetChar
 
 
 !-----------------------------------------------------------------------
@@ -897,21 +979,23 @@
 ! !IROUTINE: ESMF_ConfigGetLen - gets the length of the line in words
 !
 ! !INTERFACE:
-
     integer function ESMF_ConfigGetLen( cf, label, rc )
 
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
-
-      character(len=*), intent(in), optional :: label ! label (if present)
-                                                      ! otherwise, current
-                                                      ! line
-
-      integer, intent(out), optional :: rc            ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout)       :: cf 
+      character(len=*), intent(in), optional :: label
+      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION: Gets the length of the line in words by counting words
-!               disregarding types
+!               disregarding types.  Returns the word count as an integer.
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [{[label]}]
+!     Identifing label.   If not specified, use the current line.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
       character*256 string
@@ -920,6 +1004,7 @@
 
       iret = 0
       count = 0
+      ESMF_ConfigGetLen = -1    ! assume error
       
       if( present( label )) then
          call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
@@ -954,23 +1039,29 @@
 ! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into memory
 !
 ! !INTERFACE:
-
     subroutine ESMF_ConfigLoadFile( cf, fname, layout, unique, rc )
 
-
-      implicit none
-
-      type(ESMF_Config), intent(inout) :: cf        ! ESMF Configuration
-      character(len=*), intent(in)     :: fname     ! file name
-      type(ESMF_DELayout), intent(in), optional  :: layout   ! ESMF layout
-      logical, intent(in), optional    :: unique    ! if unique is present, 
-                                                    ! uniqueness of labels
-                                                    ! is checked and error
-                                                    ! code is set
-                                                    ! 
-      integer, intent(out), optional :: rc          ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout) :: cf     
+      character(len=*), intent(in)     :: fname 
+      type(ESMF_DELayout), intent(in), optional  :: layout 
+      logical, intent(in), optional    :: unique 
+      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION: Resource file fname is loaded is loaded into memory
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [fname]
+!     Configuration file name.
+!   \item [{[layout]}]
+!     {\tt ESMF\_DELayout} associated with this configuration.
+!   \item [{[unique]}]
+!     If specified as true, uniqueness of labels are checked and 
+!     error code set if duplicates found.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
 !
 !EOP -------------------------------------------------------------------
 
@@ -1125,21 +1216,24 @@
 !
 ! !IROUTINE: ESMF_ConfigNextLine - finds next line
 !
-! !DESCRIPTION: selects the next line (for tables)
-
-!
 ! !INTERFACE:
-
     subroutine ESMF_ConfigNextLine( cf, tend, rc)
 
-      implicit none
-
-      type(ESMF_Config), intent(inout) :: cf     ! ESMF Configuration
-      logical, intent(out), optional :: tend     ! if present, end of the
-                                                 ! table mark (::) is checked
-
-      integer, intent(out), optional:: rc        ! Error code
+! !ARGUMENTS:
+      type(ESMF_Config), intent(inout) :: cf 
+      logical, intent(out), optional :: tend
+      integer, intent(out), optional:: rc 
 !
+! !DESCRIPTION: selects the next line (for tables)
+!   \begin{description}
+!   \item [cf]
+!     Already created {\tt ESMF\_Config} object.
+!   \item [{[tend]}]
+!     If specifed as TRUE, end of table mark (::) is checked.
+!   \item [{[rc]}]
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+
 !EOP -------------------------------------------------------------------
       integer :: i, j, iret
       logical :: local_tend
