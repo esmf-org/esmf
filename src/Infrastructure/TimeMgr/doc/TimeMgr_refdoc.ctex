@@ -125,6 +125,13 @@
 %\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
 %#endif
 
+\subsection{Implementation Notes}
+#ifdef STANDALONE
+\input{Calendar_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Calendar_implnotes}
+#endif
+
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Calendar_fapi}
@@ -270,6 +277,13 @@
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/Alarm_rest}
 %#endif
+
+\subsection{Implementation Notes}
+#ifdef STANDALONE
+\input{Alarm_implnotes}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Alarm_implnotes}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
