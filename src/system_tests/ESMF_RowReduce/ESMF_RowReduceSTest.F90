@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.30 2004/06/15 22:50:28 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.31 2004/10/14 20:15:41 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -25,14 +25,15 @@
     implicit none
     
     ! Local variables
-    integer :: i, ni, rc
+    integer :: i, j, ij, rc
     integer :: row_to_reduce
-    integer :: rowlen, rstart, rend
+    integer :: rowlen
     integer :: result, pet_id, npets, rightvalue 
     integer :: counts(2), localCount(2)
     type(ESMF_GridHorzStagger) :: horz_stagger
     real(ESMF_KIND_R8) :: min(2), max(2)
-    integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
+    integer(ESMF_KIND_I4), dimension(:), pointer :: ldata, rowdata, oneDdata
+    integer(ESMF_KIND_I4), dimension(:,:), pointer :: idata, rdata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: delayout1 
     type(ESMF_Grid) :: grid1
@@ -114,33 +115,47 @@
     call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDELocalInfo(grid1, localCellCount=ni, &
+    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=localCount, &
                                  horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "allocating", ni, " cells on PET", pet_id
-    allocate(idata(ni))
-    allocate(ldata(ni))
+    print *, "allocating", localCount(1)*localCount(2), " cells on PET", pet_id
+    allocate(idata(localCount(1), localCount(2)))
+    allocate(ldata(localCount(1) * localCount(2)))
+    allocate(oneDdata(localCount(1) * localCount(2)))
 
     ! set original values to 0; local to global call below will overwrite
     ! this with global index numbers
-    idata(:) = 0
+    idata = 0
     
     ! Generate global cell numbers.  First set to local number and
     ! then translate to global index.
-    do i=1,ni
-       ldata(i) = i
+    do j=1,localcount(2)
+      do i=1,localcount(1)
+        ij = ((j-1) * localcount(1)) + i
+        ldata(ij) = ij
+      enddo
     enddo
+  
     print *, "size local1D", size(ldata)
     print *, "size global1D", size(idata)
-    call ESMF_GridDELocalToGlobalIndex(grid1, local1D=ldata, global1D=idata, &
+    ! TODO: there should be a 2D version of this call.
+    call ESMF_GridDELocalToGlobalIndex(grid1, local1D=ldata, global1D=oneDdata, &
                                        horzRelloc=ESMF_CELL_CENTER, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+    do j=1,localcount(2)
+      do i=1,localcount(1)
+        ij = ((j-1) * localcount(1)) + i
+        idata(i,j) = oneDdata(ij)
+      enddo
+    enddo
+  
     print *, "after local to global"
     print *, "ldata was = ", ldata
     print *, "idata now = ", idata
     ! Delete local cell number array, not needed anymore.
     deallocate(ldata, stat=rc)
+    deallocate(oneDdata, stat=rc)
 
     !  Create Array based on an existing, allocated F90 pointer.
     !  Data is type Integer, 1D.
@@ -184,8 +199,8 @@
     call ESMF_ArrayPrint(array2, "foo", rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Get a pointer to the start of the data
-    call ESMF_ArrayGetData(array2, ldata, ESMF_DATA_REF, rc)
+    ! Get a pointer to the start of the result data
+    call ESMF_ArrayGetData(array2, rdata, ESMF_DATA_REF, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Get the mapping between local and global indices for this DE
@@ -196,16 +211,13 @@
  
     ! Create a new Fortran array for just the part of this row on this DE
     rowlen = localCount(1)
-    rstart = ((row_to_reduce-1) * rowlen) + 1
-    rend = (row_to_reduce) * rowlen
     
     ! make space for row
     allocate(rowdata(rowlen))
 
     ! and copy over the data row
-    rowdata = ldata(rstart:rend)
+    rowdata = rdata(:,row_to_reduce)
     print *, "rowlen = ", rowlen
-    print *, "rstart, rend = ", rstart, rend
     print *, "row data = ", rowdata
 
     ! Call the Reduce code
