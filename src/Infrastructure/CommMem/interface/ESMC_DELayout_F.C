@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.2 2003/03/10 04:16:23 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.3 2003/03/11 18:00:18 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,65 +35,65 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_layoutcreate)(ESMC_DELayout **ptr, int *nx, int *ny,
+       void FTN(c_esmc_delayoutcreate)(ESMC_DELayout **ptr, int *nx, int *ny,
                 int *delist, int *commhint, int *status) {
          *ptr = ESMC_DELayoutCreate(*nx, *ny, delist, (ESMC_CommHint_e) *commhint,
-                                  status);
+                                    status);
        }
 
-       void FTN(c_esmc_layoutdestroy)(ESMC_DELayout **ptr, int *status) {
+       void FTN(c_esmc_delayoutdestroy)(ESMC_DELayout **ptr, int *status) {
            *status = ESMC_DELayoutDestroy(*ptr);
        }
 
-       void FTN(c_esmc_layoutgetsize)(ESMC_DELayout **ptr, int *nx, int *ny,
+       void FTN(c_esmc_delayoutgetsize)(ESMC_DELayout **ptr, int *nx, int *ny,
                 int *status) {
            *status = (*ptr)->ESMC_DELayoutGetSize(nx, ny);
        }
 
-       void FTN(c_esmc_layoutgetdeposition)(ESMC_DELayout **ptr, int *x, int *y,
+       void FTN(c_esmc_delayoutgetdeposition)(ESMC_DELayout **ptr, int *x, int *y,
                 int *status) {
            *status = (*ptr)->ESMC_DELayoutGetDEPosition(x, y);
        }
 
-       void FTN(c_esmc_layoutgetdeid)(ESMC_DELayout **ptr, int *id, int *status) {
+       void FTN(c_esmc_delayoutgetdeid)(ESMC_DELayout **ptr, int *id, int *status) {
            *status = (*ptr)->ESMC_DELayoutGetDEid(id);
        }
 
-       void FTN(c_esmc_layoutsetaxisindex)(ESMC_DELayout **ptr,
-                                           int *global_counts, 
-                                           int *size_gcount, int *decompids, 
-                                           int *size_decomp, 
-                                           ESMC_AxisIndex *AIPtr, int *status) {
+       void FTN(c_esmc_delayoutsetaxisindex)(ESMC_DELayout **ptr,
+                                             int *global_counts, 
+                                             int *size_gcount, int *decompids, 
+                                             int *size_decomp, 
+                                             ESMC_AxisIndex *AIPtr, int *status) {
            *status = (*ptr)->ESMC_DELayoutSetAxisIndex(global_counts, *size_gcount, 
-                                                     decompids, *size_decomp,
-                                                     AIPtr);
+                                                       decompids, *size_decomp,
+                                                       AIPtr);
        }
 
-       void FTN(c_esmc_layoutgatherarrayi)(ESMC_DELayout **ptr,
-                                           int *DistArray, int *decompids, 
-                                           int *size_decomp, 
-                                           ESMC_AxisIndex *AIPtr, 
-                                           ESMC_AxisIndex *AIPtr2, 
-                                           int *GlobalArray, int *status) {
+       void FTN(c_esmc_delayoutgatherarrayi)(ESMC_DELayout **ptr,
+                                             int *DistArray, int *decompids, 
+                                             int *size_decomp, 
+                                             ESMC_AxisIndex *AIPtr, 
+                                             ESMC_AxisIndex *AIPtr2, 
+                                             int *GlobalArray, int *status) {
            *status = (*ptr)->ESMC_DELayoutGatherArrayI(DistArray, decompids, 
-                                                     *size_decomp, AIPtr,
-                                                     AIPtr2, GlobalArray);
+                                                       *size_decomp, AIPtr,
+                                                       AIPtr2, GlobalArray);
        }
 
-//     void FTN(c_esmc_layoutprint)(ESMC_DELayout **ptr, char *opts, int *status){
+//     void FTN(c_esmc_delayoutprint)(ESMC_DELayout **ptr, char *opts, int *status){
 //         *status = (*ptr)->ESMC_DELayoutPrint(opts);
 //     }
 
-       void FTN(c_esmc_layoutallreduce)(ESMC_DELayout **ptr, int *array,
+       void FTN(c_esmc_delayoutallreduce)(ESMC_DELayout **ptr, int *array,
                 int *result, int *len, int *op, int *status) {
            *status = (*ptr)->ESMC_DELayoutAllReduce(array, result, *len,
                                                   (ESMC_Op_e) *op);
        }
-       void FTN(c_esmc_layoutallgathervi)(ESMC_DELayout **ptr,
+       void FTN(c_esmc_delayoutallgathervi)(ESMC_DELayout **ptr,
                                  int *sndarray, int *slen, 
                                  int *rcvarray, int *rlen, int *rcvdispls, 
                                  int *status) {
            *status = (*ptr)->ESMC_DELayoutAllGatherVI(sndarray, *slen,
-                                                    rcvarray,  rlen, rcvdispls);
+                                                      rcvarray,  rlen, rcvdispls);
        }
 };
