@@ -227,10 +227,24 @@ available for the computation.
 \subsubsection{Input/Output Specfication (ESMF\_IOspec)}
 \label{sec:iospec} 
 \begin{description}
-\item [Description] A Input/Output specfication contains all information necessary to
-read or write objects.  It includes the destination information (e.g. file), the name,
-the format, and any format specific parameters needed to complete the I/O.
-\item [Function] The IOspec class is ...   << how does this fit?? >>
+\item [Description] A Input/Output specfication contains all 
+information necessary to read or write objects.  It includes the 
+destination information (e.g. file, socket), the name,
+the format, and any additional parameters needed to complete the I/O.
+\item [Function] The IOspec class provides a format-independent layer by
+providing generic methods such as Initialize/Finalize, Open/Close, 
+and Read/Write which are not specific to any one input or output format.
+The methods
+within the IO layer will encapsulate format dependent parameters and calls.
+The IO layer will write not only the simulation output (large, computational
+data) but also the metadata which is required to document what the data is
+and information about how it was generated.
+The ESMF library will probably strive simply to
+support the existing variety of file formats which are in common use in
+the climate community, but looking forward
+the existence of this class lays the foundation for future extension 
+of IO beyond simple files to live connections to database systems, 
+web servers, etc.
 \end{description}
 
 
