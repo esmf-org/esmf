@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.10 2005/02/14 04:36:24 theurich Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.11 2005/02/28 16:29:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,15 +35,15 @@
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.10 2005/02/14 04:36:24 theurich Exp $'
+    character(*), parameter :: version = &
+   '$Id: ESMF_FieldDataMapUTest.F90,v 1.11 2005/02/28 16:29:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, datarank, npets
+      integer :: rc, datarank
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -55,24 +55,21 @@
       !character(ESMF_MAXSTR) :: validate_options
       !character(ESMF_MAXSTR) :: print_options
       type(ESMF_RelLoc) :: horzRelloc
-      type(ESMF_VM):: vm
 
       ! instantiate a FieldDataMap 
       type(ESMF_FieldDataMap) :: fieldDataMap1
 
-      !------------------------------------------------------------------------
-      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-      ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
-      ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-      ! to OFF, then only the sanity unit tests.
-      ! Special strings (Non-exhaustive and exhaustive) have been
-      ! added to allow a script to count the number and types of unit tests.
-      !------------------------------------------------------------------------
+!------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!------------------------------------------------------------------------
 
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       datarank=1
 
@@ -113,7 +110,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(horzRelloc.eq.ESMF_CELL_CENTER),&
                         name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test FieldDataMap Print
@@ -121,8 +117,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Print FieldDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -132,7 +126,6 @@
       write(name, *) "Validate FieldDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test FieldDataMap Set
@@ -140,7 +133,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Set FieldDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -161,9 +153,6 @@
 
 #endif
 
-      call ESMF_Finalize(rc=rc)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-      ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
-  
       end program ESMF_FieldDataMapUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataUTest.F90,v 1.2 2004/12/09 00:25:08 nscollins Exp $
+! $Id: ESMF_ArrayDataUTest.F90,v 1.3 2005/02/28 16:30:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayDataUTest.F90,v 1.2 2004/12/09 00:25:08 nscollins Exp $'
+      '$Id: ESMF_ArrayDataUTest.F90,v 1.3 2005/02/28 16:30:24 nscollins Exp $'
 !------------------------------------------------------------------------------
     
     ! cumulative result: count failures; no failures equals "all pass"
@@ -90,16 +90,19 @@
     
     type(PtrIWrap1) :: sizetest1I
     
+#if 0
 #ifdef ESMF_EXHAUSTIVE
     type(PtrRWrap2) :: sizetest2R
     type(PtrR8Wrap3) :: sizetest3R8
     type(PtrSWrap1) :: sizetest1S
+#endif
 #endif
     
 
     call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     
 
+!------------------------------------------------------------------------------
     !NEX_UTest
     allocate(sizetest1I%data(-12:-6), stat=rc)
     do i = -12, -6

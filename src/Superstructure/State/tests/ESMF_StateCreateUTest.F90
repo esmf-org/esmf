@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateUTest.F90,v 1.1 2005/02/24 22:21:46 nscollins Exp $
+! $Id: ESMF_StateCreateUTest.F90,v 1.2 2005/02/28 16:31:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,14 +32,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateCreateUTest.F90,v 1.1 2005/02/24 22:21:46 nscollins Exp $'
+      '$Id: ESMF_StateCreateUTest.F90,v 1.2 2005/02/28 16:31:56 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
-    integer :: x, rc, num, number
-    character(ESMF_MAXSTR) :: sname, bname, fname
+    integer :: rc
+    character(ESMF_MAXSTR) :: sname, bname
     type(ESMF_Array) :: array1, array2
-    type(ESMF_Field) :: field1, field2
+    !type(ESMF_Field) :: field1, field2
     type(ESMF_Bundle) :: bundle1, bundle2, qbundle
     type(ESMF_State) :: state1, state2, state3, state4, state5
     logical :: IsNeeded
@@ -261,6 +261,12 @@
       write(name, *) "Destroying a Bundle"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !------------------------------------------------------------------------
+    
+      ! other tests to be added here
+      state4 = state3
+
       !------------------------------------------------------------------------
       !------------------------------------------------------------------------
       !EX_UTest      

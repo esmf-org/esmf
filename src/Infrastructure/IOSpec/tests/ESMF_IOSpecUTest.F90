@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpecUTest.F90,v 1.4 2005/02/14 04:36:24 theurich Exp $
+! $Id: ESMF_IOSpecUTest.F90,v 1.5 2005/02/28 16:30:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,14 +36,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_IOSpecUTest.F90,v 1.4 2005/02/14 04:36:24 theurich Exp $'
+      '$Id: ESMF_IOSpecUTest.F90,v 1.5 2005/02/28 16:30:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc = 1, npets
+      integer :: rc
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -53,7 +53,6 @@
       type(ESMF_IOSpec) :: iospec
       character(ESMF_MAXSTR) :: fname
       type (ESMF_IOFileFormat) :: fformat
-      type(ESMF_VM):: vm
 
 
 !-------------------------------------------------------------------------------
@@ -64,11 +63,7 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------- 
-      print *, "Starting job"
-
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -112,9 +107,14 @@
       write(name, *) "Verify IOSpec File Format  Test"
       call ESMF_Test((fformat.eq.ESMF_IO_FILEFORMAT_UNSPECIFIED), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+#ifdef ESMF_EXHAUSTIVE
 
-      call ESMF_Finalize(rc=rc)
+      ! add more tests here
 
-      print *, "******  End of IOSpecUTest  ******"
+#endif
+      !------------------------------------------------------------------------
+
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
       end program ESMF_IOSpecUTest

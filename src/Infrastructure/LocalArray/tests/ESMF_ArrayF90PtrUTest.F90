@@ -1,11 +1,13 @@
 
     program test
     
+#include "ESMF.h"
+
     use ESMF_Mod
+    use ESMF_TestMod
     implicit none
 
-    integer :: rc, npets
-    type(ESMF_VM):: vm
+    integer :: rc, result
 
     ! Pointers to arrays of data type Integer * 4 
     type PtrIWrap1  
@@ -144,11 +146,14 @@
     type(PtrSWrap5) :: sizetest5S(2)
 #endif
     
+    result = 0
 
-    call ESMF_Initialize(vm=vm, rc=rc)
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+
+    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
     
+    ! Unlike the other tests, the SizePrint routine prints out the
+    ! pass/fail message internally before it returns.
+
     !NEX_UTest
     call c_ESMF_SizePrint(sizetest1I(1), sizetest1I(2), 1, rc)
     !NEX_UTest
@@ -195,7 +200,7 @@
     call c_ESMF_SizePrint(sizetest5S(1), sizetest5S(2), 5, rc)
 #endif
 
-    call ESMF_Finalize(rc=rc)
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
 
     end program test
     

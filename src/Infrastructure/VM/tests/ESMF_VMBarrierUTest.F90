@@ -1,4 +1,4 @@
-! $Id: ESMF_VMBarrierUTest.F90,v 1.4 2005/01/26 20:43:56 svasquez Exp $
+! $Id: ESMF_VMBarrierUTest.F90,v 1.5 2005/02/28 16:31:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMBarrierUTest.F90,v 1.4 2005/01/26 20:43:56 svasquez Exp $'
+      '$Id: ESMF_VMBarrierUTest.F90,v 1.5 2005/02/28 16:31:06 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -45,17 +45,14 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
-      character(len=8) :: strvalue
 
       ! local variables
       integer:: i, rc, loop_rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
-      integer:: count,root  
       real(ESMF_KIND_R8)  t_a, t0, t1, t_b, dt, max_time,delay
       real(ESMF_KIND_R8), allocatable:: delay_time(:)
 
-      integer :: status, myde, npets
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid1UTest.F90,v 1.2 2005/02/15 17:58:30 svasquez Exp $
+! $Id: ESMF_Regrid1UTest.F90,v 1.3 2005/02/28 16:30:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_Regrid1UTest.F90,v 1.2 2005/02/15 17:58:30 svasquez Exp $'
+      '$Id: ESMF_Regrid1UTest.F90,v 1.3 2005/02/28 16:30:53 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -44,29 +44,25 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
       character(ESMF_MAXSTR) :: name
-      character(len=8) :: strvalue
     
     ! Local variables
     type(ESMF_Field) :: field1, field2
     type(ESMF_Grid) :: srcgrid, dstgrid
     type(ESMF_RouteHandle) :: regrid_rh
-    type(ESMF_Array) :: arraya, arrayb
     type(ESMF_DELayout) :: layout1, layout2
     integer :: rc, loop_rc
 !EOC
 
-    integer :: x, y, finalrc, npets, localPet
+    integer :: finalrc, npets, localPet
     integer :: i, j, lb(2), ub(2), halo
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_FieldDataMap) :: datamap
+    !type(ESMF_FieldDataMap) :: datamap
     type(ESMF_VM) :: vm
-    character (len = ESMF_MAXSTR) :: fname
-    type(ESMF_IOSpec) :: iospec
     real (ESMF_KIND_R8), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    type (ESMF_Array), dimension(2)        :: ESMF_coords, ESMF_coords2
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords,y_coords
-    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2,y_coords2
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords !, y_coords
+    real (ESMF_KIND_R8), dimension(:,:), pointer :: x_coords2 !, y_coords2
     real (ESMF_KIND_R8), dimension(2) :: mincoords, maxcoords
+    type (ESMF_Array), dimension(2) :: ESMF_coords, ESMF_coords2
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are

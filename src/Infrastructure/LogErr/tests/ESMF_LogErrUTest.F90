@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrUTest.F90,v 1.8 2005/02/14 04:36:24 theurich Exp $
+! $Id: ESMF_LogErrUTest.F90,v 1.9 2005/02/28 16:30:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_LogErrUTest.F90,v 1.8 2005/02/14 04:36:24 theurich Exp $'
+      '$Id: ESMF_LogErrUTest.F90,v 1.9 2005/02/28 16:30:40 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,24 +51,21 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: rc2, npets
+      integer :: rc2
       logical :: is_error
       type(ESMF_Log) :: log1
-      type(ESMF_VM):: vm
 
-!-------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 ! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
 ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 ! to OFF, then only the sanity unit tests.
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
-!------------------------------------------------------------------------------- 
+!------------------------------------------------------------------------------
       print *, "Starting LogErr Tests"
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -78,8 +75,8 @@
       write(name, *) "Open Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Log Close
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -87,7 +84,6 @@
       write(name, *) "Close Log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
-      !------------------------------------------------------------------------
 
 
 #ifdef ESMF_EXHAUSTIVE
@@ -102,8 +98,8 @@
       write(name, *) "Use of default log Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Error Msg Found Error
       write(failMsg, *) "Did not return FALSE"
@@ -145,8 +141,8 @@
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Value of rcToReturn
       write(failMsg, *) "Did not return ESMF_RC_MEM"
@@ -155,7 +151,6 @@
       print *, " rc2 = ", rc2
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test Error Msg Found Alloc Error
       write(failMsg, *) "Did not return ESMF_FAILURE"
@@ -197,8 +192,8 @@
       write(name, *) "Log Found Alloc Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
-      !------------------------------------------------------------------------
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test Value of rcToReturn
       write(failMsg, *) "Did not return ESMF_RC_MEM"
@@ -249,9 +244,8 @@
       write(name, *) "Log Found Error Test"
       call ESMF_Test((is_error), name, failMsg, result, ESMF_SRCLINE)
       print *, " rc = ", rc
+
       !------------------------------------------------------------------------
-
-
       !EX_UTest
       ! Test Value of rcToReturn
       write(failMsg, *) "Did not return ESMF_FAILURE"
@@ -261,8 +255,7 @@
 
 #endif
 
-      call ESMF_Finalize(rc=rc)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
-      print *, "******  End of LogErrUTest  ******"
 
       end program ESMF_LogErrUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMapUTest.F90,v 1.15 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_BundleDataMapUTest.F90,v 1.16 2005/02/28 16:29:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,15 +35,15 @@
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_BundleDataMapUTest.F90,v 1.15 2005/02/14 04:36:23 theurich Exp $'
+    character(*), parameter :: version = &
+    '$Id: ESMF_BundleDataMapUTest.F90,v 1.16 2005/02/28 16:29:07 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, npets
+      integer :: rc
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -52,22 +52,19 @@
       character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
-      type(ESMF_BundleDataMap) :: bundleDataMap1, bundleDataMap2, bundleDataMap3
+      type(ESMF_BundleDataMap) :: bundleDataMap1
       type(ESMF_InterleaveFlag) :: interleave
-      type(ESMF_VM):: vm
 
       !------------------------------------------------------------------------
-      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-      ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
-      ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-      ! to OFF, then only the sanity unit tests.
+      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests
+      ! are always run. When the environment variable, EXHAUSTIVE, is set to 
+      ! ON then the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE 
+      ! variable is set to OFF, then only the sanity unit tests.
       ! Special strings (Non-exhaustive and exhaustive) have been
       ! added to allow a script to count the number and types of unit tests.
       !------------------------------------------------------------------------
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -95,7 +92,6 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Set BundleDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -130,7 +126,6 @@
       write(name, *) "Set BundleDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
       !------------------------------------------------------------------------
       !EX_UTest
       ! Test BundleDataMap Get
@@ -141,7 +136,6 @@
            name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-
       !EX_UTest
       ! Test BundleDataMap Print
       call ESMF_BundleDataMapPrint(bundleDataMap1, rc=rc)
@@ -149,15 +143,8 @@
       write(name, *) "Print BundleDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-
-      ! return number of failures to environment; 0 = success (all pass)
-      ! return result  ! TODO: no way to do this in F90 ?
-  
 #endif
       
-      call ESMF_Finalize(rc=rc)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
       
-      print *, "******  End of BundleDataMapUTest  ******"
-
       end program ESMF_BundleDataMapUTest

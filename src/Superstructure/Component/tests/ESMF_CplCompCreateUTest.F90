@@ -1,4 +1,4 @@
-! $Id: ESMF_CplCompCreateUTest.F90,v 1.10 2005/02/14 04:36:25 theurich Exp $
+! $Id: ESMF_CplCompCreateUTest.F90,v 1.11 2005/02/28 16:31:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,10 +31,8 @@
     implicit none
     
 !   ! Local variables
-    integer :: rc, npets
-    integer , pointer:: pointer
+    integer :: rc
     character(ESMF_MAXSTR) :: cname, bname, cplname
-    type(ESMF_CplComp) :: comp1
     type(ESMF_CplComp) :: cpl
     type(ESMF_VM):: vm
 
@@ -67,9 +65,8 @@
 !-------------------------------------------------------------------------------
         
    ! Initialize framework and get back default global VM
-   call ESMF_Initialize(vm=vm, rc=rc)
-   call ESMF_VMGet(vm, petCount=npets, rc=rc)
-   print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+   call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+   call ESMF_VMGetGlobal(vm, rc=rc)
 
 
 !-------------------------------------------------------------------------
@@ -229,7 +226,7 @@
 
 #endif
 
-    call ESMF_Finalize(rc=rc)
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
 
     end program ESMF_CplCompCreateUTest
     

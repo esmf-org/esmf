@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMapUTest.F90,v 1.8 2005/02/14 04:36:22 theurich Exp $
+! $Id: ESMF_ArrayDataMapUTest.F90,v 1.9 2005/02/28 16:28:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,14 +36,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayDataMapUTest.F90,v 1.8 2005/02/14 04:36:22 theurich Exp $'
+      '$Id: ESMF_ArrayDataMapUTest.F90,v 1.9 2005/02/28 16:28:51 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, datarank, npets
+      integer :: rc, datarank
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -51,7 +51,6 @@
       ! individual test failure messages
       character(ESMF_MAXSTR*2) :: failMsg
       
-      type(ESMF_VM):: vm
 
       ! local variables needed to pass into function/subroutine calls
       !character(ESMF_MAXSTR) :: validate_options
@@ -64,23 +63,20 @@
       ! instantiate a ESMF_ArrayDataMap
       type(ESMF_ArrayDataMap) :: ArrayDataMap
 
-      !-------------------------------------------------------------------------------
-      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-      ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
-      ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-      ! to OFF, then only the sanity unit tests.
+      !------------------------------------------------------------------------
+      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests
+      !  are always run. When the environment variable, EXHAUSTIVE, is set to 
+      !  ON then the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE 
+      !  variable is set to OFF, then only the sanity unit tests.
       ! Special strings (Non-exhaustive and exhaustive) have been
       ! added to allow a script to count the number and types of unit tests.
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
 
-
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       datarank = 1
 
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test ArrayDataMap Initialization
       call ESMF_ArrayDataMapSetDefault(ArrayDataMap, datarank, rc=rc)
@@ -88,8 +84,7 @@
       write(name, *) "Set Default ArrayDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !-------------------------------------------------------------------------------
-
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test ArrayDataMap Invalid
       call ESMF_ArrayDataMapSetInvalid(ArrayDataMap, rc=rc)
@@ -101,7 +96,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
 
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Initialization
       call ESMF_ArrayDataMapSetDefault(ArrayDataMap, datarank, rc=rc)
@@ -109,16 +104,16 @@
       write(name, *) "Set ArrayDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Get
       call ESMF_ArrayDataMapGet(ArrayDataMap,  datarank=datarank, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS and/or datarank incorrect"
       write(name, *) "Get ArrayDataMap Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(datarank.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(datarank.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
-
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Print
       call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
@@ -126,8 +121,7 @@
       write(name, *) "Print ArrayDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Validate
       call ESMF_ArrayDataMapValidate(ArrayDataMap, rc=rc)
@@ -135,8 +129,7 @@
       write(name, *) "Validate ArrayDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Set
       call ESMF_ArrayDataMapSet(ArrayDataMap, datarank=2, rc=rc)
@@ -144,19 +137,16 @@
       write(name, *) "Set ArrayDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Get
       call ESMF_ArrayDataMapGet(ArrayDataMap,  datarank, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS and/or horzRelloc incorrect"
       write(name, *) "Get ArrayDataMap Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(datarank.eq.2), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(datarank.eq.2),  &
+                      name, failMsg, result, ESMF_SRCLINE)
 
-
-
-
-      !-------------------------------------------------------------------------------
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Test ArrayDataMap Print
       call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
@@ -165,11 +155,9 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
-
 #endif
 
-      call ESMF_Finalize(rc=rc)
-      ! return number of failures to environment; 0 = success (all pass)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
       ! return result  ! TODO: no way to do this in F90 ?
   
       end program ESMF_ArrayDataMapUTest

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.14 2004/12/15 17:42:21 nscollins Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.15 2005/02/28 16:31:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,6 @@
     
 !   ! Local variables
     integer :: rc
-    integer , pointer:: pointer
     character(ESMF_MAXSTR) :: cname, bname
     type(ESMF_GridComp) :: comp1
 

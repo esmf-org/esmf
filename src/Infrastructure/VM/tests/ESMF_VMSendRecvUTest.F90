@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendRecvUTest.F90,v 1.2 2005/01/28 18:12:20 rfaincht Exp $
+! $Id: ESMF_VMSendRecvUTest.F90,v 1.3 2005/02/28 16:31:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendRecvUTest.F90,v 1.2 2005/01/28 18:12:20 rfaincht Exp $'
+      '$Id: ESMF_VMSendRecvUTest.F90,v 1.3 2005/02/28 16:31:34 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -64,7 +64,6 @@
 
       type(ESMF_logical), allocatable::  recv_logical(:)
      
-      integer :: status, myde, npets
       integer :: isum
       real(ESMF_KIND_R8) :: R8Sum
       real(ESMF_KIND_R4) :: R4Sum

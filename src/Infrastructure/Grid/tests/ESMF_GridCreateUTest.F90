@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.36 2005/02/14 04:36:24 theurich Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.37 2005/02/28 16:29:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.36 2005/02/14 04:36:24 theurich Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.37 2005/02/28 16:29:55 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,7 +63,7 @@
       integer :: nDE_i, nDE_j
       type(ESMF_GridHorzStagger) :: horz_stagger, Rhorz_stagger
       type(ESMF_GridVertStagger) :: vert_stagger
-      integer :: status, npets
+      integer :: status
       integer, dimension (4) :: DEDim1
       integer, dimension (10000) :: DEDim2
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
@@ -74,24 +74,20 @@
       type(ESMF_VM) :: vm
 
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!------------------------------------------------------------------------------
 
-      !NEX_UTest
-      call ESMF_Initialize(vm = vm, rc=status)
-      write(name, *) "ESMF_Initialize Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      call ESMF_Test((status.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+
+      !------------------------------------------------------------------------
       !NEX_UTest
       call ESMF_VMGetGlobal(vm, status)
       write(name, *) "ESMF_VMGetGlobal Test"
@@ -100,6 +96,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      ! set up values to be used below
       counts(1) = 10
       counts(2) = 12
       DEDim1(1) = 1
@@ -119,8 +116,10 @@
       grid_max(3) = 100.0
       delta(1:15) = 6.6667
       gName = "test grid 1"
-      !NEX_UTest
 
+
+      !------------------------------------------------------------------------
+      !NEX_UTest
       layout = ESMF_DELayoutCreate(vm, rc=rc)
       write(name, *) "Creating a DELayout Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -139,6 +138,7 @@
       write(name, *) "Creating a LogRectUniform Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       !------------------------------------------------------------------------
       ! Add Vert Height Test
       !NEX_UTest
@@ -153,7 +153,6 @@
       ! Grid Distribute Test
       !NEX_UTest
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
-      
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Grid Distribute Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
@@ -191,7 +190,6 @@
       ! Grid Distribute Test
       !NEX_UTest
       call ESMF_GridDistribute(grid1, delayout=layout, rc=status)
-
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Grid Distribute Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
@@ -200,9 +198,9 @@
       !------------------------------------------------------------------------
       !NEX_UTest 
       ! Destroy the Grid test
+      call ESMF_GridDestroy(grid1, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Destroy the Grid Test"
-      call ESMF_GridDestroy(grid1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
                               
       !------------------------------------------------------------------------
@@ -223,7 +221,6 @@
       ! Grid Distribute Test
       !NEX_UTest
       call ESMF_GridDistribute(grid2, delayout=layout, rc=status)
-
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Grid Distribute Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
@@ -232,9 +229,9 @@
       !------------------------------------------------------------------------
       !NEX_UTest 
       ! Destroy the Grid test
+      call ESMF_GridDestroy(grid2, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Destroy the Grid Test"
-      call ESMF_GridDestroy(grid2, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
                               
 #ifdef ESMF_EXHAUSTIVE
@@ -269,7 +266,7 @@
       write(name, *) "Grid Distribute Test"
       call ESMF_GridDistribute(grid, delayout=layout, countsPerDEDim1=DEDim1, &
                                countsPerDEDim2=DEDim2, rc=status)
-       call ESMF_Test((status.eq.ESMF_SUCCESS), &
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -321,25 +318,25 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Validate the Grid test
+      call ESMF_GridValidate(grid, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Validate the Grid Test"
-      call ESMF_GridValidate(grid, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Distribute a Grid test
+      call ESMF_GridDistribute(grid, layout, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Distribute the Grid Test"
-      call ESMF_GridDistribute(grid, layout, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
       ! Destroy the Grid test
+      call ESMF_GridDestroy(grid, rc=rc)
       write(failMsg, *) "Did not returned ESMF_SUCCESS"
       write(name, *) "Destroy the Grid Test"
-      call ESMF_GridDestroy(grid, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -365,10 +362,9 @@
 
 
       !------------------------------------------------------------------------
-      write(name, *) "ESMF_Finalize Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
+
 #endif
 
-      call ESMF_Finalize(rc=status)
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
       end program ESMF_GridCreateUTest

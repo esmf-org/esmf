@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.29 2005/01/06 20:36:42 jwolfe Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.30 2005/02/28 16:30:35 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -44,22 +44,20 @@
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: result = 0, npets
-    type(ESMF_VM):: vm
+    integer :: result = 0
 
     
-    call ESMF_Initialize(vm=vm, rc=rc)
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+    call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
-!-------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 !   ! Test 1:
 !   !  Create based on an existing, allocated F90 pointer. 
 !   !  Data is type Integer, 1D.
     print *, ">>> Test 1:"
  
-    ! Allocate and set initial data values, using a lower bound != 1
+    !--------------------------------------------------------------------------
     !NEX_UTest
+    ! Allocate and set initial data values, using a lower bound != 1
     ni = 515 
     allocate(intptr(5:ni+5))
     do i=5,ni+5
@@ -71,8 +69,8 @@
     array1 = ESMF_LocalArrayCreate(intptr, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1a create returned"
-
    
+    !--------------------------------------------------------------------------
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS."
     write(name, *) "Local Array Destroy Test"
@@ -82,6 +80,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array with Integer 1D Data Test"
@@ -89,6 +88,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1b create returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Printing a Local Array with Integer 1D Data Test"
@@ -96,6 +96,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1b print returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array with Integer 1D Data Test"
@@ -103,6 +104,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1b getdata returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting lower and upper index bounds"
@@ -114,6 +116,7 @@
     call ESMF_Test((rlb(1).eq.lb(1)).and.(rub(1).eq.ub(1)), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1b getbounds returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     do i=5,ni+5
         if (intptr(i).eq.intptr2(i)) then
@@ -129,6 +132,7 @@
     print *, "array 1b getdata returned"
     print *, "first 10 intptr2 data = ", intptr2(5:15)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS."
     write(name, *) "Local Array Destroy Test"
@@ -152,6 +156,7 @@
        intptr(i) = i
     enddo
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Local Array Based on existing pointer Test"
@@ -162,6 +167,7 @@
     call ESMF_LocalArrayPrint(array1, "", rc)
     print *, "array 1c print returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array Data Test"
@@ -181,6 +187,7 @@
     write(name, *) "Compare Local Array Data Integer 1D Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS."
     write(name, *) "Local Array Destroy Test"
@@ -188,6 +195,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1c destroy returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Returned ESMF_SUCCESS incorrectly."
     write(name, *) "Local Array Destroy a destroyed Array Test"
@@ -211,6 +219,7 @@
        intptr(i) = i
     enddo
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Local Array Based on allocated pointer Test"
@@ -221,12 +230,14 @@
     call ESMF_LocalArrayPrint(array1, "", rc)
     print *, "array 1d print returned"
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array with Integer 1D Data Test"
     call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     do i=1,ni
         if (intptr(i).eq.intptr2(i)) then
@@ -262,6 +273,7 @@
     enddo
     print *, "partial print of realptr data = ", realptr(3:6,7:9)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Local Array with 2D Real Data Test"
@@ -288,6 +300,7 @@
     print *, "bounds: ", lbound(realptr2), ubound(realptr2)
     print *, "partial print of realptr2 data = ", realptr2(3:7,7:9)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     do i=3,ni+3
      do j=7,nj+7
@@ -324,6 +337,7 @@
      enddo
     enddo
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Local Array with 2D Real Data based on an existing F90 pointer Test"
@@ -337,7 +351,8 @@
     print *, "array 2b getdata returned"
     print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
 
-   !EX_UTest
+    !--------------------------------------------------------------------------
+    !EX_UTest
     do i=1,ni
      do j=1,nj
         if (realptr(i,j).eq.realptr2(i,j)) then
@@ -377,6 +392,7 @@
      enddo
     enddo
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating Local Array with 2D Real Data based on an existing F90 pointer Test"
@@ -398,6 +414,7 @@
     print *, "array 2c getdata returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Getting Local Array 2D Real Data Test"
@@ -406,6 +423,7 @@
     print *, "array 2c getdata returned"
     print *, "realptr2 data = ", realptr2(1:3,1:3)
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     do i=1,ni
      do j=1,nj
@@ -445,6 +463,7 @@
      enddo
     enddo
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
@@ -458,6 +477,7 @@
     !call ESMF_LocalArrayGetData(array4, realptr2, ESMF_DATA_COPY, rc)
     !call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     nullify(real3d2ptr)
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -479,12 +499,14 @@
      enddo
     enddo
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Array data should be the same."
     write(name, *) "Compare Local Array 3D Real Data without allocating array size Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     allocate(real3d2ptr(ni,nj,nk))
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -506,6 +528,7 @@
      enddo
     enddo
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Array data should be the same."
     write(name, *) "Compare Local Array 3D Real Data Test"
@@ -532,6 +555,7 @@
     nk = 160
     allocate(real3dptr(ni,nj,nk))
 
+    !--------------------------------------------------------------------------
    !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating a Local Array 3D DATA_COPY Real Data Test"
@@ -556,6 +580,7 @@
     deallocate(real3dptr)
     nullify(real3dptr)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Creating a Local Array 3D DATA_REF Real Data with deallocated array Test"
@@ -580,6 +605,7 @@
     !print *, "array 4c re-destroy returned"
 
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     allocate(real3dptr(ni,nj,nk))
     write(failMsg, *) "Did not return ESMF_FAILURE"
@@ -603,6 +629,7 @@
     nk = 40
     allocate(real3dptr(ni,nj,nk))
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Creating a Local Array 3D DATA_REF Real Data with an allocated array Test"
@@ -625,6 +652,7 @@
     ! print *, ">>> Test 7:"
  
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     arank = 2
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
@@ -637,33 +665,35 @@
     counts(1) = 10
     counts(2) = 20
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Creating an Array Spec Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts(1:2), rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "rank not correct" 
     write(name, *) "Get Spec rank and verify Test"
     call ESMF_ArraySpecGet(arrayspec, rank=brank, rc=rc)
     call ESMF_Test((arank.eq.brank), name, failMsg, result, ESMF_SRCLINE)
 
-
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "type not correct" 
     write(name, *) "Get Spec type and verify Test"
     call ESMF_ArraySpecGet(arrayspec, type=atype, rc=rc)
     call ESMF_Test((atype.eq.ESMF_DATA_REAL), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "kind not correct" 
     write(name, *) "Get Spec kind and verify Test"
     call ESMF_ArraySpecGet(arrayspec, kind=akind, rc=rc)
     call ESMF_Test((akind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
 
-
+    !--------------------------------------------------------------------------
     !EX_UTest
     arank = 10
     write(failMsg, *) "Did not return ESMF_FAILURE"
@@ -671,12 +701,14 @@
     call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Creating an Array from a Spec with rank of 10 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     arank = 5
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -684,14 +716,14 @@
     call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 5 Test"
     array2 = ESMF_LocalArrayCreate(arrayspec, counts, rc=rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
+    !--------------------------------------------------------------------------
     !EX_UTest
     arank = 4
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -699,8 +731,7 @@
     call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Creating an Array from a Spec with rank of 4 Test"
@@ -725,6 +756,7 @@
       enddo
     enddo
 
+    !--------------------------------------------------------------------------
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Initializing an Array with data type integer Test"
@@ -743,7 +775,7 @@
 
 #endif
 
-    call ESMF_Finalize()
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
 
     end program ESMF_LocalArrayTest
     

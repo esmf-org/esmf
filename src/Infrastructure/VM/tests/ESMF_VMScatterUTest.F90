@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterUTest.F90,v 1.2 2005/01/28 18:03:29 theurich Exp $
+! $Id: ESMF_VMScatterUTest.F90,v 1.3 2005/02/28 16:31:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterUTest.F90,v 1.2 2005/01/28 18:03:29 theurich Exp $'
+      '$Id: ESMF_VMScatterUTest.F90,v 1.3 2005/02/28 16:31:21 nscollins Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -55,7 +55,6 @@
       real(ESMF_KIND_R8), allocatable:: farray1(:), farray2(:)
       real(ESMF_KIND_R4), allocatable:: f4array1(:), f4array2(:)
      
-      integer :: status, myde 
 
 !------------------------------------------------------------------------------
 !   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are

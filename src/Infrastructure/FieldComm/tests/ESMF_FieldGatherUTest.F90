@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.6 2005/02/14 04:36:23 theurich Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.7 2005/02/28 16:29:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.6 2005/02/14 04:36:23 theurich Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.7 2005/02/28 16:29:44 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -77,22 +77,17 @@
 !   added to allow a script to count the number and types of unit tests.
 !------------------------------------------------------------------------------
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 20
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
+
+      if (.not. ESMF_TestMinPETs(6, ESMF_SRCLINE)) goto 20
 
       ! Get the PET count
+      call ESMF_VMGetGlobal(vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
-      ! test script needs this to compute right numbers for test results
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
-
-      if (npets .eq. 1) then
-        print *, "This test must run with > 1 processor"
-        goto 20
-      endif
-
 #if ESMF_EXHAUSTIVE
+!-----------------------------------------------------------------------------
       ! Create a 2D layout to be used by the Field
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -101,6 +96,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       ! Create a grid and corresponding Field.  Note that the counts are
       ! prime numbers to ensure the grid can not be evenly distributed
       !EX_UTest_Multi_Proc_Only
@@ -119,6 +115,7 @@
                              kind=ESMF_R8, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid Create Horz XYUni Test"
@@ -131,6 +128,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid Distribute Test"
@@ -138,6 +136,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Create Test"
@@ -146,6 +145,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       ! Get coordinate arrays available for setting the source data array
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -157,6 +157,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
 
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Array Get Data Test"
@@ -164,6 +165,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Array Get Data Test"
@@ -171,6 +173,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Array Get Test"
@@ -178,6 +181,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       ! Get pointers to the data and set it up
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -186,6 +190,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Array Get Data Test"
@@ -213,6 +218,7 @@
 !-------------------------------------------------------------------------
 !
 
+!-----------------------------------------------------------------------------
       ! Call gather method here, output ends up in array2 on DE0
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -221,6 +227,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       ! check results, at least if the values are in the global computational
       ! range
       !EX_UTest_Multi_Proc_Only
@@ -228,6 +235,8 @@
       write(name, *) "DELayout Get Test"
       call ESMF_DELayoutGet(delayout, localDE=myDE, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+!-----------------------------------------------------------------------------
       ok = .true.
       if (myDE.eq.0) then
         call ESMF_ArrayGetData(array2, gatheredData, ESMF_DATA_REF, rc)
@@ -253,6 +262,7 @@
 
       ! Clean up
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Destroy Test"
@@ -260,6 +270,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid Destroy Test"
@@ -267,6 +278,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+!-----------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout Destroy Test"
@@ -277,6 +289,8 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-   20 call ESMF_Finalize(rc=rc)
+   20 continue
+
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
       end program ESMF_FieldGatherUTest

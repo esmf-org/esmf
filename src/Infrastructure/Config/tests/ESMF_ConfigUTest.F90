@@ -1065,7 +1065,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.14 2004/10/05 15:28:18 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.15 2005/02/28 16:29:13 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
@@ -1081,9 +1081,7 @@ end module config_subrs
 !-------------------------------------------------------------------------------
 
 
-      call ESMF_Initialize(vm=vm, rc=rc)
-      call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+      call ESMF_TestStart(ESMF_SRCLINE, rc=rc)
 
       !------------------------------------------------------------------------
       !NEX_UTest
@@ -1157,7 +1155,7 @@ end module config_subrs
 
 #endif
 
-      call ESMF_Finalize()
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
 
 
   end program ESMF_Config_Test
