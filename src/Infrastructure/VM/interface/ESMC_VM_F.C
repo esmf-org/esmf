@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.28.2.1 2005/02/09 20:20:27 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.28.2.2 2005/03/02 05:32:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -300,6 +300,8 @@ extern "C" {
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
     else
       (*ptr)->vmkplan_minthreads(**ptr_vm, 1);
+    // set the nothreadflag because this is the default for new VMs
+    (*ptr)->nothreadflag = 1;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
@@ -357,8 +359,13 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    (*ptr)->vmkplan_maxcores(**ptr_vm, maxx, (int*)petlist, *npetlist,
-      ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    int localrc = (*ptr)->vmkplan_maxcores(**ptr_vm, maxx, (int*)petlist,
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    if (localrc) localrc = ESMF_FAILURE;
+    else localrc = ESMF_SUCCESS;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
+      " was compiled with ESMF_PTHREADS=off and thus does not support"
+      " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
@@ -370,7 +377,6 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
        
   void FTN(c_esmc_vmplanmaxthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
@@ -403,8 +409,13 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    (*ptr)->vmkplan_maxthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
-      ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    int localrc = (*ptr)->vmkplan_maxthreads(**ptr_vm, maxx, (int*)petlist,
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    if (localrc) localrc = ESMF_FAILURE;
+    else localrc = ESMF_SUCCESS;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
+      " was compiled with ESMF_PTHREADS=off and thus does not support"
+      " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
@@ -416,7 +427,6 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
   void FTN(c_esmc_vmplanminthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
@@ -449,8 +459,13 @@ extern "C" {
     delete [] (*ptr)->myvms;
     delete [] (*ptr)->myvmachs;
     // Now define a new vmplan
-    (*ptr)->vmkplan_minthreads(**ptr_vm, maxx, (int*)petlist, *npetlist,
-      ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    int localrc = (*ptr)->vmkplan_minthreads(**ptr_vm, maxx, (int*)petlist,
+      *npetlist, ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    if (localrc) localrc = ESMF_FAILURE;
+    else localrc = ESMF_SUCCESS;
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
+      " was compiled with ESMF_PTHREADS=off and thus does not support"
+      " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
     // and hold the information in the public portion of ESMC_VMPlan
@@ -462,7 +477,6 @@ extern "C" {
       (*ptr)->myvmachs[i] = static_cast<ESMC_VMK *>((*ptr)->myvms[i]);
     }
     (*ptr)->vmkplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
   

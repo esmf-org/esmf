@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.16.2.1 2005/02/09 20:19:56 theurich Exp $
+// $Id: ESMC_VM.h,v 1.16.2.2 2005/03/02 05:32:18 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,6 +67,7 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
   public:
     void *ESMC_VMStartup(class ESMC_VMPlan *vmp, void *(fctp)(void *, void *),
       void *cargo, int *rc);
+    void ESMC_VMEnter(class ESMC_VMPlan *vmp, void *info, void *cargo);
     int ESMC_VMGet(
       // Get method that supports the F90 optional arguments interface
       int          *localPet,       // out - id of local PET
