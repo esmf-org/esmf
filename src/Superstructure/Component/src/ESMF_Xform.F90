@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.3 2003/02/03 17:10:20 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.4 2003/02/03 21:45:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,17 +42,6 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_XformType
-!
-!     ! Internal Xform data type.
-
-      type ESMF_XformType
-      sequence
-      private
-        integer :: xformcount
-        character(len=ESMF_MAXSTR), pointer :: namelist(:)
-        type(ESMF_Pointer), pointer :: funclist(:)
-      end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_Xform
@@ -62,7 +51,8 @@
       type ESMF_Xform
       sequence
       private
-        type(ESMF_XformType), pointer :: xformp
+        character(len=ESMF_MAXSTR) :: name
+        type(ESMF_Pointer) :: funcptr
       end type
 
 !------------------------------------------------------------------------------
@@ -88,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.3 2003/02/03 17:10:20 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.4 2003/02/03 21:45:50 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -171,12 +161,12 @@ end interface
 
 
 !       local vars
-        type (ESMF_XformType), target :: newxform 
+        !type (ESMF_XformType), target :: newxform 
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        nullify(ESMF_XformCreateNew%xformp)
+        !nullify(ESMF_XformCreateNew%xformp)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -187,7 +177,7 @@ end interface
 !       !TODO : insert code here
 
 !       set return values
-        ESMF_XformCreateNew%xformp => newxform
+        !ESMF_XformCreateNew%xformp => newxform
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_XformCreateNew
@@ -232,7 +222,7 @@ end interface
         endif
 
 !       ! TODO: insert code here
-        nullify(xform%xformp)
+        !nullify(xform%xformp)
 
 !       set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
@@ -356,9 +346,9 @@ end interface
         type (ESMF_Xform) :: a 
 
 !       this is just to shut the compiler up
-        type (ESMF_XformType), target :: b 
-        a%xformp => b
-        nullify(a%xformp)
+        !type (ESMF_XformType), target :: b 
+        !a%xformp => b
+        !nullify(a%xformp)
 
 !
 ! TODO: add code here
@@ -404,10 +394,10 @@ end interface
 !      ! TODO: Add Print code  here
        if(present(options)) then
            ! decode options - long, short, whatever
-           print *, "Transform object", xform%xformp%xformcount
+           print *, "Transform object" !!, xform%xformp%xformcount
  	   status = ESMF_SUCCESS
        else
-           print *, "Transform object", xform%xformp%xformcount
+           print *, "Transform object" !!, xform%xformp%xformcount
  	   status = ESMF_SUCCESS
        endif
 
