@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.7 2004/07/22 14:49:13 nscollins Exp $
+#  $Id: build_rules.mk,v 1.8 2004/10/26 19:08:15 nscollins Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -133,9 +133,9 @@ STRICT			= -qstrict
 FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 FPPFLAGS		+= $(addprefix $(FPP_PREFIX), $(CPPFLAGS))
-F_FREECPP               = -qsuffix=cpp=F90
+F_FREECPP               = -qfree=f90 -qsuffix=cpp=F90
 F_FIXCPP                = -qfixed=132 -qsuffix=cpp=f90
-F_FREENOCPP             = -qsuffix=f=F
+F_FREENOCPP             = -qfree=f90 -qsuffix=f=F
 F_FIXNOCPP              = -qfixed=132 -qsuffix=f=f        
 
 #
