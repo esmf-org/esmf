@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.50 2004/05/14 21:35:08 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.51 2004/05/14 22:20:14 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.50 2004/05/14 21:35:08 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.51 2004/05/14 22:20:14 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -388,15 +388,14 @@ bool ESMC_Log::ESMC_LogFoundError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-	int result=false;
-    char[] msg="General Error";
+    int result=false;
     rc=status;
-	if (status!=ESMF_SUCCESS)
-	{
-		ESMC_LogWrite(msg,ESMC_LOG_ERROR,LINE,FILE,method);
-		result=true;
-	}
-	return result;
+    if (status!=ESMF_SUCCESS)
+    {
+         ESMC_LogWrite("GeneralError",ESMC_LOG_ERROR,LINE,FILE,method);
+         result=true;
+    }
+    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -406,69 +405,6 @@ bool ESMC_Log::ESMC_LogFoundError(
 // !INTERFACE:
 
 bool ESMC_Log::ESMC_LogMsgFoundError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    int status,
-    int rc
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-	int result=false;
-    char[] msg="General Error";
-    rc=status;
-	if (status!=ESMF_SUCCESS)
-	{
-		ESMC_LogWrite(msg,ESMC_LOG_ERROR);
-		result=true;
-	}
-	return result;
-}
-
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_LogMsgFoundError - LogMsgFoundError
-//
-// !INTERFACE:
-
-
-bool ESMC_Log::ESMC_LogMsgFoundError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    int status,
-    int LINE,
-    char FILE[],
-    char method[],
-    int rc
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-	int result=false;
-    rc=status;
-	if (status!=ESMF_SUCCESS)
-	{
-		ESMC_LogWrite(msg,ESMC_LOG_ERROR,LINE,FILE,method);
-		result=true;
-	}
-	return result;
-}
-
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_LogFoundErrorMsg - LogFoundErrorMsg
-//
-// !INTERFACE:
-
-bool ESMC_Log::ESMC_LogFoundErrorMsg(
 
 // !RETURN VALUE:
 //  none
@@ -482,14 +418,48 @@ bool ESMC_Log::ESMC_LogFoundErrorMsg(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-	int result=false;
+    int result=false;
     rc=status;
-	if (status!=ESMF_SUCCESS)
-	{
-		ESMC_LogWrite(msg,ESMC_LOG_ERROR);
-		result=true;
-	}
-	return result;
+    if (status!=ESMF_SUCCESS)
+    {
+        ESMC_LogWrite(msg,ESMC_LOG_ERROR);
+        result=true;
+    }
+    return result;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogMsgFoundError - LogMsgFoundError
+//
+// !INTERFACE:
+
+
+bool ESMC_Log::ESMC_LogMsgFoundError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int status,
+    char msg[],
+    int LINE,
+    char FILE[],
+    char method[],
+    int rc
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+    int result=false;
+    rc=status;
+    if (status!=ESMF_SUCCESS)
+    {
+        ESMC_LogWrite(msg,ESMC_LOG_ERROR,LINE,FILE,method);
+        result=true;
+    }
+    return result;
 }
 
 //----------------------------------------------------------------------------
@@ -556,17 +526,17 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 //  none
 //
 // !ARGUMENTS:
-    char[] msg
+    char msg[]
       
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 {
-	int result=false;
-	ESMC_LogWrite(strcat("Memory allocation error",msg),ESMC_LOG_ERROR);
-	result=true;
-	return result;
+    int result=false;
+    ESMC_LogWrite(strcat("Memory allocation error",msg),ESMC_LOG_ERROR);
+    result=true;
+    return result;
 
 }
 
@@ -583,7 +553,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 //  none
 //
 // !ARGUMENTS:
-    char[] msg,
+    char msg[],
     int LINE,
     char FILE[],
     char method[]      
@@ -592,9 +562,9 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 // Prints log messsge, line number, file, directory
 //EOP
 {
-	int result=false;
-	ESMC_LogWrite(strcat("Memory allocation error",msg,ESMC_LOG_ERROR,LINE,FILE,method);
-	result=ESMF_TRUE;
-	return true;
+    int result=false;
+    ESMC_LogWrite(strcat("Memory allocation error",msg),ESMC_LOG_ERROR,LINE,FILE,method);
+    result=ESMF_TRUE;
+    return true;
 }
 
