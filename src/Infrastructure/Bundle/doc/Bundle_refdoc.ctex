@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.7 2003/10/21 03:56:51 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.8 2003/10/21 04:42:06 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -33,20 +33,6 @@
 \newpage
 #endif
 
-%\section{Overview}
-%#ifdef STANDALONE
-%\input{Field_syn}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Bundle/doc/Field_syn}
-%#endif
-
-%\section{Programming Model}
-%#ifdef STANDALONE
-%\input{Field_prog}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Bundle/doc/Field_prog}
-%#endif
-
 \section{Bundle Class}
 
 \subsection{Description}
@@ -79,12 +65,19 @@
 \input{../Infrastructure/Bundle/doc/Bundle_implnotes}
 #endif
 
-% \subsection{Parameters and Definitions}
-% #ifdef STANDALONE
-% \input{Bundle_fparam}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Bundle/doc/Bundle_fparam}
-% #endif
+\subsection{Object Model}
+#ifdef STANDALONE
+\input{Bundle_obj}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Bundle/doc/Bundle_obj}
+#endif
+
+%\subsection{Global Parameters}
+%#ifdef STANDALONE
+%\input{Bundle_fparam}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Bundle/doc/Bundle_fparam}
+%#endif
 
 \subsection{Class API}
 #ifdef STANDALONE

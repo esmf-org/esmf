@@ -1,15 +1,18 @@
-% $Id: Bundle_rest.tex,v 1.2 2003/10/20 23:21:48 cdeluca Exp $
+% $Id: Bundle_rest.tex,v 1.3 2003/10/21 04:42:06 cdeluca Exp $
 
 %\subsubsection{Restrictions}
 
-\begin{enumerate}
-
-\item The Bundle class does not support differential or other
+\subsubsection{No Mathematical Operators}
+The Bundle class does not support differential or other
 mathematical operators.
 
-\item It also does not automatically support collective field operations,
-other than a limited set including I/O, regridding, and subsetting.
-For other operations on Fields, first query the Bundle for the
-specific field desired, then operate on it with Field methods.
+\subsubsection{Limited Collective Field Operations}
+The Bundle class does not automatically support collective field 
+operations, other than a limited set including I/O, regridding, and 
+indexing.  For other operations on Fields, first query the Bundle 
+for the specific Field desired, then operate on it with Field methods.
 
-\end{enumerate}
+
+
+
+
