@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.1 2004/05/05 15:40:26 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.2 2004/05/05 15:42:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,6 +104,8 @@
         type(ESMF_Status) :: status 
 #endif
         ! TODO: add interleaves here
+        type(ESMF_FieldDataMap) :: fdm
+        type(ESMF_BundleInterleave) :: bil
       end type
 
 
@@ -127,7 +129,7 @@
       public ESMF_BundleDataMapWrite, ESMF_BundleDataMapRead 
       public ESMF_BundleDataMapValidate, ESMF_BundleDataMapPrint
 
-      public ESMF_RelLocString, ESMF_InterleaveString, ESMF_IndexOrderString
+      public ESMF_BundleInterleaveString
 
       public operator(.eq.), operator(.ne.)
 
@@ -138,7 +140,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_BundleDataMap.F90,v 1.1 2004/05/05 15:40:26 nscollins Exp $'
+             '$Id: ESMF_BundleDataMap.F90,v 1.2 2004/05/05 15:42:38 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
