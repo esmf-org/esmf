@@ -87,7 +87,7 @@ field = ESMF_FieldCreate('temp')
 \label{sec:deepshallow}
 
 The ESMF contains two types of classes.  {\bf Deep} classes require
-{\tt ESMF\_<Class>Create>} and {\tt ESMF\_<Class>Destroy} calls.
+{\tt ESMF\_<Class>Create} and {\tt ESMF\_<Class>Destroy} calls.
 They take significant time to set up and should not be created
 in a time-critical portion of code.  Deep objects persist 
 even after the method in which they were created has returned.
