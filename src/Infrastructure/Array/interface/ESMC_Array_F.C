@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.27 2004/06/02 23:11:56 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.28 2004/06/17 15:40:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,6 +26,10 @@
 #include "ESMC_DELayout.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
+
+#ifdef ESMC_DATA_ADDR_NEEDS_INDIR
+#define XD *
+#endif
 
 //------------------------------------------------------------------------------
 //BOP
@@ -60,7 +64,7 @@ extern "C" {
      }
  
      void FTN(c_esmc_arraysetinfo)(ESMC_Array **ptr, 
-                               struct c_F90ptr *fptr, void *base, int *counts,
+                               struct c_F90ptr *fptr, void XD *base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
 			       int *hwidth, int *status) {
@@ -70,7 +74,7 @@ extern "C" {
               return;
           }
 
-         *status = (*ptr)->ESMC_ArraySetInfo(fptr, base, counts, 
+         *status = (*ptr)->ESMC_ArraySetInfo(fptr, XD base, counts, 
                                             lbounds, ubounds, offsets, 
                                             *contig, *dealloc, *hwidth);
      }
@@ -255,13 +259,13 @@ extern "C" {
          }
      }
 
-     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void *base, int *status) {
+     void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void XD *base, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
 
-          *status = (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
+          *status = (*ptr)->ESMC_ArraySetBaseAddr(XD base);
      }
 
      void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, void **base, int *status) {

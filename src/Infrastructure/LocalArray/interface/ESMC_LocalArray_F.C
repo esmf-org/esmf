@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.10 2004/04/23 21:55:36 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.11 2004/06/17 15:41:01 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,10 @@
 //
 //EOPI
 
+#ifdef ESMC_DATA_ADDR_NEEDS_INDIR
+#define XD *
+#endif
+
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
@@ -60,7 +64,8 @@ char *name = NULL;
  
      void FTN(c_esmc_localarraysetinternal)(ESMC_LocalArray **ptr, 
                                struct c_F90ptr *fptr,
-                               void *base, int *counts,
+                               void XD *base, 
+                               int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
                                int *status) {
@@ -69,7 +74,7 @@ char *name = NULL;
               *status = ESMF_FAILURE;
               return;
           }
-         *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, base, counts, 
+         *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, XD base, counts, 
                                                   lbounds, ubounds, offsets, 
                                                   contig, dealloc);
      }
@@ -89,7 +94,7 @@ char *name = NULL;
      }
 
      void FTN(c_esmc_localarraygetinfo)(ESMC_LocalArray **ptr, 
-                               void *base, int *counts,
+                               void **base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                int *status) {
       
@@ -187,12 +192,12 @@ char *name = NULL;
          *status = ESMC_LocalArrayDestroy(*ptr);
      }
 
-     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, float *base, int *status) {
+     void FTN(c_esmc_localarraysetbaseaddr)(ESMC_LocalArray **ptr, void XD *base, int *status) {
           if ((ptr == NULL) || (*ptr == NULL)) {
               *status = ESMF_FAILURE;
               return;
           }
-          *status = (*ptr)->ESMC_LocalArraySetBaseAddr((void *)(base));
+          *status = (*ptr)->ESMC_LocalArraySetBaseAddr(XD base);
      }
 
      void FTN(c_esmc_localarraygetbaseaddr)(ESMC_LocalArray **ptr, float **base, int *status) {
