@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.6 2004/03/19 16:11:05 theurich Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.7 2004/04/02 19:58:43 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,18 +38,9 @@
 extern "C" {
 
   void FTN(c_esmc_newdelayoutcreate)(ESMC_newDELayout **ptr, ESMC_VM **vm,
-    int *nDEs, int *ndim, int *DEtoPET, int *len, ESMC_Logical *cyclic, 
-    int *status){
-    // Sort out the non-present F90 optional arguments. 
-    // The detection of non-present F90 optional arguemtns is compiler/platform
-    // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
-    // Since the actual C++ methods expect non-present arguments to be
-    // indicated by a pointer to NULL all we need to do here is set those 
-    // that point to (NULL - 1) [which is available as macro ESMC_BAD_POINTER]
-    // to NULL as well before passing them down further.
-    (void*)cyclic   == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : cyclic;
-    // Done sorting out non-present F90 optional arguments.
-    *ptr = ESMC_newDELayoutCreate(**vm, nDEs, *ndim, DEtoPET, *len, cyclic,
+    int *nDEs, int *ndim, int *DEtoPET, int *len, int *status){
+    ESMC_Logical cyclic = ESMF_TRUE;
+    *ptr = ESMC_newDELayoutCreate(**vm, nDEs, *ndim, DEtoPET, *len, &cyclic,
       status);
   }
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.14 2004/04/02 16:41:43 theurich Exp $
+! $Id: ESMF_newDELayout.F90,v 1.15 2004/04/02 19:58:44 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,6 +86,14 @@
 
 !------------------------------------------------------------------------------
 
+      ! CommHandle type for DELayout
+      type ESMF_DELayoutCommHandle
+        sequence
+        integer:: dummy ! not yet used...
+      end type
+
+!------------------------------------------------------------------------------
+
       integer(ESMF_KIND_I4), parameter:: ESMF_CWGHT_NORMAL = 50 !default
 
 !------------------------------------------------------------------------------
@@ -95,6 +103,7 @@
       public ESMF_R4_AP
       public ESMF_R8_AP
       public ESMF_DELayoutData
+      public ESMF_DELayoutCommHandle
       
 !------------------------------------------------------------------------------
 ! !PUBLIC PARAMETERS:
@@ -131,7 +140,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.14 2004/04/02 16:41:43 theurich Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.15 2004/04/02 19:58:44 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -271,7 +280,7 @@ contains
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-    type(ESMF_newDELayout):: layout   ! opaque pointer to new C++ DELayout
+    type(ESMF_newDELayout):: delayout ! opaque pointer to new C++ DELayout
     integer :: status                 ! local error status
     logical :: rcpresent
     integer :: i, len, ndim
@@ -287,17 +296,17 @@ contains
     endif
 
     ! Initialize the pointer to NULL
-    layout%this = ESMF_NULL_POINTER
+    delayout%this = ESMF_NULL_POINTER
 
     ! Deal with optional array argument
     len = 0
-    if (present(DEtoPET)) len = size(DEtoPET)
+    if (present(dePetList)) len = size(dePetList)
     
-    if (present(nDEs)) then
-      ndim = size(nDEs)
+    if (present(deCountList)) then
+      ndim = size(deCountList)
       allocate(dummy_nDEs(ndim))
       do i=1, ndim
-        dummy_nDEs(i) = nDEs(i)
+        dummy_nDEs(i) = deCountList(i)
       enddo
     else
       ndim = 1
@@ -307,11 +316,11 @@ contains
     
     ! Routine which interfaces to the C++ creation routine.
     if (len==0) then
-      call c_ESMC_newDELayoutCreate(layout, vm, dummy_nDEs, ndim, &
-        dummy, len, cyclic, status)
+      call c_ESMC_newDELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
+        dummy, len, status)
     else
-      call c_ESMC_newDELayoutCreate(layout, vm, dummy_nDEs, ndim, &
-        DEtoPET, len, cyclic, status)
+      call c_ESMC_newDELayoutCreate(delayout, vm, dummy_nDEs, ndim, &
+        dePetList, len, status)
     endif
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutCreate error"
@@ -321,7 +330,7 @@ contains
     deallocate(dummy_nDEs)
     
     ! set return values
-    ESMF_newDELayoutCreateND = layout 
+    ESMF_newDELayoutCreateND = delayout 
     if (rcpresent) rc = ESMF_SUCCESS
  
   end function ESMF_newDELayoutCreateND
@@ -365,7 +374,7 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDestroy(layout, status)
+    call c_ESMC_newDELayoutDestroy(delayout, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutDestroy error"
       return
@@ -431,13 +440,15 @@ contains
     
     ! Deal with optional array argument
     len = 0
-    if (present(myDEs)) len = size(myDEs)
+    if (present(localDeList)) len = size(localDeList)
 
     ! Routine which interfaces to the C++ creation routine.
     if (len==0) then
-      call c_ESMC_newDELayoutGet(layout, nDEs, ndim, nmyDEs, dummy, len, status)
+      call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
+        dummy, len, status)
     else
-      call c_ESMC_newDELayoutGet(layout, nDEs, ndim, nmyDEs, myDEs, len, status)
+      call c_ESMC_newDELayoutGet(delayout, deCount, dimCount, localDeCount, &
+        localDeList, len, status)
     endif
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGet error"
@@ -510,30 +521,30 @@ contains
     ! Deal with optional array arguments
     ! TODO: make sure that this pointer, target stuff is a portable way of 
     ! TODO: dealing with multiple optional arrays and the F90/C++ interface.
-    if (present(DEcoord)) then
-      len_coord = size(DEcoord)
-      opt_DEcoord => DEcoord
+    if (present(coord)) then
+      len_coord = size(coord)
+      opt_DEcoord => coord
     else
       len_coord = 0
       opt_DEcoord => dummy
     endif
-    if (present(DEcde)) then
-      len_cde = size(DEcde)
-      opt_DEcde => DEcde
+    if (present(connectionList)) then
+      len_cde = size(connectionList)
+      opt_DEcde => connectionList
     else
       len_cde = 0
       opt_DEcde => dummy
     endif
-    if (present(DEcw)) then
-      len_cw = size(DEcw)
-      opt_DEcw => DEcw
+    if (present(connectionWeightList)) then
+      len_cw = size(connectionWeightList)
+      opt_DEcw => connectionWeightList
     else
       len_cw = 0
       opt_DEcw => dummy
     endif
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGetDE(layout, DEid, opt_DEcoord, len_coord, &
-      opt_DEcde, len_cde, opt_DEcw, len_cw, nDEc, status)
+    call c_ESMC_newDELayoutGetDE(delayout, de, opt_DEcoord, len_coord, &
+      opt_DEcde, len_cde, opt_DEcw, len_cw, connectionCount, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGet error"
       return
@@ -586,7 +597,7 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutPrint(layout, status)
+    call c_ESMC_newDELayoutPrint(delayout, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutPrint error"
       return
@@ -863,7 +874,7 @@ contains
     endif
 
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutDataDestroy(mydata, status)
+    call c_ESMC_newDELayoutDataDestroy(delayoutData, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutDataDestroy error"
       return
@@ -938,12 +949,12 @@ contains
     endif
     
     ! Determine the number of bytes that need to be copied dependent on type
-    if (datain%dtk == ESMF_I4) blen = len * 4 ! 4 bytes
-    if (datain%dtk == ESMF_R4) blen = len * 4 ! 4 bytes
-    if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
+    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutCopy(layout, datain, dataout, blen, src, dest, &
+    call c_ESMC_newDELayoutCopy(delayout, srcData, dstData, blen, src, dst, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutCopy error"
@@ -1014,12 +1025,12 @@ contains
     endif
     
     ! Determine the number of bytes that need to be copied dependent on type
-    if (datain%dtk == ESMF_I4) blen = len * 4 ! 4 bytes
-    if (datain%dtk == ESMF_R4) blen = len * 4 ! 4 bytes
-    if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
+    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutScatter(layout, datain, dataout, blen, root, &
+    call c_ESMC_newDELayoutScatter(delayout, srcData, dstData, blen, root, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutScatter error"
@@ -1090,12 +1101,12 @@ contains
     endif
     
     ! Determine the number of bytes that need to be copied dependent on type
-    if (datain%dtk == ESMF_I4) blen = len * 4 ! 4 bytes
-    if (datain%dtk == ESMF_R4) blen = len * 4 ! 4 bytes
-    if (datain%dtk == ESMF_R8) blen = len * 8 ! 8 bytes
+    if (srcData%dtk == ESMF_I4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R4) blen = count * 4 ! 4 bytes
+    if (srcData%dtk == ESMF_R8) blen = count * 8 ! 8 bytes
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutGather(layout, datain, dataout, blen, root, &
+    call c_ESMC_newDELayoutGather(delayout, srcData, dstData, blen, root, &
       status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutGather error"
@@ -1166,8 +1177,8 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(layout, datain, dataout, &
-      len, ESMF_I4, op, status)
+    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+      count, ESMF_I4, operation, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"
       return
@@ -1238,8 +1249,8 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(layout, datain, dataout, &
-      len, ESMF_R4, op, status)
+    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+      count, ESMF_R4, operation, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"
       return
@@ -1310,8 +1321,8 @@ contains
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_newDELayoutAllGlobalReduce(layout, datain, dataout, &
-      len, ESMF_R8, op, status)
+    call c_ESMC_newDELayoutAllGlobalReduce(delayout, srcData, dstData, &
+      count, ESMF_R8, operation, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_newDELayoutAllGlobalReduce error"
       return
