@@ -1,4 +1,4 @@
-% $Id: Component_desdoc.ctex,v 1.6 2003/03/21 17:58:01 flanigan Exp $
+% $Id: Component_desdoc.ctex,v 1.7 2003/04/04 16:39:13 flanigan Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,19 +144,15 @@
 \subsection{Application F90 Use and Examples}
 #ifdef STANDALONE
 \input{ESMF_AppMainEx_fapi}
-\input{ESMF_AppCompEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMF_AppMainEx_fapi}
-\input{../Superstructure/Component/doc/ESMF_AppCompEx_fapi}
 #endif
 
 \subsection{Application C++ Use and Examples}
 #ifdef STANDALONE
 \input{ESMC_AppMainEx_ccapi}
-\input{ESMC_AppCompEx_ccapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/Component/doc/ESMC_AppMainEx_ccapi}
-\input{../Superstructure/Component/doc/ESMC_AppCompEx_ccapi}
 #endif
 
 
