@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.19 2003/06/06 23:07:14 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.20 2003/06/07 00:42:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,6 +31,8 @@
 !
 ! Defines F90 wrapper entry points for corresponding
 ! C++ class { \tt ESMC\_Calendar} implementation
+!
+! See {\tt ../include/ESMC\_Calendar.h} for complete description
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -116,8 +118,8 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_CalendarInit
-      public ESMF_CalendarInitGeneric
+      public ESMF_CalendarSet
+      public ESMF_CalendarSetGeneric
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -130,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.19 2003/06/06 23:07:14 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.20 2003/06/07 00:42:00 eschwab Exp $'
 
 !==============================================================================
 
@@ -138,14 +140,14 @@
 
 !==============================================================================
 !
-! This section includes the Init methods.
+! This section includes the Set methods.
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarInit - Initializes the calendar type
+! !IROUTINE: ESMF_CalendarSet - Initializes the calendar type
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarInit(calendar, Type, rc)
+      subroutine ESMF_CalendarSet(calendar, Type, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar), intent(out) :: calendar
@@ -170,16 +172,16 @@
 !EOP
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarInit(calendar, Type, rc)
+      call c_ESMC_CalendarSet(calendar, Type, rc)
     
-      end subroutine ESMF_CalendarInit
+      end subroutine ESMF_CalendarSet
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarInitGeneric - Initialize calendar to user-type
+! !IROUTINE: ESMF_CalendarSetGeneric - Initialize calendar to user-type
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarInitGeneric(calendar, DaysPerMonth, &
+      subroutine ESMF_CalendarSetGeneric(calendar, DaysPerMonth, &
                                           SecondsPerDay, DaysPerYear, &
                                           DaysPerYearDn, DaysPerYearDd, rc)
 ! !ARGUMENTS:
@@ -217,11 +219,11 @@
 !EOP
 
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarInitGeneric(calendar, DaysPerMonth, &
+      call c_ESMC_CalendarSetGeneric(calendar, DaysPerMonth, &
                                       SecondsPerDay, DaysPerYear, &
                                       DaysPerYearDn, DaysPerYearDd, rc)
     
-      end subroutine ESMF_CalendarInitGeneric
+      end subroutine ESMF_CalendarSetGeneric
     
 !------------------------------------------------------------------------------
 ! 

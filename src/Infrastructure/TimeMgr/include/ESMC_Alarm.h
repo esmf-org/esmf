@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.12 2003/05/02 22:07:00 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.13 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,35 +106,15 @@ class ESMC_Alarm {
 
   public:
 
-    // Alarm is a shallow class, so only Init methods are needed
-    // (TMG 4.1, 4.7)
-    int ESMC_AlarmInit(ESMC_Time         *ringTime=0,
-                       ESMC_TimeInterval *ringInterval=0,
-                       ESMC_Time         *stopTime=0,
-                       bool               enabled=true);
-
     // Alarm doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    int ESMC_AlarmEnable(void);    // TMG4.5.3
-    int ESMC_AlarmDisable(void);
-
-    int ESMC_AlarmTurnOn(void);    // TMG4.6: manually turn on/off
-    int ESMC_AlarmTurnOff(void);
-
-    bool ESMC_AlarmIsRinging(int *rc) const;
-                                         // TMG 4.4: synchronous query for apps
-    bool ESMC_AlarmCheckRingTime(ESMC_Time *clockCurrTime, bool positive,
-                                 int *rc) const;
-                         // associated clock should invoke after advance:
-                         // TMG4.4, 4.6
-                         // Check for crossing RingTime in either positive or
-                         //   negative direction
-                         // Can be basis for asynchronous alarm reporting
-
-    bool operator==(const ESMC_Alarm &) const; 
-
     // accessor methods
+
+    int ESMC_AlarmSet(ESMC_Time         *ringTime=0,
+                      ESMC_TimeInterval *ringInterval=0,
+                      ESMC_Time         *stopTime=0,
+                      bool               enabled=true);  // (TMG 4.1, 4.7)
 
     int ESMC_AlarmGetRingInterval(ESMC_TimeInterval *ringInterval) const;
                                                            // TMG4.7
@@ -154,6 +134,23 @@ class ESMC_Alarm {
     int ESMC_AlarmGetStopTime(ESMC_Time *stopTime) const ; // TMG 4.5.2, 4.7
     int ESMC_AlarmSetStopTime(ESMC_Time *stopTime); // TMG 4.5.2, 4.7
 
+    int ESMC_AlarmEnable(void);    // TMG4.5.3
+    int ESMC_AlarmDisable(void);
+
+    int ESMC_AlarmTurnOn(void);    // TMG4.6: manually turn on/off
+    int ESMC_AlarmTurnOff(void);
+
+    bool ESMC_AlarmIsRinging(int *rc) const;
+                                         // TMG 4.4: synchronous query for apps
+    bool ESMC_AlarmCheckRingTime(ESMC_Time *clockCurrTime, bool positive,
+                                 int *rc) const;
+                         // associated clock should invoke after advance:
+                         // TMG4.4, 4.6
+                         // Check for crossing RingTime in either positive or
+                         //   negative direction
+                         // Can be basis for asynchronous alarm reporting
+
+    bool operator==(const ESMC_Alarm &) const; 
 
     // required methods inherited and overridden from the ESMC_Base class
 

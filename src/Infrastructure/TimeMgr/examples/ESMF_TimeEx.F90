@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.7 2003/05/07 21:48:03 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.8 2003/06/07 00:41:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.7 2003/05/07 21:48:03 eschwab Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.8 2003/06/07 00:41:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -45,8 +45,8 @@
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2
 
       ! temp variables for Get functions
-      integer :: MM, DD, H, M
-      integer(ESMF_IKIND_I8) :: YR, D, S
+      integer :: YR, MM, DD, D, H, M, S
+      integer(ESMF_IKIND_I8) :: YRl, Dl, Sl
       type(ESMF_Calendar) :: cal
       integer :: dayOfYear, dayOfWeek, dayOfMonth
 
@@ -54,21 +54,21 @@
       integer :: rc
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time1 to 2/28/2000 2:24:45
-      call ESMF_TimeInit(time1, YR=int(2000,kind=ESMF_IKIND_I8), &
-                       MM=2, DD=28, H=2, M=24, S=int(45,kind=ESMF_IKIND_I8), &
-                       cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(time1, YR=2000, &
+                        MM=2, DD=28, H=2, M=24, S=45, &
+                        cal=gregorianCalendar, rc=rc)
 
       ! initialize time2 to 3/1/2000 3:26:01
-      call ESMF_TimeInit(time2, YR=int(2000,kind=ESMF_IKIND_I8), &
-                       MM=3, DD=1, H=3, M=26, S=int(1,kind=ESMF_IKIND_I8), &
-                       cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(time2, YR=2000, &
+                        MM=3, DD=1, H=3, M=26, S=1, &
+                        cal=gregorianCalendar, rc=rc)
 
       ! initialize time interval1 to 2 days, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalInit(timeInterval1, D=int(2,kind=ESMF_IKIND_I8), &
-                                 S=int(1800,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval1, D=2, &
+                                S=1800, rc=rc)
 
       print *, "Time1 = "
       call ESMF_TimePrint(time1, "string", rc)
@@ -120,7 +120,7 @@
       call ESMF_TimePrint(midMonth, "string", rc)
 
       ! get wall clock time
-      call ESMF_TimeInit(wallClock, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(wallClock, cal=gregorianCalendar, rc=rc)
       call ESMF_TimeGetRealTime(wallClock, rc)
       print *, "Wall Clock Time = "
       call ESMF_TimePrint(wallClock, "string", rc)

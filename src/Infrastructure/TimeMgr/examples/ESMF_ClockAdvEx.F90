@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.6 2003/05/07 22:07:23 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.7 2003/06/07 00:41:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.6 2003/05/07 22:07:23 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.7 2003/06/07 00:41:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -47,11 +47,11 @@
       type(ESMF_TimeInterval) :: currSimTime, prevSimTime
 
       ! temp variables for Get functions
-      integer :: MM, DD, H, M, yD
+      integer :: YR, MM, DD, D, H, M, S, yD
       type(ESMF_TimeInterval) :: time_step, time_step_copy
       type(ESMF_TimeInterval) :: time_diff
       type(ESMF_Time) :: curr_time, curr_time_copy, prev_time
-      integer(ESMF_IKIND_I8) :: advanceCount, YR, D, S
+      integer(ESMF_IKIND_I8) :: advanceCount, YRl, Dl, Sl
       double precision :: d_
       logical alarmRinging
 
@@ -63,33 +63,33 @@
       !
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to -1 day
-      call ESMF_TimeIntervalInit(timeStep, D=int(-1,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, D=-1, rc=rc)
 
       ! initialize start time to 5/15/2003 12:00:00 noon
-      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=5, DD=15, H=12, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(startTime, YR=2003, &
+                        MM=5, DD=15, H=12, cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 5/15/2002 12:00:00 noon
-      call ESMF_TimeInit(stopTime, YR=int(2002,kind=ESMF_IKIND_I8), &
-                         MM=5, DD=15, H=12, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, YR=2002, &
+                        MM=5, DD=15, H=12, cal=gregorianCalendar, rc=rc)
 
       ! initialize reference time to 1/1/2000 00:00:00 midnight
-      call ESMF_TimeInit(refTime, YR=int(2000,kind=ESMF_IKIND_I8), &
-                         MM=1, DD=1, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(refTime, YR=2000, &
+                        MM=1, DD=1, cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
-      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, refTime, rc)
+      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, refTime, rc)
 
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currtime", rc)        ! default format
       call ESMF_ClockPrint(clock, "currtime string", rc) ! string format
 
       ! initialize alarm time to July 4, 2002, noon
-      call ESMF_TimeInit(alarmTime, YR=int(2002,kind=ESMF_IKIND_I8), &
-                         MM=7, DD=4, H=12, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(alarmTime, YR=2002, &
+                        MM=7, DD=4, H=12, cal=gregorianCalendar, rc=rc)
       alarmRinging = .false.
 
       !
@@ -202,7 +202,7 @@
       print *, "Current Time Step = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
 
-      call ESMF_TimeIntervalSet(timeStep, D=int(2,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, D=2, rc=rc)
       call ESMF_ClockSetTimeStep(clock, timeStep, rc)
       print *, "Time Step reset to = "
       call ESMF_ClockPrint(clock, "timestep string", rc)
@@ -212,8 +212,8 @@
       print *, "Previous time = "
       call ESMF_ClockPrint(clock, "prevtime string", rc)
 
-      call ESMF_TimeInit(curr_time, YR=int(1776,kind=ESMF_IKIND_I8), &
-                         MM=7, DD=4, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(curr_time, YR=1776, &
+                        MM=7, DD=4, cal=gregorianCalendar, rc=rc)
       call ESMF_ClockSetCurrTime(clock, curr_time, rc)
       print *, "Current Time changed to = "
       call ESMF_ClockPrint(clock, "currtime string", rc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.10 2003/04/25 09:07:41 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.11 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Clock} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_Clock} class functions.
 //
 //EOP
 
@@ -33,14 +33,14 @@
 extern "C" {
 
        // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_clockinit)(ESMC_Clock *ptr,
-                                  ESMC_TimeInterval *timeStep,
-                                  ESMC_Time *startTime,
-                                  ESMC_Time *stopTime,
-                                  ESMC_Time *refTime,
-                                  int *status) {
-           *status = (ptr)->ESMC_ClockInit(timeStep, startTime, stopTime,
-                                           refTime);
+       void FTN(c_esmc_clockset)(ESMC_Clock *ptr,
+                                 ESMC_TimeInterval *timeStep,
+                                 ESMC_Time *startTime,
+                                 ESMC_Time *stopTime,
+                                 ESMC_Time *refTime,
+                                 int *status) {
+           *status = (ptr)->ESMC_ClockSet(timeStep, startTime, stopTime,
+                                          refTime);
        }
 
        void FTN(c_esmc_clockaddalarm)(ESMC_Clock *ptr,

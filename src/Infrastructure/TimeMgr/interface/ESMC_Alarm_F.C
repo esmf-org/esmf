@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.8 2003/05/02 00:59:40 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.9 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,11 +32,11 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_alarminit)(ESMC_Alarm *ptr,
+       void FTN(c_esmc_alarmset)(ESMC_Alarm *ptr,
                 ESMC_Time *ringTime, ESMC_TimeInterval *ringInterval,
                 ESMC_Time *stopTime, int *enabled, int *status) {
-           *status = (ptr)->ESMC_AlarmInit(ringTime, ringInterval, stopTime,
-                                           *enabled);
+           *status = (ptr)->ESMC_AlarmSet(ringTime, ringInterval, stopTime,
+                                          *enabled);
        }
 
        void FTN(c_esmc_alarmenable)(ESMC_Alarm *ptr, int *status) {

@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.12 2003/05/02 22:09:24 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.13 2003/06/07 00:42:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.12 2003/05/02 22:09:24 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.13 2003/06/07 00:42:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -41,10 +41,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_AlarmInit - initializes a Alarm object
+// !IROUTINE:  ESMC_AlarmSet - initializes a Alarm object
 //
 // !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmInit(
+      int ESMC_Alarm::ESMC_AlarmSet(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -75,191 +75,7 @@
 
     return(ESMC_AlarmValidate());
 
- } // end ESMC_AlarmInit
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmEnable - enables an Alarm object to function
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmEnable(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which enables an {\tt Alarm} object to function
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-    Enabled = true;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmEnable
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmDisable - disables an Alarm object from functioning
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmDisable(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which disables an {\tt Alarm} object from functioning
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-    Ringing = false;
-    Enabled = false;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmDisable
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmTurnOn - sets an Alarm to the ringing state
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmTurnOn(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which sets an {\tt Alarm} object to the ringing state
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-    if(!Enabled) return(ESMF_FAILURE);
-
-    Ringing = true;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmTurnOn
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmTurnOff - turns off an Alarm's ringing state
-//
-// !INTERFACE:
-      int ESMC_Alarm::ESMC_AlarmTurnOff(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which turns off an {\tt Alarm}'s ringing state
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-    Ringing = false;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_AlarmTurnOn
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmIsRinging - check if Alarm is ringing
-//
-// !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmIsRinging(
-//
-// !RETURN VALUE:
-//    bool is ringing or not
-//
-// !ARGUMENTS:
-      int  *rc) const {        // out - error return code
-//
-// !DESCRIPTION:
-//    checks if {\tt Alarm}'s ringing state is set.
-//
-//EOP
-// !REQUIREMENTS:
-
-    *rc = ESMF_SUCCESS;
-
-    return(Enabled && Ringing);
-
- } // end ESMC_AlarmIsRinging
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_AlarmCheckRingTime - check if time to ring
-//
-// !INTERFACE:
-      bool ESMC_Alarm::ESMC_AlarmCheckRingTime(
-//
-// !RETURN VALUE:
-//    bool is ringing or not
-//
-// !ARGUMENTS:
-      ESMC_Time *ClockCurrTime,  // in - current time to check
-      bool positive,      // in - postive or negative ring time crossing trigger
-      int  *rc) const {   // out - error return code
-
-// !DESCRIPTION:
-//    checks if its time to ring based on current time crossing the ring
-//    time in either the positive or negative direction.
-//
-//EOP
-// !REQUIREMENTS:  TMG4.4, 4.6
-
-    *rc = ESMF_SUCCESS;
-
-    if (positive) {
-      return(*ClockCurrTime >= RingTime);
-    } else {
-      return(*ClockCurrTime <= RingTime);
-    }
-
- } // end ESMC_AlarmCheckRingTime
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Alarm(==) - Alarm equality comparison    
-//
-// !INTERFACE:
-      bool ESMC_Alarm::operator==(
-//
-// !RETURN VALUE:
-//    bool result
-//
-// !ARGUMENTS:
-      const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
-//
-// !DESCRIPTION:
-//      Compare for equality the current object's (this) {\tt Alarm} with
-//      given {\tt Alarm}, return result
-//
-//EOP
-// !REQUIREMENTS:
-
-    return(ID == alarm.ID);
-
-}  // end ESMC_Alarm::operator==
+ } // end ESMC_AlarmSet
 
 //-------------------------------------------------------------------------
 //BOP
@@ -476,6 +292,190 @@
     return(ESMF_SUCCESS);
 
  } // end ESMC_AlarmSetStopTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmEnable - enables an Alarm object to function
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_AlarmEnable(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which enables an {\tt Alarm} object to function
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    Enabled = true;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_AlarmEnable
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmDisable - disables an Alarm object from functioning
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_AlarmDisable(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which disables an {\tt Alarm} object from functioning
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    Ringing = false;
+    Enabled = false;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_AlarmDisable
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmTurnOn - sets an Alarm to the ringing state
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_AlarmTurnOn(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which sets an {\tt Alarm} object to the ringing state
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    if(!Enabled) return(ESMF_FAILURE);
+
+    Ringing = true;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_AlarmTurnOn
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmTurnOff - turns off an Alarm's ringing state
+//
+// !INTERFACE:
+      int ESMC_Alarm::ESMC_AlarmTurnOff(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      ESMF routine which turns off an {\tt Alarm}'s ringing state
+//
+//EOP
+// !REQUIREMENTS:  developer's guide for classes
+
+    Ringing = false;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_AlarmTurnOn
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmIsRinging - check if Alarm is ringing
+//
+// !INTERFACE:
+      bool ESMC_Alarm::ESMC_AlarmIsRinging(
+//
+// !RETURN VALUE:
+//    bool is ringing or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    checks if {\tt Alarm}'s ringing state is set.
+//
+//EOP
+// !REQUIREMENTS:
+
+    *rc = ESMF_SUCCESS;
+
+    return(Enabled && Ringing);
+
+ } // end ESMC_AlarmIsRinging
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_AlarmCheckRingTime - check if time to ring
+//
+// !INTERFACE:
+      bool ESMC_Alarm::ESMC_AlarmCheckRingTime(
+//
+// !RETURN VALUE:
+//    bool is ringing or not
+//
+// !ARGUMENTS:
+      ESMC_Time *ClockCurrTime,  // in - current time to check
+      bool positive,      // in - postive or negative ring time crossing trigger
+      int  *rc) const {   // out - error return code
+
+// !DESCRIPTION:
+//    checks if its time to ring based on current time crossing the ring
+//    time in either the positive or negative direction.
+//
+//EOP
+// !REQUIREMENTS:  TMG4.4, 4.6
+
+    *rc = ESMF_SUCCESS;
+
+    if (positive) {
+      return(*ClockCurrTime >= RingTime);
+    } else {
+      return(*ClockCurrTime <= RingTime);
+    }
+
+ } // end ESMC_AlarmCheckRingTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Alarm(==) - Alarm equality comparison    
+//
+// !INTERFACE:
+      bool ESMC_Alarm::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt Alarm} with
+//      given {\tt Alarm}, return result
+//
+//EOP
+// !REQUIREMENTS:
+
+    return(ID == alarm.ID);
+
+}  // end ESMC_Alarm::operator==
 
 //-------------------------------------------------------------------------
 //BOP

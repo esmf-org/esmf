@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.14 2003/05/02 22:07:30 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.15 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -119,11 +119,10 @@ class ESMC_Calendar {
 
   public:
 
-    // Calendar is a shallow class, so only Init methods are needed
-    int ESMC_CalendarInit(ESMC_CalendarType type);
-    int ESMC_CalendarInitGeneric(int *daysPerMonth, int secondsPerDay,
-                                 int daysPerYear,   int daysPerYearDn,
-                                 int daysPerYearDd);
+    int ESMC_CalendarSet(ESMC_CalendarType type);
+    int ESMC_CalendarSetGeneric(int *daysPerMonth, int secondsPerDay,
+                                int daysPerYear,   int daysPerYearDn,
+                                int daysPerYearDd);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -131,10 +130,12 @@ class ESMC_Calendar {
     // conversions based on UTC: time zone offset done by client
     //  (TMG 2.4.5, 2.5.6)
     int ESMC_CalendarConvertToTime(ESMF_IKIND_I8 YR, int MM, int DD,
-                             ESMF_IKIND_I8 D, ESMC_BaseTime *T) const;
+                                   ESMF_IKIND_I8 D, ESMC_BaseTime *T) const;
     int ESMC_CalendarConvertToDate(const ESMC_BaseTime *T,
-                             ESMF_IKIND_I8 *YR=0, int *MM=0, int *DD=0,
-                             ESMF_IKIND_I8 *D=0, double *d_=0) const;
+                             int *YR=0, ESMF_IKIND_I8 *YRl=0,
+                             int *MM=0, int *DD=0,
+                             int *D=0, ESMF_IKIND_I8 *Dl=0,
+                             double *d_=0) const;
 
     // TODO:  add method to convert calendar interval to core time ?
 

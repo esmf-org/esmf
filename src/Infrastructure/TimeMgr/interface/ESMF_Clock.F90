@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.18 2003/06/06 23:08:00 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.19 2003/06/07 00:42:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,6 +31,8 @@
 ! Defines F90 wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Time} implementation
 !     
+! See {\tt ../include/ESMC\_Clock.h} for complete description
+!
 !------------------------------------------------------------------------------
 ! !USES:
       ! inherit from ESMF base class
@@ -75,13 +77,7 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_ClockInit
-      public ESMF_ClockAddAlarm
-      public ESMF_ClockGetAlarmList
-      public ESMF_ClockGetNumAlarms
-      public ESMF_ClockSyncToWallClock
-      public ESMF_ClockAdvance
-      public ESMF_ClockIsStopTime
+      public ESMF_ClockSet
       public ESMF_ClockGetAdvanceCount
       public ESMF_ClockGetTimeStep
       public ESMF_ClockSetTimeStep
@@ -93,6 +89,12 @@
       public ESMF_ClockGetPrevTime
       public ESMF_ClockGetCurrSimTime
       public ESMF_ClockGetPrevSimTime
+      public ESMF_ClockAddAlarm
+      public ESMF_ClockGetAlarmList
+      public ESMF_ClockGetNumAlarms
+      public ESMF_ClockSyncToWallClock
+      public ESMF_ClockAdvance
+      public ESMF_ClockIsStopTime
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -105,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.18 2003/06/06 23:08:00 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.19 2003/06/07 00:42:00 eschwab Exp $'
 
 !==============================================================================
 
@@ -113,15 +115,15 @@
 
 !==============================================================================
 !
-! This section includes the Init methods.
+! This section includes the Set methods.
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockInit - Initialize a clock
+! !IROUTINE: ESMF_ClockSet - Initialize a clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockInit(clock, TimeStep, StartTime, StopTime, &
-                                RefTime, rc)
+      subroutine ESMF_ClockSet(clock, TimeStep, StartTime, StopTime, &
+                               RefTime, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(out) :: clock
@@ -154,210 +156,10 @@
 !     TMG3.1, TMG3.4.4
 !EOP
 
-      call c_ESMC_ClockInit(clock, TimeStep, StartTime, StopTime, &
-                            RefTime, rc)
+      call c_ESMC_ClockSet(clock, TimeStep, StartTime, StopTime, &
+                           RefTime, rc)
     
-      end subroutine ESMF_ClockInit
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockAddAlarm - Add an alarm to a clock's alarm list
-
-! !INTERFACE:
-      subroutine ESMF_ClockAddAlarm(clock, Alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
-      type(ESMF_Alarm), intent(in) :: Alarm
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Add an {\tt ESMF\_Alarm} to a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to add an {\tt Alarm} to
-!     \item[Alarm]
-!          The {\tt ESMF\_Alarm} to add to the {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-! !REQUIREMENTS:
-!     TMG4.1, TMG4.2
-!EOP
-    
-      call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
-    
-      end subroutine ESMF_ClockAddAlarm
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockGetAlarmList - Get a clock's alarm list
-
-! !INTERFACE:
-      subroutine ESMF_ClockGetAlarmList(clock, AlarmList, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(in) :: clock
-      type(ESMF_Alarm), intent(out) :: AlarmList(:)
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list     
-!   
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to get the {\tt ESMF\_Alarm} list from
-!     \item[AlarmList]
-!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-! !REQUIREMENTS:
-!     TMG4.3
-!EOP
-
-      call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
-    
-      end subroutine ESMF_ClockGetAlarmList
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockGetNumAlarms - Get the number of alarms in a clock's alarm list
-
-! !INTERFACE:
-      subroutine ESMF_ClockGetNumAlarms(clock, NumAlarms, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(in) :: clock
-      integer, intent(out) :: NumAlarms
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get the number of {\tt ESMF\_Alarm}s in a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list     
-!   
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to get the number of {\tt ESMF\_Alarm}s from
-!     \item[NumAlarms]
-!          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-! !REQUIREMENTS:
-!     TMG4.3
-!EOP
-
-      call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
-    
-      end subroutine ESMF_ClockGetNumAlarms
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockSyncToWallClock - Set clock's current time to wall clock time
-
-! !INTERFACE:
-      subroutine ESMF_ClockSyncToWallClock(clock, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
-      integer, intent(out), optional :: rc
-    
-! !DESCRIPTION:
-!     Set a {\tt ESMF\_Clock}'s current time to wall clock time     
-!   
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to synchronize to wall clock time
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-! !REQUIREMENTS:
-!     TMG3.4.5
-!EOP
-
-      call c_ESMC_ClockSyncToWallClock(clock, rc)
-    
-      end subroutine ESMF_ClockSyncToWallClock
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockAdvance - Advance a clock's current time by one time step
-
-! !INTERFACE:
-      subroutine ESMF_ClockAdvance(clock, RingingAlarmList, &
-                                   NumRingingAlarms, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout) :: clock
-      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out), optional :: &
-                                        RingingAlarmList
-      integer, intent(out), optional :: NumRingingAlarms
-      integer, intent(out), optional :: rc
-!   
-! !DESCRIPTION:
-!     Advance a {\tt ESMF\_Clock}'s current time by one time step
-!  
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to advance
-!     \item[{[RingingAlarmList]}]
-!          Return a list of any ringing alarms after the time step
-!     \item[{[NumRingingAlarms]}]
-!          The number of ringing alarms returned
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!  
-! !REQUIREMENTS:
-!     TMG3.4.1
-!EOP
-
-      call c_ESMC_ClockAdvance(clock, RingingAlarmList, NumRingingAlarms, rc)
-    
-      end subroutine ESMF_ClockAdvance
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockIsStopTime - Has the clock reached its stop time ?
-
-! !INTERFACE:
-      function ESMF_ClockIsStopTime(clock, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_ClockIsStopTime
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(in) :: clock
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Return true if {\tt ESMF\_Clock} has reached its stop time, false otherwise     
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to check
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-
-! !REQUIREMENTS:
-!     TMG3.5.6
-!EOP
-
-      call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
-    
-      end function ESMF_ClockIsStopTime
+      end subroutine ESMF_ClockSet
 
 !------------------------------------------------------------------------------
 !BOP
@@ -722,6 +524,210 @@
       call c_ESMC_ClockGetPrevSimTime(clock, PrevSimTime, rc)
    
       end subroutine ESMF_ClockGetPrevSimTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockAddAlarm - Add an alarm to a clock's alarm list
+
+! !INTERFACE:
+      subroutine ESMF_ClockAddAlarm(clock, Alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Alarm), intent(in) :: Alarm
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Add an {\tt ESMF\_Alarm} to a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to add an {\tt Alarm} to
+!     \item[Alarm]
+!          The {\tt ESMF\_Alarm} to add to the {\tt ESMF\_Clock}'s
+!            {\tt ESMF\_Alarm} list
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!   
+! !REQUIREMENTS:
+!     TMG4.1, TMG4.2
+!EOP
+    
+      call c_ESMC_ClockAddAlarm(clock, Alarm, rc)
+    
+      end subroutine ESMF_ClockAddAlarm
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetAlarmList - Get a clock's alarm list
+
+! !INTERFACE:
+      subroutine ESMF_ClockGetAlarmList(clock, AlarmList, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in) :: clock
+      type(ESMF_Alarm), intent(out) :: AlarmList(:)
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list     
+!   
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to get the {\tt ESMF\_Alarm} list from
+!     \item[AlarmList]
+!          The {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!   
+! !REQUIREMENTS:
+!     TMG4.3
+!EOP
+
+      call c_ESMC_ClockGetAlarmList(clock, AlarmList, rc)
+    
+      end subroutine ESMF_ClockGetAlarmList
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetNumAlarms - Get the number of alarms in a clock's alarm list
+
+! !INTERFACE:
+      subroutine ESMF_ClockGetNumAlarms(clock, NumAlarms, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out) :: NumAlarms
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get the number of {\tt ESMF\_Alarm}s in a {\tt ESMF\_Clock}'s
+!       {\tt ESMF\_Alarm} list     
+!   
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to get the number of {\tt ESMF\_Alarm}s from
+!     \item[NumAlarms]
+!          The number of {\tt ESMF\_Alarm}s in the {\tt ESMF\_Clock}'s
+!            {\tt ESMF\_Alarm} list
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!   
+! !REQUIREMENTS:
+!     TMG4.3
+!EOP
+
+      call c_ESMC_ClockGetNumAlarms(clock, NumAlarms, rc)
+    
+      end subroutine ESMF_ClockGetNumAlarms
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockSyncToWallClock - Set clock's current time to wall clock time
+
+! !INTERFACE:
+      subroutine ESMF_ClockSyncToWallClock(clock, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout) :: clock
+      integer, intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Set a {\tt ESMF\_Clock}'s current time to wall clock time     
+!   
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to synchronize to wall clock time
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!   
+! !REQUIREMENTS:
+!     TMG3.4.5
+!EOP
+
+      call c_ESMC_ClockSyncToWallClock(clock, rc)
+    
+      end subroutine ESMF_ClockSyncToWallClock
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockAdvance - Advance a clock's current time by one time step
+
+! !INTERFACE:
+      subroutine ESMF_ClockAdvance(clock, RingingAlarmList, &
+                                   NumRingingAlarms, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(inout) :: clock
+      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out), optional :: &
+                                        RingingAlarmList
+      integer, intent(out), optional :: NumRingingAlarms
+      integer, intent(out), optional :: rc
+!   
+! !DESCRIPTION:
+!     Advance a {\tt ESMF\_Clock}'s current time by one time step
+!  
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to advance
+!     \item[{[RingingAlarmList]}]
+!          Return a list of any ringing alarms after the time step
+!     \item[{[NumRingingAlarms]}]
+!          The number of ringing alarms returned
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!  
+! !REQUIREMENTS:
+!     TMG3.4.1
+!EOP
+
+      call c_ESMC_ClockAdvance(clock, RingingAlarmList, NumRingingAlarms, rc)
+    
+      end subroutine ESMF_ClockAdvance
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockIsStopTime - Has the clock reached its stop time ?
+
+! !INTERFACE:
+      function ESMF_ClockIsStopTime(clock, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockIsStopTime
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in) :: clock
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Return true if {\tt ESMF\_Clock} has reached its stop time, false 
+!       otherwise     
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to check
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+
+! !REQUIREMENTS:
+!     TMG3.5.6
+!EOP
+
+      call c_ESMC_ClockIsStopTime(clock, ESMF_ClockIsStopTime, rc)
+    
+      end function ESMF_ClockIsStopTime
 
 !------------------------------------------------------------------------------
 !

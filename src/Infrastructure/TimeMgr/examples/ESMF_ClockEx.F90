@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.18 2003/05/07 20:41:14 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.19 2003/06/07 00:41:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.18 2003/05/07 20:41:14 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.19 2003/06/07 00:41:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -45,10 +45,10 @@
       type(ESMF_Time) :: stopTime
 
       ! temp variables for Get functions
-      integer :: MM, DD, H, M, yD
+      integer :: MM, DD, D, H, M, S, yD
       type(ESMF_TimeInterval) :: time_step
       type(ESMF_TimeInterval) :: time_diff
-      integer(ESMF_IKIND_I8) :: advanceCount, D, S
+      integer(ESMF_IKIND_I8) :: advanceCount, Dl, Sl
       double precision :: d_
 
       ! result code
@@ -59,22 +59,22 @@
       !
 
       ! initialize calendar to be Gregorian type
-      call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+      call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 2 days, 4 hours (6 timesteps in 13 days)
-      call ESMF_TimeIntervalInit(timeStep, D=int(2,kind=ESMF_IKIND_I8), &
-                                 H=4, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, D=2, &
+                                H=4, rc=rc)
 
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
-      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=4, DD=1, H=2, M=24, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(startTime, YR=2003, &
+                        MM=4, DD=1, H=2, M=24, cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
-      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=4, DD=14, H=2, M=24, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, YR=2003, &
+                        MM=4, DD=14, H=2, M=24, cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
-      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
 
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currtime string", rc)

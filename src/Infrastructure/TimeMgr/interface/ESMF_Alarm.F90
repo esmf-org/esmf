@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.16 2003/06/06 23:05:47 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.17 2003/06/07 00:42:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,6 +32,8 @@
 !
 ! Defines F90 wrapper entry points for corresponding
 ! C++ class {\tt ESMC\_Alarm}
+!
+! See {\tt ../include/ESMC\_Alarm.h} for complete description
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -74,13 +76,7 @@
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_AlarmInit
-      public ESMF_AlarmEnable
-      public ESMF_AlarmDisable
-      public ESMF_AlarmTurnOn
-      public ESMF_AlarmTurnOff
-      public ESMF_AlarmIsRinging
-      public ESMF_AlarmCheckRingTime
+      public ESMF_AlarmSet
       public ESMF_AlarmGetRingInterval
       public ESMF_AlarmSetRingInterval
       public ESMF_AlarmGetRingTime
@@ -89,6 +85,12 @@
       public ESMF_AlarmSetPrevRingTime
       public ESMF_AlarmGetStopTime
       public ESMF_AlarmSetStopTime
+      public ESMF_AlarmEnable
+      public ESMF_AlarmDisable
+      public ESMF_AlarmTurnOn
+      public ESMF_AlarmTurnOff
+      public ESMF_AlarmIsRinging
+      public ESMF_AlarmCheckRingTime
  
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -104,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.16 2003/06/06 23:05:47 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.17 2003/06/07 00:42:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -134,15 +136,15 @@
 
 !------------------------------------------------------------------------------
 !
-! This section includes the Init methods.
+! This section includes the Set methods.
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmInit - Initializes an alarm
+! !IROUTINE: ESMF_AlarmSet - Initializes an alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmInit(alarm, RingTime, RingInterval, &
-                                StopTime, Enabled, rc)
+      subroutine ESMF_AlarmSet(alarm, RingTime, RingInterval, &
+                               StopTime, Enabled, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(out) :: alarm
@@ -174,10 +176,274 @@
 ! !REQUIREMENTS:
 !     TMG4.1, TMG4.7
 !EOP
-      call c_ESMC_AlarmInit(alarm, RingTime, RingInterval, &
+      call c_ESMC_AlarmSet(alarm, RingTime, RingInterval, &
                             StopTime, Enabled, rc)
 
-      end subroutine ESMF_AlarmInit
+      end subroutine ESMF_AlarmSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmGetRingInterval - Get an alarm's ring interval
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmGetRingInterval(alarm, RingInterval, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm
+      type(ESMF_TimeInterval), intent(out) :: RingInterval
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt ESMF\_Alarm}'s ring interval
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the ring interval
+!     \item[RingInterval]
+!          The {\tt Alarm}'s ring interval
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+
+! !REQUIREMENTS:
+!     TMG4.7
+!EOP
+    
+      call c_ESMC_AlarmGetRingInterval(alarm, RingInterval, rc)
+
+      end subroutine ESMF_AlarmGetRingInterval
+ 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmSetRingInterval - Set an alarm's ring interval
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmSetRingInterval(alarm, RingInterval, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_TimeInterval), intent(in) :: RingInterval
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s ring interval
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set the ring interval
+!     \item[RingInterval]
+!          The {\tt Alarm}'s ring interval
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.5.2, TMG4.7
+!EOP
+    
+      call c_ESMC_AlarmSetRingInterval(alarm, RingInterval, rc)
+
+      end subroutine ESMF_AlarmSetRingInterval
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmGetRingTime - Get an alarm's time to ring
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmGetRingTime(alarm, RingTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm
+      type(ESMF_Time), intent(out) :: RingTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt ESMF\_Alarm}'s time to ring
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the ring time
+!     \item[RingTime]
+!          The {\tt Alarm}'s ring time
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.7, TMG4.8
+!EOP
+
+      call c_ESMC_AlarmGetRingTime(alarm, RingTime, rc)
+
+      end subroutine ESMF_AlarmGetRingTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmSetRingTime - Set an alarm's time to ring
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmSetRingTime(alarm, RingTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Time), intent(in) :: RingTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s time to ring
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set the ring time
+!     \item[RingTime]
+!          The {\tt Alarm}'s ring time to set
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.5.1, TMG4.7, TMG4.8
+!EOP
+   
+      call c_ESMC_AlarmSetRingTime(alarm, RingTime, rc)
+
+      end subroutine ESMF_AlarmSetRingTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmGetPrevRingTime - Get an alarm's previous ring time
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmGetPrevRingTime(alarm, PrevRingTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm
+      type(ESMF_Time), intent(out) :: PrevRingTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt ESMF\_Alarm}'s previous ring time
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the previous ring time
+!     \item[PrevRingTime]
+!          The {\tt Alarm}'s previous ring time
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.7, TMG4.8
+!EOP
+
+      call c_ESMC_AlarmGetPrevRingTime(alarm, PrevRingTime, rc)
+
+      end subroutine ESMF_AlarmGetPrevRingTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmSetPrevRingTime - Set an alarm's previous ring time
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmSetPrevRingTime(alarm, PrevRingTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Time), intent(in) :: PrevRingTime
+      integer, intent(out), optional :: rc
+   
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s previous ring time
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set the previous ring time
+!     \item[PrevRingTime]
+!          The {\tt Alarm}'s previous ring time to set
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.7, TMG4.8
+!EOP
+
+      call c_ESMC_AlarmSetPrevRingTime(alarm, PrevRingTime, rc)
+
+      end subroutine ESMF_AlarmSetPrevRingTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmGetStopTime - Get an alarm's stop time
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmGetStopTime(alarm, StopTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm
+      type(ESMF_Time), intent(out) :: StopTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get an {\tt Alarm}'s stop time
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to get the stop time
+!     \item[StopTime]
+!          The {\tt ESMF\_Alarm}'s stop time
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.5.2, TMG4.7
+!EOP
+   
+      call c_ESMC_AlarmGetStopTime(alarm, StopTime, rc)
+
+      end subroutine ESMF_AlarmGetStopTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmSetStopTime - Set an alarm's stop time
+!
+! !INTERFACE:
+      subroutine ESMF_AlarmSetStopTime(alarm, StopTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(out) :: alarm
+      type(ESMF_Time), intent(in) :: StopTime
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s stop time
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set the stop time
+!     \item[StopTime]
+!          The {\tt Alarm}'s stop time
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG4.5.2, TMG4.7
+!EOP
+
+      call c_ESMC_AlarmSetStopTime(alarm, StopTime, rc)
+
+      end subroutine ESMF_AlarmSetStopTime
 
 !------------------------------------------------------------------------------
 !BOP
@@ -358,7 +624,7 @@
 !     \item[alarm]
 !          The object instance to check if time to ring   
 !     \item[ClockCurrTime]
-!          The {\tt Clock}'s current time
+!          The {\tt ESMF\_Clock}'s current time
 !     \item[positive]
 !          Whether to check ring time in the positive or negative direction
 !     \item[{[rc]}]
@@ -397,7 +663,7 @@
 !     \item[alarm1]
 !          The first {\tt ESMF\_Alarm} to compare
 !     \item[alarm2]
-!          The first {\tt ESMF\_Alarm} to compare
+!          The second {\tt ESMF\_Alarm} to compare
 !     \end{description}
 !
 ! !REQUIREMENTS:  
@@ -406,270 +672,6 @@
       call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
 
       end function ESMF_AlarmEQ
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AlarmGetRingInterval - Get an alarm's ring interval
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmGetRingInterval(alarm, RingInterval, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm
-      type(ESMF_TimeInterval), intent(out) :: RingInterval
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get an {\tt ESMF\_Alarm}'s ring interval
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to get the ring interval
-!     \item[RingInterval]
-!          The {\tt Alarm}'s ring interval
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-
-! !REQUIREMENTS:
-!     TMG4.7
-!EOP
-    
-      call c_ESMC_AlarmGetRingInterval(alarm, RingInterval, rc)
-
-      end subroutine ESMF_AlarmGetRingInterval
- 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AlarmSetRingInterval - Set an alarm's ring interval
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmSetRingInterval(alarm, RingInterval, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
-      type(ESMF_TimeInterval), intent(in) :: RingInterval
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Set an {\tt ESMF\_Alarm}'s ring interval
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to set the ring interval
-!     \item[RingInterval]
-!          The {\tt Alarm}'s ring interval
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG4.5.2, TMG4.7
-!EOP
-    
-      call c_ESMC_AlarmSetRingInterval(alarm, RingInterval, rc)
-
-      end subroutine ESMF_AlarmSetRingInterval
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmGetRingTime - Get an alarm's time to ring
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmGetRingTime(alarm, RingTime, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm
-      type(ESMF_Time), intent(out) :: RingTime
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get an {\tt ESMF\_Alarm}'s time to ring
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to get the ring time
-!     \item[RingTime]
-!          The {\tt Alarm}'s ring time
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG4.7, TMG4.8
-!EOP
-
-      call c_ESMC_AlarmGetRingTime(alarm, RingTime, rc)
-
-      end subroutine ESMF_AlarmGetRingTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmSetRingTime - Set an alarm's time to ring
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmSetRingTime(alarm, RingTime, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
-      type(ESMF_Time), intent(in) :: RingTime
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Set an {\tt ESMF\_Alarm}'s time to ring
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to set the ring time
-!     \item[RingTime]
-!          The {\tt ESMF\_Alarm}'s ring time to set
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG4.5.1, TMG4.7, TMG4.8
-!EOP
-   
-      call c_ESMC_AlarmSetRingTime(alarm, RingTime, rc)
-
-      end subroutine ESMF_AlarmSetRingTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmGetPrevRingTime - Get an alarm's previous ring time
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmGetPrevRingTime(alarm, PrevRingTime, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm
-      type(ESMF_Time), intent(out) :: PrevRingTime
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get an {\tt ESMF\_Alarm}'s previous ring time
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to get the previous ring time
-!     \item[PrevRingTime]
-!          The {\tt Alarm}'s previous ring time
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG4.7, TMG4.8
-!EOP
-
-      call c_ESMC_AlarmGetPrevRingTime(alarm, PrevRingTime, rc)
-
-      end subroutine ESMF_AlarmGetPrevRingTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmSetPrevRingTime - Set an alarm's previous ring time
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmSetPrevRingTime(alarm, PrevRingTime, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
-      type(ESMF_Time), intent(in) :: PrevRingTime
-      integer, intent(out), optional :: rc
-   
-! !DESCRIPTION:
-!     Set an {\tt ESMF\_Alarm}'s previous ring time
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to set the previous ring time
-!     \item[PrevRingTime]
-!          The {\tt ESMF\_Alarm}'s previous ring time to set
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG4.7, TMG4.8
-!EOP
-
-      call c_ESMC_AlarmSetPrevRingTime(alarm, PrevRingTime, rc)
-
-      end subroutine ESMF_AlarmSetPrevRingTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmGetStopTime - Get an alarm's stop time
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmGetStopTime(alarm, StopTime, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm
-      type(ESMF_Time), intent(out) :: StopTime
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Get an {\tt ESMF\_Alarm}'s stop time
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to get the stop time
-!     \item[StopTime]
-!          The {\tt ESMF\_Alarm}'s stop time
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG4.5.2, TMG4.7
-!EOP
-   
-      call c_ESMC_AlarmGetStopTime(alarm, StopTime, rc)
-
-      end subroutine ESMF_AlarmGetStopTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmSetStopTime - Set an alarm's stop time
-!
-! !INTERFACE:
-      subroutine ESMF_AlarmSetStopTime(alarm, StopTime, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(out) :: alarm
-      type(ESMF_Time), intent(in) :: StopTime
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Set an {\tt ESMF\_Alarm}'s stop time
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to set the stop time
-!     \item[StopTime]
-!          The {\tt ESMF\_Alarm}'s stop time 
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.  
-!     \end{description} 
-!  
-! !REQUIREMENTS: 
-!     TMG4.5.2, TMG4.7
-!EOP
-
-      call c_ESMC_AlarmSetStopTime(alarm, StopTime, rc)
-
-      end subroutine ESMF_AlarmSetStopTime
 
 !------------------------------------------------------------------------------
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.3 2003/05/07 20:12:15 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.4 2003/06/07 00:41:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,27 +30,27 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.3 2003/05/07 20:12:15 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.4 2003/06/07 00:41:59 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3
 
       ! temp variables
-      integer :: H, M
-      integer(ESMF_IKIND_I8) :: D, S
+      integer :: D, H, M, S
+      integer(ESMF_IKIND_I8) :: Dl, Sl
       double precision quotient, divisor, multiplier
 
       ! result code
       integer :: rc
 
       ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)
-      call ESMF_TimeIntervalInit(timeInterval1, D=int(1,kind=ESMF_IKIND_I8), &
-                                 S=int(1800,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval1, D=1, &
+                                S=1800, rc=rc)
 
       ! initialize time interval2 to 4 days, 5400 seconds (1.5 hours)
-      call ESMF_TimeIntervalInit(timeInterval2, D=int(4,kind=ESMF_IKIND_I8), &
-                                 S=int(5400,kind=ESMF_IKIND_I8), rc=rc)
+      call ESMF_TimeIntervalSet(timeInterval2, D=4, &
+                                S=5400, rc=rc)
 
       call ESMF_TimeIntervalGet(timeInterval1, D=D, H=H, M=M, rc=rc)
       print *, "Time Interval1 = ", D, " days, ", H, " hours, ", M, " minutes."

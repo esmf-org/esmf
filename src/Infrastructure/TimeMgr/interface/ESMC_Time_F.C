@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.14 2003/05/02 22:16:57 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.15 2003/06/07 00:42:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -25,7 +25,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Time} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_Time} class functions.
 //
 //EOP
 
@@ -33,41 +33,35 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_timeinit)(ESMC_Time *ptr, ESMF_IKIND_I8 *YR, int *MM,
-                                 int *DD, ESMF_IKIND_I8 *D,
-                                 int *H, int *M, ESMF_IKIND_I8 *S,
-                                 int *MS, int *US, int *NS,
-                                 double *d_, double *h_, double *m_,
-                                 double *s_, double *ms_, double *us_,
-                                 double *ns_, int *Sn, int *Sd,
-                                 ESMC_Calendar *cal, int *tz, int *status) {
-           *status = (ptr)->ESMC_TimeInit(YR, MM, DD, D, H, M, S, MS,
-                                          US, NS, d_, h_, m_, s_, ms_,
-                                          us_, ns_, Sn, Sd, cal, tz);
-       }
-
-       void FTN(c_esmc_timeget)(ESMC_Time *ptr, ESMF_IKIND_I8 *YR, int *MM,
-                                int *DD, ESMF_IKIND_I8 *D,
-                                int *H, int *M, ESMF_IKIND_I8 *S,
+       void FTN(c_esmc_timeget)(ESMC_Time *ptr,
+                                int *YR, ESMF_IKIND_I8 *YRl,
+                                int *MM, int *DD,
+                                int *D, ESMF_IKIND_I8 *Dl,
+                                int *H, int *M,
+                                int *S, ESMF_IKIND_I8 *Sl,
                                 int *MS, int *US, int *NS,
                                 double *d_, double *h_, double *m_,
                                 double *s_, double *ms_, double *us_,
                                 double *ns_, int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_TimeGet(YR, MM, DD, D, H, M, S, MS,
-                                         US, NS, d_, h_, m_, s_, ms_,
-                                         us_, ns_, Sn, Sd);
+           *status = (ptr)->ESMC_TimeGet(YR, YRl, MM, DD, D, Dl, H, M, S, Sl,
+                                         MS, US, NS, d_, h_, m_, s_,
+                                         ms_, us_, ns_, Sn, Sd);
        }
 
-       void FTN(c_esmc_timeset)(ESMC_Time *ptr, ESMF_IKIND_I8 *YR, int *MM,
-                                int *DD, ESMF_IKIND_I8 *D,
-                                int *H, int *M, ESMF_IKIND_I8 *S,
+       void FTN(c_esmc_timeset)(ESMC_Time *ptr,
+                                int *YR, ESMF_IKIND_I8 *YRl,
+                                int *MM, int *DD,
+                                int *D, ESMF_IKIND_I8 *Dl,
+                                int *H, int *M,
+                                int *S, ESMF_IKIND_I8 *Sl,
                                 int *MS, int *US, int *NS,
                                 double *d_, double *h_, double *m_,
                                 double *s_, double *ms_, double *us_,
-                                double *ns_, int *Sn, int *Sd, int *status) {
-           *status = (ptr)->ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS,
-                                         US, NS, d_, h_, m_, s_, ms_,
-                                         us_, ns_, Sn, Sd);
+                                double *ns_, int *Sn, int *Sd,
+                                ESMC_Calendar *cal, int *tz, int *status) {
+           *status = (ptr)->ESMC_TimeSet(YR, YRl, MM, DD, D, Dl, H, M, S, Sl,
+                                         MS, US, NS, d_, h_, m_, s_,
+                                         ms_, us_, ns_, Sn, Sd, cal, tz);
        }
 
        void FTN(c_esmc_timegetcalendarcopy)(ESMC_Time *ptr,

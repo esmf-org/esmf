@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.25 2003/05/02 22:10:25 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.26 2003/06/07 00:42:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.25 2003/05/02 22:10:25 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.26 2003/06/07 00:42:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -41,10 +41,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarInit - shallow class initializer 1
+// !IROUTINE:  ESMC_CalendarSet - calendar initializer
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarInit(
+      int ESMC_Calendar::ESMC_CalendarSet(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -129,7 +129,7 @@
 
         case ESMC_CAL_GENERIC:
             // user defined; need more info; user must call
-            //   InitGeneric() instead
+            //   SetGeneric() instead
             rc = ESMF_FAILURE;
             break;
 
@@ -140,14 +140,14 @@
     }
     return(rc);
 
-}  // end ESMC_CalendarInit
+}  // end ESMC_CalendarSet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarInitGeneric - shallow class initializer 1
+// !IROUTINE:  ESMC_CalendarSetGeneric - generic calendar initializer
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarInitGeneric(
+      int ESMC_Calendar::ESMC_CalendarSetGeneric(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -176,7 +176,7 @@
     this->DaysPerYear.Dd = 1;
     
     if (DaysPerMonth == 0) {
-      cout << "ESMC_Calendar::ESMC_CalendarInitGeneric():  DaysPerMonth "
+      cout << "ESMC_Calendar::ESMC_CalendarSetGeneric():  DaysPerMonth "
            << "pointer passed in is zero.";
       return(ESMF_FAILURE);
     }
@@ -195,7 +195,7 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_CalendarInitGeneric
+}  // end ESMC_CalendarSetGeneric
 
 //-------------------------------------------------------------------------
 //BOP
@@ -323,9 +323,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime *T,                 // in
-      ESMF_IKIND_I8 *YR, int *MM, int *DD,    // out
-      ESMF_IKIND_I8 *D, double *d_) const {   // out
+      const ESMC_BaseTime *T,                          // in
+      int *YR, ESMF_IKIND_I8 *YRl, int *MM, int *DD,   // out
+      int *D, ESMF_IKIND_I8 *Dl, double *d_) const {   // out
 //
 // !DESCRIPTION:
 //     Converts a core {\tt ESMC\_BaseTime} representation to a
@@ -345,6 +345,8 @@
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
+    int rc = ESMF_SUCCESS;
+
     switch (Type)
     {
         // convert Time => Gregorian Date
@@ -359,9 +361,19 @@
             ESMF_IKIND_I8 jdays = T->S / SecondsPerDay;
 
             if (D != ESMC_NULL_POINTER) {
-              *D = jdays;
+              if (jdays > INT_MIN && jdays <= INT_MAX) {
+                *D = (int) jdays;
+                // adjust for negative time (reverse integer division)
+                if (T->S % SecondsPerDay < 0) (*D)--;
+              } else {
+                // too large to fit in given int
+                rc = ESMF_FAILURE;
+              }
+            }
+            if (Dl != ESMC_NULL_POINTER) {
+              *Dl = jdays;
               // adjust for negative time (reverse integer division)
-              if (T->S % SecondsPerDay < 0) (*D)--;
+              if (T->S % SecondsPerDay < 0) (*Dl)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
               *d_ = (double) T->S / (double) SecondsPerDay;
@@ -369,22 +381,36 @@
 
             // convert Julian days to Gregorian date
             // Julian days (jdays) => Gregorian date (YR, MM, DD)
-            ESMF_IKIND_I8 templ = jdays + 68569;
-            ESMF_IKIND_I8 tempn = (4 * templ) / 146097;
-                          templ = templ - (146097 * tempn + 3) / 4;
-            ESMF_IKIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
-                          templ = templ - (1461 * tempi) / 4 + 31;
-            ESMF_IKIND_I8 tempj = (80 * templ) / 2447;
-            if (DD != ESMC_NULL_POINTER) {
-              *DD = templ - (2447 * tempj) / 80;
+            if (DD != ESMC_NULL_POINTER || MM != ESMC_NULL_POINTER ||
+                YR != ESMC_NULL_POINTER || YRl != ESMC_NULL_POINTER) {
+              ESMF_IKIND_I8 templ = jdays + 68569;
+              ESMF_IKIND_I8 tempn = (4 * templ) / 146097;
+                            templ = templ - (146097 * tempn + 3) / 4;
+              ESMF_IKIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
+                            templ = templ - (1461 * tempi) / 4 + 31;
+              ESMF_IKIND_I8 tempj = (80 * templ) / 2447;
+              if (DD != ESMC_NULL_POINTER) {
+                *DD = templ - (2447 * tempj) / 80;
+              }
+              templ = tempj / 11;
+              if (MM != ESMC_NULL_POINTER) {
+                *MM = tempj + 2 - (12 * templ);
+              }
+
+              ESMF_IKIND_I8 year = 100 * (tempn - 49) + tempi + templ;
+              if (YR != ESMC_NULL_POINTER) {
+                if (year >= INT_MIN && year <= INT_MAX) {
+                  *YR = (int) year;  // >= 32-bit
+                } else {
+                  // too large to fit in given int
+                  rc = ESMF_FAILURE;
+                }
+              }
+              if (YRl != ESMC_NULL_POINTER) {
+                *YRl = year;    // >= 64-bit
+              }
             }
-            templ = tempj / 11;
-            if (MM != ESMC_NULL_POINTER) {
-              *MM = tempj + 2 - (12 * templ);
-            }
-            if (YR != ESMC_NULL_POINTER) {
-              *YR = 100 * (tempn - 49) + tempi + templ;
-            }
+
             break;
         }
         // convert Time => No Leap Date
@@ -395,9 +421,20 @@
                                      // = (1/1/0000) - (11/24/-4713)
 
             if (YR != ESMC_NULL_POINTER) {
-              *YR = tmpS / SecondsPerYear;
+              ESMF_IKIND_I8 year = tmpS / SecondsPerYear;
+              if (year > INT_MIN && year <= INT_MAX) {
+                  *YR = (int) year;  // >= 32-bit
+                  // adjust for negative time (reverse integer division)
+                  if (tmpS % SecondsPerYear < 0) (*YR)--;
+              } else {
+                  // too large to fit in given int
+                  rc = ESMF_FAILURE;
+              }
+            }
+            if (YRl != ESMC_NULL_POINTER) {
+              *YRl = tmpS / SecondsPerYear;  // >= 64-bit
               // adjust for negative time (reverse integer division)
-              if (tmpS % SecondsPerYear < 0) (*YR)--;
+              if (tmpS % SecondsPerYear < 0) (*YRl)--;
             }
 
             int day = (tmpS % SecondsPerYear) / SecondsPerDay + 1;
@@ -417,9 +454,20 @@
 
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = tmpS / SecondsPerDay;
+              ESMF_IKIND_I8 day = tmpS / SecondsPerDay;
+              if (day > INT_MIN && day <= INT_MAX) {
+                *D = (int) day;   // >= 32-bit
+                // adjust for negative time (reverse integer division)
+                if (tmpS % SecondsPerDay < 0) (*D)--;
+              } else {
+                // too large to fit in given int
+                rc = ESMF_FAILURE;
+              }
+            }
+            if (Dl != ESMC_NULL_POINTER) {
+              *Dl = tmpS / SecondsPerDay;   // >= 64-bit
               // adjust for negative time (reverse integer division)
-              if (tmpS % SecondsPerDay < 0) (*D)--;
+              if (tmpS % SecondsPerDay < 0) (*Dl)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
               *d_ = (double) tmpS / (double) SecondsPerDay;
@@ -435,9 +483,20 @@
                                      // = (1/1/0000) - (11/24/-4713)
 
             if (YR != ESMC_NULL_POINTER) {
-              *YR = tmpS / SecondsPerYear;
+              ESMF_IKIND_I8 year = tmpS / SecondsPerYear;
+              if (year > INT_MIN && year <= INT_MAX) {
+                *YR = (int) year;
+                // adjust for negative time (reverse integer division)
+                if (tmpS % SecondsPerYear < 0) (*YR)--;
+              } else {
+                // too large to fit in given int
+                rc = ESMF_FAILURE;
+              }
+            }
+            if (YRl != ESMC_NULL_POINTER) {
+              *YRl = tmpS / SecondsPerYear;
               // adjust for negative time (reverse integer division)
-              if (tmpS % SecondsPerYear < 0) (*YR)--;
+              if (tmpS % SecondsPerYear < 0) (*YRl)--;
             }
 
             int dayOfYear = (tmpS % SecondsPerYear) / SecondsPerDay + 1;
@@ -453,9 +512,20 @@
 
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = tmpS / SecondsPerDay;
+              ESMF_IKIND_I8 day = tmpS / SecondsPerDay;
+              if (day > INT_MIN && day <= INT_MAX) {
+                *D = (int) day;   // >= 32-bit
+                // adjust for negative time (reverse integer division)
+                if (tmpS % SecondsPerDay < 0) (*D)--;
+              } else {
+                // too large to fit in given int
+                rc = ESMF_FAILURE;
+              }
+            }
+            if (Dl != ESMC_NULL_POINTER) {
+              *Dl = tmpS / SecondsPerDay;   // >= 64-bit
               // adjust for negative time (reverse integer division)
-              if (tmpS % SecondsPerDay < 0) (*D)--;
+              if (tmpS % SecondsPerDay < 0) (*Dl)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
               *d_ = (double) tmpS / (double) SecondsPerDay;
@@ -468,9 +538,20 @@
         {
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
-              *D = T->S / SecondsPerDay;
-              // adjust for negative time (reverse integer division)
-              if (T->S % SecondsPerDay < 0) (*D)--;
+              ESMF_IKIND_I8 day = T->S / SecondsPerDay;
+              if (day > INT_MIN && day <= INT_MAX) {
+                *D = (int) day;    // >= 32-bit
+                // adjust for negative time (reverse integer division)
+                if (T->S % SecondsPerDay < 0) (*D)--;
+              } else {
+                // too large to fit in given int
+                rc = ESMF_FAILURE;
+              }
+            }
+            if (Dl != ESMC_NULL_POINTER) {
+              *Dl = T->S / SecondsPerDay;  // >= 64-bit
+                // adjust for negative time (reverse integer division)
+                if (T->S % SecondsPerDay < 0) (*Dl)--;
             }
             if (d_ != ESMC_NULL_POINTER) {
               *d_ = (double) T->S / (double) SecondsPerDay;
@@ -481,7 +562,7 @@
             break;
     }
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
 }  // end ESMC_CalendarConvertToDate
 
@@ -654,8 +735,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Initializes a {\tt ESMC\_Calendar} with defaults via
-//      {\tt ESMC\_CalendarInit}
+//      Initializes a {\tt ESMC\_Calendar} with defaults
 //
 //EOP
 // !REQUIREMENTS: 
@@ -685,12 +765,12 @@
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInstant} to be of a specific type via
-//      {\tt ESMC\_CalendarInit}
+//      {\tt ESMC\_CalendarSet}
 //
 //EOP
 // !REQUIREMENTS: 
 
-    ESMC_CalendarInit(Type);
+    ESMC_CalendarSet(Type);
 
 }   // end ESMC_Calendar
 
@@ -713,13 +793,13 @@
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Time} to be of a custom user-defined type
-//      via {\tt ESMC\_CalendarInitGeneric}
+//      via {\tt ESMC\_CalendarSetGeneric}
 //
 //EOP
 // !REQUIREMENTS: 
 
-    ESMC_CalendarInitGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
-                             DaysPerYearDn, DaysPerYearDd);
+    ESMC_CalendarSetGeneric(DaysPerMonth,  SecondsPerDay, DaysPerYear,
+                            DaysPerYearDn, DaysPerYearDd);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------

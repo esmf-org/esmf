@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.6 2003/04/02 17:24:54 eschwab Exp $
+// $Id: ESMC_Fraction_F.C,v 1.7 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Fraction} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_Fraction} class functions.
 //
 //EOP
 
@@ -34,9 +34,9 @@ extern "C" {
 
 #if 0
        // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_fractioninit)(ESMC_Fraction *ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *status = (ptr)->ESMC_FractionInit(*arg1, *arg2, *arg3);
+       void FTN(c_esmc_fractionset)(ESMC_Fraction *ptr, int *arg1, int *arg2,
+                                                  int *arg3, int *status) {
+           *status = (ptr)->ESMC_FractionSet(*arg1, *arg2, *arg3);
        }
 
        void FTN(c_esmc_fractionget)(ESMC_Fraction *ptr, 

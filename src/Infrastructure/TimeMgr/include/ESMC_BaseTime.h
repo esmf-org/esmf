@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.14 2003/05/02 01:01:45 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.15 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 // the overloaded equals (=) operator.  E.g.  *obj1 = *obj2 which
 // can be called from a C wrapper function mapping F90 to C++
 //
-// TMG 1.5.1, 2.4.1, 3.1, 4.1: Each class has an Init() function,
+// TMG 1.5.1, 2.4.1, 3.1, 4.1: Each class has an Set() function,
 // which is used in lieu of a constructor since it can
 // return an error code.
 //
@@ -134,22 +134,21 @@ class ESMC_BaseTime {
 
   public:
 
-    // BaseTime is a shallow class, so only Init methods are needed
-    int ESMC_BaseTimeInit(ESMF_IKIND_I8 S, int Sn, int Sd);
-
     // Get/Set methods (primarily to support F90 interface)
     int ESMC_BaseTimeGet(int secondsPerDay,
-                         int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+                         int *H=0, int *M=0, int *S=0, ESMF_IKIND_I8 *Sl=0,
                          int *MS=0, int *US=0, int *NS=0,
                          double *h_=0, double *m_=0, double *s_=0,
                          double *ms_=0, double *us_=0, double *ns_=0,
                          int *Sn=0, int *Sd=0) const;
 
-    int ESMC_BaseTimeSet(int *H=0, int *M=0, ESMF_IKIND_I8 *S=0,
+    int ESMC_BaseTimeSet(int *H=0, int *M=0, int *S=0, ESMF_IKIND_I8 *Sl=0,
                          int *MS=0, int *US=0, int *NS=0,
                          double *h_=0, double *m_=0, double *s_=0,
                          double *ms_=0, double *us_=0, double *ns_=0,
                          int *Sn=0, int *Sd=0);
+
+    int ESMC_BaseTimeSet(ESMF_IKIND_I8 S, int Sn, int Sd);
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required

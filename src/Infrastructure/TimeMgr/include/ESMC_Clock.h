@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.12 2003/05/02 01:03:44 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.13 2003/06/07 00:41:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,31 +101,15 @@
 
   public:
 
-    // Clock is a shallow class, so only Init methods are needed
-    int ESMC_ClockInit(ESMC_TimeInterval *timeStep=0,
-                       ESMC_Time         *startTime=0,
-                       ESMC_Time         *stopTime=0,
-                       ESMC_Time         *refTime=0);
-                       // (TMG 3.1, 3.4.4)
-
     // Clock doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
 
-    int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
-    int ESMC_ClockGetAlarmList(ESMC_Alarm ***alarmList, int *NumAlarms) const;
-    int ESMC_ClockGetAlarmList(ESMC_Alarm **alarmList, int *NumAlarms) const;
-    int ESMC_ClockGetNumAlarms(int *numAlarms) const; // (TMG 4.3)
-
-    int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
-    // (see ESMC_Time::GetRealTime()
-
-    int ESMC_ClockAdvance(ESMC_Alarm *ringingList=0, int *NumRingingAlarms=0);
-    // TMG3.4.1  after increment, for each alarm,
-    //           calls ESMC_Alarm::CheckActive()
-
-    bool ESMC_ClockIsStopTime(int *rc) const;    // TMG3.5.6
-
     // accessor methods
+
+    int ESMC_ClockSet(ESMC_TimeInterval *timeStep=0,
+                      ESMC_Time         *startTime=0,
+                      ESMC_Time         *stopTime=0,
+                      ESMC_Time         *refTime=0);   // (TMG 3.1, 3.4.4)
 
     int ESMC_ClockGetAdvanceCount(ESMF_IKIND_I8 *advanceCount) const;// TMG3.5.1
 
@@ -146,6 +130,20 @@
                                                                     // TMG3.5.5
     int ESMC_ClockGetPrevSimTime(ESMC_TimeInterval *prevSimTime) const;
                                                                     // TMG3.5.5
+
+    int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
+    int ESMC_ClockGetAlarmList(ESMC_Alarm ***alarmList, int *NumAlarms) const;
+    int ESMC_ClockGetAlarmList(ESMC_Alarm **alarmList, int *NumAlarms) const;
+    int ESMC_ClockGetNumAlarms(int *numAlarms) const; // (TMG 4.3)
+
+    int ESMC_ClockSyncToWallClock(void); // TMG3.4.5
+    // (see ESMC_Time::GetRealTime()
+
+    int ESMC_ClockAdvance(ESMC_Alarm *ringingList=0, int *NumRingingAlarms=0);
+    // TMG3.4.1  after increment, for each alarm,
+    //           calls ESMC_Alarm::CheckActive()
+
+    bool ESMC_ClockIsStopTime(int *rc) const;    // TMG3.5.6
 
     // required methods inherited and overridden from the ESMC_Base class
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.21 2003/06/06 23:09:25 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.22 2003/06/07 00:42:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,6 +31,8 @@
 !
 ! Defines F90 wrapper entry points for corresponding
 ! C++ implementaion of class {\tt ESMC\_TimeInterval}
+!
+! See {\tt ../include/ESMC\_TimeInterval.h} for complete description
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -71,7 +73,6 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_TimeIntervalInit
       public ESMF_TimeIntervalGet
       public ESMF_TimeIntervalSet
       public ESMF_TimeIntervalGetString
@@ -132,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.21 2003/06/06 23:09:25 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.22 2003/06/07 00:42:00 eschwab Exp $'
 
 !==============================================================================
 !
@@ -314,106 +315,6 @@
 
 !==============================================================================
 !
-! This section includes the Init methods.
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeIntervalInit - Initialize via user-specified unit set
-
-! !INTERFACE:
-      subroutine ESMF_TimeIntervalInit(timeinterval, YY, MO, D, H, M, S, &
-                                       MS, US, NS, &
-                                       d_, h_, m_, s_, ms_, us_, ns_, &
-                                       Sn, Sd, rc)
-
-! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(out) :: timeinterval
-      integer(ESMF_IKIND_I8), intent(in), optional :: YY
-      integer(ESMF_IKIND_I8), intent(in), optional :: MO
-      integer(ESMF_IKIND_I8), intent(in), optional :: D
-      integer, intent(in), optional :: H
-      integer, intent(in), optional :: M
-      integer(ESMF_IKIND_I8), intent(in), optional :: S
-      integer, intent(in), optional :: MS
-      integer, intent(in), optional :: US
-      integer, intent(in), optional :: NS
-      double precision, intent(in), optional :: d_
-      double precision, intent(in), optional :: h_
-      double precision, intent(in), optional :: m_
-      double precision, intent(in), optional :: s_
-      double precision, intent(in), optional :: ms_
-      double precision, intent(in), optional :: us_
-      double precision, intent(in), optional :: ns_
-      integer, intent(in), optional :: Sn
-      integer, intent(in), optional :: Sd
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Initializes a {\tt ESMF\_TimeInterval} with set of user-specified units
-!     via F90 optional arguments
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeinterval]
-!          The object instance to initialize
-!     \item[{[YY]}]
-!          Integer number of interval years (64-bit)
-!     \item[{[MO]}]
-!          Integer number of interval months (64-bit)
-!     \item[{[D]}]
-!          Integer number of interval days (64-bit)
-!     \item[{[H]}]
-!          Integer hours
-!     \item[{[M]}]
-!          Integer minutes
-!     \item[{[S]}]
-!          Integer seconds (64-bit)
-!     \item[{[MS]}]
-!          Integer milliseconds
-!     \item[{[US]}]
-!          Integer microseconds
-!     \item[{[NS]}]
-!          Integer nanoseconds
-!     \item[{[d\_]}]
-!          Double precision days
-!     \item[{[h\_]}]
-!          Double precision hours
-!     \item[{[m\_]}]
-!          Double precision minutes
-!     \item[{[s\_]}]
-!          Double precision seconds
-!     \item[{[ms\_]}]
-!          Double precision milliseconds
-!     \item[{[us\_]}]
-!          Double precision microseconds
-!     \item[{[ns\_]}]
-!          Double precision nanoseconds
-!     \item[{[Sn]}]
-!          Integer fractional seconds - numerator
-!     \item[{[Sd]}]
-!          Integer fractional seconds - denominator
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMGn.n.n
-!EOP
-
-      ! use optional args for any subset
-      call c_ESMC_TimeIntervalInit(timeinterval, YY, MO, D, H, M, S, &
-                                   MS, US, NS, &
-                                   d_, h_, m_, s_, ms_, us_, ns_, &
-                                   Sn, Sd, rc)
-
-      end subroutine ESMF_TimeIntervalInit
-
-!------------------------------------------------------------------------------
-!
-! This section includes the TimeInterval Get and Set methods.
-!
-!------------------------------------------------------------------------------
-!
 ! Generic Get/Set routines which use F90 optional arguments
 !
 !------------------------------------------------------------------------------
@@ -421,18 +322,22 @@
 ! !IROUTINE: ESMF_TimeIntervalGet - Get value in user-specified units
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalGet(timeinterval, YY, MO, D, H, M, S, MS, &
-                                      US, NS, d_, h_, m_, s_, ms_, us_, ns_, &
-                                      Sn, Sd, rc)
+      subroutine ESMF_TimeIntervalGet(timeinterval, YY, YYl, MO, MOl, D, Dl, &
+                                      H, M, S, Sl, MS, US, NS, d_, h_, m_, s_, &
+                                      ms_, us_, ns_, Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeinterval
-      integer(ESMF_IKIND_I8), intent(out), optional :: YY
-      integer(ESMF_IKIND_I8), intent(out), optional :: MO
-      integer(ESMF_IKIND_I8), intent(out), optional :: D
+      integer, intent(out), optional :: YY
+      integer(ESMF_IKIND_I8), intent(out), optional :: YYl
+      integer, intent(out), optional :: MO
+      integer(ESMF_IKIND_I8), intent(out), optional :: MOl
+      integer, intent(out), optional :: D
+      integer(ESMF_IKIND_I8), intent(out), optional :: Dl
       integer, intent(out), optional :: H
       integer, intent(out), optional :: M
-      integer(ESMF_IKIND_I8), intent(out), optional :: S
+      integer, intent(out), optional :: S
+      integer(ESMF_IKIND_I8), intent(out), optional :: Sl
       integer, intent(out), optional :: MS
       integer, intent(out), optional :: US
       integer, intent(out), optional :: NS
@@ -448,25 +353,40 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the value of the {\tt ESMF\_TimeInterval} in units specified by the user
-!     via F90 optional arguments
+!     Get the value of the {\tt TimeInterval} in units specified by the user
+!     via F90 optional arguments.
+!
+!     Time manager represents and manipulates time internally with integers 
+!     to maintain precision.  Hence, user-specified floating point values are
+!     converted internally from integers.
+!
+!     See {\tt ../include/ESMC\_BaseTime.h} and
+!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !     
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to query
 !     \item[{[YY]}]
-!          Integer years (64-bit)
+!          Integer years (>= 32-bit)
+!     \item[{[YYl]}]
+!          Integer years (large, >= 64-bit)
 !     \item[{[MO]}]
-!          Integer months (64-bit)
+!          Integer months (>= 32-bit)
+!     \item[{[MOl]}]
+!          Integer months (large, >= 64-bit)
 !     \item[{[D]}]
-!          Integer days (64-bit)
+!          Integer days (>= 32-bit)
+!     \item[{[Dl]}]
+!          Integer days (large, >= 64-bit)
 !     \item[{[H]}]
 !          Integer hours
 !     \item[{[M]}]
 !          Integer minutes
 !     \item[{[S]}]
-!          Integer seconds (64-bit)
+!          Integer seconds (>= 32-bit)
+!     \item[{[Sl]}]
+!          Integer seconds (large, >= 64-bit)
 !     \item[{[MS]}]
 !          Integer milliseconds
 !     \item[{[US]}]
@@ -500,29 +420,34 @@
 !EOP
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalGet(timeinterval, YY, MO, D, H, M, S, MS, US, &
-                                  NS, d_, h_, m_, s_, ms_, us_, ns_, &
-                                  Sn, Sd, rc)
+      call c_ESMC_TimeIntervalGet(timeinterval, YY, YYl, MO, MOl, D, Dl, &
+                                  H, M, S, Sl, MS, US, NS, d_, h_, m_, s_, &
+                                  ms_, us_, ns_, Sn, Sd, rc)
     
       end subroutine ESMF_TimeIntervalGet
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Set value in user-specified units
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize via user-specified unit set
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalSet(timeinterval, YY, MO, D, H, M, S, MS, &
-                                      US, NS, d_, h_, m_, s_, ms_, us_, ns_, &
+      subroutine ESMF_TimeIntervalSet(timeinterval, YY, YYl, MO, MOl, D, Dl, &
+                                      H, M, S, Sl, MS, US, NS, &
+                                      d_, h_, m_, s_, ms_, us_, ns_, &
                                       Sn, Sd, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(out) :: timeinterval
-      integer(ESMF_IKIND_I8), intent(in), optional :: YY
-      integer(ESMF_IKIND_I8), intent(in), optional :: MO
-      integer(ESMF_IKIND_I8), intent(in), optional :: D
+      integer, intent(in), optional :: YY
+      integer(ESMF_IKIND_I8), intent(in), optional :: YYl
+      integer, intent(in), optional :: MO
+      integer(ESMF_IKIND_I8), intent(in), optional :: MOl
+      integer, intent(in), optional :: D
+      integer(ESMF_IKIND_I8), intent(in), optional :: Dl
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
-      integer(ESMF_IKIND_I8), intent(in), optional :: S
+      integer, intent(in), optional :: S
+      integer(ESMF_IKIND_I8), intent(in), optional :: Sl
       integer, intent(in), optional :: MS
       integer, intent(in), optional :: US
       integer, intent(in), optional :: NS
@@ -538,48 +463,63 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the value of the {\tt ESMF\_TimeInterval} in units specified by the user
-!     via F90 optional arguments
-!     
+!     Set the value of the {\tt ESMF\_TimeInterval} in units specified by
+!     the user via F90 optional arguments
+!
+!     Time manager represents and manipulates time internally with integers 
+!     to maintain precision.  Hence, user-specified floating point values are
+!     converted internally to integers.
+!
+!     See {\tt ../include/ESMC\_BaseTime.h} and
+!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
+!
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
-!          The object instance to query
+!          The object instance to initialize
 !     \item[{[YY]}]
-!          Integer years (64-bit)
+!          Integer number of interval years (>= 32-bit)
+!     \item[{[YYl]}]
+!          Integer number of interval years (large, >= 64-bit)
 !     \item[{[MO]}]
-!          Integer months (64-bit)
-!     \item[{D]}]
-!          Integer days (64-bit)
-!     \item[{H]}]
+!          Integer number of interval months (>= 32-bit)
+!     \item[{[MOl]}]
+!          Integer number of interval months (large, >= 64-bit)
+!     \item[{[D]}]
+!          Integer number of interval days (>= 32-bit)
+!     \item[{[Dl]}]
+!          Integer number of interval days (large, >= 64-bit)
+!     \item[{[H]}]
 !          Integer hours
-!     \item[{M]}]
+!     \item[{[M]}]
 !          Integer minutes
-!     \item[{S]}]
-!          Integer seconds (64-bit)
-!     \item[{MS]}]
+!     \item[{[S]}]
+!          Integer seconds (>= 32-bit)
+!     \item[{[Sl]}]
+!          Integer seconds (large, >= 64-bit)
+!     \item[{[MS]}]
 !          Integer milliseconds
-!     \item[{US]}]
+!     \item[{[US]}]
 !          Integer microseconds
-!     \item[{NS]}]
+!     \item[{[NS]}]
 !          Integer nanoseconds
-!     \item[{d\_]}]
+!     \item[{[d\_]}]
 !          Double precision days
-!     \item[{h\_]}]
+!     \item[{[h\_]}]
 !          Double precision hours
-!     \item[{m\_]}]
+!     \item[{[m\_]}]
 !          Double precision minutes
-!     \item[{s\_]}]
+!     \item[{[s\_]}]
 !          Double precision seconds
-!     \item[{ms\_]}]
+!     \item[{[ms\_]}]
 !          Double precision milliseconds
-!     \item[{us\_]}]
+!     \item[{[us\_]}]
 !          Double precision microseconds
-!     \item[{ns\_]}]
+!     \item[{[ns\_]}]
 !          Double precision nanoseconds
-!     \item[{Sn]}]
+!     \item[{[Sn]}]
 !          Integer fractional seconds - numerator
-!     \item[{Sd]}]
+!     \item[{[Sd]}]
 !          Integer fractional seconds - denominator
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -588,12 +528,13 @@
 ! !REQUIREMENTS:
 !     TMGn.n.n
 !EOP
-    
+
       ! use optional args for any subset
-       call c_ESMC_TimeIntervalSet(timeinterval, YY, MO, D, H, M, S, MS, US, &
-                                   NS, d_, h_, m_, s_, ms_, us_, ns_, &
-                                   Sn, Sd, rc)
-    
+      call c_ESMC_TimeIntervalSet(timeinterval, YY, YYl, MO, MOl, D, Dl, &
+                                  H, M, S, Sl, MS, US, NS, &
+                                  d_, h_, m_, s_, ms_, us_, ns_, &
+                                  Sn, Sd, rc)
+
       end subroutine ESMF_TimeIntervalSet
 
 !------------------------------------------------------------------------------

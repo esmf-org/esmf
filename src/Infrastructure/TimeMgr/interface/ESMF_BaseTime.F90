@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTime.F90,v 1.7 2003/04/25 21:10:50 eschwab Exp $
+! $Id: ESMF_BaseTime.F90,v 1.8 2003/06/07 00:42:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,6 +32,8 @@
 !
 ! This module serves only as the common Time definition inherited
 ! by {\tt ESMF\_TimeInterval} and {\tt ESMF\_Time}
+!
+! See {\tt ../include/ESMC\_BaseTime.h} for complete description
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -74,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BaseTime.F90,v 1.7 2003/04/25 21:10:50 eschwab Exp $'
+      '$Id: ESMF_BaseTime.F90,v 1.8 2003/06/07 00:42:00 eschwab Exp $'
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.27 2003/06/04 20:07:45 nscollins Exp $
+// $Id: ESMC_TimeInterval.C,v 1.28 2003/06/07 00:42:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.27 2003/06/04 20:07:45 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.28 2003/06/07 00:42:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -48,47 +48,205 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalInit - initializer for native C++ use
+// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalInit(
+      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
 //
 // !RETURN VALUE:
 //    int error return code
-// 
+//
 // !ARGUMENTS:
-      const char *timeList,    // in - initializer specifier string
-      ...) {                   // in - specifier values (variable args)
+      const char *TimeList,    // in  - time interval value specifier string
+      ...) const {             // out - specifier values (variable args)
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt TimeInterval} with values given in variable arg list.
+//      Gets a {\tt TimeInterval}'s values in user-specified format.
 //      Supports native C++ use.
 //
 //EOP
-// !REQUIREMENTS:
+// !REQUIREMENTS:  
 
     // TODO
     return(ESMF_SUCCESS);
 
- }  // end ESMC_TimeIntervalInit
+ }  // end ESMC_TimeIntervalGet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalInit - initializer to support F90 interface
+// !IROUTINE:  ESMC_TimeIntervalSet - Set a TimeInterval value
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalInit(
+      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 *YY,        // in - integer number of interval years
-      ESMF_IKIND_I8 *MO,        // in - integer number of interval months
-      ESMF_IKIND_I8 *D,         // in - integer number of interval days
+      const char *TimeList,    // in - time interval value specifier string
+      ...) {                   // in - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Sets a {\tt TimeInterval}'s values in user-specified values.
+//      Supports native C++ use.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeIntervalSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value; supports F90 interface
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *YY,                  // out - integer number of interval years
+                                //                           (>= 32-bit)
+      ESMF_IKIND_I8 *YYl,       // out - integer number of interval years
+                                //                           (large, >= 64-bit)
+      int *MO,                  // out - integer number of interval months
+                                //                           (>= 32-bit)
+      ESMF_IKIND_I8 *MOl,       // out - integer number of interval months
+                                //                           (large, >= 64-bit)
+      int *D,                   // out - integer number of interval days
+                                //                           (>= 32-bit)
+      ESMF_IKIND_I8 *Dl,        // out - integer number of interval days
+                                //                           (large, >= 64-bit)
+      int *H,                   // out - integer hours
+      int *M,                   // out - integer minutes
+      int *S,                   // out - integer seconds (>= 32-bit)
+      ESMF_IKIND_I8 *Sl,        // out - integer seconds (large, >= 64-bit)
+      int *MS,                  // out - integer milliseconds
+      int *US,                  // out - integer microseconds
+      int *NS,                  // out - integer nanoseconds
+      double *d_,               // out - floating point days
+      double *h_,               // out - floating point hours
+      double *m_,               // out - floating point minutes
+      double *s_,               // out - floating point seconds
+      double *ms_,              // out - floating point milliseconds
+      double *us_,              // out - floating point microseconds
+      double *ns_,              // out - floating point nanoseconds
+      int *Sn,                  // out - fractional seconds numerator
+      int *Sd) const {          // out - fractional seconds denominator
+//
+// !DESCRIPTION:
+//      Gets a {\tt TimeInterval}'s values in user-specified format.
+//      This version supports the F90 interface.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int rc = ESMF_SUCCESS, rc2;
+
+    // TODO: fractional, sub-seconds
+
+    // calendar interval
+
+    if (YY != ESMC_NULL_POINTER) {
+      if (this->YY >= INT_MIN && this->YY <= INT_MAX) {
+        *YY = (int) this->YY;  // >= 32-bit
+      } else {
+        // too large to fit in given int
+        rc = ESMF_FAILURE;
+      }
+    }
+    if (YYl != ESMC_NULL_POINTER) {
+      *YYl = this->YY;  // >= 64-bit
+    }
+
+    if (MO != ESMC_NULL_POINTER) {
+      if (this->MO >= INT_MIN && this->MO <= INT_MAX) {
+        *MO = (int) this->MO;  // >= 32-bit
+      } else {
+        // too large to fit in given int
+        rc = ESMF_FAILURE;
+      }
+    }
+    if (MOl != ESMC_NULL_POINTER) {
+      *MOl = this->MO;   // >= 64-bit
+    }
+
+      // TODO: use when Calendar Intervals implemented
+//    if (D != ESMC_NULL_POINTER) {
+//      if (this->D >= INT_MIN && this->D <= INT_MAX) {
+//        *D = (int) this->D;  // >= 32-bit
+//      } else {
+//        // too large to fit in given int
+//        rc = ESMF_FAILURE;
+//      }
+//    }
+//    if (Dl != ESMC_NULL_POINTER) {
+//      *Dl = this->D;  // >= 64-bit
+//    }
+
+    // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
+    // get number of seconds in a day
+    int secPerDay = SECONDS_PER_DAY;
+//    if (Calendar != ESMC_NULL_POINTER) {
+//      secPerDay = Calendar->SecondsPerDay;
+//    }
+
+    if (D != ESMC_NULL_POINTER) {
+      ESMF_IKIND_I8 days = this->S / secPerDay;
+      if (days >= INT_MIN && days <= INT_MAX) {
+        *D = days;
+      } else {
+        // to large to fit in given int
+        rc = ESMF_FAILURE;
+      }
+    }
+    if (Dl != ESMC_NULL_POINTER) {
+      *Dl = this->S / secPerDay;
+    }
+    if (d_ != ESMC_NULL_POINTER) {
+      *d_ = (double) this->S / (double) secPerDay;
+    }
+
+    // use base class to get sub-day values
+    rc2 = ESMC_BaseTimeGet(secPerDay, H, M, S, Sl, MS, US, NS,
+                           h_, m_, s_, ms_, us_, ns_, Sn, Sd);
+
+    return((rc == ESMF_SUCCESS && rc2 == ESMF_SUCCESS) ? ESMF_SUCCESS :
+                                                         ESMF_FAILURE);
+
+ }  // end ESMC_TimeIntervalGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeIntervalSet - initializer to support F90 interface
+//
+// !INTERFACE:
+      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *YY,                  // in - integer number of interval years
+                                //                           (>= 32-bit)
+      ESMF_IKIND_I8 *YYl,       // in - integer number of interval years
+                                //                           (large, >= 64-bit)
+      int *MO,                  // in - integer number of interval months
+                                //                           (>= 32-bit)
+      ESMF_IKIND_I8 *MOl,       // in - integer number of interval months
+                                //                           (large, >= 64-bit)
+      int *D,                   // in - integer number of interval days
+                                //                           (>= 32-bit)
+      ESMF_IKIND_I8 *Dl,        // in - integer number of interval days
+                                //                           (large, >= 64-bit)
       int *H,                   // in - integer hours
       int *M,                   // in - integer minutes
-      ESMF_IKIND_I8 *S,         // in - integer seconds 
+      int *S,                   // in - integer seconds (>= 32-bit)
+      ESMF_IKIND_I8 *Sl,        // in - integer seconds (large, >= 64-bit)
       int *MS,                  // in - integer milliseconds
       int *US,                  // in - integer microseconds
       int *NS,                  // in - integer nanoseconds
@@ -122,21 +280,54 @@
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    if (ESMC_TimeIntervalSet(YY, MO, D, H, M, S, MS, US, NS,
-                       d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd) != ESMF_SUCCESS)
-      return(ESMF_FAILURE);
+    // calendar interval
+    if (YY != ESMC_NULL_POINTER) {
+      this->YY = *YY;  // >= 32-bit
+    } else if (YYl != ESMC_NULL_POINTER) {
+      this->YY = *YYl; // >= 64-bit
+    }
+    if (MO != ESMC_NULL_POINTER) {
+      this->MO = *MO;  // >= 32-bit
+    } else if (MOl != ESMC_NULL_POINTER) {
+      this->MO = *MOl; // >= 64-bit
+    }
+    if (D != ESMC_NULL_POINTER) {
+      this->D = *D;  // >= 32-bit
+    } else if (Dl != ESMC_NULL_POINTER) {
+      this->D = *Dl; // >= 64-bit
+    }
+
+    // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
+    // get number of seconds in a day
+    int secPerDay = SECONDS_PER_DAY;
+//    if (Calendar != ESMC_NULL_POINTER) {
+//      secPerDay = Calendar->SecondsPerDay;
+//    }
+
+    if (D != ESMC_NULL_POINTER) {
+      this->S = *D * secPerDay;  // >= 32-bit
+    } else if (Dl != ESMC_NULL_POINTER) {
+      this->S = *Dl * secPerDay; // >= 64-bit
+    }
+    if (d_ != ESMC_NULL_POINTER) {
+      this->S = (ESMF_IKIND_I8) (*d_ * secPerDay);
+    }
+
+    // use base class set for sub-day values
+    ESMC_BaseTimeSet(H, M, S, Sl, MS, US, NS, h_, m_, s_,
+                     ms_, us_, ns_, Sn, Sd);
 
     return(ESMC_TimeIntervalValidate());
 
- }  // end ESMC_TimeIntervalInit
+ }  // end ESMC_TimeIntervalSet
 
 #if 0
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeIntervalInit - shallow class initializer 1
+// !IROUTINE:  ESMC_TimeIntervalSet - shallow class initializer 1
 //
 // !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalInit(
+      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -155,8 +346,8 @@
 //EOP
 // !REQUIREMENTS:
 
-    // use base class Init()
-    if (ESMC_BaseTime::ESMC_BaseTimeInit(S, Sn, Sd) == ESMF_SUCCESS)
+    // use base class Set()
+    if (ESMC_BaseTime::ESMC_BaseTimeSet(S, Sn, Sd) == ESMF_SUCCESS)
     {
       this->YY = YY;
       this->MO = MO;
@@ -166,206 +357,8 @@
     }
     else return(ESMF_FAILURE);
 
-}  // end ESMC_TimeIntervalInit
+}  // end ESMC_TimeIntervalSet
 #endif
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value
-//
-// !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const char *TimeList,    // in  - time interval value specifier string
-      ...) const {             // out - specifier values (variable args)
-//
-// !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s values in user-specified format.
-//      This version supports native C++ use.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO
-    return(ESMF_SUCCESS);
-
- }  // end ESMC_TimeIntervalGet
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeIntervalSet - Set a TimeInterval value
-//
-// !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const char *TimeList,    // in - time interval value specifier string
-      ...) {                   // in - specifier values (variable args)
-//
-// !DESCRIPTION:
-//      Sets a {\tt TimeInterval}'s values in user-specified values.
-//      This version supports native C++ use.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO
-    return(ESMF_SUCCESS);
-
- }  // end ESMC_TimeIntervalSet
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeIntervalGet - Get a TimeInterval value; supports F90 interface
-//
-// !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalGet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMF_IKIND_I8 *YY,        // out - integer number of interval years
-      ESMF_IKIND_I8 *MO,        // out - integer number of interval months
-      ESMF_IKIND_I8 *D,         // out - integer number of interval days
-      int *H,                   // out - integer hours
-      int *M,                   // out - integer minutes
-      ESMF_IKIND_I8 *S,         // out - integer seconds 
-      int *MS,                  // out - integer milliseconds
-      int *US,                  // out - integer microseconds
-      int *NS,                  // out - integer nanoseconds
-      double *d_,               // out - floating point days
-      double *h_,               // out - floating point hours
-      double *m_,               // out - floating point minutes
-      double *s_,               // out - floating point seconds
-      double *ms_,              // out - floating point milliseconds
-      double *us_,              // out - floating point microseconds
-      double *ns_,              // out - floating point nanoseconds
-      int *Sn,                  // out - fractional seconds numerator
-      int *Sd) const {          // out - fractional seconds denominator
-//
-// !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s values in user-specified format.
-//      This version supports the F90 interface.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO: fractional, sub-seconds
-
-    // calendar interval
-    if (YY != ESMC_NULL_POINTER) {
-      *YY = this->YY;
-    }
-    if (MO != ESMC_NULL_POINTER) {
-      *MO = this->MO;
-    }
-      // TODO: use when Calendar Intervals implemented
-//    if (D != ESMC_NULL_POINTER) {
-//      *D = this->D;
-//    }
-
-    // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
-    // get number of seconds in a day
-    int secPerDay = SECONDS_PER_DAY;
-//    if (Calendar != ESMC_NULL_POINTER) {
-//      secPerDay = Calendar->SecondsPerDay;
-//    }
-
-    if (D != ESMC_NULL_POINTER) {
-      *D = this->S / secPerDay;
-    }
-    if (d_ != ESMC_NULL_POINTER) {
-      *d_ = (double) this->S / (double) secPerDay;
-    }
-
-    // use base class to get sub-day values
-    return(ESMC_BaseTimeGet(secPerDay, H, M, S, MS, US, NS,
-                            h_, m_, s_, ms_, us_, ns_, Sn, Sd));
-
- }  // end ESMC_TimeIntervalGet
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_TimeIntervalSet - Set a TimeInterval value; supports F90 interface
-//
-// !INTERFACE:
-      int ESMC_TimeInterval::ESMC_TimeIntervalSet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMF_IKIND_I8 *YY,        // in - integer number of interval years
-      ESMF_IKIND_I8 *MO,        // in - integer number of interval months
-      ESMF_IKIND_I8 *D,         // in - integer number of interval days
-      int *H,                   // in - integer hours
-      int *M,                   // in - integer minutes
-      ESMF_IKIND_I8 *S,         // in - integer seconds 
-      int *MS,                  // in - integer milliseconds
-      int *US,                  // in - integer microseconds
-      int *NS,                  // in - integer nanoseconds
-      double *d_,               // in - floating point days
-      double *h_,               // in - floating point hours
-      double *m_,               // in - floating point minutes
-      double *s_,               // in - floating point seconds
-      double *ms_,              // in - floating point milliseconds
-      double *us_,              // in - floating point microseconds
-      double *ns_,              // in - floating point nanoseconds
-      int *Sn,                  // in - fractional seconds numerator
-      int *Sd) {                // in - fractional seconds denominator
-//
-// !DESCRIPTION:
-//      Sets a {\tt TimeInterval}'s values in user-specified format.
-//      This version supports the F90 interface.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO: validate inputs (individual and combos), set basetime values
-    //       e.g. integer and float specifiers are mutually exclusive
-
-    // TODO: fractional, sub-seconds
-
-    // TODO: share code with ESMC_TimeIntervalInit ?
-
-    // calendar interval
-    if (YY != ESMC_NULL_POINTER) {
-      this->YY = *YY;
-    }
-    if (MO != ESMC_NULL_POINTER) {
-      this->MO = *MO;
-    }
-    if (D != ESMC_NULL_POINTER) {
-      this->D = *D;
-    }
-
-    // TODO: use Calendar-defined SecondsPerDay; for now assume 86400
-    // get number of seconds in a day
-    int secPerDay = SECONDS_PER_DAY;
-//    if (Calendar != ESMC_NULL_POINTER) {
-//      secPerDay = Calendar->SecondsPerDay;
-//    }
-
-    if (D != ESMC_NULL_POINTER) {
-      this->S = *D * secPerDay;
-    }
-    if (d_ != ESMC_NULL_POINTER) {
-      this->S = (ESMF_IKIND_I8) (*d_ * secPerDay);
-    }
-
-    // use base class set for sub-day values
-    return(ESMC_BaseTimeSet(H, M, S, MS, US, NS,
-                            h_, m_, s_, ms_, us_, ns_, Sn, Sd));
-
- }  // end ESMC_TimeIntervalSet
 
 //-------------------------------------------------------------------------
 //BOP
@@ -389,17 +382,20 @@
     // validate input
     if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
 
-    ESMF_IKIND_I8 D, S;
+    ESMF_IKIND_I8 Dl, Sl;
     int H, M;
     // TODO: use native C++ Get, not F90 entry point, when ready
-    ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER, &D, &H, &M, &S);
-    //ESMC_TimeIntervalGet(&YY, &MM, &D, &H, &M, &S); // TODO: when calendar
+    ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                         ESMC_NULL_POINTER, &Dl, &H, &M,
+                         ESMC_NULL_POINTER, &Sl);
+    //ESMC_TimeIntervalGet(&YYl, &MM, &Dl, &H, &M, &Sl); // TODO: when calendar
                                                       //  intervals implemented
 
     // ISO 8601 format PyYmMdDThHmMsS
-    sprintf(timeString, "P%lldDT%dH%dM%lldS\0", D, H, M, S);
+    sprintf(timeString, "P%lldDT%dH%dM%lldS\0", Dl, H, M, Sl);
     //sprintf(timeString, "P%lldY%dM%lldDT%dH%dM%lldS\0", // TODO: when calendar
-    //        YY, MO, D, H, M, S);                    //  intervals implemented
+    //        YYl, MOl, Dl, H, M, Sl);                //  intervals implemented
 
     return(ESMF_SUCCESS);
 
@@ -1026,8 +1022,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Initializes an {\tt ESMC\_TimeInterval} with defaults via
-//      {\tt ESMC\_BaseTime} base class
+//      Initializes an {\tt ESMC\_TimeInterval} with defaults
 //
 //EOP
 // !REQUIREMENTS:

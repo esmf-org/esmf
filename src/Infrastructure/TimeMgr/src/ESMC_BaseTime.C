@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.20 2003/05/02 22:10:02 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.21 2003/06/07 00:42:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.20 2003/05/02 22:10:02 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.21 2003/06/07 00:42:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -51,10 +51,157 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeInit - shallow class initializer 1
+// !IROUTINE:  ESMC_BaseTimeGet - get sub-day units of a basetime
 //
 // !INTERFACE:
-      int ESMC_BaseTime::ESMC_BaseTimeInit(
+      int ESMC_BaseTime::ESMC_BaseTimeGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int secondsPerDay,        // in  - seconds per day
+      int *H,                   // out - integer hours
+      int *M,                   // out - integer minutes
+      int *S,                   // out - integer seconds (>= 32-bit)
+      ESMF_IKIND_I8 *Sl,        // out - integer seconds (large, >= 64-bit)
+      int *MS,                  // out - integer milliseconds
+      int *US,                  // out - integer microseconds
+      int *NS,                  // out - integer nanoseconds
+      double *h_,               // out - floating point hours
+      double *m_,               // out - floating point minutes
+      double *s_,               // out - floating point seconds
+      double *ms_,              // out - floating point milliseconds
+      double *us_,              // out - floating point microseconds
+      double *ns_,              // out - floating point nanoseconds
+      int *Sn,                  // out - fractional seconds numerator
+      int *Sd) const {          // out - fractional seconds denominator
+
+//
+// !DESCRIPTION:
+//      Get sub-day (non-calendar dependent) values of a {\tt BaseTime}
+//      converted to user units.  Primarily to support F90 interface
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int rc = ESMF_SUCCESS;
+
+    // TODO: fractional seconds
+
+    // for sub-day units, start with number of seconds into the date
+    int remainder = this->S % secondsPerDay;
+
+    if (H != ESMC_NULL_POINTER) {
+      *H = remainder / SECONDS_PER_HOUR;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (M != ESMC_NULL_POINTER) {
+      *M = remainder / SECONDS_PER_MINUTE;
+      remainder %= SECONDS_PER_MINUTE;
+    }
+    if (S != ESMC_NULL_POINTER) {
+      *S = remainder;    // >= 32 bit
+    }
+    if (Sl != ESMC_NULL_POINTER) {
+      *Sl = remainder;   // >= 64 bit
+    }
+
+    //
+    // floating point units
+    //
+
+    // for sub-day units, start with number of seconds into the date
+    remainder = this->S % secondsPerDay;
+
+    if (h_ != ESMC_NULL_POINTER) {
+      *h_ = (double) remainder / (double) SECONDS_PER_HOUR;
+      remainder %= SECONDS_PER_HOUR;
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      *m_ = (double) remainder / (double) SECONDS_PER_MINUTE;
+      remainder %= SECONDS_PER_MINUTE;
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      *s_ = (double) remainder;
+    }
+
+    return(rc);
+
+}  // end ESMC_BaseTimeGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet - set sub-day values of a basetime
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *H,                   // out - integer hours
+      int *M,                   // out - integer minutes
+      int *S,                   // out - integer seconds (>= 32 bit)
+      ESMF_IKIND_I8 *Sl,        // out - integer seconds (large, >= 64 bit)
+      int *MS,                  // out - integer milliseconds
+      int *US,                  // out - integer microseconds
+      int *NS,                  // out - integer nanoseconds
+      double *h_,               // out - floating point hours
+      double *m_,               // out - floating point minutes
+      double *s_,               // out - floating point seconds
+      double *ms_,              // out - floating point milliseconds
+      double *us_,              // out - floating point microseconds
+      double *ns_,              // out - floating point nanoseconds
+      int *Sn,                  // out - fractional seconds numerator
+      int *Sd) {                // out - fractional seconds denominator
+//
+// !DESCRIPTION:
+//      Sets sub-day (non-calendar dependent) values of a {\tt BaseTime}.
+//      Primarily to support F90 interface.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: fractional seconds
+
+    if (H != ESMC_NULL_POINTER) {
+      this->S += *H * SECONDS_PER_HOUR;
+    }
+    if (M != ESMC_NULL_POINTER) {
+      this->S += *M * SECONDS_PER_MINUTE;
+    }
+    if (S != ESMC_NULL_POINTER) {
+      this->S += *S;    // >= 32-bit
+    } else if (Sl != ESMC_NULL_POINTER) {
+      this->S += *Sl;   // >= 64-bit
+    }
+
+    //
+    // floating point units
+    //
+
+    if (h_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
+    }
+    if (m_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
+    }
+    if (s_ != ESMC_NULL_POINTER) {
+      this->S += (ESMF_IKIND_I8) *s_;
+    }
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet - direct core value initializer
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -89,144 +236,6 @@
         return(ESMF_SUCCESS);
     }
     else return(ESMF_FAILURE);
-
-}  // end ESMC_BaseTimeInit
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTimeGet - get sub-day units of a basetime
-//
-// !INTERFACE:
-      int ESMC_BaseTime::ESMC_BaseTimeGet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int secondsPerDay,        // in  - seconds per day
-      int *H,                   // out - integer hours
-      int *M,                   // out - integer minutes
-      ESMF_IKIND_I8 *S,         // out - integer seconds
-      int *MS,                  // out - integer milliseconds
-      int *US,                  // out - integer microseconds
-      int *NS,                  // out - integer nanoseconds
-      double *h_,               // out - floating point hours
-      double *m_,               // out - floating point minutes
-      double *s_,               // out - floating point seconds
-      double *ms_,              // out - floating point milliseconds
-      double *us_,              // out - floating point microseconds
-      double *ns_,              // out - floating point nanoseconds
-      int *Sn,                  // out - fractional seconds numerator
-      int *Sd) const {          // out - fractional seconds denominator
-
-//
-// !DESCRIPTION:
-//      Get sub-day (non-calendar dependent) values of a {\tt BaseTime}
-//      converted to user units.  Primarily to support F90 interface
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO: fractional seconds
-
-    // for sub-day units, start with number of seconds into the date
-    ESMF_IKIND_I8 remainder = this->S % secondsPerDay;
-
-    if (H != ESMC_NULL_POINTER) {
-      *H = remainder / SECONDS_PER_HOUR;
-      remainder %= SECONDS_PER_HOUR;
-    }
-    if (M != ESMC_NULL_POINTER) {
-      *M = remainder / SECONDS_PER_MINUTE;
-      remainder %= SECONDS_PER_MINUTE;
-    }
-    if (S != ESMC_NULL_POINTER) {
-      *S = remainder;
-    }
-
-    //
-    // floating point units
-    //
-
-    // for sub-day units, start with number of seconds into the date
-    remainder = this->S % secondsPerDay;
-
-    if (h_ != ESMC_NULL_POINTER) {
-      *h_ = (double) remainder / (double) SECONDS_PER_HOUR;
-      remainder %= SECONDS_PER_HOUR;
-    }
-    if (m_ != ESMC_NULL_POINTER) {
-      *m_ = (double) remainder / (double) SECONDS_PER_MINUTE;
-      remainder %= SECONDS_PER_MINUTE;
-    }
-    if (s_ != ESMC_NULL_POINTER) {
-      *s_ = (double) remainder;
-    }
-
-    return(ESMF_SUCCESS);
-
-}  // end ESMC_BaseTimeGet
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BaseTimeSet - set sub-day values of a basetime
-//
-// !INTERFACE:
-      int ESMC_BaseTime::ESMC_BaseTimeSet(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int *H,                   // out - integer hours
-      int *M,                   // out - integer minutes
-      ESMF_IKIND_I8 *S,         // out - integer seconds
-      int *MS,                  // out - integer milliseconds
-      int *US,                  // out - integer microseconds
-      int *NS,                  // out - integer nanoseconds
-      double *h_,               // out - floating point hours
-      double *m_,               // out - floating point minutes
-      double *s_,               // out - floating point seconds
-      double *ms_,              // out - floating point milliseconds
-      double *us_,              // out - floating point microseconds
-      double *ns_,              // out - floating point nanoseconds
-      int *Sn,                  // out - fractional seconds numerator
-      int *Sd) {                // out - fractional seconds denominator
-//
-// !DESCRIPTION:
-//      Sets sub-day (non-calendar dependent) values of a {\tt BaseTime}.
-//      Primarily to support F90 interface.
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // TODO: fractional seconds
-
-    if (H != ESMC_NULL_POINTER) {
-      this->S += *H * SECONDS_PER_HOUR;
-    }
-    if (M != ESMC_NULL_POINTER) {
-      this->S += *M * SECONDS_PER_MINUTE;
-    }
-    if (S != ESMC_NULL_POINTER) {
-      this->S += *S;
-    }
-
-    //
-    // floating point units
-    //
-
-    if (h_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) (*h_ * SECONDS_PER_HOUR);
-    }
-    if (m_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) (*m_ * SECONDS_PER_MINUTE);
-    }
-    if (s_ != ESMC_NULL_POINTER) {
-      this->S += (ESMF_IKIND_I8) *s_;
-    }
-
-    return(ESMF_SUCCESS);
 
 }  // end ESMC_BaseTimeSet
 
@@ -406,7 +415,7 @@
     // fractional part addition -- LCD (assume same denominator for now) ??
     sum.Sn += baseTime.Sn;
 
-    // normalize (share logic with ESMC_BaseTimeInit() ?? )
+    // normalize (share logic with ESMC_BaseTimeSet() ?? )
     int w;
     if (labs((w = sum.Sn/sum.Sd)) >= 1)
     {
@@ -486,7 +495,7 @@
     // fractional part addition -- LCD (assume same denominator for now) ??
     Sn += baseTime.Sn;
 
-    // normalize (share logic with ESMC_BaseTimeInit() ?? )
+    // normalize (share logic with ESMC_BaseTimeSet() ?? )
     int w;
     if (labs((w = Sn/Sd)) >= 1)
     {
@@ -704,8 +713,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Initializes a {\tt ESMC\_BaseTime} with defaults via
-//      {\tt ESMC\_BaseTimeInit}
+//      Initializes a {\tt ESMC\_BaseTime} with defaults
 //
 //EOP
 // !REQUIREMENTS:  
@@ -732,7 +740,7 @@
       int Sd) {           // in - fractional seconds, denominator
 //
 // !DESCRIPTION:
-//      Initializes a {\tt ESMC\_BaseTime} via {\tt ESMC\_BaseTimeInit}
+//      Initializes a {\tt ESMC\_BaseTime}
 //
 //EOP
 // !REQUIREMENTS:  

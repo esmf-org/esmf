@@ -1,4 +1,4 @@
-// $Id: ESMC_ClockUTest.C,v 1.3 2003/04/22 16:47:57 svasquez Exp $
+// $Id: ESMC_ClockUTest.C,v 1.4 2003/06/07 00:42:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.3 2003/04/22 16:47:57 svasquez Exp $";
+ static const char *const version = "$Id: ESMC_ClockUTest.C,v 1.4 2003/06/07 00:42:00 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -85,8 +85,8 @@
 
    // test initialization of members of statically allocated ESMC_Clock
    //   may want to read back values via Get methods for comparison
-   rc = clock_ptr->ESMC_ClockInit(args);
-   sprintf(name, "ESMC_ClockInit"); 
+   rc = clock_ptr->ESMC_ClockSet(args);
+   sprintf(name, "ESMC_ClockSet"); 
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
               name, failMsg, &result, ESMF_SRCLINE);
