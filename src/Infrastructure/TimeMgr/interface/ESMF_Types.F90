@@ -1,4 +1,29 @@
-! $Id: ESMF_Types.F90,v 1.1 2002/10/07 20:23:35 eschwab Exp $
+! $Id: ESMF_Types.F90,v 1.2 2002/10/28 18:16:13 svasquez Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+! ESMF Types Module
+!
+! (all lines below between the !BOP and !EOP markers will be included in
+!  the automated document processing.)
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! put any constants or macros which apply to the whole component in this
+!  include file.  anything public or esmf-wide should be up higher at
+!  the top level include files.
+
+#include <ESMF_TimeMgr.h>
+
+!------------------------------------------------------------------------------
+! module definition
+
       module ESMF_TypesMod
 !===============================================================================
 !BOP
@@ -7,6 +32,8 @@
 !
 ! !USES:
 !
+!------------------------------------------------------------------------------
+
 ! !PUBLIC TYPES:
         implicit none
 
