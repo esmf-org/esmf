@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.22 2003/10/22 01:06:28 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.23 2003/10/22 02:29:16 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -240,19 +240,18 @@
     // Note: though seemingly redundant with the friend declarations within
     // the class definition above, the following declarations are necessary
     // to appease some compilers (most notably IBM), as well as ANSI C++. 
+    // These also establish defaults to match F90 optional args.
 
     // friend function to allocate and initialize clock from heap
-    ESMC_Clock *ESMC_ClockCreate(int, const char*, ESMC_TimeInterval*,
-                          ESMC_Time*, ESMC_Time*, ESMC_Time*, int*);
+    ESMC_Clock *ESMC_ClockCreate(int                nameLen,
+                                 const char*        name=0,
+                                 ESMC_TimeInterval* timeStep=0,
+                                 ESMC_Time*         startTime=0,
+                                 ESMC_Time*         stopTime=0,
+                                 ESMC_Time*         refTime=0,
+                                 int*               rc=0);
 
     // friend function to de-allocate clock
-    int ESMC_ClockDestroy(ESMC_Clock *);
-
-    // friend to allocate and initialize alarm from heap
-    //   (needs access to clock current time to initialize alarm ring time)
-    ESMC_Alarm *ESMC_AlarmCreate(int, const char*, ESMC_Clock*, 
-                           ESMC_Time*, ESMC_TimeInterval*, ESMC_Time*, 
-                           ESMC_TimeInterval*, int*, ESMC_Time*, bool*,
-                           bool*, int*);
+    int ESMC_ClockDestroy(ESMC_Clock *clock);
 
 #endif // ESMC_CLOCK_H
