@@ -1,4 +1,4 @@
-% $Id: Regrid_reqdoc.ctex,v 1.1 2002/08/28 23:38:44 eschwab Exp $
+% $Id: Regrid_reqdoc.ctex,v 1.2 2003/07/24 18:17:04 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -113,12 +113,13 @@
 %\section*{Glossary}
 %\input{Regrid_glos}
 %\addcontentsline{toc}{section}{Glossary}
+#endif
 
 %\section{References}
-%\bibliography{Regrid} 
-%\bibliographystyle{plain}
-%\addcontentsline{toc}{section}{References}
-#endif
+\bibliography{Regrid} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{References}
+endif
 
 #ifdef STANDALONE
 \end{document}
