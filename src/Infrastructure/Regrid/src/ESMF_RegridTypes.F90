@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.67 2004/12/07 23:34:40 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.68 2004/12/20 21:15:35 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -257,7 +257,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.67 2004/12/07 23:34:40 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.68 2004/12/20 21:15:35 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -660,13 +660,15 @@
                                      reorder=.false., rc=localrc)
       endif
 
-      if (hasDstDataUse) then
-        call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
-        allocate(dstMin(gridrank), &
-                 dstMax(gridrank), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
-                                       ESMF_CONTEXT, rc)) return
+      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
+      allocate(dstMin(gridrank), &
+               dstMax(gridrank), stat=localrc)
+      dstMin =  9876543.0d0
+      dstMax = -9876543.0d0
+      if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
+      if (hasDstDataUse) then
         call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstHorzRelLoc, &
                                   rc=localrc)
         call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstHorzRelLoc, &
@@ -691,20 +693,20 @@
                                        ESMF_CONTEXT, rc)) return
       endif
 
-      if (hasDstDataUse) then
-        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, dstMin, dstMax, &
-                                       recvDomainList, &
-                                       total=totalUse, rc=localrc)
-                           !            srcHorzRelLoc, dstHorzRelLoc, &
-                           !            total=totalUse, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-        deallocate(dstMin, &
-                   dstMax, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                       ESMF_CONTEXT, rc)) return
-      endif
+      call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, parentVM, &
+                                     dstMin, dstMax, &
+                                     recvDomainList, hasDstDataUse, hasSrcData, &
+                                     total=totalUse, rc=localrc)
+                         !            srcHorzRelLoc, dstHorzRelLoc, &
+                         !            total=totalUse, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      deallocate(dstMin, &
+                 dstMax, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
       ! TODO: move this to its own subroutine?
@@ -760,12 +762,6 @@
 
       ! recvDomainList next
       if (hasDstDataUse .AND. present(dstArray)) then
-        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
-        allocate(     allAI(nDEs,dimCount), &
-                 allLocalAI(nDEs,dimCount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
-                                       ESMF_CONTEXT, rc)) return
-
         if (totalUse) then
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                            totalindex=allAI, rc=localrc)
@@ -773,6 +769,13 @@
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                            compindex=allAI, rc=localrc)
         endif
+        call ESMF_FieldDataMapGet(dstDataMap, dataIndexList=dimOrder, rc=localrc)
+        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
+        allocate(     allAI(nDEs,dimCount), &
+                 allLocalAI(nDEs,dimCount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
+                                       ESMF_CONTEXT, rc)) return
+
         do i = 1,recvDomainList%num_domains
           theirDE = recvDomainList%domains(i)%DE + 1
           do j = 1,recvDomainList%domains(i)%rank
