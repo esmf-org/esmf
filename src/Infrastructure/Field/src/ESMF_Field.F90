@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.64 2003/08/21 19:58:16 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.65 2003/08/22 21:34:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,29 +87,6 @@
                                ESMF_NO_ALLOCATE = ESMF_DataAllocate(1)
 
 !------------------------------------------------------------------------------
-!     ! ESMF_Mask
-!  
-!     ! Class for storing information about masked regions.
-
-      type ESMF_Mask
-      sequence
-      private
-        ! same size as data array
-        type (ESMF_LocalArray), pointer :: maskvals => NULL() 
-      end type
-
-!------------------------------------------------------------------------------
-!     ! ESMF_HaloDirection
-!  
-!     ! Object for specifiying halo directions (mostly a placeholder for now)
-
-      type ESMF_HaloDirection
-      sequence
-      private
-        integer :: edges
-      end type
-
-!------------------------------------------------------------------------------
 !     ! ESMF_LocalField
 !      
 !     ! The LocalField class contains information which is associated with the
@@ -165,7 +142,7 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_Field, ESMF_Mask, ESMF_Access, ESMF_HaloDirection
+      public ESMF_Field, ESMF_Access
       public ESMF_FieldType            ! intended for internal lib use only
       public ESMF_DataAllocate, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
 
@@ -242,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.64 2003/08/21 19:58:16 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.65 2003/08/22 21:34:51 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2719,7 +2696,8 @@
 
 
       call ESMF_ArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
-                               ftypep%mapping, routehandle, blocking, rc=status)
+                               ftypep%mapping, routehandle, &
+                               halodirection, blocking, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHaloStore: ArrayHaloStore returned failure"
         return
