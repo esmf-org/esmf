@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.28 2004/06/17 18:49:01 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.29 2004/06/17 21:18:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.28 2004/06/17 18:49:01 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.29 2004/06/17 21:18:06 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -263,6 +263,48 @@
       write(name, *) "CalendarType Equal Calendar Test" 
       calendarsEqual = (ESMF_CAL_NOLEAP == gregorianCalendar)
       call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set calendar type
+      write(name, *) "Set Calendar Type Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_CalendarSet(gregorianCalendar, calendarType=ESMF_CAL_NOLEAP, &
+                            rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar,calendartype)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equal CalendarType Test" 
+      calendarsEqual = (gregorianCalendar == ESMF_CAL_NOLEAP)
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Set calendar type
+      write(name, *) "Set Calendar Type Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_CalendarSet(gregorianCalendar, &
+                            calendarType=ESMF_CAL_GREGORIAN, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+  
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar,calendartype)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equal CalendarType Test" 
+      calendarsEqual = (gregorianCalendar == ESMF_CAL_GREGORIAN)
+      call ESMF_Test((calendarsEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
