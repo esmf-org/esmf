@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreate.F90,v 1.4 2003/03/10 03:23:13 cdeluca Exp $
+! $Id: ESMF_CompCreate.F90,v 1.5 2003/03/26 20:44:44 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -53,22 +53,20 @@
     print *, "Comp Init returned"
 
 
-    call ESMF_CompPrint(comp1, rc)
+    call ESMF_CompPrint(comp1, rc=rc)
     print *, "Comp Print returned"
 
-    timestep = 1
-    call ESMF_CompRun(comp1, timesteps=timestep, rc=rc)
+    call ESMF_CompRun(comp1, rc=rc)
     print *, "Comp Run returned"
 
-
-    call ESMF_CompFinalize(comp1, rc)
+    call ESMF_CompFinalize(comp1, rc=rc)
     print *, "Comp Finalize returned"
 
 
     call ESMF_CompDestroy(comp1, rc)
     print *, "Comp Destroy returned"
 
-    call ESMF_DELayoutDestroy(layout, rc);
+    call ESMF_DELayoutDestroy(layout, rc)
     print *, "DELayout Destroy returned"
 
     print *, "Component Test 1 finished"
