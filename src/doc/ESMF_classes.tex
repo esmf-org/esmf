@@ -1,27 +1,29 @@
 \section{ESMF Classes}
 
 We divide the ESMF classes into two main categories, those associated with the coupling 
-superstructure and those that are part of the utility infrastructure.  The superstructure or data 
+superstructure and those that are part of the utility infrastructure.  Superstructure and data 
 classes are based on a hierarchical 
 calling tree of increasingly abstract data structures that represent the field data associated 
-with the physical systems being modeled.  Infrastructure or utility classes are independent 
+with the physical systems being modeled.  Utility classes are independent 
 of the data classes, though they too have a hierarchical structure; higher-level utilities
 employ general-purpose tools such as a message log.
 
 In the listing of classes below we provide a description of each class and its function.
 
+\subsection{Object Model}
+
+The hierarchy of data classes in ESMF is shown in the following UML diagram.  
+
+\scalebox{0.70}{\includegraphics{ESMF_DataStructureHierarchy.eps}}
+
 \subsection{Coupling Superstructure}
+
+Below, needs a thorough gutting.
 
 \subsubsection{Component (ESMF\_Comp)} 
 \begin{description}
 \item [Description] A Component is a functionally related computational entity that represents 
-a large system.  {\it All} Components have a Name, a Status (ESMF\_ACTIVE, ESMF\_ERROR, etc.), and a Map that 
-describes the tasks and/or heaps over which the Component is distributed.  Components may be 
-nested within other Components.
-\item [Function] Some of the basic methods associated with a Component are
-initialize, finalize, run, and stop.  A Component can be queried for its Name, Map, and Status.  If it is a Gridded Component, it can can be queried for its Distributed Grid; if it is an I/O Component it can be queried for an I/O
-Specification.  When running as part of a brokered Application, a Component can 
-register those Fields it can export and those needed for it to run.
+a large system.  
 \end{description}
 
 \subsubsection{Application (ESMF\_App)}
@@ -41,50 +43,18 @@ information on any Component that it includes, including its Name, Map, and
 Status.
 \end{description}
 
-\subsubsection{Coupler (ESMF\_Coupler)}
+\subsubsection{Coupler Component (ESMF\_Coupler)}
 \begin{description}
 \item [Description] A Coupler is a specialized type of Component that encompasses all the 
 functionality needed to communicate
-data between two Components. It may include multiple Route calls and Transforms, and
-may be separated into initialize and run stages.
-\item [Function] The basic methods of a Coupler are send, which may be blocking or
-non-blocking, and receive. 
-\end{description}
-
-\subsubsection{Route (ESMF\_Route)}
-\label{sec:route}
-\begin{description}
-\item [Description] A Route is a data transfer path established between two Field Groups,
-and it is created using their Maps.  A Route may be separated into initialize and run stages.
-\item [Function] Routes have send methods, which may be blocking or nonblocking, and receives.
-\end{description}
-
-\subsubsection{Registry (ESMF\_Registry)} 
-\label{sec:registry}
-\begin{description}
-\item [Description]  A Registry is an entity that stores Component Names, Maps, and metadata,
-including descriptions of those Fields available for export by the Component and those needed to run.   
-\item [Function] The Registry can add a Component, remove a Component, or update the information
-for a given Component.  Use of the Registry is optional.
+data between two or more Components. 
 \end{description}
 
 \subsubsection{Gridded Component (ESMF\_GComp)} 
 \label{sec:gridcomp}
 \begin{description}
 \item [Description] A Gridded Component is a specialized type of Component that is associated
-with a single Distributed Grid.  It may include one or more Field Groups that are discretized 
-on the same grid and distributed in the same fashion.  A Gridded Component is the representation 
-of most component models, such as ocean models.  
-\item [Function] Gridded Components can provide all their associated data (get state), or can
-set this data (set state).  Gridded Components can be regridded, in which case the regridding directive
-propagates through all the Fields and Field Groups associated with the Component.  
-\end{description}
-
-\subsubsection{I/O Component (ESMF\_IOComp)} 
-\begin{description}
-\item [Description] An I/O Component represents the input and output of data from an external
-device as a transfer of data to another Component.  
-\item [Function]
+with a Distributed Grid.  
 \end{description}
 
 \subsubsection{Transform (ESMF\_XForm)} 
@@ -100,55 +70,22 @@ to take sets of individual Fields or Field Groups.  Methods may include a
 separate initialization and run. 
 \end{description}
 
-\subsubsection{Map (ESMF\_Map)}
-\label{sec:map} 
+\subsubsection{Layout (ESMF\_Layout)}
+\label{sec:layout} 
 \begin{description}
-\item [Description] A Map is a description of a computational domain that
+\item [Description] A layout is a description of a computational domain that
 may describe the decomposition of an Application, a Component, a Field Group, a Field, or 
 a Distributed Grid.
-If no Map is specified for an object, it can inherit its Map from an object
-higher in the data hierarchy.  For example, if the map for a Field is not
-specified, it will be assigned the Map associated with the Component.  A
-default Map is assigned if none have been specified anywhere in an 
-Application. 
-\item [Function] A Map describes the decomposition of a data object.  It can be
-queried for the details of that decomposition.
+If no Layout is specified for an object, it can inherit its layout from an object
+higher in the data hierarchy.  
 \end{description}
 
-\subsubsection{Clock (ESMF\_Clock)}
-\begin{description}
-\item [Description] A Clock advances model time during integration and stores
-information relating to integration, such as the start date, model timestep, number of 
-timesteps taken, and stop date or timestep.
-\item [Function] Some of the methods associated with a Clock are advance time,
-get previous time, get current time, and test if last step. 
-\end{description}  
-
-\subsubsection{Distributed Grid (ESMF\_DGrid)} 
-\begin{description}
-\item [Description] Contains a decomposition over heaps and tasks 
-as well as a grid specification.  A grid may be defined on a specific set of heaps and tasks, and 
-different grids within the same executable may be mapped to different sets of heaps 
-and tasks.  The way grids are mapped may change over the course of model execution.  
-Global grids and subsets (masks, regional grids) must be supported.  Time dependent 
-grid subsets, such as satellite swaths, are a projected capability. 
-\end{description}
-
-\subsubsection{Field Group (ESMF\_FieldGroup)} 
-\begin{description}
-\item [Description] A Field Group is a set of fields that is discretized on the same grid.  
-Field Groups are the basic units of exchange between Components.  
-\item [Function] A Field Group can be regridded or redistributed, can be queried for a 
-list of the fields that it contains.  It can return its Distributed Grid. 
-\end{description}
+\subsubsection{Distributed Grid (ESMF\_DistGrid)} 
 
 \subsubsection{Field (ESMF\_Field)}
 \begin{description} 
 \item [Description] A Field represents a single physical field or the components of a 
-vector field.  Attributes include metadata, such as FieldName, FieldUnits, etc., that describe the
-Field.
-\item [Function] A Field can be regridded or redistributed, and can be queried on its
-Distributed Grid or its metadata.
+vector field.  
 \end{description}
 
 \subsection{Utility Infrastructure}
@@ -186,7 +123,7 @@ nodes.  It may optionally provide information on quantities such as bandwidth an
 latency through active tests.  
 \end{description}
 
-\subsubsection{Time Management (ESMF\_Date, ESMF\_DT)}
+\subsubsection{Time Manager (ESMF\_Date, ESMF\_DT)}
 \begin{description}
 \item [Description] The date and time interval methods in the ESMF provide date
 calculations based on a number of different calendars.
