@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.17 2004/09/21 16:41:44 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.18 2004/10/05 22:51:09 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -24,7 +24,7 @@
     module CouplerMod
 
     ! ESMF Framework module - defines ESMF data types and procedures
-    use ESMF_Mod
+    use global_data
 
     implicit none
     
@@ -59,6 +59,11 @@
 !
 !EOPI
 
+      ! because none of the arguments to this subroutine will ever be optional,
+      ! go ahead and set rc to an initial return code before using it below.
+      ! (this makes some eager error-checking compilers happy.)
+      rc = ESMF_FAILURE
+
       ! Register the callback routines.
 
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, coupler_init, &
@@ -80,7 +85,6 @@
 ! !INTERFACE:
       subroutine coupler_init(comp, importState, exportState, clock, rc)
 
-      use global_data
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: comp
@@ -115,6 +119,11 @@
     character(ESMF_MAXSTR) :: statename
 
     print *, "Coupler Init starting"
+
+    ! because none of the arguments to this subroutine will ever be optional,
+    ! go ahead and set rc to an initial return code before using it below.
+    ! (this makes some eager error-checking compilers happy.)
+    rc = ESMF_FAILURE
 
     ! Get VM from coupler component and create default delayout
     call ESMF_CplCompGet(comp, vm=vm, rc=rc)
@@ -160,7 +169,6 @@
 ! !INTERFACE:
       subroutine coupler_run(comp, importState, exportState, clock, rc)
 
-      use global_data
 !
 ! !ARGUMENTS:
      type(ESMF_CplComp), intent(inout) :: comp
@@ -196,6 +204,11 @@
        
         integer :: i, datacount
         character(len=ESMF_MAXSTR), dimension(7) :: datanames
+
+        ! none of the arguments to this subroutine will ever be optional, so
+        ! go ahead and set rc to an initial return code before using it below.
+        ! (this makes some eager error-checking compilers happy.)
+        rc = ESMF_FAILURE
 
         datacount = 7
         datanames(1) = "SIE"
@@ -268,7 +281,6 @@
 ! !INTERFACE:
       subroutine coupler_final(comp, importState, exportState, clock, rc)
 
-      use global_data
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp) :: comp
@@ -297,7 +309,12 @@
 !EOPI
 
         print *, "Coupler Final starting"
-  
+   
+        ! none of the arguments to this subroutine will ever be optional, so
+        ! go ahead and set rc to an initial return code before using it below.
+        ! (this makes some eager error-checking compilers happy.)
+        rc = ESMF_FAILURE
+
         ! Only thing to do here is release redist and route handles
         call ESMF_FieldRedistRelease(fromFlow_rh, rc)
         call ESMF_RouteHandleDestroy(fromFlow_rh, rc)
