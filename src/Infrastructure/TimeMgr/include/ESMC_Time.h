@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.39 2004/10/27 18:49:29 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.40 2004/11/24 00:29:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,11 @@
                      ESMC_CalendarType *calendarType=0, 
                      int *timeZone=0,
                      int timeStringLen=0, int *tempTimeStringLen=0,
-                     char *tempTimeString=0, int *dayOfWeek=0,
+                     char *tempTimeString=0,
+                     int timeStringLenISOFrac=0,
+                     int *tempTimeStringLenISOFrac=0,
+                     char *tempTimeStringISOFrac=0,
+                     int *dayOfWeek=0,
                      ESMC_Time *midMonth=0,
                      ESMF_KIND_I4 *dayOfYear=0,
                      ESMF_KIND_R8 *dayOfYear_r8=0,
@@ -193,7 +197,7 @@
 //
   private:
     // return in string format (TMG 2.4.7)
-    int ESMC_TimeGetString(char *timeString) const;
+    int ESMC_TimeGetString(char *timeString, const char *options=0) const;
 
     int ESMC_TimeGetDayOfWeek(int *dayOfWeek) const;    // (TMG 2.5.3)
     int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
