@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/11 20:05:24 svasquez Exp $ 
+# $Id: makefile,v 1.7 2003/03/17 18:05:20 svasquez Exp $ 
 
 ALL:  tests
 
@@ -15,55 +15,55 @@ LIBBASE	  =
 DIRS	  = 
 LOCDIR	  = src/Infrastructure/Field/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldTest \
-		$(ESMC_TESTDIR)/ESMF_BundleTest
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_FieldUTest \
+		$(ESMC_TESTDIR)/ESMF_BundleUTest
 
-TESTS_RUN     = RUN_ESMF_FieldTest \
-		RUN_ESMF_BundleTest 
+TESTS_RUN     = RUN_ESMF_FieldUTest \
+		RUN_ESMF_BundleUTest 
 
-TESTS_RUN_UNI = RUN_ESMF_FieldTestUNI \
-		RUN_ESMF_BundleTestUNI 
+TESTS_RUN_UNI = RUN_ESMF_FieldUTestUNI \
+		RUN_ESMF_BundleUTestUNI 
 
-TESTS_RM      = ESMF_FieldTest.rm \
-		ESMF_BundleTest.rm 
+TESTS_RM      = ESMF_FieldUTest.rm \
+		ESMF_BundleUTest.rm 
 
 include ${ESMF_DIR}/makefile
 
 #
 #  Bundles
 #
-$(ESMC_TESTDIR)/ESMF_BundleTest: ESMF_BundleTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BundleTest ESMF_BundleTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_BundleTest.o
+$(ESMC_TESTDIR)/ESMF_BundleUTest: ESMF_BundleUTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BundleUTest ESMF_BundleUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_BundleUTest.o
 
-RUN_ESMF_BundleTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleTest > $(ESMC_TESTDIR)/ESMF_BundleTest.stdout
+RUN_ESMF_BundleUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
 
-RUN_ESMF_BundleTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleTest > $(ESMC_TESTDIR)/ESMF_BundleTest.stdout
+RUN_ESMF_BundleUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
 
-ESMF_BundleTest.rm:
-	echo "ESMF_BundleTest.rm target called here."
+ESMF_BundleUTest.rm:
+	echo "ESMF_BundleUTest.rm target called here."
 
 #
 # Field
 #
-$(ESMC_TESTDIR)/ESMF_FieldTest: ESMF_FieldTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldTest ESMF_FieldTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_FieldTest.o
+$(ESMC_TESTDIR)/ESMF_FieldUTest: ESMF_FieldUTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldUTest ESMF_FieldUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_FieldUTest.o
 
-RUN_ESMF_FieldTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldTest > $(ESMC_TESTDIR)/ESMF_FieldTest.stdout
+RUN_ESMF_FieldUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
 
-RUN_ESMF_FieldTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_FieldTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldTest > $(ESMC_TESTDIR)/ESMF_FieldTest.stdout
+RUN_ESMF_FieldUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
 
-ESMF_FieldTest.rm:
-	echo "ESMF_FieldTest.rm target called here."
+ESMF_FieldUTest.rm:
+	echo "ESMF_FieldUTest.rm target called here."
 
 
 
