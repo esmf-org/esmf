@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.24 2004/01/13 22:52:00 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.25 2004/01/16 00:38:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.24 2004/01/13 22:52:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.25 2004/01/16 00:38:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -119,6 +119,8 @@ int ESMC_Alarm::count=0;
       bool ringTimeIsCurrTime;
       if (ringTime != ESMC_NULL_POINTER) {
          ringTimeIsCurrTime = (*ringTime == clock->currTime);
+         // TODO: handle case where *ringTime < clock->currTime;
+         //       same or similar to refTime
       }
       
       if (ringTime == ESMC_NULL_POINTER || ringTimeIsCurrTime) {
@@ -137,6 +139,10 @@ int ESMC_Alarm::count=0;
     }
     if (refTime != ESMC_NULL_POINTER) {
       alarm->refTime = *refTime;
+      // TODO:  for ringInterval, calculate 1st ringTime > clock->currTime,
+      //        (&& > ringTime, if specified), using refTime as the base.
+    } else {
+      // TODO:  default to clock's current time (or ringTime, if specified?)
     }
     if (enabled != ESMC_NULL_POINTER) {
       alarm->enabled = *enabled;
@@ -144,6 +150,13 @@ int ESMC_Alarm::count=0;
     if (sticky != ESMC_NULL_POINTER) {
       alarm->sticky = *sticky;
     }
+
+    // TODO:  invoke private method, shared with ESMC_AlarmSet(), to calculate
+    //        first ringTime for interval alarms, given ringInterval and none,
+    //        one or both of refTime and ringTime.  Will replace logic in
+    //        corresponding above sections.
+    //        this->ringTime > clock->currTime &&
+    //        this->ringTime > (passed in) ringTime
 
     returnCode = alarm->ESMC_AlarmValidate();
     if (rc != ESMC_NULL_POINTER) {
@@ -266,6 +279,13 @@ int ESMC_Alarm::count=0;
       this->sticky = *sticky;
     }
      
+    // TODO:  invoke private method, shared with ESMC_AlarmCreate(), to
+    //        calculate next ringTime for interval alarms, given ringInterval
+    //        and none, one or both of refTime and ringTime.  Will replace
+    //        logic in corresponding above sections.
+    //        this->ringTime > clock->currTime &&
+    //        this->ringTime > (passed in) ringTime
+
     if (ESMC_AlarmValidate() == ESMF_SUCCESS) return (ESMF_SUCCESS);
     else {
       // restore original alarm values

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.36 2003/12/19 19:22:00 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.37 2004/01/16 00:38:22 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.36 2003/12/19 19:22:00 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.37 2004/01/16 00:38:22 eschwab Exp $'
 
 !==============================================================================
 !
@@ -200,7 +200,7 @@
 !          otherwise ringDuration is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[refTime]}]
-!          The reference time for an alarm.
+!          The reference (i.e. base) time for an interval alarm.
 !     \item[{[enabled]}]
 !          Sets the enabled state; default is on (true).  If disabled,
 !          an alarm will not function at all.
@@ -323,7 +323,7 @@
 !          otherwise ringDuration is used.
 !          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
 !     \item[{[refTime]}]
-!          The reference time for an alarm.
+!          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
 !          Sets the ringing state.
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
@@ -427,7 +427,7 @@
 !          ringDuration (see above).  Mutually exclusive with nTimeStepsRinging
 !          (see above).
 !     \item[{[refTime]}]
-!          The reference time for an alarm.
+!          The reference (i.e. base) time for an interval alarm.
 !     \item[{[ringing]}]
 !          The current ringing state.
 !          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
@@ -1032,7 +1032,7 @@
 !          "prevRingTime" - print the alarm's previous ring time. \\
 !          "stopTime"     - print when alarm intervals end. \\
 !          "ringBegin"    - print time when the alarm actually begins to ring.\\
-!          "refTime"      - print the alarm's reference time. \\
+!          "refTime"      - print the alarm's interval reference (base) time. \\
 !          "nRingDurationTimeSteps" - print for how many time steps the alarm \\
 !                                     rings. \\
 !          "nTimeStepsRinging"      - print for how many time steps the alarm \\
