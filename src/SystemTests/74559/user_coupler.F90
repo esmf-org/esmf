@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.3 2003/04/24 16:52:18 nscollins Exp $
+! $Id: user_coupler.F90,v 1.4 2003/04/28 17:46:37 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -65,27 +65,23 @@
         type(ESMF_Field) :: fromflow_sie, fromflow_u, fromflow_v 
 
         print *, "User Coupler Init starting"
-        call ESMF_StateGetData(statelist, "Heat Energy", toflow_sie, rc)
-        call ESMF_StatePrint(toflow_sie, rc=rc)
+        call ESMF_StateGetData(statelist, "name?", toflow, rc)
 
-        call ESMF_StateGetData(statelist, "Heat U Velocity", toflow_u, rc)
-        call ESMF_StatePrint(toflow_u, rc=rc)
+        call ESMF_StateIsNeeded(toflow, "SIE", rc)
+        call ESMF_StateIsNeeded(toflow, "V", rc)
+        call ESMF_StateIsNeeded(toflow, "RHO", rc)
+        call ESMF_StateIsNeeded(toflow, "FLAG", rc)
 
-        call ESMF_StateGetData(statelist, "Heat V Velocity", toflow_v, rc)
-        call ESMF_StatePrint(toflow_v, rc=rc)
+        call ESMF_StateGetData(statelist, "name?", fromflow, rc)
 
-        call ESMF_StateGetData(statelist, "Flow Energy", fromflow_sie, rc)
-        call ESMF_StatePrint(fromflow_sie, rc=rc)
+        call ESMF_StateIsNeeded(fromflow, "SIE", rc)
+        call ESMF_StateIsNeeded(fromflow, "V", rc)
+        call ESMF_StateIsNeeded(fromflow, "RHO", rc)
+        call ESMF_StateIsNeeded(fromflow, "FLAG", rc)
 
-        call ESMF_StateGetData(statelist, "Flow U Velocity", fromflow_u, rc)
-        call ESMF_StatePrint(fromflow_u, rc=rc)
-
-        call ESMF_StateGetData(statelist, "Flow V Velocity", fromflow_v, rc)
-        call ESMF_StatePrint(fromflow_v, rc=rc)
-
-
-
-        ! This is where the model specific setup code goes.  
+        ! do we set up coupling now?  the flow solver reads in the
+        ! initial conditions file, so the first coupling is solver
+        ! feedback to heat injector, right?
 
         print *, "User Coupler Init returning"
    
@@ -109,33 +105,52 @@
 
        
         integer :: status
+        integer :: i, datacount
+        character(len=ESMF_MAXSTR), dimension(datacount) :: datanames
+
+        datanames(1) = "SIE"
+        datanames(2) = "U"
+        datanames(3) = "V"
+        datanames(4) = "RHO"
+        datanames(5) = "FLAG"
 
         print *, "User Coupler Run starting"
 
-        ! Get input data
-        call ESMF_StateGetData(statelist, "Heat Source", mysource, rc)
-        call ESMF_StatePrint(mysource, rc=rc)
-        call ESMF_StateGetData(mysource, "temperature", temperature1, rc=status)
-        call ESMF_FieldPrint(temperature1, "", rc=rc)
-
-        ! Get location of output data
+        ! Get import and export states
+        call ESMF_StateGetData(statelist, "Heat Feedback", mysource, rc)
         call ESMF_StateGetData(statelist, "Heat Injection", mydest, rc)
-        call ESMF_StatePrint(mydest, rc=rc)
-        call ESMF_StateGetData(mydest, "temperature", temperature2, rc=status)
-        call ESMF_FieldPrint(temperature2, "", rc=rc)
+
+        ! Get import and export states
+        call ESMF_StateGetData(statelist, "Flow Source", mysource, rc)
+        call ESMF_StateGetData(statelist, "Flow Feedback", mydest, rc)
 
         ! Get layout from coupler component
         call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
-        ! Need to get temp2 on temp1 layout to add?
+        do i=1, datacount
 
-        ! These are fields on different layouts - call Route to rearrange
-        !  the data using the Comm routines.
-        call ESMF_FieldRoute(temperature1, temperature2, cpllayout, status)
+           ! check isneeded flag here
+           if (.not. ESMF_StateIsNeeded(mysource, datanames(i), rc)) then 
+               cycle
+           endif
+
+           call ESMF_StateGetData(mysource, datanames(i), srcfield, rc=status)
+           call ESMF_FieldPrint(srcfield, "", rc=rc)
+
+           call ESMF_StateGetData(mydest, datanames(i), dstfield, rc=status)
+           call ESMF_FieldPrint(dstfield, "", rc=rc)
 
 
-        ! Set output data
-        call ESMF_StateAddData(mydest, temperature2, rc=status)
+          ! These are fields on different layouts - call Route to rearrange
+          !  the data using the Comm routines.
+          call ESMF_FieldRoute(srcfield, dstfdield, cpllayout, status)
+
+
+          ! Set export data in export state
+          call ESMF_StateAddData(mydest, datanames(i), rc=status)
+
+        enddo
+
         call ESMF_StatePrint(mydest, rc=status)
 
  
