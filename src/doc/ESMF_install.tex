@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.18 2003/04/09 17:08:24 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.19 2003/04/10 03:42:31 cdeluca Exp $
 
 \subsection{Downloading the ESMF Software}
 
@@ -9,14 +9,15 @@ Downloads} page on the ESMF website, \htmladdnormallink{http://www.esmf.ucar.edu
 \subsection{Installation}
 \label{InstallProcedures}
 
+\input{ESMF_systemreq}
+
 \subsubsection{ESMF Environment Variables}
 
-Currently the following environment variables need to be set:
+The following environment variables must be set:
 \begin{verbatim}
   ESMF_DIR      top-level ESMF directory
   ESMF_ARCH     platform and compiler configuration
 \end{verbatim}
-
 
 \subsubsection{Supported Platforms}
 \input{user_arch.tex}
