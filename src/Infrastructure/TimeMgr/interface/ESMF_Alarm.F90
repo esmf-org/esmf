@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.12 2003/04/23 21:39:32 cdeluca Exp $
+! $Id: ESMF_Alarm.F90,v 1.13 2003/04/25 09:10:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.12 2003/04/23 21:39:32 cdeluca Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.13 2003/04/25 09:10:34 eschwab Exp $'
 
 !==============================================================================
 !
@@ -384,6 +384,39 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE:  ESMF_AlarmEQ - Compare two alarms for equality
+!
+! !INTERFACE:
+      function ESMF_AlarmEQ(alarm1, alarm2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_AlarmEQ
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm1
+      type(ESMF_Alarm), intent(in) :: alarm2
+
+! !DESCRIPTION:
+!     Compare two alarms for equality; return true if equal, false otherwise
+!     Maps to overloaded (==) operator interface function
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm1]
+!          The first {\tt Alarm} to compare
+!     \item[alarm2]
+!          The first {\tt Alarm} to compare
+!     \end{description}
+!
+! !REQUIREMENTS:  
+!EOP
+
+      call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
+
+      end function ESMF_AlarmEQ
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_AlarmGetRingInterval - Get an alarm's ring interval
 !
 ! !INTERFACE:
@@ -645,39 +678,6 @@
       call c_ESMC_AlarmSetStopTime(alarm, StopTime, rc)
 
       end subroutine ESMF_AlarmSetStopTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmEQ - Compare two alarms for equality
-!
-! !INTERFACE:
-      function ESMF_AlarmEQ(alarm1, alarm2)
-!
-! !RETURN VALUE:
-      logical :: ESMF_AlarmEQ
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm1
-      type(ESMF_Alarm), intent(in) :: alarm2
-
-! !DESCRIPTION:
-!     Compare two alarms for equality; return true if equal, false otherwise
-!     Maps to overloaded (==) operator interface function
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm1]
-!          The first {\tt Alarm} to compare
-!     \item[alarm2]
-!          The first {\tt Alarm} to compare
-!     \end{description}
-!
-! !REQUIREMENTS:  
-!EOP
-
-      call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
-
-      end function ESMF_AlarmEQ
 
 !------------------------------------------------------------------------------
 !

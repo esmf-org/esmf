@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.7 2003/04/15 16:47:39 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.8 2003/04/25 09:06:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,7 +19,6 @@
 //------------------------------------------------------------------------------
 #include "ESMC.h"
 #include "ESMC_Calendar.h"
-#include <iostream.h>
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -39,17 +38,16 @@ extern "C" {
            *status = (ptr)->ESMC_CalendarInit(*type);
        }
 
-#if 0
-       void FTN(c_esmc_calendarget)(ESMC_Calendar *ptr, 
-                                         <value> *value, int *status} {
-           *status = (ptr)->ESMC_CalendarGet(&value);
+       void FTN(c_esmc_calendarinitgeneric)(ESMC_Calendar *ptr,
+                                     int *daysPerMonth, int *secondsPerDay,
+                                     int *daysPerYear,  int *daysPerYearDn,
+                                     int *daysPerYearDd, int *status) {
+           *status = (ptr)->ESMC_CalendarInitGeneric(daysPerMonth,
+                                                     *secondsPerDay,
+                                                     *daysPerYear,
+                                                     *daysPerYearDn,
+                                                     *daysPerYearDd);
        }
-
-       void FTN(c_esmc_calendarset)(ESMC_Calendar *ptr, 
-                                         <value> *value, int *status} {
-           *status = (ptr)->ESMC_CalendarSet(value);
-       }
-#endif
 
        void FTN(c_esmc_calendarread)(ESMC_Calendar *ptr,
                                      ESMC_CalendarType *type,
