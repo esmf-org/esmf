@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.9 2003/04/04 15:11:51 cdeluca Exp $
+// $Id: ESMC_DE.C,v 1.10 2003/04/04 21:08:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.9 2003/04/04 15:11:51 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.10 2003/04/04 21:08:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -464,15 +464,11 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  cout << "esmfID = " << esmfID << endl;
-  cout << "pID = " << pID << endl;
-  cout << "tID = " << tID << endl;
-  cout << "deType = " << deType << endl;
-  cout << "process = " << process << endl;
-  cout << "thread = " << thread << endl;
-  cout << "exclusive = " << exclusive << endl;
+  cout << "esmfID=" << esmfID << ", pID=" << pID << ", tID=" << tID 
+       << ", deType=" << deType << ", proc=" << process 
+       << ", thread=" << thread << ", excl=" << exclusive << endl;
 
-  cout << "PE = ";
+  cout << "PE=";
   if (PE != 0) {
     PE->ESMC_PEPrint();
   } else {

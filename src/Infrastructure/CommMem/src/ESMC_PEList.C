@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.9 2003/03/13 22:56:13 cdeluca Exp $
+// $Id: ESMC_PEList.C,v 1.10 2003/04/04 21:08:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.9 2003/03/13 22:56:13 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.10 2003/04/04 21:08:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -550,6 +550,7 @@
 
   // walk list and print each element via PE class Print method
   for(int i=0; i<numPEs; i++) {
+    cout << "PE[" << i << "] = ";
     peList[i].ESMC_PEPrint();
   }
 
