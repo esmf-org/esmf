@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.28 2003/07/28 19:45:01 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.29 2003/08/29 16:16:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.28 2003/07/28 19:45:01 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.29 2003/08/29 16:16:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -93,7 +93,7 @@
       ! Test Setting Time Step
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Set Time Interval Initialization Test"
-      call ESMF_TimeIntervalSet(timeStep, h_i4=1, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, h=1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -102,7 +102,7 @@
       !NEX_UTest
       ! Test getting the timestep
       write(name, *) "Get Time Interval Test"
-      call ESMF_TimeIntervalGet(timeStep, h_i4=H, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, h=H, rc=rc)
       write(failMsg, *) " Returned ESMF_FAILURE and/or timeStep not correct value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(H.eq.1), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -113,7 +113,7 @@
       !NEX_UTest
       ! Test Setting the Start Time
       write(name, *) "Set Start Time Initialization Test"
-      call ESMF_TimeSet(startTime, yr_i4=2003, mm_i4=3, dd_i4=13, &
+      call ESMF_TimeSet(startTime, yr=2003, mm=3, dd=13, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -123,7 +123,7 @@
       !NEX_UTest
       ! Verify the year is set correctly
       write(name, *) "Get Start Time Year Test"
-      call ESMF_TimeGet(startTime, yr_i4=YR, rc=rc)
+      call ESMF_TimeGet(startTime, yr=YR, rc=rc)
       write(failMsg, *) " Returned ESMF_FAILURE and/or Year not correct value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.2003), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -133,7 +133,7 @@
       !NEX_UTest
       ! Verify the month is set correctly
       write(name, *) "Get StartTime Month Test"
-      call ESMF_TimeGet(startTime, mm_i4=MM, rc=rc)
+      call ESMF_TimeGet(startTime, mm=MM, rc=rc)
       write(failMsg, *) " Returned ESMF_FAILURE and/or Month not correct value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -143,7 +143,7 @@
       !NEX_UTest
       ! Verify the day is set correctly
       write(name, *) "Get StartTime Day Test"
-      call ESMF_TimeGet(startTime, dd_i4=DD, rc=rc)
+      call ESMF_TimeGet(startTime, dd=DD, rc=rc)
       write(failMsg, *) " Returned ESMF_FAILURE and/or Day not correct value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -232,7 +232,7 @@
 
       !NEX_UTest
       write(name, *) "Stop Time Initialization Test"
-      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=3, dd_i4=14, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=3, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -242,7 +242,7 @@
       !NEX_UTest
       ! Verify the year is set correctly
       write(name, *) "Get StopTime Year Test"
-      call ESMF_TimeGet(stopTime, yr_i4=YR, rc=rc)
+      call ESMF_TimeGet(stopTime, yr=YR, rc=rc)
       write(failMsg, *) " Returned ESMF_FAILURE and/or Year not correct value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.2003), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -252,7 +252,7 @@
       !NEX_UTest
       ! Verify the month is set correctly
       write(name, *) "Get StopTime Month Test"
-      call ESMF_TimeGet(stopTime, mm_i4=MM, rc=rc)
+      call ESMF_TimeGet(stopTime, mm=MM, rc=rc)
       write(failMsg, *) " Returned ESMF_FAILURE and/or Month not correct value"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3), &
                       name, failMsg, result, ESMF_SRCLINE)
