@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.10 2003/04/16 21:11:14 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.11 2003/04/25 08:58:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -248,6 +248,6 @@ class ESMC_BaseTime {
 //EOP
 //-------------------------------------------------------------------------
 
-};    // end class <ESMC_BaseTime>
+};    // end class ESMC_BaseTime
 
 #endif // ESMC_BASETIME_H
