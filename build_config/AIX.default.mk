@@ -1,4 +1,4 @@
-#  $Id: AIX.default.mk,v 1.2 2003/08/29 16:56:05 flanigan Exp $
+#  $Id: AIX.default.mk,v 1.3 2003/09/09 21:45:44 flanigan Exp $
 #
 #  AIX.default.mk
 #
@@ -297,10 +297,10 @@ endif
 #
 
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${ESMC_INCLUDE} $<
 
 .f90.o:
 	${FC} -c ${FOPTFLAGS} -qfixed=132 -qsuffix=cpp=f90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
@@ -315,12 +315,12 @@ endif
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} -qsuffix=f=F ${FFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 

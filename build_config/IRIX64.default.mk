@@ -1,4 +1,4 @@
-# $Id: IRIX64.default.mk,v 1.1 2003/08/26 17:40:16 flanigan Exp $
+# $Id: IRIX64.default.mk,v 1.2 2003/09/09 21:45:44 flanigan Exp $
 # 
 # IRIX64.default.mk
 #
@@ -239,10 +239,10 @@ endif
 ###################
 
 .F90.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F.o:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
 
 .f90.o:
 	${FC} -c ${FOPTFLAGS} ${FFLAGS} ${F_FIXCPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
@@ -257,12 +257,12 @@ endif
 	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREECPP} ${FCPPFLAGS} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 
 .F.a:
-	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
+	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${F_FREENOCPP} ${ESMC_INCLUDE} $<
 	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 	${RM} $*.o
 

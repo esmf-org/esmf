@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.5 2003/09/09 17:25:09 flanigan Exp $
+#  $Id: common.mk,v 1.6 2003/09/09 21:45:15 flanigan Exp $
 #
 #  common.mk
 #
@@ -53,8 +53,6 @@ ESMF_BUILD	= $(ESMF_TOP_DIR)
 
 
 LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
-ESMC_MODDIR     = $(ESMF_BUILD)/mod/mod$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
-#ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${ESMF_BOPT}/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
@@ -86,14 +84,9 @@ DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
-		  -I$(ESMF_BUILD)/src/include \
-		  -I$(ESMF_TOP_DIR)/src/include \
 		  -I/usr/local/include \
 		  -I${ESMF_BUILD_DIR}/build_config/conf/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE) \
-		  -I${ESMF_TOP_DIR}/include \
-		  -I${ESMC_MODDIR} \
-		  -I${ESMF_TOP_DIR}/src/timing \
-		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) 
+		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR)
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
@@ -232,8 +225,8 @@ chk_dir:
           echo "Remove all .o files and rerun make with appropriate ESMF_BOPT"; false; fi
 	-@if [ ! -d $(ESMF_LIBDIR) ]; then \
 	  echo Making directory $(ESMF_LIBDIR) for library; mkdir -p $(ESMF_LIBDIR) ; fi
-	-@if [ ! -d ${ESMC_MODDIR} ]; then \
-	  echo Making directory ${ESMC_MODDIR} for *.mod files; mkdir -p ${ESMC_MODDIR} ; fi
+	-@if [ ! -d ${ESMF_MODDIR} ]; then \
+	  echo Making directory ${ESMF_MODDIR} for *.mod files; mkdir -p ${ESMF_MODDIR} ; fi
 
 chkdir_doc:
 	-@if [ ! -d ${ESMC_DOCDIR} ]; then \
@@ -873,7 +866,7 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #  	${RM} $*.o
 #  
 #  .F.o .F90.o:
-#  	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+#  	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
 #  
 #  .h.tex:
 #  	${PROTEX} -bF +f $< > doc/$*.tex
@@ -882,7 +875,7 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #  	${PROTEX} -bF +f $< > doc/$*.tex
 #  
 #  .F.a: 
-#  	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
+#  	${FC} -c ${C_FC_MOD}${ESMF_MODDIR} ${FOPTFLAGS} ${FFLAGS} ${FCPPFLAGS} $<
 #  	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
 #  	${RM} $*.o
 #  
