@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.2 2003/04/29 17:02:03 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.3 2003/04/29 21:41:37 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -350,16 +350,18 @@
         enddo
       enddo
 !
-! add inflow section
+! add injector section
 !
       do i = iflo_min, iflo_max
-        global(1,1) = i
-        global(1,2) = 1
-        call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
-                                         local2d=local, rc=status)
-        if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
-          flag(local(1,1),local(1,2)) = 10
-        endif
+        do j = 1, 2 
+          global(1,1) = i
+          global(1,2) = j
+          call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
+                                           local2d=local, rc=status)
+          if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
+            flag(local(1,1),local(1,2)) = 10
+          endif
+        enddo
       enddo
 !
 ! obstacle normal boundary conditions here
@@ -486,6 +488,11 @@
         return
       endif
       dt = s_
+ 
+      call ESMF_FieldHalo(field_sie, status)
+      call ESMF_FieldHalo(field_u, status)
+      call ESMF_FieldHalo(field_v, status)
+      call ESMF_FieldHalo(field_rho, status)
 
       !
       ! calculate RHOU's and RHOV's

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.2 2003/04/29 17:02:01 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.3 2003/04/29 21:41:36 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -170,6 +170,7 @@
           !  the data using the Comm routines.
           call ESMF_FieldRoute(srcfield, dstfield, cpllayout, status)
 
+          !call ESMF_FieldHalo(dstfield, rc)
 
           ! Set export data in export state
           !call ESMF_StateAddData(mydest, datanames(i), rc=status)

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.3 2003/04/29 17:02:03 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.4 2003/04/29 21:41:37 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -71,11 +71,11 @@
         call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
         ! initialize start time to 13May2003, 3:00 pm
-        ! for testing, initialize start time to 13May2003, 10:00 am
+        ! for testing, initialize start time to 13May2003, 9:00:06 am
         call ESMF_TimeInit(datablock%inject_start_time, &
                            YR=int(2003,kind=ESMF_IKIND_I8), &
-                           MM=5, DD=13, H=10, M=0, &
-                           S=int(0,kind=ESMF_IKIND_I8), &
+                           MM=5, DD=13, H=9, M=0, &
+                           S=int(6,kind=ESMF_IKIND_I8), &
                            cal=gregorianCalendar, rc=rc)
 
         ! initialize stop time to 14May2003, 3:00 pm
@@ -127,8 +127,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       rc = ESMF_FAILURE
    
       ! Grid parameters
-      i_max = 160
-      j_max = 80
+      i_max = 156
+      j_max = 72 
       x_min = 0.0
       x_max = 2.0e+05
       y_min = 0.0
@@ -249,12 +249,20 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         call ESMF_StateGetData(importstate, "RHO", field_rho, rc=rc)
         call ESMF_StateGetData(importstate, "FLAG", field_flag, rc=rc)
       
+        call ESMF_FieldHalo(field_sie, rc)
+        call ESMF_FieldHalo(field_u, rc)
+        call ESMF_FieldHalo(field_v, rc)
+        call ESMF_FieldHalo(field_rho, rc)
+        
         ! Check time to see if we are still injecting
         call ESMF_ClockGetCurrTime(clock, currtime, rc)
         if ((currtime .ge. datablock%inject_start_time) .and. &
             (currtime .le. datablock%inject_stop_time)) then
 
             ! Get pointers to data contents
+            print *, "injecting energy, flow, density:"
+            print *,  datablock%inject_energy, datablock%inject_velocity, &
+                        datablock%inject_density
     
             ! Get the Field and Bundle data from the State
             call ESMF_FieldGetData(field_sie, array_sie, rc=rc) 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.6 2003/04/29 17:02:02 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.7 2003/04/29 21:41:37 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -90,7 +90,8 @@
     !  The coupler will run on the original default 1 x N layout.
     cnameHI = "Injector model"
     delist = (/ (i, i=0, ndes-1) /)
-    layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
+    layoutHI = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
+    !layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
     HIcomp = ESMF_GridCompCreate(cnameHI, layout=layoutHI, rc=rc)
     print *, "Created component ", trim(cnameHI), "rc =", rc
     !call ESMF_DELayoutPrint(layoutHI, rc=rc)
@@ -211,6 +212,8 @@
         print *, "Coupler Run returned, rc =", rc
   
         call ESMF_ClockAdvance(clock, rc=rc)
+        print *, "--Clock Advance"
+
 
       enddo
  
