@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.47 2004/02/10 18:45:50 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.48 2004/02/11 06:50:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.47 2004/02/10 18:45:50 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.48 2004/02/11 06:50:30 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -488,12 +488,12 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int                nameLen,         // out
+      int                nameLen,         // in
       int               *tempNameLen,     // out
       char              *tempName,        // out
       ESMC_CalendarType *calendarType,    // out
       int               *daysPerMonth,    // out
-      int               *sizeofDaysPerMonth, // in
+      int                sizeofDaysPerMonth, // in
       int               *monthsPerYear,   // out
       ESMF_KIND_I4      *secondsPerDay,   // out
       ESMF_KIND_I4      *secondsPerYear,  // out
@@ -519,19 +519,38 @@ int ESMC_Calendar::count=0;
         daysPerYeardN  == ESMC_NULL_POINTER &&
         daysPerYeardD  == ESMC_NULL_POINTER) {
         cout << "ESMC_Calendar::ESMC_CalendarGet():  no valid "
-             << "pointer passed in.";
+             << "pointer passed in." << endl;
       return (ESMF_FAILURE);
+    }
+
+    // TODO: use inherited methods from ESMC_Base
+    if (nameLen > 0) {
+      if (strlen(this->name) < nameLen) {
+        // copy all of it
+        strcpy(tempName, this->name);
+      } else {
+        // TODO: copy what will fit and return ESMF_FAILURE ?
+        strncpy(tempName, this->name, nameLen-1);
+        tempName[nameLen] = '\0';  // null terminate
+        return(ESMF_FAILURE);
+      }
+      // report how many characters were copied
+      *tempNameLen = strlen(tempName);
     }
 
     if (calendarType != ESMC_NULL_POINTER) {
       *calendarType = this->calendarType;
     }
+#if 0
+// TODO:  make daysPerMonth array work like ESMC_GetAlarmList(alarmList) ?
+          daysPerMonth is not NULL when not passed from F90!
     if (daysPerMonth != ESMC_NULL_POINTER) {
-      if (*sizeofDaysPerMonth < this->monthsPerYear) return(ESMF_FAILURE);
+      if (sizeofDaysPerMonth < this->monthsPerYear) return(ESMF_FAILURE);
       for (int i=0; i<this->monthsPerYear; i++) {
         daysPerMonth[i] = this->daysPerMonth[i];
       }
     }
+#endif
     if (monthsPerYear != ESMC_NULL_POINTER) {
       *monthsPerYear = this->monthsPerYear;
     }
