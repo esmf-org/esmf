@@ -1,6 +1,4 @@
-% $Id: Regrid_background.tex,v 1.2 2002/03/16 22:20:47 pwjones Exp $
-
-\section{Background}
+% $Id: Regrid_background.tex,v 1.3 2002/03/26 19:30:25 pwjones Exp $
 
 Many applications in Earth system modeling require
 communicating fields between different grids.  Such
@@ -37,8 +35,9 @@ The regridding and interpolation is part of the ESMF
 Infrastructure.  It will use information from Physical
 Grids (PhysGrid) to compute regridding information and
 use Distributed Grid (DistGrid) for performing
-data-motion related to regridding.  It will (presumably)
-be used by couplers(?) and fields (?).
+data motion related to regridding.  It will (presumably)
+be used by couplers and fields as well as within
+component models when necessary.
 
 \subsection{Scope}
 
