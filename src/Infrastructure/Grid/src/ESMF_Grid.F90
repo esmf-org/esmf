@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.93 2003/09/05 20:28:43 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.94 2003/09/09 17:06:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -215,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.93 2003/09/05 20:28:43 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.94 2003/09/09 17:06:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1229,7 +1229,7 @@
 ! !REQUIREMENTS: TODO
 !EOPI
 
-      character(len=4) :: physgrid_name       !
+      character(len=ESMF_MAXSTR) :: physgrid_name       !
       integer :: physgridId                   ! integer identifier for physgrid
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -1468,7 +1468,7 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      character(len=4) :: physgrid_name       !
+      character(len=ESMF_MAXSTR) :: physgrid_name       !
       integer :: physgridId                   ! integer identifier for physgrid
       type(ESMF_RelLoc) :: relloc
 
