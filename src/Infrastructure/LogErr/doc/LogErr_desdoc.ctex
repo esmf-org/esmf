@@ -1,4 +1,4 @@
-% $Id: LogErr_desdoc.ctex,v 1.6 2003/10/10 06:15:55 cdeluca Exp $
+% $Id: LogErr_desdoc.ctex,v 1.7 2003/10/10 06:25:15 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,40 +122,6 @@
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/LogErr/doc/ESMF_LogErr_fapi}
 #endif
-
-\section{LogErr C++ Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{LogErr_cex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_cex}
-#endif
-
-\subsection{Parameters}
-#ifdef STANDALONE
-\input{LogErr_chapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_chapi}
-#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{LogErr_ccapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_ccapi}
-#endif
-
-\subsection{Wrapper Functions}
-#ifdef STANDALONE
-\input{LogErr_ccwrapper}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_ccwrapper}
-#endif
-
-\section{LogErr Design}
-
-% Subsections same as LogErr Design ...
 
 #ifdef STANDALONE
 \section{Review Status}
