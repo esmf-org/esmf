@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.5 2003/07/18 02:53:15 eschwab Exp $
+// $Id: ESMC_LocalArray.h,v 1.6 2003/07/22 19:38:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@ typedef enum {
 } ESMC_DataCopy;
 
 typedef enum { 
-    ESMC_DOMAIN_LOCAL = 1, 
+    ESMC_DOMAIN_TOTAL = 1, 
     ESMC_DOMAIN_COMPUTATIONAL,
     ESMC_DOMAIN_EXCLUSIVE
 } ESMC_DomainType;
