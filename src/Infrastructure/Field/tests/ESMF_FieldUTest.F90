@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.17 2003/06/05 17:34:54 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.18 2003/06/06 14:19:51 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.17 2003/06/05 17:34:54 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.18 2003/06/06 14:19:51 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -67,11 +67,14 @@
 !     always run. When the environment variable, EXHAUSTIVE, is set to ON then 
 !     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
 !     to OFF, then only the sanity unit tests.
+!     Special strings (Non-exhaustive and exhaustive) have been
+!     added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------- 
 
 
       !------------------------------------------------------------------------
-
+      
+      !NEX_UTest
       ! Test Requirement FLD1.1.3 Creation without data 
       ! Fields may be created as in FLD1.1.1 without allocating data or specifying 
       ! an associated data array. In this case specifying the grid parameters and 
@@ -84,6 +87,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       ! Verifing that an initialized Field can be printed
       call ESMF_FieldPrint(f1, rc=rc)
       write(failMsg, *) ""
@@ -91,6 +95,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verifing that the Field name can be queried from a no data Field
       call ESMF_FieldGetName(f1, fname, rc=rc)
       write(failMsg, *) "returned name not 'default_name'"
@@ -100,6 +105,7 @@
 
 #endif
 
+      !NEX_UTest
       ! Test Requirement FLD1.4 Deletion 
       ! Fields may be deleted.
       call ESMF_FieldDestroy(f1, rc=rc)
@@ -118,6 +124,7 @@
      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
        ! verify that querying the name of a destroyed Field is handled properly.
        ! The following code is commented out because it crashes the program.
        ! It will be uncommented when the bug is fixed.
@@ -127,6 +134,7 @@
        call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verifing that printing a destroyed Field is handled properly.
       call ESMF_FieldPrint(f1, rc=rc)
       write(failMsg, *) ""
@@ -135,6 +143,7 @@
       !------------------------------------------------------------------------
 
 #endif
+      !NEX_UTest
       ! Verifing that a Field can be created with a name
       f2 = ESMF_FieldCreateNoData("pressure", rc=rc)
       write(failMsg, *) ""
@@ -143,6 +152,7 @@
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Verifing that the Field name can be queried.
       Call ESMF_FieldGetName(f2, fname, rc=rc)
       write(failMsg, *) ""
@@ -151,6 +161,7 @@
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Verifing that recreating a Field is allowed.
       f2 = ESMF_FieldCreateNoData("temperature", rc=rc)
       write(failMsg, *) ""
@@ -159,6 +170,7 @@
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Verifing that a Field can be created after it has been destroyed
       call ESMF_FieldDestroy(f2)
       f2 = ESMF_FieldCreateNoData("precipitation", rc=rc)
@@ -170,6 +182,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       ! Verifing that an uninitialized Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -179,6 +192,7 @@
 
 #endif
 
+      !NEX_UTest
       ! Verifing that a Grid can be created
       grid =  ESMF_GridCreate("atmgrid", rc=rc)
       write(failMsg, *) ""
@@ -188,6 +202,7 @@
      
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       ! Test requirement FLD1.5.1. Default name attribute 
       ! The only default attribute of a field will be a name. A unique name will 
       ! be generated if not supplied by the user.
@@ -212,6 +227,7 @@
       !------------------------------------------------------------------------
 
 
+      !EX_UTest
       ! Verifing that a Grid can be printed
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -221,6 +237,7 @@
 
 #endif
 
+      !NEX_UTest
       ! Verifing that recreating a created Grid is allowed.
       grid =  ESMF_GridCreate("landgrid", rc=rc)
       write(failMsg, *) ""
@@ -228,6 +245,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Verifing that an Array can be created
       allocate(f90ptr1(10,20))
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
@@ -238,6 +256,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       ! Verifing that an Array can be printed
       call ESMF_ArrayPrint(arr, rc=rc)
       write(failMsg, *) ""
@@ -247,6 +266,7 @@
 
 #endif
 
+      !NEX_UTest
       ! Verifing that recreating a created Array is allowed
       allocate(f90ptr1(10,20))
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
@@ -255,6 +275,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Test requirement FLD1.1.1
       ! Fields may be created by specifying attributes, a grid, data array dimensions 
       ! and descriptors, optional masks (e.g. for active cells), and an optional I/O 
@@ -268,6 +289,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Requirement FLD1.1.2 Creation with external data 
       ! Fields may be created as in FLD1.1.1 with a data array passed into 
       ! the argument list. The data array is referenced and not copied.
@@ -289,6 +311,7 @@
       ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verifing that a Field with a Grid and Array can be destroyed
       call ESMF_FieldDestroy(f3, rc=rc)
       write(failMsg, *) ""
@@ -297,6 +320,7 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verifing that a Field cannot` be created with an uninitialized Grid and Array
       f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                                    dm, "Field 0", ios, rc)
@@ -307,6 +331,7 @@
       !------------------------------------------------------------------------
 #endif
 
+      !NEX_UTest
       ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f2, rc=rc)
       write(failMsg, *) ""
@@ -317,6 +342,7 @@
 
 #ifdef ESMF_EXHAUSTIVE
 
+      !EX_UTest
       ! Verifing that a destroying a destroyed  Field is handled properly.
       call ESMF_FieldDestroy(f2, rc=rc)
       write(failMsg, *) ""
@@ -325,6 +351,7 @@
       call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verify that a Grid cannot be gotten from a Field created with no data
       f5 = ESMF_FieldCreateNoData(rc=rc)
       call ESMF_FieldGetGrid(f5, grid3, rc=rc)
