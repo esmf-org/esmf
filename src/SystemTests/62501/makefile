@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/05/23 20:16:50 jwolfe Exp $ 
+# $Id: makefile,v 1.11 2003/05/30 17:41:20 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -14,7 +14,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/SystemTests/62501
 
-SYSTEM_TESTS_BUILD    = $(ESMC_TESTDIR)/ESMF_SysTest62501  
+SYSTEM_TESTS_BUILD    = warning $(ESMC_TESTDIR)/ESMF_SysTest62501  
 
 # Object files other than ESMF_SysTest%.o that the
 # system tests executable will depend on.
@@ -36,6 +36,14 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  = *.o *.mod
 CLOBBERDIRS =
+
+warning: 
+	@echo "*******************************************************************"
+	@echo ""
+	@echo "Warning this test is valid only for previous ESMF versions"
+	@echo "and is not expected to either build or run with this ESMF release."
+	@echo ""
+	@echo "*******************************************************************"
 
 
 RUN_ESMF_SysTest62501:  
