@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.116 2003/11/07 18:40:32 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.117 2003/12/05 23:15:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.116 2003/11/07 18:40:32 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.117 2003/12/05 23:15:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3728,7 +3728,8 @@
                               horz_coord_system, vert_coord_system, &
                               coord_order, global_min_coord, &
                               global_max_coord, global_cell_dim, &
-                              global_start, periodic, name, rc)
+                              global_start, local_cell_max_dim, &
+                              periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -3746,6 +3747,8 @@
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
                             optional :: global_cell_dim
       integer, intent(out), dimension(:,:), optional :: global_start
+      integer, intent(out), dimension(ESMF_MAXGRIDDIM), &
+                            optional :: local_cell_max_dim
       type (ESMF_Logical), intent(out), optional :: periodic(:)
       character(len = *), intent(out), optional :: name
       integer, intent(out), optional :: rc
@@ -3784,6 +3787,8 @@
 !          Array of numbers of global grid increments in each direction.
 !     \item[{[global\_start]}]
 !          Array of global starting locations for each DE and in each direction.
+!     \item[{[local\_cell\_max\_dim]}]
+!          Array of maximum grid counts on any DE in each direction.
 !     \item[{[periodic]}]
 !          Returns the periodicity along the coordinate axes - logical array.
 !     \item[{[name]}]
@@ -3825,10 +3830,12 @@
       if(present(coord_order)) coord_order = gridp%coord_order
 
       ! Get distgrid info with global coordinate counts
-      if(present(global_cell_dim) .or. present(global_start)) then
+      if(present(global_cell_dim) .or. present(global_start) &
+                                  .or. present(local_cell_max_dim)) then
         call ESMF_DistGridGet(gridp%distgrid%ptr, &
                               global_cell_dim=global_cell_dim, &
                               global_start=global_start, &
+                              local_cell_max_dim=local_cell_max_dim, &
                               rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: DistGrid get"
