@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.75 2004/07/21 19:07:41 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.76 2005/01/10 23:19:00 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.75 2004/07/21 19:07:41 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.76 2005/01/10 23:19:00 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -879,7 +879,7 @@
       subroutine ESMF_CalendarInitialize(calendartype, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in)            :: calendartype
+      type(ESMF_CalendarType), intent(in),  optional :: calendartype
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -889,8 +889,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[calendartype]
-!          The calendar type to initialize the default to.
+!     \item[{[calendartype]}]
+!          The calendar type to initialize the default to.  If not specified,
+!          the default is set to {\tt ESMF\_CAL\_NOCALENDAR}.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
