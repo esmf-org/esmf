@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.8 2004/11/01 23:38:46 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.9 2004/11/02 21:33:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,11 @@
       type ESMF_Pointer
       sequence
       !private
+#ifdef S32
+          integer*4 :: ptr
+#else
           integer*8 :: ptr
+#endif
       end type
 
       type(ESMF_Pointer), parameter :: ESMF_NULL_POINTER = ESMF_Pointer(0), &
