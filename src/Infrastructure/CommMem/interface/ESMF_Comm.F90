@@ -1,4 +1,4 @@
-! $Id: ESMF_Comm.F90,v 1.1 2003/03/25 18:03:05 cdeluca Exp $
+! $Id: ESMF_Comm.F90,v 1.2 2003/03/25 22:09:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,7 +67,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comm.F90,v 1.1 2003/03/25 18:03:05 cdeluca Exp $'
+      '$Id: ESMF_Comm.F90,v 1.2 2003/03/25 22:09:33 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -92,14 +92,15 @@
 ! !IROUTINE: ESMF_CommSendRecv - send / receive data transfer
 
 ! !INTERFACE:
-      subroutine ESMF_CommSendRecv(comm, sarray, rarray, arraylen, &
+      subroutine ESMF_CommSendRecv(comm, sarray, rarray, sarraylen, rarraylen, &
 				sde, rde, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_Comm) :: comm
       real(4), intent(in) :: sarray(:), rarray(:)
-      integer, intent(in) :: arraylen
+      integer, intent(in) :: sarraylen
+      integer, intent(in) :: rarraylen
       integer, intent(in) :: sde, rde
       integer, intent(out), optional :: rc 
 !
@@ -129,7 +130,7 @@
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-      call c_ESMC_CommSendRecv(comm, sarray, rarray, arraylen, &
+      call c_ESMC_CommSendRecv(comm, sarray, rarray, sarraylen, rarraylen, &
      				sde, rde, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "Comm send recv error"

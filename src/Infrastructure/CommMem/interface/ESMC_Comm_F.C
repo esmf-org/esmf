@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm_F.C,v 1.1 2003/03/25 21:58:10 cdeluca Exp $
+// $Id: ESMC_Comm_F.C,v 1.2 2003/03/25 22:09:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,9 +36,10 @@
 extern "C" {
 
        void FTN(c_esmc_commsendrecv)(ESMC_Comm **ptr, 
-  				     void *sbuf, void *rbuf, int *num, int *sde, 
-  				     int *rde, int *status) {
-       *status = (*ptr)->ESMC_CommSendRecv(sbuf, rbuf, *num, *sde, *rde);
+  				     void *sbuf, void *rbuf, 
+                                     int *snum, int *rnum, 
+                                     int *sde, int *rde, int *status) {
+      *status = (*ptr)->ESMC_CommSendRecv(sbuf, rbuf, *snum, *rnum, *sde, *rde);
        }
 
   //         void FTN(c_esmc_commsendrecv)(ESMC_Comm **ptr, ESMC_DELayout *delayout, 
