@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.26 2004/06/07 19:15:13 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.27 2004/06/08 03:47:09 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,6 +10,7 @@
 !
 !==============================================================================
 #define ESMF_FILENAME "ESMF_VM.F90"
+!==============================================================================
 !
 ! ESMF VM Module
 module ESMF_VMMod
@@ -52,15 +53,15 @@ module ESMF_VMMod
 !     ! parameter controls whether the "IsComplete" call blocks/waits
 !     ! or simply tests and returns.
       
-      type ESMF_CommHandle
-      sequence
-      private
-        integer :: dummy  !so compiler is satisfied for now...
-!        integer :: mpi_handle  ! mpi returns this for async calls
-!        integer :: wait        ! after an async call, does query block?
-      end type
+  type ESMF_CommHandle
+  sequence
+  private
+    integer :: dummy  !so compiler is satisfied for now...
+!    integer :: mpi_handle  ! mpi returns this for async calls
+!    integer :: wait        ! after an async call, does query block?
+  end type
       
-      integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
+  integer, parameter :: ESMF_TEST_COMPLETE = 1, ESMF_WAIT_COMPLETE = 2
 
 !------------------------------------------------------------------------------
 
@@ -116,34 +117,29 @@ module ESMF_VMMod
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-  ! - ESMF_VM:
-  ! For ESMF application use
-  public ESMF_VMGetGlobal
+! - ESMF-public methods:
+  public ESMF_VMAllGlobalReduce
+  public ESMF_VMAllReduce
+  public ESMF_VMBarrier
+  public ESMF_VMGather
   public ESMF_VMGet
+  public ESMF_VMGetGlobal
   public ESMF_VMGetPET
   public ESMF_VMPrint
-  ! For ESMF application use (communications)
-  public ESMF_VMSend
   public ESMF_VMRecv
-  public ESMF_VMSendRecv
   public ESMF_VMScatter
-  public ESMF_VMGather
-  public ESMF_VMAllReduce
-  public ESMF_VMAllGlobalReduce
-  public ESMF_VMBarrier
+  public ESMF_VMSend
+  public ESMF_VMSendRecv
   public ESMF_VMThreadBarrier
   public ESMF_VMWait
-  ! For ESMF internal use only
+! - ESMF-private methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
-  
-  ! - ESMF_VMPlan:
-  ! For ESMF internal use only
   public ESMF_VMPlanConstruct
   public ESMF_VMPlanDestruct
+  public ESMF_VMPlanMaxPEs
   public ESMF_VMPlanMaxThreads
   public ESMF_VMPlanMinThreads
-  public ESMF_VMPlanMaxPEs
 
 !EOPI
 !------------------------------------------------------------------------------
@@ -151,7 +147,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.26 2004/06/07 19:15:13 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.27 2004/06/08 03:47:09 theurich Exp $'
 
 !==============================================================================
 
@@ -161,122 +157,7 @@ module ESMF_VMMod
 !
 !==============================================================================
 
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMSend -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMSend
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMSendI4
-      module procedure ESMF_VMSendR4
-      module procedure ESMF_VMSendR8
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMSend} functions.   
-!EOPI 
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMScatter -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMRecv
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMRecvI4
-      module procedure ESMF_VMRecvR4
-      module procedure ESMF_VMRecvR8
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMRecv} functions.   
-!EOPI 
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMSendRecv -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMSendRecv
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMSendRecvI4
-      module procedure ESMF_VMSendRecvR4
-      module procedure ESMF_VMSendRecvR8
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMSendRecv} functions.   
-!EOPI 
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMScatter -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMScatter
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMScatterI4
-      module procedure ESMF_VMScatterR4
-      module procedure ESMF_VMScatterR8
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMScatter} functions.   
-!EOPI 
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMGather -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMGather
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMGatherI4
-      module procedure ESMF_VMGatherR4
-      module procedure ESMF_VMGatherR8
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMGather} functions.   
-!EOPI 
-      end interface
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_VMAllReduce -- Generic interface
-
-! !INTERFACE:
-      interface ESMF_VMAllReduce
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-      module procedure ESMF_VMAllReduceI4
-      module procedure ESMF_VMAllReduceR4
-      module procedure ESMF_VMAllReduceR8
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_VMAllReduce} functions.   
-!EOPI 
-      end interface
-
-
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 !BOPI
 ! !IROUTINE: ESMF_VMAllGlobalReduce -- Generic interface
 
@@ -295,6 +176,120 @@ module ESMF_VMMod
 !EOPI 
       end interface
 
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMAllReduce -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMAllReduce
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMAllReduceI4
+      module procedure ESMF_VMAllReduceR4
+      module procedure ESMF_VMAllReduceR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMAllReduce} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMGather -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMGather
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMGatherI4
+      module procedure ESMF_VMGatherR4
+      module procedure ESMF_VMGatherR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMGather} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMScatter -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMRecv
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMRecvI4
+      module procedure ESMF_VMRecvR4
+      module procedure ESMF_VMRecvR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMRecv} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMScatter -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMScatter
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMScatterI4
+      module procedure ESMF_VMScatterR4
+      module procedure ESMF_VMScatterR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMScatter} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMSend -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMSend
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMSendI4
+      module procedure ESMF_VMSendR4
+      module procedure ESMF_VMSendR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMSend} functions.   
+!EOPI 
+      end interface
+
+! -------------------------- ESMF-public method -------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMSendRecv -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMSendRecv
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMSendRecvI4
+      module procedure ESMF_VMSendRecvR4
+      module procedure ESMF_VMSendRecvR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMSendRecv} functions.   
+!EOPI 
+      end interface
+
 
 !==============================================================================
       
@@ -302,267 +297,7 @@ module ESMF_VMMod
   contains
       
         
-!==============================================================================
-! ESMF_VM methods:
-!==============================================================================
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllReduceI4()"
-!BOP
-! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte integers
-
-! !INTERFACE:
-  ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, operation, &
-    blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),     intent(in)              :: operation
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
-    integer,                  intent(out),  optional  :: rc
-!         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
-!   on contigous data of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM}
-!   object performing the specified operation.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData on each of the PETs.
-!   \item[operation] 
-!        Reduction operation.
-!   \item[{[blockingFlag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commHandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-    integer :: size
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
-        return
-      endif
-    endif
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_I4, operation, &
-      localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_VMAllReduceI4
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllReduceR4()"
-!BOP
-! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte reals
-
-! !INTERFACE:
-  ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceR4(vm, sendData, recvData, count, operation, &
-    blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),     intent(in)              :: operation
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
-    integer,                  intent(out),  optional  :: rc
-!         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
-!   on contigous data of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM}
-!   object performing the specified operation.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData on each of the PETs.
-!   \item[operation] 
-!        Reduction operation.
-!   \item[{[blockingFlag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commHandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-    integer :: size
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
-        return
-      endif
-    endif
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R4, operation, &
-      localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_VMAllReduceR4
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMAllReduceR8()"
-!BOP
-! !IROUTINE: ESMF_VMAllReduce - AllReduce 8-byte reals
-
-! !INTERFACE:
-  ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceR8(vm, sendData, recvData, count, operation, &
-    blockingFlag, commHandle, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
-    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
-    integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),     intent(in)              :: operation
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
-    integer,                  intent(out),  optional  :: rc
-!         
-!
-! !DESCRIPTION:
-!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
-!   on contigous data of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM}
-!   object performing the specified operation.
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vm] 
-!        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. All PETs must specify a
-!        valid source array.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
-!   \item[count] 
-!        Number of elements in sendData on each of the PETs.
-!   \item[operation] 
-!        Reduction operation.
-!   \item[{[blockingFlag]}] 
-!        Flag indicating whether this call behaves blocking or non-blocking:
-!        \begin{description}
-!        \item[{\tt ESMF\_BLOCKING}]
-!             Block until local operation has completed. 
-!        \item[{\tt ESMF\_NONBLOCKING}]
-!             Return immediately without blocking.
-!        \end{description}
-!   \item[{[commHandle]}]
-!        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-    integer :: size
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
-        return
-      endif
-    endif
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R8, operation, &
-      localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_VMAllReduceR8
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGlobalReduceI4()"
 !BOP
@@ -571,14 +306,14 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGlobalReduce()
   subroutine ESMF_VMAllGlobalReduceI4(vm, sendData, recvData, count, &
-    operation,  blockingFlag, commHandle, rc)
+    reduceFlag,  blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
     integer(ESMF_KIND_I4),    intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -601,7 +336,7 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[operation] 
+!   \item[reduceFlag] 
 !        Reduction operation.
 !   \item[{[blockingFlag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
@@ -630,14 +365,16 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_I4, &
-      operation, localrc)
+      reduceFlag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -647,7 +384,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGlobalReduceR4()"
 !BOP
@@ -656,14 +393,14 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGlobalReduce()
   subroutine ESMF_VMAllGlobalReduceR4(vm, sendData, recvData, count, &
-    operation, blockingFlag, commHandle, rc)
+    reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R4),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -686,7 +423,7 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[operation] 
+!   \item[reduceFlag] 
 !        Reduction operation.
 !   \item[{[blockingFlag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
@@ -715,14 +452,16 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_R4, &
-      operation, localrc)
+      reduceFlag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -732,7 +471,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMAllGlobalReduceR8()"
 !BOP
@@ -741,14 +480,14 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGlobalReduce()
   subroutine ESMF_VMAllGlobalReduceR8(vm, sendData, recvData, count, &
-    operation, blockingFlag, commHandle, rc)
+    reduceFlag, blockingFlag, commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R8),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -771,7 +510,7 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[operation] 
+!   \item[reduceFlag] 
 !        Reduction operation.
 !   \item[{[blockingFlag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
@@ -800,14 +539,16 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_R8, &
-      operation, localrc)
+      reduceFlag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -817,7 +558,268 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceI4()"
+!BOP
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceFlag, &
+    blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
+!   on contigous data of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM}
+!   object performing the specified operation.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid destination array.
+!   \item[count] 
+!        Number of elements in sendData on each of the PETs.
+!   \item[reduceFlag] 
+!        Reduction operation.
+!   \item[{[blockingFlag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commHandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingFlag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingFlag)) then
+      if (blockingFlag == ESMF_NONBLOCKING) then
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_I4, &
+      reduceFlag, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllReduceI4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceR4()"
+!BOP
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceR4(vm, sendData, recvData, count, reduceFlag, &
+    blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
+!   on contigous data of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM}
+!   object performing the specified operation.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid destination array.
+!   \item[count] 
+!        Number of elements in sendData on each of the PETs.
+!   \item[reduceFlag] 
+!        Reduction operation.
+!   \item[{[blockingFlag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commHandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingFlag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingFlag)) then
+      if (blockingFlag == ESMF_NONBLOCKING) then
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R4, &
+      reduceFlag, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllReduceR4
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceR8()"
+!BOP
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 8-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceR8(vm, sendData, recvData, count, reduceFlag, &
+    blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
+    real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
+!   on contigous data of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM}
+!   object performing the specified operation.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[sendData]
+!        Contigous data arry holding data to be send. All PETs must specify a
+!        valid source array.
+!   \item[recvData] 
+!        Contigous data array for data to be received. All PETs must specify a
+!        valid destination array.
+!   \item[count] 
+!        Number of elements in sendData on each of the PETs.
+!   \item[reduceFlag] 
+!        Reduction operation.
+!   \item[{[blockingFlag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commHandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingFlag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Flag not implemented features
+    if (present(blockingFlag)) then
+      if (blockingFlag == ESMF_NONBLOCKING) then
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
+        return
+      endif
+    endif
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R8, &
+      reduceFlag, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllReduceR8
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMBarrier()"
 !BOP
@@ -861,7 +863,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherI4()"
 !BOP
@@ -928,7 +930,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -945,7 +949,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherR4()"
 !BOP
@@ -1012,7 +1016,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1029,7 +1035,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGatherR8()"
 !BOP
@@ -1096,7 +1102,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1113,7 +1121,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGet()"
 !BOP
@@ -1187,7 +1195,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 !BOP
 ! !IROUTINE: ESMF_VMGetGlobal - Get Global VM
 
@@ -1227,7 +1235,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMGetPET()"
 !BOP
@@ -1291,7 +1299,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPrint()"
 !BOP
@@ -1334,7 +1342,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvI4()"
 !BOP
@@ -1395,7 +1403,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1412,7 +1422,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvR4()"
 !BOP
@@ -1473,7 +1483,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1490,7 +1502,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMRecvR8()"
 !BOP
@@ -1551,7 +1563,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1568,7 +1582,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterI4()"
 !BOP
@@ -1635,7 +1649,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1652,7 +1668,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterR4()"
 !BOP
@@ -1720,7 +1736,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1737,7 +1755,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMScatterR8()"
 !BOP
@@ -1805,7 +1823,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1822,7 +1842,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendI4()"
 !BOP
@@ -1883,7 +1903,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1900,7 +1922,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendR4()"
 !BOP
@@ -1961,7 +1983,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -1978,7 +2002,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendR8()"
 !BOP
@@ -2039,7 +2063,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -2056,7 +2082,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvI4()"
 !BOP
@@ -2127,7 +2153,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -2146,7 +2174,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvR4()"
 !BOP
@@ -2217,7 +2245,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -2236,7 +2266,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMSendRecvR8()"
 !BOP
@@ -2307,7 +2337,9 @@ module ESMF_VMMod
     ! Flag not implemented features
     if (present(blockingFlag)) then
       if (blockingFlag == ESMF_NONBLOCKING) then
-!        call ESMF_LogWrite('Non-blocking not implemented.', ESMF_LOG_ERROR)
+        if (ESMF_LogWrite('Non-blocking not yet implemented', &
+          ESMF_LOG_WARNING, &
+          ESMF_CONTEXT)) continue
         return
       endif
     endif
@@ -2326,7 +2358,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMThreadBarrier()"
 !BOP
@@ -2371,7 +2403,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-public method -------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMWait()"
 !BOP
@@ -2421,7 +2453,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMInitialize()"
 !BOPI
@@ -2461,7 +2493,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMFinalize()"
 !BOPI
@@ -2506,7 +2538,7 @@ module ESMF_VMMod
 !==============================================================================
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanConstruct()"
 !BOPI
@@ -2558,7 +2590,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanDestruct()"
 !BOPI
@@ -2601,7 +2633,74 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
+!BOPI
+! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
+
+! !INTERFACE:
+  subroutine ESMF_VMPlanMaxPEs(vmplan, vm, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VMPlan), intent(inout)         :: vmplan
+    type(ESMF_VM),     intent(in)            :: vm
+    integer,           intent(in),  optional :: max
+    integer,           intent(in),  optional :: pref_intra_process
+    integer,           intent(in),  optional :: pref_intra_ssi
+    integer,           intent(in),  optional :: pref_inter_ssi
+    integer,           intent(in)            :: npetlist
+    integer,           intent(in)            :: petlist(:)
+    integer,           intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Set up a MaxPEs vmplan
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vmplan] 
+!        VMPlan
+!   \item[vm] 
+!        VM
+!   \item[{[max]}] 
+!        Maximum number of cores per thread
+!   \item[{[pref_intra_process]}] 
+!        Intra process communication preference
+!   \item[{[pref_intra_ssi]}] 
+!        Intra SSI communication preference
+!   \item[{[pref_inter_ssi]}] 
+!        Inter process communication preference
+!   \item[npetlist] 
+!        Number of PETs in petlist
+!   \item[petlist] 
+!        List of PETs that the parent VM will provide to the child VM
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
+      npetlist, petlist, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMPlanMaxPEs
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMaxThreads()"
 !BOPI
@@ -2668,7 +2767,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 
 
-!------------------------------------------------------------------------------
+! -------------------------- ESMF-private method ------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_VMPlanMinThreads()"
 !BOPI
@@ -2732,73 +2831,6 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMPlanMinThreads
-!------------------------------------------------------------------------------
-
-
-!------------------------------------------------------------------------------
-#undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_VMPlanMaxPEs()"
-!BOPI
-! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
-
-! !INTERFACE:
-  subroutine ESMF_VMPlanMaxPEs(vmplan, vm, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, npetlist, petlist, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_VMPlan), intent(inout)         :: vmplan
-    type(ESMF_VM),     intent(in)            :: vm
-    integer,           intent(in),  optional :: max
-    integer,           intent(in),  optional :: pref_intra_process
-    integer,           intent(in),  optional :: pref_intra_ssi
-    integer,           intent(in),  optional :: pref_inter_ssi
-    integer,           intent(in)            :: npetlist
-    integer,           intent(in)            :: petlist(:)
-    integer,           intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!   Set up a MaxPEs vmplan
-!
-!   The arguments are:
-!   \begin{description}
-!   \item[vmplan] 
-!        VMPlan
-!   \item[vm] 
-!        VM
-!   \item[{[max]}] 
-!        Maximum number of cores per thread
-!   \item[{[pref_intra_process]}] 
-!        Intra process communication preference
-!   \item[{[pref_intra_ssi]}] 
-!        Intra SSI communication preference
-!   \item[{[pref_inter_ssi]}] 
-!        Inter process communication preference
-!   \item[npetlist] 
-!        Number of PETs in petlist
-!   \item[petlist] 
-!        List of PETs that the parent VM will provide to the child VM
-!   \item[{[rc]}] 
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-!------------------------------------------------------------------------------
-    integer :: localrc                        ! local return code
-
-    ! Assume failure until success
-    if (present(rc)) rc = ESMF_FAILURE
-
-    ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMPlanMaxPEs(vmplan, vm, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, &
-      npetlist, petlist, localrc)
-
-    ! Use LogErr to handle return code
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
-      ESMF_CONTEXT, rcToReturn=rc)) return
-
-  end subroutine ESMF_VMPlanMaxPEs
 !------------------------------------------------------------------------------
 
 

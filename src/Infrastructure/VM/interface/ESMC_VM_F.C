@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.15 2004/06/08 02:54:25 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.16 2004/06/08 03:47:09 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,7 +9,7 @@
 // Licensed under the GPL.
 //
 //==============================================================================
-//
+#define ESMC_FILENAME "ESMC_VM_F.C"
 //==============================================================================
 //
 // This file contains the Fortran interface code to link F90 and C++.
@@ -17,8 +17,6 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
 #include "ESMC_F90Interface.h"
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
@@ -47,6 +45,75 @@ extern "C" {
   // ESMC_VM interfaces
   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   
+  void FTN(c_esmc_vmallglobalreduce)(ESMC_VM **vm, void *input, void *output, 
+    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmallglobalreduce()"
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // need to type cast or transform dtk and op into vmachine types
+    vmType vmt;
+    switch (*dtk){
+    case ESMF_I4:
+      vmt = vmI4;
+      break;
+    case ESMF_R4:
+      vmt = vmR4;
+      break;
+    case ESMF_R8:
+      vmt = vmR8;
+      break;
+    default:
+      localrc = ESMF_FAILURE;
+    }
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
+      return;
+    (*vm)->vmachine_allglobalreduce(input, output, *count, vmt, (vmOp)(*op));
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmallreduce)(ESMC_VM **vm, void *input, void *output, 
+    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmallreduce()"
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // need to type cast or transform dtk and op into vmachine types
+    vmType vmt;
+    switch (*dtk){
+    case ESMF_I4:
+      vmt = vmI4;
+      break;
+    case ESMF_R4:
+      vmt = vmR4;
+      break;
+    case ESMF_R8:
+      vmt = vmR8;
+      break;
+    default:
+      localrc = ESMF_FAILURE;
+    }
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
+      return;
+    (*vm)->vmachine_allreduce(input, output, *count, vmt, (vmOp)(*op));
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmbarrier)(ESMC_VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmbarrier()"
+    (*ptr)->vmachine_barrier();
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmgather)(ESMC_VM **vm, void *input, void *output, int *size, 
+    int *root, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgather()"
+    (*vm)->vmachine_gather(input, output, *size, *root);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
   void FTN(c_esmc_vmget)(ESMC_VM **ptr, int *localPet, int *petCount, 
     int *peCount, int *mpiCommunicator, ESMC_Logical *okOpenMpFlag, int *rc){
 #undef  ESMC_METHOD
@@ -78,97 +145,48 @@ extern "C" {
   }
   
   void FTN(c_esmc_vmprint)(ESMC_VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmprint()"
     (*ptr)->vmachine_print();
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
-  }
-
-  void FTN(c_esmc_vmsend)(ESMC_VM **ptr, void *message, int *size, int *dest,
-    int *rc){
-    (*ptr)->vmachine_send(message, *size, *dest);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
   void FTN(c_esmc_vmrecv)(ESMC_VM **ptr, void *message, int *size, int *source,
     int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmrecv()"
     (*ptr)->vmachine_recv(message, *size, *source);
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
-  }
-
-  void FTN(c_esmc_vmsendrecv)(ESMC_VM **ptr, void *sendData, int *sendSize, 
-    int *dst, void *recvData, int *recvSize, int *src, int *rc){
-    (*ptr)->vmachine_sendrecv(sendData, *sendSize, *dst, 
-      recvData, *recvSize, *src);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
   void FTN(c_esmc_vmscatter)(ESMC_VM **vm, void *input, void *output, int *size,
     int *root, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmscatter()"
     (*vm)->vmachine_scatter(input, output, *size, *root);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
   
-  void FTN(c_esmc_vmgather)(ESMC_VM **vm, void *input, void *output, int *size, 
-    int *root, int *rc){
-    (*vm)->vmachine_gather(input, output, *size, *root);
+  void FTN(c_esmc_vmsend)(ESMC_VM **ptr, void *message, int *size, int *dest,
+    int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsend()"
+    (*ptr)->vmachine_send(message, *size, *dest);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
-  void FTN(c_esmc_vmallreduce)(ESMC_VM **vm, void *input, void *output, 
-    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
-    // start assuming local success
-    int localrc = ESMF_SUCCESS;
-    // need to type cast or transform dtk and op into vmachine types
-    vmType vmt;
-    switch (*dtk){
-    case ESMF_I4:
-      vmt = vmI4;
-      break;
-    case ESMF_R4:
-      vmt = vmR4;
-      break;
-    case ESMF_R8:
-      vmt = vmR8;
-      break;
-    default:
-      localrc = ESMF_FAILURE;
-    }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
-      return;
-    (*vm)->vmachine_allreduce(input, output, *count, vmt, (vmOp)(*op));
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
-  }
-
-  void FTN(c_esmc_vmallglobalreduce)(ESMC_VM **vm, void *input, void *output, 
-    int *count, ESMC_DataKind *dtk, ESMC_Operation *op, int *rc){
-    // start assuming local success
-    int localrc = ESMF_SUCCESS;
-    // need to type cast or transform dtk and op into vmachine types
-    vmType vmt;
-    switch (*dtk){
-    case ESMF_I4:
-      vmt = vmI4;
-      break;
-    case ESMF_R4:
-      vmt = vmR4;
-      break;
-    case ESMF_R8:
-      vmt = vmR8;
-      break;
-    default:
-      localrc = ESMF_FAILURE;
-    }
-    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
-      return;
-    (*vm)->vmachine_allglobalreduce(input, output, *count, vmt, (vmOp)(*op));
-    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
-  }
-
-  void FTN(c_esmc_vmbarrier)(ESMC_VM **ptr, int *rc){
-    (*ptr)->vmachine_barrier();
+  void FTN(c_esmc_vmsendrecv)(ESMC_VM **ptr, void *sendData, int *sendSize, 
+    int *dst, void *recvData, int *recvSize, int *src, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmsendrecv()"
+    (*ptr)->vmachine_sendrecv(sendData, *sendSize, *dst, 
+      recvData, *recvSize, *src);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 
   void FTN(c_esmc_vmthreadbarrier)(ESMC_VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmthreadbarrier()"
     (*ptr)->vmachine_threadbarrier();
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
@@ -197,6 +215,8 @@ extern "C" {
   
   void FTN(c_esmc_vmplanconstruct)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
     int *npetlist, int *petlist, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplanconstruct()"
     (*ptr) = new ESMC_VMPlan;
     if (npetlist > 0)
       (*ptr)->vmplan_minthreads(**ptr_vm, 1, (int*)petlist, *npetlist);
@@ -217,6 +237,8 @@ extern "C" {
   }
 
   void FTN(c_esmc_vmplandestruct)(ESMC_VMPlan **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplandestruct()"
     // Do garbage collection on this PET's VM instances that were allocated
     for (int i=0; i<(*ptr)->nspawn; i++)
       delete (*ptr)->myvms[i];
@@ -227,9 +249,57 @@ extern "C" {
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
+  void FTN(c_esmc_vmplanmaxpes)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
+    int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
+    int *npetlist, int *petlist, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplanmaxpes()"
+    // Sort out the non-present F90 optional arguments. 
+    max = ESMC_NOT_PRESENT_FILTER(max);
+    pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
+    pref_intra_ssi = ESMC_NOT_PRESENT_FILTER(pref_intra_ssi);
+    pref_inter_ssi = ESMC_NOT_PRESENT_FILTER(pref_inter_ssi);
+    petlist = ESMC_NOT_PRESENT_FILTER(petlist);
+    // Done sorting out non-present F90 optional arguments.
+    int maxx = 0; 
+    if ((void*)max != ESMC_NULL_POINTER)
+      maxx = *max;
+    int ppref_intra_process = -1;
+    if ((void*)pref_intra_process != ESMC_NULL_POINTER)
+      ppref_intra_process = *pref_intra_process;
+    int ppref_intra_ssi = -1;
+    if ((void*)pref_intra_ssi != ESMC_NULL_POINTER)
+      ppref_intra_ssi = *pref_intra_ssi;
+    int ppref_inter_ssi = -1;
+    if ((void*)pref_inter_ssi != ESMC_NULL_POINTER)
+      ppref_inter_ssi = *pref_inter_ssi;
+    // Do garbage collection on this PET's VM instances that were allocated
+    for (int i=0; i<(*ptr)->nspawn; i++)
+      delete (*ptr)->myvms[i];
+    delete [] (*ptr)->myvms;
+    delete [] (*ptr)->myvmachs;
+    // Now define a new vmplan
+    (*ptr)->vmplan_maxcores(**ptr_vm, maxx, (int*)petlist, *npetlist,
+      ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
+    //debug: (*ptr)->vmplan_print();
+    // Allocate as many ESMC_VM instances as this PET will spawn 
+    // and hold the information in the public portion of ESMC_VMPlan
+    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
+    (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
+    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
+    for (int i=0; i<(*ptr)->nspawn; i++){
+      (*ptr)->myvms[i] = new ESMC_VM;
+      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
+    }
+    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
+    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
+  }
+       
   void FTN(c_esmc_vmplanmaxthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplanmaxthreads()"
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -274,6 +344,8 @@ extern "C" {
   void FTN(c_esmc_vmplanminthreads)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
     int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
     int *npetlist, int *petlist, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmplanminthreads()"
     // Sort out the non-present F90 optional arguments. 
     max = ESMC_NOT_PRESENT_FILTER(max);
     pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
@@ -315,48 +387,4 @@ extern "C" {
     *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
   }
   
-  void FTN(c_esmc_vmplanmaxpes)(ESMC_VMPlan **ptr, ESMC_VM **ptr_vm,
-    int *max, int *pref_intra_process, int *pref_intra_ssi, int *pref_inter_ssi,
-    int *npetlist, int *petlist, int *rc){
-    // Sort out the non-present F90 optional arguments. 
-    max = ESMC_NOT_PRESENT_FILTER(max);
-    pref_intra_process = ESMC_NOT_PRESENT_FILTER(pref_intra_process);
-    pref_intra_ssi = ESMC_NOT_PRESENT_FILTER(pref_intra_ssi);
-    pref_inter_ssi = ESMC_NOT_PRESENT_FILTER(pref_inter_ssi);
-    petlist = ESMC_NOT_PRESENT_FILTER(petlist);
-    // Done sorting out non-present F90 optional arguments.
-    int maxx = 0; 
-    if ((void*)max != ESMC_NULL_POINTER)
-      maxx = *max;
-    int ppref_intra_process = -1;
-    if ((void*)pref_intra_process != ESMC_NULL_POINTER)
-      ppref_intra_process = *pref_intra_process;
-    int ppref_intra_ssi = -1;
-    if ((void*)pref_intra_ssi != ESMC_NULL_POINTER)
-      ppref_intra_ssi = *pref_intra_ssi;
-    int ppref_inter_ssi = -1;
-    if ((void*)pref_inter_ssi != ESMC_NULL_POINTER)
-      ppref_inter_ssi = *pref_inter_ssi;
-    // Do garbage collection on this PET's VM instances that were allocated
-    for (int i=0; i<(*ptr)->nspawn; i++)
-      delete (*ptr)->myvms[i];
-    delete [] (*ptr)->myvms;
-    delete [] (*ptr)->myvmachs;
-    // Now define a new vmplan
-    (*ptr)->vmplan_maxcores(**ptr_vm, maxx, (int*)petlist, *npetlist,
-      ppref_intra_process, ppref_intra_ssi, ppref_inter_ssi);
-    //debug: (*ptr)->vmplan_print();
-    // Allocate as many ESMC_VM instances as this PET will spawn 
-    // and hold the information in the public portion of ESMC_VMPlan
-    (*ptr)->nspawn = (*ptr)->vmplan_nspawn(); // determine spawned PETs
-    (*ptr)->myvms = new ESMC_VM*[(*ptr)->nspawn];
-    (*ptr)->myvmachs = new vmachine*[(*ptr)->nspawn];
-    for (int i=0; i<(*ptr)->nspawn; i++){
-      (*ptr)->myvms[i] = new ESMC_VM;
-      (*ptr)->myvmachs[i] = static_cast<vmachine *>((*ptr)->myvms[i]);
-    }
-    (*ptr)->vmplan_myvms((*ptr)->myvmachs); // use pointer array inside
-    *rc = ESMF_SUCCESS;   // TODO: error handling, catching allocation failure
-  }
-       
 };
