@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: user_model2.F90,v 1.2 2003/09/22 17:37:02 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -89,8 +89,8 @@
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
       integer, dimension(:,:), pointer :: idata
-      real :: min(2)
-      real :: delta1(40), delta2(50)
+      real(ESMF_KIND_R8) :: min(2)
+      real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
       integer :: de_id
       integer :: horz_gridtype, horz_stagger, horz_coord_system
