@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.22 2003/10/22 01:15:10 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.23 2003/12/19 19:21:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -246,24 +246,27 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalreadrestart)(ESMC_TimeInterval *ptr,
-                                           ESMF_KIND_I8 *s,
-                                           ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                           ESMF_KIND_I8 *yy, ESMF_KIND_I8 *mo,
-                                           ESMF_KIND_I8 *d, int *status) {
-          int rc = (ptr)->ESMC_TimeIntervalReadRestart(*s, *sN, *sD,
-                                                       *yy, *mo, *d);
+                                                int *nameLen,
+                                                const char *name,
+                                                ESMC_IOSpec *iospec,
+                                                int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalReadRestart(
+                 *nameLen,  // always present internal argument.
+                 name,      // required.
+                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?      
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalwriterestart)(ESMC_TimeInterval *ptr,
-                                           ESMF_KIND_I8 *s, 
-                                           ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                           ESMF_KIND_I8 *yy, ESMF_KIND_I8 *mo,
-                                           ESMF_KIND_I8 *d, int *status) {
-          int rc = (ptr)->ESMC_TimeIntervalWriteRestart(s, sN, sD, yy, mo, d);
+                                                 ESMC_IOSpec *iospec,
+                                                 int *status) {
+          int rc = (ptr)->ESMC_TimeIntervalWriteRestart(
+              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;  
        }
 
        void FTN(c_esmc_timeintervalvalidate)(ESMC_TimeInterval *ptr,

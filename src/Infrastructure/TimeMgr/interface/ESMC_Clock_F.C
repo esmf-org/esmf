@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.18 2003/10/22 01:06:28 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.19 2003/12/19 19:21:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -222,44 +222,27 @@ extern "C" {
            *esmf_clockEQ = (int) (**clock1 == **clock2);
        }
 
-       void FTN(c_esmc_clockreadrestart)(ESMC_Clock **ptr, 
-                                         ESMC_TimeInterval *timeStep,
-                                         ESMC_Time *startTime,
-                                         ESMC_Time *stopTime,
-                                         ESMC_Time *refTime,
-                                         ESMC_Time *currTime,
-                                         ESMC_Time *prevTime,
-                                         ESMF_KIND_I8 *advanceCount,
-                                         int *numAlarms,
-                                         ESMC_Alarm *alarmList[],
-                                         int *status) {
-          int rc = (*ptr)->ESMC_ClockReadRestart(timeStep, startTime,
-                                                stopTime, refTime,
-                                                currTime, prevTime,
-                                                *advanceCount, *numAlarms,
-                                                alarmList);
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+       void FTN(c_esmc_clockreadrestart)(ESMC_Clock **ptr, int *nameLen,
+                                         const char *name,
+                                         ESMC_IOSpec *iospec,   
+                                         int *status) {    
+          *ptr = ESMC_ClockReadRestart(
+                 *nameLen,  // always present internal argument.
+                 name,      // required.
+                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?       
+                                                  ESMC_NULL_POINTER : iospec),
+                 ((void*)status == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : status) );
        }
 
-       void FTN(c_esmc_clockwriterestart)(ESMC_Clock **ptr, 
-                                          ESMC_TimeInterval *timeStep,
-                                          ESMC_Time *startTime,
-                                          ESMC_Time *stopTime,
-                                          ESMC_Time *refTime,
-                                          ESMC_Time *currTime,
-                                          ESMC_Time *prevTime,
-                                          ESMF_KIND_I8 *advanceCount,
-                                          int *numAlarms,
-                                          ESMC_Alarm *alarmList[],
+       void FTN(c_esmc_clockwriterestart)(ESMC_Clock **ptr,
+                                          ESMC_IOSpec *iospec,
                                           int *status) {
-          int rc = (*ptr)->ESMC_ClockWriteRestart(timeStep, startTime,
-                                                 stopTime, refTime,
-                                                 currTime, prevTime,
-                                                 advanceCount, numAlarms, 
-                                                 alarmList);
+          int rc = (*ptr)->ESMC_ClockWriteRestart(
+              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;    
        }
 
        void FTN(c_esmc_clockvalidate)(ESMC_Clock **ptr, const char *options,

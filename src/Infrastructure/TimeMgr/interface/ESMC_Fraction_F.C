@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction_F.C,v 1.11 2003/09/22 22:29:44 nscollins Exp $
+// $Id: ESMC_Fraction_F.C,v 1.12 2003/12/19 19:21:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,18 +62,27 @@ extern "C" {
               (int)status != ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_fractionreadrestart)(ESMC_Fraction *ptr, int *arg1,
-                                            int *arg2, int *arg3, int *status) {
-          int rc = (ptr)->ESMC_Fraction::ESMC_ReadRestart(*arg1, *arg2, *arg3);
+       void FTN(c_esmc_fractionreadrestart)(ESMC_Fraction *ptr, int *nameLen,
+                                            const char *name,
+                                            ESMC_IOSpec *iospec,
+                                            int *status) {
+          int rc = (ptr)->ESMC_FractionReadRestart(
+                 *nameLen,  // always present internal argument.
+                 name,      // required.
+                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?      
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_fractionwriterestart)(ESMC_Fraction *ptr, int *arg1,
-                                            int *arg2, int *arg3, int *status) {
-          int rc = (ptr)->ESMC_Fraction::ESMC_WriteRestart(arg1, arg2, arg3);
+       void FTN(c_esmc_fractionwriterestart)(ESMC_Fraction *ptr,
+                                             ESMC_IOSpec *iospec,
+                                             int *status) {
+          int rc = (ptr)->ESMC_FractionWriteRestart(
+              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
-              (int)status != ESMC_BAD_POINTER) *status = rc;
+              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;  
        }
 
        void FTN(c_esmc_fractionvalidate)(ESMC_Fraction *ptr,

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.20 2003/09/12 01:58:03 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.21 2003/12/19 19:21:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@ extern "C" {
                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                                 ESMC_Calendar *calendar, int *timeZone,
                                 char *timeString, int *dayOfWeek,
-                                int *dayOfMonth, ESMC_Time *midMonth,
+                                ESMC_Time *midMonth,
                                 ESMF_KIND_I4 *dayOfYear,
                                 ESMF_KIND_R8 *dayOfYear_r8,
                                 ESMC_TimeInterval *dayOfYear_intvl,
@@ -179,8 +179,6 @@ extern "C" {
                                          ESMC_NULL_POINTER : timeString),
                  ((void*)dayOfWeek  == (void*)ESMC_BAD_POINTER ?
                                          ESMC_NULL_POINTER : dayOfWeek),
-                 ((void*)dayOfMonth == (void*)ESMC_BAD_POINTER ?
-                                         ESMC_NULL_POINTER : dayOfMonth),
                  ((void*)midMonth   == (void*)ESMC_BAD_POINTER ?
                                          ESMC_NULL_POINTER : midMonth),
                  ((void*)dayOfYear  == (void*)ESMC_BAD_POINTER ?
@@ -210,21 +208,25 @@ extern "C" {
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, ESMF_KIND_I8 *s,
-                                        ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                        ESMC_Calendar *calendar, int *timeZone,
+       void FTN(c_esmc_timereadrestart)(ESMC_Time *ptr, int *nameLen,
+                                        const char *name,
+                                        ESMC_IOSpec *iospec,   
                                         int *status) {
-          int rc = (ptr)->ESMC_TimeReadRestart(*s, *sN, *sD, calendar,
-                                               *timeZone);
+          int rc = (ptr)->ESMC_TimeReadRestart(
+                 *nameLen,  // always present internal argument.
+                 name,      // required.
+                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?       
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
-       void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, ESMF_KIND_I8 *s,
-                                         ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
-                                         ESMC_Calendar *calendar, int *timeZone,
+       void FTN(c_esmc_timewriterestart)(ESMC_Time *ptr, 
+                                         ESMC_IOSpec *iospec,
                                          int *status) {
-          int rc = (ptr)->ESMC_TimeWriteRestart(s, sN, sD, calendar, timeZone);
+          int rc = (ptr)->ESMC_TimeWriteRestart(
+              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }

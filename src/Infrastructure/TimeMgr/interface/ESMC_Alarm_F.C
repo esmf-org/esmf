@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.16 2003/10/22 01:03:48 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.17 2003/12/19 19:21:21 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -244,54 +244,25 @@ extern "C" {
            *esmf_alarmEQ = (int) (**alarm1 == **alarm2);
        }
 
-       void FTN(c_esmc_alarmreadrestart)(ESMC_Alarm **ptr,
-                                         ESMC_Clock **clock,
-                                         ESMC_TimeInterval *ringInterval,
-                                         ESMC_TimeInterval *ringDuration,
-                                         ESMC_Time *ringTime,
-                                         ESMC_Time *prevRingTime,
-                                         ESMC_Time *stopTime,
-                                         ESMC_Time *ringBegin,
-                                         ESMC_Time *refTime,
-                                         int  *nRingDurationTimeSteps,
-                                         int  *nTimeStepsRinging,
-                                         bool *ringing,
-                                         bool *enabled,
-                                         bool *sticky,
-                                         int  *status) {
-          int rc = (*ptr)->ESMC_AlarmReadRestart(clock, ringInterval, 
-                                                ringDuration, ringTime,
-                                                prevRingTime, stopTime,
-                                                ringBegin, refTime,
-                                                *nRingDurationTimeSteps,
-                                                *nTimeStepsRinging,
-                                                *ringing, *enabled, *sticky);
-          if (status != ESMC_NULL_POINTER &&
-              (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+       void FTN(c_esmc_alarmreadrestart)(ESMC_Alarm **ptr, int *nameLen,
+                                         const char *name,
+                                         ESMC_IOSpec *iospec,
+                                         int *status) {
+          *ptr = ESMC_AlarmReadRestart(
+                 *nameLen,  // always present internal argument.
+                 name,      // required.
+                 ((void*)iospec == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : iospec),
+                 ((void*)status == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : status) );
        }
 
        void FTN(c_esmc_alarmwriterestart)(ESMC_Alarm **ptr,
-                                         ESMC_Clock **clock,
-                                         ESMC_TimeInterval *ringInterval,
-                                         ESMC_TimeInterval *ringDuration,
-                                         ESMC_Time *ringTime,
-                                         ESMC_Time *prevRingTime,
-                                         ESMC_Time *stopTime,
-                                         ESMC_Time *ringBegin,
-                                         ESMC_Time *refTime,
-                                         int  *nRingDurationTimeSteps,
-                                         int  *nTimeStepsRinging,
-                                         bool *ringing,
-                                         bool *enabled,
-                                         bool *sticky,
-                                         int  *status) {
-          int rc = (*ptr)->ESMC_AlarmWriteRestart(clock, ringInterval, 
-                                                 ringDuration, ringTime,
-                                                 prevRingTime, stopTime,
-                                                 ringBegin, refTime,
-                                                 nRingDurationTimeSteps,
-                                                 nTimeStepsRinging,
-                                                 ringing, enabled, sticky);
+                                          ESMC_IOSpec *iospec,
+                                          int *status) {
+          int rc = (*ptr)->ESMC_AlarmWriteRestart(
+              ((void*)iospec == (void*)ESMC_BAD_POINTER ?
+                                                  ESMC_NULL_POINTER : iospec) );
           if (status != ESMC_NULL_POINTER &&
               (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
