@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.51 2004/05/14 22:20:14 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.52 2004/05/14 23:31:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,9 @@
 #include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
 
+// include array of error messages
+#include "ESMC_ErrMsgs.C"
+
 //Global Variables
 ESMC_Log ESMC_LogDefault;
 FILE* logErrCFilePtr[10];
@@ -44,7 +47,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.51 2004/05/14 22:20:14 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.52 2004/05/14 23:31:07 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -392,7 +395,7 @@ bool ESMC_Log::ESMC_LogFoundError(
     rc=status;
     if (status!=ESMF_SUCCESS)
     {
-         ESMC_LogWrite("GeneralError",ESMC_LOG_ERROR,LINE,FILE,method);
+         ESMC_LogWrite(ESMC_LogGetErrMsg(status),ESMC_LOG_ERROR,LINE,FILE,method);
          result=true;
     }
     return result;
@@ -566,5 +569,27 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
     ESMC_LogWrite(strcat("Memory allocation error",msg),ESMC_LOG_ERROR,LINE,FILE,method);
     result=ESMF_TRUE;
     return true;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogGetErrMsg - LogGetErrMsg
+//
+// !INTERFACE:
+
+
+char *ESMC_Log::ESMC_LogGetErrMsg(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int rc
+    )
+// !DESCRIPTION:
+// Gets error message corresponding to rc
+//EOP
+{
+    return((char *)errMsg[rc]);
 }
 
