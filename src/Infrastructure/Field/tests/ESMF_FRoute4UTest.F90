@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.6 2004/10/05 15:39:43 svasquez Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.7 2004/11/03 18:27:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.6 2004/10/05 15:39:43 svasquez Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.7 2004/11/03 18:27:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,14 +57,13 @@
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_FieldDataMap) :: dm
       type(ESMF_RelLoc) :: rl
-      type(ESMF_DELayout) :: layout0, layout1, layout2
+      type(ESMF_DELayout) :: layout1, layout2
       type(ESMF_VM) :: vm
       type(ESMF_RouteHandle) :: rh
       integer :: delist(64)
       character (len = 20) :: fname, fname1, fname2, gname
       type(ESMF_IOSpec) :: ios
       type(ESMF_Field) :: f1, f2, f3, f4, f5
-      integer :: nDEs, nDE_i, nDE_j
       integer :: half, quart
       real (ESMF_KIND_R8):: min(2), max(2)
       integer :: counts(ESMF_MAXGRIDDIM)
@@ -85,20 +84,16 @@
 
       call ESMF_Initialize(vm=vm, rc=rc)
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
-      print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
-
-      ! Make a default 1xN layout
-      layout0 = ESMF_DELayoutCreate(vm, rc=rc)
-      call ESMF_DELayoutGet(layout0, deCount=nDEs, rc=rc)
+      call ESMF_TestStart(npets, ESMF_SRCLINE)
 
       ! exit early if we have less than 4 procs
-      if (nDEs .lt. 4) then
+      if (npets .lt. 4) then
         print *, "This test cannot run with less than 4 processors"
         goto 10
       endif
 
-      half = nDEs / 2
-      quart = nDEs / 4
+      half = npets / 2
+      quart = npets / 4
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
@@ -108,7 +103,7 @@
       layout1 = ESMF_DELayoutCreate(vm, (/ quart, 4 /), rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .eq. ESMF_FAILURE) then
-        print *, "cannot create 1x4 layout"
+        print *, "cannot create Nx4 layout"
         goto 10
       endif
 
@@ -127,7 +122,7 @@
       layout2 = ESMF_DELayoutCreate(vm, (/ half, 2 /), rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       if (rc .eq. ESMF_FAILURE) then
-        print *, "cannot create 2x2 layout"
+        print *, "cannot create Nx2 layout"
         goto 10
       endif
 
@@ -169,7 +164,7 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      write(failMsg, *) "Did not return ESMF_SUCESS"
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Grid distribute Test "
       call ESMF_GridDistribute(grid1, delayout=layout1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -218,7 +213,7 @@
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
                               name=gname, rc=status)
-      call ESMF_GridDistribute(grid2, delayout=layout1, rc=rc)
+      call ESMF_GridDistribute(grid2, delayout=layout2, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Creating a destination Test Grid"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -381,6 +376,7 @@
 
 10    print *, "end of Field Route test"
 
+      call ESMF_TestEnd(result, ESMF_SRCLINE)
       call ESMF_Finalize(rc)
 
       end program ESMF_FRouteUTest
