@@ -1,4 +1,4 @@
-% $Id: README_DES,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: README_DES,v 1.2 2002/07/25 17:08:56 eschwab Exp $
 
 ================================================================================
                                  README_DES
@@ -15,21 +15,22 @@ are typically segregated into separate files.  Several classes or modules
 may be included in a single design document.
 
 The structure of the design document accommodates the specification of
-multiple language interfaces.  For now, only Fortran templates are 
+multiple language interfaces.  For now, only Fortran and C++ templates are 
 actually included.
 
 --------------------------------------------------------------------------------
 Part		Template File      Description
 --------------------------------------------------------------------------------
-document	<comp>_desdoc.tex  Document shell, includes review status
+document	    <comp>_desdoc.tex  Document shell, includes review status
 
 synopsis        <comp>_syn.tex	   Brief description of the software 
                                    function 
 
 [algorithms]    <comp>_alg.tex	   Description of the continuous and discrete
-                                   scientific algorithms expressed in the software
+                                   scientific algorithms expressed in the
+                                   software
 
-requirements	<comp>_req.tex	   Scientific and computational requirements
+[requirements]	<comp>_req.tex	   Scientific and computational requirements
 
 [architecture]  <comp>_arch.tex    Description of the computational 
                                    architecture, including layering strategy 
@@ -44,8 +45,8 @@ design                             definition and class restrictions
 class           class_def.tex      Description of the class data structure.
 definition
 
-class           class_rest.tes     List of class restrictions due to design
-restrictions                       or implementation strategies
+[class          class_rest.tes     List of class restrictions due to design
+restrictions]                       or implementation strategies
 
 fortran files   prologue.F         Code headers instrumented for
                                    ProTeX; not included in the document but 
@@ -59,16 +60,16 @@ fapi            class_fapi.tex     Fortran application program interface;
 
 [fexamples]     class_fex.tex      Fortran examples
 
-[c/c++ files]   prologue.c         Code headers instrumented for
+[c++ files]     prologue.cc        Code headers instrumented for
                                    ProTeX; not included in the document but 
                                    used to create it
 
-[cparameters]   class_cparam.tex   C/C++ flags and enum types, if any
+[ccparameters]  class_ccparam.tex  C++ flags and enum types, if any
 
-[capi]          class_capi.tex     C/C++ application program interface;
+[ccapi]         class_ccapi.tex    C++ application program interface;
                                    this file should be generated using ProTeX
 
-[cexamples]     class_cex.tex      C/C++ examples
+[ccexamples]    class_ccex.tex     C++ examples
 
 [glossary]      <comp>_glos.tex	   Definitions, acronyms, abbreviations
 
@@ -83,11 +84,13 @@ including and specify the \input filenames of files that you are including.
 
 Process prologue files for each class or module using ProTeX:
 
-	do_fprotex <class> <prologue.F[90]>
+	do_fprotex  <class> <prologue.F[90]>
+	do_ccprotex <class> <prologue.cc>
 	
-	Here <prologue.F[90]> is the name of the Fortran file with the 
-        instrumented headers.
-        This script will produce a LaTeX file called <class>_fapi.tex.
+	Here <prologue.F[90]> and <prologue.cc> are the names of the Fortran and
+        C/C++ files, respectively, with the instrumented headers.
+        These scripts will produce LaTeX files called <class>_fapi.tex and
+        <class_ccapi.tex>, respectively.
 
 Build a dvi file from LaTeX documents:
 
@@ -105,10 +108,3 @@ The dvipdf tool can be used to produce a pdf:
 
 ================================================================================
 C. DeLuca (cdeluca@ucar.edu)                                      March 13, 2000
-
-
-
-
-
-
-
