@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.35 2003/07/18 01:51:26 eschwab Exp $
+// $Id: ESMC_DELayout.C,v 1.36 2003/07/18 21:03:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.35 2003/07/18 01:51:26 eschwab Exp $";
+           "$Id: ESMC_DELayout.C,v 1.36 2003/07/18 21:03:27 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2258,7 +2258,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutBcast - broadcast from a root DE to an entire layout
+// !IROUTINE:  ESMC_DELayoutBcast - broadcast from a source DE to an entire layout
 //
 // !INTERFACE:
       int ESMC_DELayout::ESMC_DELayoutBcast(
@@ -2269,12 +2269,12 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 // !ARGUMENTS:  
       void *buf,                // in  - buffer     
       int num,                  // in  - buffer length
-      int rootde_index,         // in  - index of root de
+      int srcde_index,         // in  - index of src de
       ESMC_DataKind type) {     // in  - data type of buffer
 
 //
 // !DESCRIPTION:
-//    Broadcasts data from a root {\tt ESMC\_DE} to all other {\tt ESMC\_DE}s in
+//    Broadcasts data from a source {\tt ESMC\_DE} to all other {\tt ESMC\_DE}s in
 //    the {\tt ESMC\_DELayout}.  
 //
 //EOP
@@ -2285,7 +2285,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   mpidatatype = comm.ESMC_DataKindToMPI[type];
 
-  if (MPI_Bcast(buf, num, mpidatatype, rootde_index, 
+  if (MPI_Bcast(buf, num, mpidatatype, srcde_index, 
                 decomm.mpicomm) == MPI_SUCCESS) {
     rc = ESMF_SUCCESS;
   }
@@ -2444,6 +2444,47 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of data array from one DE to all others in layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *sndArray,      // in  - send data array
+      void *rcvArray,      // out - received data array
+      int len,             // in  - data array chunk size
+      ESMC_DataKind type,  // in  - array data type
+      int srcDEid) {       // in  - src DE performing the scatter
+//
+// !DESCRIPTION:
+//    Perform MPI-like scatter of a data array from one DE to all others
+//    in the layout.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+  // TODO: make comm public and invoke directly rather than at DELayout level ?
+  //       (does not depend on any DELayout knowledge)
+
+  ESMC_DE *srcDE;
+  int rc;
+
+  // perform scatter operation across all DEs in the layout
+  rc = ESMC_DELayoutGetDE(srcDEid, &srcDE);
+  rc = comm.ESMC_CommScatter(sndArray, rcvArray, len, type, srcDE);
+  if (rc != ESMF_SUCCESS) {
+    cout << "ESMC_DELayoutScatter() error" << endl;
+  }
+
+  return(rc);
+
+ } // end ESMC_DELayoutScatter
+
+//-----------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_DELayoutScatter - Perform MPI-like scatter of local array from one DE to all others in layout
 //
 // !INTERFACE:
@@ -2456,7 +2497,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       ESMC_LocalArray *sndArray,  // in  - send data array
       ESMC_LocalArray *rcvArray,  // out - received data array
       int len,                    // in  - data array chunk size
-      int srcDEid) {              // in  - root DE performing the scatter
+      int srcDEid) {              // in  - src DE performing the scatter
 //
 // !DESCRIPTION:
 //    Perform MPI-like scatter of a local array from one DE to all others

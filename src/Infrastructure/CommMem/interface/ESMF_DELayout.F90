@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.24 2003/07/18 01:53:56 eschwab Exp $
+! $Id: ESMF_DELayout.F90,v 1.25 2003/07/18 21:03:27 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,9 +45,6 @@
       integer, parameter :: ESMF_COMMTYPE_MP=0, ESMF_COMMTYPE_SHR=2
 
       integer, parameter :: ESMF_SUM=0, ESMF_MIN=1, ESMF_MAX=2
-
-      integer, parameter :: ESMF_INT=0, ESMF_LONG=1, ESMF_FLOAT=2, &
-                            ESMF_DOUBLE=3
 
 ! exclusivity type used for allocating DEs within a layout to sub-layouts
 ! TODO:  move to ESMF_DE.F90 when created, to be symmetrical with C++ ?
@@ -111,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.24 2003/07/18 01:53:56 eschwab Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.25 2003/07/18 21:03:27 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -136,6 +133,26 @@
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_DELayoutCreate} functions.   
 !EOP 
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutScatter -- Scatter data from one DE to all others in a layout
+
+! !INTERFACE:
+      interface ESMF_DELayoutScatter
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_DELayoutScatterR8
+      module procedure ESMF_DELayoutScatterR4
+      module procedure ESMF_DELayoutScatterI4
+      module procedure ESMF_DELayoutScatterLA
+
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_DELayoutScatter} functions.
+!EOP
       end interface
 
 !==============================================================================
@@ -1344,11 +1361,149 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutScatter - Scatter local array among DEs
+! !IROUTINE: ESMF_DELayoutScatterR8 - Scatter real*8 array among DEs
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutScatter(layout, sndArray, rcvArray, len, &
-                                      srcDEid, rc)
+      subroutine ESMF_DELayoutScatterR8(layout, sndArray, rcvArray, len, &
+                                        srcDEid, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real(ESMF_IKIND_R8), intent(in) :: sndArray(:)
+      real(ESMF_IKIND_R8), intent(out) :: rcvArray(:)
+      integer, intent(in) :: len
+      integer, intent(in) :: srcDEid
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform an MPI-like scatter from one DE to all DEs in a layout
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutScatterNA(layout, sndArray, rcvArray, len, &
+                                    ESMF_KIND_R8, srcDEid, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutScatterR8 error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutScatterR8
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutScatterR4 - Scatter real*4 array among DEs
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutScatterR4(layout, sndArray, rcvArray, len, &
+                                        srcDEid, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real(ESMF_IKIND_R4), intent(in) :: sndArray(:)
+      real(ESMF_IKIND_R4), intent(out) :: rcvArray(:)
+      integer, intent(in) :: len
+      integer, intent(in) :: srcDEid
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform an MPI-like scatter from one DE to all DEs in a layout
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutScatterNA(layout, sndArray, rcvArray, len, &
+                                    ESMF_KIND_R4, srcDEid, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutScatterR4 error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutScatterR4
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutScatterI4 - Scatter inteter*4 array among DEs
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutScatterI4(layout, sndArray, rcvArray, len, &
+                                        srcDEid, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      integer(ESMF_IKIND_I4), intent(in) :: sndArray(:)
+      integer(ESMF_IKIND_I4), intent(out) :: rcvArray(:)
+      integer, intent(in) :: len
+      integer, intent(in) :: srcDEid
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform an MPI-like scatter from one DE to all DEs in a layout
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutScatterNA(layout, sndArray, rcvArray, len, &
+                                    ESMF_KIND_I4, srcDEid, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutScatterI4 error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutScatterI4
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutScatterLA - Scatter local array among DEs
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutScatterLA(layout, sndArray, rcvArray, len, &
+                                        srcDEid, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1377,17 +1532,16 @@
       endif
 
 !     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutScatter(layout, sndArray, rcvArray, len, &
-                                  srcDEid, status)
+      call c_ESMC_DELayoutScatterLA(layout, sndArray, rcvArray, len, &
+                                    srcDEid, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutScatter error"
+          print *, "ESMF_DELayoutScatterLA error"
           return
       endif
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_DELayoutScatter
+      end subroutine ESMF_DELayoutScatterLA
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1471,7 +1625,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutSendRecv(layout, sarray, rarray, snum, & 
-        rnum, sde_index, rde_index, ESMF_FLOAT, rc)
+        rnum, sde_index, rde_index, ESMF_KIND_R4, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutSendRecv error"
         return
@@ -1517,7 +1671,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutBcast(layout, array, num, rootde_index, &
-			        ESMF_FLOAT, rc)
+			        ESMF_KIND_R4, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutBcast error"
         return
