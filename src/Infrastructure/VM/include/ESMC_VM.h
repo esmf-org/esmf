@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.7 2004/04/20 18:59:51 nscollins Exp $
+// $Id: ESMC_VM.h,v 1.8 2004/04/26 15:58:14 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,18 +62,12 @@ class ESMC_VM : public vmachine {   // inherits from vmachine class
       ESMF_KIND_I4 *ssiid,          // out - ssid for this PET
       ESMF_KIND_I4 *nthreads,       // out - number of treads in group with PET
       ESMF_KIND_I4 *tid);           // out - thread id for this PET
-    // ESMC_VMFillFromVmachine allows to "copy" a vmachine object into a 
-    // ESMC_VM object. This is necessary because calling vmachine_enter on 
-    // a ESMC_VM object returns the child vmachine object and NOT an ESMC_VM
-    // object!
-    void ESMC_VMFillFromVmachine(vmachine &vmach);
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
 ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global vmachine
-void ESMC_VMFinalize(int *rc);        // Shut down and clean up global vmachine
-
-ESMC_VM *ESMC_VMGetGlobal(int *rc);    // Return pointer to global VM
+void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global vmachine
+ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
 
 // class definition
 class ESMC_VMPlan : public vmplan {   // inherits from vmplan class

@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.7 2004/04/23 22:03:56 nscollins Exp $
+// $Id: ESMC_VM.C,v 1.8 2004/04/26 15:58:15 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.7 2004/04/23 22:03:56 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.8 2004/04/26 15:58:15 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -209,40 +209,5 @@ int ESMC_VM::ESMC_VMGetPET(
   if (tid != ESMC_NULL_POINTER)
     *tid = this->vmachine_tid(*petid);
   return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMFillFromVmachine
-//
-// !INTERFACE:
-void ESMC_VM::ESMC_VMFillFromVmachine(
-//
-//
-// !ARGUMENTS:
-//
-  vmachine &vmach){         // in - vmachine to use
-//
-// !DESCRIPTION:
-//    Fill the VM members according to an existing vmachine object
-//
-//EOP
-//-----------------------------------------------------------------------------
-  mypet = vmach.mypet;
-  npets = vmach.npets;
-  lpid = vmach.lpid;
-  pid = vmach.pid;
-  tid = vmach.tid;
-  ncpet = vmach.ncpet;
-  cid = vmach.cid;
-  mpionly = vmach.mpionly;
-  mpi_g = vmach.mpi_g;
-  mpi_c = vmach.mpi_c;
-  pth_mutex2 = vmach.pth_mutex2;
-  pth_mutex = vmach.pth_mutex;
-  pth_finish_count = vmach.pth_finish_count;
-  commarray = vmach.commarray;
 }
 //-----------------------------------------------------------------------------
