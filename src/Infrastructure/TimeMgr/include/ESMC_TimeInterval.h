@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.17 2003/05/02 01:01:08 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.18 2003/05/02 22:08:30 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -172,7 +172,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
                                ESMF_IKIND_I8 *D) const;
 
-    // internal validation
+    // internal validation (TMG 7.1.1)
     int ESMC_TimeIntervalValidate(const char *options=0) const;
 
     // for testing/debugging
