@@ -1,5 +1,6 @@
-# $Id: makefile,v 1.5 2003/11/06 23:56:46 nscollins Exp $ 
+# $Id: makefile,v 1.6 2003/11/10 23:08:55 nscollins Exp $ 
 
+# by default, this makefile builds the executable named "Application"
 ALL:  executable
 
 CFLAGS    =
@@ -14,6 +15,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/AppDriver/seq_pairwise_fdriver_spmd
 
+# this includes all the ESMF definitions that we use below.
 include $(ESMF_DIR)/makefile
 
 DIRS = 
@@ -22,23 +24,30 @@ CLEANDIRS   =
 CLEANFILES  = *.o *.mod loadmap.txt
 CLOBBERDIRS =
 
+# object files which need to be compiled into the executable.
 APPOBJS = CouplerComponentTemplate.o GridComponentTemplate.o GridComp2.o \
           ParentGridComponentTemplate.o AppDriver.o
 
 #
+# Sample application for which we supply skeleton files to use as a 
+# starting point for a larger application.
 #
-# Components
-#
+
+# build the executable.
 executable: $(APPOBJS)
 	-$(SL_F_LINKER) -o Application $(APPOBJS) -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} -f $(CLEANFILES)
 
+# run the executable in parallel.
 run:  Application
 	-${MPIRUN} -np 4 ./Application
 
+# run only a single copy.
 rununi: Application
 	-${MPIRUN} -np 1 ./Application
 
 
+# files to be deleted when cleaning up.
 clean:
 	${RM} -f Application $(CLEANFILES)
+
