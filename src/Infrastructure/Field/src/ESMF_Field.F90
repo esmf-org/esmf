@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.44 2003/07/24 20:35:02 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.45 2003/07/25 23:15:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.44 2003/07/24 20:35:02 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.45 2003/07/25 23:15:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2083,6 +2083,8 @@
       integer :: i, gridrank, datarank, thisdim, thislength
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
+      integer :: decomps(ESMF_MAXGRIDDIM)
+      integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2102,6 +2104,13 @@
         print *, "ERROR in FieldAllGather: DataMapGet returned failure"
         return
       endif 
+!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
+!     if(status .NE. ESMF_SUCCESS) then 
+!       print *, "ERROR in FieldAllGather: GridGet returned failure"
+!       return
+!     endif 
+      decomps(1) = 1    ! TODO: remove this once the grid call is created
+      decomps(2) = 2
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
@@ -2110,6 +2119,12 @@
         print *, "ERROR in FieldAllGather: ArrayGet returned failure"
         return
       endif 
+
+      allocate(decompids(datarank), stat=status)
+      do i=1, datarank
+        decompids(i) = dimorder(i)
+        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
+      enddo
 
       ! Set the axis info on the array to pass thru to DistGrid
       do i=1, gridrank
@@ -2132,9 +2147,8 @@
 
       ! Call Array method to perform actual work -- need layout and decompids
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-!jw      call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
-!jw                               array, status)
-!  need to get decompids
+      call ESMF_ArrayAllGather(ftypep%localfield%localdata, layout, decompids, &
+                               array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: Array AllGather returned failure"
         return
@@ -2191,6 +2205,7 @@
       integer :: i, gridrank, datarank, thisdim, thislength
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
+      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2210,6 +2225,13 @@
         print *, "ERROR in FieldGather: DataMapGet returned failure"
         return
       endif 
+!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
+!     if(status .NE. ESMF_SUCCESS) then 
+!       print *, "ERROR in FieldGather: GridGet returned failure"
+!       return
+!     endif 
+      decomps(1) = 1    ! TODO: remove this once the grid call is created
+      decomps(2) = 2
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
@@ -2218,6 +2240,11 @@
         print *, "ERROR in FieldGather: ArrayGet returned failure"
         return
       endif 
+
+      do i=1, datarank
+        decompids(i) = dimorder(i)
+        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
+      enddo
 
       ! Set the axis info on the array to pass thru to DistGrid
       do i=1, gridrank
@@ -2238,11 +2265,10 @@
         return
       endif 
 
-      ! Call Array method to perform actual work -- need layout and decompids
+      ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-!jw      call ESMF_ArrayGather(ftypep%localfield%localdata, layout, decompids, &
-!jw                            destination_de, array, status)
-!  needs decompids
+      call ESMF_ArrayGather(ftypep%localfield%localdata, layout, decompids, &
+                            destination_de, array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: Array Gather returned failure"
         return
@@ -2304,6 +2330,7 @@
       integer :: i, gridrank, datarank, thisdim, thislength
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
+      integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2318,17 +2345,36 @@
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indicies and the grid indicies.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
+                           dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldScatter: DataMapGet returned failure"
         return
       endif 
+!     call ESMF_GridGet(ftypep%grid, decomps, rc=status)   !TODO
+!     if(status .NE. ESMF_SUCCESS) then 
+!       print *, "ERROR in FieldScatter: GridGet returned failure"
+!       return
+!     endif 
+      decomps(1) = 1    ! TODO: remove this once the grid call is created
+      decomps(2) = 2
 
-      ! Call Array method to perform actual work -- need layout and decompids
+      ! And get the Array sizes
+      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+                         counts=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldGather: ArrayGet returned failure"
+        return
+      endif 
+
+      do i=1, datarank
+        decompids(i) = dimorder(i)
+        if(dimorder(i).ne.0) decompids(i) = decomps(dimorder(i))
+      enddo
+
+      ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-!jw      call ESMF_ArrayScatter(array, layout, decompids, source_de, dstarray,
-!jw                             status)
-!  need to get decompids
+      call ESMF_ArrayScatter(array, layout, decompids, source_de, dstarray, &
+                             status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldScatter: Array Scatter returned failure"
         return
