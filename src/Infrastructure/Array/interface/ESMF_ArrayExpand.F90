@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.17 2004/03/11 16:16:35 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.18 2004/03/11 17:22:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.17 2004/03/11 16:16:35 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.18 2004/03/11 17:22:35 svasquez Exp $'
 
 !==============================================================================
 !
@@ -834,7 +834,7 @@ end interface
         end subroutine ESMF_ArrayConstructF90Ptr
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArraySetData
 !
 ! !INTERFACE:
@@ -853,10 +853,11 @@ end interface
 !
 ! TODO: this needs to be macroized for T/K/R, just like create
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:
 
 !
+!	Changed BOP/EOP to BOPI/EOPI until code is added.
 ! TODO: code goes here
 !
         rc = ESMF_FAILURE
@@ -19441,20 +19442,21 @@ end interface
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Deallocate data contents for an array created from the C++ interface.
-! The arguments are:
-! \begin{description}
-! \item[array]
-! A partially created {\tt Array} object.
-! \item[rank]
-! The {\tt Array} rank.
-! \item[type]
-! The {\tt Array} type (integer, real/float, etc).
-! \item[kind]
-! The {\tt Array} kind (short/2, long/8, etc).
-! \item[{[rc]}]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-! \end{description}
+!      Deallocate data contents for an array created from the C++ interface.
+!
+!      The arguments are:
+!      \begin{description}
+!      \item[array]
+!      A partially created {\tt Array} object.
+!      \item[rank]
+!      The {\tt Array} rank.
+!      \item[type]
+!      The {\tt Array} type (integer, real/float, etc).
+!      \item[kind]
+!      The {\tt Array} kind (short/2, long/8, etc).
+!      \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
