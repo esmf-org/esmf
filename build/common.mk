@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.3 2003/09/04 20:01:37 nscollins Exp $
+#  $Id: common.mk,v 1.4 2003/09/08 17:37:15 flanigan Exp $
 #
 #  common.mk
 #
@@ -628,81 +628,20 @@ tree_run_demo: $(DEMO_RUN)
 #
 # Recursive calls
 #
-tree: ${ACTION}
+tree: $(ACTION)
 	@if [ "${DIRS}" != "" ]; then \
 	  for dir in ${DIRS} foo ; do \
             if [ -d $$dir ]; then \
-	      r=`egrep requirespackage $$dir/makefile`; \
-              if [ "$$?" = 0 ]; then \
-                f=0; \
-                for l in ${PCONF} foo ; do \
-                  echo $$r | egrep "'$$l'" > /dev/null; \
-                  if [ "$$?" = 0 ]; then \
-	            f=1; \
-                    break; \
-                  fi; \
-                done ; \
-                if [ "$$f" = 0 ]; then \
-                  continue; \
-                fi; \
+              (cd $$dir ; \
+              echo $(ACTION) in: `pwd`; \
+              $(MAKE) -f makefile tree ACTION=$(ACTION));\
+              if [ "$$?" != 0 ]; then \
+                exit 1; \
               fi; \
-              r=`egrep requireslanguage $$dir/makefile`; \
-              if [ "$$?" = 0 ]; then \
-                echo $$r | egrep ${ESMC_LANGUAGE} > /dev/null; \
-                if [ "$$?" = 1 ]; then \
-                  continue; \
-                fi; \
-              fi; \
-              r=`egrep requiresscalar $$dir/makefile`; \
-              if [ "$$?" = 0 ]; then \
-                echo $$r |  egrep ${ESMC_SCALAR} > /dev/null; \
-                if [ "$$?" = 1 ]; then \
-                  continue; \
-                fi; \
-              fi; \
-            else \
-              continue; \
             fi; \
-            (cd $$dir ; \
-            echo ${ACTION} in: `pwd`; \
-            ${OMAKE} -f makefile tree ACTION=${ACTION} ESMF_BOPT=${ESMF_BOPT} ESMF_ARCH=${ESMF_ARCH});\
-            if [ "$$?" != 0 ]; then \
-              exit 1; \
-            fi; \
-	  done ; \
+	  done; \
         fi
 
-# Performs the specified action throughout the directory tree
-ttree: ${ACTION}
-	@-if [ "${DIRS}" != "" ]; then \
-	for dir in ${DIRS} foo ; do if [ -d $$dir ]; then \
-	(cd $$dir ; echo ${ACTION} in: `pwd`; \
-	${OMAKE} -f makefile ttree ACTION=${ACTION} ESMF_BOPT=${ESMF_BOPT} \
-	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
-	done ; fi
-
-#This target goes through all the dirs that contains a makefile
-alltree_makefile: ${ACTION}
-	-@DIRS=`ls`; \
-	for dir in $$DIRS foo ; do if [ -f $$dir/makefile ]; then \
-	(cd $$dir ; echo ${ACTION} in: `pwd`; \
-	${OMAKE} -f makefile alltree_makefile ACTION=${ACTION} ESMF_BOPT=${ESMF_BOPT} \
-	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
-	done
-# This target goes through all dirs specified by DIRS,EDIRS, and 
-# excludes dirs specified by $XDIRS
-alltree: ${ACTION}
-	@-if [ "${DIRS} ${EDIRS}" != " " ]; then \
-	NDIRS="${DIRS} ${EDIRS}" ;\
-	if [ "${XDIRS}" != "" ]; then \
-	for XDIR in ${XDIRS} qwertyuiop ; do \
-	NDIRS=`echo $$NDIRS | sed s/$$XDIR//g`; \
-	done; fi ; \
-	for dir in $$NDIRS foo ; do if [ -d $$dir ]; then \
-	(cd $$dir ; echo ${ACTION} in: `pwd`; \
-	${OMAKE} -f makefile alltree ACTION=${ACTION} ESMF_BOPT=${ESMF_BOPT} \
-	ESMF_ARCH=${ESMF_ARCH}  ) ;fi; \
-	done ; fi
 
 # --------------------------------------------------------------------
 .SUFFIXES: .f .f90 .F .F90 ${SUFFIXES} .C .cc .cpp .r .rm .so
@@ -728,9 +667,6 @@ build_shared:
 	    rm -rf tmp_$$LIBNAME ;\
 	fi ;\
 	done 
-
-
-
 
 
 #
