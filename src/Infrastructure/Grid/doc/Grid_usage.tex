@@ -1,12 +1,12 @@
-% $Id: Grid_usage.tex,v 1.2 2003/05/07 19:34:19 jwolfe Exp $
+% $Id: Grid_usage.tex,v 1.3 2003/10/08 21:06:21 jwolfe Exp $
 
 %\subsection{Design}
 
 % <Describe strategy for overall class design.>
 
 
-The Grid class aggregates two internal classes: a DistGrid class
-and a PhysGrid class.  The separation allows the code to differentiate
+Each Grid contains at least one Distributed Grid and one Physical Grid.  
+The separation into two internal classes allows the code to differentiate
 between functions which define the local decomposition of data and
 the local representation of the grid.  The Grid class itself maintains
 general information about the global grid (e.g. the grid type, staggering,
