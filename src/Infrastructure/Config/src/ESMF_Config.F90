@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.17 2004/09/10 16:26:51 theurich Exp $
+! $Id: ESMF_Config.F90,v 1.18 2004/09/22 17:17:43 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -1995,6 +1995,7 @@ end function luavail
 	    form	='formatted',	&
 	    access	='sequential',	&
 	    status	='unknown',	&
+	    action	='readwrite',	&
 	    position	='append',	&
 	    iostat	=ier		)
 
@@ -2006,6 +2007,7 @@ end function luavail
 	    form	='formatted',	&
 	    access	='sequential',	&
 	    status	=status,	&
+	    action	='read',	&
 	    position	='asis',	&
 	    iostat	=ier		)
 
