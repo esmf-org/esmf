@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.13 2004/06/08 15:51:37 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.14 2004/06/09 22:15:51 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -575,7 +575,6 @@
     !Bug report 791282 has been filed.
     !This test will be uncommented when the bug is fixed
     ! this deletes the space
-    !EX_UTest
     !write(failMsg, *) "Did not return ESMF_SUCCESS"
     !write(name, *) "Destroying a Local Array 3D DATA_COPY Real Data with deallocated array Test"
     !call ESMF_LocalArrayDestroy(array4)
