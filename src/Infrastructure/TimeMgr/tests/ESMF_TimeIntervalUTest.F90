@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.26 2004/05/21 17:22:47 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.27 2004/06/05 00:14:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,15 +37,15 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.26 2004/05/21 17:22:47 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.27 2004/06/05 00:14:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, totalDays, &
-                 hours, minutes, secs, testResults, ans
+      integer :: rc, H, M, S, MM, DD, D, YY, days, months, years, &
+                 hours, secs, ans
       logical :: bool
 
       ! individual test name
@@ -56,14 +56,11 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
-      type(ESMF_Time) :: startTime, endTime, stopTime, startTime2, stopTime2
-      type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
+      type(ESMF_Time) :: startTime, endTime
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
                              noLeapCalendar, day360Calendar
-      type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       type(ESMF_TimeInterval) :: absoluteTime
-      integer(ESMF_KIND_I8) :: advanceCounts, year, days2, month, minute, second
-      integer(ESMF_KIND_I4) :: day, hour
+      integer(ESMF_KIND_I8) :: days2
       real(ESMF_KIND_R8) :: ratio
 
 
@@ -1713,10 +1710,10 @@
 
 
       !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
+      write(failMsg, *) "Should not return ESMF_SUCCESS."
       call ESMF_TimeIntervalGet(timeStep2, s=secs, rc=rc)
-      write(name, *) "Time Step Get of uninitalized Time Interval Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      write(name, *) "Time Step Get of no calendar Time Interval Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       print *, " Seconds = ", secs
 

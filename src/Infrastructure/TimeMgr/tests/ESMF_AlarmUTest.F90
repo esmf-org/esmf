@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.13 2004/05/20 19:25:14 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.14 2004/06/05 00:14:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,14 +35,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.13 2004/05/20 19:25:14 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.14 2004/06/05 00:14:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, MM, DD, YY, days, totalDays, secs, testResults
+      integer :: rc
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -57,23 +57,14 @@
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
       logical :: willRingNext
 
-      ! Random number
-      real :: ranNum
-      integer :: seed(32)
-      integer :: timevals(8)
-
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
-      type(ESMF_CalendarType) :: cal_type
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep, timeStep2
+      type(ESMF_TimeInterval) :: timeStep
       type(ESMF_Time) :: startTime, stopTime, alarmTime, nextTime
-      type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
-      type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
-      integer(ESMF_KIND_I8) :: advanceCounts, year, day2, month, minute, second
-      integer(ESMF_KIND_I4) :: day, hour
+      type(ESMF_Time) :: currentTime
       character(ESMF_MAXSTR) :: aName
 
 

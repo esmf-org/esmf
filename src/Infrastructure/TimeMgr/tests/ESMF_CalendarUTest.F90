@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.25 2004/05/24 20:18:38 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.26 2004/06/05 00:14:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.25 2004/05/24 20:18:38 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.26 2004/06/05 00:14:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, MM, DD, YY, days, totalDays, secs, testResults
+      integer :: rc, days, totalDays 
       integer(ESMF_KIND_I8) :: year
       integer(ESMF_KIND_I8) :: julianDay, advanceCounts
 
@@ -54,22 +54,18 @@
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
 
-      logical :: bool, calendarsEqual, calendarsNotEqual
+      logical :: calendarsEqual, calendarsNotEqual
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, &
+      type(ESMF_Clock) :: clock_gregorian, &
                           clock_no_leap, clock_360day
       type(ESMF_Time) :: startTime, stopTime
 
-      ! Random number
-      real :: ranNum
-      integer :: seed(32)
-      integer :: timevals(8)
-
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar, gregorianCalendar1, gregorianCalendar2, &
-				julianDayCalendar,  no_leapCalendar, esmf_360dayCalendar
+      type(ESMF_Calendar) :: gregorianCalendar, gregorianCalendar1, &
+                             gregorianCalendar2, julianDayCalendar, &
+                             no_leapCalendar, esmf_360dayCalendar
       type(ESMF_Calendar) :: customCalendar
-      type(ESMF_CalendarType) :: cal_type, cal_type1, cal_type2, cal_type3
+      type(ESMF_CalendarType) :: cal_type, cal_type1, cal_type2
       integer, dimension(MONTHS_PER_YEAR) :: &
              days_per_month =(/30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30, 30/)
       integer, dimension(MONTHS_PER_YEAR) :: &
@@ -116,18 +112,18 @@
 #ifdef ESMF_EXHAUSTIVE
       !EX_UTest
       ! print out initialized variables
-      ! Test that print subroutine returns ESMF_SUCESS
-      write(failMsg, *) " Should return ESMF_SUCCESS"
+      ! Test that print subroutine doesn't return ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Un-initialized Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
       ! Validate No Leap Calendar
-      ! Test that validate subroutine returns ESMF_SUCESS
+      ! Test that validate subroutine doesn't return ESMF_SUCESS
       write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Validate un-initialized Calendar Test"
       call ESMF_CalendarValidate(gregorianCalendar, rc=rc)
@@ -471,11 +467,11 @@
 
       !EX_UTest
       ! print out initialized variables
-      ! Test that print subroutine returns ESMF_SUCESS
-      write(failMsg, *) " Should return ESMF_SUCCESS"
-      write(name, *) "Initialized Custom Type Calendar Print Test"
+      ! Test that print subroutine doesn't return ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Un-initialized Custom Type Calendar Print Test"
       call ESMF_CalendarPrint(customCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -508,11 +504,11 @@
 
       !EX_UTest
       ! print out initialized variables
-      ! Test that print subroutine returns ESMF_SUCESS
-      write(failMsg, *) " Should return ESMF_SUCCESS"
-      write(name, *) "Initialized Custom Type Calendar Print Test"
+      ! Test that print subroutine doesn't return ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Un-initialized Custom Type Calendar Print Test"
       call ESMF_CalendarPrint(customCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -546,11 +542,11 @@
 
       !EX_UTest
       ! print out initialized variables
-      ! Test that print subroutine returns ESMF_SUCESS
-      write(failMsg, *) " Should return ESMF_SUCCESS"
-      write(name, *) "Initialized Custom Type Calendar Print Test"
+      ! Test that print subroutine doesn't return ESMF_SUCESS
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Un-initialized Custom Type Calendar Print Test"
       call ESMF_CalendarPrint(customCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
@@ -670,12 +666,12 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Test Setting the Start Time for the Julian Day Calencar
-      write(failMsg, *) " Should return ESMF_SUCCESS"
+      ! Test Setting the Start Time for the Julian Day Calendar
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit minus 1 day of Julian Day Calendar Test"
       call ESMF_TimeSet(startTime, d=-32045, &
                                    calendar=julianDayCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------

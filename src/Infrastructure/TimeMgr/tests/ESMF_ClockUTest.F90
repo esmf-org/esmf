@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.70 2004/05/21 17:22:47 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.71 2004/06/05 00:14:02 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.70 2004/05/21 17:22:47 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.71 2004/06/05 00:14:02 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -54,7 +54,7 @@
 
       logical :: bool, clocksEqual, clocksNotEqual
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1, clock2, clock_gregorian, clock_julian, &
+      type(ESMF_Clock) :: clock, clock1, clock2, clock_gregorian, &
                           clock_no_leap, clock_360day
 
       ! Random number
@@ -68,11 +68,11 @@
       type(ESMF_CalendarType) :: cal_type
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep, timeStep2
+      type(ESMF_TimeInterval) :: timeStep
       type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2
       type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
-      integer(ESMF_KIND_I8) :: advanceCounts, year, day2, month, minute, second
+      integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
 
 
@@ -655,10 +655,6 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
-      call ESMF_ClockDestroy(clock, rc)
-
-      ! ----------------------------------------------------------------------------
-
 
       !EX_UTest
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -1142,11 +1138,11 @@
      ! ----------------------------------------------------------------------------
 
       !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
+      write(failMsg, *) "Should not return ESMF_SUCCESS."
       call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=31, &
                                         calendar=esmf_360dayCalendar, rc=rc)
       write(name, *) "Start Time set to illegite day in 360 day Calendar Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -1154,11 +1150,11 @@
 
 
       !EX_UTest
-      write(failMsg, *) "Should return ESMF_SUCCESS."
+      write(failMsg, *) "Should not return ESMF_SUCCESS."
       call ESMF_TimeSet(startTime, yy=-100, mm=1, dd=380, &
                                         calendar=esmf_360dayCalendar, rc=rc)
       write(name, *) "Start Time set to illegite day in 360 day Calendar Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
 
