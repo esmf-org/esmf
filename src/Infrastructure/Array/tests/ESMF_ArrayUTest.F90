@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.3 2004/05/19 18:02:09 svasquez Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.4 2004/06/15 22:45:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.3 2004/05/19 18:02:09 svasquez Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.4 2004/06/15 22:45:07 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -78,12 +78,13 @@
 !   !  Create an Array Test
     ! The following code core dumps it will be uncommented
     ! when bug 932018 is fixed.
-    !allocate(f90ptr1(10,20))
-    !write(failMsg, *) "Did not return ESMF_SUCCESS" 
-    !write(name, *) "Create Array Test"
-    !!array1 =  ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    !print *, "array 1 create returned"
+    !EX_UTest
+    allocate(f90ptr1(10,20))
+    write(failMsg, *) "Did not return ESMF_SUCCESS" 
+    write(name, *) "Create Array Test"
+    array1 =  ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    print *, "array 1 create returned"
 
 !-------------------------------------------------------------------------------
 !   !  Create an Array Test
