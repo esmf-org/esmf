@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout_F.C,v 1.12 2004/04/13 16:01:57 nscollins Exp $
+// $Id: ESMC_newDELayout_F.C,v 1.13 2004/04/20 19:02:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,6 +48,17 @@ extern "C" {
     *status = ESMC_newDELayoutDestroy(*ptr);
   }
        
+  void FTN(c_esmc_ndelayoutcreateglobal)(int *status){
+    *status = ESMC_newDELayoutCreateGlobal();
+  }
+
+  void FTN(c_esmc_ndelayoutgetglobal)(ESMC_newDELayout **ptr, int *status){
+    // return a pointer to the global layout
+    *ptr = ESMC_newDELayoutGetGlobal();
+    if (status) 
+      *status = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
+  }
+
   void FTN(c_esmc_ndelayoutget)(ESMC_newDELayout **ptr,
     int *deCount, int *dimCount, int *localDeCount, int *localDeList,
     int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 

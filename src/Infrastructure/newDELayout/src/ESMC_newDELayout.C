@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.13 2004/04/19 21:53:05 nscollins Exp $
+// $Id: ESMC_newDELayout.C,v 1.14 2004/04/20 19:02:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,9 +33,11 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.13 2004/04/19 21:53:05 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.14 2004/04/20 19:02:32 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
+// global default layout
+static ESMC_newDELayout *GlobalDELayout = NULL;
 
 //-----------------------------------------------------------------------------
 //
@@ -354,6 +356,36 @@ int ESMC_newDELayout::ESMC_newDELayoutDestruct(void){
 }
 //-----------------------------------------------------------------------------
 
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_newDELayoutCreateGlobal
+//
+// !INTERFACE:
+int ESMC_newDELayoutCreateGlobal(void){
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//    Create the default layout.
+//
+//EOPI
+//-----------------------------------------------------------------------------
+
+  int rc;
+  ESMC_VM *globalVM;
+
+  globalVM = ESMC_VMGetGlobal(&rc);
+
+  GlobalDELayout = new ESMC_newDELayout;
+  rc = GlobalDELayout->ESMC_newDELayoutConstruct1D(*globalVM, NULL, 0, 0, 
+                                                     ESMF_TRUE);
+
+  return rc;
+
+}
+
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -461,6 +493,28 @@ int ESMC_newDELayout::ESMC_newDELayoutGetDE(
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGetGlobal
+//
+// !INTERFACE:
+ESMC_newDELayout *ESMC_newDELayoutGetGlobal(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS: 
+    void){
+//
+// !DESCRIPTION:
+//    Return the default global layout.
+//
+//EOP
+//-----------------------------------------------------------------------------
+
+  return GlobalDELayout;
+}
 
 
 //-----------------------------------------------------------------------------
