@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.134 2005/01/12 22:08:00 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.135 2005/02/09 00:40:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,7 +127,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.134 2005/01/12 22:08:00 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.135 2005/02/09 00:40:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4122,12 +4122,14 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      integer :: i, i1, j1
+      integer :: i, i1, j1, gridBoundWidth
+      integer, dimension(dimCount) :: counts, compCount
       integer, dimension(:), allocatable :: cellType
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
       logical :: dummy
       logical, dimension(dimCount) :: coordAligned, coordEqualSpaced, coordCyclic
       real(ESMF_KIND_R8), dimension(dimCount) :: localMin, localMax
+      real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
       type(ESMF_CoordSystem) :: coordSystem
       type(ESMF_CoordType), dimension(dimCount) :: coordType
       type(ESMF_Grid) :: gridp
@@ -4139,6 +4141,8 @@
 
       gridp%ptr => grid
 
+      ! initialize some values
+      gridBoundWidth = 1   ! TODO: move into structure, make input?
       localMin =  99999999.
       localMax = -99999999.
 
@@ -4156,7 +4160,41 @@
         if (coord2(j1+1).gt.localMax(2)) localMax(2) = coord2(j1+1)
       enddo
 
-      ! allocate and load cell type masksvertex,
+      ! modify global counts to include ghost region
+      compCount(1) = size(coord1)
+      compCount(2) = size(coord2)
+      counts(1) = compCount(1) + 2*gridBoundWidth
+      counts(2) = compCount(2) + 2*gridBoundWidth
+
+      ! allocate and load coords for use, which includes calculating the coordinates
+      ! in the halo cells which might be needed for certain staggerings
+      allocate(coordUse1(counts(1)), &
+               coordUse2(counts(2)), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "coordUse arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
+      do i = 1,compCount(1)
+        coordUse1(i+gridBoundWidth) = coord1(i)
+      enddo
+      do i = gridBoundWidth,1,-1
+        coordUse1(i) = coordUse1(i+1) - (coord1(2)-coord1(1))
+      enddo
+      do i = compCount(1)+gridBoundWidth,compCount(1)+2*gridBoundWidth-1
+        coordUse1(i+1) = coordUse1(i) &
+                       + (coord1(compCount(1))-coord1(compCount(1)-1))
+      enddo
+      do i = 1,compCount(2)
+        coordUse2(i+gridBoundWidth) = coord2(i)
+      enddo
+      do i = gridBoundWidth,1,-1
+        coordUse2(i) = coordUse2(i+1) - (coord2(2)-coord2(1))
+      enddo
+      do i = compCount(2)+gridBoundWidth,compCount(2)+2*gridBoundWidth-1
+        coordUse2(i+1) = coordUse2(i) &
+                       + (coord2(compCount(2))-coord2(compCount(2)-1))
+      enddo
+
+      ! allocate and load cell type masks
       allocate(cellType(myCount), stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "cellType arrays", &
                                      ESMF_CONTEXT, rc)) return
@@ -4255,13 +4293,13 @@
 
       ! set coordinates
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, myCount, &
-                               myIndices, relloc, coord1, coord2, &
+                               myIndices, relloc, coordUse1, coordUse2, &
                                total=.true., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
       call ESMF_LRGridSetCoord(grid, physGridId, dimCount, myCount, &
-                               myIndices, relloc, coord1, coord2, &
+                               myIndices, relloc, coordUse1, coordUse2, &
                                total=.false., rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -4274,7 +4312,9 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      deallocate(cellType, stat=localrc)
+      deallocate(cellType, &
+                 coordUse1, &
+                 coordUse2, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocating local arrays", &
                                      ESMF_CONTEXT, rc)) return
 
