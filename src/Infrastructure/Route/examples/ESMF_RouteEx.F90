@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.20 2004/06/11 19:50:24 svasquez Exp $
+! $Id: ESMF_RouteEx.F90,v 1.21 2004/06/21 09:48:11 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -169,7 +169,7 @@
     call ESMF_FieldRegridRelease(regrid_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_RouteHandleDestroy(redist_rh)
+    call ESMF_RouteHandleDestroy(regrid_rh)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     print *, "Regrid example 3 returned"
