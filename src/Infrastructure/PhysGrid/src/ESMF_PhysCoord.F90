@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.1 2003/10/09 22:59:12 jwolfe Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.2 2003/10/14 20:32:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -164,7 +164,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.1 2003/10/09 22:59:12 jwolfe Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.2 2003/10/14 20:32:05 nscollins Exp $'
 
 !==============================================================================
 !
@@ -259,25 +259,25 @@
 !          Name to use for this coordinate.  Generally, these should
 !          follow standard CF conventions to allow the framework to
 !          treat certain coordinates correctly (e.g. multi-valued longitude).
-!     \item[[units]]
+!     \item[{[units]}]
 !          Units used for this coordinate (e.g. degrees).
-!     \item[[aligned]]
+!     \item[{[aligned]}]
 !          True if physical coordinate is aligned with logical coordinate.
-!     \item[[equal\_spaced]]
+!     \item[{[equal\_spaced]}]
 !          True when coordinate points are equally-spaced along axis.
-!     \item[[cyclic]]
+!     \item[{[cyclic]}]
 !          True if coordinate is cyclic.
-!     \item[[min\_val]]
+!     \item[{[min\_val]}]
 !          Minimum value for grid point along this coordinate.
-!     \item[[max\_val]]
+!     \item[{[max\_val]}]
 !          Maximum value for grid point along this coordinate.
-!     \item[[origin\_offset]]
+!     \item[{[origin\_offset]}]
 !          If the grid origin is offset or rotated from coordinate system
 !          origin, this specifies the offset in this coordinate direction.
 !          Note that this is the offset for the global grid, so if this
 !          is being defined for a local DE, the offset refers only to the
 !          origin of the full grid.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -285,14 +285,16 @@
 !EOP
 
       type(ESMF_PhysCoordType), pointer :: physcoord ! Pointer to new PhysCoord
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize pointers
       nullify(physcoord)
       nullify(ESMF_PhysCoordCreate%ptr)
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -386,17 +388,19 @@
 !     \begin{description}
 !     \item[physcoord]
 !          The {\tt ESMF\_PhysCoord} object which is to be destroyed.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -462,39 +466,41 @@
 !     \item[physcoord]
 !          The {\tt ESMF\_PhysCoord} object for which attributes are
 !          to be set.
-!     \item[[name]]
+!     \item[{[name]}]
 !          Name to use for this coordinate.  Generally, these should
 !          follow standard CF conventions to allow the framework to
 !          treat certain coordinates correctly (e.g. multi-valued longitude).
-!     \item[[units]]
+!     \item[{[units]}]
 !          Units used for this coordinate (e.g. degrees).
-!     \item[[aligned]]
+!     \item[{[aligned]}]
 !          True if physical coordinate is aligned with logical coordinate.
-!     \item[[equal\_spaced]]
+!     \item[{[equal\_spaced]}]
 !          True when coordinate points are equally-spaced along axis.
-!     \item[[cyclic]]
+!     \item[{[cyclic]}]
 !          True if coordinate is cyclic.
-!     \item[[min\_val]]
+!     \item[{[min\_val]}]
 !          Minimum value for grid point along this coordinate.
-!     \item[[max\_val]]
+!     \item[{[max\_val]}]
 !          Maximum value for grid point along this coordinate.
-!     \item[[origin\_offset]]
+!     \item[{[origin\_offset]}]
 !          If the grid origin is offset or rotated from coordinate system
 !          origin, this specifies the offset in this coordinate direction.
 !          Note that this is the offset for the global grid, so if this
 !          is being defined for a local DE, the offset refers only to the
 !          origin of the full grid.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -570,17 +576,19 @@
 !     \begin{description}
 !     \item[physcoord]
 !          Existing {\tt ESMF\_PhysCoord} for which name is requested.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -627,17 +635,19 @@
 !     \begin{description}
 !     \item[physcoord]
 !          Existing {\tt ESMF\_PhysCoord} for which units are requested.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -683,24 +693,26 @@
 !     \begin{description}
 !     \item[physcoord]
 !          Existing {\tt ESMF\_PhysCoord} for which units are requested.
-!     \item[[min\_val]]
+!     \item[{[min\_val]}]
 !          Minimum extent of this coordinate.
-!     \item[[max\_val]]
+!     \item[{[max\_val]}]
 !          Maximum extent of this coordinate.
-!     \item[[origin\_offset]]
+!     \item[{[origin\_offset]}]
 !          Used if coordinates have different origin from the coordinate
 !          system origin.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -747,17 +759,19 @@
 !     \begin{description}
 !     \item[physcoord]
 !          Existing {\tt ESMF\_PhysCoord} to check for alignment.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -802,17 +816,19 @@
 !     \begin{description}
 !     \item[physcoord]
 !          Existing {\tt ESMF\_PhysCoord} to check for equal spacing.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -856,17 +872,19 @@
 !     \begin{description}
 !     \item[physcoord]
 !          Existing {\tt ESMF\_PhysCoord} to check for cyclic attribute.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -918,20 +936,21 @@
 !     \item[physcoord]
 !          Physical coordinate object to check whether point lies within
 !          coordinate axis extents.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      integer :: status=ESMF_FAILURE                 ! Error status
-      logical :: rcpresent=.FALSE.                   ! Return code present
-
-      real (ESMF_KIND_R8) :: &
-         minlon, maxlon, pi   ! for treating double-value issue in longitude
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
+      real (ESMF_KIND_R8) ::i minlon, maxlon, pi   
+                                ! for treating double-value issue in longitude
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
@@ -1005,10 +1024,10 @@
 !     \begin{description}
 !     \item[physcoord] 
 !          Physcoord whose info is to be printed.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Print ptions that control the type of information and level of 
 !          detail.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
