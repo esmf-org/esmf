@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.2 2004/05/26 18:30:45 nscollins Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.3 2004/06/12 18:51:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,12 +12,12 @@
 !
       program ESMF_FieldDataMapUTest
 
------------------------------------------------------------------------
+!-----------------------------------------------------------------------
 ! Include file, for ESMF_SRCLINE which must be done by the preprocessor
 
 #include <ESMF_Macros.inc>
 
------------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !BOP
 ! !PROGRAM: ESMF_FieldDataMapUTest - One line general statement about this test
 !
@@ -36,14 +36,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.2 2004/05/26 18:30:45 nscollins Exp $'
+      '$Id: ESMF_FieldDataMapUTest.F90,v 1.3 2004/06/12 18:51:40 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc
+      integer :: rc, datarank
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -54,114 +54,112 @@
       ! local variables needed to pass into function/subroutine calls
       character(ESMF_MAXSTR) :: validate_options
       character(ESMF_MAXSTR) :: print_options
-      type(ESMF_FieldDataMapConfig) :: config_set
-      type(ESMF_FieldDataMapConfig) :: config_get
-      ! when get/set value routines enabled, comment these in and set
-      ! the appropriate values, and remove the temporary integers.
-      !<value type> :: value_set, value_get
+      type(ESMF_RelLoc) :: horzRelloc
       integer :: value_set, value_get
 
       ! instantiate a FieldDataMap 
-      type(ESMF_FieldDataMap) :: fielddatamap
+      type(ESMF_FieldDataMap) :: fieldDataMap1
+
+      !-------------------------------------------------------------------------------
+      ! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+      ! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+      ! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+      ! to OFF, then only the sanity unit tests.
+      ! Special strings (Non-exhaustive and exhaustive) have been
+      ! added to allow a script to count the number and types of unit tests.
+      !-------------------------------------------------------------------------------
+
+
+      call ESMF_Initialize(rc=rc)
+      datarank=1
+
+      !-------------------------------------------------------------------------------
+      !NEX_UTest
+      ! Test FieldDataMap Initialization
+      call ESMF_FieldDataMapSetDefault(fieldDataMap1, datarank, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set Default FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !-------------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test FieldDataMap Invalid
+      call ESMF_FieldDataMapSetInvalid(fieldDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set Invalid FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
-      ! perform exhaustive tests here;
-      !   see #else below for non-exhaustive tests
-      ! future release will use run-time switching mechanism
+ 
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test FieldDataMap Initialization
+      call ESMF_FieldDataMapSetDefault(fieldDataMap1, datarank, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! for deep classes, keep create/construct routine and remove init
-      ! for shallow classes, keep init and remove create/construct
-     
-      ! test dynamic allocation of ESMF_FieldDataMap
-      fielddatamap = ESMF_FieldDataMapCreate(args, rc)
-      write(name, *) "ESMF_FieldDataMapCreate"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
-    
-      ! test internal dynamic allocation within statically allocated
-      !   ESMF_FieldDataMap
-      call ESMF_FieldDataMapConstruct(fielddatamap, args, rc)
-      write(name, *) "ESMF_FieldDataMapConstruct"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test FieldDataMap Get
+      call ESMF_FieldDataMapGet(fieldDataMap1,  horzRelloc=horzRelloc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS and/or horzRelloc incorrect"
+      write(name, *) "Get FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(horzRelloc.eq.ESMF_CELL_CENTER), name, failMsg, result, ESMF_SRCLINE)
 
-      ! test initialization of members of statically allocated ESMF_FieldDataMap
-      !   may want to read back values via Get methods for comparison
-      call ESMF_FieldDataMapSetDefault(fielddatamap, args, rc)
-      write(name, *) "ESMF_FieldDataMapSetDefault"
-      write(failMsg, *) "rc =", rc, ", args =", args
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
-      ! test setting of configuration values
-      call ESMF_FieldDataMapSetConfig(fielddatamap, config_set, rc)
-      write(name, *) "ESMF_FieldDataMapSetConfig"
-      write(failMsg, *) "rc =", rc, ", config_set =", config_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS),  &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !This code crashes
+      ! Bug report 969243 opened
+      ! Test FieldDataMap Print
+      !call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
+      !write(failMsg, *) "Did not return ESMF_SUCCESS"
+      !write(name, *) "Print FieldDataMap Test"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! test getting of configuration values,
-      !  compare to values set previously
-      call ESMF_FieldDataMapGetConfig(fielddatamap, config_get, rc)
-      write(name, *) "ESMF_FieldDataMapGetConfig"
-      write(failMsg, *) "rc =", rc, ", config_get =", config_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. config_get .eq. config_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
-      ! test setting of ESMF_FieldDataMap members values
-      !call ESMF_FieldDataMapSet<Value>(fielddatamap, value_set, rc)
-      rc = ESMF_FAILURE  ! remove this when this test enabled
-      write(name, *) "ESMF_FieldDataMapSet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_set =", value_set
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
-      ! test getting of ESMF_FieldDataMap members values,
-      !   compare to values set previously
-      !call ESMF_FieldDataMapGet<Value>(fielddatamap, value_get, rc)
-      rc = ESMF_FAILURE  ! remove this when this test enabled
-      write(name, *) "ESMF_FieldDataMapGet<Value>"
-      write(failMsg, *) "rc =", rc, ", value_get =", value_get
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
-                      name, failMsg, result, ESMF_SRCLINE)
-    
-      ! test validate method via option string
-      call ESMF_FieldDataMapValidate(fielddatamap, validate_options, rc)
-      write(name, *) "ESMF_FieldDataMapValidate"
-      write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test FieldDataMap Validate
+      call ESMF_FieldDataMapValidate(fieldDataMap1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validate FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! test print method via option string
-      call ESMF_FieldDataMapPrint(fielddatamap, print_options, rc)
-      write(name, *) "ESMF_FieldDataMapPrint"
-      write(failMsg, *) "rc =", rc, ", print_options =", trim(print_options)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
-      ! test internal dynamic deallocation within statically allocated 
-      !   ESMF_FieldDataMap.   only valid for deep classes; remove for shallow
-      call ESMF_FieldDataMapDestruct(fielddatamap, rc)
-      write(name, *) "ESMF_FieldDataMapDestruct"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test FieldDataMap Set
+      call ESMF_FieldDataMapSet(fieldDataMap1, horzRelloc=ESMF_CELL_UNDEFINED, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Set FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      ! test dynamic deallocation of ESMF_FieldDataMap
-      !   also tests destructor
-      call ESMF_FieldDataMapDestroy(fielddatamap, rc)
-      write(name, *) "ESMF_FieldDataMapDestroy"
-      write(failMsg, *) "rc =", rc
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      name, failMsg, result, ESMF_SRCLINE)
 
-#else
+      !-------------------------------------------------------------------------------
+      !EX_UTest
+      ! Test FieldDataMap Get
+      call ESMF_FieldDataMapGet(fieldDataMap1,  horzRelloc=horzRelloc, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS and/or horzRelloc incorrect"
+      write(name, *) "Get FieldDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(horzRelloc.eq.ESMF_CELL_UNDEFINED), name, failMsg, result, ESMF_SRCLINE)
 
-      ! perform non-exhaustive tests here;
-      !   use same templates as above
+
+
+      !-------------------------------------------------------------------------------
+      !This code crashes
+      ! Bug report 969243 opened
+      ! Test FieldDataMap Print
+      !call ESMF_FieldDataMapPrint(fieldDataMap1, rc=rc)
+      !write(failMsg, *) "Did not return ESMF_SUCCESS"
+      !write(name, *) "Print FieldDataMap Test"
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+
+
 
 #endif
 
