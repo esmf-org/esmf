@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.7 2004/01/26 17:42:11 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.8 2004/03/08 16:25:45 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -203,6 +203,7 @@
                                             //localAxisCounts, local_maxlength,
                                             ai_comp, ai_total, 
                                             this->kind, gathered->base_addr);
+        //gathered->ESMC_ArrayPrint();
     } else {
         // call something which will do a send
         layout->ESMC_DELayoutGatherArray(this->base_addr, global_dimlengths, 
@@ -211,10 +212,9 @@
                                             NULL, local_maxlength,
                                             //localAxisCounts, local_maxlength,
                                             ai_comp, ai_total, 
-                                            this->kind, gathered->base_addr);
+                                            this->kind, NULL);
       } 
 
-    //gathered->ESMC_ArrayPrint();
 
     if (thisde == deid)
        *Array_out = gathered;
