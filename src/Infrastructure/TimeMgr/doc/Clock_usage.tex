@@ -1,13 +1,33 @@
-% $Id: Clock_usage.tex,v 1.1 2003/05/07 06:58:56 cdeluca Exp $
+% $Id: Clock_usage.tex,v 1.2 2003/08/15 06:15:26 cdeluca Exp $
 
-The {\tt Clock} class contains {\tt Time} instants and a {\tt TimeInterval}
-to track and time step model time.  For tracking, {\tt Time} instants are
-instantiated for the current time, stop time, start time, reference time,
-and previous time.  For time stepping, a single {\tt TimeInterval} is
-instantiated.  There is also an integer counter for keeping track of the
-number of timesteps, and an array of associated alarms.  Methods are
-defined for advancing the clock (perform a time step), checking if the
-stop time is reached, synchronizing with a real-time clock, and getting
-values of the class attributes defined above. After performing the time
-step, the advance method will iterate over the alarm list and return a
-list of any active alarms.
+The following is a typical sequence for using a Clock in a 
+geophysical model.
+
+\noindent {\bf At initialization:}
+\begin{itemize}
+\item Create a Calendar.
+\item Set start time, stop time and time step as Times and 
+Time Intervals.
+\item Create a Clock using the start time, stop time and time
+step to initialize it.
+\item Define Times and Time Intervals associated with special
+events, and use these to create Alarms.
+\end{itemize}
+
+\noindent {\bf At run:}
+\begin{itemize}
+\item If Advance the Clock, checking for ringing alarms as needed.
+\item Check if it is time to stop.
+\end{itemize}
+
+\noindent {\bf At finalize:}
+\begin{itemize}
+\item Destroy the Clock 
+\item Destroy the Calendar
+\end{itemize}
+
+The following code example illustrates Clock usage.
+
+
+
+

@@ -1,7 +1,17 @@
-% $Id: Clock_desc.tex,v 1.5 2003/08/14 21:57:05 cdeluca Exp $
+% $Id: Clock_desc.tex,v 1.6 2003/08/15 06:15:26 cdeluca Exp $
 
 \label{sec:Clock}
-The 
-The {\tt Clock} class encapsulates the essential ESMF component requirement
-of tracking and time-stepping model time.  It also checks associated alarms
-to trigger their ringing state.
+
+The Clock class advances model time and tracks its associated
+date on a specified Calendar.  It stores start time, stop time,
+current time, and a time step (which may be changed while a 
+Component runs).  A Clock also stores a list of Alarms, which can
+be set to flag events that occur at a specified time instant or at 
+a specified time interval.  See Section~\ref{sec:Alarm} for 
+details on how to use Alarms.
+
+There are methods for creating a Clock and setting and getting
+the quantities associated with it.  Methods are defined for 
+advancing the Clock's current time, checking if the
+stop time is reached, and synchronizing with a real clock. 
+
