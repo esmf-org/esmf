@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.7 2004/06/11 16:54:48 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.8 2004/06/11 17:07:12 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       type (ESMF_Config) cf 
@@ -306,7 +306,7 @@
      ! Config Get Attribute Char Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute Char Test"
-     call ESMF_ConfigGetChar ( cf, answer, 'Do_you_want_quality_control:', &
+     call ESMF_ConfigGetChar( cf, answer, 'Do_you_want_quality_control:', &
                                     rc = rc )
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
@@ -340,7 +340,7 @@
      ! Config Get Attribute String Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Attribute String Test"
-     call ESMF_ConfigGetAttribute ( cf, restart_file ,'restart_file_name:', &
+     call ESMF_ConfigGetAttribute( cf, restart_file ,'restart_file_name:', &
            rc = rc )
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
@@ -388,7 +388,7 @@
      ! Config Find Label Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Find Label Test"
-     call ESMF_ConfigFindLabel ( cf, 'u-wind_error:', rc ) ! identifies label
+     call ESMF_ConfigFindLabel( cf, 'u-wind_error:', rc ) ! identifies label
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !''''''''''''''''''''''''''''
@@ -407,7 +407,7 @@
      ! Config Get Attribute String Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get String Test"
-     call ESMF_ConfigGetAttribute ( cf, u_dataType, rc =rc )  ! first token   
+     call ESMF_ConfigGetAttribute( cf, u_dataType, rc =rc )  ! first token   
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -439,7 +439,7 @@
      ! Config Get Attribute Int Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Int Test"
-     call ESMF_ConfigGetAttribute ( cf, nu, rc = rc )            ! second token
+     call ESMF_ConfigGetAttribute( cf, nu, rc = rc )            ! second token
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -470,7 +470,7 @@
      ! Config Get Attribute Floats Test
      write(failMsg, *) "Did not return ESMF_SUCCESS"
      write(name, *) "Config Get Floats Test"
-     call ESMF_ConfigGetAttribute ( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8
+     call ESMF_ConfigGetAttribute( cf, sigU, nu,  rc=rc )     ! tokens 3 thru 8
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -519,7 +519,7 @@ subroutine MultPar_SingleLine_V
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel ( cf, 'v-wind_error:', rc )
+      call ESMF_ConfigFindLabel( cf, 'v-wind_error:', rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -537,7 +537,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get String Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get String Test"
-      call ESMF_ConfigGetAttribute ( cf, v_dataType, rc = rc )
+      call ESMF_ConfigGetAttribute( cf, v_dataType, rc = rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -569,7 +569,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Int Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Int Test"
-      call ESMF_ConfigGetAttribute ( cf, nv, rc = rc )
+      call ESMF_ConfigGetAttribute( cf, nv, rc = rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -601,7 +601,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Floats Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Floats Test"
-      call ESMF_ConfigGetAttribute ( cf, sigV, nsize=nv, rc=rc )
+      call ESMF_ConfigGetAttribute( cf, sigV, nsize=nv, rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -652,7 +652,7 @@ subroutine MultPar_SingleLine_V
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel ( cf, 'ObsErr*QSCAT::', rc ) ! identify label
+      call ESMF_ConfigFindLabel( cf, 'ObsErr*QSCAT::', rc ) ! identify label
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -671,7 +671,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Next Line Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Next Line Test"
-      call ESMF_ConfigNextLine ( cf, rc=rc )               ! move down 1 line
+      call ESMF_ConfigNextLine( cf, rc=rc )               ! move down 1 line
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -690,7 +690,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get String Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get String Test"
-      call ESMF_ConfigGetAttribute ( cf, u_dataType, rc=rc )  ! first token
+      call ESMF_ConfigGetAttribute( cf, u_dataType, rc=rc )  ! first token
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -722,7 +722,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Int Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Int Test"
-      call ESMF_ConfigGetAttribute ( cf, nu, rc=rc )              ! second token
+      call ESMF_ConfigGetAttribute( cf, nu, rc=rc )              ! second token
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -747,7 +747,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Floats Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Floats Test"
-      call ESMF_ConfigGetAttribute ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8
+      call ESMF_ConfigGetAttribute( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -781,7 +781,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Next LIne Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Next Line Test"
-      call ESMF_ConfigNextLine ( cf, rc=rc )
+      call ESMF_ConfigNextLine( cf, rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -800,7 +800,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get STring Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get String Test"
-      call ESMF_ConfigGetAttribute ( cf, v_dataType, rc=rc )
+      call ESMF_ConfigGetAttribute( cf, v_dataType, rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -831,7 +831,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Int Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Int Test"
-      call ESMF_ConfigGetAttribute ( cf, nv, rc=rc )
+      call ESMF_ConfigGetAttribute( cf, nv, rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -863,7 +863,7 @@ subroutine MultPar_SingleLine_V
       ! Config Get Floats Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Get Floats Test"
-      call ESMF_ConfigGetAttribute ( cf, sigV, nsize=6,rc=rc )
+      call ESMF_ConfigGetAttribute( cf, sigV, nsize=6,rc=rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
@@ -964,7 +964,7 @@ subroutine MultPar_SingleLine_V
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
+      call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
@@ -1029,7 +1029,7 @@ subroutine MultPar_SingleLine_V
       ! Config Find Label Test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Find Label Test"
-      call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
+      call ESMF_ConfigFindLabel( cf,'ObsErr*vCor_HH-7::', rc )
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
       counter_total =counter_total + 1
@@ -1055,7 +1055,7 @@ subroutine MultPar_SingleLine_V
 !               -----------------------
          counter_total =counter_total + 1
 !''''''''''''''''''''''''''''
-            call ESMF_ConfigGetAttribute ( cf, plev(line), rc=rc )
+            call ESMF_ConfigGetAttribute( cf, plev(line), rc=rc )
 !''''''''''''''''''''''''''''
          if (rc /= 0) then
             print *,'ESMF_ConfigNextLine failed, rc =', rc 
@@ -1076,7 +1076,7 @@ subroutine MultPar_SingleLine_V
          counter_total =counter_total + 1
 !''''''''''''''''''''''''''''
          do col =1, ncol(line)
-            call ESMF_ConfigGetAttribute ( cf, temp, rc=rc)
+            call ESMF_ConfigGetAttribute( cf, temp, rc=rc)
             if (rc == 0) then 
                vCorr(line,col) = temp 
             end if
