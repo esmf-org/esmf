@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.89 2005/02/02 20:43:11 jwolfe Exp $
+#  $Id: common.mk,v 1.90 2005/02/02 20:55:23 jwolfe Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -796,10 +796,10 @@ build_demos: chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_build_demos tree
 
-tree_build_demos: $(DEMO_BUILD) 
+tree_build_demos: $(DEMOS_BUILD) 
 
-$(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
-	$(SL_F_LINKER) -o $@ $(DEMO_OBJ) $< -lesmf ${MPI_LIB} ${MP_LIB} \
+$(ESMC_TESTDIR)/%App : %Demo.o $(DEMOS_OBJ) $(ESMFLIB)
+	$(SL_F_LINKER) -o $@ $(DEMOS_OBJ) $< -lesmf ${MPI_LIB} ${MP_LIB} \
 	${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} ${F90CXXLIBS} $(SL_LINKOPTS)
 	${RM} -f *.o *.mod
 
@@ -811,13 +811,13 @@ run_demos:  chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_run_demos tree
 
-tree_run_demos: $(DEMO_RUN) 
+tree_run_demos: $(DEMOS_RUN) 
 
 run_demos_uni:  chkopts chkdir_tests
 	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ACTION=tree_run_demos_uni tree
 
-tree_run_demos_uni: $(DEMO_RUN_UNI) 
+tree_run_demos_uni: $(DEMOS_RUN_UNI) 
 
 
 #-------------------------------------------------------------------------------
