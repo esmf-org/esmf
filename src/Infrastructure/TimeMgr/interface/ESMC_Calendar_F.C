@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.22 2004/01/30 23:14:03 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.23 2004/01/31 03:07:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,6 +78,16 @@ extern "C" {
               ((void*) daysPerYearDd  == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : daysPerYearDd),
               ((void*) status         == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : status) );
+       }
+
+       void FTN(c_esmc_calendarcreatecopy)(ESMC_Calendar **ptr,
+                                           ESMC_Calendar **calendar,
+                                           int *status) {
+          *ptr = ESMC_CalendarCreateCopy(
+                            *calendar,   // required
+
+                    ((void*) status == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : status) );
        }
 

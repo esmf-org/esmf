@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.29 2004/01/31 00:18:55 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.30 2004/01/31 03:07:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -180,6 +180,7 @@ class ESMC_Calendar {
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
+    ESMC_Calendar(const ESMC_Calendar &calendar);
     ESMC_Calendar(ESMC_CalendarType type);
     ESMC_Calendar(int *monthsPerYear, int *daysPerMonth,
                   ESMF_KIND_I4 *secondsPerDay, ESMF_KIND_I4 *daysPerYear,
@@ -197,6 +198,9 @@ class ESMC_Calendar {
                                                     ESMF_KIND_I4*,
                                                     ESMF_KIND_I4*,
                                                     ESMF_KIND_I4*, int*);
+
+    // friend function to copy a calendar
+    friend ESMC_Calendar *ESMC_CalendarCreateCopy(ESMC_Calendar*, int*);
 
     // friend function to de-allocate clock
     friend int ESMC_CalendarDestroy(ESMC_Calendar *);
@@ -236,6 +240,9 @@ class ESMC_Calendar {
                                              ESMF_KIND_I4 *daysPerYearDn=0,
                                              ESMF_KIND_I4 *daysPerYearDd=0,
                                              int          *rc=0);
+
+    // friend function to copy a calendar
+    ESMC_Calendar *ESMC_CalendarCreateCopy(ESMC_Calendar *calendar, int *rc=0);
 
     // friend function to de-allocate calendar
     int ESMC_CalendarDestroy(ESMC_Calendar *calendar);

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.47 2004/01/30 23:14:03 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.48 2004/01/31 03:07:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,6 +98,7 @@
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_CalendarCreate
       public ESMF_CalendarCreateCustom
+      public ESMF_CalendarCreateCopy
       public ESMF_CalendarDestroy
       public ESMF_CalendarSet
       public ESMF_CalendarSetCustom
@@ -114,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.47 2004/01/30 23:14:03 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.48 2004/01/31 03:07:59 eschwab Exp $'
 
 !==============================================================================
 
@@ -264,6 +265,39 @@
     
       end function ESMF_CalendarCreateCustom
     
+!------------------------------------------------------------------------------
+!BOP    
+! !IROUTINE: ESMF_CalendarCreateCopy - Create a copy of a Calendar
+
+! !INTERFACE:
+      function ESMF_CalendarCreateCopy(calendar, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Calendar) :: ESMF_CalendarCreateCopy
+
+! !ARGUMENTS:
+      type(ESMF_Calendar), intent(in)            :: calendar
+      integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates a copy of a given {\tt ESMF\_Calendar}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!        The {\tt ESMF\_Calendar} to copy.
+!     \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point to copy calendar
+      call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, rc)
+
+      end function ESMF_CalendarCreateCopy
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CalendarDestroy

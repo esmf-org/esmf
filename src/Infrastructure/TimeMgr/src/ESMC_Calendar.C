@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.41 2004/01/30 23:14:03 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.42 2004/01/31 03:07:59 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.41 2004/01/30 23:14:03 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.42 2004/01/31 03:07:59 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -190,6 +190,51 @@ int ESMC_Calendar::count=0;
     return(calendar);
 
  } // end ESMC_CalendarCreateCustom
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CalendarCreateCopy - Creates a copy of a calendar
+//
+// !INTERFACE:
+      ESMC_Calendar *ESMC_CalendarCreateCopy(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Calendar
+//
+// !ARGUMENTS:
+      ESMC_Calendar *calendar,  // in  - calendar to copy
+      int           *rc) {      // out - return code 
+
+// !DESCRIPTION:
+//      Creates a new copy of the given calendar.
+//
+//EOP
+// !REQUIREMENTS:
+
+    int returnCode;
+    ESMC_Calendar *calendarCopy;
+
+    try {
+      // allocate new calendar and pass given calendar to copy constructor.
+      calendarCopy = new ESMC_Calendar(*calendar);
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_CalendarCreateCopy() memory allocation failed\n";
+      if (rc != ESMC_NULL_POINTER) {
+        *rc = ESMF_FAILURE;
+      }
+      return(ESMC_NULL_POINTER);
+    }
+
+    returnCode = calendarCopy->ESMC_CalendarValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
+
+    return(calendarCopy);     
+
+ } // end ESMC_CalendarCreateCopy  
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1051,6 +1096,29 @@ int ESMC_Calendar::count=0;
     ESMC_CalendarSetCustom(monthsPerYear, daysPerMonth, secondsPerDay, 
                            daysPerYear, daysPerYeardN, daysPerYeardD);
 }  // end ESMC_Calendar
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Calendar - native C++ copy constructor
+//
+// !INTERFACE:
+      ESMC_Calendar::ESMC_Calendar(
+//
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+      const ESMC_Calendar &calendar) {  // in - calendar to copy
+//
+// !DESCRIPTION:
+//      Copies members of given calendar.
+//
+//EOP
+// !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    *this = calendar;
+
+ } // end ESMC_Calendar
 
 //-------------------------------------------------------------------------
 //BOP
