@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2004/03/17 18:09:55 nscollins Exp $
+# $Id: build_rules.mk,v 1.7 2004/03/18 20:11:51 nscollins Exp $
 #
 # Linux.lahey.default.mk
 #
@@ -117,12 +117,12 @@ C_F90CXXLD         = lf95 -verbose
 C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -Wl,-rpath /usr/local/lf9560/lib \
                      -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
-                     -lstdc++ -lgcc -lg2c
+                     -lstdc++ -lgcc -lg2c -lrt
 
 C_CXXF90LD         = g++ 
 
 C_CXXF90LIBS       = -L/usr/local/lf9560/lib -lfj9i6 -lfj9ipp -lfj9f6 -lfj9fpp \
-                      -lfj9e6 -lfccx86_6a
+                      -lfj9e6 -lfccx86_6a -lrt
 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
