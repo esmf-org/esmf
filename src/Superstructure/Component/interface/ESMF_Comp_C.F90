@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.27 2004/12/28 07:11:04 theurich Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.28 2005/01/10 20:39:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.27 2004/12/28 07:11:04 theurich Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.28 2005/01/10 20:39:59 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -174,13 +174,13 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: gcomp
-       character(len=*) :: name
-       type(ESMF_GridCompType) :: mtype
-       type(ESMF_Grid) :: grid
-       type(ESMF_Config) :: config
-       character(len=*) :: configFile
-       type(ESMF_Clock) :: clock
-       integer :: rc
+       character(len=*), optional :: name
+       type(ESMF_GridCompType), optional :: mtype
+       type(ESMF_Grid), optional :: grid
+       type(ESMF_Config), optional :: config
+       character(len=*), optional :: configFile
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: rc
 
        gcomp = ESMF_GridCompCreate(name, mtype, grid, &
                                        config, configFile, clock, rc)
@@ -194,7 +194,7 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp
-       integer :: rc              
+       integer, optional :: rc              
 
        call ESMF_GridCompDestroy(comp, rc)
     
@@ -210,12 +210,12 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       type(ESMF_State) :: importState
-       type(ESMF_State) :: exportState
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       type(ESMF_BlockingFlag) :: blockingFlag
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
        call ESMF_GridCompInitialize(comp, importState, exportState, &
                                     clock, phase, blockingFlag, rc)
@@ -232,12 +232,12 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       type(ESMF_State) :: importState
-       type(ESMF_State) :: exportState
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       type(ESMF_BlockingFlag) :: blockingFlag
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
        call ESMF_GridCompRun(comp, importState, exportState, &
                              clock, phase, blockingFlag, rc)
@@ -254,12 +254,12 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       type(ESMF_State) :: importState
-       type(ESMF_State) :: exportState
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       type(ESMF_BlockingFlag) :: blockingFlag
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
        call ESMF_GridCompFinalize(comp, importState, exportState, &
                                   clock, phase, blockingFlag, rc)
@@ -273,7 +273,7 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_GridCompSet(comp)
 
@@ -286,7 +286,7 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_GridCompGet(comp)
 
@@ -299,8 +299,8 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_GridCompValidate(comp, options, rc)
 
@@ -313,8 +313,8 @@
        use ESMF_GridCompMod
 
        type(ESMF_GridComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_GridCompPrint(comp, options, rc)
 
@@ -331,11 +331,11 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: ccomp
-       character(len=*) :: name
-       type(ESMF_Config) :: config
-       character(len=*) :: configFile
-       type(ESMF_Clock) :: clock
-       integer :: rc
+       character(len=*), optional :: name
+       type(ESMF_Config), optional :: config
+       character(len=*), optional :: configFile
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: rc
 
        ccomp = ESMF_CplCompCreate(name, config, configFile, clock, rc)
     
@@ -348,7 +348,7 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp
-       integer :: rc              
+       integer, optional :: rc              
 
        call ESMF_CplCompDestroy(comp, rc)
     
@@ -364,12 +364,12 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       type(ESMF_State) :: importState
-       type(ESMF_State) :: exportState
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       type(ESMF_BlockingFlag) :: blockingFlag
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
        call ESMF_CplCompInitialize(comp, importState, exportState, &
                                     clock, phase, blockingFlag, rc)
@@ -385,12 +385,12 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       type(ESMF_State) :: importState
-       type(ESMF_State) :: exportState
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       type(ESMF_BlockingFlag) :: blockingFlag
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
        call ESMF_CplCompRun(comp, importState, exportState, &
                              clock, phase, blockingFlag, rc)
@@ -406,12 +406,12 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       type(ESMF_State) :: importState
-       type(ESMF_State) :: exportState
-       type(ESMF_Clock) :: clock
-       integer :: phase
-       type(ESMF_BlockingFlag) :: blockingFlag
-       integer :: rc     
+       type(ESMF_State), optional :: importState
+       type(ESMF_State), optional :: exportState
+       type(ESMF_Clock), optional :: clock
+       integer, optional :: phase
+       type(ESMF_BlockingFlag), optional :: blockingFlag
+       integer, optional :: rc     
 
        call ESMF_CplCompFinalize(comp, importState, exportState, &
                                   clock, phase, blockingFlag, rc)
@@ -425,7 +425,7 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_CplCompSet(comp)
 
@@ -438,7 +438,7 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       integer :: rc     
+       integer, optional :: rc     
 
        call ESMF_CplCompGet(comp)
 
@@ -451,8 +451,8 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_CplCompValidate(comp, options, rc)
 
@@ -465,8 +465,8 @@
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: comp      
-       character(len=*) :: options
-       integer :: rc     
+       character(len=*), optional :: options
+       integer, optional :: rc     
 
        call ESMF_CplCompPrint(comp, options, rc)
 
