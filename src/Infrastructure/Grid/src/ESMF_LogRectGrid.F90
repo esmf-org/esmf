@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.67 2004/05/24 22:59:16 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.68 2004/05/25 20:08:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2874,8 +2874,21 @@
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
+        ! ESMF_GRID_TYPE_LATLON_UNI
+        case (2)
+          coordSystem         = ESMF_COORD_SYSTEM_SPHERICAL
+          coordNames(1)       = 'latitude'
+          coordNames(2)       = 'longitude'
+          coordType(1)        = ESMF_COORD_TYPE_LAT
+          coordType(2)        = ESMF_COORD_TYPE_LON
+          coordUnits(:)       = 'degrees'
+          coordAligned(:)     = .true.
+          coordEqualSpaced(:) = .true.
+          coordCyclic(1)      = .true.
+          coordCyclic(2)      = .false.
+
         ! ESMF_GRID_TYPE_XY
-        case (7)
+        case (8)
           coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
           coordNames(1)       = 'x'
           coordNames(2)       = 'y'
@@ -2884,6 +2897,18 @@
           coordUnits(:)       = ''
           coordAligned(:)     = .true.
           coordEqualSpaced(:) = .false.
+          coordCyclic(:)      = .false.
+
+        ! ESMF_GRID_TYPE_XY_UNI
+        case (9)
+          coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
+          coordNames(1)       = 'x'
+          coordNames(2)       = 'y'
+          coordType(1)        = ESMF_COORD_TYPE_X
+          coordType(2)        = ESMF_COORD_TYPE_Y
+          coordUnits(:)       = ''
+          coordAligned(:)     = .true.
+          coordEqualSpaced(:) = .true.
           coordCyclic(:)      = .false.
 
         case default
