@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.61 2004/01/28 20:31:02 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.62 2004/02/05 21:52:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.61 2004/01/28 20:31:02 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.62 2004/02/05 21:52:23 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -246,8 +246,9 @@ end function
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
 ! !INTERFACE:
-      subroutine ESMF_CompConstruct(compp, ctype, name, layout, mtype, &
-                                 dirpath, configfile, config, grid, clock, rc)
+      subroutine ESMF_CompConstruct(compp, ctype, name, layout, &
+                                              mtype, dirpath, configfile, &
+                                              config, grid, clock, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -500,8 +501,8 @@ end function
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompInitialize(compp, importstate, exportstate, &
-                                       clock, phase, rc)
+      recursive subroutine ESMF_CompInitialize(compp, importstate, &
+                                                exportstate, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -597,7 +598,8 @@ end function
 ! !IROUTINE: ESMF_CompWriteRestart -- Call the Component's internal save routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompWriteRestart(compp, iospec, clock, phase, rc)
+      recursive subroutine ESMF_CompWriteRestart(compp, iospec, clock, &
+                                                                     phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -691,7 +693,7 @@ end function
 ! !IROUTINE: ESMF_CompReadRestart -- Call the Component's internal restart routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompReadRestart(compp, iospec, clock, phase, rc)
+      recursive subroutine ESMF_CompReadRestart(compp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -786,7 +788,7 @@ end function
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompFinalize(compp, importstate, exportstate, &
+      recursive subroutine ESMF_CompFinalize(compp, importstate, exportstate, &
                                       clock, phase, rc)
 !
 !
@@ -883,8 +885,8 @@ end function
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRun(compp, importstate, exportstate, &
-                                clock, phase, rc)
+      recursive subroutine ESMF_CompRun(compp, importstate, exportstate, &
+                                                            clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -986,8 +988,8 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, layout, mtype, grid, clock, &
-                                             dirpath, configfile, config, rc)
+      subroutine ESMF_CompGet(compp, name, layout, mtype, grid, &
+                                        clock, dirpath, configfile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1067,8 +1069,8 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, layout, mtype, grid, clock, &
-                                             dirpath, configfile, config, rc)
+      subroutine ESMF_CompSet(compp, name, layout, mtype, grid, &
+                                        clock, dirpath, configfile, config, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1153,7 +1155,7 @@ end function
 ! !IROUTINE: ESMF_CompWrite - Write a Component to disk
 !
 ! !INTERFACE:
-      subroutine ESMF_CompWrite(compp, iospec, rc)
+      recursive subroutine ESMF_CompWrite(compp, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CompClass) :: compp
@@ -1219,7 +1221,7 @@ end function
 ! !IROUTINE: ESMF_CompValidate -- Ensure the Component internal data is valid.
 !
 ! !INTERFACE:
-      subroutine ESMF_CompValidate(compp, options, rc)
+      recursive subroutine ESMF_CompValidate(compp, options, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -1271,7 +1273,7 @@ end function
 ! !IROUTINE:  ESMF_CompPrint -- Print the contents of a Component
 !
 ! !INTERFACE:
-      subroutine ESMF_CompPrint(compp, options, rc)
+      recursive subroutine ESMF_CompPrint(compp, options, rc)
 !
 !
 ! !ARGUMENTS:
