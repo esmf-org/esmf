@@ -31,7 +31,13 @@
       type(ESMF_DELayout) :: layout  
       type (ESMF_Config) cf 
       
-      character(len=255) :: fname, restart_file
+      character, parameter :: fname ='ESMF_Resource_File_Sample.rc'
+      integer, parameter   :: nDE_0 = 32      
+      real, parameter      :: tau_0 = 14.0
+      character, parameter ::restart_file_0 = 'RestartFile123'
+      character(len=1)   :: answer_0 = 'y'
+ 
+      character(len=255) :: restart_file
       integer :: rc
       logical :: unique
       integer   :: nDE
@@ -48,38 +54,123 @@
       integer, allocatable, dimension(:) :: ncol
       logical :: end
       real temp
+      
+      integer :: counter_total, counter_success
+      integer :: rc_opening
+      real :: success_rate
 
-      fname ='ESMF_Resource_File_Sample.rc'
+      counter_total = 0
+      counter_success = 0
+ 
+      rc = 0
 
 ! Initialization:
 !----------------
 
       cf = ESMF_ConfigCreate( rc )
-      print *,'ESMF_ConfigCreate completed, rc =', rc
+      
+      if ( rc /= 0 ) then 
+         print *,'ESMF_ConfigCreate: catastrophic error, rc =', rc
+         STOP 'CANNOT CREAT CONFIGURATION'
+      endif
 
       call ESMF_ConfigLoadFile( cf, fname, rc = rc)
-      print *,'ESMF_ConfigLoadFile loaded file ', fname,' rc = ', rc
 
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigLoadFile:  loaded file ', fname, &
+              ' catastrophic error, rc = ', rc
+         STOP 'CANNOT OPEN FILE'
+      else
+         counter_total =counter_total + 1
+         counter_success =counter_success + 1         
+      endif
+      
 !!      if ( .NOT. unique ) then
 !!         print *,' File contains multiple copies of a label' 
 !!      end if
 
 ! Retrieval of single parameters
 !--------------------------------
+! Integer
 
-      call ESMF_ConfigGetInt ( cf, nDE, label ='Number_of_DEs:', default=7, &
-           rc = rc )
-      print *,'ESMF_ConfigGetInt got nDE =', nDE,' rc =', rc
+      rc = 0
+
+!*********************************************************************
+      call ESMF_ConfigGetInt ( cf, nDE, label ='Number_of_DEs:', & 
+           default=7, rc = rc )
+!*********************************************************************      
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigGetInt got nDE =', nDE,' rc =', rc
+      else
+         if (nDE == nDE_0) then
+            counter_success =counter_success + 1
+         else
+            print *,'ESMF_ConfigGetInt ERROR: got nDE =', nDE, &
+              ' should be', nDE_0
+         endif
+      endif
 
 
+! Floating point
+
+      rc = 0
+!*********************************************************************   
       call ESMF_ConfigGetFloat ( cf, tau, &
            label ='Relaxation_time_scale_in_days:', rc = rc)
+!*********************************************************************   
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigGetFloat got tau =', tau,' rc =', rc
+      else
+         if (tau == tau_0) then
+            counter_success =counter_success + 1
+         else
+            print *,'ESMF_ConfigGetFloat ERROR: got tau =', tau, &
+              ' should be', tau_0
+         endif
+      endif
+
+
+! Character
+
+      rc = 0
+!*********************************************************************
       answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', &
                                     rc = rc )
-      print *,'ESMF_ConfigGetChar: answer =', answer,' rc =', rc
+!*********************************************************************
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigGetChar got answer =', answer,' rc =', rc
+      else
+         if (answer == answer_0) then
+            counter_success =counter_success + 1
+         else
+            print *,'ESMF_ConfigGetChar ERROR: got answer =', answer, &
+              ' should be', answer_0
+         endif
+      endif
 
+! String
+
+     rc = 0
+!*********************************************************************
       call ESMF_ConfigGetString ( cf, restart_file ,'restart_file_name:', &
            rc = rc )
+!*********************************************************************
+      counter_total =counter_total + 1
+      if ( rc /= 0 ) then      
+         print *,'ESMF_ConfigGetString got =', restart_file,' rc =', rc
+      else
+         if (answer == answer_0) then
+            counter_success =counter_success + 1
+         else
+            print *,'ESMF_ConfigGetString ERROR: got  =', restart_file, &
+              ' should be', restart_file_0
+         endif
+      endif
+
+
       print *,'ESMF_ConfigGetString: restart_file =',  restart_file, &
            ' rc =', rc
 
@@ -90,6 +181,9 @@
 
 ! Retrieval of a group of parameters on a single line
 ! ----------------------------------------------------
+
+
+      rc = 0
 
       call ESMF_ConfigFindLabel ( cf, 'u-wind-error:', rc ) ! identifies label
       call ESMF_ConfigGetString ( cf, u_dataType, rc =rc )  ! first token
@@ -213,9 +307,21 @@
       end if
 
 ! Finalization
-!   ------------
+! ------------
       call ESMF_ConfigDestroy ( cf, rc ) 
       print *,'ESMF_ConfigDestroy: rc =', rc
       
+
+
+! REPORTING
+! ------------
+      if  (counter_total > 0) then
+         if( counter_success == counter_total ) then 
+            print *,'ESMF_Config_Test: All tests were successful'
+         else
+            success_rate = 100.0 * counter_success / counter_total 
+            print *,'ESMF_Config_Test: Success rate: ', success_rate,'%' 
+         endif
+      endif
 
     end program ESMF_Config_Test

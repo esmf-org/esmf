@@ -147,48 +147,6 @@
 !       integer rc
 !       call ESMF_ConfigDestroy( cf, rc )
 ! \end{verbatim}
-
-!
-! \subsubsection{Main Routine/Functions}
-!
-! \begin{verbatim}
-!  ------------------------------------------------------------------
-!         Routine/Function                      Description
-!  ------------------------------------------------------------------
-!  ESMF_ConfigCreate ( fname, layout, rc )  creates configuration
-!  ESMF_ConfigDestroy ( cf, rc )            destroys configuration
-!
-!  ESMF_ConfigLoadFile ( cf, fname, unique, loads resource file 
-!                        rc )               into memory
-!
-!  ESMF_ConfigFindLabel( cf, label, unique, selects a label (key)
-!                        rc )  
-!
-!  ESMF_ConfigNextLine ( cf, tend, rc )     selects next line (for 
-!                                           tables)
-!
-!  ESMF_ConfigGetFloat ( cf, label, nsize,   returns next float number 
-!                        default, rc )      (function)
-!
-!  ESMF_ConfigGetInt ( cf, label, nsize,     returns next integer number 
-!                      default, rc )        (function)
-! 
-!  ESMF_ConfigGetChar ( cf, label, nsize,    returns next character or
-!                       default, rc )       character array
-!
-!  ESMF_ConfigGetString ( cf, string,        retutns next string (word) 
-!                         label, default, rc )
-!
-!  ESMF_ConfigGetLen ( cf, label, unique,   gets number of words in the line
-!                      rc)                  by counting disregarding type 
-!                                           (function)
-!
-!  ESMF_ConfigGetDim ( cf, label, lines,    gets number of lines in the tables
-!                      columns, unique, rc) and max number of columns by word 
-!                                           counting disregarding type
-!                                           (function)
-!  ------------------------------------------------------------------
-! \end{verbatim}
 !
 ! {\em Common Arguments:}
 !
@@ -683,20 +641,20 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetToken - gets a token
+! !IROUTINE: ESMF_ConfigGetString - gets a string
 !
-! !DESCRIPTION: Gets a sequence of characters (token, word). It will be 
+! !DESCRIPTION: Gets a sequence of characters (string, word). It will be 
 !               terminated by the first white space.
 
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetToken( cf, token, label, default, rc )
+    subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
 
       implicit none
       
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(out)          :: token    ! token (word)
+      character(len=*), intent(out)          :: string    ! string (word)
       
       character(len=*), intent(in), optional :: label    ! label
       
@@ -734,16 +692,16 @@
       end if
       
       if ( ie .lt. ib ) then
-         token = BLK
-         if ( present ( default )) token = default
+         string = BLK
+         if ( present ( default )) string = default
          iret = -1
          if ( present (rc )) rc = iret
          return
       else
-         ! Get the token, and shift the rest of %this_line to
+         ! Get the string, and shift the rest of %this_line to
          ! the left
          
-         token = cf%this_line(ib:ie) 
+         string = cf%this_line(ib:ie) 
          cf%this_line = cf%this_line(ie+2:)
          iret = 0
       end if
@@ -752,7 +710,7 @@
       return
       
       
-    end subroutine ESMF_ConfigGetToken
+    end subroutine ESMF_ConfigGetString
     
     
 
@@ -783,19 +741,19 @@
 !EOP -------------------------------------------------------------------
 !
       integer:: iret
-      character*256 :: token
+      character*256 :: string
       real ::     x
       
       iret = 0
 
       if (present (label ) ) then
-         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
       else
-         call ESMF_ConfigGetToken( cf, token, rc = iret )
+         call ESMF_ConfigGetString( cf, string, rc = iret )
       endif
 
       if ( iret .eq. 0 ) then
-           read(token,*,iostat=iret) x
+           read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
       end if
       if ( iret .ne. 0 ) then
@@ -903,20 +861,20 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
-      character*256 token
+      character*256 string
       real*8        x
       integer       n, iret
 
       iret = 0
 
       if (present (label ) ) then
-         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
       else
-         call ESMF_ConfigGetToken( cf, token, rc = iret )
+         call ESMF_ConfigGetString( cf, string, rc = iret )
       endif
 
       if ( iret == 0 ) then
-           read(token,*,iostat=iret) x
+           read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
       end if
       if ( iret == 0 ) then
@@ -1029,21 +987,21 @@
 !      15apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
       character ch
-      character*256 token
+      character*256 string
       integer       iret
 
       iret = 0
 
       if (present (label ) ) then
-         call ESMF_ConfigGetToken( cf, token, label, rc = iret )
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
       else
-         call ESMF_ConfigGetToken( cf, token, rc = iret )
+         call ESMF_ConfigGetString( cf, string, rc = iret )
       endif
 
      if ( iret .ne. 0 ) then
         ch = default
       else
-         ch = token(1:1)
+         ch = string(1:1)
       end if
 
       if (present( rc )) rc = iret
@@ -1055,49 +1013,6 @@
 
 
 
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetString - gets a string 
-!
-!
-! !INTERFACE:
-
-    subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
-
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(out)          :: string   ! string
-
-      character(len=*), intent(in), optional :: label    ! label
-
-      character(len=*), intent(in), optional :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !DESCRIPTION: Gets a sequence of characters (word). It will be 
-!               terminated by the first white space.
-!
-! !REVISION HISTORY:
-! 	7anp2003  Zaslavsky  initial interface/prolog
-!      21apr2003  Zaslavsky  Coding
-
-!
-!EOP -------------------------------------------------------------------
-      integer iret
-
-      if (present (label ) ) then
-         call ESMF_ConfigGetToken( cf, string, label, rc = iret )
-      else
-         call ESMF_ConfigGetToken( cf, string, rc = iret )
-      endif
-
-      if (present( rc )) rc = iret
-
-      return
-    end subroutine ESMF_ConfigGetString
 
 
 !-----------------------------------------------------------------------
@@ -1126,7 +1041,7 @@
 ! 	7anp2003  Zaslavsky  initial interface/prolog
 !      22apr2003  Zaslavsky  Coding
 !EOP -------------------------------------------------------------------
-      character*256 token
+      character*256 string
       integer iret
       integer count 
 
@@ -1142,7 +1057,7 @@
       endif
 
       do
-         call ESMF_ConfigGetToken( cf, token, rc = iret )
+         call ESMF_ConfigGetString( cf, string, rc = iret )
          if ( iret == 0 ) then
             count = count + 1
          else
@@ -1264,7 +1179,7 @@
       integer idx, i, n, nlen, lt, ibot, itop
       integer, parameter :: MAXLEN = 32767   ! max size of signed 2-byte integer
       n = len(string)         ! length of string
-      lt = len(tok)           ! length of token
+      lt = len(tok)           ! length of token tok
       i = 1                   ! initialize loop index
       nlen = MAXLEN-lt        ! index requires len(sting)+len(tok)<=MAXLEN 
       itop = min(nlen,n)      ! top of string to index

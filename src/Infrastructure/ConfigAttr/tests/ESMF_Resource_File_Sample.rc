@@ -4,7 +4,7 @@
 Number_of_DEs: 32
 Relaxation_time_scale_in_days: 14
 Do_you_want_quality_control: yes
-
+restart_file_name: RestartFile123
 
 # EXAMPLE 2 - retrieval of group of parameters in a single line
 #---------------------------------------------------------------
