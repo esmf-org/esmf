@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.11 2004/04/28 23:12:14 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.12 2004/06/11 19:21:38 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -88,10 +88,10 @@
       call ESMF_StateGet(importState, name=statename, rc=rc)
       if (trim(statename) .eq. "FlowSolver Feedback") then
 
-        call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATA_NEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATA_NEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATA_NEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATA_NEEDED, rc)
 
         ! Precompute and return a routehandle which identifies this operation
         call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
@@ -101,10 +101,10 @@
 
       if (trim(statename) .eq. "Injection Feedback") then
 
-        call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
-        call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATA_NEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATA_NEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATA_NEEDED, rc)
+        call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATA_NEEDED, rc)
 
         ! Precompute and return a routehandle which identifies this operation
         call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.14 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: ESMF_StateUTest.F90,v 1.15 2004/06/11 19:21:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.14 2004/06/11 02:12:59 cdeluca Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.15 2004/06/11 19:21:37 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -335,7 +335,7 @@
       call ESMF_StateGetNeeded(state1, "Humidity", needed, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Query if Field is needed in a State Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(needed.eq.ESMF_STATEDATAISNEEDED), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(needed.eq.ESMF_STATEDATA_NEEDED), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -364,7 +364,7 @@
 
       !EX_UTest
       ! Test setting Field as not needed in a State
-      call ESMF_StateSetNeeded(state1, "Humidity", ESMF_STATEDATANOTNEEDED, rc)
+      call ESMF_StateSetNeeded(state1, "Humidity", ESMF_STATEDATA_NOTNEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Field as not needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -390,7 +390,7 @@
 
       !EX_UTest
       ! Test setting Bundle as not needed in a State
-      call ESMF_StateSetNeeded(state1, "Temperature", ESMF_STATEDATANOTNEEDED, rc)
+      call ESMF_StateSetNeeded(state1, "Temperature", ESMF_STATEDATA_NOTNEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Bundle as not needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -408,7 +408,7 @@
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
       ! Test setting Array as not needed in a State
-      !call ESMF_StateSetNeeded(state1, aname, ESMF_STATEDATANOTNEEDED, rc)
+      !call ESMF_StateSetNeeded(state1, aname, ESMF_STATEDATA_NOTNEEDED, rc)
       !write(failMsg, *) ""
       !write(name, *) "Set Array as not needed in a State Test"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -463,7 +463,7 @@
 
       !EX_UTest
       ! Test setting Bundle as needed in a State
-      call ESMF_StateSetNeeded(state1, "Temperature", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(state1, "Temperature", ESMF_STATEDATA_NEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Bundle as needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -478,7 +478,7 @@
 
       !EX_UTest
       ! Test setting Field as needed in a State
-      call ESMF_StateSetNeeded(state1, "Humidity", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(state1, "Humidity", ESMF_STATEDATA_NEEDED, rc)
       write(failMsg, *) ""
       write(name, *) "Set Field as needed in a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -494,7 +494,7 @@
       !Commented out because it crashes
       ! Bug report 959618 resolution should allow this test to run
       ! Test setting Array as needed in a State
-      !call ESMF_StateSetNeeded(state1, aname, ESMF_STATEDATAISNEEDED, rc)
+      !call ESMF_StateSetNeeded(state1, aname, ESMF_STATEDATA_NEEDED, rc)
       !write(failMsg, *) ""
       !write(name, *) "Set Array as needed in a State Test"
       !call ESMF_Test((rc.eq.ESMF_SUCCESS), &

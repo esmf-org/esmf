@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.56 2004/06/11 17:49:27 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.57 2004/06/11 19:21:37 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,8 +99,8 @@
       end type
 
       type(ESMF_StateDataNeeded), parameter :: &
-                ESMF_STATEDATAISNEEDED = ESMF_StateDataNeeded(1), &
-                ESMF_STATEDATANOTNEEDED = ESMF_StateDataNeeded(2)
+                ESMF_STATEDATA_NEEDED = ESMF_StateDataNeeded(1), &
+                ESMF_STATEDATA_NOTNEEDED = ESMF_StateDataNeeded(2)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateDataReady
@@ -234,8 +234,8 @@
                                    ESMF_STATEITEM_NAME
       public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
                                    ESMF_STATE_LIST
-      public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
-                                   ESMF_STATEDATANOTNEEDED
+      public ESMF_StateDataNeeded, ESMF_STATEDATA_NEEDED, &
+                                   ESMF_STATEDATA_NOTNEEDED
       public ESMF_StateDataReady,  ESMF_STATEDATAREADYTOWRITE, &
                                    ESMF_STATEDATAREADYTOREAD, &
                                    ESMF_STATEDATANOTREADY
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.56 2004/06/11 17:49:27 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.57 2004/06/11 19:21:37 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1524,9 +1524,9 @@ end function
 !    in the argument lists matches this count of the expected number of items.
 !   \item[{[dataneeded]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEDATAISNEEDED} or 
-!    {\tt ESMF\_STATEDATANOTNEEDED}.  If not specified, the default value is
-!    set to {\tt ESMF\_STATEDATAISNEEDED}.
+!    Valid values are {\tt ESMF\_STATEDATA\_NEEDED} or 
+!    {\tt ESMF\_STATEDATA\_NOTNEEDED}.  If not specified, the default value is
+!    set to {\tt ESMF\_STATEDATA\_NEEDED}.
 !   \item[{[dataready]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAREADYTOWRITE},
@@ -2770,8 +2770,8 @@ end function
 !      \item[dataname]
 !       Name of the data item to query.
 !      \item[needed]
-!       Status of data item.  Returns either {\tt ESMF\_STATEDATAISNEEDED},
-!       or {\tt ESMF\_STATEDATANOTNEEDED}.
+!       Status of data item.  Returns either {\tt ESMF\_STATEDATA\_NEEDED},
+!       or {\tt ESMF\_STATEDATA\_NOTNEEDED}.
 !      \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -2897,7 +2897,7 @@ end function
 ! !DESCRIPTION:
 !      Returns true if the status of the {\tt needed} flag for the data item
 !      named by {\tt dataname} in the {\tt ESMF\_State} is 
-!      {\tt ESMF\_STATEDATAISNEEDED}.  Returns false for no item found 
+!      {\tt ESMF\_STATEDATA\_NEEDED}.  Returns false for no item found 
 !      with the specified name or item marked not needed.  Also sets error
 !      code if {\tt dataname} not found.
 !
@@ -2935,7 +2935,7 @@ end function
           return
       endif
 
-      if (dataitem%needed .eq. ESMF_STATEDATAISNEEDED) ESMF_StateIsNeeded = .TRUE.
+      if (dataitem%needed .eq. ESMF_STATEDATA_NEEDED) ESMF_StateIsNeeded = .TRUE.
   
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -3045,9 +3045,9 @@ end function
          end select
 
          select case (dp%needed%needed)
-           case (ESMF_STATEDATAISNEEDED%needed)
+           case (ESMF_STATEDATA_NEEDED%needed)
              outbuf = trim(outbuf) //  " marked as needed."
-           case (ESMF_STATEDATANOTNEEDED%needed)
+           case (ESMF_STATEDATA_NOTNEEDED%needed)
              outbuf = trim(outbuf) //  " marked as NOT needed."
          end select
 
@@ -3146,7 +3146,7 @@ end function
 !        Name of the data item to set.
 !       \item[needed]
 !        Set status of data item to this.  Valid values are 
-!        {\tt ESMF\_STATEDATAISNEEDED}, or {\tt ESMF\_STATEDATANOTNEEDED}. 
+!        {\tt ESMF\_STATEDATA\_NEEDED}, or {\tt ESMF\_STATEDATA\_NOTNEEDED}. 
 !       \item[{[rc]}]
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -3431,9 +3431,9 @@ end function
 !    to verify that the actual total number of items found matches this count.
 !   \item[{[dataneeded]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
-!    Valid values are {\tt ESMF\_STATEDATAISNEEDED} or 
-!    {\tt ESMF\_STATEDATANOTNEEDED}.  If not specified, the default value is
-!    set to {\tt ESMF\_STATEDATAISNEEDED}.
+!    Valid values are {\tt ESMF\_STATEDATA\_NEEDED} or 
+!    {\tt ESMF\_STATEDATA\_NOTNEEDED}.  If not specified, the default value is
+!    set to {\tt ESMF\_STATEDATA\_NEEDED}.
 !   \item[{[dataready]}]
 !    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAREADYTOWRITE},
@@ -3492,7 +3492,7 @@ end function
         if (present(dataneeded)) then
             stypep%needed_default = dataneeded
         else
-            stypep%needed_default = ESMF_STATEDATAISNEEDED
+            stypep%needed_default = ESMF_STATEDATA_NEEDED
         endif
 
         if (present(dataready)) then
@@ -3846,7 +3846,7 @@ end function
             dataitem%datap%ap = arrays(i)
         
             ! don't update flags on existing entry
-            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%needed = ESMF_STATEDATA_NEEDED
             !dataitem%ready = ESMF_STATEDATAREADYTOREAD
             !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
@@ -4039,7 +4039,7 @@ end function
         
             ! If we're replacing an existing item, then we shouldn't
             !  alter existing settings on the data state.
-            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%needed = ESMF_STATEDATA_NEEDED
             !dataitem%ready = ESMF_STATEDATAREADYTOREAD
             !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
@@ -4238,7 +4238,7 @@ end function
             dataitem%datap%bp = bundles(i)
         
             ! Don't change flags of existing entry
-            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%needed = ESMF_STATEDATA_NEEDED
             !dataitem%ready = ESMF_STATEDATAREADYTOREAD
             !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif
@@ -4576,7 +4576,7 @@ end function
             dataitem%datap%spp => states(i)%statep
         
             ! don't update flags on existing entry
-            !dataitem%needed = ESMF_STATEDATAISNEEDED
+            !dataitem%needed = ESMF_STATEDATA_NEEDED
             !dataitem%ready = ESMF_STATEDATAREADYTOREAD
             !dataitem%valid = ESMF_STATEDATAVALIDITYUNKNOWN
         endif

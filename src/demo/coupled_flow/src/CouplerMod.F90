@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.11 2004/05/27 13:31:54 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.12 2004/06/11 19:21:37 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -128,10 +128,10 @@
     call ESMF_StateGetField(exportState, "SIE", dst_field, rc=rc)
 
     if (trim(statename) .eq. "FlowSolver Feedback") then
-      call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATA_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATA_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATA_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATA_NEEDED, rc)
 
       fromFlow_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
@@ -140,10 +140,10 @@
     endif
 
     if (trim(statename) .eq. "Injection Feedback") then
-      call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATAISNEEDED, rc)
-      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATAISNEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "SIE", ESMF_STATEDATA_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "V", ESMF_STATEDATA_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "RHO", ESMF_STATEDATA_NEEDED, rc)
+      call ESMF_StateSetNeeded(importState, "FLAG", ESMF_STATEDATA_NEEDED, rc)
 
       fromInject_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, cpllayout, &
