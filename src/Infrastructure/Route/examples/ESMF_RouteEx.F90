@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.23 2004/11/03 23:34:31 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.24 2004/11/04 16:02:29 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -110,7 +110,7 @@
 
 
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
-                                                   name="dst pressure", rc=rc)
+                                    haloWidth=3,  name="dst pressure", rc=rc)
 
  
     ! fields all ready to go
