@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.9 2003/04/15 16:18:15 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.10 2003/04/15 16:25:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,8 +111,6 @@ subroutine ESMF_LogInit(aLog,verbose,flushflag,haltOnErr,haltOnWarn)
  if (present(haltOnWarn)) stopOnWarn=haltOnWarn
  call esmf_loginit_c(aLog,verbosity,flushOut,stopOnErr,stopOnWarn)
 end subroutine
-
-end module ESMF_LogErr
 
 
 
@@ -344,5 +342,6 @@ subroutine ESMF_LogOpenFortran(isOpen,unitNumber, nameLogFile)
   if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
   10 format('+',F14.7)
   20 format('+',A)
- end subroutine
+ end subroutine ESMF_LogPrintReal
 
+end module ESMF_LogErr
