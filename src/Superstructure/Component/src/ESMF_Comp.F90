@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.15 2003/02/18 20:41:32 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.16 2003/02/18 20:43:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.15 2003/02/18 20:41:32 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.16 2003/02/18 20:43:11 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -283,8 +283,8 @@ end interface
         endif
 
         ! Call construction method to initialize component internals
-        call ESMF_CompConstruct(compclass, name, layout, ctype, mtype, &
-                                                             filepath, status)
+        !call ESMF_CompConstruct(compclass, name, layout, ctype, mtype, &
+        !                                                     filepath, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -338,7 +338,7 @@ end interface
         endif
 
         ! call Destroy to release resources
-        call ESMF_CompDestruct(component%compp, status)
+        !call ESMF_CompDestruct(component%compp, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component contents destruction error"
           return
