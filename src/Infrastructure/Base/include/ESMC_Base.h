@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.2 2002/11/04 21:23:05 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.3 2003/02/03 05:51:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,13 +51,33 @@ enum ESMC_DataType { ESMF_DATA_INTEGER=1,
                      ESMF_DATA_LOGICAL,
                      ESMF_DATA_CHARACTER };
 
-enum ESMC_DataKind { ESMF_KIND_1=1,
-                     ESMF_KIND_2,
-                     ESMF_KIND_4,
-                     ESMF_KIND_8,
-                     ESMF_KIND_16 };
+enum ESMC_DataKind { ESMF_KIND_I1=1,
+                     ESMF_KIND_I2,
+                     ESMF_KIND_I4,
+                     ESMF_KIND_I8,
+                     ESMF_KIND_R4,
+                     ESMF_KIND_R8,
+                     ESMF_KIND_C8,
+                     ESMF_KIND_C16 };
 
-// general logical valud
+// ESMF platform-dependent data types
+#ifdef ESMF_IS_32BIT_MACHINE
+  typedef long long ESMF_IKIND_I8;
+  typedef int       ESMF_IKIND_I4;
+  typedef short     ESMF_IKIND_I2;
+  typedef char      ESMF_IKIND_I1;
+  typedef double    ESMF_IKIND_R8;
+  typedef float     ESMF_IKIND_R4;
+#else // 64-bit or larger machine
+  typedef long      ESMF_IKIND_I8;
+  typedef int       ESMF_IKIND_I4;
+  typedef short     ESMF_IKIND_I2;
+  typedef char      ESMF_IKIND_I1;
+  typedef double    ESMF_IKIND_R8;
+  typedef float     ESMF_IKIND_R4;
+#endif
+
+// general logical value
 enum ESMC_Logical { ESMF_TF_UNKNOWN=1,
                     ESMF_TF_TRUE,
                     ESMF_TF_FALSE };
@@ -67,7 +87,7 @@ struct ESMC_DataValue {
   private:
     ESMC_DataType dt;
     int rank;
-    union {   // can't do in F90 ?? EQUIVALENCE statement too limited ??
+    union {   // can't do in F90 ?? EQUIVALENCE statement too limited ?? TODO
       int     vi;               // could be an integer,
       int    *vip;              // pointer to integer,
       double  vr;               // double (real),
