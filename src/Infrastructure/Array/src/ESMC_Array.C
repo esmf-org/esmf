@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.7 2003/07/22 19:36:49 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.8 2003/07/23 16:59:06 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -822,7 +822,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Grid *grid,                     // in - associated grid 
+      struct ESMC_AxisIndex *global,       // in - associated global AIs
+      int nDEs,                            // in -
       struct ESMC_AxisIndex *total,        // out - total region
       struct ESMC_AxisIndex *comp,         // out - computational
       struct ESMC_AxisIndex *excl) const { // out - exclusive
@@ -837,44 +838,42 @@
 //
 //EOP
 
-     int i;
-     int halo_width;   // TODO: make this an array before/after each dim
+     int i, j, ij, count;
+     int halo_widths[ESMF_MAXGRIDDIM][2];
 
      // TODO: when widths are 2*Ndim, compute all of them.
-     halo_width = ai_comp[0].min - ai_total[0].min;
+     for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+       halo_widths[i][0] = ai_comp[i].min  - ai_total[i].min;
+       halo_widths[i][1] = ai_total[i].max - ai_comp[i].max;
+     }
 
-     // nsc - needs code here
-     // nsc - ask grid how many DEs there are.
+     for (j=0; j<ESMF_MAXGRIDDIM; j++) {
+       for (i=0; i<nDEs; i++) {
+         ij = j*nDEs + i;
+         count = global[ij].max - global[ij].min + 1;
 
-     // nsc - needs code here
-     // nsc - ask grid for the starts along each dim
-     // nsc - ai_global
-
-     
-     for (i=0; i<rank; i++) {
-
-         // nsc - fixme.  code not implemented
+         // nsc - fixme.  please.  purty please.
 
          if (total) {
-             total[i].max = 0;
-             total[i].min = 0;
-             total[i].stride = 1;
+             total[ij].min = 0;
+             total[ij].max = count + halo_widths[j][0] + halo_widths[j][1];
+             total[ij].stride = 1;
          }
 
          if (comp) {
-             comp[i].max = 0;
-             comp[i].min = 0;
-             comp[i].stride = 1;
+             comp[ij].min = halo_widths[j][0];
+             comp[ij].max = halo_widths[j][0] + count;
+             comp[ij].stride = 1;
          }
 
          if (excl) {
-             excl[i].max = 0;
-             excl[i].min = 0;
+             excl[i].min = halo_widths[j][0] + halo_widths[j][1];
+             excl[i].max = halo_widths[j][0] + halo_widths[j][1] + count;
              excl[i].stride = 1;
          }
-
+       }
      }
-    
+
      return ESMF_SUCCESS;
 
  } // end ESMC_ArrayGetAllAxisIndices
