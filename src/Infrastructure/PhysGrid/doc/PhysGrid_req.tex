@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.23 2002/06/21 20:31:51 cnh Exp $
+%$Id: PhysGrid_req.tex,v 1.24 2002/06/21 21:26:51 cnh Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -327,6 +327,7 @@ set at the time of creation of the stream.
 {\bf Source:} Required by PSAS, MIT, GFDL.\\
 {\bf Status:} Approved-2. \\
 {\bf Verification:} Code inspection.
+{\bf Note:} REJECT because of Arlindo {Elements in stream have similar properties}
 \end{reqlist}
 
 \ssreq{Global attributes: dimension names}
@@ -393,7 +394,7 @@ some locations may be missing).
 \begin{reqlist}
 {\bf Priority:} 2. \\
 {\bf Source:} MIT. \\
-{\bf Status:} ????. \\
+{\bf Status:} Rejected. \\
 {\bf Verification:} Code inspection. \\
 {\bf Notes:} MAJOR OBJECTION. Where did this come from? I'd like to be able to represent the whole observation vector for a given synoptic time on a single location stream. While data have horizontal coordinates in (lat,lon), vertical coordinates may vary widely (winds at 10m above sfc, temperature at 500 hPa, to name a few). So, each element would contain the (lat,lon,lev,levunits); it is conceivable that at  some point one would need (lat,lon,lev,xunits,yunits,zunits) - Arlindo.
 NO STATUS ASSIGNED WE NEED TO REVISIT THIS - CNH/RWH.
@@ -405,7 +406,7 @@ Methods shall be provided to set and query each element's location.
 \begin{reqlist}
 {\bf Priority:} 1\\
 {\bf Source:} Required by PSAS, MIT, GFDL.\\
-{\bf Status:} Approved-2. \\
+{\bf Status:} Approved-1. \\
 {\bf Verification:} Unit test.
 \end{reqlist}
 
