@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.71 2004/01/08 23:36:29 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.72 2004/01/27 17:55:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -140,9 +140,9 @@
       sequence
       private
           type(ESMF_DataType) :: dt
-          integer :: rank
+          integer :: items
           ! how do you do values of all types here ? TODO
-          ! in C++ i'd do a union w/ overloaded access funcs
+          ! in C++ i'm using a union w/ overloaded access funcs
           integer :: vi
           !integer, dimension (:), pointer :: vip
           !real :: vr
@@ -151,6 +151,7 @@
           !logical, pointer :: vlp
           !character (len=ESMF_MAXSTR) :: vc
           !character, pointer :: vcp
+          integer :: pad
       end type
 
 !------------------------------------------------------------------------------
@@ -159,7 +160,7 @@
       sequence
       private
           character (len=ESMF_MAXSTR) :: attr_name
-          type (ESMF_DataType) :: attr_type
+          !!type (ESMF_DataType) :: attr_type
           type (ESMF_DataValue) :: attr_value
       end type
 
@@ -199,10 +200,10 @@
       type ESMF_BasePointer
       sequence
       private
-          integer*8 :: base_ptr
+          integer*8 :: basePtr
       end type
 
-      integer :: global_count = 0
+      integer :: globalCount = 0
 
 !------------------------------------------------------------------------------
 !
@@ -224,9 +225,12 @@
       sequence
       private
          integer :: ID
-         integer :: ref_count
-         type (ESMF_Status) :: base_status
+         integer :: refCount
+         type (ESMF_Status) :: baseStatus
          character (len=ESMF_MAXSTR) :: name
+         integer :: attrCount
+         integer :: attrAlloc
+         type (ESMF_Pointer) :: attrList
      end type
 
 ! !PUBLIC TYPES:
@@ -262,6 +266,7 @@
 
       public ESMF_AxisIndex, ESMF_AxisIndexSet, ESMF_AxisIndexGet
       public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
+      public ESMF_BasePrint
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -356,7 +361,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.71 2004/01/08 23:36:29 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.72 2004/01/27 17:55:27 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -573,11 +578,14 @@ end function
         rc = ESMF_FAILURE
       endif
 
-      global_count = global_count + 1
-      base%ID = global_count
-      base%ref_count = 1
-      base%base_status = ESMF_STATE_READY
+      globalCount = globalCount + 1
+      base%ID = globalCount
+      base%refCount = 1
+      base%baseStatus = ESMF_STATE_READY
       base%name = "undefined"
+      base%attrCount = 0
+      base%attrAlloc = 0
+      base%attrList = ESMF_NULL_POINTER
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -957,7 +965,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_AttributeCopyAll - copy attributes between two objects
+!IROUTINE:  ESMF_AttributeCopyAll - copy attributes between two objects
 
 !
 ! !INTERFACE:
@@ -980,6 +988,44 @@ end function
 ! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopyAll
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+!  Print routine
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMF_BasePrint - call into C++ code to print base object
+
+!
+! !INTERFACE:
+      subroutine ESMF_BasePrint(base, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in) :: base
+      character(len=*), intent(in), optional :: options
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!  Interface to call through to C++ and print base object values.
+
+!
+!EOP
+! !REQUIREMENTS:  FLD1.5.4
+      integer :: status
+      character(len=ESMF_MAXSTR) :: opts
+
+      if (present(options)) then
+          opts = options
+      else
+          opts = ""
+      endif
+
+      call c_ESMC_BasePrint(base, opts, status)
+      if (present(rc)) rc = status
+
+      end subroutine ESMF_BasePrint
 
 !=========================================================================
 ! Domain List routines.
@@ -1210,7 +1256,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_AxisIndexSet - initialize an AxisIndex object
+!IROUTINE:  ESMF_AxisIndexSet - initialize an AxisIndex object
 
 !
 ! !INTERFACE:
@@ -1239,7 +1285,7 @@ end function
 !-------------------------------------------------------------------------
 !BOP
 !
-!IROUTINE:  ESMC_AxisIndexGet - get contents of an AxisIndex object
+!IROUTINE:  ESMF_AxisIndexGet - get contents of an AxisIndex object
 !
 ! !INTERFACE:
       subroutine ESMF_AxisIndexGet(ai, min, max, stride, rc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.17 2004/01/26 17:42:11 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.18 2004/01/27 17:55:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.17 2004/01/26 17:42:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.18 2004/01/27 17:55:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -133,6 +133,17 @@ static int globalCount = 0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+  int i;
+
+  printf("Base object ID: %d, Ref count: %d, Status=%s, Name=%s\n", 
+           ID, refCount, ESMC_StatusString(baseStatus), baseName);
+
+  if (attrCount > 0) printf("  %d Attributes:\n", attrCount);
+  for (i=0; i<attrCount; i++) {
+      printf(" Attr %d: \n");
+      // TODO:  add attr value print here
+  }
+                         
   return ESMF_SUCCESS;
 
  } // end ESMC_Print
@@ -533,6 +544,34 @@ struct ESMC_AxisIndex ESMC_DomainList::ESMC_DomainListGetAI(int domainnum, int a
 }
 
 //-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_StatusString - Return fixed char string for printing
+//
+// !INTERFACE:
+    const char *ESMC_StatusString(
+//
+// !RETURN VALUE:
+//  const char * to string name of value
+// 
+// !ARGUMENTS:
+    ESMC_Status stat) {       // in - a status value
+
+    switch (stat) {
+      case ESMF_STATE_UNINIT:       return  "Uninitialized";
+      case ESMF_STATE_READY:        return  "Ready";
+      case ESMF_STATE_UNALLOCATED:  return  "Unallocated";
+      case ESMF_STATE_ALLOCATED:    return  "Allocated";
+      case ESMF_STATE_BUSY:         return  "Busy";
+      case ESMF_STATE_INVALID:      return  "Invalid";
+      default:
+         fprintf(stderr, "Unknown Status in ESMC_StatusString()\n");
+         return NULL;
+    }
+
+    /* not reached */
+}
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_F90toCstring - Convert an F90 string into a C++ string
@@ -826,33 +865,33 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,               // in - attribute name
-      ESMC_DataValue value) {   // in - attribute value
+      ESMC_Attribute *attr) {   // in - attribute name, type, value
 // 
 // !DESCRIPTION:
 //     Associate a (name,value) pair with any type in the system.
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5, FLD1.5.3
 
   int i, rc;
 
-  // simple sanity check
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMF_AttributeSet: bad attribute name\n");
+  // simple sanity checks
+  if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
+      printf("ESMF_AttributeSet: bad attribute object\n");
       return ESMF_FAILURE;
   }
 
   // first, see if you are replacing an existing attribute
   for (i=0; i<attrCount; i++) {
-      if (strcmp(name, attr[i].attrName))
+      if (strcmp(attr->attrName, attr[i].attrName))
           continue;
 
       // FIXME: we might want an explicit flag saying that this is what
       // is wanted, instead of an error if a previous value not expected.
 
       // if you get here, you found a match.  replace previous copy.
-      attr[i].attrValue = value;      // struct contents copy
+      // FIXME - if length > 1, you have to delete the pointer contents first
+      // otherwise, memory leaks here.
+      attr[i].attrValue = attr->attrValue;        // struct contents copy
       return ESMF_SUCCESS;
   }   
 
@@ -861,8 +900,8 @@ extern "C" {
   if (rc != ESMF_SUCCESS)
       return rc;
   
-  strcpy(attr[attrCount].attrName, name);
-  attr[attrCount].attrValue = value;      // struct contents copy
+  strcpy(attr[attrCount].attrName, attr->attrName);
+  attr[attrCount].attrValue = attr->attrValue;      // struct contents copy
   attrCount++;
   return ESMF_SUCCESS;
 
@@ -879,30 +918,26 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      char *name,                      // in - attribute name
-      ESMC_DataType *type,             // out - attribute type
-      ESMC_DataValue *value) const {   // out - attribute value
+      ESMC_Attribute *attr) const {    // in/out - name in, type & value out
 // 
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  FLD1.5.1, FLD1.5.3
 
   int rc, i;
 
-  // simple sanity check
-  if ((!name) || (name[0] == '\0')) {
-      printf("ESMC_AttributeGet: bad attribute name\n");
+  // simple sanity checks
+  if ((!attr) || (!attr->attrName) || (attr->attrName[0] == '\0')) {
+      printf("ESMF_AttributeGet: bad attribute object\n");
       return ESMF_FAILURE;
   }
 
   for (i=0; i<attrCount; i++) {
-      if (strcmp(name, attr[i].attrName))
+      if (strcmp(attr->attrName, attr[i].attrName))
           continue;
 
-      // if you get here, you found a match
-      if (type) *type = attr[i].attrValue.dt;
-      if (value) *value = attr[i].attrValue;      // struct contents copy
+      // if you get here, you found a match.  struct contents copy.
+      attr->attrValue = attr[i].attrValue;
       return ESMF_SUCCESS;
   }   
 
@@ -948,6 +983,7 @@ extern "C" {
 // 
 // !ARGUMENTS:
       int number,                      // in - attribute number
+      // FIXME: should this be passing ESMC_Attribute * here?
       char *name,                      // out - attribute name
       ESMC_DataType *type,             // out - attribute type
       ESMC_DataValue *value) const {   // out - attribute value

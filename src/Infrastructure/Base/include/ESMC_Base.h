@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.37 2004/01/26 17:42:11 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.38 2004/01/27 17:55:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,17 +99,17 @@ enum ESMC_Logical { ESMF_TRUE=1,
 struct ESMC_DataValue {
   //private:
     ESMC_DataType dt;
-    int rank;
-    union {         // overload pointers to conserve space 
-      int     vi;               // could be an integer,
-      int    *vip;              // pointer to integer,
-      double  vr;               // double (real),
-      double *vrp;              // pointer to double (real),
-      bool    vl;               // boolean (logical),
-      bool   *vlp;              // pointer to boolean (logical),
-      char    vc[ESMF_MAXSTR];  // character string,
-      char   *vcp;              // or a pointer to a character string
-      void   *voidp;            // cannot be dereferenced
+    int items;         // number of items (NOT byte count) only for pointers
+    union {            // overload pointers to conserve space 
+      int     vi;               // integer, or
+      int    *vip;              // pointer to integer list, or
+      double  vr;               // double (real), or
+      double *vrp;              // pointer to double (real) list, or
+      bool    vl;               // boolean (logical), or
+      bool   *vlp;              // pointer to boolean (logical) list, or
+      char   *vcp;              // pointer to a character string, or
+      void   *voidp;            // cannot be dereferenced, but generic.
+      // ESMC_Array *ap,        // pointer to an ESMC_Array object (someday?)
     };
 };
 
@@ -117,7 +117,7 @@ struct ESMC_DataValue {
 // elemental attribute
 struct ESMC_Attribute {
   //private:
-    char           attrName[ESMF_MAXSTR];
+    char attrName[ESMF_MAXSTR];  // inline to reduce memory thrashing
     //ESMC_DataType  attrType;   // redundant w/ dt in datavalue
     ESMC_DataValue attrValue;
 };
@@ -216,9 +216,8 @@ class ESMC_Base
     virtual int ESMC_Print(const char *options=0) const;
 
     // attribute methods
-    int ESMC_AttributeSet(char *name, ESMC_DataValue value);
-    int ESMC_AttributeGet(char *name, ESMC_DataType *type,
-                          ESMC_DataValue *value) const;
+    int ESMC_AttributeSet(ESMC_Attribute *attr);
+    int ESMC_AttributeGet(ESMC_Attribute *attr) const;
     int ESMC_AttributeAlloc(int adding);
 
     int ESMC_AttributeGetCount(void) const;
@@ -279,6 +278,8 @@ void  FTN(esmf_ctof90string)(char *src, char *dst, int *rc,
 
 // return byte counts for DataKinds
 int ESMC_DataKindSize(ESMC_DataKind dk);
+// return a static string name for various enums
+const char *ESMC_StatusString(ESMC_Status stat);
 
 extern "C" {
 void FTN(f_esmf_domainlistgetde)(ESMC_DomainList *, int *, int *, int *);
