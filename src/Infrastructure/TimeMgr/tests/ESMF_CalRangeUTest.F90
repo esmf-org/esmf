@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.8 2003/07/29 23:28:16 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.9 2003/08/29 19:09:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.8 2003/07/29 23:28:16 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.9 2003/08/29 19:09:34 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -80,7 +80,7 @@
       ! Julian Calendar
 
       ! initialize calendar to be Julian type
-      call ESMF_CalendarSet(julianCalendar, ESMF_CAL_JULIAN, rc)
+      call ESMF_CalendarSet(julianCalendar, ESMF_CAL_JULIANDAY, rc)
 
       ! Gregorian Calendar
 
@@ -115,9 +115,9 @@
       MM = 11
       DD = 24
       Dl = 0 
-      call ESMF_TimeSet(Time, yr_i8=YRl, mm_i4=MM, dd_i4=DD, &
+      call ESMF_TimeSet(Time, yr_i8=YRl, mm=MM, dd=DD, &
                         calendar=gregorianCalendar, rc=rc)
-      call ESMF_TimeGet(Time, yr_i8=rYRl, mm_i4=rMM, dd_i4=rDD, d_i8=rDl, rc=rc)
+      call ESMF_TimeGet(Time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
       print *, "Low range test"
       print *, "  Start Time Gregorian = ", rYRl, "/", rMM, "/", rDD
       print *, "  Start Julian Days = ", rDl
@@ -235,9 +235,9 @@
 
         endif
 
-        call ESMF_TimeSet(Time, yr_i8=YRl, mm_i4=MM, dd_i4=DD, &
+        call ESMF_TimeSet(Time, yr_i8=YRl, mm=MM, dd=DD, &
                           calendar=gregorianCalendar, rc=rc)
-        call ESMF_TimeGet(Time, yr_i8=rYRl, mm_i4=rMM, dd_i4=rDD, d_i8=rDl, rc=rc)
+        call ESMF_TimeGet(Time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
         print *, "High range test #", test
         print *, "  Start Time Gregorian = ", rYRl, "/", rMM, "/", rDD
         print *, "  Start Julian Days = ", rDl
@@ -359,11 +359,11 @@
       !
 
       ! set date via ESMF Gregorian calendar
-      call ESMF_TimeSetCalendar(time, calendar=gregCal, rc=rc)
-      call ESMF_TimeSet(time, yr_i8=YRl, mm_i4=MM, dd_i4=DD, rc=rc)
+      call ESMF_TimeSet(time, calendar=gregCal, rc=rc)
+      call ESMF_TimeSet(time, yr_i8=YRl, mm=MM, dd=DD, rc=rc)
 
       ! see what we get back
-      call ESMF_TimeGet(time, yr_i8=rYRl, mm_i4=rMM, dd_i4=rDD, d_i8=rDl, rc=rc)
+      call ESMF_TimeGet(time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
 
       if (.not.(rYRl.eq.YRl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
                 rDl.eq.Dl)) then
@@ -380,7 +380,7 @@
       !
 
       ! see what we get back via Julian calendar
-      call ESMF_TimeSetCalendar(time, calendar=julCal, rc=rc)
+      call ESMF_TimeSet(time, calendar=julCal, rc=rc)
       call ESMF_TimeGet(time, d_i8=rDl, rc=rc)
 
       if (.not.(rDl.eq.Dl)) then
@@ -396,7 +396,7 @@
       !
 
       ! set date via ESMF Julian calendar
-      call ESMF_TimeSetCalendar(time, calendar=julCal, rc=rc)
+      call ESMF_TimeSet(time, calendar=julCal, rc=rc)
       call ESMF_TimeSet(time, d_i8=Dl, rc=rc)
 
       ! see what we get back
@@ -415,8 +415,8 @@
       !
 
       ! see what we get back via Gregorian calendar
-      call ESMF_TimeSetCalendar(time, calendar=gregCal, rc=rc)
-      call ESMF_TimeGet(time, yr_i8=rYRl, mm_i4=rMM, dd_i4=rDD, d_i8=rDl, rc=rc)
+      call ESMF_TimeSet(time, calendar=gregCal, rc=rc)
+      call ESMF_TimeGet(time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
 
       if (.not.(rYRl.eq.YRl .and. rMM.eq.MM .and. rDD.eq.DD .and. &
                 rDl.eq.Dl)) then
