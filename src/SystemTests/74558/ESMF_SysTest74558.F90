@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.5 2003/04/14 14:51:48 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.6 2003/04/14 17:31:34 nscollins Exp $
 !
 ! System test code #74558
 
@@ -130,7 +130,7 @@
         print *, "Comp 1 Run returned, rc =", rc
 
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, rc=rc)
+        !call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
 

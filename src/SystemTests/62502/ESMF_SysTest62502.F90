@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.9 2003/04/14 14:51:43 nscollins Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.10 2003/04/14 17:31:33 nscollins Exp $
 !
 ! System test code #62502
 
@@ -170,7 +170,7 @@
         print *, "Comp 2 Run returned, rc =", rc
 
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_ClockPrint(clock, rc=rc)
+        !call ESMF_ClockPrint(clock, rc=rc)
 
       enddo
  
