@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.24 2003/03/25 15:43:14 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.25 2003/07/09 17:47:09 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.24 2003/03/25 15:43:14 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.25 2003/07/09 17:47:09 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -57,10 +57,10 @@
 //
 // !ARGUMENTS:
       int nrank,
-      int nleft,
-      int nright,
-      int *nstrides,
-      int *nnum) {
+      int noffset,
+      int ncontig_length,
+      int *nstride,
+      int *nrep_count) {
 //
 // !DESCRIPTION:
 //
@@ -71,11 +71,11 @@
 // !REQUIREMENTS:  AAAn.n.n
 
     rank = nrank;
-    left = nleft;
-    right = nright;
+    offset = noffset;
+    contig_length = ncontig_length;
     for (int i=0; i<rank; i++) {
-      strides[i] = nstrides[i];
-      num[i] = nnum[i];
+      stride[i] = nstride[i];
+      rep_count[i] = nrep_count[i];
     }
 
     return ESMF_SUCCESS;
@@ -95,10 +95,10 @@
 //
 // !ARGUMENTS:
       int *nrank,     // out, single ints
-      int *nleft,     // out, single ints
-      int *nright,    // out, single ints
-      int *nstrides,  // out, array of rank ints
-      int *nnum) {    // out, array of rank ints
+      int *noffset,     // out, single ints
+      int *ncontig_length,    // out, single ints
+      int *nstride,  // out, array of rank ints
+      int *nrep_count) {    // out, array of rank ints
 //
 // !DESCRIPTION:
 //     Returns the contents of XPacket member.
@@ -107,11 +107,11 @@
 // !REQUIREMENTS:  
 
     *nrank = rank;
-    *nleft = left;
-    *nright = right;
+    *noffset = offset;
+    *ncontig_length = contig_length;
     for (int i=0; i<rank; i++) {
-      nstrides[i] = strides[i];
-      nnum[i] = num[i];
+      nstride[i] = stride[i];
+      nrep_count[i] = rep_count[i];
     }
 
     return ESMF_SUCCESS;
@@ -186,19 +186,19 @@
     // check that the xpacket strides are the same
     if (this->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
-        if (xpacket1->strides[i] != xpacket2->strides[i]) {
+        if (xpacket1->stride[i] != xpacket2->stride[i]) {
           return ESMF_FAILURE;
         }
-        this->strides[i] = xpacket1->strides[i];
+        this->stride[i] = xpacket1->stride[i];
       }
     }
 
-    // set left, right, and nums to zero as default
-    this->left = 0;
-    this->right = 0;
+    // set offset, contig_length, and rep_counts to zero as default
+    this->offset = 0;
+    this->contig_length = 0;
     if (this->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
-        this->num[i] = 0;
+        this->rep_count[i] = 0;
       }
     }
 
@@ -206,52 +206,52 @@
     switch (this->rank) {
       case 1:
         {
-          if (xpacket1->left >= xpacket2->left)
-            this->left  = xpacket1->left;
+          if (xpacket1->offset >= xpacket2->offset)
+            this->offset  = xpacket1->offset;
           else
-            this->left  = xpacket2->left;
-          if (xpacket1->right <= xpacket2->left)
-            this->right = xpacket1->right;
+            this->offset  = xpacket2->offset;
+          if (xpacket1->contig_length <= xpacket2->offset)
+            this->contig_length = xpacket1->contig_length;
           else
-            this->right = xpacket2->right;
-          this->num[0] = 1;
+            this->contig_length = xpacket2->contig_length;
+          this->rep_count[0] = 1;
         }
       break;
       case 2:
         {
           // implementation of efficient intersection calculation from
           // thesis by Ramaswamy
-          int intersect1 = (xpacket2->left-xpacket1->right+xpacket1->strides[0]-1)
-                         /  xpacket1->strides[0];  // rounding to nearest integer
+          int intersect1 = (xpacket2->offset-xpacket1->contig_length+xpacket1->stride[0]-1)
+                         /  xpacket1->stride[0];  // rounding to nearest integer
           if (intersect1 < 0) intersect1 = 0;
-          int intersect2 = (xpacket1->left-xpacket2->right+xpacket2->strides[0]-1)
-                         /  xpacket2->strides[0];  // rounding to nearest integer
+          int intersect2 = (xpacket1->offset-xpacket2->contig_length+xpacket2->stride[0]-1)
+                         /  xpacket2->stride[0];  // rounding to nearest integer
           if (intersect2 < 0) intersect2 = 0;
           int i1=intersect1;
-          int L1_left  = xpacket1->left  + i1*xpacket1->strides[0];
-          int L1_right = xpacket1->right + i1*xpacket1->strides[0];
-          int i2 = (i1*xpacket1->strides[0] + xpacket1->left - xpacket2->right)
-                 / xpacket2->strides[0];
+          int L1_offset  = xpacket1->offset  + i1*xpacket1->stride[0];
+          int L1_contig_length = xpacket1->contig_length + i1*xpacket1->stride[0];
+          int i2 = (i1*xpacket1->stride[0] + xpacket1->offset - xpacket2->contig_length)
+                 / xpacket2->stride[0];
           if (i2 < intersect2) i2 = intersect2;
-          int L2_left  = xpacket2->left  + i2*xpacket2->strides[0];
-          int L2_right = xpacket2->right + i2*xpacket2->strides[0];
-          if (L1_left >= L2_left)
-            this->left  = L1_left;
+          int L2_offset  = xpacket2->offset  + i2*xpacket2->stride[0];
+          int L2_contig_length = xpacket2->contig_length + i2*xpacket2->stride[0];
+          if (L1_offset >= L2_offset)
+            this->offset  = L1_offset;
           else
-            this->left  = L2_left;
-          if (L1_right <= L2_right)
-            this->right = L1_right;
+            this->offset  = L2_offset;
+          if (L1_contig_length <= L2_contig_length)
+            this->contig_length = L1_contig_length;
           else
-            this->right = L2_right;
-          if (xpacket1->num[0]-i1 <= xpacket2->num[0]-i2) 
-            this->num[0] = xpacket1->num[0]-i1;
+            this->contig_length = L2_contig_length;
+          if (xpacket1->rep_count[0]-i1 <= xpacket2->rep_count[0]-i2) 
+            this->rep_count[0] = xpacket1->rep_count[0]-i1;
           else
-            this->num[0] = xpacket2->num[0]-i2;
+            this->rep_count[0] = xpacket2->rep_count[0]-i2;
           // for now, just check here for a real intersection
-          if (this->left > this->right) {
-            this->left = 0;
-            this->right = 0;
-            this->num[0] = 0;
+          if (this->offset > this->contig_length) {
+            this->offset = 0;
+            this->contig_length = 0;
+            this->rep_count[0] = 0;
           }
         }
       break;
@@ -318,17 +318,17 @@
           int global_l[2];
           int global_r[2];
           this->rank = 2;
-          // calculate global lefts and rights for the index space
+          // calculate global offsets and contig_lengths for the index space
           for (i=0; i<size_axisindex; i++) {
-   //printf("incoming AxisIndex: [%d] left=%d, right=%d, gstart=%d, max=%d\n",
+   //printf("incoming AxisIndex: [%d] offset=%d, contig_length=%d, gstart=%d, max=%d\n",
    // i, indexlist[i].l, indexlist[i].r, indexlist[i].gstart, indexlist[i].max);
             global_l[i] = indexlist[i].l + indexlist[i].gstart;
             global_r[i] = indexlist[i].r + indexlist[i].gstart;
           }
-          this->left  = global_l[1]*indexlist[0].max + global_l[0];
-          this->right = global_l[1]*indexlist[0].max + global_r[0];
-          this->strides[0] = indexlist[0].max;
-          this->num[0] = indexlist[1].r - indexlist[1].l + 1;
+          this->offset  = global_l[1]*indexlist[0].max + global_l[0];
+          this->contig_length = global_l[1]*indexlist[0].max + global_r[0];
+          this->stride[0] = indexlist[0].max;
+          this->rep_count[0] = indexlist[1].r - indexlist[1].l + 1;
  //    printf("outgoing ");
  //    this->ESMC_XPacketPrint();
         }
@@ -390,16 +390,16 @@
       case 2:
         {
           int my_stride = indexlist[0].r - indexlist[0].l + 1;
-          int my_row = global_XP->left/indexlist[0].max;
-          int my_left = global_XP->left - my_row*indexlist[0].max
+          int my_row = global_XP->offset/indexlist[0].max;
+          int my_offset = global_XP->offset - my_row*indexlist[0].max
                       - indexlist[0].gstart;
-          int my_right = global_XP->right - my_row*indexlist[0].max
+          int my_contig_length = global_XP->contig_length - my_row*indexlist[0].max
                        - indexlist[0].gstart;
           my_row      = my_row - indexlist[1].gstart;
-          this->left  = my_row*my_stride + my_left;
-          this->right = my_row*my_stride + my_right;
-          this->strides[0] = my_stride;
-          this->num[0] = global_XP->num[0];
+          this->offset  = my_row*my_stride + my_offset;
+          this->contig_length = my_row*my_stride + my_contig_length;
+          this->stride[0] = my_stride;
+          this->rep_count[0] = global_XP->rep_count[0];
         }
       break;
       case 3:
@@ -446,15 +446,15 @@
 
     int i;
 
-    printf("XPacket: rank=%d, left=%d, right=%d, ", rank, left, right);
+    printf("XPacket: rank=%d, offset=%d, contig_length=%d, ", rank, offset, contig_length);
  
     printf("strides=(");
     for (i=0; i<rank-1; i++) 
-      printf("%d,", strides[i]);
-    printf("%d), num=(", strides[i]);
+      printf("%d,", stride[i]);
+    printf("%d), rep_count=(", stride[i]);
     for (i=0; i<rank-1; i++) 
-      printf("%d,", num[i]);
-    printf("%d)\n", num[i]); 
+      printf("%d,", rep_count[i]);
+    printf("%d)\n", rep_count[i]); 
 
     return ESMF_SUCCESS;
 
@@ -481,7 +481,7 @@
 
     int i;
 
-    if (num[0] == 0)
+    if (rep_count[0] == 0)
         return 1;
   
     return 0;
