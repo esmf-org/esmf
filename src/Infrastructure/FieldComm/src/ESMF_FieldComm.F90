@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.48 2004/06/23 13:19:42 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.49 2004/06/23 13:40:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.48 2004/06/23 13:19:42 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.49 2004/06/23 13:40:33 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1514,6 +1514,7 @@
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the blocking flag is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
