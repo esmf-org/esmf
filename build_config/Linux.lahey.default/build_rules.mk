@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.5 2004/03/16 18:00:53 nscollins Exp $
+# $Id: build_rules.mk,v 1.6 2004/03/17 18:09:55 nscollins Exp $
 #
 # Linux.lahey.default.mk
 #
@@ -114,23 +114,10 @@ CXX_SYS_LIB	   = -ldl -lc -lm
 
 C_F90CXXLD         = lf95 -verbose
 
-<<<<<<< build_rules.mk
-C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/2.96 \
-                     -Wl,-rpath /usr/local/lf9560/lib \
-                     -L/usr/lib/gcc-lib/i386-redhat-linux/2.96 -lstdc++ -lgcc -lg2c
-=======
 C_F90CXXLIBS       = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -Wl,-rpath /usr/local/lf9560/lib \
                      -L/usr/lib/gcc-lib/i386-redhat-linux/3.2.2 \
                      -lstdc++ -lgcc -lg2c
-#C_F90CXXLIBS     = -Wl,-rpath /usr/lib/gcc-lib/i386-redhat-linux/egcs-2.91.66 \
-#                   -Wl,-rpath /usr/local/lf9560/lib \
-#                   -L/usr/lib/gcc-lib/i386-redhat-linux/egcs-2-91.66 \
-#                   -lstdc++ -lgcc -lg2c
->>>>>>> 1.3
-#C_F90CXXLIBS       = -lstdc++ -L/usr/lib/gcc-lib/i386-glibc21-linux/egcs-2.91.66 -lgcc 
-#C_F90CXXLIBS       = /usr/lib/gcc-lib/i386-redhat-linux/2.96/libgcc.a \
-#                     /usr/lib/gcc-lib/i386-redhat-linux/2.96/libstdc++.a 
 
 C_CXXF90LD         = g++ 
 
