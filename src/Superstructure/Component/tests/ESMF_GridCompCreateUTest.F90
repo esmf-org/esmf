@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.3 2004/08/23 17:57:09 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.4 2004/08/26 19:12:48 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,10 +31,11 @@
     implicit none
     
 !   ! Local variables
-    integer :: rc
+    integer :: rc, npets
     integer , pointer:: pointer
     character(ESMF_MAXSTR) :: cname, bname
     type(ESMF_GridComp) :: comp1
+    type(ESMF_VM):: vm
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
@@ -63,7 +64,9 @@
 !   added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
         
-    call ESMF_Initialize(rc=rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    print *, "NUMBER_OF_PROCESSORS ", npets
 
 
 !-------------------------------------------------------------------------
