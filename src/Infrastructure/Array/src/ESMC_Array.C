@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.35 2004/07/26 17:47:50 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.36 2004/10/20 17:06:05 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.35 2004/07/26 17:47:50 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.36 2004/10/20 17:06:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1068,7 +1068,8 @@
                 tcount = imax;
                 for (i=0; i<tcount; i++) {
                     if (!opt_byline)
-                        sprintf(msgbuf,"(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
+                        sprintf(msgbuf,"(%2d) =  %lg\n", i+lbound[0], 
+                               *((float *)(this->base_addr) + i));
                     else
                         sprintf(msgbuf,"%lg ", *((float *)(this->base_addr) + i));
                     printf(msgbuf);
@@ -1096,13 +1097,14 @@
                 rcount = 0;
                 for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        sprintf(msgbuf,"(*,%2d) = ", j+lbound[1]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            sprintf(msgbuf,"(%2d,%2d) =  %lg\n", i+1, j+1, 
+                            sprintf(msgbuf,"(%2d,%2d) =  %lg\n", 
+                                     i+lbound[0], j+lbound[1], 
                                    *((float *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%lg ",  
@@ -1137,14 +1139,15 @@
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", 
+                                          j+lbound[1], k+lbound[2]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %g\n", 
-                                   i+1, j+1, k+1,
+                                   i+lbound[0], j+lbound[1], k+lbound[2],
                                    *((float *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
@@ -1189,7 +1192,8 @@
                 tcount = imax;
                 for (i=0; i<tcount; i++) {
                     if (!opt_byline)
-                        sprintf(msgbuf,"(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
+                        sprintf(msgbuf,"(%2d) =  %lg\n", i+lbound[0], 
+                                     *((double *)(this->base_addr) + i));
                     else
                         sprintf(msgbuf,"%lg ", *((double *)(this->base_addr) + i));
                     printf(msgbuf);
@@ -1217,13 +1221,14 @@
                 rcount = 0;
                 for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        sprintf(msgbuf,"(*,%2d) = ", j+lbound[1]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            sprintf(msgbuf,"(%2d,%2d) =  %lg\n", i+1, j+1, 
+                            sprintf(msgbuf,"(%2d,%2d) =  %lg\n", 
+                                            i+lbound[0], j+lbound[1], 
                                    *((double *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%lg ",  
@@ -1258,14 +1263,15 @@
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+lbound[1], 
+                                                         k+lbound[2]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %lg\n", 
-                                   i+1, j+1, k+1,
+                                   i+lbound[0], j+lbound[1], k+lbound[2],
                                    *((double *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
@@ -1314,7 +1320,7 @@
                   // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
-                        sprintf(msgbuf,"(%2d) =  %d\n", i+1, 
+                        sprintf(msgbuf,"(%2d) =  %d\n", i+lbound[0], 
                                *((int *)(this->base_addr) + i));
                     else
                         sprintf(msgbuf,"%d ",
@@ -1344,14 +1350,14 @@
                 rcount = 0; 
                 for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        sprintf(msgbuf,"(*,%2d) = ", j+lbound[1]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d) =  %d\n", 
-                                    i+1, j+1, 
+                                    i+lbound[0], j+lbound[1], 
                                  *((int *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%d ", 
@@ -1386,14 +1392,15 @@
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", 
+                                     j+lbound[1], k+lbound[2]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %d\n", 
-                                   i+1, j+1, k+1,
+                                   i+lbound[0], j+lbound[1], k+lbound[2],
                                    *((int *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
@@ -1439,7 +1446,7 @@
                   // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
-                        sprintf(msgbuf,"(%2d) =  %ld\n", i+1, 
+                        sprintf(msgbuf,"(%2d) =  %ld\n", i+lbound[0], 
                                *((long *)(this->base_addr) + i));
                     else
                         sprintf(msgbuf,"%ld ",
@@ -1469,14 +1476,14 @@
                 rcount = 0; 
                 for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        sprintf(msgbuf,"(*,%2d) = ", j+lbound[1]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d) =  %ld\n", 
-                                    i+1, j+1, 
+                                    i+lbound[0], j+lbound[1], 
                                  *((long *)(this->base_addr) + i + j*imax) );
                         else
                             sprintf(msgbuf,"%ld ", 
@@ -1511,14 +1518,15 @@
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
                     if (opt_byline) {
-                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", 
+                                        j+lbound[1], k+lbound[2]);
                         printf(msgbuf);
                           // ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
                             sprintf(msgbuf,"(%2d,%2d,%2d) =  %ld\n", 
-                                   i+1, j+1, k+1,
+                                   i+lbound[0], j+lbound[1], k+lbound[2],
                                    *((long *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
