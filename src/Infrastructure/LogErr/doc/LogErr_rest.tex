@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.5 2004/03/22 19:02:30 cdeluca Exp $
+% $Id: LogErr_rest.tex,v 1.6 2004/06/10 22:08:36 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,5 +17,14 @@ predefined symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ to the argument list
 Using these constants, we can associate a file name and line number with the
 message.  If the CPP preprocessor is not used, this expansion will not be done
 and the file and line number will not appear in the Log text.
+
+Currently, the ESMF\_LogGet and ESMF_LogSet subroutines are not implemented.
+Also, the flushing will occur after every write instead of allowing the user to
+specify the buffer size.
+
+ESMF\_LogInitialize and ESMF\_LogFinalize are called during ESMF\_Initialize and
+ESMF_\Finalize so they do not need to be called if the default Log is used.  If
+a new Log is required, ESMF\_LogOpen is used with a new new aLog object passed
+in so that there are no conflicts with the default Log.
 
 \end{enumerate}
