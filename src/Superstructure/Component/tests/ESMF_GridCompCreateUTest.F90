@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCompCreateUTest.F90,v 1.7 2004/10/05 15:14:10 svasquez Exp $
+! $Id: ESMF_GridCompCreateUTest.F90,v 1.8 2004/10/27 21:40:17 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -68,7 +68,7 @@
         
     call ESMF_Initialize(vm=vm, rc=rc)
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
+    call ESMF_TestStart(npets, ESMF_SRCLINE)
 
 
 !-------------------------------------------------------------------------
@@ -96,6 +96,18 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
+
+!-------------------------------------------------------------------------
+!   !
+    !EX_UTest
+!   !  Test get a Component name from a destroyed component
+
+    call ESMF_GridCompGet(comp1, name=bname, rc=rc)
+
+    write(failMsg, *) "Returned ESMF_SUCCESS incorrectly"
+    write(name, *) "Getting  a Component name Test"
+    call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
 
 !-------------------------------------------------------------------------
 !   !
@@ -208,6 +220,7 @@
 
 #endif
 
+    call ESMF_TestEnd(result, ESMF_SRCLINE)
     call ESMF_Finalize(rc)
 
     end program ESMF_GridCompCreateUTest
