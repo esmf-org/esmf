@@ -22,8 +22,8 @@
 %===============================================================================
 % User-defined commands
 %-------------------------------------------------------------------------------
-\newcommand{\longname}{ESMF }
-\newcommand{\funcname}{ESMF }
+\newcommand{\longname}{ESMF RISKS }
+\newcommand{\funcname}{RISKS }
 \newcommand{\shortname}{RSK}
 \newcommand{\myauthors}{ESMF Technical Leads:  V. Balaji, Cecelia DeLuca, Chris Hill}
 %===============================================================================
@@ -56,21 +56,42 @@ in delivering a system that meets the requirements of a community standard with
 \item inbuilt support for ongoing extensibility
 \end{enumerate}
 
-Risks have been categorized as {\bf Very High}, {\bf High}, {\bf Medium}, {\bf Fairly Low} and {\bf Low}.
-This classification is used for both measuring impact on the ESMF project ( the {\it Level of Impact On Project})
-category and for quantifying the currently perceived exposure to the risk within
+\subsection{Cataloging Risks}
+Risks have been categorized as {\it Very High}, {\it High}, {\it Medium}, {\it Fairly Low} and {\it Low}.
+This classification is used for both measuring impact on the ESMF project ( the {\it Level of Impact On Project} 
+category) and for quantifying the currently perceived exposure to the risk within
 the project ( the {\it Problem Likelihood} attribute), so that the
-status of the risk is a pair of values, such as ({\bf Low,Low}), that expresses
+status of the risk is a pair of values, such as ({\it Low,Low}), that expresses
 both the risk seriousness (the first element) and the risk impact (the second element) on
-ESMF.  
+ESMF. A risk is recorded using the following template
+\begin{itemize}
+\item {\bf Short Title}: A brief, single sentence description of the risk.
+\item {\bf Description}: Explanatory text that gives details of the risk.
+\item {\bf Level of Impact On Project}: A single value that captures the impact on the project
+if this risk occurs. Valid values are {\it Very High}, {\it High}, {\it Medium}, {\it Fairly Low} and
+{\it Low}.
+\item {\bf Nature of Impact}: Text that clarifies in what way the risk would impact the project.
+\item {\bf Problem Likelihood}: A single value that captures the perceived probability that the risk
+identified will occur. Valid values are {\it Very High}, {\it High}, {\it Medium}, {\it Fairly Low} and
+{\it Low}.
+\item {\bf Preventative Measures}: Text describing what measures are being used to deal with the
+risk identified. The measures described under this heading are already in place.
+\item {\bf Fix}: Text describing what actions have been identified as possible courses of action
+to follow if the risk impact level or likelihood rise to high levels. These are courses of action 
+that are not currently being pursued, but that could be adopted if the risk status warrants.
+In some cases these actions could involve quite major shifts in project strategy.
+\end{itemize}
 
+\subsection{Risk Tracking and Review Procedures}
 ESMF is funded on a strict budget and "hard" milestone basis. Special attention needs to be
 paid to risks that affect the milestone schedule.
 This document is reviewed on a monthly basis by the technical lead team and managerial adjustments
 made as appropriate. Typical adjustments are expected to include updates to notes on specific risks,
 occasional risk status adjustments and occasional addition of new risks.
-Preventative measures are to be taken for any risk that has a status greater than {\bf Medium, Medium}.
-Fix actions are taken for risks with a ({\bf High, Medium}) status or higher.
+Preventative measures are always to be taken for any risk that has a status greater than {\it Medium, Medium}.
+Fix actions are taken for risks with a ({\it High, Medium}) status or higher, or where a risk
+has a {\it Very High} status in either of the {\bf Level of Impact On Project} or the
+{\bf Problem Likelihood} field.
 The technical lead team will keep the NASA CT {\it milestone validation team} informed of 
 risk issue status at their regular monthly telecons and will also involve project PI's where 
 appropriate.
@@ -86,10 +107,25 @@ These issues will be communicated via the standard
 project mechanisms of teleconferences and email to the technical lead team who will incorporate updates
 into the document as appropriate.
 
-\section{ESMF Development Risks}
+\subsection{Document Organization}
 
-This section deals with risks that are related to the overall goal of the ESMF project and
+The risks reported here are grouped into three parts. The first part {\bf ESMF Development Risks} describes
+technical issues that have qualities that are tied to the nature of the planned ESMF development.
+The second part {\bf ESMF Project Management Risks} deals with project management issues
+that have qualities that are tied to the nature of the ESMF project. The final part, {\bf Generic Risks},
+describes how standard project risks are being managed within ESMF.
+
+\newpage
+
+\part{ESMF Development Risks}
+
+This part deals with risks that are related to the overall goal of the ESMF project and
 to specific technical issues that ESMF faces.
+
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
 \req{Community Adoption Issues}
 ESMF aims to be a widely used community standard. As such it faces a number of challenges that are
@@ -97,12 +133,13 @@ related to a mix of technical and organizational factors.
 \sreq{Inadequate community dialog}
 \begin{reqlist}
 {\bf Level of Impact On Project:}  High \\
-{\bf Nature of Impact:} ESMF is aimed to a community standard. It won't be one if it isn't used.\\
+{\bf Nature of Impact:} ESMF is aiming to become a community standard. It won't be one if it isn't used.\\
 {\bf Problem Likelihood:} Fairly Low\\
 {\bf Preventive Measures Being Taken:} Community meetings. Active participation by project
 members in related community efforts. Deployment of wide number of community codes
 onto the framework. Attendance by project participants at related project
-meetings.\\
+meetings. The Source Forge open source repository, along with its feedback forums
+and a project web site with feedback forms also serve as conduits for community interaction.\\
 {\bf Fix:} Increase community participation in project. Improve features to make
 adoption more compelling.\\
 {\bf Notes:} \\
@@ -111,12 +148,12 @@ adoption more compelling.\\
 \sreq{Unable to respond to all community needs}
 \begin{reqlist}
 {\bf Level of Impact On Project:}  Medium \\
-{\bf Nature of Impact:} If ESMF is perceived to be unresponsive to needs and unable to adapt to needs community adoption
-will be in jeopardy.\\
+{\bf Nature of Impact:} If ESMF is perceived to be unresponsive to needs and unable to adapt to needs,
+ community adoption will be in jeopardy.\\
 {\bf Problem Likelihood:} Medium \\
 {\bf Preventative Measures Being Taken:} Ongoing dialog to identify an prioritize
 community needs. Critical requirements will be adopted to the extent
-that contractual obligations admit. Track requirements that cannot be accommodate during the
+that contractual obligations admit. Track requirements that cannot be accommodated during the
 project time frame. Plan and design for extensibility and future community contributions.\\
 {\bf Fix:} Seek resources for requirements that cannot be accommodated within current
 contract obligations. Discuss contract modifications with NASA if truly critical
@@ -133,22 +170,29 @@ could impact milestone achievement.\\
 {\bf Preventative Measures Being Taken:} Clear emphasis of project milestones. Implementation
 team only accountable to technical leads.\\
 {\bf Fix:} Down prioritize community needs that do not align with contractual obligations.
-Discuss with NASA sponsors possible amends to contract terms if appropriate.\\
+Discuss with NASA sponsors possible amendments to contract terms if appropriate.\\
 {\bf Notes:} \\
 \end{reqlist}
 
 \sreq{Unable to achieve sufficient community adoption in project time frame}
+The long-term viability of ESMF will rest on its broad use and a perception of
+its value to a large user base. This will take time, possibly longer
+than the three-year project window.
 \begin{reqlist}
 {\bf Level of Impact On Project:}  High \\
-{\bf Nature of Impact:} The long-term viability of ESMF will rest on its broad use and a perception of
-its value to a large user base. This will take time, possibly longer
-than the three-year project window.\\
+{\bf Nature of Impact:} Project could be perceived as having failed even though the
+technical product it has created is effective and capable.\\
 {\bf Problem Likelihood:} Fairly low \\
 {\bf Preventative Measures Being Taken:} Broad range of dialog and visibility 
 forums being maintained. Example codes, extensive documentation and tutorial
-workshops are being planned.
-Close monitoring of experiences of collaborator groups.  \\
-{\bf Fix:} Solicit non-adopter input on what is missing or why framework is not working for them.\\
+workshops are being planned. Involvement of broad range of groups in alpha and
+beta testing. Adoption by Mechoso and Hauser external collaborators.
+Close monitoring of experiences of collaborator groups.  
+Working to develop follow-on funding sources for the project to continue
+to add features requested by the community.
+\\
+{\bf Fix:} Solicit non-adopter input on what is missing or why framework is not working for them.
+Review and revise design and implementation appropriately.\\
 {\bf Notes:} \\
 \end{reqlist}
 
@@ -165,7 +209,8 @@ teams and one independent adopter will provide additional validation.
 The feedback will be used to focus the teams design and development efforts on 
 specific parts of the framework that require clean, flexible and easy to use design.
 \\
-{\bf Fix:} Solicit non-adopter input on what is missing or why framework is not working for them.\\
+{\bf Fix:} Solicit non-adopter input on what is missing or why framework is not working for them.
+Review and revise design and implementation appropriately.\\
 {\bf Notes:} \\
 \end{reqlist}
 
@@ -180,7 +225,9 @@ solution would limit range of code architectures that could work with ESMF.\\
 {\bf Problem Likelihood:} Low \\
 {\bf Preventative Measures Being Taken:} Detailed prototype studies to demonstrate all required
 combinations.\\
-{\bf Fix:} Reduce scope of support to a tractable level.\\
+{\bf Fix:} Reevaluate priorities after revisiting detailed requirements and
+pare back initial functionality being implemented to only include
+what is strictly required for milestones.\\
 {\bf Notes:}
 \end{reqlist}
 
@@ -192,13 +239,16 @@ behavior.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
 {\bf Nature of Impact:} Multi-language support could create complex development
-issues that draw resources away from other areas.\\
+issues that draw resources away from other areas. It may also impose constraints
+on possible designs and functionality that can be implemented.
+\\
 {\bf Problem Likelihood:} Low\\
-{\bf Preventative Measures Being Taken:} Significant prototyping in being undertaken and
+{\bf Preventative Measures Being Taken:} Significant prototyping is being undertaken and
 the language boundaries are being very clearly delineated.\\
 {\bf Fix:} Entire framework would need to be in C/C++.\\
 {\bf Notes:} Reimplementation in C/C++ would be time-consuming but
-otherwise straightforward.
+otherwise straightforward. However, complete C/C++ implementation could deter
+some community members from adopting the framework.
 \end{reqlist}
 
 \sreq{F90 Continued Availability}
@@ -221,7 +271,7 @@ is being tracked.\\
 otherwise straightforward. For components the impact would be far more
 serious, but this is outside the scope of ESMF.
 Components in Fortran 77, C and C++ would not be affected by lack of 
-compiler availability as compilers exist almost all hardware for these languages.
+compiler availability as compilers for these languages exist on almost all hardware platforms.
 \end{reqlist}
 
 \sreq{Vector Platform Availability of ESMF}
@@ -230,7 +280,7 @@ compiler availability as compilers exist almost all hardware for these languages
 {\bf Nature of Impact:} The framework might not build and install "out of the box"
 on a vector system.\\
 {\bf Problem Likelihood:} Medium\\
-{\bf Preventative Measures Being Taken:} ESMF being tested and built on a range of *NIX systems. This will
+{\bf Preventative Measures Being Taken:} ESMF is being tested and built on a range of *NIX systems. This will
 ensure fairly easy portability to other systems, however, effort will still be needed 
 to validate ESMF code and installation on a new platform. \\
 {\bf Fix:} Test and modify to build on appropriate system\\
@@ -243,7 +293,7 @@ to validate ESMF code and installation on a new platform. \\
 {\bf Nature of Impact:} The framework might not build and install "out of the box"
 on a Windows system.\\
 {\bf Problem Likelihood:} High \\
-{\bf Preventative Measures Being Taken:}  ESMF being tested and built on a range of *NIX systems.
+{\bf Preventative Measures Being Taken:}  ESMF is being tested and built on a range of *NIX systems.
 No specific tests of build actions are envisaged to ensure Windows compatibility.\\
 {\bf Fix:} Test and modify to build on a Windows system\\
 {\bf Notes:} This would require resources but otherwise would not be a major challenge.
@@ -252,13 +302,81 @@ No specific tests of build actions are envisaged to ensure Windows compatibility
 \sreq{Other OS Validation}
 \begin{reqlist}
 {\bf Level of Impact On Project:} Low \\
-{\bf Nature of Impact:} he framework might not build and install "out of the box"
+{\bf Nature of Impact:} The framework might not build and install "out of the box"
 on a non-validated OS.\\
 {\bf Problem Likelihood:} High \\
 {\bf Preventative Measures Being Taken:} ESMF being tested and built on a range of *NIX systems\\
 {\bf Fix:}  Test and modify to build on appropriate system\\
 {\bf Notes:} This could require resources but otherwise would not be a major challenge.
 However, for systems where no F90 compiler is available resource requirements could be substantial.
+\end{reqlist}
+
+\sreq{Insufficient test platform availability}
+ESMF will need to be continually test on a range of platforms for
+a variety of different hardware configurations and both small and larger
+numbers of processors. This assumes that the project team will have easy
+and continual access to a range of hardware.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Nature of Impact:} Could impact milestone achievement by affecting code portability
+and code performance.\\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventative Measures Being Taken:}
+Resources have been requested from NASA and have recently been provided.
+Usage, utility and responsiveness of the systems is being monitored.
+\\
+{\bf Fix:} Work to acquire special dedicated hardware resources for exclusive project
+use.
+Acquire compute resources through other channels - other agency centers,
+industrial partners etc...
+\\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Performance Inconsistencies Between Platforms}
+Multi-platform support introduces a risk of inconsistent performance across supported
+platforms. System specific libraries and system calls, quality of compiler optimizations, and 
+other items introduce machine specific performance problems. Vendor implementations
+may not have optimal performance and it may be necessary to use a custom
+implementation, an alternative set of libraries, etc... in order to 
+achieve good performance on specific systems.
+\begin{reqlist}
+{\bf Level of Impact On Project:} Medium \\
+{\bf Nature of Impact:} Community members using a platform where the framework has
+performance issues, will be less likely to adopt the framework.
+and code performance.\\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventative Measures Being Taken:}
+Performance profiling of the framework will be done
+on each target platform to identify these issues early. Vendor contacts
+are being established that will provide an effective route for 
+system software problem reporting.
+The framework is being designed to allow flexible adaptation to
+different libraries so that alternate codes can be used with little
+impact on end users.
+\\
+{\bf Fix:}For certain features the ESMF project could choose to develop its
+own code or to incorporate extra, existing open-source code into the framework.
+\\
+{\bf Notes:} 
+\end{reqlist}
+
+\req{EVA code integration}
+The EVA codes are being developed from many different legacy code sources.
+Some of these codes are quite large and synthesizing the code into
+a suite that is integrated into ESMF may involve considerable unanticipated work.
+\begin{reqlist}
+{\bf Level of Impact On Project:} High \\
+{\bf Nature of Impact:} Could lead to schedule delays and milestone delays.\\
+{\bf Problem Likelihood:} Medium \\
+{\bf Preventative Measures Being Taken:} Experts from EVA code source institutions
+are working with the core ESMF team EVA developers. A baseline EVA suite will
+be assembled early in project.\\
+{\bf Fix:} Increase involvement of source institutions in EVA suite
+formulation. Arrange site visits to exchange expertise and to allow ESMF
+team members to work with key developers at source institutions for relevant
+codes. \\
+{\bf Notes:} 
 \end{reqlist}
 
 \req{Infrastructure - Fields and Grid Level Issues}
@@ -289,9 +407,9 @@ impact adoption.
 {\bf Nature of Impact:} Low performance would impact community adoption and
 would impact milestone achievement.\\
 {\bf Problem Likelihood:} Medium \\
-{\bf Preventative Measures Being Taken:} Quantitative measures of grid primitives
+{\bf Preventative Measures Being Taken:} Quantitative measures of grid primitive
 performance are being devised and will be tracked.\\
-{\bf Fix:} Develop specialized forms and increase level of resources
+{\bf Fix:} Develop specialized forms and increase level of resources devoted
 to developing these parts of the system.\\
 {\bf Notes:} 
 \end{reqlist}
@@ -307,7 +425,7 @@ would impact milestone achievement.\\
 {\bf Problem Likelihood:} Medium \\
 {\bf Preventative Measures Being Taken:} Quantitative measures of grid primitives
 performance are being devised and will be tracked.\\
-{\bf Fix:} Develop specialized forms and increase level of resources
+{\bf Fix:} Develop specialized forms and increase level of resources devoted
 to developing these parts of the system. Reduce feature set for which
 optimized support is developed.
 \\
@@ -319,18 +437,25 @@ Inadequate resources for developing highly portable and versatile
 signaling, performance monitoring, I/O, communication, memory sharing and namespace sharing tools.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
-{\bf Nature of Impact:} \\
+{\bf Nature of Impact:} This would affect the robustness, portability and usability
+of ESMF. \\
 {\bf Problem Likelihood:} Medium \\
 {\bf Preventative Measures Being Taken:} Tools developed under other projects (for example PetSC, ALICE, TAU)
 will be adopted wherever possible.
 \\
 {\bf Fix:} Devote more resources to this area. Reduce feature set for which
 highly optimized support is provided initially. \\
-{\bf Notes:} 
+{\bf Notes:} Dependencies of ESMF on third-party software installation will be noted
+in the Software Engineering Plan system documentation.
 \end{reqlist}
 
+\newpage
+\part{ESMF Project Management Risks}
+This part deals with risks that are related to the overall goal of the ESMF project and
+to specific project management issues that arise from the goals and project structure.
 
-\req{Project Management}
+
+\req{Distributed Project Team}
 ESMF involves many institutions and a geographical distributed team. 
 This can create competing time pressures and difficulty in communication.
 
@@ -365,15 +490,16 @@ complex areas of development.
 
 \sreq{Coding Standards may be ignored}
 The core framework and EVA suite are required to meet very specific agreed code quality and coding
-standards for milestone acceptance. Failure to develop code that meets the
-standard will cause project funding delays.
+and documentation standards for milestone acceptance.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
-{\bf Nature of Impact:} \\
+{\bf Nature of Impact:}  Failure to develop code that meets the
+standard will cause project funding delays.
+ \\
 {\bf Problem Likelihood:} Fairly Low \\
 {\bf Preventative Measures Being Taken:} Developers are aware of the
-coding standards and a peer review and independent {\it milestone validation process}
-that have been established.
+coding standards, as described in the Software Developers Guide, and of the peer review and 
+independent {\it milestone validation} processes that have been established.
 \\
 {\bf Fix:} Closer involvement of {\it milestone validation team} in ongoing code 
 assessment. Development of automated tools to assist in code standard validation.
@@ -384,16 +510,17 @@ assessment. Development of automated tools to assist in code standard validation
 
 \sreq{Cross-project milestone coordination}
 Several phases in the project rely on earlier milestones under a separate
-project. Dependent phases could be seriously impacted by earlier delays.
+project.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
-{\bf Nature of Impact:} \\
+{\bf Nature of Impact:} Dependent phases could be seriously impacted by earlier delays.
+\\
 {\bf Problem Likelihood:} Fairly Low \\
 {\bf Preventative Measures Being Taken:} Joint technical lead team has representation
 from all projects. Weekly ESMF wide telecons are used to track upcoming
 milestones. Project phases are planned jointly and time lines mapped out
 together at joint meetings. Technical lead team tracks milestone
-work schedule and coordinates multiple milestone countdown reviews prior 
+work-schedule and coordinates multiple milestone countdown reviews prior 
 to milestones.
 \\
 {\bf Fix:} Reassign milestone work responsibilities as appropriate.
@@ -403,16 +530,17 @@ countdown reviews.
 {\bf Notes:} 
 \end{reqlist}
 
-\section{Generic Project Risks}
+\newpage
+\part{Generic Project Risks}
 
-This section documents how more general risk issues, that are faced by all complex projects,
+This part documents how more general risk issues, that are faced by all complex projects,
 are addressed with ESMF.
 
-\sreq{Staff skill issues}
+\req{Staff skill issues}
 Task estimates may be based on assumptions about individual skills that become unavailable
 due to unforeseen conditions.
 \begin{reqlist}
-{\bf Level of Impact On Project:} Low \\
+{\bf Level of Impact On Project:} High \\
 {\bf Nature of Impact:} Replacement staff have to be hired and trained which affects
 project schedule.\\
 {\bf Problem Likelihood:} Medium \\
@@ -423,8 +551,8 @@ standards are adhered to.\\
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Schedule delays with cascade effects}
-A delay in one tack may cause cascading delays in other dependent tasks.
+\req{Schedule delays with cascade effects}
+A delay in one task may cause cascading delays in other dependent tasks.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
 {\bf Nature of Impact:} Could impact milestone target dates.\\
@@ -442,52 +570,35 @@ increased site traveling by technical leads.\\
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Code quality}
+\req{Code quality}
+Inadequate adherence to encapsulation and modularity principles could
+lead to overly fragile software.
 \begin{reqlist}
 {\bf Level of Impact On Project:} High \\
-{\bf Nature of Impact:} Could impact milestone achievement.\\
+{\bf Nature of Impact:} Could impact milestone achievement. System reliability, framework ease of use
+and maintainability can all be effected.\\
 {\bf Problem Likelihood:} Fairly Low \\
 {\bf Preventative Measures Being Taken:} Peer review and testing of all modules.
 \\
-{\bf Fix:}\\
+{\bf Fix:}May require redesign and reimplementation.\\
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{System stability}
+\req{System stability}
 As code evolves previously working feature may break.
 \begin{reqlist}
 {\bf Level of Impact On Project:} Medium \\
 {\bf Nature of Impact:} Could impact milestone achievement.\\
 {\bf Problem Likelihood:} Fairly Low \\
-{\bf Preventative Measures Being Taken:} Automated test system will catch 
-broken code at a fine grain level.
+{\bf Preventative Measures Being Taken:} Automated regression test system will catch 
+broken code at a fine grain level. Peer review of modules and adherence to modular
+design principles will also help catch issues here.
 \\
 {\bf Fix:}\\
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Insufficient test platform availability}
-ESMF will need to be continually teste on a range of platforms for
-a variety of different hardware configurations and both small and larger
-numbers of processors.
-\begin{reqlist}
-{\bf Level of Impact On Project:} High \\
-{\bf Nature of Impact:} Could impact milestone achievement by affecting code portability
-and code performance.\\
-{\bf Problem Likelihood:} Medium \\
-{\bf Preventative Measures Being Taken:}
-Resources have been requested from NASA and have recently been provided.
-Usage, utility and responsiveness of the systems is being monitored.
-\\
-{\bf Fix:} Acquire special dedicated hardware resources for exclusive project
-use.
-Acquire compute resources through other channels - other agency centers,
-industrial partners etc...
-\\
-{\bf Notes:} 
-\end{reqlist}
-
-\sreq{Inappropriate design}
+\req{Inappropriate design}
 Inappropriate design may require redesign and re-implementation.
 \begin{reqlist}
 {\bf Level of Impact On Project:} Medium \\
@@ -501,7 +612,7 @@ an implementation.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Team conflicts}
+\req{Team conflicts}
 Conflicts between team members may result in poor communication, poor designs,
 and extra rework.
 \begin{reqlist}
@@ -516,7 +627,7 @@ resolve the issues. Maintain an open, participatory process.
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Lack of critical skills}
+\req{Lack of critical skills}
 Personnel with critical skills may not be available due to funding, other
 project commitments, etc...
 \begin{reqlist}
@@ -528,12 +639,14 @@ Identify personnel with critical skills and ensure other team
 members are familiar with their domain of expertise.
 Ensure that personnel with critical skills are committed
 to the development effort and confirm availability.
+New hires are being selected on the basis of skill sets that are
+missing and can be trained, both formally and informally, as needed.
 \\
 {\bf Fix:}\\
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Inaccurate Progress Tracking}
+\req{Inaccurate Progress Tracking}
 Inaccurate progress tracking may result in not knowing the project is
 behind schedule until late in the project.
 \begin{reqlist}
