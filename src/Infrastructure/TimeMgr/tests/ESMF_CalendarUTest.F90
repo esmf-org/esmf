@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.2 2003/09/22 22:49:30 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.3 2003/09/23 23:05:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_ClockTest
+      program ESMF_CalendarUTest
 
 !------------------------------------------------------------------------------
 !
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.2 2003/09/22 22:49:30 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.3 2003/09/23 23:05:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -45,6 +45,8 @@
 
       ! individual test result code
       integer :: rc, H, MM, DD, YR, days, totalDays, secs, testResults
+      integer(ESMF_KIND_I8) :: year
+      integer(ESMF_KIND_I4) :: julianDay
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -127,7 +129,7 @@
       ! Test Setting the Start Time for the Gregorian Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit of Gregorian Calendar Test"
-      call ESMF_TimeSet(startTime, yr=-4800, mm=2, dd=29, &
+      call ESMF_TimeSet(startTime, yr=-4800, mm=3, dd=1, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -141,13 +143,36 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Setting the Start Time for the Gregorian Calencar
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Set Start Time at lower limit minus 1 second of Gregorian Calendar Test"
+      call ESMF_TimeSet(startTime, yr=-4800, mm=3, dd=1, s=-1, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Start Time Print Test"
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+#endif 
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
       ! Test Setting the Stop Time for the Gregorian Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit of Gregorian Calendar Test"
-      call ESMF_TimeSet(stopTime, yr_i8=292277019914, mm=10, dd=30, &
+      year=292277019914_ESMF_KIND_I8
+      call ESMF_TimeSet(stopTime, yr_i8=year, mm=10, dd=29, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -156,31 +181,126 @@
 
       !NEX_UTest
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      write(name, *) "Start Time Print Test"
+      write(name, *) "Stop Time Print Test"
       call ESMF_TimePrint(stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
+
       ! ----------------------------------------------------------------------------
-      !NEX_UTest
-      ! Verify the year is set correctly
-      write(name, *) "Get Start Time Year Test"
-      call ESMF_TimeGet(startTime, yr=YR, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or Year not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.-4800), &
+
+      !EX_UTest
+      ! Test Setting the Stop Time for the Gregorian Calencar
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Set Stop Time at upper limit plus 86400 second of Gregorian Calendar Test"
+      year=292277019914_ESMF_KIND_I8
+      call ESMF_TimeSet(stopTime, yr_i8=year, mm=10, dd=29, s=86400, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Stop Time Print Test"
+      call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+#endif 
+
+
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Verify the month is set correctly
-      write(name, *) "Get StartTime Month Test"
-      call ESMF_TimeGet(startTime, mm=MM, rc=rc)
-      write(failMsg, *) " Returned ESMF_FAILURE and/or Month not correct value"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.2), &
+      ! Test Setting the Start Time for the Julian Day Calencar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Set Start Time at lower limit of Julian Day Calendar Test"
+      call ESMF_TimeSet(startTime, d=-32045, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Start Time Print Test"
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
+
       ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Setting the Start Time for the Julian Day Calencar
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Set Start Time at lower limit minus 1 day of Julian Day Calendar Test"
+      call ESMF_TimeSet(startTime, yr=-32046, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Start Time Print Test"
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+#endif 
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting the Stop Time for the Julian Day Calencar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Set Stop Time at upper limit of Julian Day Calendar Test"
+      call ESMF_TimeSet(stopTime, d=julianDay, &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Stop Time Print Test"
+      call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+#ifdef ESMF_EXHAUSTIVE
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting the Stop Time for the Julian Day Calencar
+      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(name, *) "Set Stop Time at upper limit plus 1 day of Julian Day Calendar Test"
+      julianDay=100000000000001_ESMF_KIND_I4
+      call ESMF_TimeSet(stopTime, d=julianDay,  &
+                                   calendar=julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Stop Time Print Test"
+      call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+       
+
+
+
+#endif 
 
 
 
@@ -190,4 +310,4 @@
       ! finalize ESMF framework
       call ESMF_FrameworkFinalize(rc)
 
-      end program ESMF_ClockTest
+      end program ESMF_CalendarUTest
