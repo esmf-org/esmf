@@ -1,14 +1,43 @@
-! $Id: ESMF_Calendar.F90,v 1.1 2002/10/07 20:23:35 eschwab Exp $
-      module ESMF_CalendarMod
-!===============================================================================
+! $Id: ESMF_Calendar.F90,v 1.2 2002/10/23 16:42:46 svasquez Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+! ESMF Calendar Module
+!
+! (all lines below between the !BOP and !EOP markers will be included in
+!  the automated document processing.)
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+! put any constants or macros which apply to the whole component in this
+!  include file.  anything public or esmf-wide should be up higher at
+!  the top level include files.
+
+#include <ESMF_TimeMgr.h>
+
+!------------------------------------------------------------------------------
+! module definition
+
+     module ESMF_CalendarMod
+!
 !BOP
 ! !MODULE: ESMF_CalendarMod
 !
+!
+! !DESCRIPTION:
+!
 ! !USES:
         use ESMF_TimeInstantMod
+        implicit none
 !
+!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      implicit none
 
         integer, parameter :: MonthsPerYear = 12
 
@@ -55,73 +84,126 @@
 !       Defines F90 wrapper entry points for corresponding
 !        C++ class ESMC\_Calendar
 !
+!EOP
 ! !REVISION HISTORY:
 !
 !  09Aug02   Earl Schwab  Initial code.
 !
+!------------------------------------------------------------------------------
 
     contains
-    
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarInit - Initializes the calendar
+
+! !INTERFACE:
         subroutine ESMF_CalendarInit(this, Type, rc)
-            type(ESMF_Calendar), intent(inout) :: this
-            integer, intent(in) :: Type
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        type(ESMF_Calendar), intent(inout) :: this
+        integer, intent(in) :: Type
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!    
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
     
-            call c_ESMF_CalendarInit(this, Type, rc)
+!       invoke C to C++ entry point
+        call c_ESMF_CalendarInit(this, Type, rc)
     
         end subroutine
     
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarInitGeneric
+
+! !INTERFACE:
         subroutine ESMF_CalendarInitGeneric(this, DaysPerMonth, &
                                             SecondsPerDay, DaysPerYear, &
                                             DaysPerYearDn, DaysPerYearDd, rc)
-            type(ESMF_Calendar), intent(inout) :: this
-            integer, dimension(MonthsPerYear), intent(in) :: DaysPerMonth
-            integer, intent(in) :: SecondsPerDay, DaysPerYear, &
-                                   DaysPerYearDn, DaysPerYearDd
-            integer, intent(out), optional :: rc
-    
-            call c_ESMF_CalendarInitGeneric(this, DaysPerMonth, &
-                                            SecondsPerDay, DaysPerYear, &
-                                            DaysPerYearDn, DaysPerYearDd, rc)
+! !ARGUMENTS:
+        type(ESMF_Calendar), intent(inout) :: this
+        integer, dimension(MonthsPerYear), intent(in) :: DaysPerMonth
+        integer, intent(in) :: SecondsPerDay, DaysPerYear, &
+                               DaysPerYearDn, DaysPerYearDd
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+!       invoke C to C++ entry point
+        call c_ESMF_CalendarInitGeneric(this, DaysPerMonth, &
+                                        SecondsPerDay, DaysPerYear, &
+                                        DaysPerYearDn, DaysPerYearDd, rc)
     
         end subroutine
     
-        !
-        ! Date <--> Time conversion routines, use F90 optional arguments
-        !
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarConvertToTime
 
+! !INTERFACE:
         subroutine ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
                                               MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
                                               time, rc)
-            integer, intent(in), optional :: MM, DD, H, M, MS
-            integer(int64), intent(in), optional :: S
-            integer(int32), intent(in), optional :: YR, D, US, NS, Sn, Sd
-            real, intent(in), optional :: d_, h_, m_, s_, ms_, us_, ns_
-            type(ESMF_Time) :: time
-            integer, intent(out), optional :: rc
+
+! !ARGUMENTS:
+        integer, intent(in), optional :: MM, DD, H, M, MS
+        integer(int64), intent(in), optional :: S
+        integer(int32), intent(in), optional :: YR, D, US, NS, Sn, Sd
+        real, intent(in), optional :: d_, h_, m_, s_, ms_, us_, ns_
+        type(ESMF_Time) :: time
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!
+!
+! Date <--> Time conversion routines, use F90 optional arguments
+!
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+!       invoke C to C++ entry point
     
-            ! use optional args for any subset
-            call c_ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
-                                              MS, US, NS, Sn, Sd, &
-                                              d_, h_, m_, s_, ms_, us_, ns_, &
-                                              time, rc)
+        ! use optional args for any subset
+         call c_ESMF_CalendarConvertToTime(YR, MM, DD, D, H, M, S, &
+                                           MS, US, NS, Sn, Sd, &
+                                           d_, h_, m_, s_, ms_, us_, ns_, &
+                                           time, rc)
     
         end subroutine
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarConvertToDate
+
+! !INTERFACE:
         subroutine ESMF_CalendarConvertToDate(time, YR, MM, DD, D, H, &
                                               M, S, MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
                                               rc)
-            integer, intent(out), optional :: MM, DD, H, M, MS
-            integer(int64), intent(out), optional :: S
-            integer(int32), intent(out), optional :: YR, D, US, NS, Sn, Sd
-            real, intent(in), optional :: d_, h_, m_, s_, ms_, us_, ns_
-            type(ESMF_Time) :: time
-            integer, intent(out), optional :: rc
-    
-            ! use optional args for any subset
-            call c_ESMF_CalendarConvertToDate(time, YR, MM, DD, D, H, &
+
+! !ARGUMENTS:
+        integer, intent(out), optional :: MM, DD, H, M, MS
+        integer(int64), intent(out), optional :: S
+        integer(int32), intent(out), optional :: YR, D, US, NS, Sn, Sd
+        real, intent(in), optional :: d_, h_, m_, s_, ms_, us_, ns_
+        type(ESMF_Time) :: time
+        integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Initialize a TimeInstant with values S, Sn, Sd, calendar & timezone
+!EOP
+! !REQUIREMENTS:  AAAn.n.n
+
+!       invoke C to C++ entry point
+        ! use optional args for any subset
+         call c_ESMF_CalendarConvertToDate(time, YR, MM, DD, D, H, &
                                               M, S, MS, US, NS, Sn, Sd, &
                                               d_, h_, m_, s_, ms_, us_, ns_, &
                                               rc)
