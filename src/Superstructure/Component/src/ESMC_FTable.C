@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.15 2004/06/07 15:45:27 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.16 2005/03/22 04:42:41 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.15 2004/06/07 15:45:27 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.16 2005/03/22 04:42:41 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -691,38 +691,50 @@
             break;
           }
           case FT_COMP2STAT: {
-            C2SFunc vf;
 //printf("calling out of case FT_COMP2STAT VM\n");
+            C2SFunc vf = (C2SFunc)funcs[i].funcptr;
             int rrc;
-//            void *comp;
-//            ESMC_CompType ctype;
-//            // Replicate the component object on the heap for this thread
-//            FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype, &rrc);
-//            if (ctype == ESMF_COMPTYPE_GRID)
-//              comp = (void *) new ESMC_GridComp;
-//            else if (ctype == ESMF_COMPTYPE_CPL)
-//              comp = (void *) new ESMC_CplComp;
-//            else
-//              comp = NULL;
-//            FTN(f_esmf_compreplicate)((ESMC_Comp *)comp,
-//              (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
-            FTN(f_esmf_compinsertvm)((ESMC_Comp *)funcs[i].funcarg[0], vm,
-              &rrc);
-            // Callback: prepare prototype, call, store return code
-            vf = (C2SFunc)funcs[i].funcptr;
-//            (*vf)(comp, funcs[i].funcarg[1],
-//                  funcs[i].funcarg[2], funcs[i].funcarg[3],
-//                 (int *)funcs[i].funcarg[4]);
-            (*vf)((void *)funcs[i].funcarg[0], funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], funcs[i].funcarg[3],
-                 (int *)funcs[i].funcarg[4]);
+            void *comp;
+            int mypet = vm_pointer->vmk_mypet();
+            if (vm_pointer->vmk_nthreads(mypet) > 1){
+              // mypet is part of a thread group
+              ESMC_CompType ctype;
+              // Replicate the component object on the heap for this thread
+              FTN(f_esmf_compget)((ESMC_Comp *)funcs[i].funcarg[0], &ctype,
+                &rrc);
+              if (ctype == ESMF_COMPTYPE_GRID)
+                comp = (void *) new ESMC_GridComp;
+              else if (ctype == ESMF_COMPTYPE_CPL)
+                comp = (void *) new ESMC_CplComp;
+              else
+                comp = NULL;
+              // replicate the component object for each thread
+              FTN(f_esmf_compreplicate)((ESMC_Comp *)comp,
+                (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
+              // call-back into user code with reference to comp object copy
+              (*vf)(comp, funcs[i].funcarg[1],
+                funcs[i].funcarg[2], funcs[i].funcarg[3],
+                (int *)funcs[i].funcarg[4]);
+              // Update the original with any changes made by the child
+              // todo: how can this be done correctly merging all the copies
+              // todo: into a single object?
+              //FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0],
+              //  (ESMC_Comp *)comp, &rrc);
+              // Delete the heap copy of the component object for this thread
+              FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
+              delete (ESMC_Comp *)comp;
+            }else{
+              // mypet is a single-threaded process within this VM
+              // insert the current vm object into component object
+              FTN(f_esmf_compinsertvm)((ESMC_Comp *)funcs[i].funcarg[0], vm,
+                &rrc);
+              // call-back into user code with reference to actual comp object
+              (*vf)((void *)funcs[i].funcarg[0], funcs[i].funcarg[1],
+                funcs[i].funcarg[2], funcs[i].funcarg[3],
+                (int *)funcs[i].funcarg[4]);
+            }
+            // ensure that the return value is set correctly
             *rc = *(int *)(funcs[i].funcarg[4]);
-            // Update the original with any changes made by the child
-//            FTN(f_esmf_compcopy)((ESMC_Comp *)funcs[i].funcarg[0],
-//                                 (ESMC_Comp *)comp, &rrc);
-            // Delete the heap copy of the component object for this thread
-//            FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
-//            delete (ESMC_Comp *)comp;
             break;
           }
           case FT_COMPSLIST: {
