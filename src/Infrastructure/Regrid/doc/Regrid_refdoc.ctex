@@ -98,12 +98,12 @@
 %\input{../Infrastructure/Regrid/doc/Regrid_def}
 %#endif
 
-%\subsubsection{Restrictions}
-%#ifdef STANDALONE
-%\input{Regrid_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Regrid/doc/Regrid_rest}
-%#endif
+\subsubsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{Regrid_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Regrid/doc/Regrid_rest}
+#endif
 
 %\subsection{Use and Examples}
 #ifdef STANDALONE
