@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/22 21:00:55 cdeluca Exp $
+# $Id: makefile,v 1.2 2003/10/23 20:22:29 jwolfe Exp $
 
 # Leave alone.
 ALL: lib 
@@ -10,10 +10,9 @@ CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
 # If you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_FTable_F.C ESMC_Xform.C \
-            ESMC_Comp.C ESMC_Comp_F.C ESMC_GridComp.C ESMC_CplComp.C
+SOURCEC	  = ESMC_Xform.C ESMC_Xform_F.C
 # If you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Comp_C.F90 ESMF_Xform_C.F90
+SOURCEF	  = ESMF_Xform_C.F90
 # If you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 # List .h files to be copied to higher level common include directory
