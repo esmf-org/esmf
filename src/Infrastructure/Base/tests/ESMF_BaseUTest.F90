@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseUTest.F90,v 1.12 2004/06/15 12:51:06 nscollins Exp $
+! $Id: ESMF_BaseUTest.F90,v 1.13 2004/06/21 22:47:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BaseUTest.F90,v 1.12 2004/06/15 12:51:06 nscollins Exp $'
+      '$Id: ESMF_BaseUTest.F90,v 1.13 2004/06/21 22:47:58 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -119,6 +119,7 @@
       ! test validate method via option string
       ! commented out because it crashes
       ! Bug report 969866 opened
+      !EX_UTest
       call ESMF_BaseValidate(base, validate_options, rc)
       write(name, *) "ESMF_BaseValidate"
       write(failMsg, *) "rc =",rc,", validate_options =", trim(validate_options)
