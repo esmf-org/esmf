@@ -1,16 +1,24 @@
-# $Id: Linux.intel.mk,v 1.5 2003/09/10 17:58:58 flanigan Exp $ 
-
-ESMF_PREC = 32
+# $Id: Linux.intel.mk,v 1.6 2003/09/10 21:18:29 nscollins Exp $ 
 
 # Location of MPI (Message Passing Interface) software
-#ESMC_MPIRUN      = 
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
-MPI_LIB        = -lmpiuni
-MPI_INCLUDE    = -I${MPI_HOME}
-MPIRUN         =  ${MPI_HOME}/mpirun
+# this section is set up for LAM mpi
+#ESMC_MPIRUN   = 
+MPI_HOME       = 
+MPI_LIB        = -lmpi -llam
+MPI_INCLUDE    = -I/usr/include
+MPIRUN         =  /usr/bin/mpirun
+
+# need an ifeq() section for mpi bypass using the uni libs
+# #ESMC_MPIRUN      = 
+# MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+# MPI_LIB        = -lmpiuni
+# MPI_INCLUDE    = -I${MPI_HOME}
+# MPIRUN         =  ${MPI_HOME}/mpirun
+#endif
+
 
 # MP_LIB is for openMP
-MP_LIB          = -L/usr/lib/mpi/lib -lmpi 
+MP_LIB          = 
 # For pthreads (or omp)
 THREAD_LIB      = -lpthread
 
@@ -23,15 +31,38 @@ RANLIB		   = ranlib
 SHELL		   = /bin/sh
 SED		   = /bin/sed
 SH_LD		   = ecc 
-# ######################### C and Fortran compiler ########################
+# ################## Compilers, Linkers, and Loaders ########################
 #
-C_CC		   = ecc 
+ifeq ($(ESMF_PREC),64)
+C_CC		   = ecc -size_lp64
+C_FC		   = efc -size_lp64
+C_CLINKER	   = ecc -size_lp64
+C_FLINKER	   = efc -size_lp64
+CXX_CC		   = ecc  -size_lp64
+CXX_FC		   = efc -mp  -size_lp64
+CXX_CLINKER	   = ecc -size_lp64
+CXX_FLINKER	   = ecc -size_lp64
+C_F90CXXLD         = efc -mp -size_lp64
+C_CXXF90LD         = ecc  -size_lp64
+C_CXXSO            = ecc -shared -size_lp64
+endif
+ifeq ($(ESMF_PREC),32)
+C_CC		   = ecc
 C_FC		   = efc
+C_CLINKER	   = ecc
+C_FLINKER	   = efc
+CXX_CC		   = ecc
+CXX_FC		   = efc -mp
+CXX_CLINKER	   = ecc
+CXX_FLINKER	   = ecc
+C_F90CXXLD         = efc -mp
+C_CXXF90LD         = ecc 
+C_CXXSO            = ecc -shared 
+endif
+# ######################### C and Fortran compiler flags ####################
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CLINKER	   = ecc
-C_FLINKER	   = efc
 C_CCV		   = ${C_CC} -V -c -w -x c
 C_FCV              = efc -V -c -w
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
@@ -43,24 +74,16 @@ G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
-# ########################## C++ compiler ##################################
+# ########################## C++ compiler flags ##############################
 #
-CXX_CC		   = ecc 
-#CXX_CC		   = ecc -mp 
-CXX_FC		   = efc -mp 
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CLINKER	   = ecc
-CXX_FLINKER	   = ecc
 CXX_CCV		   = ${CXX_CC} -V -c -w -x c++
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
-C_F90CXXLD         = efc -mp
 C_F90CXXLIBS       = -lcprts
-C_CXXF90LD         = ecc 
 C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins
-C_CXXSO            = ecc -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
