@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.104 2004/02/09 17:51:39 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.105 2004/02/17 19:44:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.104 2004/02/09 17:51:39 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.105 2004/02/17 19:44:15 nscollins Exp $'
 
 !==============================================================================
 !
@@ -417,9 +417,10 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_FieldCreateNew - Create a new Field
+! !IROUTINE:   ESMF_FieldCreate - Create a new Field
 
 ! !INTERFACE:
+      ! internal name; call using ESMF_FieldCreate()
       function ESMF_FieldCreateNew(grid, arrayspec, allocflag, horizRelloc, &
                                    vertRelloc, haloWidth, datamap, name, &
                                    iospec, rc)
@@ -440,6 +441,7 @@
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
+!     An interface function to {\tt ESMF\_FieldCreate()}.
 !     Create a {\tt ESMF\_Field} and allocate space internally for a
 !     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
 ! 
@@ -515,9 +517,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldCreateFromArray - Create a Field from an existing ESMF Array
+! !IROUTINE: ESMF_FieldCreate - Create a Field from an existing ESMF Array
 
 ! !INTERFACE:
+      ! internal name; call using ESMF_FieldCreate()
       function ESMF_FieldCreateFromArray(grid, array, copyflag, horizRelloc, &
                                          vertRelloc, haloWidth, datamap, name, &
                                          iospec, rc)
@@ -538,6 +541,7 @@
       integer, intent(out), optional :: rc                
 !
 ! !DESCRIPTION:
+!     An interface function to {\tt ESMF\_FieldCreate()}.
 !     This version of creation assumes the data exists already and is being
 !     passed in through an {\tt ESMF\_Array}.  
 ! 
@@ -614,9 +618,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldCreateNoBuffer - Create a Field with no associated data buffer
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
+      ! internal name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoBuffer(grid, arrayspec, horizRelloc, vertRelloc, &
                                         haloWidth, datamap, name, iospec, rc)
 !
@@ -635,6 +640,7 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
+!     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     Creates a {\tt ESMF\_Field} in its entirety except for the assignment
 !     or allocation of an associated raw data buffer.
 !
@@ -706,9 +712,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldCreateNoArray - Create a Field with no associated Array object
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
+      ! internal name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoArray(grid, horizRelloc, vertRelloc, &
                                        haloWidth, datamap, name, iospec, rc)
 !
@@ -726,6 +733,7 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
+!     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds a {\tt ESMF\_Field} 
 !     and depends on a later call to add an {\tt ESMF\_Array} to it.  
 !
@@ -794,9 +802,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldCreateNoGridArray - Create a Field with no Grid or Array
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no Grid or Array
 
 ! !INTERFACE:
+      ! internal name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoGridArray(name, iospec, rc)
 !
 ! !RETURN VALUE:
@@ -808,6 +817,7 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
+!     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
 !     and depends on later calls to add a {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
 !     it.  
@@ -865,9 +875,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldCreateRemap - Create a Field by remapping another Field
+! !IROUTINE: ESMF_FieldCreate - Create a Field by remapping another Field
 
 ! !INTERFACE:
+      ! internal name; call using ESMF_FieldCreate()
       function ESMF_FieldCreateRemap(srcfield, grid, horizRelloc, vertRelloc, &
                                      haloWidth, datamap, name, iospec, rc)
 !
@@ -887,6 +898,7 @@
 !
 ! !DESCRIPTION:
 !
+! An interface function to {\tt ESMF\_FieldCreate()}.
 ! Remaps data between an existing {\tt ESMF\_Grid} on a source {\tt ESMF\_Field}
 ! and a new {\tt ESMF\_Grid}.  The {\tt ESMF\_Grid} is referenced by the 
 ! new {\tt ESMF\_Field}.  Data is copied.
@@ -1059,10 +1071,10 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_Array) :: array                   ! New array
-      type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: index
-      integer, dimension(ESMF_MAXDIM) :: counts
+      integer, dimension(ESMF_MAXDIM) :: gridcounts, arraycounts
+      integer, dimension(ESMF_MAXDIM) :: dimorder, counts
       integer :: hwidth
-      integer :: i, rank, gridRank
+      integer :: i, j, arrayRank, gridRank
 
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -1086,25 +1098,44 @@
         return
       endif 
 
-      call ESMF_ArraySpecGet(arrayspec, rank=rank, rc=status)
-      call ESMF_GridGetDE(grid, globalAIPerDim=index, rc=status)
+      call ESMF_ArraySpecGet(arrayspec, rank=arrayRank, rc=status)
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_ArraySpecGet"
+        return
+      endif 
+      call ESMF_GridGet(grid, numDims=gridRank, rc=status)
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGet"
+        return
+      endif 
+      call ESMF_GridGetDE(grid, localCellCountPerDim=gridcounts, rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE"
         return
       endif 
 
-      do i=1, rank
-        counts(i) = index(i)%max - index(i)%min + (2*hwidth) + 1
+      ! get information back from datamap
+      call ESMF_DataMapGet(ftype%mapping, dimlist=dimorder, &
+                                                    counts=counts, rc=status)
+
+      arraycounts(:) = 1
+      j = 1
+      do i=1, arrayRank
+         if (dimorder(i) .eq. 0) then
+            arraycounts(i) = counts(j) 
+            j = j + 1
+         else
+            arraycounts(i) = gridcounts(dimorder(i)) 
+         endif
       enddo
 
-      array = ESMF_ArrayCreate(arrayspec, counts, hwidth, rc=status) 
+
+      array = ESMF_ArrayCreate(arrayspec, arraycounts, hwidth, rc=status) 
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldConstructNew: Array create"
         return
       endif 
 
-      if (present(datamap)) ftype%mapping = datamap
-      
       ftype%localfield%localdata = array
       ftype%datastatus = ESMF_STATE_READY
 
@@ -1288,13 +1319,13 @@
       else
         if (gridRank .eq. 1) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, horizRelloc, &
-                                                  vertRelloc, gridRank, status)
+                                               vertRelloc, gridRank, rc=status)
         else if (gridRank .eq. 2) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, horizRelloc, &
-                                                  vertRelloc, gridRank, status)
+                                               vertRelloc, gridRank, rc=status)
         else if (gridRank .eq. 3) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, horizRelloc, &
-                                                  vertRelloc, gridRank, status)
+                                               vertRelloc, gridRank, rc=status)
         endif
       endif
 
@@ -1407,13 +1438,13 @@
       else
         if (gridRank .eq. 1) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_I, horizRelloc, &
-                                                  vertRelloc, gridRank, status)
+                                               vertRelloc, gridRank, rc=status)
         else if (gridRank .eq. 2) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJ, horizRelloc, &
-                                                  vertRelloc, gridRank, status)
+                                               vertRelloc, gridRank, rc=status)
         else if (gridRank .eq. 3) then
           ftype%mapping = ESMF_DataMapCreate(ESMF_IO_IJK, horizRelloc, &
-                                                  vertRelloc, gridRank, status)
+                                               vertRelloc, gridRank, rc=status)
         endif
       endif
 
