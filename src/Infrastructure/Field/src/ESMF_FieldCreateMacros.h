@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldCreateMacros.h,v 1.6 2005/02/09 00:38:40 jwolfe Exp $
+! $Id: ESMF_FieldCreateMacros.h,v 1.7 2005/02/24 23:22:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -149,7 +149,7 @@
  @\
         ! Construction method allocates and initializes field internals. @\
         call ESMF_FieldConstruct(ftype, grid, array, & @\
-                                    horzRelloc, vertRelloc, haloWidth, & @\
+                                    horzRelloc, vertRelloc, & @\
                                     datamap, name, iospec, status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\

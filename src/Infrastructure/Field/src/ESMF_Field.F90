@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.201 2005/02/22 15:18:12 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.202 2005/02/24 23:22:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.201 2005/02/22 15:18:12 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.202 2005/02/24 23:22:00 nscollins Exp $'
 
 !==============================================================================
 !
@@ -438,8 +438,9 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
-      function ESMF_FieldCreateNoDataPtr(grid, arrayspec, horzRelloc, vertRelloc, &
-                                        haloWidth, datamap, name, iospec, rc)
+      function ESMF_FieldCreateNoDataPtr(grid, arrayspec, horzRelloc, &
+                                         vertRelloc, haloWidth, &
+                                         datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoDataPtr   
@@ -449,7 +450,7 @@
       type(ESMF_ArraySpec), intent(in) :: arrayspec    
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
+      integer, intent(in), optional :: haloWidth    
       type(ESMF_FieldDataMap), intent(in), optional :: datamap    
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
@@ -474,8 +475,8 @@
 !           Relative location of data per grid cell/vertex in the vertical
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!     \item [{[haloWidth]}]
+!           Halo region width when data is eventually created.  Defaults to 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.
@@ -531,7 +532,7 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoArray(grid, horzRelloc, vertRelloc, &
-                                       haloWidth, datamap, name, iospec, rc)
+                                       datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateNoArray 
@@ -540,7 +541,6 @@
       type(ESMF_Grid) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
       type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
@@ -563,8 +563,6 @@
 !           Relative location of data per grid cell/vertex in the vertical
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.
@@ -597,7 +595,7 @@
 
       ! Call field construction method
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, datamap, name, &
+                                      datamap, name, &
                                       iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4411,7 +4409,7 @@
 
       ! this sets the grid status, and the datamap status
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      hwidth, dmap, name, &
+                                      dmap, name, &
                                       iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4473,7 +4471,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNewArray(ftype, grid, array, horzRelloc, &
-                                             vertRelloc, haloWidth, datamap, &
+                                             vertRelloc, datamap, &
                                              name, iospec, rc)
 !
 ! !ARGUMENTS:
@@ -4482,7 +4480,6 @@
       type(ESMF_Array), intent(in) :: array     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
       type(ESMF_FieldDataMap), intent(in), optional :: datamap           
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
@@ -4509,14 +4506,6 @@
 !           Relative location of data per grid cell/vertex in the vertical
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!           This input is currently ignored; the halo depth is taken
-!           from the existing {\tt array}.  It must have been created with
-!           the desired {\tt haloWidth} setting, and space for the halo region
-!           must be added to all axes of the array.  This will change in
-!           future versions of the system; the halo region will only need
-!           to be added to axes which correspond to {\tt ESMF\_Grid} axes.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.
@@ -4539,7 +4528,7 @@
 
       ! this validates the grid already, no need to validate it first.
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
-                                      haloWidth, datamap=datamap, name=name, &
+                                      datamap=datamap, name=name, &
                                       iospec=iospec, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4592,7 +4581,7 @@
       type(ESMF_ArraySpec), intent(in) :: arrayspec     
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
+      integer, intent(in), optional :: haloWidth 
       type(ESMF_FieldDataMap), intent(in), optional :: datamap 
       character (len=*), intent(in), optional :: name
       type(ESMF_IOSpec), intent(in), optional :: iospec 
@@ -4619,8 +4608,8 @@
 !           Relative location of data per grid cell/vertex in the vertical 
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
+!     \item [{[haloWidth]}]
+!           Width of the halo region around the data.  Defaults to 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.
@@ -4706,7 +4695,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, &
-                                            vertRelloc, haloWidth, &
+                                            vertRelloc, &
                                             datamap, name, iospec, rc)
 !
 ! !ARGUMENTS:     
@@ -4714,7 +4703,6 @@
       type(ESMF_Grid), intent(in) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
-      integer, intent(in), optional :: haloWidth
       type(ESMF_FieldDataMap), intent(in), optional :: datamap              
       character (len=*), intent(in), optional :: name    
       type(ESMF_IOSpec), intent(in), optional :: iospec  
@@ -4738,8 +4726,6 @@
 !           Relative location of data per grid cell/vertex in the vertical
 !           grid.  If a relative location is specified both as an argument
 !           here as well as set in the {\tt datamap}, this takes priority.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.

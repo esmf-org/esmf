@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.9 2004/08/16 20:59:18 nscollins Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.10 2005/02/24 23:22:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.9 2004/08/16 20:59:18 nscollins Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.10 2005/02/24 23:22:01 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -259,14 +259,6 @@ InterfaceMacro(FieldCreateEPtr)
 !           Relative location of data per grid cell/vertex in the vertical grid.
 !           If specified here, takes precedence over the same setting
 !           in the {\tt datamap} argument.
-!     \item [{[haloWidth]}] 
-!           Maximum halo depth along all edges.  Default is 0.
-!           This input is currently ignored; the halo depth is taken
-!           from the existing {\tt array}.  It must have been created with
-!           the desired {\tt haloWidth} setting, and space for the halo region
-!           must be added to all axes of the array.  This will change in 
-!           future versions of the system; the halo region will only need
-!           to be added to axes which correspond to {\tt ESMF\_Grid} axes.
 !     \item [{[datamap]}]
 !           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
 !           data to the {\tt ESMF\_Grid}.
@@ -304,7 +296,7 @@ InterfaceMacro(FieldCreateEPtr)
 
       ! Call construction method to allocate and initialize field internals.
       call ESMF_FieldConstruct(ftype, grid, array, horzRelloc, &
-                                       vertRelloc, haloWidth, datamap, name, &
+                                       vertRelloc, datamap, name, &
                                        iospec, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
