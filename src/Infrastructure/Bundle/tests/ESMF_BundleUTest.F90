@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.8 2004/03/15 18:37:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.7 2004/03/08 16:03:22 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.8 2004/03/15 18:37:46 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -232,7 +232,7 @@
 
       !NEX_UTest
       ! Verify that the first Field names can be queried fron a Bundle
-      call ESMF_BundleGetFields(bundle1, "pressure", returnedfield1, rc)
+      call ESMF_BundleGetField(bundle1, "pressure", returnedfield1, rc)
       write(failMsg, *) ""
       write(name, *) "Getting first Field by name from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -247,7 +247,7 @@
 
       !NEX_UTest
       ! Verify that the second Field names can be queried fron a Bundle
-      call ESMF_BundleGetFields(bundle1, 2, returnedfield2, rc)
+      call ESMF_BundleGetField(bundle1, 2, returnedfield2, rc)
       write(failMsg, *) ""
       write(name, *) "Getting a second Field by index from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -262,7 +262,7 @@
 
       !NEX_UTest
       ! Verify that the third Field names can be queried fron a Bundle
-      call ESMF_BundleGetFields(bundle1, 3, returnedfield3, rc)
+      call ESMF_BundleGetField(bundle1, 3, returnedfield3, rc)
       write(failMsg, *) ""
       write(name, *) "Getting a third Field by index from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -279,7 +279,7 @@
       !NEX_UTest
       ! Verify that the fourth Field names cannot be queried fron a Bundle
       ! because there are ony three Fields in the Bundle
-      call ESMF_BundleGetFields(bundle1, 4, returnedfield3, rc)
+      call ESMF_BundleGetField(bundle1, 4, returnedfield3, rc)
       write(failMsg, *) ""
       write(name, *) "Getting a non-existent Field from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -289,7 +289,7 @@
 
       !EX_UTest
       ! Verify that the zeroth Field names cannot be queried fron a Bundle
-      call ESMF_BundleGetFields(bundle1, 0, returnedfield3, rc)
+      call ESMF_BundleGetField(bundle1, 0, returnedfield3, rc)
       write(failMsg, *) ""
       write(name, *) "Getting a zeroth non-existent Field from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -297,7 +297,7 @@
 
       !EX_UTest
       ! Verify that the querying Field with wrong name from a Bundle returns FAILURE
-      call ESMF_BundleGetFields(bundle1, "nressure", returnedfield1, rc)
+      call ESMF_BundleGetField(bundle1, "nressure", returnedfield1, rc)
       write(failMsg, *) ""
       write(name, *) "Getting wrong Field name from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
