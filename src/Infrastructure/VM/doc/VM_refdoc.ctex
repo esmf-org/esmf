@@ -1,4 +1,4 @@
-% $Id: VM_refdoc.ctex,v 1.5 2004/05/17 17:41:36 theurich Exp $ 
+% $Id: VM_refdoc.ctex,v 1.6 2004/05/17 19:33:49 theurich Exp $ 
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,10 +65,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{VM_usage}
-%\input{ESMF_VMCreateEx_fapi}
+\input{ESMF_VMTest1Ex_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/VM/doc/VM_usage}
-%\input{../Infrastructure/VM/doc/ESMF_VMCreateEx_fapi}
+\input{../Infrastructure/VM/doc/ESMF_VMTest1Ex_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
