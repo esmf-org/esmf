@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.38 2004/02/10 23:59:40 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.39 2004/02/13 15:25:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.38 2004/02/10 23:59:40 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.39 2004/02/13 15:25:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -51,6 +51,7 @@
 
 !     !LOCAL VARIABLES:
       integer :: x, y, i, count
+      type(ESMF_DELayout) :: delayout
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
       type(ESMF_Array) :: arr, arr2
       type(ESMF_ArraySpec) :: arrayspec
@@ -83,12 +84,18 @@
       call ESMF_Initialize(rc)
 
       !------------------------------------------------------------------------
-      
+      ! several calls to field need a valid grid.  these will be used in
+      ! the grid create calls.
+      delayout = ESMF_DELayoutCreate(rc=rc)
+      minCoord(:) = (/ 0.0, 0.0 /)
+
+      !------------------------------------------------------------------------
       !NEX_UTest
       ! Test Requirement FLD1.1.3 Creation without data 
-      ! Fields may be created as in FLD1.1.1 without allocating data or specifying 
-      ! an associated data array. In this case specifying the grid parameters and 
-      ! data array dimensions may be deferred until data is attached.
+      ! Fields may be created as in FLD1.1.1 without allocating data or 
+      ! specifying an associated data array. In this case specifying the 
+      ! grid parameters and data array dimensions may be deferred until 
+      ! data is attached.
       f1 = ESMF_FieldCreateNoData(rc=rc) 
       write(failMsg, *) ""
       write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
@@ -224,7 +231,8 @@
 
       !NEX_UTest
       ! Verifing that a Grid can be created
-      grid =  ESMF_GridCreate(name="atmgrid", rc=rc)
+      grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
+                                     name="landgrid", layout=delayout, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -269,9 +277,9 @@
 
       !NEX_UTest
       ! Verifing that recreating a created Grid is allowed.
-      minCoord(:) = (/ 0.0, 0.0 /)
+      ! and create a valid grid which can be used below. 
       grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
-                                     name="landgrid", rc=rc)
+                                     name="landgrid", layout=delayout, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Recreating a created Grid Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -393,7 +401,8 @@
       ! It will be uncommented when the query function is written.
       ! Bug 705196 "Unable to query Grid name"
       gname="oceangrid"
-      grid =  ESMF_GridCreate(name=gname, rc=rc)
+      grid =  ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), minCoord, &
+                                     name=gname, layout=delayout, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
@@ -410,7 +419,6 @@
 
       !NEX_UTest
       ! Req. xxx - getting a data pointer directly from a field
-      grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
@@ -423,7 +431,6 @@
 
       !NEX_UTest
       ! Req. xxx  - setting and getting Attributes from a Field
-      grid =  ESMF_GridCreate(name=gname, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
