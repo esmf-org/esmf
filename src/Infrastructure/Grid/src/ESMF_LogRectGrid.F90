@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.47 2004/03/22 21:57:31 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.48 2004/03/22 23:53:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2936,7 +2936,6 @@
       ! Initialize other variables
       horzPhysIdUse = -1
       vertPhysIdUse = -1
-      order(:) = gridOrder(grid%ptr%coordOrder%order,:)
 
       ! Get the grid rank -- to check if there is a vertical grid available
       gridRank = grid%ptr%dimCount
@@ -2956,20 +2955,20 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (gridRank.le.2) then
-          print *, "ERROR in ESMF_LRGridGetCoord: ", &
-                   "defined vertical relloc but only a 2D grid"
-          return
-        endif
+   !     if (gridRank.le.2) then
+   !       print *, "ERROR in ESMF_LRGridGetCoord: ", &
+   !                "defined vertical relloc but only a 2D grid"
+   !       return
+   !     endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetCoord: get PhysGrid id"
             return
           endif
-        else
-          print *, "ERROR in ESMF_LRGridGetCoord: undefined vertical relloc"
-          return
+ !       else
+ !         print *, "ERROR in ESMF_LRGridGetCoord: undefined vertical relloc"
+ !         return
         endif
       endif
 
@@ -2997,6 +2996,7 @@
             return
           endif
         endif
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i = 1,aSize
           centerCoord(order(i)) = coord(i)
         enddo
@@ -3025,6 +3025,7 @@
             return
           endif
         endif
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i = 1,aSize
           cornerCoord(:,order(i)) = coord2(:,i)
         enddo
@@ -3182,7 +3183,6 @@
       vertDistIdUse = -1
       horzPhysIdUse = -1
       vertPhysIdUse = -1
-      order(:) = gridOrder(grid%ptr%coordOrder%order,:)
 
       ! Get the grid rank -- to check if there is a vertical grid available
       gridRank = grid%ptr%dimCount
@@ -3203,11 +3203,11 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (gridRank.le.2) then
-          print *, "ERROR in ESMF_LRGridGetCoord: ", &
-                   "defined vertical relloc but only a 2D grid"
-          return
-        endif
+  !      if (gridRank.le.2) then
+  !        print *, "ERROR in ESMF_LRGridGetCoord: ", &
+  !                 "defined vertical relloc but only a 2D grid"
+  !        return
+  !      endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
@@ -3215,9 +3215,9 @@
             return
           endif
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
-        else
-          print *, "ERROR in ESMF_LRGridGetCoord: undefined vertical relloc"
-          return
+  !      else
+  !        print *, "ERROR in ESMF_LRGridGetCoord: undefined vertical relloc"
+  !        return
         endif
       endif
 
@@ -3290,7 +3290,8 @@
           endif
         endif
         ! load local values into return arguments
-        do i = 1,gridRank
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        do i = 1,aSize
           if (present(localCellCountPerDim)) &
                       localCellCountPerDim(order(i)) = localCellCountPerDimUse(i)
           if (present(   globalStartPerDim)) &
@@ -3311,7 +3312,7 @@
             call ESMF_PhysCoordGetExtents(coord, minVal=minLCPDUse(i), &
                                           rc=status)
             if (status .NE. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_GridGet: physcoord get extents"
+              print *, "ERROR in ESMF_LRGridGetDE: physcoord get extents"
               return
             endif
           enddo
@@ -3321,10 +3322,11 @@
           call ESMF_PhysCoordGetExtents(coord, minVal=minLCPDUse(index), &
                                         rc=status)
           if (status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridGet: physcoord get extents"
+            print *, "ERROR in ESMF_LRGridGetDE: physcoord get extents"
             return
           endif
         endif
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i = 1,aSize
           minLocalCoordPerDim(order(i)) = minLCPDUse(i)
         enddo
@@ -3340,7 +3342,7 @@
             call ESMF_PhysCoordGetExtents(coord, maxVal=maxLCPDUse(i), &
                                           rc=status)
             if (status .NE. ESMF_SUCCESS) then
-              print *, "ERROR in ESMF_GridGet: physcoord get extents"
+              print *, "ERROR in ESMF_LRGridGetDE: physcoord get extents"
               return
             endif
           enddo
@@ -3350,10 +3352,11 @@
           call ESMF_PhysCoordGetExtents(coord, maxVal=maxLCPDUse(index), &
                                         rc=status)
           if (status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridGet: physcoord get extents"
+            print *, "ERROR in ESMF_LRGridGetDE: physcoord get extents"
             return
           endif
         endif
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i = 1,aSize
           maxLocalCoordPerDim(order(i)) = maxLCPDUse(i)
         enddo
@@ -3432,7 +3435,6 @@
       vertDistIdUse = -1
       horzPhysIdUse = -1
       vertPhysIdUse = -1
-      order(:) = gridOrder(grid%ptr%coordOrder%order,:)
 
       ! Get the grid rank and check against size of globalAI
       gridRank = grid%ptr%dimCount
@@ -3464,11 +3466,11 @@
       endif
 
       if (present(vertRelLoc)) then
-        if (gridRank.le.2) then
-          print *, "ERROR in ESMF_LRGridGetAllAxisIndex: ", &
-                   "defined vertical relloc but only a 2D grid"
-          return
-        endif
+   !     if (gridRank.le.2) then
+   !       print *, "ERROR in ESMF_LRGridGetAllAxisIndex: ", &
+   !                "defined vertical relloc but only a 2D grid"
+   !       return
+   !     endif
         if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
           call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, status)
           if (status .NE. ESMF_SUCCESS) then
@@ -3476,10 +3478,10 @@
             return
           endif
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
-        else
-          print *, "ERROR in ESMF_LRGridGetAllAxisIndex: ", &
-                   "undefined vertical relloc"
-          return
+   !     else
+   !       print *, "ERROR in ESMF_LRGridGetAllAxisIndex: ", &
+   !                "undefined vertical relloc"
+   !       return
         endif
       endif
 
@@ -3513,6 +3515,7 @@
       endif
 
       ! Load temp values into input array and clean up
+      order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
       if (aSize.ge.2) then
         globalAI(:,order(1)) = horzAI(:,1)
         globalAI(:,order(2)) = horzAI(:,2)
@@ -3596,10 +3599,14 @@
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
-      integer :: gridRank, aSize, i
+      integer :: i
+      integer :: order(3)
+      integer :: gridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer, dimension(:), allocatable :: dimOrderUse
+      integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
+      type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code
@@ -3610,25 +3617,53 @@
         rc = ESMF_FAILURE
       endif
 
+      ! some basic error checking    TODO: more
+      if (.not.associated(grid%ptr)) then
+        print *, "ERROR: ESMF_LRGridGet called with invalid grid object"
+        return
+      endif
+
       ! Initialize other variables
       horzDistIdUse = -1
       vertDistIdUse = -1
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! determine the largest input array size
+      ! determine the largest input array size and allocate temp arrays
       aSize = 0
-      if (present(global1D))   aSize = max(aSize, size(global1D))
-      if (present(global2D))   aSize = max(aSize, size(global2D,1))
-      if (present(globalAI1D)) aSize = max(aSize, size(globalAI1D))
-      if (present(globalAI2D)) aSize = max(aSize, size(globalAI2D,1))
-
-      ! Get the grid rank and check against size of input arrays
-      gridRank = grid%ptr%dimCount
-      if (aSize.lt.gridRank) then
-        print *, "WARNING in ESMF_LRGridGlobalToLocalIndex: ", &
-                 "input array sizes smaller than grid rank"
+      if (present(global1D)) then
+        tempSize = size(global1D)
+        aSize = max(aSize, tempSize)
       endif
+      if (present(global2D)) then
+        tempSize  = size(global2D,1)
+        tempSize2 = size(global2D,2)
+        aSize = max(aSize, tempSize)
+        allocate(gtemp2D(tempSize,tempSize2))
+        allocate(ltemp2D(tempSize,tempSize2))
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          gtemp2D(:,i) = global2D(:,order(i))
+        enddo
+      endif
+      if (present(globalAI1D)) then
+        tempSize = size(globalAI1D)
+        aSize = max(aSize, tempSize)
+      endif
+      if (present(globalAI2D)) then
+        tempSize  = size(globalAI2D,1)
+        tempSize2 = size(globalAI2D,2)
+        aSize = max(aSize, tempSize)
+        allocate(gtempAI2D(tempSize,tempSize2))
+        allocate(ltempAI2D(tempSize,tempSize2))
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          gtempAI2D(:,i) = globalAI2D(:,order(i))
+        enddo
+      endif
+
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = grid%ptr%dimCount
 
       ! calculate default if dimOrder is not present
       allocate(dimOrderUse(aSize))
@@ -3663,10 +3698,10 @@
           endif
           vertDistIdUse = grid%ptr%distGridIndex(vertPhysIdUse)
         endif
-      else
-        print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
-                 "undefined vertical relloc"
-        return
+  !    else
+  !      print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+  !               "undefined vertical relloc"
+  !      return
       endif
 
       hdgtype => grid%ptr%distgrids(horzDistIdUse)%ptr
@@ -3683,23 +3718,29 @@
       ! call DistGrid method to retrieve information otherwise not available
       ! to the application level
       ! can't send parts of optional arguments, so for now break out
-      ! TODO: make temp arrays so grid can be reordered
       if (present(global1D)) then
-        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
-                                             global1D=global1D, &
-                                             local1D=local1D, &
-                                             dimOrder=dimOrderUse(1:2), &
-                                             rc=status)
-        if (status .NE. ESMF_SUCCESS) then
+        if (gridRank.le.2) then
+          call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+                                               global1D=global1D, &
+                                               local1D=local1D, &
+                                               dimOrder=dimOrderUse(1:2), &
+                                               rc=status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        else
           print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
-                   "distgrid global to local"
+                   "1D operation not yet defined for 3d grids"
           return
         endif
       endif
+
       if (present(global2D)) then
         call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
-                                             global2D=global2D(:,1:2), &
-                                             local2D=local2D(:,1:2), &
+                                             global2D=gTemp2D(:,1:2), &
+                                             local2D=lTemp2D(:,1:2), &
                                              dimOrder=dimOrderUse(1:2), &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
@@ -3709,8 +3750,8 @@
         endif
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
-                                               global2D=global2D(:,3:3), &
-                                               local2D=local2D(:,3:3), &
+                                               global2D=gTemp2D(:,3:3), &
+                                               local2D=lTemp2D(:,3:3), &
                                                dimOrder=dimOrderUse(3:3), &
                                                rc=status)
           if (status .NE. ESMF_SUCCESS) then
@@ -3719,23 +3760,38 @@
             return
           endif
         endif
+        tempSize2 = size(global2D,2)
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          local2D(:,order(i)) = ltemp2D(:,i)
+        enddo
+        deallocate(gtemp2D)
+        deallocate(ltemp2D)
       endif
+
       if (present(globalAI1D)) then
-        call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
-                                             globalAI1D=globalAI1D, &
-                                             localAI1D=localAI1D, &
-                                             dimOrder=dimOrderUse(1:2), &
-                                             rc=status)
-        if (status .NE. ESMF_SUCCESS) then
+        if (gridRank.le.2) then
+          call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
+                                               globalAI1D=globalAI1D, &
+                                               localAI1D=localAI1D, &
+                                               dimOrder=dimOrderUse(1:2), &
+                                               rc=status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        else
           print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
-                   "distgrid global to local"
+                   "1D operation not yet defined for 3d grids"
           return
         endif
       endif
+
       if (present(globalAI2D)) then
         call ESMF_DistGridGlobalToLocalIndex(hdgtype, &
-                                             globalAI2D=globalAI2D(:,1:2), &
-                                             localAI2D=localAI2D(:,1:2), &
+                                             globalAI2D=gTempAI2D(:,1:2), &
+                                             localAI2D=lTempAI2D(:,1:2), &
                                              dimOrder=dimOrderUse(1:2), &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
@@ -3745,8 +3801,8 @@
         endif
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridGlobalToLocalIndex(vdgtype, &
-                                               globalAI2D=globalAI2D(:,3:3), &
-                                               localAI2D=localAI2D(:,3:3), &
+                                               globalAI2D=gTempAI2D(:,3:3), &
+                                               localAI2D=lTempAI2D(:,3:3), &
                                                dimOrder=dimOrderUse(3:3), &
                                                rc=status)
           if (status .NE. ESMF_SUCCESS) then
@@ -3755,6 +3811,13 @@
             return
           endif
         endif
+        tempSize2 = size(globalAI2D,2)
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          localAI2D(:,order(i)) = ltempAI2D(:,i)
+        enddo
+        deallocate(gtempAI2D)
+        deallocate(ltempAI2D)
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -3829,9 +3892,13 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: gridRank, arraySize
+      integer :: i
+      integer :: order(3)
+      integer :: gridRank, aSize, tempSize, tempSize2
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
+      integer(ESMF_KIND_I4), dimension(:,:), allocatable :: gTemp2D,   lTemp2D
+      type(ESMF_AxisIndex),  dimension(:,:), allocatable :: gTempAI2D, lTempAI2D
       type(ESMF_DistGridType), pointer :: hdgtype, vdgtype
 
       ! Initialize return code
@@ -3842,33 +3909,67 @@
         rc = ESMF_FAILURE
       endif
 
+      ! some basic error checking    TODO: more
+      if (.not.associated(grid%ptr)) then
+        print *, "ERROR: ESMF_LRGridGet called with invalid grid object"
+        return
+      endif
+
       ! Initialize other variables
       horzDistIdUse = -1
       vertDistIdUse = -1
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
-      ! determine the largest input array size
-      arraySize = 0
-      if (present(local1D))   arraySize = max(arraySize, size(local1D))
-      if (present(local2D))   arraySize = max(arraySize, size(local2D,1))
-      if (present(localAI1D)) arraySize = max(arraySize, size(localAI1D))
-      if (present(localAI2D)) arraySize = max(arraySize, size(localAI2D,1))
-
-      ! Get the grid rank and check against size of input arrays
-      gridRank = grid%ptr%dimCount
-      if (arraySize.lt.gridRank) then
-        print *, "WARNING in ESMF_LRGridLocalToGlobalIndex: ", &
-                 "input array sizes smaller than grid rank"
+      ! determine the largest input array size and allocate temp arrays
+      aSize = 0
+      if (present(local1D)) then
+        tempSize = size(local1D)
+        aSize = max(aSize, tempSize)
+      endif
+      if (present(local2D)) then
+        tempSize  = size(local2D,1)
+        tempSize2 = size(local2D,2)
+        aSize = max(aSize, tempSize)
+        allocate(gtemp2D(tempSize,tempSize2))
+        allocate(ltemp2D(tempSize,tempSize2))
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          ltemp2D(:,i) = local2D(:,order(i))
+        enddo
+      endif
+      if (present(localAI1D)) then
+        tempSize = size(localAI1D)
+        aSize = max(aSize, tempSize)
+      endif
+      if (present(localAI2D)) then
+        tempSize  = size(localAI2D,1)
+        tempSize2 = size(localAI2D,2)
+        aSize = max(aSize, tempSize)
+        allocate(gtempAI2D(tempSize,tempSize2))
+        allocate(ltempAI2D(tempSize,tempSize2))
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          ltempAI2D(:,i) = localAI2D(:,order(i))
+        enddo
       endif
 
-      ! get distgrid identifier from relative locations
-      call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = grid%ptr%dimCount
+
+      ! get distgrid identifiers from relative locations
+      if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
+        call ESMF_GridGetPhysGridId(grid%ptr, horzRelLoc, horzPhysIdUse, status)
+        if (status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: get PhysGrid id"
+          return
+        endif
+        horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
+      else
+        print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                 "undefined horizontal relloc"
         return
       endif
-      horzDistIdUse = grid%ptr%distGridIndex(horzPhysIdUse)
 
       if (present(vertRelLoc)) then
        if (vertRelLoc.ne.ESMF_CELL_UNDEFINED) then
@@ -3885,7 +3986,7 @@
       if (vertDistIdUse.ne.-1) then
         vdgtype => grid%ptr%distgrids(vertDistIdUse)%ptr
       else
-        if (arraySize.ge.3 .and. gridRank.eq.3) then
+        if (aSize.ge.3 .and. gridRank.eq.3) then
           print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
                    "no valid vertRelLoc when one is needed"
           return
@@ -3896,20 +3997,27 @@
       ! to the application level
       ! can't send parts of optional arguments, so for now break out  TODO: fix
       if (present(local1D)) then
-        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             local1D=local1D, &
-                                             global1D=global1D, &
-                                             rc=status)
-        if (status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
-                   "distgrid global to local"
+        if (gridRank.le.2) then
+          call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                               local1D=local1D, &
+                                               global1D=global1D, &
+                                               rc=status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        else
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "1D operation not yet defined for 3d grids"
           return
         endif
       endif
+
       if (present(local2D)) then
         call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             local2D=local2D(:,1:2), &
-                                             global2D=global2D(:,1:2), &
+                                             local2D=lTemp2D(:,1:2), &
+                                             global2D=gTemp2D(:,1:2), &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
@@ -3918,8 +4026,8 @@
         endif
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
-                                               local2D=local2D(:,3:3), &
-                                               global2D=global2D(:,3:3), &
+                                               local2D=lTemp2D(:,3:3), &
+                                               global2D=gTemp2D(:,3:3), &
                                                rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
@@ -3927,22 +4035,37 @@
             return
           endif
         endif
+        tempSize2 = size(local2D,2)
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          global2D(:,order(i)) = gtemp2D(:,i)
+        enddo
+        deallocate(gtemp2D)
+        deallocate(ltemp2D)
       endif
+
       if (present(localAI1D)) then
-        call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             localAI1D=localAI1D, &
-                                             globalAI1D=globalAI1D, &
-                                             rc=status)
-        if (status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
-                   "distgrid global to local"
+        if (gridRank.le.2) then
+          call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
+                                               localAI1D=localAI1D, &
+                                               globalAI1D=globalAI1D, &
+                                               rc=status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
+                     "distgrid global to local"
+            return
+          endif
+        else
+          print *, "ERROR in ESMF_LRGridGlobalToLocalIndex: ", &
+                   "1D operation not yet defined for 3d grids"
           return
         endif
       endif
+
       if (present(localAI2D)) then
         call ESMF_DistGridLocalToGlobalIndex(hdgtype, &
-                                             localAI2D=localAI2D(:,1:2), &
-                                             globalAI2D=globalAI2D(:,1:2), &
+                                             localAI2D=lTempAI2D(:,1:2), &
+                                             globalAI2D=gTempAI2D(:,1:2), &
                                              rc=status)
         if (status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
@@ -3951,8 +4074,8 @@
         endif
         if (vertDistIdUse.ne.-1) then
           call ESMF_DistGridLocalToGlobalIndex(vdgtype, &
-                                               localAI2D=localAI2D(:,3:3), &
-                                               globalAI2D=globalAI2D(:,3:3), &
+                                               localAI2D=lTempAI2D(:,3:3), &
+                                               globalAI2D=gTempAI2D(:,3:3), &
                                                rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridLocalToGlobalIndex: ", &
@@ -3960,6 +4083,13 @@
             return
           endif
         endif
+        tempSize2 = size(localAI2D,2)
+        order(:) = gridOrder(tempSize2,grid%ptr%coordOrder%order,:)
+        do i = 1,tempSize2
+          globalAI2D(:,order(i)) = gtempAI2D(:,i)
+        enddo
+        deallocate(gtempAI2D)
+        deallocate(ltempAI2D)
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -4411,7 +4541,6 @@
       vertDistIdUse = -1
       horzPhysIdUse = -1
       vertPhysIdUse = -1
-      order(:) = gridOrder(gridp%coordOrder%order,:)
 
       ! if present, gets information from the grid derived type
       if (present(horzGridType   )) horzGridType    = gridp%horzGridType
@@ -4434,22 +4563,25 @@
 
       ! Get global coordinate extents
       if (present(minGlobalCoordPerDim)) then
-        do i=1,ESMF_MAXGRIDDIM
-          if (i > size(minGlobalCoordPerDim)) exit
+        aSize = size(minGlobalCoordPerDim)
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        do i=1,aSize
           minGlobalCoordPerDim(order(i)) = gridp%minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
-        do i=1,ESMF_MAXGRIDDIM
-          if (i > size(maxGlobalCoordPerDim)) exit
+        aSize = size(maxGlobalCoordPerDim)
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        do i=1,aSize
           maxGlobalCoordPerDim(order(i)) = gridp%maxGlobalCoordPerDim(i)
         enddo
       endif
 
       ! get the periodicity
       if (present(periodic)) then
-        do i=1,ESMF_MAXGRIDDIM
-          if (i > size(periodic)) exit
+        aSize = size(periodic)
+        order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
+        do i=1,aSize
           periodic(order(i)) = gridp%periodic(i)
         enddo
       endif
@@ -4520,6 +4652,7 @@
               return
             endif
           endif
+          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
           do i = 1,aSize
             globalCellCountPerDim(order(i)) = gCCPDUse(i)
           enddo
@@ -4545,6 +4678,7 @@
               return
             endif
           endif
+          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
           do i = 1,aSize
             globalStartPerDEPerDim(:,order(i)) = gSPDEPDUse(:,i)
           enddo
@@ -4570,6 +4704,7 @@
               return
             endif
           endif
+          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
           do i = 1,aSize
             maxLocalCellCountPerDim(order(i)) = mLCCPDUse(i)
           enddo
@@ -4593,6 +4728,7 @@
               return
             endif
           endif
+          order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
           do i = 1,aSize
             cellCountPerDEPerDim(:,order(i)) = cCPDEPDUse(:,i)
           enddo
