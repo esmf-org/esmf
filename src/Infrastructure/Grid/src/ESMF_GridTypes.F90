@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.32.2.1 2004/07/22 20:56:42 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.32.2.2 2004/07/22 22:46:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -280,8 +280,6 @@
     
     public ESMF_GridConstructNew
     public ESMF_GridGetDELayout
-    public ESMF_GridAddAttribute
-    public ESMF_GridGetAttributes
     public ESMF_GridAddDistGrid
     public ESMF_GridMakeDistGridSpace
     public ESMF_GridAddPhysGrid
@@ -494,7 +492,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.32.2.1 2004/07/22 20:56:42 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.32.2.2 2004/07/22 22:46:19 nscollins Exp $'
 
 !==============================================================================
 !
@@ -674,6 +672,9 @@
       end subroutine ESMF_GridGetDELayout
 
 !------------------------------------------------------------------------------
+#if 0
+!! these routines are obsoleted by the standard attribute routines,
+!! i think.  nsc.
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridAddAttribute"
 !BOP
@@ -997,6 +998,7 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetAttributes
+#endif
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
