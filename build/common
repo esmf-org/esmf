@@ -1,4 +1,4 @@
-# $Id: common,v 1.13 2003/01/08 23:22:15 nscollins Exp $ 
+# $Id: common,v 1.14 2003/02/04 22:20:13 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -52,13 +52,13 @@ storeh:
 	  fi ; \
 	done
 
-buildtex: ${TEXFILES}
+buildtex: chkdir_doc ${TEXFILES}
 
-builddvi: ${DVIFILES}
+builddvi: chkdir_doc ${DVIFILES}
 
-buildpdf: ${PDFFILES}
+buildpdf: chkdir_doc ${PDFFILES}
 
-buildhtml: ${HTMLFILES}
+buildhtml:chkdir_doc ${HTMLFILES}
 
 localpdf: chkdir_doc
 	cd ..;  ${OMAKE} buildtex
