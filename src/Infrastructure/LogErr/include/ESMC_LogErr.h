@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.21 2004/04/21 04:08:23 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.22 2004/04/21 16:55:20 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,6 @@
 
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
-#include "ESMC_UtilityFunctions.h"
 
 class ESMC_Log {
   private:
