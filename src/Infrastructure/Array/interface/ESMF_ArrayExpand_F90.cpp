@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.14 2004/03/11 23:43:17 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.15 2004/03/12 19:49:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.14 2004/03/11 23:43:17 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.15 2004/03/12 19:49:09 svasquez Exp $'
 
 !==============================================================================
 ! 
@@ -224,19 +224,13 @@ end interface
 !    
 !  The arguments are:
 !  \begin{description}
-!  \item[arrayspec]
-!    ArraySpec object.
-!  \item[counts]
-!    The number of items in each dimension of the array.  This is a 1D
+!  \item[arrayspec]  ArraySpec object.
+!  \item[counts]  The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
-!  \item[{[haloWidth]}] 
-!   Set the maximum width of the halo region on all edges. Defaults to 0.
-!  \item[{[lbounds]}] 
-!   An integer array of length rank, with the lower index for each dimension.
-!  \item[{[ubounds]}] 
-!   An integer array of length rank, with the upper index for each dimension.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \item[{[haloWidth]}]  Set the maximum width of the halo region on all edges. Defaults to 0.
+!  \item[{[lbounds]}]  An integer array of length rank, with the lower index for each dimension.
+!  \item[{[ubounds]}]  An integer array of length rank, with the upper index for each dimension.
+!   \item[{[rc]}]   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
@@ -299,27 +293,18 @@ end interface
 !    
 !  The arguments are:
 !  \begin{description}
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!  \item[rank]  Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
+!  \item[type]  Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
+!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, {\tt ESMF\_DATA\_CHARACTER}.
+!  \item[kind]  Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
 !    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
 !    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!  \item[counts]
-!    The number of items in each dimension of the array.  This is a 1D
+!  \item[counts]  The number of items in each dimension of the array.  This is a 1D
 !    integer array the same length as the rank.
-!  \item[{[haloWidth]}] 
-!   Set the maximum width of the halo region on all edges. Defaults to 0.
-!  \item[{[lbounds]}] 
-!   An integer array of length rank, with the lower index for each dimension.
-!  \item[{[ubounds]}] 
-!   An integer array of length rank, with the upper index for each dimension.
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \item[{[haloWidth]}]  Set the maximum width of the halo region on all edges. Defaults to 0.
+!  \item[{[lbounds]}]  An integer array of length rank, with the lower index for each dimension.
+!  \item[{[ubounds]}]  An integer array of length rank, with the upper index for each dimension.
+!   \item[{[rc]}]   Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
