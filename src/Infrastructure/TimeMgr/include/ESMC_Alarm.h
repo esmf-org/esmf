@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.11 2003/05/02 00:58:07 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.12 2003/05/02 22:07:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ class ESMC_Alarm {
     int ESMC_AlarmInit(ESMC_Time         *ringTime=0,
                        ESMC_TimeInterval *ringInterval=0,
                        ESMC_Time         *stopTime=0,
-                       bool enabled=true);
+                       bool               enabled=true);
 
     // Alarm doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
