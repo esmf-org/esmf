@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.22 2003/04/29 16:23:45 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.23 2003/04/29 19:32:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.22 2003/04/29 16:23:45 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.23 2003/04/29 19:32:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2311,9 +2311,18 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      integer :: i, gridrank, datarank, thisdim
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: grid
+      integer :: i, j, gridrank, datarank, thisdim
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
+      type(ESMF_Route) :: route
+      logical :: hascachedroute    ! can we reuse an existing route?
+      integer :: nx, ny
+      integer :: my_DE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
+      integer :: AI_count
+
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2323,12 +2332,17 @@
         rc = ESMF_FAILURE
       endif     
 
+      ! Get the Layout from the Field's Grid
       ftypep = field%ftypep
+      call ESMF_GridGetDELayout(ftypep%grid, layout, status)
+
+      ! Our DE number in the layout
+      call ESMF_DELayoutGetDEid(layout, my_DE, status)
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indicies and the grid indicies.
       call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
-                                               dimlist=dimorder, rc=status)
+                           dimlist=dimorder, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldHalo: DataMapGet returned failure"
         return
@@ -2336,38 +2350,39 @@
 
       ! And get the Array sizes
       call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
-                                               counts=dimlengths, rc=status)
+                         counts=dimlengths, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: ArrayGet returned failure"
-        return
+         print *, "ERROR in FieldHalo: ArrayGet returned failure"
+         return
       endif 
 
-      ! Set the axis info on the array to pass thru to DistGrid
-      do i=1, gridrank
-          thisdim = dimorder(i)
-          if (thisdim .eq. 0) cycle
-     
-          ! TODO: this needs to be hidden behind a method to get & set
-          axis(i)%l = 0
-          axis(i)%r = dimlengths(thisdim)
-          axis(i)%max = dimlengths(thisdim)
-          axis(i)%decomp = thisdim
-          axis(i)%gstart = 0
-     
-      enddo
+      ! set up things we need to find a cached route or precompute one
+      call ESMF_GridGetAllAxisIndex(ftypep%grid, src_AI, AI_tot=dst_AI)
+      call ESMF_DELayoutGetSize(layout, nx, ny);
+      AI_count = nx * ny
+          
+      ! Does this same route already exist?  If so, then we can drop
+      ! down immediately to RouteRun.
+      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, &
+                               AI_count, layout, my_DE, &
+                               src_AI, AI_count, layout, &
+                               hascachedroute, route, rc=status)
 
-      ! Attach this info to the array
-      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, axis, status)
-      if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: ArraySetAxisIndex returned failure"
-        return
-      endif 
+      if (.not. hascachedroute) then
+          ! Create the route object.
+          route = ESMF_RouteCreate(layout, rc) 
 
-      ! Call Grid method to perform actual work
-      call ESMF_GridHalo(field%ftypep%grid, field%ftypep%localfield%localdata, &
-                                                        status)
+          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, &
+                                        dst_AI, AI_count, layout, rc=status)
+
+      endif
+
+      ! Once table is full, execute the communications it represents.
+
+      call ESMF_RouteRun(route, ftypep%localfield%localdata, &
+                         ftypep%localfield%localdata, status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHalo: Grid Halo returned failure"
+        print *, "ERROR in FieldHalo: RouteRun returned failure"
         return
       endif 
 
