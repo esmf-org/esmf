@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.77 2004/12/03 20:47:50 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.78 2004/12/09 23:51:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.77 2004/12/03 20:47:50 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.78 2004/12/09 23:51:12 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -5166,7 +5166,7 @@ end interface
 ! !IROUTINE: ESMF_StateSerialize - Serialize state info into a byte stream
 !
 ! !INTERFACE:
-      subroutine ESMF_StateSerialize(state, buffer, length, offset, rc) 
+      recursive subroutine ESMF_StateSerialize(state, buffer, length, offset, rc) 
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(in) :: state 
@@ -5205,6 +5205,7 @@ end interface
       integer :: i
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
+      type(ESMF_State) :: wrapper
 
       ! shortcut to internals
       sp => state%statep
@@ -5233,14 +5234,24 @@ end interface
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_BUNDLE%ot)
+             call ESMF_BundleSerialize(sip%datap%bp, buffer, length, &
+                                       offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_FIELD%ot)
+             call ESMF_FieldSerialize(sip%datap%fp, buffer, &
+                                       length, offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_ARRAY%ot)
+             call c_ESMC_ArraySerializeNoData(sip%datap%ap, buffer(1), &
+                                       length, offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_STATE%ot)
+             wrapper%statep => sip%datap%spp
+             call ESMF_StateSerialize(wrapper, buffer, length, offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_NAME%ot)
+             call c_ESMC_StringSerialize(sip%namep, buffer(1), &
+                                         length, offset, localrc)
               continue ! TODO: serialize
             case (ESMF_STATEITEM_INDIRECT%ot)
               continue ! TODO: serialize
@@ -5262,7 +5273,7 @@ end interface
 ! !IROUTINE: ESMF_StateDeserialize - Deserialize a byte stream into a State
 !
 ! !INTERFACE:
-      function ESMF_StateDeserialize(vm, buffer, offset, rc) 
+      recursive function ESMF_StateDeserialize(vm, buffer, offset, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_State) :: ESMF_StateDeserialize   
@@ -5300,6 +5311,11 @@ end interface
       integer :: i
       type(ESMF_StateClass), pointer :: sp           ! state type
       type(ESMF_StateItem), pointer :: sip           ! state item
+      type(ESMF_State) :: substate
+      type(ESMF_Bundle) :: bundle
+      type(ESMF_Field) :: field
+      type(ESMF_Array) :: array
+      character(len=ESMF_MAXSTR) :: thisname
 
 
       ! in case of error, make sure this is invalid.
@@ -5338,20 +5354,28 @@ end interface
 
           select case (sip%otype%ot)
             case (ESMF_STATEITEM_BUNDLE%ot)
+              sip%datap%bp = ESMF_BundleDeserialize(vm, buffer, offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_FIELD%ot)
+              sip%datap%fp = ESMF_FieldDeserialize(vm, buffer, offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_ARRAY%ot)
+              call c_ESMC_ArrayDeserializeNoData(sip%datap%ap, buffer, &
+                                                 offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_STATE%ot)
+              substate = ESMF_StateDeserialize(vm, buffer, offset, localrc)
+              sip%datap%spp => substate%statep
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_NAME%ot)
+              call c_ESMC_StringDeserialize(sip%namep, buffer(1), offset, localrc)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_INDIRECT%ot)
               continue ! TODO: deserialize
             case (ESMF_STATEITEM_UNKNOWN%ot)
               continue ! TODO: deserialize
           end select
+
 
       enddo
 
