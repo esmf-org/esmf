@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.12 2003/01/07 21:31:11 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.13 2003/01/10 18:06:12 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.12 2003/01/07 21:31:11 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.13 2003/01/10 18:06:12 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -453,7 +453,8 @@
     
     // TODO: make this look at one of the option letters to see if user
     //   wants data printed.
-    if (this->type == ESMF_DATA_REAL) {
+    switch (this->type) {
+      case ESMF_DATA_REAL:
         switch (this->rank) {
           case 1:
             printf("  Data values:\n");
@@ -471,6 +472,28 @@
             printf("no code to handle rank %d yet\n", this->rank);
             break;    
         }
+      case ESMF_DATA_INTEGER:
+        switch (this->rank) {
+          case 1:
+            printf("  Data values:\n");
+            for (i=0; i<this->length[0]; i++)
+                printf("(%2d) =  %d\n", i+1, *((int *)(this->base_addr) + i));
+            break;
+          case 2:
+            printf("  Data values:\n");
+            for (j=0; j<this->length[1]; j++)
+                for (i=0; i<this->length[0]; i++)
+                printf("(%2d,%2d) =  %d\n", i+1, j+1, *((int *)(this->base_addr) + 
+                                              i + j*this->length[0]) );
+            break;
+          default:
+            printf("no code to handle rank %d yet\n", this->rank);
+            break;    
+        }
+      default:
+            printf("no code to handle data type %d yet\n", this->type);
+
+      break;
     }
 
     rc = ESMF_SUCCESS;
