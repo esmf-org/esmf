@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.40 2004/06/08 22:37:19 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.41 2004/06/09 23:17:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,9 +85,9 @@
    public ESMF_FieldScatter  ! Split 1 field into a decomposed one over N DEs
   !public ESMF_FieldBroadcast! Send 1 field to all DEs, none decomposed
   !public ESMF_FieldAlltoAll ! might make sense with bundles; each DE could
-                              ! call with a different non-decomposed field
-                              ! and the result would be a packed bundle of
-                              ! data with decomposed fields on each DE.
+                             ! call with a different non-decomposed field
+                             ! and the result would be a packed bundle of
+                             ! data with decomposed fields on each DE.
 
    public ESMF_FieldReduce     ! Global reduction operation, return on 1 DE
   !public ESMF_FieldAllReduce  ! Global reduction operation, return on each DE
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.40 2004/06/08 22:37:19 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.41 2004/06/09 23:17:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -916,6 +916,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, &
+                                  parentDelayout, regridmethod, regridnorm, &
                                   srcMask, dstMask, blockingflag, commhandle, rc)
 !
 !
@@ -923,6 +924,9 @@
       type(ESMF_Field), intent(in) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_DELayout) :: parentDelayout
+      integer, intent(in), optional :: regridmethod
+      integer, intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcMask                 
       type(ESMF_Mask), intent(in), optional :: dstMask                 
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -948,6 +952,21 @@
 !           associated with the precomputed
 !           information for a regrid operation on this {\tt ESMF\_Field}.
 !           This handle must be supplied at run time to execute the regrid.
+!     \item [{[parentDelayout]}]
+!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the layout of the Coupler if the regridding is
+!           inter-component, but could also be the individual layout for
+!           a component if the regridding is intra-component.  This argument
+!           is used only if the routehandle has not been previously computed
+!           during a RegridStore call.
+!     \item [{[regridmethod]}]
+!           Type of regridding to do.  A set of predefined methods are
+!           supplied.  This argument is used only if the routehandle has
+!           not been previously computed during a RegridStore call.
+!     \item [{[regridnorm]}]
+!           Normalization option, only for specific regrid types.
+!           This argument is used only if the routehandle has not been
+!           previously computed during a RegridStore call.
 !     \item [{[srcMask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !           (Not yet implemented.)
@@ -975,6 +994,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      logical :: allInOne
       type(ESMF_DELayout) :: srcDelayout, dstDelayout
       !type(ESMF_DELayout) :: parentDelayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
@@ -985,7 +1005,6 @@
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
       type(ESMF_FieldDataMap) :: src_datamap, dst_datamap
-
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -993,8 +1012,22 @@
       if(present(rc)) then
         rcpresent = .TRUE. 
         rc = ESMF_FAILURE
-      endif     
+      endif
 
+      ! Initialize other variables
+      allInOne = .false.
+
+      ! if the routehandle has not been precomputed, do so now
+      ! TODO: this is not quite the right way to do this -- add a status
+      !       to routehandle that says it's ready
+      call ESMF_RouteHandleValidate(routehandle, rc=status)
+      if (status .ne. ESMF_SUCCESS) then
+        allInOne = .true.
+        ! TODO:  add error handling, write a message to the log file
+        call ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
+                                   routehandle, regridmethod, regridnorm, &
+                                   srcMask, dstMask, status)
+      endif
 
       ! Our DE number in the parent layout
       ! call ESMF_DELayoutGet(parentDelayout, localDe=my_DE, status)
@@ -1061,6 +1094,9 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
+      ! if this is a regrid call with an uninitialized routehandle, then 
+      ! destroy it before returning    TODO:  is this right?
+      if (allInOne) call ESMF_FieldRegridRelease(routehandle, status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1140,10 +1176,9 @@
 !           {\tt ESMF\_Field} containing destination grid and data map.
 !     \item [parentDelayout]
 !           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could 
-!           also be the individual layout for a component if the 
-!           regridding is intra-component.  
+!           most commonly the layout of the Coupler if the regridding is
+!           inter-component, but could also be the individual layout for
+!           a component if the regridding is intra-component.  
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
 !           will be executed when {\tt ESMF\_FieldRegrid} is called.
@@ -1233,9 +1268,8 @@
                                  routehandle, regridmethod, regridnorm, &    
                                  srcMask, dstMask, status)
 
-
       ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldRegridStore
 
