@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.72 2003/10/22 03:30:22 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.73 2003/10/22 05:01:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.72 2003/10/22 03:30:22 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.73 2003/10/22 05:01:24 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1494,12 +1494,12 @@ static int maxroutes = 10;
     // Calculate the sending table.
     // loop over DE's from DomainList to send to
     for (k=0; k<sendDomainList->num_domains; k++) {
-      //their_de = sendDomainList->ESMC_DomainListGetDE(k);
-      their_de = sendDomainList->domains[k].DE;
+      their_de = sendDomainList->ESMC_DomainListGetDE(k);
+      //their_de = sendDomainList->domains[k].DE;
       // get "my" AI
       for (j=0; j<rank; j++) 
-        //my_AI[j] = sendDomainList->ESMC_DomainListGetAI(k, j);
-        my_AI[j] = sendDomainList->domains[k].ai_list[j];
+        my_AI[j] = sendDomainList->ESMC_DomainListGetAI(k, j);
+        //my_AI[j] = sendDomainList->domains[k].ai_list[j];
       
  
       // calculate "my" XPacket from the AxisIndices -- in this case the
