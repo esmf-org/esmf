@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.9 2003/09/09 21:08:12 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.10 2003/09/23 15:20:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@
 
       type ESMF_GridComp
       sequence
-      private
+      !private
 #ifndef ESMF_NO_INITIALIZERS
          type(ESMF_CompClass), pointer :: compp => NULL()
 #else
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.9 2003/09/09 21:08:12 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.10 2003/09/23 15:20:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -125,6 +125,14 @@
 !
 
 !EOP
+      end interface
+
+      interface
+          subroutine services(comp, rc)
+            use ESMF_CompMod
+            type(ESMF_CompClass) :: comp 
+            integer :: rc
+          end subroutine
       end interface
 
 !==============================================================================
@@ -233,13 +241,16 @@
 ! !IROUTINE: ESMF_GridCompCreateConf -- Create a new Component.
 
 ! !INTERFACE:
+      !function ESMF_GridCompCreateConf(services, name, layout, mtype, grid, &
+      !                                                  config, configfile, rc)
       function ESMF_GridCompCreateConf(name, layout, mtype, grid, &
-                                                    config, configfile, rc)
+                                                        config, configfile, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateConf
 !
 ! !ARGUMENTS:
+      !external :: services
       character(len=*), intent(in), optional :: name
       type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_ModelType), intent(in), optional :: mtype 

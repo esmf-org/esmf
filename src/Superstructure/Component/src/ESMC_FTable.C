@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.3 2003/08/01 22:02:32 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.4 2003/09/23 15:20:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.3 2003/08/01 22:02:32 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.4 2003/09/23 15:20:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -506,24 +506,28 @@
             *rc = *(int *)(funcs[i].funcarg[1]);
             break;
           }
-          case FT_GRID: {
-            GridCall vf;
-            vf = (GridCall)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], 
-                        funcs[i].funcarg[1],
-                        funcs[i].funcarg[2],
-                        funcs[i].funcarg[3],
+          case FT_COMP1STAT: {
+            C1SFunc vf;
+            vf = (C1SFunc)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
+            *rc = *(int *)(funcs[i].funcarg[3]);
+            break;
+          }
+          case FT_COMP2STAT: {
+            C2SFunc vf;
+            vf = (C2SFunc)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], funcs[i].funcarg[3],
                  (int *)funcs[i].funcarg[4]);
             *rc = *(int *)(funcs[i].funcarg[4]);
             break;
           }
-          case FT_CPL: {
-            CplCall vf;
-            vf = (CplCall)funcs[i].funcptr;
-            (*vf)(funcs[i].funcarg[0], 
-                        funcs[i].funcarg[1],
-                        funcs[i].funcarg[2],
-                 (int *)funcs[i].funcarg[3]);
+          case FT_COMPSLIST: {
+            CSLFunc vf;
+            vf = (CSLFunc)funcs[i].funcptr;
+            (*vf)(funcs[i].funcarg[0], funcs[i].funcarg[1],
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
             break;
           }

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.7 2003/09/09 21:08:12 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.8 2003/09/23 15:20:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,7 +56,7 @@
 
       type ESMF_CplComp
       sequence
-      private
+      !private
 #ifndef ESMF_NO_INITIALIZERS
          type(ESMF_CompClass), pointer :: compp => NULL()
 #else
@@ -90,12 +90,15 @@
       public ESMF_CplCompReadRestart
       !public ESMF_CplCompWrite
       !public ESMF_CplCompRead
+
+      !public operator(.eq.), operator(.ne.), assignment(=)
+
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.7 2003/09/09 21:08:12 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.8 2003/09/23 15:20:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -191,11 +194,23 @@
 !EOP
       end interface
 
+! out for now.
+!      interface assignment(=)
+!        module procedure ESMF_cpas
+!      end interface
+
 !==============================================================================
 
       contains
 
 !==============================================================================
+
+!subroutine ESMF_cpas(lval, rval)
+! type(ESMF_CompClass), intent(out) :: lval
+! type(ESMF_CplClass), intent(in) :: rval
+!
+! compp = rval%compp
+!end subroutine
 
 
 !------------------------------------------------------------------------------

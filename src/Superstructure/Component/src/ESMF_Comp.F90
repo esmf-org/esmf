@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.52 2003/09/09 21:08:12 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.53 2003/09/23 15:20:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,11 +81,11 @@
 !------------------------------------------------------------------------------
 !     ! ESMF Entry Point Names
 
-      character(len=16), parameter :: ESMF_SETINIT         = "ESMF_Initialize"
-      character(len=16), parameter :: ESMF_SETRUN          = "ESMF_Run"
-      character(len=16), parameter :: ESMF_SETFINAL        = "ESMF_Finalize"
-      character(len=16), parameter :: ESMF_SETWRITERESTART = "ESMF_WriteRestart"
-      character(len=16), parameter :: ESMF_SETREADRESTART  = "ESMF_ReadRestart"
+      character(len=20), parameter :: ESMF_SETINIT         = "ESMF_Initialize"
+      character(len=20), parameter :: ESMF_SETRUN          = "ESMF_Run"
+      character(len=20), parameter :: ESMF_SETFINAL        = "ESMF_Finalize"
+      character(len=20), parameter :: ESMF_SETWRITERESTART = "ESMF_WriteRestart"
+      character(len=20), parameter :: ESMF_SETREADRESTART  = "ESMF_ReadRestart"
  
 !------------------------------------------------------------------------------
 !     ! ESMF Phase number
@@ -184,7 +184,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.52 2003/09/09 21:08:12 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.53 2003/09/23 15:20:56 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -566,18 +566,21 @@ end function
         ! Wrap comp so it's passed to C++ correctly.
         compw%compp => compp
 
-        ! Set up the arguments before the call     
+        ! Set up the arguments, then make the call
         if (statecount .eq. 2) then
-          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETINIT, phase, &
+          call c_ESMC_FTableSet2StateArgs(compp%this, ESMF_SETINIT, phase, &
                                compw, importstate, exportstate, clock, status)
+          
+          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, &
+                                                             phase, 2, status)
         else
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETINIT, phase, &
+          call c_ESMC_FTableSet1StateArgs(compp%this, ESMF_SETINIT, phase, &
                                               compw, statelist, clock, status)
+         
+          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, &
+                                                            phase, 1, status)
         endif
 
-        ! Call user-defined init routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETINIT, &
-                                                                 phase, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
@@ -671,7 +674,7 @@ end function
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
-                                                               phase, status)
+                                                            phase, 2, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component WriteRestart error"
           return
@@ -765,7 +768,7 @@ end function
 
         ! Call user-defined run routine
         call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
-                                                               phase, status)
+                                                           phase, 2, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component ReadRestart error"
           return
@@ -866,17 +869,20 @@ end function
         compw%compp => compp
 
         ! Set up the arguments before the call     
-        if (compp%ctype .eq. ESMF_GRIDCOMPTYPE) then
-          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETFINAL, phase, &
+        if (statecount .eq. 2) then
+          call c_ESMC_FTableSet2StateArgs(compp%this, ESMF_SETFINAL, phase, &
                                 compw, importstate, exportstate, clock, status)
+        
+          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, &
+                                                              phase, 2, status)
         else
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETFINAL, phase, &
-                                              compw, statelist, clock, status)
+          call c_ESMC_FTableSet1StateArgs(compp%this, ESMF_SETFINAL, phase, &
+                                               compw, statelist, clock, status)
+        
+          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, &
+                                                              phase, 1, status)
         endif
 
-        ! Call user-defined finalize routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETFINAL, &
-                                                               phase, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component finalize error"
           return
@@ -977,16 +983,19 @@ end function
 
         ! Set up the arguments before the call     
         if (statecount .eq. 2) then
-          call c_ESMC_FTableSetGridArgs(compp%this, ESMF_SETRUN, phase, compw, &
+          call c_ESMC_FTableSet2StateArgs(compp%this, ESMF_SETRUN, phase, compw, &
                                        importstate, exportstate, clock, status)
+        
+          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
+                                                              phase, 2, status)
         else
-          call c_ESMC_FTableSetCplArgs(compp%this, ESMF_SETRUN, phase, &
-                                              compw, statelist, clock, status)
+          call c_ESMC_FTableSet1StateArgs(compp%this, ESMF_SETRUN, phase, &
+                                               compw, statelist, clock, status)
+        
+          call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
+                                                              phase, 1, status)
         endif
 
-        ! Call user-defined run routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRUN, &
-                                                               phase, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"
           return
