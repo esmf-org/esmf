@@ -1,4 +1,4 @@
-% $Id: PerfProf_req.tex,v 1.6 2002/05/15 18:19:21 dneckels Exp $
+% $Id: PerfProf_req.tex,v 1.7 2002/05/15 23:29:08 cnh Exp $
 
 \req{Code Section Timing}
 
@@ -8,7 +8,7 @@ end of a passage of interest.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -22,7 +22,7 @@ the results of the timing are reported, each timer will be associated with its n
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -34,7 +34,7 @@ A named timer may be reset at any time.  All data will be cleared.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:}  \\
+{\bf Source:} MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -54,7 +54,7 @@ The timer will provide a means to estimate and reconcile the extra time added by
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} It is desirable to offer a mechanism which removes the
@@ -69,7 +69,7 @@ System time can be recorded.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -82,7 +82,7 @@ Wall clock time can be recorded.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -105,7 +105,7 @@ Collection of the following data will be supported, where available:
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -118,7 +118,7 @@ from MPI process 3, thread 6).
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:}  CAM-FV, POP, CICE, PSAS \\
+{\bf Source:}  CAM-FV, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -131,7 +131,7 @@ identify and report which process it was called from.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -144,7 +144,7 @@ identify and report which thread it was called from.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -161,7 +161,7 @@ The profiler will write its output via the Log.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:}  \\
+{\bf Source:}  MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -172,7 +172,7 @@ The profiler will write its output via the Log.
 The profiler data will be accessible to the program by means of an API.
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:}  \\
+{\bf Source:} MIT  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -190,7 +190,7 @@ minimum amount of time spent in any thread, the maximum, and the mean.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:}  \\
+{\bf Source:}  MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -208,7 +208,7 @@ The library can be turned into stub calls at compile time.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
 {\bf Notes:} 
@@ -221,9 +221,11 @@ this flag and return.
 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS, MIT \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection \\
-{\bf Notes:} 
+{\bf Notes:} It is particularly useful to be able to do some timing
+early on in a run to predict time to completion and then have
+the timing switch itself off.
 \end{reqlist}
 
