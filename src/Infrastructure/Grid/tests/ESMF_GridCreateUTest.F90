@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.28 2004/08/26 20:48:51 svasquez Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.29 2004/09/16 22:48:40 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.28 2004/08/26 20:48:51 svasquez Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.29 2004/09/16 22:48:40 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,7 +64,7 @@
       type(ESMF_GridHorzStagger) :: horz_stagger, Rhorz_stagger
       type(ESMF_GridVertStagger) :: vert_stagger
       integer :: status, npets
-      integer, dimension (1) :: DEDim1
+      integer, dimension (4) :: DEDim1
       integer, dimension (10000) :: DEDim2
       real(ESMF_KIND_R8) :: delta(15), grid_min(3), grid_max(3)
       real(ESMF_KIND_R8) :: coord1(21), coord2(16)
@@ -102,6 +102,11 @@
       !------------------------------------------------------------------------
       counts(1) = 10
       counts(2) = 12
+      DEDim1(1) = 1
+      DEDim1(2) = 5
+      DEDim1(3) = 2
+      DEDim1(4) = 2
+      DEDim2(1) = 12
       nDE_i = 2
       nDE_j = 2
       horz_stagger      = ESMF_GRID_HORZ_STAGGER_A
