@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.18 2004/12/03 20:47:50 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.19 2004/12/06 22:58:20 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,12 +97,13 @@
 !
 ! !INTERFACE:
       subroutine ESMF_Initialize(defaultConfigFileName, defaultCalendar, &
-                                 defaultLogFileName, vm, rc)
+                                 defaultLogFileName, defaultLogType, vm, rc)
 !
 ! !ARGUMENTS:
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar  
       character(len=*),        intent(in),  optional :: defaultLogFileName
+      type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       type(ESMF_VM),           intent(out), optional :: vm   
       integer,                 intent(out), optional :: rc     
 
@@ -126,6 +127,8 @@
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to {\tt ESMF\_ErrorLog}.
+!     \item [{[defaultLogType]}]
+!           Sets the default Log Type to be used by ESMF Log Manager.
 !     \item [{[vm]}]
 !           Returns the global {\tt ESMF\_VM} that was created 
 !           during initialization.
@@ -139,7 +142,8 @@
       type(ESMF_VM):: localvm
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
-                                      defaultCalendar, defaultLogFileName, rc)
+                                      defaultCalendar, defaultLogFileName, &
+                                      defaultLogType, rc)
       call ESMF_VMGetGlobal(localvm, rc)
       if (present(vm)) vm = localvm
 
@@ -155,13 +159,15 @@
 !
 ! !INTERFACE:
       subroutine ESMF_FrameworkInternalInit(lang, defaultConfigFileName, &
-                                       defaultCalendar, defaultLogFileName, rc)
+                                       defaultCalendar, defaultLogFileName, &
+                                       defaultLogType, rc)
 !
 ! !ARGUMENTS:
       integer,                 intent(in)            :: lang     
       character(len=*),        intent(in),  optional :: defaultConfigFileName
       type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
       character(len=*),        intent(in),  optional :: defaultLogFileName
+      type(ESMF_LogType),      intent(in),  optional :: defaultLogType  
       integer,                 intent(out), optional :: rc     
 
 !
@@ -181,6 +187,9 @@
 !     \item [{[defaultLogFileName]}]
 !           Name of the default log file for warning and error messages.
 !           If not specified, defaults to "ESMF_ErrorLog".
+!     \item [{[defaultLogType]}]
+!           Sets the default Log Type to be used by ESMF Log Manager.
+!           If not specified, defaults to "ESMF_LOG_SINGLE".
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -218,9 +227,11 @@
       endif
 
       if (present(defaultLogFileName)) then
-          call ESMF_LogInitialize(defaultLogFileName, rc=status)
+          call ESMF_LogInitialize(defaultLogFileName, logType=defaultLogType, &
+                                  rc=status)
       else
-          call ESMF_LogInitialize("ESMF_LogFile", rc=status)
+          call ESMF_LogInitialize("ESMF_LogFile", logType=defaultLogType, &
+                                   rc=status)
       endif
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing the default log/error manager"
