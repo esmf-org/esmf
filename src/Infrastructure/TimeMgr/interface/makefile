@@ -1,9 +1,10 @@
-# $Id: makefile,v 1.7 2003/03/17 16:51:17 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/03/17 18:41:30 eschwab Exp $ 
 ALL: lib 
 
 CFLAGS    = 
 FFLAGS    =
-SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
+#SOURCEC	  = ESMC_Fraction_F.C ESMC_BaseTime_F.C \
+SOURCEC	  = ESMC_BaseTime_F.C \
             ESMC_Calendar_F.C ESMC_TimeInterval_F.C ESMC_Time_F.C \
             ESMC_Alarm_F.C ESMC_Clock_F.C
 
@@ -24,18 +25,33 @@ include $(ESMF_DIR)/makefile
 
 DIRS = 
 
-ESMC_Time_F.o:	ESMC_Time.h makefile
+ESMC_Fraction_F.o:	ESMC.h ESMC_Base.h ESMC_Fraction.h makefile
+
+ESMC_BaseTime_F.o:	ESMC.h ESMC_Base.h ESMC_BaseTime.h makefile
+
+ESMC_Calendar_F.o:	ESMC.h ESMC_Base.h ESMC_Calendar.h makefile
+
+ESMC_TimeInterval_F.o:	ESMC.h ESMC_Base.h ESMC_TimeInterval.h makefile
+
+ESMC_Time_F.o:	ESMC.h ESMC_Base.h ESMC_Time.h makefile
+
+ESMC_Alarm_F.o:	ESMC.h ESMC_Base.h ESMC_Alarm.h makefile
+
+ESMC_Clock_F.o:	ESMC.h ESMC_Base.h ESMC_Clock.h makefile
 
 ESMF_Fraction.o:	makefile
 
-ESMF_BaseTime.o:	ESMF_Base.o makefile
+ESMF_BaseTime.o:	ESMF_BaseMod.mod makefile
 
-ESMF_Calendar.o:	ESMF_Time.o makefile
+ESMF_Calendar.o:	ESMF_BaseMod.mod ESMF_BaseTimeMod.mod makefile
 
-ESMF_TimeInterval.o:	ESMF_Fraction.o ESMF_BaseTime.o makefile
+ESMF_TimeInterval.o:	ESMF_BaseMod.mod ESMF_FractionMod.mod \
+			ESMF_BaseTimeMod.mod ESMF_CalendarMod.mod makefile
 
-ESMF_Time.o:	ESMF_BaseTime.o ESMF_TimeInterval.o makefile
+ESMF_Time.o:	ESMF_BaseTimeMod.mod ESMF_TimeIntervalMod.mod makefile
 
-ESMF_Alarm.o:	ESMF_TimeInterval.o ESMF_Time.o	makefile
+ESMF_Alarm.o:	ESMF_BaseMod.mod ESMF_TimeIntervalMod.mod ESMF_TimeMod.mod \
+		makefile
 
-ESMF_Clock.o:	ESMF_TimeInterval.o ESMF_Time.o ESMF_Alarm.o makefile
+ESMF_Clock.o:	ESMF_BaseMod.mod ESMF_TimeIntervalMod.mod ESMF_TimeMod.mod \
+		ESMF_AlarmMod.mod makefile
