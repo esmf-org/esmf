@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.19 2004/06/22 20:56:59 cdeluca Exp $
+% $Id: ESMF_use.tex,v 1.20 2004/07/30 15:09:44 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -54,6 +54,11 @@ defined. So, if a library {\bf A} uses functionality provided by library
 link line. 
 
 \subsubsection{Linking}
+
+When building the ESMF libraries on platforms that support both
+32 and 64 bit addressing, verify that the ESMF\_PREC environment 
+variable is set to match the compile option that was specified 
+to build your application.
 
 To link a Fortran application to the ESMF libraries please 
 refer to the {\tt link\_rules} files found in the following directories:
