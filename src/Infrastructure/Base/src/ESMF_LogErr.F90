@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.2 2004/06/08 17:50:39 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.3 2004/06/09 06:02:28 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,28 +42,27 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-   use ESMF_BaseTypesMod
-   
+    ! inherit from ESMF base class
+    use ESMF_BaseTypesMod
+
+implicit none
+!
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
 !------------------------------------------------------------------------------
 !     ! ESMF_LogFileType
-!
-!     ! Log File Types
-
-
-!EOPI
-implicit none
-
 type ESMF_LogFileType
     sequence
     integer                                 :: ftype
 end type
 
-type(ESMF_LogFileType), parameter ::  &
+!     ! Log File Types
+type(ESMF_LogFileType), parameter           ::  &
     ESMF_LOG_INFO  = ESMF_LogFileType(1), &
     ESMF_LOG_WARNING = ESMF_LogFileType(2), &
     ESMF_LOG_ERROR = ESMF_LogFileType(3)
-
-                                  
+     
+!     ! Log Entry                            
 type ESMF_LOGENTRY
     private
     sequence
@@ -74,6 +73,7 @@ type ESMF_LOGENTRY
 	character(len=32) context
 end type ESMF_LOGENTRY
 
+!     ! Log  
 type ESMF_Log
     private
     sequence       
@@ -102,14 +102,28 @@ type ESMF_Log
     integer                                 ::  stdOutUnitNumber
 #endif
 end type ESMF_Log
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+    public ESMF_LOG_INFO
+    public ESMF_LOG_WARNING
+    public ESMF_LOG_ERROR
+!------------------------------------------------------------------------------
+!
+! !PUBLIC MEMBER FUNCTIONS:
+   public ESMF_Log
+   public ESMF_LogClose
+   public ESMF_LogFinalize
+   public ESMF_LogFoundAllocError
+   public ESMF_LogFoundError
+   public ESMF_LogGet
+   public ESMF_LogInitialize
+   public ESMF_LogMsgFoundAllocError
+   public ESMF_LogMsgFoundError
+   public ESMF_LogOpen
+   public ESMF_LogSet
+   public ESMF_LogWrite
 
-
-   public ESMF_Log,ESMF_LogClose,ESMF_LogFinalize,ESMF_LogFoundAllocError,&
-   ESMF_LogFoundError,ESMF_LogGet,ESMF_LogInitialize,&
-   ESMF_LogMsgFoundAllocError,ESMF_LogMsgFoundError,ESMF_LogOpen,&
-   ESMF_LogSet,ESMF_LogWrite
-
-   public ESMF_LOG_INFO, ESMF_LOG_WARNING, ESMF_LOG_ERROR
+!EOPI  
 
 type(ESMF_Log),SAVE::ESMF_LogDefault	
 !----------------------------------------------------------------------------
@@ -121,11 +135,11 @@ contains
 ! !IROUTINE: ESMF_LogClose - Close Log file(s)
 
 ! !INTERFACE: 
-	subroutine ESMF_LogClose(aLog,rc)
+    subroutine ESMF_LogClose(aLog,rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Log)			:: aLog
-      integer, intent(out),optional	:: rc
+    type(ESMF_Log)			            :: aLog
+    integer, intent(out),optional	    :: rc
 
 ! !DESCRIPTION:
 !      This routine closes the file(s) associated with {\tt aLog}.
@@ -195,7 +209,8 @@ end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogFoundAllocError - Returns logical associated with finding an error
+! !IROUTINE: 
+! ESMF_LogFoundAllocError - Returns logical associated with finding an error
 
 ! !INTERFACE: 
 	function ESMF_LogFoundAllocError(rcToCheck,line,file,method,rcToReturn)
@@ -383,8 +398,8 @@ end function ESMF_LogMsgFoundAllocError
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
-	integer, intent(out),optional		                :: halt
-	type(ESMF_LogFileType), intent(in),optional	        :: logtype
+	integer, intent(out),optional		            :: halt
+	type(ESMF_LogFileType), intent(in),optional	    :: logtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -506,7 +521,7 @@ end subroutine ESMF_LogInitialize
 	integer, intent(in), optional                   :: line
 	character(len=*), intent(in), optional          :: file
 	character(len=*), intent(in), optional	        :: method
-	integer, intent(out),optional                    :: rcToReturn
+	integer, intent(out),optional                   :: rcToReturn
 	
 
 ! !DESCRIPTION:
@@ -515,14 +530,18 @@ end subroutine ESMF_LogInitialize
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [rc]
+!      \item [rcToCheck]
 !            Return code to check.
-!      \item [string]
+!      \item [msg]
 !            User-provided context string.
-!      \item [logtype]
-!            The type of message (info(0), warning(1), error(2)).
+!      \item [line]
+!            cpp provided line number.
+!      \item [file]
+!            cpp provided file string.
 !      \item [method]
-!            User-provided method string.
+!            cpp provided method string.
+!      \item [rcToReturn]
+!            Return code to Return.
 !      
 !      \end{description}
 ! 
@@ -607,7 +626,7 @@ end subroutine ESMF_LogOpen
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
 	integer, intent(in),optional			        :: halt
-	type(ESMF_LogFileType), intent(in),optional             :: logtype
+	type(ESMF_LogFileType), intent(in),optional     :: logtype
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -675,6 +694,10 @@ end subroutine ESMF_LogSet
 !            User-provided context string.
 !      \item [logtype]
 !            The type of message (info(0), warning(1), error(2))..
+!      \item [line]
+!            cpp provided line number.
+!      \item [file]
+!            cpp provided file string.
 !      \item [method]
 !            User-provided method string.
 !      \item [{[rc]}]
