@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.27 2003/02/27 21:28:27 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.28 2003/03/02 19:02:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,6 +101,7 @@
          type(ESMF_State) :: importstate               ! import state
          type(ESMF_State) :: exportstate               ! export state
          type(ESMF_State), dimension(:), pointer :: statelist  ! coupling list
+         integer :: statecount                         ! length of statelist
          type(ESMF_Layout) :: layout                   ! component layout
          type(ESMF_Clock) :: clock                     ! component clock
          character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
@@ -157,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.27 2003/02/27 21:28:27 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.28 2003/03/02 19:02:21 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -815,6 +816,7 @@ end interface
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
+        type(ESMF_CompClass), pointer :: cp     ! comp class pointer
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -824,30 +826,35 @@ end interface
           rc = ESMF_FAILURE
         endif
 
+        cp => comp%compp
+
         if (present(import)) then
-          import = comp%compp%importstate
+          import = cp%importstate
         endif
  
         if (present(export)) then
-          export = comp%compp%exportstate
+          export = cp%exportstate
         endif
  
         if (present(layout)) then
-          layout = comp%compp%layout
+          layout = cp%layout
         endif
 
         if (present(clock)) then
-          clock = comp%compp%clock
+          clock = cp%clock
         endif
 
         if (present(instanceid)) then
-          instanceid = comp%compp%instance_id
+          instanceid = cp%instance_id
         endif
 
         ! TODO: does this need to be allocated before copy?
-        !if (present(statelist)) then
-        !  statelist = comp%compp%statelist
-        !endif
+        if (present(statelist)) then
+          if (size(cp%statelist) .gt. size(statelist)) then
+            print *, "statelist array not long enough"
+          endif
+          statelist = cp%statelist
+        endif
 
         ! TODO: add rest of comp contents here
 
@@ -887,6 +894,7 @@ end interface
         ! local vars
         integer :: status                       ! local error status
         logical :: rcpresent                    ! did user specify rc?
+        type(ESMF_CompClass), pointer :: cp     ! comp class pointer
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -896,30 +904,43 @@ end interface
           rc = ESMF_FAILURE
         endif
 
+        cp => comp%compp
         if (present(import)) then
-          comp%compp%importstate = import
+          cp%importstate = import
         endif
  
         if (present(export)) then
-          comp%compp%exportstate = export
+          cp%exportstate = export
         endif
  
         if (present(layout)) then
-          comp%compp%layout = layout
+          cp%layout = layout
         endif
 
         if (present(clock)) then
-          comp%compp%clock = clock
+          cp%clock = clock
         endif
 
         if (present(instanceid)) then
-          comp%compp%instance_id = instanceid
+          cp%instance_id = instanceid
         endif
 
-        ! TODO: does this need to be allocated before copy?
-        !if (present(statelist)) then
-        !  comp%compp%statelist = statelist
-        !endif
+        ! TODO: does this do the right thing?
+        if (present(statelist)) then
+           if (associated(cp%statelist)) then
+             deallocate(cp%statelist, stat=status)
+             if (status .ne. 0) then
+               print *, "Component statelist deallocate error"
+               return
+             endif
+           endif
+           allocate(cp%statelist(size(statelist)), stat=status)
+           if (status .ne. 0) then
+             print *, "Component statelist allocate error"
+             return
+           endif
+           cp%statelist = statelist
+        endif
 
         ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
