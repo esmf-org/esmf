@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.28 2003/09/03 20:49:00 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.29 2003/09/03 21:08:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.28 2003/09/03 20:49:00 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.29 2003/09/03 21:08:54 cdeluca Exp $'
 
 !==============================================================================
 
@@ -157,10 +157,10 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initialize or set {\tt calendar} to the given {\tt ESMF\_CalendarType}.  
+!     Initializes or sets {\tt calendar} to the given {\tt ESMF\_CalendarType}.  
 !     Valid values for {\tt type} are:  {\tt ESMF\_CAL\_GREGORIAN}, 
 !     {\tt ESMF\_CAL\_JULIANDAY},
-!     {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GENERIC}
+!     {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GENERIC}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -183,7 +183,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSetGeneric - Set a custom Calendar
+! !IROUTINE: ESMF_CalendarSetGeneric - Initialize or set a custom Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSetGeneric(calendar, daysPerMonth, &

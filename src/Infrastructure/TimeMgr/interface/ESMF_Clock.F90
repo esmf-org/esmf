@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.27 2003/09/03 20:47:23 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.28 2003/09/03 21:08:54 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.27 2003/09/03 20:47:23 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.28 2003/09/03 21:08:54 cdeluca Exp $'
 
 !==============================================================================
 
@@ -399,7 +399,7 @@
 !   
 ! !DESCRIPTION:
 !     Advances the {\tt clock}'s current time by one time step.  This
-!     method optionally returns the number of ringing {\tt ESMF_Alarm}s.
+!     method optionally returns the number of ringing {\tt ESMF\_Alarm}s.
 !  
 !     The arguments are:
 !     \begin{description}
