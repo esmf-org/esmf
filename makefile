@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.46 2004/08/03 22:14:33 nscollins Exp $
+# $Id: makefile,v 1.47 2004/08/04 21:02:45 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -17,10 +17,9 @@ TOPALL: all
 
 # name of directory containing the ESMF source
 ESMF_TOP_DIR   = $(ESMF_DIR)
-# name of directory containing the /build makefiles
-ESMF_BUILD_DIR = $(ESMF_DIR)
 
-include $(ESMF_BUILD_DIR)/build/common.mk
+
+include $(ESMF_TOP_DIR)/build/common.mk
 
 #
 #  End Build Update 1
@@ -30,9 +29,10 @@ DIRS = src
 
 CLEANDIRS = $(ESMF_LIBDIR) $(ESMF_MODDIR) $(ESMF_TESTDIR) $(ESMF_EXDIR) \
 	    $(ESMF_BUILD)/src/include
-CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod $(ESMF_BUILD)/test \
-              $(ESMF_BUILD)/quick_start $(ESMF_BUILD)/release \
-	      $(ESMF_BUILD)/examples $(ESMF_BUILD)/doc
+CLOBBERDIRS = $(ESMF_BUILD)/lib $(ESMF_BUILD)/mod \
+	      $(ESMF_BUILD)/test $(ESMF_BUILD)/quick_start \
+              $(ESMF_BUILD)/release $(ESMF_BUILD)/examples \
+              $(ESMF_BUILD)/doc
 
 
 #-------------------------------------------------------------------------------
@@ -63,7 +63,7 @@ info:
 	-@echo "Using ESMF flags: ${PCONF}"
 	-@echo "-----------------------------------------"
 	-@echo "Using configuration flags:"
-	-@grep "define " ${ESMF_BUILD_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h
+	-@grep "define " ${ESMF_TOP_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE)/ESMC_Conf.h
 	-@echo "-----------------------------------------"
 	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "-----------------------------------------"
