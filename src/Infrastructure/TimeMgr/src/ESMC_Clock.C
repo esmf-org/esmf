@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.21 2003/04/30 07:47:04 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.22 2003/05/02 22:10:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.21 2003/04/30 07:47:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.22 2003/05/02 22:10:55 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -77,7 +77,7 @@
     PrevTime = CurrTime;
     AdvanceCount = 0;
 
-    return(ESMF_SUCCESS);
+    return(ESMC_ClockValidate());
 
  } // end ESMC_ClockInit
 
@@ -776,9 +776,13 @@
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-//
-//  code goes here
-//
+    if(TimeStep.ESMC_TimeIntervalValidate() != ESMF_SUCCESS ||
+       StartTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
+       StopTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
+       RefTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
+       CurrTime.ESMC_TimeValidate() != ESMF_SUCCESS ||
+       PrevTime.ESMC_TimeValidate()) return(ESMF_FAILURE);
+    
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockValidate
