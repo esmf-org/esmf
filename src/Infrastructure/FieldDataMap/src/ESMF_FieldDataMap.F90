@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.6 2004/06/01 20:04:26 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.7 2004/06/01 22:21:30 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.6 2004/06/01 20:04:26 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.7 2004/06/01 22:21:30 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -123,7 +123,7 @@
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldDataMapSetDefault - Initialize a FieldDataMap type
 
 ! !INTERFACE:
@@ -136,7 +136,7 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_FieldDataMap}
 !  initialization methods.
-!EOP
+!EOPI
 
       end interface 
                                       
