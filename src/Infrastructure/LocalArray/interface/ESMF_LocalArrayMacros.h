@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.14 2004/03/17 17:50:23 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.15 2004/03/17 18:35:27 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
 ! !IROUTINE: ESMF_LocalArrayCreate - Create an ESMF array from an unallocated Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
-!      ! Private name; call using ESMF_LocalArrayCreate()
+!      ! Private name; call using ESMF_LocalArrayCreate() @\
 !      function ESMF_LocalArrCreateByMTPtr<rank><type><kind>(fptr, counts, lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
@@ -155,7 +155,7 @@
 ! !IROUTINE: ESMF_LocalArrayCreate - make an ESMF array from an allocated Fortran pointer @\
 ! @\
 ! !INTERFACE: @\
-!      ! Private name; call using ESMF_LocalArrayCreate()
+!      ! Private name; call using ESMF_LocalArrayCreate() @\
 !      function ESMF_LocalArrCreateByFlPtr<rank><type><kind>(fptr, docopy, rc) @\
 ! @\
 ! !RETURN VALUE: @\
