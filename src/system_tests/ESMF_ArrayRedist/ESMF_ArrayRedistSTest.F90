@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.8 2004/04/15 19:24:53 nscollins Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.9 2004/04/27 16:06:12 nscollins Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -25,21 +25,19 @@
     implicit none
     
     ! Local variables
-    integer :: nx, ny, nz, i, j, k, rc, ii, jj, kk
-    integer, dimension(:), allocatable :: delist
+    integer :: i, j, k, rc, ii, jj, kk
     integer, dimension(3) :: global_start, global_position, counts1, counts2, de_pos
-    integer :: result, len, base, de_id
-    integer :: i_max, j_max, k_max, miscount
-    integer :: status
-    integer :: nde(2), ndes
+    integer :: de_id, npets
+    integer :: i_max, j_max, miscount
+    integer :: nde(2)
     logical :: match
     integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
-    integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
+    integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
-    character(len=ESMF_MAXSTR) :: sname, gname, fname, aname
-    type(ESMF_newDELayout) :: delayout0, delayout1, delayout2
+    character(len=ESMF_MAXSTR) :: sname, aname
+    type(ESMF_newDELayout) :: delayout1
     type(ESMF_VM) :: vm
-    type(ESMF_Array) :: array1, array1a, array2, array2a, array3
+    type(ESMF_Array) :: array1, array1a, array2, array3
     type(ESMF_AxisIndex) :: indexlist1(3), indexlist2(3), indexlist3(3)
     type(ESMF_State) :: state1
         
@@ -64,26 +62,23 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc=rc)
+    ! Initialize the framework and get back the default global VM
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    call ESMF_VMGetGlobal(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
- 
-    ! Create a default 1xN DELayout
-    delayout0 = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_newDELayoutGet(delayout0, deCount=ndes, rc=rc)
+    ! Get number of PETs and my PET id
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
-    if (ndes .eq. 1) then
+    if (npets .eq. 1) then
        print *, "This test must run with > 1 processor"
        goto 20
     endif
 
+    ! Create a 2 x N layout
     nde(1) = 2
-    nde(2) = ndes/2
-    delayout1 = ESMF_newDELayoutCreate(vm, (/nde(1), nde(2)/), rc=rc)
+    nde(2) = npets/2
+    delayout1 = ESMF_newDELayoutCreate(vm, (/ nde(1), nde(2) /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "DELayout Create finished, rc =", rc
 
