@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.15 2004/10/05 22:49:18 nscollins Exp $
+# $Id: build_rules.mk,v 1.16 2004/10/08 15:43:10 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -88,7 +88,7 @@ endif
 
 ifeq ($(ESMF_COMM),mpich)
 MPI_HOME       = 
-MPI_LIB        = -lmpich 
+MPI_LIB        = -lmpich
 MPI_INCLUDE    = -DESMF_MPICH=1
 MPIRUN         =  mpirun $(ESMF_NODES)
 endif
@@ -130,12 +130,12 @@ endif
 
 ifeq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
-C_CC		   = mpiCC -size_lp64
-C_FC		   = mpif90 -size_lp64
+C_CC		   = icc -size_lp64
+C_FC		   = ifort -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
-C_CC		   = mpiCC
-C_FC		   = mpif90
+C_CC		   = icc
+C_FC		   = ifort
 endif
 endif
 
@@ -156,8 +156,8 @@ SH_LD              = ${C_CC}
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
-C_CCV		   = ${C_CC} -V -c -w -x c
-C_FCV              = ${C_FC} -V -c -w
+C_CCV		   = ${C_CC} -V -v
+C_FCV              = ${C_FC} -V -v
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 F_FREECPP          = -cpp -FR
 F_FIXCPP           = -cpp
@@ -174,7 +174,7 @@ O_FOPTFLAGS	   = -O
 #
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CCV		   = ${CXX_CC} -V -c -w -x c++
+CXX_CCV		   = ${CXX_CC} -V -v
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 ifeq ($(ESMF_COMPILER_VERSION),81)
 C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_81/lib -L/opt/intel_cc_81/lib \
