@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.1 2003/02/11 18:30:40 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.2 2003/03/12 15:53:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,45 +136,60 @@ class ESMC_BaseTime {
 
     // individual get/set accessor methods which perform signed conversion
     //  (TMG 1.1, 1.2, 2.1)
+
+    // Integer Days
     int ESMC_BaseTimeGet_D(int *D);
     int ESMC_BaseTimeSet_D(int  D);
 
+    // Integer Hours
     int ESMC_BaseTimeGet_H(int *H);
     int ESMC_BaseTimeSet_H(int  H);
 
+    // Integer Minutes
     int ESMC_BaseTimeGet_M(int *M);
     int ESMC_BaseTimeSet_M(int  M);
 
+    // Integer Seconds
     int ESMC_BaseTimeGet_S(int *S);
     int ESMC_BaseTimeSet_S(int  S);
 
+    // Integer Millseconds
     int ESMC_BaseTimeGet_MS(int *MS);
     int ESMC_BaseTimeSet_MS(int  MS);
 
-    int ESMC_BaseTimeGet_US(int *MS);
-    int ESMC_BaseTimeSet_US(int  MS);
+    // Integer Microseconds
+    int ESMC_BaseTimeGet_US(int *US);
+    int ESMC_BaseTimeSet_US(int  US);
 
+    // Integer Nanoseconds
     int ESMC_BaseTimeGet_NS(int *NS);
     int ESMC_BaseTimeSet_NS(int  NS);
 
+    // Floating point days
     int ESMC_BaseTimeGet_d(double *d);
     int ESMC_BaseTimeSet_d(double  d);
 
+    // Floating point hours
     int ESMC_BaseTimeGet_h(double *h);
     int ESMC_BaseTimeSet_h(double  h);
 
+    // Floating point minutes
     int ESMC_BaseTimeGet_m(double *m);
     int ESMC_BaseTimeSet_m(double  m);
 
+    // Floating point seconds
     int ESMC_BaseTimeGet_s(double *s);
     int ESMC_BaseTimeSet_s(double  s);
 
+    // Floating point milliseconds
     int ESMC_BaseTimeGet_ms(double *ms);
     int ESMC_BaseTimeSet_ms(double  ms);
 
+    // Floating point microseconds
     int ESMC_BaseTimeGet_us(double *us);
     int ESMC_BaseTimeSet_us(double  us);
 
+    // Floating point nanoseconds
     int ESMC_BaseTimeGet_ns(double *ns);
     int ESMC_BaseTimeSet_ns(double  ns);
 
