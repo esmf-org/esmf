@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.13 2004/04/28 23:11:48 cdeluca Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.14 2004/05/07 22:00:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.13 2004/04/28 23:11:48 cdeluca Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.14 2004/05/07 22:00:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -301,6 +301,24 @@
       write(failMsg, *) "Did not return ESMF_SUCCESS or wrong value"
       write(name, *) "Getting an integer attribute from a Bundle Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(number.eq.65), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Print a Bundle Test
+      call ESMF_BundlePrint(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Printing a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Validate a Bundle Test
+      call ESMF_BundleValidate(bundle1, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Validating a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
