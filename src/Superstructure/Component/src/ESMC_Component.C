@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.C,v 1.2 2003/01/08 23:24:58 nscollins Exp $
+// $Id: ESMC_Component.C,v 1.3 2003/01/09 19:51:14 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,15 +22,21 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <ESMC.h>
+#include <string.h>
+#include <stdio.h>
+#include "ESMC.h"
 
  // associated class definition file
- #include <ESMC_Component.h>
+#include <ESMC_Component.h>
+
+ // return min value 
+#define min(a,b)  (((a)<(b))?(a):(b))
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Component.C,v 1.2 2003/01/08 23:24:58 nscollins Exp $";
+ static const char *const version = 
+           "$Id: ESMC_Component.C,v 1.3 2003/01/09 19:51:14 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -60,7 +66,7 @@
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Create a new Component from ... Allocates memory for a new Component
+//      Create a new Component.  Allocates memory for a new Component
 //      object and uses the internal routine ESMC_ComponentContruct to
 //      initialize it. 
 //
@@ -70,9 +76,11 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-//
-//  code goes here
-//
+    ESMC_Component *comp = new ESMC_Component;
+
+    *rc = comp->ESMC_ComponentConstruct(name, layout, ctype, mtype, filepath);
+
+    return comp;
 
  } // end ESMC_ComponentCreate
 
@@ -99,6 +107,10 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+    component->ESMC_ComponentDestruct();
+    delete component;
+
+    return ESMF_SUCCESS;
 //
 //  code goes here
 //
@@ -116,7 +128,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void) {
+      char *name,
+      ESMC_Layout *layout,
+      enum ESMC_CompType ctype,
+      enum ESMC_ModelType mtype,
+      char *filepath) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -132,6 +148,19 @@
 //
 //  code goes here
 //
+    int len;
+
+    len = min(strlen(name), ESMF_MAXSTR-1); 
+    strncpy(this->compname, name, len);
+   
+    this->layout = *layout;
+    this->ctype = ctype;
+    this->mtype = mtype;
+
+    len = min(strlen(filepath), ESMF_MAXSTR-1);
+    strncpy(this->filepath, filepath, len);
+
+    return ESMF_SUCCESS ;
 
  } // end ESMC_ComponentConstruct
 
@@ -153,14 +182,14 @@
 //      ESMF_ComponentConstruct, does any additional cleanup before the
 //      original Component object is freed.  Intended for internal ESMF
 //      use only; end-users use ESMC_ComponentDestroy, which calls
-//      ESMC_ComponentDestruct.  Define for deep classes only.
+//      ESMC_ComponentDestruct. 
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//
-//  code goes here
-//
+    // TODO: add any needed code here to free/release resources
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_ComponentDestruct
 
@@ -185,6 +214,7 @@
 //
 //  code goes here
 //
+    printf("ComponentInit method called \n");
 
  } // end ESMC_ComponentInit
 
@@ -209,6 +239,7 @@
 //
 //  code goes here
 //
+    printf("ComponentRun method called \n");
 
  } // end ESMC_ComponentRun
 
@@ -233,6 +264,7 @@
 //
 //  code goes here
 //
+    printf("ComponentFinalize method called \n");
 
  } // end ESMC_ComponentFinalize
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.h,v 1.2 2003/01/08 23:25:26 nscollins Exp $
+// $Id: ESMC_Component.h,v 1.3 2003/01/09 19:51:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 enum ESMC_CompType { ESMF_APPCOMP=1, ESMF_GRIDCOMP, ESMF_CPLCOMP, 
                      ESMF_COMPTYPE_UNKNOWN };
 enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE, 
-                      ESMF_RIVER, ESMF_MODELUNKNOWN };
+                      ESMF_RIVER, ESMF_MODEL_UNKNOWN };
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -68,6 +68,12 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
  class ESMC_Component : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
+    char compname[ESMF_MAXSTR];
+    ESMC_Layout layout;
+    enum ESMC_CompType ctype;
+    enum ESMC_ModelType mtype;
+    char filepath[ESMF_MAXSTR];
+    
  //  < insert class members here >  // real class definition
 
 // !PUBLIC MEMBER FUNCTIONS:
@@ -90,7 +96,10 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
     int ESMC_ComponentPrint(const char *options) const;
 
  // secondary construct/destruct routines
-    int ESMC_ComponentConstruct(void);
+    int ESMC_ComponentConstruct(char *name, ESMC_Layout *layout,
+                                      enum ESMC_CompType ctype,
+                                      enum ESMC_ModelType mtype,
+                                      char *filepath);
     int ESMC_ComponentDestruct(void);
 
  // native C++ constructors/destructors

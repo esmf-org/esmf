@@ -1,4 +1,4 @@
-! $Id: ESMF_Component.F90,v 1.2 2003/01/08 23:35:42 nscollins Exp $
+! $Id: ESMF_Component.F90,v 1.3 2003/01/09 19:51:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,7 +51,7 @@
       type ESMF_Component
       sequence
       private
-        type(ESMF_Component), pointer :: this       ! the C++ class data
+        type(ESMF_Pointer) :: this               ! the C++ class data
       end type
 
 !------------------------------------------------------------------------------
@@ -103,7 +103,7 @@
  
       public ESMF_ComponentInit
       public ESMF_ComponentRun
-      public ESMF_ComponentFinal
+      public ESMF_ComponentFinalize
  
       !public ESMF_ComponentCheckpoint
       !public ESMF_ComponentRestore
@@ -117,7 +117,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Component.F90,v 1.2 2003/01/08 23:35:42 nscollins Exp $'
+      '$Id: ESMF_Component.F90,v 1.3 2003/01/09 19:51:14 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -221,12 +221,12 @@ end interface
 
 
 !       local vars
-        type (ESMF_Component), pointer :: ptr  ! opaque pointer to new C++ Component
+        type (ESMF_Component) :: comp       ! the new Component
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       Initialize the pointer to null.
-        nullify(ptr)
+        comp%this = ESMF_NULL_POINTER
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -235,14 +235,15 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_ComponentCreate(status)
+        call c_ESMC_ComponentCreate(comp, name, layout, ctype, mtype, &
+                                    filepath, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
         endif
 
 !       set return values
-        ESMF_ComponentCreateNew%this => ptr 
+        ESMF_ComponentCreateNew = comp 
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ComponentCreateNew
@@ -277,12 +278,12 @@ end interface
 
 
 !       ! Local variables
-        type (ESMF_Component), pointer :: a    ! pointer to new Component
+        type (ESMF_Component) :: comp       ! new Component
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
 !       ! Initialize pointer
-        nullify(a)
+        comp%this = ESMF_NULL_POINTER
 
 !       ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -291,14 +292,14 @@ end interface
         endif
 
 !       ! C routine which interfaces to the C++ routine which does actual work
-        !call c_ESMC_ComponentCreateNoData(status)
+        !call c_ESMC_ComponentCreateNoData(comp, arglist, status)
         !if (status .ne. ESMF_SUCCESS) then
         !  print *, "Component construction error"
         !  return
         !endif
 
 !       set return values
-        ESMF_ComponentCreateNoData%this => a
+        ESMF_ComponentCreateNoData = comp
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_ComponentCreateNoData
@@ -341,7 +342,7 @@ end interface
         endif
 
 !       call Destroy to release resources on the C++ side
-        call c_ESMC_ComponentDestroy(component%this, status)
+        call c_ESMC_ComponentDestroy(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component contents destruction error"
           return
@@ -401,7 +402,7 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_ComponentInit(component%this, status)
+        call c_ESMC_ComponentInit(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
@@ -459,7 +460,7 @@ end interface
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_ComponentRun(component%this, timesteps, status)
+        call c_ESMC_ComponentRun(component, timesteps, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component run error"
           return
@@ -473,10 +474,10 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ComponentFinal -- Call the Component's finalization routine
+! !IROUTINE: ESMF_ComponentFinalize -- Call the Component's finalization routine
 
 ! !INTERFACE:
-      subroutine ESMF_ComponentFinal(component, rc)
+      subroutine ESMF_ComponentFinalize(component, rc)
 !
 !
 ! !ARGUMENTS:
@@ -506,14 +507,14 @@ end interface
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
-!       Finalialize return code; assume failure until success is certain
+!       Finalize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
 
 !       Routine which interfaces to the C++ creation routine.
-        call c_ESMC_ComponentFinal(component%this, status)
+        call c_ESMC_ComponentFinalize(component, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component initialization error"
           return
@@ -522,7 +523,7 @@ end interface
 !       set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ComponentFinal
+        end subroutine ESMF_ComponentFinalize
 
 
 !------------------------------------------------------------------------------
@@ -632,10 +633,7 @@ end interface
         type (ESMF_Component) :: a 
 
 !       this is just to shut the compiler up
-        type (ESMF_Component), target :: b 
-        a%this => b
-        nullify(a%this)
-
+        a%this = ESMF_NULL_POINTER
 !
 ! TODO: add code here
 !
@@ -696,9 +694,7 @@ end interface
         type (ESMF_Component) :: a
 
 !       this is just to shut the compiler up
-        type (ESMF_Component), target :: b 
-        a%this => b
-        nullify(a%this)
+        a%this = ESMF_NULL_POINTER
 
 !
 ! TODO: add code here
@@ -743,9 +739,9 @@ end interface
 
 !      ! Interface to call the C++ validate code
        if(present(options)) then
-           call c_ESMC_ComponentValidate(component%this, options, status) 
+           call c_ESMC_ComponentValidate(component, options, status) 
        else
-           call c_ESMC_ComponentValidate(component%this, defaultopts, status) 
+           call c_ESMC_ComponentValidate(component, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
@@ -792,9 +788,9 @@ end interface
 
 !      ! Interface to call the C++ print code
        if(present(options)) then
-           call c_ESMC_ComponentPrint(component%this, options, status) 
+           call c_ESMC_ComponentPrint(component, options, status) 
        else
-           call c_ESMC_ComponentPrint(component%this, defaultopts, status) 
+           call c_ESMC_ComponentPrint(component, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
