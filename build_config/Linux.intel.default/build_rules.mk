@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.32 2005/03/04 21:01:40 nscollins Exp $
+# $Id: build_rules.mk,v 1.33 2005/03/05 00:11:57 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -71,7 +71,7 @@ endif
 ifeq ($(ESMF_COMM),lam)
 ifdef MPI_HOME
 MPI_INCLUDE    = -I${MPI_HOME}/include
-MPI_LIB        = -L${MPI_HOME}/lib -llamf77mpi -lmpi -llam
+MPI_LIB        = -L${MPI_HOME}/lib -llamf77mpi -lmpi -llam -lpthread
 MPIRUN         =  ${MPI_HOME}/bin/mpirun
 else
 MPI_INCLUDE    = 
