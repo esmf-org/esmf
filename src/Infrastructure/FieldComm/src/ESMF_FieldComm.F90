@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.12 2004/03/09 22:37:57 svasquez Exp $
+! $Id: ESMF_FieldComm.F90,v 1.13 2004/03/11 16:18:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.12 2004/03/09 22:37:57 svasquez Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.13 2004/03/11 16:18:16 nscollins Exp $'
 
 !==============================================================================
 !
@@ -205,12 +205,12 @@
 ! !IROUTINE: ESMF_FieldGather - Data gather operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldGather(field, destination_de, array, async, rc)
+      subroutine ESMF_FieldGather(field, destinationDE, array, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field                 
-      integer, intent(in) :: destination_de
+      integer, intent(in) :: destinationDE
       type(ESMF_Array), intent(out) :: array
       type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
@@ -227,7 +227,7 @@
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be gathered.
-!     \item [destination\_de] 
+!     \item [destinationDE] 
 !           Destination {\tt ESMF\_DE} number where the Gathered Array is to be returned.
 !     \item [array] 
 !           Newly created array containing the collected data on the
@@ -335,7 +335,7 @@
       ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
       call ESMF_ArrayGather(ftypep%localfield%localdata, layout, decompids, &
-                            global_dimlengths, local_maxlengths, destination_de, &
+                            global_dimlengths, local_maxlengths, destinationDE, &
                             array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: Array Gather returned failure"
@@ -1257,43 +1257,44 @@
 ! !IROUTINE: ESMF_FieldScatter - Data Scatter operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldScatter(array, source_de, field, async, rc)
+      subroutine ESMF_FieldScatter(array, sourceDE, field, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
-      integer, intent(in) :: source_de
+      integer, intent(in) :: sourceDE
       type(ESMF_Field), intent(inout) :: field                 
       type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a scatter operation over the data
-!     in an {\tt ESMF\_Array}, returning it as the data array in a {\tt ESMF\_Field}.  
+!     Perform a scatter operation over the data in an {\tt ESMF\_Array}, 
+!     returning it as the data array in a {\tt ESMF\_Field}.  
 !     If the Field is decomposed over N {\tt ESMF\_DE}s, this routine
-!     takes a single array on the specified {\tt ESMF\_DE} and returns a decomposed copy
-!     on each of the N {\tt ESMF\_DE}s, as the {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Field}.
+!     takes a single array on the specified {\tt ESMF\_DE} and returns 
+!     a decomposed copy on each of the N {\tt ESMF\_DE}s, as the 
+!     {\tt ESMF\_Array} associated with the given empty {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array] 
-!           Input {\tt ESMF\_Array} containing the collected data.
-!           It must be the size of the entire undecomposed grid.
-!     \item [source\_de]
-!           Integer {\tt ESMF\_DE} number where the data to be Scattered is located.  The
-!           {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
+!      Input {\tt ESMF\_Array} containing the collected data.
+!      It must be the size of the entire undecomposed grid.
+!     \item [sourceDE]
+!      Integer {\tt ESMF\_DE} number where the data to be Scattered is located.
+!      The {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
 !     \item [field] 
-!           Empty Field containing {\tt ESMF\_Grid} which will correspond to the data 
-!           in the array which will be scattered.  When this routine returns
-!           each {\tt ESMF\_Field} will contain a valid data array containing the 
-!           subset of the decomposed data.
+!      Empty Field containing {\tt ESMF\_Grid} which will correspond to the 
+!      data in the array which will be scattered.  When this routine returns
+!      each {\tt ESMF\_Field} will contain a valid data array containing the 
+!      subset of the decomposed data.
 !     \item [{[async]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
+!      Optional argument which specifies whether the operation should
+!      wait until complete before returning or return as soon
+!      as the communication between {\tt DE}s has been scheduled.
+!      If not present, default is to do synchronous communications.
 !     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -1353,7 +1354,7 @@
 
       ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(ftypep%grid, layout, status)
-      call ESMF_ArrayScatter(array, layout, decompids, source_de, dstarray, &
+      call ESMF_ArrayScatter(array, layout, decompids, sourceDE, dstarray, &
                              status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldScatter: Array Scatter returned failure"

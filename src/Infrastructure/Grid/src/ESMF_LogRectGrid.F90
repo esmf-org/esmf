@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.34 2004/03/09 23:51:09 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.35 2004/03/11 16:22:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.34 2004/03/09 23:51:09 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.35 2004/03/11 16:22:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3969,7 +3969,7 @@
       type = ESMF_DATA_REAL
       do i = 1,numDims
         arrayTemp(i) = ESMF_ArrayCreate(numDims, type, kind, counts, &
-                                        halo_width=gridBoundWidth, rc=status)
+                                        haloWidth=gridBoundWidth, rc=status)
       enddo
 
       select case (numDims)
@@ -4542,7 +4542,7 @@
       kind = ESMF_I4
       type = ESMF_DATA_INTEGER
       arrayTemp = ESMF_ArrayCreate(numDims, type, kind, counts, &
-                                   halo_width=gridBoundWidth, rc=status)
+                                   haloWidth=gridBoundWidth, rc=status)
       call ESMF_ArrayGetData(arrayTemp, temp, ESMF_DATA_REF, status)
 
 !     TODO: should this be different for different relative locations?

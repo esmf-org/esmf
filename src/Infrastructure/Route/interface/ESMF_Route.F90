@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.42 2004/03/06 00:02:22 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.43 2004/03/11 16:25:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.42 2004/03/06 00:02:22 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.43 2004/03/11 16:25:47 nscollins Exp $'
 
 !==============================================================================
 !
@@ -429,11 +429,11 @@
 ! !IROUTINE: ESMF_RouteSetRecv - Set recv values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSetRecv(Route, src_de, xp, rc)
+      subroutine ESMF_RouteSetRecv(Route, srcDE, xp, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      integer, intent(in) :: src_de
+      integer, intent(in) :: srcDE
       type(ESMF_XPacket), intent(in) :: xp
       integer, intent(out), optional :: rc            
 
@@ -445,7 +445,7 @@
 !     \begin{description}
 !     \item[route] 
 !          Route to be modified.
-!     \item[src_de]
+!     \item[srcDE]
 !          Source DE id.
 !     \item[xp]
 !          Exchange packet describing the data to be received.  Note that
@@ -473,7 +473,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteSetRecv(route, src_de, xp, status)
+        call c_ESMC_RouteSetRecv(route, srcDE, xp, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Set error"
           return  
@@ -488,11 +488,11 @@
 ! !IROUTINE: ESMF_RouteSetSend - Set send values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSetSend(route, dest_de, xp, rc)
+      subroutine ESMF_RouteSetSend(route, destDE, xp, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(inout) :: route
-      integer, intent(in) :: dest_de
+      integer, intent(in) :: destDE
       type(ESMF_XPacket), intent(in) :: xp
       integer, intent(out), optional :: rc            
 
@@ -505,7 +505,7 @@
 !     \begin{description}
 !     \item[route] 
 !          Route to be modified.
-!     \item[dest_de]
+!     \item[destDE]
 !          Destination DE id.
 !     \item[xp]
 !          Exchange packet describing the data to be sent.  Note that
@@ -533,7 +533,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteSetSend(route, dest_de, xp, status)
+        call c_ESMC_RouteSetSend(route, destDE, xp, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Set error"
           return  

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.8 2004/03/09 21:33:17 svasquez Exp $
+! $Id: ESMF_BundleComm.F90,v 1.9 2004/03/11 16:17:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.8 2004/03/09 21:33:17 svasquez Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.9 2004/03/11 16:17:48 nscollins Exp $'
 
 !==============================================================================
 !
@@ -188,12 +188,12 @@
 ! !IROUTINE: ESMF_BundleGather - Data Gather operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleGather(bundle, destination_de, array, async, rc)
+      subroutine ESMF_BundleGather(bundle, destinationDE, array, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(inout) :: bundle                 
-      integer, intent(in) :: destination_de
+      integer, intent(in) :: destinationDE
       type(ESMF_Array), intent(out) :: array
       type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
@@ -209,7 +209,7 @@
 !     \begin{description}
 !     \item [bundle] 
 !           {\tt ESMF\_Bundle} containing data to be gathered.
-!     \item [destination\_de] 
+!     \item [destinationDE] 
 !           Destination {\tt ESMF\_DE} number where the Gathered Array is to be returned.
 !     \item [array] 
 !           Newly created array containing the collected data on the
@@ -310,7 +310,7 @@
       ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(btypep%grid, layout, status)
       call ESMF_ArrayGather(btypep%flist(1)%ftypep%localfield%localdata, layout, decompids, &
-                            global_dimlengths, local_maxlengths, destination_de, &
+                            global_dimlengths, local_maxlengths, destinationDE, &
                             array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleGather: Array Gather returned failure"
@@ -391,12 +391,12 @@
 ! !IROUTINE: ESMF_BundleScatter - Data Scatter operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleScatter(array, source_de, bundle, async, rc)
+      subroutine ESMF_BundleScatter(array, sourceDE, bundle, async, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
-      integer, intent(in) :: source_de
+      integer, intent(in) :: sourceDE
       type(ESMF_Bundle), intent(inout) :: bundle                 
       type(ESMF_Async), intent(inout), optional :: async
       integer, intent(out), optional :: rc               
@@ -412,7 +412,7 @@
 !     \item [array] 
 !           Input {\tt ESMF\_Array} containing the collected data.
 !           It must be the size of the entire undecomposed grid.
-!     \item [source\_de]
+!     \item [sourceDE]
 !           Integer {\tt ESMF\_DE} number where the data to be Scattered is located.  The
 !           {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
 !     \item [bundle] 
@@ -484,7 +484,7 @@
 
       ! Call Array method to perform actual work
       call ESMF_GridGetDELayout(btypep%grid, layout, status)
-      call ESMF_ArrayScatter(array, layout, decompids, source_de, dstarray, &
+      call ESMF_ArrayScatter(array, layout, decompids, sourceDE, dstarray, &
                              status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in BundleScatter: Array Scatter returned failure"
