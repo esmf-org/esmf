@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.7 2004/11/03 18:27:04 nscollins Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.8 2004/11/04 19:00:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.7 2004/11/03 18:27:04 nscollins Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.8 2004/11/04 19:00:11 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -307,6 +307,17 @@
       write(name, *) "Field Redist Test"
       call ESMF_FieldRedist(f1, f2, rh, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      ! -- add missing EX label here when this test is included --
+      !write(failMsg, *) "Did not return ESMF_SUCCESS"
+      !write(name, *) "Field Redist Test with different halo widths"
+      ! this needs a separate test created where f1 and f2 have different
+      ! halo widths -- once the code has been added to support it.
+      ! (the current version of the framework does not yet contain code that
+      ! can execute the redist function if the halo widths are not equal.)
+      !call ESMF_FieldRedist(f1, f2, rh, rc=rc)
+      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest_Multi_Proc_Only
