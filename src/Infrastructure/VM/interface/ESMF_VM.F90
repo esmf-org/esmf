@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.6 2004/04/20 22:59:56 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.7 2004/04/26 19:46:28 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.6 2004/04/20 22:59:56 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.7 2004/04/26 19:46:28 theurich Exp $'
 
 !==============================================================================
 
@@ -389,7 +389,7 @@ module ESMF_VMMod
 !        Number of PEs referenced by VM.
 !   \item[{[mpic]}]
 !        MPI Intracommunicator for VM.
-!   \item[{[ok_openmp]}]
+!   \item[{[ok\_openmp]}]
 !        Indicate whether user-level OpenMP threading can be supported
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
