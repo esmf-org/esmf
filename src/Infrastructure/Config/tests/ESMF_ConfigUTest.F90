@@ -43,7 +43,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.6 2004/06/11 15:54:34 svasquez Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.7 2004/06/11 16:54:48 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       type (ESMF_Config) cf 
@@ -105,7 +105,7 @@
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
-      call ESMF_ConfigDestroy ( cf, rc ) 
+      call ESMF_ConfigDestroy( cf, rc ) 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
@@ -1127,7 +1127,7 @@ subroutine MultPar_SingleLine_V
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
-      call ESMF_ConfigDestroy ( cf, rc ) 
+      call ESMF_ConfigDestroy( cf, rc ) 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 !''''''''''''''''''''''''''''
 
