@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.6 2004/06/15 10:58:53 nscollins Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.7 2004/06/18 10:44:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@
 !BOC
     ! Initialize ESMF to initialize the default log
     call ESMF_Initialize(rc=rc1)
+
     ! LogWrite 
     ret= ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
     ! LogMsgFoundError
@@ -76,5 +77,8 @@
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE, ESMF_CONTEXT, rc2,alog)
     ! Close the log.
     call ESMF_LogClose(alog)
+
+    ! Finalize ESMF to close the default log
+    call ESMF_Finalize(rc=rc1)
 end program
 !EOC
