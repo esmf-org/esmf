@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.28 2005/02/25 05:31:14 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.29 2005/02/28 20:40:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -320,7 +320,7 @@
 !     \item [{[terminationType]}]
 !           Used to specify type of termination. Default is {\tt ESMF\_FINAL}
 !           which waits for all PETs of the global VM to reach the finalize call
-!           before termination. Specifying {\tt ESMF_ABORT} instead will result
+!           before termination. Specifying {\tt ESMF\_ABORT} instead will result
 !           in a global abort of the ESMF application. There is no guarantee 
 !           that all PETs will shut down cleanly during an abort. However, the
 !           application should not hang and the LogErr of at least one PET
