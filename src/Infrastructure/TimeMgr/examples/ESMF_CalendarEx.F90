@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.17 2003/12/17 22:46:13 svasquez Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.18 2004/01/06 16:57:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,10 +12,6 @@
 !
       program ESMF_CalendarEx
 
-!------------------------------------------------------------------------------
-! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.17 2003/12/17 22:46:13 svasquez Exp $'
 !------------------------------------------------------------------------------
 !
 !==============================================================================
