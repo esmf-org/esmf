@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.59 2004/01/29 17:02:35 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.60 2004/01/30 23:20:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.59 2004/01/29 17:02:35 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.60 2004/01/30 23:20:25 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1061,35 +1061,54 @@
 
      ! ----------------------------------------------------------------------------
 
-      ! This test is commented out because it sometimes
-      ! causes Segmentation errors.
-      ! write(failMsg, *) "Should return ESMF_SUCCESS."
-      ! call ESMF_TimeSyncToRealTime(syncTime, rc)
-      ! write(name, *) "Time Sync to Real Time Test"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      ! name, failMsg, result, ESMF_SRCLINE)
+      !NEX_UTest
+       write(failMsg, *) "Should not return ESMF_SUCCESS."
+       call ESMF_TimeSyncToRealTime(syncTime, rc)
+       write(name, *) "Time Sync to Real Time Test"
+       call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                       name, failMsg, result, ESMF_SRCLINE)
 
 
      ! ----------------------------------------------------------------------------
 
-      
-      ! write(failMsg, *) " Returned ESMF_FAILURE"
-      ! write(name, *) "Sync Time Print Test"
-      ! call ESMF_TimePrint(syncTime, rc=rc)
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-                      ! name, failMsg, result, ESMF_SRCLINE)
+      !NEX_UTest
+       write(failMsg, *) " Did not return ESMF_SUCCESS"
+       write(name, *) "Sync Time Set Calendar Test"
+       call ESMF_TimeSet(syncTime, calendar=gregorianCalendar, rc=rc)
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
       
-      ! Verify the year is set correctly
-      ! write(name, *) "Get Sync Time Year Test"
-      ! call ESMF_TimeGet(syncTime, yy=YY, rc=rc)
-      ! write(failMsg, *) " Did not return ESMF_SUCCESS and/or Year not correct value"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2003), &
-                      ! name, failMsg, result, ESMF_SRCLINE)
+      !NEX_UTest
+       write(failMsg, *) "Should return ESMF_SUCCESS."
+       call ESMF_TimeSyncToRealTime(syncTime, rc)
+       write(name, *) "Time Sync to Real Time Test"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                       name, failMsg, result, ESMF_SRCLINE)
+
+
+     ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+       write(failMsg, *) " Did not return ESMF_SUCCESS"
+       write(name, *) "Sync Time Print Test"
+       call ESMF_TimePrint(syncTime, rc=rc)
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       
-      ! print *, " Sync Time year = ", YY
-      ! print *, " Get Sync Time rc  = ", rc
+      !NEX_UTest
+      ! Verify the year is set correctly
+       write(name, *) "Get Sync Time Year Test"
+       call ESMF_TimeGet(syncTime, yy=YY, rc=rc)
+       write(failMsg, *) " Did not return ESMF_SUCCESS and/or Year not correct value"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YY.eq.2004), &
+                       name, failMsg, result, ESMF_SRCLINE)
+      
+       print *, " Sync Time year = ", YY
+       print *, " Get Sync Time rc  = ", rc
       ! ----------------------------------------------------------------------------
 
 #ifdef ESMF_EXHAUSTIVE
