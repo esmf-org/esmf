@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.12 2004/12/13 21:11:08 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.13 2004/12/21 17:05:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.12 2004/12/13 21:11:08 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.13 2004/12/21 17:05:09 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -157,9 +157,10 @@
     integer :: localrc
     type(ESMF_StateItemInfo), dimension(:), pointer :: stateinfo
 
-    ! TODO: this turns off the fast option on Regrid, which is not
-    !  compatible (yet) with reconcile.
-    domainOption = 0
+    ! This turns off the fast option on Regrid; it is working now for
+    !  exclusive components, but if there is any reason we should turn
+    !  it back off, here is how to do it.
+    !!domainOption = 0
 
     ! Each PET broadcasts the object ID lists and compares them to what
     ! they get back.   Missing objects are sent so they can be recreated
