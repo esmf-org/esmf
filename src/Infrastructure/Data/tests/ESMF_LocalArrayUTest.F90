@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.1 2003/08/11 22:55:32 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.2 2003/08/13 23:30:33 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -61,21 +61,21 @@
 
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Creating a Local Array Test"
+    write(name, *) "Creating a Local Array with Integer 1D Data Test"
     array1 = ESMF_LocalArrayCreate(intptr, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 create returned"
 
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Printing a Local Array Test"
+    write(name, *) "Printing a Local Array with Integer 1D Data Test"
     call ESMF_LocalArrayPrint(array1, "foo", rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 print returned"
 
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting Local Array Data Test"
+    write(name, *) "Getting Local Array with Integer 1D Data Test"
     call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -90,7 +90,7 @@
     	end if
     enddo
     write(failMsg, *) "Array data did not compare."
-    write(name, *) "Compare Local Array Data Test"
+    write(name, *) "Compare Local Array Integer 1D Data Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1 getdata returned"
     print *, "intptr2 data = ", intptr2
@@ -144,7 +144,7 @@
         end if
     enddo
     write(failMsg, *) "Array data did not compare."
-    write(name, *) "Compare Local Array Data Test"
+    write(name, *) "Compare Local Array Data Integer 1D Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
     !NEX_UTest
@@ -181,7 +181,7 @@
 
     !NEX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Getting Local Array Data Test"
+    write(name, *) "Getting Local Array with Integer 1D Data Test"
     call ESMF_LocalArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -196,7 +196,7 @@
         end if
     enddo
     write(failMsg, *) "Array data did not compare."
-    write(name, *) "Compare Local Array Data Test"
+    write(name, *) "Compare Local Array Data Integer 1D Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
     call ESMF_LocalArrayDestroy(array1)
@@ -257,7 +257,7 @@
      enddo
     enddo
     write(failMsg, *) "Array data did not compare."
-    write(name, *) "Compare Local Array Data Test"
+    write(name, *) "Compare Local Array 2D Real Data Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
 
