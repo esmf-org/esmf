@@ -1,0 +1,72 @@
+# $Id: makefile,v 1.1 2004/01/26 17:44:00 nscollins Exp $
+
+ALL:  tests
+
+CFLAGS    =
+FFLAGS    =
+SOURCEC	  = 
+SOURCEF	  =
+
+SOURCEH	  = 
+OBJSC	  =  
+OBJSF	  = 
+MANSEC	  = 
+LIBBASE	  = 
+LOCDIR	  = src/Infrastructure/BundleComm/tests
+
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_<Class>UTest \
+	        $(ESMC_TESTDIR)/ESMC_<Class>UTest 
+
+TESTS_RUN     = RUN_ESMF_<Class>UTest \
+		RUN_ESMC_<Class>UTest 
+
+TESTS_RUN_UNI = RUN_ESMF_<Class>UTestUNI \
+		RUN_ESMC_<Class>UTestUNI 
+
+TESTS_RM      = ESMF_<Class>UTest.rm \
+                ESMC_<Class>UTest.rm
+
+
+include ${ESMF_DIR}/makefile
+
+DIRS	  = 
+
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt NULL core $(TESTS_BUILD)
+CLOBBERDIRS =
+
+#
+# Fortran unit test
+#
+RUN_ESMF_<Class>UTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
+
+RUN_ESMF_<Class>UTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
+
+ESMF_<Class>UTest.rm:
+	echo "ESMF_<Class>Test.rm target called here."
+
+
+#
+# C++ Unit tests
+#
+$(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
+	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_<Class>UTest ESMC_<Class>UTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMC_<Class>UTest.o
+
+RUN_ESMC_<Class>UTest:
+	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+
+RUN_ESMC_<Class>UTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+
+ESMC_<Class>UTest.rm:
+	echo "ESMC_<Class>Test.rm target called here."
+
+
+
