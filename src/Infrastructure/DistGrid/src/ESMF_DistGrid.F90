@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.76 2003/10/14 03:55:39 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.77 2003/10/14 15:49:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,8 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt ESMF\_DistGrid} class, which contains a
+! The code in this file implements the {\tt ESMF\_DistGrid} class, which 
+! contains a
 ! collection of subgrids which constitute a single logical {\tt ESMF\_Grid}. The
 ! subgrids can be operated on in parallel on a multiprocessor machine. The
 ! {\tt ESMF\_DistGrid} class contains the mapping between the local grid 
@@ -51,71 +52,103 @@
 !------------------------------------------------------------------------------
 !     ! ESMF_DistGridLocal
 !
-!     ! Description of ESMF_DistGridLocal
+!     ! The DistGridLocal type contains detailed subgrid information for
+!     ! the data located on this PE.  When we implement multiple DEs
+!     ! per PE then we will have a list of these instead of a single one
+!     ! in the DistGridType type.
 
       type ESMF_DistGridLocal
       sequence
       !private
-        integer :: MyDE             ! identifier for this DE
-        integer :: local_cell_count ! local (on this DE) number of cells
+
+        ! single values for this DE:
+        integer :: MyDE                     ! identifier for this DE
+        integer :: local_cell_count         ! total number of cells for this DE
+
+        ! one value per axis/dimension of the Grid:
+        !  number of cells per dim
         integer, dimension(ESMF_MAXGRIDDIM) :: local_axis_length
+        !  offset, per dim, for this DE from the global grid origin
         integer, dimension(ESMF_MAXGRIDDIM) :: global_start
+        !  (min/max/stride) per axis relative to the global grid origin
         type (ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: ai_global
-                                    ! local cell index in each direction using
-                                    ! global indexing, covering the total domain
       end type
 
 !------------------------------------------------------------------------------
 !     ! ESMF_DistGridGlobal
 !
-!     ! Description of ESMF_DistGridGlobal
+!     ! The DistGridGlobal type contains general information about each of 
+!     ! the subgrids that the entire grid has been decomposed into. This
+!     ! includes information about how each part relates to the whole, how
+!     ! many points/cells there are per decomposition, etc.  This information
+!     ! allows DistGrid to compute information about other decompositions on
+!     ! other PEs without having to do communication first.
 
       type ESMF_DistGridGlobal
       sequence
       !private
-        ! values where there are only 1 per Grid
-        integer :: global_cell_count   ! global number of cells
-        integer :: local_cell_max      ! maximum number of cells on any one DE
-        ! values where there are 1 per dimension of the Grid
-        integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
-                                       ! global number of cells in each dim
-        integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
-                                       ! maximum DE cell counts in each dim
+ 
+        ! values where there are only a single one per Grid:
 
-        ! values where there are 1 per DE in this Grid.  For the 2d values
-        ! below, one dim is per DE, the other dim is per grid dimension.
-        integer, dimension(:), pointer :: local_cell_count
-                                       ! number of cells on each DE
+        !  total number of cells in the entire grid
+        integer :: global_cell_count  
+        !  maximum number of cells in the largest single DE for this grid
+        integer :: local_cell_max  
+
+        ! values where there are 1 per dimension of the Grid:
+  
+        !  number of cells in the entire grid, per axis/dimension
+        integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
+        !  the largest number of cells per axis in any single DE for this grid 
+        integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
+
+        ! values where there are 1 per DE in this Grid:  (For the 2d values
+        ! below, one dim is per DE, the other dim is per Grid dimension.)
+
+        !  total number of cells per each DE
+        integer, dimension(:), pointer :: local_cell_count 
+        !  number of cells per axis, one for each DE
         integer, dimension(:,:), pointer :: local_axis_length
-                                       ! number of cells along each axis
-        integer, dimension(:,:), pointer :: global_start  
-                                       ! offset of each DE in the global grid
+        !  offset from the origin of the entire grid, per axis, per DE
+        integer, dimension(:,:), pointer :: global_start
+        !  (min/max/stride) per axis, per DE relative to the entire grid
         type (ESMF_AxisIndex), dimension(:,:), pointer :: ai_global
-                                       ! AIs for each DE
 
       end type
 
 !------------------------------------------------------------------------------
 !     !  ESMF_DistGridType
 !
-!     !  Description of ESMF_DistGridType. 
+!     !  There is one of these types per Grid.  It contains both detailed 
+!     !  information about the local decomposition on this PE as well as
+!     !  general information about the rest of the other decompositions on
+!     !  other PEs which avoids additional communication overhead.
+!     !  For each of the local and global types there are two versions:
+!     !  one for the computational area, which is the unique set of
+!     !  cells in the grid where each cell belongs to one and only one DE.
+!     !  The other is the total area, which includes the computational cells
+!     !  as well as a layer of boundary cells around the edges.  
+!     !  These are not the same as a data halo; this information is used by
+!     !  the Grid code in conjunction with PhysGrid information to compute 
+!     !  Regridding exterior boundary conditions and relative weightings for
+!     !  contributions on the interior edges of decompositions without 
+!     !  requiring additional interprocessor communication.
 
       type ESMF_DistGridType
       sequence
       !private
 
-        type (ESMF_Base) :: base
-        logical :: covers_domain       ! does distgrid cover the entire 
-                                       ! physical domain?
-        integer :: grid_boundary_width ! number of exterior cells
+        type (ESMF_Base) :: base      ! standard ESMF base object
+        logical :: covers_domain      ! distgrid covers entire physical domain?
+        integer :: grid_boundary_width          ! # of exterior cells/edge
+        type (ESMF_DELayout), pointer :: layout ! the layout for this grid
 
-        type (ESMF_DELayout) :: layout ! TODO: should this be a pointer?
         ! 1 per dimension of the Grid
-        integer, dimension(ESMF_MAXGRIDDIM) :: decompids
+        integer, dimension(ESMF_MAXGRIDDIM) :: decompids  ! currently unneeded
 
-        ! sizes where they differ depending on if you are asking about the
-        ! total number of cells including the boundary, or just the
-        ! computational cells
+        ! local and global information, for both the total number of cells 
+        ! including the boundary regions, and the computational cells 
+        ! (where each cell belongs to one and only one DE).
         type (ESMF_DistGridLocal) :: MyDE_total 
         type (ESMF_DistGridLocal) :: MyDE_comp 
         type (ESMF_DistGridGlobal) :: global_total
@@ -131,8 +164,7 @@
       type ESMF_DistGrid
       sequence
       !private
-        type (ESMF_DistGridType), pointer :: ptr     ! pointer to a distgrid
-                                                     ! type
+        type (ESMF_DistGridType), pointer :: ptr  ! pointer to a distgrid type
       end type
 
 !------------------------------------------------------------------------------
@@ -170,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.76 2003/10/14 03:55:39 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.77 2003/10/14 15:49:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -188,8 +220,8 @@
 !        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt ESMF\_DistGrid} create
-!     methods.
+!     This interface provides a single entry point for
+!     {\tt ESMF\_DistGrid} create methods.
 !
 !EOP
       end interface 
@@ -269,9 +301,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]] 
+!     \item[{[name]}] 
 !          {\tt DistGrid} name.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -339,13 +371,13 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[counts]] 
+!     \item[{counts]}] 
 !          Array of number of computational cells in each direction.
-!     \item[[layout]]
+!     \item[{layout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[[name]] 
+!     \item[{name]}] 
 !          {\tt ESMF\_DistGrid} name.
-!     \item[[rc]] 
+!     \item[{rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -422,15 +454,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[countsPerDE1]] 
+!     \item[{[countsPerDE1]}] 
 !          Array of number of computational cells for each DE in direction 1.
-!     \item[[countsPerDE2]] 
+!     \item[{[countsPerDE2]}] 
 !          Array of number of computational cells for each DE in direction 2.
-!     \item[[layout]]
+!     \item[{[layout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[[name]] 
+!     \item[{[name]}] 
 !          {\tt ESMF\_DistGrid} name.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -490,7 +522,7 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          The class to be destroyed.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -541,7 +573,7 @@
       subroutine ESMF_DistGridConstructNew(dgtype, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: dgtype 
+      type(ESMF_DistGridType), pointer :: dgtype 
       character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
@@ -557,9 +589,9 @@
 !     \begin{description}
 !     \item[dgtype] 
 !          Pointer to a {\tt ESMF\_DistGrid}.
-!     \item[[name]] 
+!     \item[{[name]}] 
 !          Name of the {\tt ESMF\_DistGrid}.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -647,8 +679,8 @@
                                                 periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: dgtype 
-      type (ESMF_DELayout), intent(in) :: layout
+      type(ESMF_DistGridType), pointer :: dgtype 
+      type (ESMF_DELayout), intent(in), target :: layout
       integer, dimension(:) :: countsPerDE1
       integer, dimension(:) :: countsPerDE2
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
@@ -700,8 +732,8 @@
       endif
 
 !     Error checking for required input   TODO: complete
-!     if (not(associated(layout%ptr))) then
-!       status = ESMF_FAILURE
+!     call ESMF_LayoutValidate(layout, rc=status)
+!     if (status .ne. ESMF_SUCCESS) then
 !       print *, "ERROR in ESMF_DistGridConstructInternal: unassociated layout"
 !       return
 !     endif
@@ -776,7 +808,7 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
         return
       endif
-      dgtype%layout = layout
+      dgtype%layout => layout
 
       ! Allocate resources based on number of DE's
       allocate(dgtype%global_total%local_cell_count(nDE), stat=status)
@@ -870,7 +902,7 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          The class to be destructed.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -911,7 +943,7 @@
                                   local_cell_max, local_cell_max_dim, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       logical, intent(inout), optional :: covers_domain
       integer, intent(inout), optional :: global_cell_count
       integer, dimension(:), intent(inout), optional :: global_cell_dim
@@ -1021,7 +1053,7 @@
                                   local_cell_max, local_cell_max_dim, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       logical, intent(in), optional :: covers_domain
       integer, intent(in), optional :: global_cell_count
       integer, dimension(:), intent(in), optional :: global_cell_dim
@@ -1127,7 +1159,7 @@
 !          Class to be queried.
 !     \item[config]
 !          Configuration information.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1161,7 +1193,7 @@
 !          Class to be configured.
 !     \item[config]
 !          Configuration information.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1196,7 +1228,7 @@
 !          Class to be queried.
 !     \item[value]
 !          Value to be retrieved.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1231,7 +1263,7 @@
 !          Class to be modified.
 !     \item[value]
 !          Value to be set.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1252,7 +1284,7 @@
                                         gcell_start, gcell_end, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       integer, intent(in) :: DE_id
       integer, dimension(:), intent(inout), optional :: lcell_count
       integer, dimension(:), intent(inout), optional :: gcell_start
@@ -1343,7 +1375,7 @@
                                              countsPerDE2, periodic, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: nDE
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
@@ -1490,7 +1522,7 @@
                                     ai_global, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: local_cell_count
       integer, dimension(:), intent(inout), optional :: local_axis_length
@@ -1655,7 +1687,7 @@
       subroutine ESMF_DistGridGetAllAxisIndex(dgtype, AI, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
@@ -1714,7 +1746,7 @@
       subroutine ESMF_DistGridGetAllCounts(dgtype, counts, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       integer, dimension(:,:), pointer :: counts
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
@@ -1780,7 +1812,7 @@
       subroutine ESMF_DistGridGetDELayout(dgtype, layout, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       type(ESMF_DELayout) :: layout
       integer, intent(out), optional :: rc            
 
@@ -1792,9 +1824,9 @@
 !     \begin{description}
 !     \item[dgtype]
 !          Class to be modified.
-!     \item[[layout]]
+!     \item[{[layout]}]
 !          The {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_DistGrid}.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1804,7 +1836,7 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1812,7 +1844,9 @@
         rc = ESMF_FAILURE
       endif
 
-!     get information from distgrid derived type
+      ! Get information from distgrid derived type
+      !  Note this needs to use = and not => to return the actual layout
+      !  and not a pointer.
       layout = dgtype%layout
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1831,7 +1865,7 @@
                                                  total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), intent(in), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: global1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
@@ -2036,7 +2070,7 @@
                                                  total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), intent(in), target :: dgtype
+      type(ESMF_DistGridType), pointer :: dgtype
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: local1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: local2D
@@ -2234,9 +2268,9 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be queried.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Validation options.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -2267,10 +2301,10 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Class to be queried.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Print ptions that control the type of information and level of 
 !          detail.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
