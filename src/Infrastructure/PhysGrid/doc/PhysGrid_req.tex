@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.22 2002/06/21 20:23:02 cnh Exp $
+%$Id: PhysGrid_req.tex,v 1.23 2002/06/21 20:31:51 cnh Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -397,6 +397,7 @@ some locations may be missing).
 {\bf Verification:} Code inspection. \\
 {\bf Notes:} MAJOR OBJECTION. Where did this come from? I'd like to be able to represent the whole observation vector for a given synoptic time on a single location stream. While data have horizontal coordinates in (lat,lon), vertical coordinates may vary widely (winds at 10m above sfc, temperature at 500 hPa, to name a few). So, each element would contain the (lat,lon,lev,levunits); it is conceivable that at  some point one would need (lat,lon,lev,xunits,yunits,zunits) - Arlindo.
 NO STATUS ASSIGNED WE NEED TO REVISIT THIS - CNH/RWH.
+*****WE****NEED****TO****CONSULT****ARLINDO*****
 \end{reqlist}
 
 \ssreq{Elements include values of locations}
