@@ -1,0 +1,17 @@
+% $Id: Bundle_rest.tex,v 1.1 2003/03/10 21:54:19 cdeluca Exp $
+
+%\subsubsection{Restrictions}
+
+% <List class restrictions due to design or implementation strategies.>
+
+The Bundle class will not support advanced
+operations on fields, such as differential or other
+mathematical operators.
+
+It will also not automatically support collective field operations,
+other than a limited set including I/O, regridding, and subsetting.
+For other operations on Fields, 
+first query the Bundle for the
+specific field desired, then operate on it with methods
+at the Fields class level.
+

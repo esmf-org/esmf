@@ -1,0 +1,28 @@
+% $Id: Bundle_fparam.tex,v 1.1 2003/03/10 21:54:19 cdeluca Exp $
+
+%\subsection{Parameters}
+
+\begin{description}
+
+\item [ESMF\_Bundle] A Bundle is a derived type with the following definition:
+\begin{verbatim}
+type ESMF_Bundle
+sequence
+    type (ESMF_Base) :: base
+    integer :: field_count
+    type (ESMF_Field), pointer :: flist
+    integer :: packed_flag
+    type (ESMF_Array), pointer :: packeddata
+    integer :: detached
+end type
+\end{verbatim}
+
+\item [rc] Integer return code, always optional and generally the last argument to a subroutine or function.
+
+\end{description}
+
+
+
+
+
+

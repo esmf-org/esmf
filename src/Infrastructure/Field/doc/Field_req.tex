@@ -1,0 +1,683 @@
+% $Id: Field_req.tex,v 1.1 2003/03/10 21:54:20 cdeluca Exp $
+
+%jm WRF checked 5/14/2002
+%===============================================================================
+\req{Fields}
+%-------------------------------------------------------------------------------
+
+\sreq{Creation}
+
+\ssreq{Creation with data allocation}
+\label{req:fldcreatewalloc}
+Fields may be created by specifying attributes, a grid, 
+data array dimensions and descriptors, optional masks (e.g. for 
+active cells), and an optional I/O specification.  In this case 
+a field will allocate its own data.  The grid passed into the 
+argument list is referenced and not copied.
+\begin{reqlist} 
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Creation with external data}
+Fields may be created as in \ref{req:fldcreatewalloc} with a data 
+array passed into the argument list.  The data array 
+is referenced and not copied.
+\begin{reqlist} 
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Should be able to specify data copy as well.
+\end{reqlist}
+
+\ssreq{Creation without data}
+Fields may be created as in \ref{req:fldcreatewalloc} without allocating 
+data or specifying an associated data array.  In this case specifying the 
+grid parameters and data array dimensions may be deferred until 
+data is attached.
+\begin{reqlist} 
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Creation by indexing an existing field}
+Fields may be created by specifying some subset of the domain of an 
+existing field.  The user may specify whether the original field's data 
+is copied or referenced.  The grid is referenced.  Staggering 
+and mask of active/inactive cells may be different in the 
+original and new fields.
+\begin{reqlist} 
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Creation with remap}
+Fields may be created as a result of transposing, interpolating, or regridding
+an existing field.  The original field's data is copied, but the target grid
+must already exist.
+\begin{reqlist} 
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} The assumption here is that the grid is being altered, so it
+should be copied and not referenced. Implies adjoint form.
+\end{reqlist}
+
+\ssreq{Creation by weighted combination}
+Fields may be created as the result of weighting (e.g. temporally or spatially, on
+a per-gridpoint basis)
+combinations of existing field values.  The original fields and the resulting
+field are defined on the same grid.  The original field's grid is referenced.
+Implies adjoint form - maybe always self-adjoint (not sure) - CNH.
+\begin{reqlist} 
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Local memory layout}
+It shall be possible to specify whether the field data is row major or column major 
+at field creation and to rearrange it (assumes local copy).  
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} We don't mind making this non-obvious since it is expensive.
+\end{reqlist}
+
+\sreq{Index order}
+It shall be possible to specify the index order of field data 
+and also to rearrange it. 
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Rearrangement is potentially a global operation.
+\end{reqlist}
+
+\sreq{Deletion}
+Fields may be deleted.
+\begin{reqlist} 
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} This implies a reference count will be defined for grids.
+\end{reqlist}
+
+\sreq{Attributes}
+The user can define a list of attribute name and value pairs, such 
+as {\tt units}, {\tt meters}, for a field.  
+The attributes may be of character, real, integer, or logical type,
+or arrays of any of these.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Default name attribute}
+The only default attribute of a field will be a name. A unique name will be
+generated if not supplied by the user.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit test. 
+{\bf Notes:} For consistency with the IO requirements more than {\tt name} may be mandatory (Arlindo).
+\end{reqlist}
+
+\ssreq{Recommended attributes}
+ESMF shall provide a list of recommended attribute names. A list of
+attributes corresponding to various naming conventions will be
+provided. It shall be possible to choose a convention at application
+setup, at which point ESMF will be able to load a default set of
+attributes.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} This list likely to be based on the CF convention. For
+consistency with IO these may be mandatory, not recommended (Arlindo).
+\end{reqlist}
+
+\ssreq{Add and delete attributes}
+Attributes may be added to or deleted from a given field.  The name
+attribute cannot be deleted.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, POP, CICE, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Copy attributes}
+Attributes may be copied from one field to another.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT(desired), GFDL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Collective assignment of attributes}
+Attributes may be added to or deleted from a list of fields collectively.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, WRF. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} The list of fields for which attributes are collectively defined
+does not need to be in the same bundle.
+\end{reqlist}
+
+\sreq{Operations}
+
+\ssreq{Remap data}
+It shall be possible to regrid, interpolate, or redistribute field data
+subject to the requirements for those operations.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Return grid}
+A field shall be able to return a reference to its grid.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} It is assumed that a grid contains both a distributed grid 
+and a physical grid.
+\end{reqlist}
+
+\ssreq{Return local memory layout}
+A field shall be able to return a description of its local memory 
+layout.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Return index order}
+A field shall be able to return a description of its index ordering.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Direct data access}
+Data arrays may be detached or accessed.  
+
+When data is detached from a field it is not deallocated; the user receives 
+a reference to the data array and the pointer within the field object
+is nullified.  The field shall be able to identify 
+whether a data segment is attached or detached.  The types of access 
+supported shall be contiguous whole array or array subset and strided whole 
+array or array subset.
+
+The access method may be used without formally detaching the field,
+in which case the pointer in the original field is not nullified. This
+allows transparent use of the same data either as a ``naked'' array or
+as a field.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\ 
+{\bf Notes:}
+\end{reqlist}
+
+\ssreq{Data access via copy}
+It shall be possible to retrieve an array that is a copy of all or
+a subset of the data values associated with a field.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Set}
+Field data may be set by specifying an index or coordinate range 
+and a data value or conformable array.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes} This data access is not direct, as with attach and detach - 
+it is through the field interface.  It enables setting single data elements
+and arrays to a given single value or conformable array, for example,
+for initialization.
+\end{reqlist}
+
+\ssreq{Write and restore from restart}
+Methods shall be provided that enable a field to write out restart data and
+to reconstruct itself identically from that data.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Queries}
+
+\ssreq{Query name}
+A field shall be able to easily return its name.  If the user does not
+provide a field name one will be created.  Field names must be unique
+within an address space and it shall be possible to check this.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} All projects need this. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query number of dimensions and index order}
+A field shall be
+able to return the number of dimensions and index order it has.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query attributes}
+A field can return its list of attributes.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query attributes by name}
+A field shall be able to return attribute values given a list of 
+attribute names.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query number of attributes}
+A field shall be able to return the number of attributes it possesses.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query presence of data}
+It shall be possible to determine whether a field has an associated
+data array.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query number of local/global cells or gridpoints}
+A field may be queried for the number of local or global cells
+or gridpoints in its underlying grid.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Redundant: information available from grid. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+%===============================================================================
+\req{Bundles}
+%-------------------------------------------------------------------------------
+
+\sreq{Creation}
+
+\ssreq{Creation using field list}
+\label{req:bundlecreatewalloc}
+It shall be possible to create a bundle with a field list, an 
+optional I/O specification, and an identifier that specifies whether 
+the bundle is to be packed (contiguous data) or loose (noncontiguous data).
+Bundles within 
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Creation by indexing an existing bundle}
+It shall be possible to initialize a bundle that is a copy of an
+existing bundle, or a specified subset of the fields or domain of an 
+existing bundle. It is assumed that field data is copied.  The grid associated with the 
+bundle shall be referenced and not copied.  
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Creation with remap}
+Bundles may be created as the result of a remapping operation on an 
+existing bundle.  The grid in this case is a pointer to the reference 
+grid.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, GFDL. \\
+{\bf Status:} Approved-2. Implies possible adjoint form\\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+
+
+\sreq{Local memory layout}
+It shall be possible to specify the local memory layout (major axis) 
+of data within a packed bundle.  
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Index order and field interleaving}
+It shall be possible to specify the index order or field 
+interleaving of bundle data and also to rearrange it. 
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, WRF, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Rearrangement is potentially a global operation.
+\end{reqlist}
+
+\sreq{Deletion}
+Bundles may be deleted.  Data allocated by and included in packed bundles 
+is deleted along with the bundle.  Pointers to field data in unpacked bundles
+are returned at deletion.
+\begin{reqlist} 
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Operations}
+
+\ssreq{Remap data}
+It shall be possible to regrid, interpolate, or redistribute bundle data
+subject to the requirements for those operations.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Insert and remove field}
+A field may be inserted into or removed from a bundle.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Inserting a field into a bundle may result in a reallocation and 
+copy if the bundle is packed.  
+\end{reqlist}
+
+\ssreq{Direct data access}
+Data arrays may be easily detached or attached to a bundle.  When data
+is detached from a bundle the pointer(s) within the bundle is nullified 
+but the data is not deallocated; the user receives a reference to the data 
+array.  The bundle shall be able to identify 
+whether a data segment is attached or detached.  The type of access 
+supported shall be contiguous whole array or offset by field.
+
+An access method will be provided that return the data pointer(s) but does
+not nullify them.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, GFDL. \\ 
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Data access via copy}
+It shall be possible to retrieve an array that is a copy of all or
+a subset of the data values associated with a bundle.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Set}
+Bundle data may be identified in its entirety or by index or coordinate and
+set to a single value, for example, for initialization.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+\end{reqlist}
+
+\ssreq{Return field(s)}
+A bundle shall be able to return a pointer to a field indexed by name
+or pointers to all the fields that it contains.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Return grid}
+A bundle shall be able to return a pointer to its grid.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} It is assumed that a grid contains both a distributed grid and
+a physical grid.
+\end{reqlist}
+
+\ssreq{Return local memory layout}
+A bundle shall be able to return a description of its local memory 
+layout.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Pack bundle}
+It shall be possible to copy noncontiguous field data in a loose bundle
+into a packed bundle.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} This may be through a series of steps or through a single step,
+implementation TBD. 
+\end{reqlist}
+
+\ssreq{Write and restore from restart}
+Methods shall be provided that enable a bundle to write out restart data and
+to reconstruct itself identically from that data.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Queries}
+
+\ssreq{Query bundle name}
+A bundle shall be able to return its name.  If the user does not
+assign a name one will be assigned by default.  All bundle names
+within an address space must be unique, and it shall be possible to
+check this.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\ssreq{Query field names}
+A bundle shall be able to return a list of field names.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query number of fields}
+A bundle shall be able to return the number of fields that it contains.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Query number of local/global cells or gridpoints}
+A bundle may be queried for the number of local or global cells
+or gridpoints.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} This is strictly for convenience; this and other grid
+methods can be implemented by retrieving the grid internal to a 
+bundle and querying it.
+\end{reqlist}
+
+\req{Field and bundle I/O}
+
+\sreq{Write}
+It shall be possible to write the data values of a field or bundle to 
+a specified destination. 
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes: } A single IO capability may be sufficient for this and the field 
+restart requirement (Arlindo).
+\end{reqlist}
+
+\sreq{Set destination}
+It shall be possible to easily customize the destination of 
+a field or bundle write operation.
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, GFDL.\\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} 
+We should at least lay the foundation for URI type naming etc... ( for both
+read and write).
+\\
+\end{reqlist}
+
+\sreq{Set write frequency}
+It shall be possible to specify the frequency, using a number of timesteps 
+or a time interval, at which either field or bundle data is written.  The
+default shall be no writes, and it shall be possible for the user
+to reset the default.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Write indexed values}
+It shall be possible to specify and to easily reset a 
+subset of field and bundle data and attributes to be written out.
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:} CCSM-CPL, MIT, GFDL. \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\sreq{Set precision}
+It shall be possible to specify the precision at which either field or 
+bundle data is written.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} CCSM-CPL, POP, CICE, CAM-FV, PSAS, MIT, GFDL. \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\req{General computational requirements}
+
+\sreq{Validity checking}
+It shall be possible to check fields and bundles for internal consistency,
+and to disable the checks for optimization purposes.
+\begin{reqlist}
+{\bf Priority:} 2\\
+{\bf Source:} CCSM-CPL, CAM-FV, PSAS, MIT, GFDL.  \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

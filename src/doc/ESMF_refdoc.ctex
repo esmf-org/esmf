@@ -116,7 +116,7 @@
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Infrastructure/Fields/doc/Fields_desdoc.ctex"
+#include "../Infrastructure/Field/doc/Field_desdoc.ctex"
 
 \newpage
 \begin{htmlonly}

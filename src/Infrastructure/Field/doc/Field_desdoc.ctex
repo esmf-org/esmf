@@ -1,0 +1,378 @@
+% $Id: Field_desdoc.ctex,v 1.1 2003/03/10 21:54:19 cdeluca Exp $
+
+#ifdef STANDALONE
+\documentclass[]{article}
+
+\usepackage{epsf}
+\usepackage{html}
+\usepackage{times}
+\usepackage{alltt}
+\usepackage[T1]{fontenc}
+\usepackage[dvips]{graphics,color}
+
+\textwidth 6.5in
+\textheight 8.5in
+\addtolength{\oddsidemargin}{-.75in}
+\newcommand{\mytitle}{Fields and Bundles Design}
+\newcommand{\myauthors}{Nancy Collins}
+#endif
+
+#ifdef STANDALONE
+\begin{document}
+#endif
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+#ifdef STANDALONE
+% Title page
+\input{../../../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+#endif
+
+\section{Synopsis}
+#ifdef STANDALONE
+\input{Fields_syn}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_syn}
+#endif
+
+\section{Programming Model}
+#ifdef STANDALONE
+\input{Fields_prog}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_prog}
+#endif
+
+\section{Object Model}
+#ifdef STANDALONE
+\input{Fields_obj}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_obj}
+#endif
+
+% %\section{Global Parameters and Definitions}
+% #ifdef STANDALONE
+% %\input{Fields_param}
+% #elif defined(CONSTITUENT)
+% %\input{comppath/Fields_param}
+% #endif
+
+\section{Fields Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Fields_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Fields_design}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Fields_def}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_def}
+#endif
+
+%\subsubsection{Restrictions}
+#ifdef STANDALONE
+%\input{Fields_rest}
+#elif defined(CONSTITUENT)
+%\input{comppath/Fields_rest}
+#endif
+
+\section{Fields F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{fieldex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/fieldex_fapi}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Fields_fparam}
+% #elif defined(CONSTITUENT)
+% \input{comppath/Fields_fparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{field_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/field_fapi}
+#endif
+
+\section{Fields C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Fields_ccex}
+#elif defined(CONSTITUENT)
+\input{comppath/Fields_ccex}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Fields_ccparam}
+% #elif defined(CONSTITUENT)
+% \input{comppath/Fields_ccparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{field_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/field_ccapi}
+#endif
+
+\section{Bundles Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Bundles_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/Bundles_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Bundles_design}
+#elif defined(CONSTITUENT)
+\input{comppath/Bundles_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Bundles_def}
+#elif defined(CONSTITUENT)
+\input{comppath/Bundles_def}
+#endif
+
+%\subsubsection{Restrictions}
+#ifdef STANDALONE
+%\input{Bundles_rest}
+#elif defined(CONSTITUENT)
+%\input{comppath/Bundles_rest}
+#endif
+
+\section{Bundles F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{bundleex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/bundleex_fapi}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Bundles_fparam}
+% #elif defined(CONSTITUENT)
+% \input{comppath/Bundles_fparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{bundle_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/bundle_fapi}
+#endif
+
+\section{Bundles C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Bundles_ccex}
+#elif defined(CONSTITUENT)
+\input{comppath/Bundles_ccex}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{Bundles_ccparam}
+% #elif defined(CONSTITUENT)
+% \input{comppath/Bundles_ccparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{bundle_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/bundle_ccapi}
+#endif
+
+
+\section{Array Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{Array_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/Array_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{Array_design}
+#elif defined(CONSTITUENT)
+\input{comppath/Array_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{Array_def}
+#elif defined(CONSTITUENT)
+\input{comppath/Array_def}
+#endif
+
+%\subsubsection{Restrictions}
+#ifdef STANDALONE
+%\input{Array_rest}
+#elif defined(CONSTITUENT)
+%\input{comppath/Array_rest}
+#endif
+
+\section{Array F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{arrayex_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/arrayex_fapi}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{array_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/array_fapi}
+#endif
+
+\section{Array C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{Array_ccex}
+#elif defined(CONSTITUENT)
+\input{comppath/Array_ccex}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{DataArray_ccparam}
+% #elif defined(CONSTITUENT)
+% \input{comppath/DataArray_ccparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{array_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/array_ccapi}
+#endif
+
+
+
+\section{DataMap Design}
+
+\subsection{Description}
+#ifdef STANDALONE
+\input{DataMap_desc}
+#elif defined(CONSTITUENT)
+\input{comppath/DataMap_desc}
+#endif
+
+\subsection{Design}
+#ifdef STANDALONE
+\input{DataMap_design}
+#elif defined(CONSTITUENT)
+\input{comppath/DataMap_design}
+#endif
+
+\subsubsection{Class Definition}
+#ifdef STANDALONE
+\input{DataMap_def}
+#elif defined(CONSTITUENT)
+\input{comppath/DataMap_def}
+#endif
+
+%\subsubsection{Restrictions}
+#ifdef STANDALONE
+%\input{DataMap_rest}
+#elif defined(CONSTITUENT)
+%\input{comppath/DataMap_rest}
+#endif
+
+\section{DataMap F90 Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{DataMap_fex}
+#elif defined(CONSTITUENT)
+\input{comppath/DataMap_fex}
+#endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{datamap_fapi}
+#elif defined(CONSTITUENT)
+\input{comppath/datamap_fapi}
+#endif
+
+\section{DataMap C++ Interface}
+
+\subsection{Use and Examples}
+#ifdef STANDALONE
+\input{DataMap_ccex}
+#elif defined(CONSTITUENT)
+\input{comppath/DataMap_ccex}
+#endif
+
+% \subsection{Parameters and Definitions}
+% #ifdef STANDALONE
+% \input{DataDataMap_ccparam}
+% #elif defined(CONSTITUENT)
+% \input{comppath/DataDataMap_ccparam}
+% #endif
+
+%\subsection{Class API}
+#ifdef STANDALONE
+\input{datamap_ccapi}
+#elif defined(CONSTITUENT)
+\input{comppath/datamap_ccapi}
+#endif
+
+
+
+#ifdef STANDALONE
+\section{Review Status}
+\input{Fields_desrev}
+#endif
+
+#ifdef STANDALONE
+%\section{Glossary}
+\input{Fields_glos}
+#endif
+
+#ifdef STANDALONE
+%\section{Bibliography}
+\bibliography{comp} 
+\bibliographystyle{plain}
+\addcontentsline{toc}{section}{Bibliography}
+#endif
+
+#ifdef STANDALONE
+\end{document}
+#endif
