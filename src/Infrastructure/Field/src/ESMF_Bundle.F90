@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.19 2003/08/28 20:04:45 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.20 2003/09/09 20:40:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,7 +16,8 @@
 !==============================================================================
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF_Macros.inc"
+#include "ESMF.h"
+
 !------------------------------------------------------------------------------
 !
 !BOPI
@@ -84,11 +85,18 @@
       type ESMF_LocalBundle
       sequence
       private
+#ifndef ESMF_NO_INITIALIZERS
         type(ESMF_GridType), pointer :: gridp => NULL() ! local data
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT    ! is grid set 
         type(ESMF_Status) :: arraystatus = ESMF_STATE_UNINIT   ! is array set 
-        type(ESMF_Array) :: packed_data               ! local packed array
         integer :: accesscount = 0                    ! reserved for future use
+#else
+        type(ESMF_GridType), pointer :: gridp
+        type(ESMF_Status) :: gridstatus
+        type(ESMF_Status) :: arraystatus
+        integer :: accesscount
+#endif
+        type(ESMF_Array) :: packed_data               ! local packed array
       
       end type
 
@@ -99,17 +107,25 @@
       sequence
       private
         type(ESMF_Base) :: base                   ! base class object
+#ifndef ESMF_NO_INITIALIZERS
         type(ESMF_Status) :: bundlestatus = ESMF_STATE_UNINIT
-        type(ESMF_Grid) :: grid                   ! associated global grid
-        type(ESMF_GridType), pointer :: gridp => NULL() ! shortcut
         type(ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT     ! is grid set
+        type(ESMF_GridType), pointer :: gridp => NULL() ! shortcut
+        type(ESMF_Field), dimension(:), pointer :: flist => NULL() 
+        integer :: field_count = 0                ! how many fields in here
+#else
+        type(ESMF_Status) :: bundlestatus
+        type(ESMF_Status) :: gridstatus
+        type(ESMF_GridType), pointer :: gridp
+        type(ESMF_Field), dimension(:), pointer :: flist
+        integer :: field_count
+#endif
+        type(ESMF_Grid) :: grid                   ! associated global grid
         type(ESMF_LocalBundle) :: localbundle     ! this differs per DE
         type(ESMF_Packflag) :: pack_flag          ! is packed data present?
         type(ESMF_FieldInterleave) :: fil         ! ordering in buffer
         type(ESMF_IOSpec) :: iospec               ! iospec values
         type(ESMF_Status) :: iostatus             ! if unset, inherit from gcomp
-        type(ESMF_Field), dimension(:), pointer :: flist => NULL() 
-        integer :: field_count = 0                ! how many fields in here
       
       end type
 
@@ -122,7 +138,11 @@
       type ESMF_Bundle
       sequence
       !private
+#ifndef ESMF_NO_INITIALIZERS
         type (ESMF_BundleType), pointer :: btypep => NULL()
+#else
+        type (ESMF_BundleType), pointer :: btypep 
+#endif
       end type
 
 !------------------------------------------------------------------------------

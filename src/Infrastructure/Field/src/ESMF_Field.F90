@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.74 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.75 2003/09/09 20:40:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF_Macros.inc"
+#include "ESMF.h"
+
 !------------------------------------------------------------------------------
 !
 !BOPI
@@ -116,12 +117,19 @@
       private
        
         type (ESMF_Base) :: base             ! base class object
+#ifndef ESMF_NO_INITIALIZERS
         type (ESMF_Status) :: fieldstatus = ESMF_STATE_UNINIT
-        type (ESMF_Grid) :: grid             ! save to satisfy query routines
-        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster access
         type (ESMF_Status) :: gridstatus = ESMF_STATE_UNINIT
-        type (ESMF_LocalField) :: localfield ! this differs per DE
         type (ESMF_Status) :: datastatus = ESMF_STATE_UNINIT
+        type (ESMF_GridType), pointer :: gridp => NULL()  ! for faster access
+#else
+        type (ESMF_Status) :: fieldstatus
+        type (ESMF_Status) :: gridstatus
+        type (ESMF_Status) :: datastatus
+        type (ESMF_GridType), pointer :: gridp
+#endif
+        type (ESMF_Grid) :: grid             ! save to satisfy query routines
+        type (ESMF_LocalField) :: localfield ! this differs per DE
         type (ESMF_DataMap) :: mapping       ! mapping of array indices to grid
         type (ESMF_IOSpec) :: iospec         ! iospec values
         type (ESMF_Status) :: iostatus       ! if unset, inherit from gcomp
@@ -137,7 +145,11 @@
       type ESMF_Field
       sequence
       !private       
+#ifndef ESMF_NO_INITIALIZERS
         type (ESMF_FieldType), pointer :: ftypep => NULL()
+#else
+        type (ESMF_FieldType), pointer :: ftypep
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -222,7 +234,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.74 2003/09/04 22:24:21 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.75 2003/09/09 20:40:44 nscollins Exp $'
 
 !==============================================================================
 !
