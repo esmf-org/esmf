@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.3 2003/04/04 17:12:33 nscollins Exp $
+! $Id: user_model1.F90,v 1.4 2003/04/08 23:10:34 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -105,14 +105,14 @@
 
         print *, "User Comp Init starting"
 
-        if (present(importstate)) print *, "importstate present"
-        if (.not.present(importstate)) print *, "importstate *not* present"
-        if (present(exportstate)) print *, "exportstate present"
-        if (.not.present(exportstate)) print *, "exportstate *not* present"
-        if (present(clock)) print *, "clock present"
-        if (.not.present(clock)) print *, "clock *not* present"
-        if (present(rc)) print *, "rc present"
-        if (.not.present(rc)) print *, "rc *not* present"
+        !!if (present(importstate)) print *, "importstate present"
+        !!if (.not.present(importstate)) print *, "importstate *not* present"
+        !!if (present(exportstate)) print *, "exportstate present"
+        !!if (.not.present(exportstate)) print *, "exportstate *not* present"
+        !!if (present(clock)) print *, "clock present"
+        !!if (.not.present(clock)) print *, "clock *not* present"
+        !!if (present(rc)) print *, "rc present"
+        !!if (.not.present(rc)) print *, "rc *not* present"
 
         ! query comp for layout
         call ESMF_GridCompGet(comp, layout=layout, rc=status)
@@ -193,14 +193,14 @@
 
         print *, "User Comp Run starting"
 
-        if (present(importstate)) print *, "importstate present"
-        if (.not.present(importstate)) print *, "importstate *not* present"
-        if (present(exportstate)) print *, "exportstate present"
-        if (.not.present(exportstate)) print *, "exportstate *not* present"
-        if (present(clock)) print *, "clock present"
-        if (.not.present(clock)) print *, "clock *not* present"
-        if (present(rc)) print *, "rc present"
-        if (.not.present(rc)) print *, "rc *not* present"
+        !!if (present(importstate)) print *, "importstate present"
+        !!if (.not.present(importstate)) print *, "importstate *not* present"
+        !!if (present(exportstate)) print *, "exportstate present"
+        !!if (.not.present(exportstate)) print *, "exportstate *not* present"
+        !!if (present(clock)) print *, "clock present"
+        !!if (.not.present(clock)) print *, "clock *not* present"
+        !!if (present(rc)) print *, "rc present"
+        !!if (.not.present(rc)) print *, "rc *not* present"
 
         ! Get our local info
         call ESMF_GridCompGetInternalState(comp, wrap, status)
@@ -248,14 +248,14 @@
 
         print *, "User Comp Final starting"
     
-        if (present(importstate)) print *, "importstate present"
-        if (.not.present(importstate)) print *, "importstate *not* present"
-        if (present(exportstate)) print *, "exportstate present"
-        if (.not.present(exportstate)) print *, "exportstate *not* present"
-        if (present(clock)) print *, "clock present"
-        if (.not.present(clock)) print *, "clock *not* present"
-        if (present(rc)) print *, "rc present"
-        if (.not.present(rc)) print *, "rc *not* present"
+        !!if (present(importstate)) print *, "importstate present"
+        !!if (.not.present(importstate)) print *, "importstate *not* present"
+        !!if (present(exportstate)) print *, "exportstate present"
+        !!if (.not.present(exportstate)) print *, "exportstate *not* present"
+        !!if (present(clock)) print *, "clock present"
+        !!if (.not.present(clock)) print *, "clock *not* present"
+        !!if (present(rc)) print *, "rc present"
+        !!if (.not.present(rc)) print *, "rc *not* present"
 
         ! Get our local info
         nullify(wrap%ptr)
