@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.12 2004/10/14 20:39:35 cpboulder Exp $
+% $Id: LogErr_usage.tex,v 1.13 2004/11/01 23:00:32 cpboulder Exp $
 
 %\subsection{Use and Examples}
 
@@ -15,7 +15,7 @@ If a user wants to use a new or different Log, the user must call
 file.
  
 By default, the Log file is not truncated at the start of a new run; it just
-gets appended each time.  Future functionality could include an option to
+gets appended each time.  Future functionality would include an option to
 either truncate or append to the Log file. 
 
 In all cases where a Log is opened, a unit number is assigned to a specific
@@ -35,7 +35,9 @@ partially implemented at this time.
 Depending on how the options are set, {\tt ESMF\_LogWrite()} either writes user
 messages directly to a Log file or writes to a buffer that can be flushed when 
 full or by using the {\tt ESMF\_LogFlush()} method.  The default is to flush 
-after every {\tt ESMF\_LogWrite()}.
+after every {\tt ESMF\_LogWrite()} because {\tt maxElements} is initialized to
+one (which means the buffer reaches its full state after each write, therefore,
+flushing.
 
 For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
 Log entry.  The time is given in microsecond precision.

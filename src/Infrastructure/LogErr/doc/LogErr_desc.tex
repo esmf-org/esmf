@@ -1,4 +1,4 @@
-% $Id: LogErr_desc.tex,v 1.12 2004/10/14 20:39:35 cpboulder Exp $
+% $Id: LogErr_desc.tex,v 1.13 2004/11/01 23:00:32 cpboulder Exp $
 
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,10 +17,10 @@ initialization.  Other Logs can be created later in the code by the user.  A set
 of standard return codes and associated messages are provided for error 
 handling.  
 
-Log provides capabilities to write to a file immediately or store entries in a 
+LogErr provides capabilities to write to a file immediately or store entries in a 
 buffer for writing either when the buffer is full, or when the user calls an 
 {\tt ESMF\_LogFlush()} command.  Currently the default is set so the Log flushes
-after every write command but can easily set to higher values using the 
+after every write command but can easily be set to higher values using the 
 {\tt ESMF\_LogSet} command and setting the {\tt maxElements} property to a value
 greater than one.  The {\tt ESMF\_LogFlush()} command is automatically
 called when the program exits (either by finishing or by using the {\tt halt}
@@ -35,9 +35,9 @@ only halt on errors.  Lastly, the user can choose to never halt by setting the
 {\tt halt} property to {\tt ESMF\_LOG\_HALTNEVER}.
 
 Many options are planned for Log, including the ability to write to a single
-file or multiple files, to write from a root PE or from all active PEs,to adjust
-the verbosity of ouput, and to optionally write to {\tt stdout} instead of 
-file(s).
+file or multiple files, to write from a root PET or from all active PETs,to 
+adjust the verbosity of ouput, and to optionally write to {\tt stdout} instead 
+of file(s).
 
 
 

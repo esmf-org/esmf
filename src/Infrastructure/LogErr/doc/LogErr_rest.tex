@@ -1,4 +1,4 @@
-% $Id: LogErr_rest.tex,v 1.11 2004/10/14 20:39:35 cpboulder Exp $
+% $Id: LogErr_rest.tex,v 1.12 2004/11/01 23:00:32 cpboulder Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,12 +10,14 @@
 
 \begin{enumerate}
 
-\item {\bf Line and file only available when using the C preprocessor}
+\item {\bf Line, file and method are only available when using the C 
+preprocessor}
 Message writing methods are expanded using a macro that adds the predefined 
-symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ to the argument list.
-Using these constants, we can associate a file name and line number with the
-message.  If the CPP preprocessor is not used, this expansion will not be done
-and the file and line number will not appear in the Log text.
+symbolic constants \_\_LINE\_\_ and \_\_FILE\_\_ and the ESMF defined constant
+\_\_METHOD\_\_ to the argument list.  Using these constants, we can associate 
+a file name, line number and method name with the message.  If the CPP 
+preprocessor is not used, this expansion will not be done and the file name,
+line number and method will not appear in the Log text.
 
 \item{\bf Get and set methods are partially implemented.}
 Currently, the {\tt ESMF\_LogGet()} and {\tt ESMF\_LogSet()} methods are 

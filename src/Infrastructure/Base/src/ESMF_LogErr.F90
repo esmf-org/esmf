@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.36 2004/10/15 20:18:06 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.37 2004/11/01 23:00:31 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,9 +96,9 @@ type ESMF_LOGENTRY
     character(len=32) 				file,method	
     character(len=8) 				d		                                     
     character(len=8)				lt  			   				
-    integer					h,m,s,ms				        
-    integer					line   
-    logical					methodflag,lineflag,fileflag,stopprogram					
+    integer					        h,m,s,ms				        
+    integer					        line   
+    logical					        methodflag,lineflag,fileflag,stopprogram					
 end type ESMF_LOGENTRY
 
 !     ! Log  
@@ -111,18 +111,18 @@ type ESMF_Log
 #else
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
 #endif                                         
-    type(ESMF_HaltType)                     ::  halt
-    type(ESMF_LogType)			    ::  logtype
-    type(ESMF_Logical)                      ::  FileIsOpen
-    type(ESMF_Logical)                      ::  flushImmediately
-    type(ESMF_Logical)			    ::  flushed     
-    type(ESMF_Logical)                      ::  rootOnly    
-    type(ESMF_Logical)                      ::  verbose  
-    type(ESMF_Logical)                      ::  dirty  
-    integer                                     maxElements
-    integer                                     stream 
-    integer                                     unitNumber
-    integer                                     fIndex 
+    type(ESMF_HaltType)                             ::  halt
+    type(ESMF_LogType)			                    ::  logtype
+    type(ESMF_Logical)                              ::  FileIsOpen
+    type(ESMF_Logical)                              ::  flushImmediately
+    type(ESMF_Logical)			                    ::  flushed     
+    type(ESMF_Logical)                              ::  rootOnly    
+    type(ESMF_Logical)                              ::  verbose  
+    type(ESMF_Logical)                              ::  dirty  
+    integer                                             maxElements
+    integer                                             stream 
+    integer                                             unitNumber
+    integer                                             fIndex 
 
 end type ESMF_Log
 !------------------------------------------------------------------------------
@@ -410,7 +410,7 @@ end subroutine ESMF_LogFlush
 !            allocation eror.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	         of the default log.
 !      
 !      \end{description}
 ! 
@@ -664,7 +664,7 @@ end subroutine ESMF_LogInitialize
 !            allocation eror.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	         of the default log.
 !      
 !      \end{description}
 ! 
@@ -735,7 +735,7 @@ end function ESMF_LogMsgFoundAllocError
 !            at the same time it is testing the value.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	         of the default log.
 !      
 !      \end{description}
 ! 
@@ -797,7 +797,7 @@ end function ESMF_LogMsgFoundError
 !            at the same time it is testing the value.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	         of the default log.
 !      
 !      \end{description}
 ! 
@@ -871,12 +871,12 @@ end subroutine ESMF_LogOpen
 !
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log) 				   		:: log
+	type(ESMF_Log) 				   		            :: log
 	type(ESMF_Logical), intent(in),optional			:: verbose
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
-	type(ESMF_HaltType), intent(in),optional                :: halt
-	type(ESMF_LogType), intent(in),optional                 :: logtype
+	type(ESMF_HaltType), intent(in),optional        :: halt
+	type(ESMF_LogType), intent(in),optional         :: logtype
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -892,9 +892,9 @@ end subroutine ESMF_LogOpen
 !      \item [{[verbose]}]
 !            Verbose flag.
 !      \item [{[rootOnly]}]
-!	     Root only flag
+!	         Root only flag
 !      \item [{[halt]}]
-!	     Halt definitions (halterr(1), haltwarn(2),haltnever(3))
+!	         Halt definitions {\tt ESMF\_HALTWARNING}, {\tt ESMF\_HALTERROR},{\tt ESMF\_HALTNEVER}
 !      \item [{[logtype]}]
 !            Defines either single or multilog
 !      \item [{[stream]}]
@@ -942,7 +942,7 @@ end subroutine ESMF_LogSet
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
 	type(ESMF_LOG), intent(in), optional	:: log
-	integer, intent(out),optional		:: rc
+	integer, intent(out),optional		    :: rc
 
 ! !DESCRIPTION:
 !      This subroutine writes to the file associated with an {\tt ESMF\_Log}.
@@ -969,7 +969,7 @@ end subroutine ESMF_LogSet
 !            User-provided method string.
 !      \item [{[log]}]
 !            An optional {\tt ESMF\_Log} object that can be used instead
-!	     of the default log.
+!	         of the default log.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
