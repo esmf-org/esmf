@@ -1,4 +1,4 @@
-% $Id: ESMF_usage.tex,v 1.5 2002/08/22 16:19:48 cdeluca Exp $
+% $Id: ESMF_usage.tex,v 1.6 2002/08/23 20:37:28 nscollins Exp $
 
 \subsection{Bindings}
 
@@ -112,8 +112,13 @@ The intent is to provide an error handling system in which
 users can choose from a variety of handlers or supply their own.
 
 
+\subsection{Attributes}
 
-
+Attributes are a list of (name, value) pairs associated with any 
+object in the library. The value can be of any data type. 
+There are methods for listing, setting, and querying attribute lists.
+These methods are expected to be implemented in the base class
+and not specialized by higher level objects.
 
 
 
