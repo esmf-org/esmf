@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.32 2003/08/29 20:49:55 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.33 2003/09/04 22:03:26 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.32 2003/08/29 20:49:55 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.33 2003/09/04 22:03:26 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,6 +58,7 @@
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar
+      type(ESMF_CalendarType) :: cal_type
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2
@@ -151,10 +152,10 @@
       ! ----------------------------------------------------------------------------
 
       ! Verify the calendar is set correctly
-      ! write(name, *) "Get StartTime calendar Test"
-      ! call ESMF_TimeGet(startTime, cal=cal, rc=rc)
-      ! write(failMsg, *) " Returned ESMF_FAILURE and/or Day not correct value"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(cal.eq.gregorianCalendar), &
+      ! write(name, *) "Get Calendar Type Test"
+      ! call ESMF_CalendarGet(gregorianCalendar, type=cal_type, rc=rc)
+      ! write(failMsg, *) " Returned ESMF_FAILURE and/or calendar not correct value"
+      ! call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(cal_type.eq.ESMF_CAL_GREGORIAN), &
       !                name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
