@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.89 2004/12/09 21:18:13 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.90 2005/01/03 23:29:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -323,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.89 2004/12/09 21:18:13 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.90 2005/01/03 23:29:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -981,7 +981,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSetLocations"
 !BOPI
-! !IROUTINE: ESMF_PhysGridSetLocations - Sets grid regions from input array.
+! !IROUTINE: ESMF_PhysGridSetLocations - Sets grid locations from input array.
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetLocations(physgrid, locationArray, name, &
