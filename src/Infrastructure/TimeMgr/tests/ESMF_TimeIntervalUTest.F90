@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.39 2004/12/28 23:28:13 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.40 2005/04/02 00:26:23 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.39 2004/12/28 23:28:13 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.40 2005/04/02 00:26:23 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -60,7 +60,8 @@
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
       type(ESMF_Time) :: startTime
-      type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
+      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
+                             julianDayCalendar, &
                              noLeapCalendar, day360Calendar
       type(ESMF_TimeInterval) :: absoluteTime
       type(ESMF_TimeInterval) :: timeInterval1, timeInterval2, timeInterval3, &
@@ -87,6 +88,8 @@
       ! initialize calendars
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
+      julianCalendar = ESMF_CalendarCreate("Julian", &
+                                              ESMF_CAL_JULIAN, rc)
       noLeapCalendar = ESMF_CalendarCreate("No Leap", &
                                               ESMF_CAL_NOLEAP, rc)
       day360Calendar = ESMF_CalendarCreate("360 Day", &
@@ -867,6 +870,777 @@
       print *, "ratio, rc = ", ratio, rc
 
       ! ----------------------------------------------------------------------------
+      ! Julian Leap year 1900 tests
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/29/1900 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing TimeInterval Validation
+      write(name, *) "Time Interval Validate Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_TimeIntervalValidate(timeStep, rc=rc)
+      call ESMF_Test(( rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/29/1900 by mm= -1 Test"
+      write(failMsg, *) " Did not return 12/29/1899 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1899 .and. MM==12 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the - operator
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
+      write(name, *) "Julian Calendar Interval decrement 3/31/1900 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=3, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the - operator
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
+      write(name, *) "Julian Calendar Interval decrement 1/31/1900 by mm= -1 Test"
+      write(failMsg, *) " Did not return 2/29/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=-1, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/30/1900 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/1900 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/29/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/1900 by (mm=1, d=1) Test"
+      write(failMsg, *) " Did not return 3/1/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/1900 by mm=2 Test"
+      write(failMsg, *) " Did not return 3/31/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==3 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/1900 by mm=3 Test"
+      write(failMsg, *) " Did not return 4/30/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=3, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==4 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/1900 by mm=49 Test"
+      write(failMsg, *) " Did not return 2/29/1904 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1904 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the - operator
+      ! resultTime = ESMF_TimeOperator(-)(time1, timestep)
+      write(name, *) "Julian Calendar Interval decrement 1/31/1900 by mm=49 Test"
+      write(failMsg, *) " Did not return 12/31/1895 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1895 .and. MM==12 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 2/28/1900 by d=2 Test"
+      write(failMsg, *) " Did not return 3/1/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 2/29/1900 by yy=1 Test"
+      write(failMsg, *) " Did not return 2/28/1901 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=2, dd=29, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1901 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 12/1/1900 by (yy=2, mm=24, d=90) Test"
+      write(failMsg, *) " Did not return 3/1/1905 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1905 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 12/1/1900 by (yy= -2, mm=24, d= -90) Test"
+      write(failMsg, *) " Did not return 9/2/1900 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=-2, mm=24, d=-90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1900 .and. MM==9 .and. DD==2 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the - operator
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
+      write(name, *) "Julian Calendar Interval decrement 3/1/1900 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
+      write(failMsg, *) " Did not return 12/1/1895 22:14:50 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, h=13, m=62, s=68, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1895 .and. MM==12 .and. DD==1 .and. &
+                      H==22 .and. M==14 .and. S==50 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the - operator
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
+      write(name, *) "Julian Calendar Interval decrement 3/1/1900 by (yy=2, mm=-24, d=90, h=-13, m=62, s=-68) Test"
+      write(failMsg, *) " Did not return 12/3/1899 00:17:06 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=3, dd=1, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=-24, d=90, h=-13, m=62, s=-68, rc=rc)
+      startTime = startTime - timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1899 .and. MM==12 .and. DD==3 .and. &
+                      H==0 .and. M==17 .and. S==6 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (1 year to days) Test"
+      write(failMsg, *) " Did not return 366 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, startTimeIn=startTime, rc=rc)
+      call ESMF_Test((days==366.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (2 years to months) Test"
+      write(failMsg, *) " Did not return 24 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=2, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, &
+                                calendarIn=julianCalendar, rc=rc)
+      call ESMF_Test((months==24.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (months to years) Test"
+      write(failMsg, *) " Did not return 3 years and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, mm=36, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, &
+                                calendarIn=julianCalendar, rc=rc)
+      call ESMF_Test((years==3.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years = ", years
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (2 months to days) Test"
+      write(failMsg, *) " Did not return 60 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=2, dd=1, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, startTimeIn=startTime, rc=rc)
+      call ESMF_Test((days==60.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (days to months) Test"
+      write(failMsg, *) " Did not return 2 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=1, dd=1, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
+                                timeString=timeString, rc=rc)
+      call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
+      print *, "timeStep = ", timeString
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (730 days to years and days) Test"
+      write(failMsg, *) " Did not return years=1, days=364 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1899, mm=3, dd=31, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=730, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, &
+                                startTimeIn=startTime, rc=rc)
+      call ESMF_Test((years==1 .and. days==364 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years, days = ", years, days
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (731 days to years and days) Test"
+      write(failMsg, *) " Did not return years=2, days=0 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2002, mm=3, dd=31, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=731, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, &
+                                startTimeIn=startTime, rc=rc)
+      call ESMF_Test((years==2 .and. days==0 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years, days = ", years, days
+
+      ! ----------------------------------------------------------------------------
+      ! Julian Non-leap year 2003 tests
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/29/2003 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=29, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/30/2003 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=30, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/2003 by mm=1 Test"
+      write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/2003 by (mm=1, d=1) Test"
+      write(failMsg, *) " Did not return 3/1/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=1, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==3 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeIntervalOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/2003 by mm=2 Test"
+      write(failMsg, *) " Did not return 3/31/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==3 .and. DD==31 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/2003 by mm=3 Test"
+      write(failMsg, *) " Did not return 4/30/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=3, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==4 .and. DD==30 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 1/31/2003 by mm=49 Test"
+      write(failMsg, *) " Did not return 2/28/2007 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=49, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2007 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 2/28/2003 by d=2 Test"
+      write(failMsg, *) " Did not return 3/2/2003 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=2, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2003 .and. MM==3 .and. DD==2 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 2/28/2003 by yy=1 Test"
+      write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=28, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2004 .and. MM==2 .and. DD==28 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 12/1/2003 by (yy=2, mm=24, d=90) Test"
+      write(failMsg, *) " Did not return 2/29/2008 12:17:58 or ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=12, dd=1, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=2, mm=24, d=90, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==2008 .and. MM==2 .and. DD==29 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (1 year to days) Test"
+      write(failMsg, *) " Did not return 365 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, yy=1, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, startTimeIn=startTime, rc=rc)
+      call ESMF_Test((days==365.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (2 years to months) Test"
+      write(failMsg, *) " Did not return 24 months or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=2, calendar=julianCalendar, &
+                                rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, rc=rc)
+      call ESMF_Test((months==24 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (months to years) Test"
+      write(failMsg, *) " Did not return 4 years or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, mm=48, calendar=julianCalendar, &
+                                rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, rc=rc)
+      call ESMF_Test((years==4 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years = ", years
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (2 months to days) Test"
+      write(failMsg, *) " Did not return 59 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=1, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, mm=2, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, d=days, startTimeIn=startTime, rc=rc)
+      call ESMF_Test((days==59.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days = ", days
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (days to months) Test"
+      write(failMsg, *) " Did not return 2 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=1, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=59, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
+                                rc=rc)
+      call ESMF_Test((months==2.and.rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months = ", months
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (730 days to years and days) Test"
+      write(failMsg, *) " Did not return years=2, days=0 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2005, mm=3, dd=31, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=730, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, &
+                                startTimeIn=startTime, rc=rc)
+      call ESMF_Test((years==2 .and. days==0 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years, days = ", years, days
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval conversion (731 days to years and days) Test"
+      write(failMsg, *) " Did not return years=2, days=1 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=2001, mm=1, dd=31, &
+                        calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=731, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, &
+                                startTimeIn=startTime, rc=rc)
+      call ESMF_Test((years==2 .and. days==1 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years, days = ", years, days
+
+      ! ----------------------------------------------------------------------------
+      ! General Julian Calendar tests
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
+      write(name, *) "Julian Calendar Interval increment 12/31/1900 by d=1 Test"
+      write(failMsg, *) " Did not return 1/1/1901 12:17:58 and ESMF_SUCCESS"
+      call ESMF_TimeSet(startTime, yy=1900, mm=12, dd=31, h=12, m=17, s=58, &
+                                   calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
+      startTime = startTime + timeStep
+      call ESMF_TimeGet(startTime, yy=YY, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
+      call ESMF_Test((YY==1901 .and. MM==1 .and. DD==1 .and. &
+                      H==12 .and. M==17 .and. S==58 .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, MM, "/", DD, "/", YY, " ", H, ":", M, ":", S
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the == operator
+      ! resultTime = ESMF_TimeOperator(==)(timestep, timestep)
+      write(name, *) "Julian Calendar Interval == test"
+      write(failMsg, *) " Did not return true"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=4, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=2, mm=16, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_Test((timeStep == timeStep2), name, failMsg, result, &
+                      ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval Abs test"
+      write(failMsg, *) " Did not return mm=32, d=10 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=-3, mm=4, d=-10, &
+                                calendar=julianCalendar, rc=rc)
+      timeStep2 = ESMF_TimeIntervalAbsValue(timeStep)
+      call ESMF_TimeIntervalGet(timeStep2, mm=months, d=days, rc=rc)
+      call ESMF_Test((months==32 .and. days==10 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months, days, rc = ", months, days, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval Negative Abs test"
+      write(failMsg, *) " Did not return mm=-32, d=-10 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-4, d=10, &
+                                calendar=julianCalendar, rc=rc)
+      timeStep2 = ESMF_TimeIntervalNegAbsValue(timeStep)
+      call ESMF_TimeIntervalGet(timeStep2, mm=months, d=days, rc=rc)
+      call ESMF_Test((months==-32 .and. days==-10 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months, days, rc = ", months, days, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the MOD operator
+      ! timestep = ESMF_TimeIntervalFunction(MOD)(timestep, timestep)
+      write(name, *) "Julian Calendar Interval Modulus test 1"
+      write(failMsg, *) " Did not return mm=10 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=4, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=2, mm=6, &
+                                calendar=julianCalendar, rc=rc)
+      timeStep3 = MOD(timeStep, timeStep2)
+      call ESMF_TimeIntervalGet(timeStep3, mm=months, rc=rc)
+      call ESMF_Test((months==10 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months, rc = ", months, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the MOD operator
+      ! timestep = ESMF_TimeIntervalFunction(MOD)(timestep, timestep)
+      write(name, *) "Julian Calendar Interval Modulus test 2"
+      write(failMsg, *) " Did not return yy=2 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=5, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=3, &
+                                calendar=julianCalendar, rc=rc)
+      timeStep3 = MOD(timeStep, timeStep2)
+      call ESMF_TimeIntervalGet(timeStep3, yy=years, rc=rc)
+      call ESMF_Test((years==2 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years, rc = ", years, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing the MOD operator
+      ! timestep = ESMF_TimeIntervalFunction(MOD)(timestep, timestep)
+      write(name, *) "Julian Calendar Interval Modulus test 3"
+      write(failMsg, *) " Did not return d=7 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, d=15, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, d=8, &
+                                calendar=julianCalendar, rc=rc)
+      timeStep3 = MOD(timeStep, timeStep2)
+      call ESMF_TimeIntervalGet(timeStep3, d=days, rc=rc)
+      call ESMF_Test((days==7 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days, rc = ", days, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval ratio test 1"
+      write(failMsg, *) " Did not return 0.5 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, d=5, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, d=10, &
+                                calendar=julianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval ratio test 2"
+      write(failMsg, *) " Did not return 0.25 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=12, &
+                                calendar=julianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-.25) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval ratio test 3"
+      write(failMsg, *) " Did not return 0.75 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, mm=6, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, mm=8, &
+                                calendar=julianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-.75) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Julian Calendar Interval ratio test 4"
+      write(failMsg, *) " Did not return 1.5 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, &
+                                calendar=julianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, mm=24, &
+                                calendar=julianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-1.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
       ! No Leap calendar 2004 tests
       ! ----------------------------------------------------------------------------
       !EX_UTest
@@ -1598,6 +2372,7 @@
       call ESMF_CalendarDestroy(julianDayCalendar)
       call ESMF_CalendarDestroy(day360Calendar)
       call ESMF_CalendarDestroy(noLeapCalendar)
+      call ESMF_CalendarDestroy(julianCalendar)
       call ESMF_CalendarDestroy(gregorianCalendar)
 
       ! ----------------------------------------------------------------------------
