@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.163 2004/04/28 23:11:52 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.164 2004/05/05 17:50:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.163 2004/04/28 23:11:52 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.164 2004/05/05 17:50:48 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1200,7 +1200,7 @@
       end subroutine ESMF_GridGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetAllAxisIndex - Get all axis indices for a Grid
 
 ! !INTERFACE:
@@ -1232,7 +1232,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
