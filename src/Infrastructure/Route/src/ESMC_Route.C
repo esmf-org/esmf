@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.20 2003/03/21 20:22:25 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.21 2003/03/21 21:10:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.20 2003/03/21 20:22:25 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.21 2003/03/21 21:10:20 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -383,15 +383,21 @@
         if (xscount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
         if (xscount > 0)
             rc = sendxp->ESMC_XPacketGet(&srank, &sleft, &sright, sstrides, snums);
-        else
+        else {
             sendxp = NULL;
+            srank = 0;
+            sleft=0; sright=0;
+        }
 
         rc = recvRT->ESMC_RTableGetEntry(theirdeid, &xrcount, &recvxp);
         if (xrcount > 1) fprintf(stderr, "cannot handle multiple xps yet\n");
         if (xrcount > 0)
             rc = recvxp->ESMC_XPacketGet(&rrank, &rleft, &rright, rstrides, rnums);
-        else
+        else {
             recvxp = NULL;
+            rrank = 0;
+            rleft=0; rright=0;
+        }
         
         // ready to call the comm routines - possibly multiple times, one for
         //  each disjoint memory piece?
@@ -411,8 +417,14 @@
         // how is this loop to be structured?  we've got to set up both
         // a send and receive each time.  ranks must match?
         for (j=0, srcbytes = sleft, rcvbytes = rleft; j<srank; j++) {
+            printf("j=%d, srank=%d\n", j, srank);
+            printf("snums[j]=%d, rnums[j]=%d\n", snums[j], rnums[j]);
             for (l=0; l<snums[j] && l<rnums[j]; l++, 
                             srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
+         
+                 printf("sending %d bytes and receiving %d bytes with %d\n", 
+                                   sleft-sright, rleft-rright, theirdeid);
+
                 //rc = layout->ESMC_DELayoutSendRecv(mydeid, 
                 //             (void *)((char *)srcaddr+srcbytes), 
                 //             sleft-sright,

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.16 2003/03/21 21:02:00 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.17 2003/03/21 21:10:20 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.16 2003/03/21 21:02:00 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.17 2003/03/21 21:10:20 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -377,7 +377,7 @@
 
     int i;
 
-    printf("XPacket: rank=%d, left=%d, right=%d\n", rank, left, right);
+    printf("XPacket: rank=%d, left=%d, right=%d, ", rank, left, right);
  
     printf("   strides=(");
     for (i=0; i<rank; i++) 
