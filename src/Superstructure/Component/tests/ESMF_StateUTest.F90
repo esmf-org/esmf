@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.7 2003/03/24 23:15:16 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.8 2003/03/25 00:00:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.7 2003/03/24 23:15:16 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.8 2003/03/25 00:00:40 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! Some common definitions.  This requires the C preprocessor.
@@ -52,7 +52,7 @@
       character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname, bname
       character(ESMF_MAXSTR) :: fieldname, fname
       type(ESMF_Field) :: field1, field2, field3(3), field4
-      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5
+      type(ESMF_Bundle) :: bundle1, bundle2(1), bundle3(1), bundle4(1), bundle5, bundle6
       type(ESMF_State) :: state1, state2, state3, state4
       type(ESMF_Array) :: array1, array2(2), array3
       real, dimension(:,:), pointer :: f90ptr1
@@ -362,6 +362,21 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+
+
+      ! Test adding a second Bundle to a State
+      bundlename = "Temperature"
+      bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1, bundle1, rc)
+      write(name, *) "Adding a second Bundle to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      call  ESMF_StatePrint(state1, rc=rc)
 
       ! Test adding Field to a State
       fieldname = "Humidity"
