@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.1 2004/06/09 05:19:34 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.2 2004/06/09 05:32:02 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,15 +29,12 @@
 #define ESMF_METHOD "ESMF_LogErrEx"
 ! ESMF Framework module
     use ESMF_Mod
-    !use ESMF_LogErrMod
     implicit none
 
-    !type(ESMF_Log) :: aLog1
-    real :: real_num
     integer :: rc1,rc2
     logical :: ret
 
-    call ESMF_LogInitialize("aLog1.txt",rc=rc1)
+    call ESMF_Initialize(rc=rc1)
     call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE,rc2)
