@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.5 2004/04/08 06:30:59 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.6 2004/04/08 20:07:04 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,13 +225,9 @@ end subroutine ESMF_LogOpen
 	rc=ESMF_FAILURE
 	if (present(method)) then
 		tmethod=adjustl(method)
-	else
-		tmethod=""
 	endif
 	if (present(module)) then
 		tmodule=adjustl(module)
-	else
-		tmodule=""
 	endif	  
 	if (aLog%FileIsOpen .eq. ESMF_TRUE) then
 		call DATE_AND_TIME(d,t)	
@@ -244,10 +240,27 @@ end subroutine ESMF_LogOpen
 				lt="ERROR"
 		end select				
 		f=adjustl(__FILE__)
-		WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
-		100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a32,a32,a)
-		if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-		lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string
+		if ((present(module)).and.(present(method))) then
+		  	WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,string
+			100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
+			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+			lt,"    ",f,__LINE__,"  ",tmodule,tmethod,string		
+		else if ((present(module)).and.not(present(method))) then
+		  	WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,string
+			101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+			lt,"    ",f,__LINE__,"  ",tmodule,string
+		else if (not(present(module)).and.(present(method))) then
+		  	WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,string
+			102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
+			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+			lt,"    ",f,__LINE__,"  ",tmodule,string	
+		else
+			WRITE(aLog%unitnumber,103) d,t,lt,f,__LINE__,string
+			103 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
+			if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+			lt,"    ",f,__LINE__,"  ",string
+		endif	
 		rc=ESMF_SUCCESS
 	endif	
        
@@ -261,15 +274,15 @@ end subroutine ESMF_LogWrite
 	function ESMF_LogFoundError(aLog,rc,string,logtype,module,method)
 !
 ! !RETURN VALUE:
-	logical									::ESMF_LogFoundError
+	logical								::ESMF_LogFoundError
 ! !ARGUMENTS:
 !	
-	type(ESMF_Log), intent(in) 				:: aLog
+	type(ESMF_Log), intent(in) 					:: aLog
 	integer, intent(in)						:: rc
-	character(len=*), intent(in),optional	:: string
-	integer, intent(in),optional			:: logtype
-	character(len=*), intent(in), optional  :: module
-	character(len=*), intent(in), optional	:: method
+	character(len=*), intent(in),optional				:: string
+	integer, intent(in),optional					:: logtype
+	character(len=*), intent(in), optional  			:: module
+	character(len=*), intent(in), optional				:: method
 	
 
 ! !DESCRIPTION:
@@ -294,30 +307,11 @@ end subroutine ESMF_LogWrite
 !      \end{description}
 ! 
 !EOP
-	character(len=32)					::tstring
-	character(len=32)					::tmodule
-	character(len=32)					::tmethod
 	integer								::trc
-	integer								::tlogtype
 	
 	ESMF_LogFoundError=ESMF_FALSE
 	if (rc .NE. ESMF_SUCCESS) then
-		if (present(method)) then
-			tmethod=adjustl(method)
-		else
-			tmethod=""
-		endif
-		if (present(module)) then
-			tmodule=adjustl(module)
-		else
-			tmodule=""
-		endif	  
-		if (present(module)) then
-			tmodule=adjustl(module)
-		else
-			tmodule=""
-		endif	  
-		call ESMF_LogWrite(aLog,tstring,logtype,tmodule,tmethod,trc)
+		call ESMF_LogWrite(aLog,string,logtype,module,method,trc)
 		ESMF_LogFoundError=ESMF_TRUE
 	endif	
        
