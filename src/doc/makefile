@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2001/11/13 18:35:47 dneckels Exp $ 
+# $Id: makefile,v 1.2 2001/11/15 19:25:32 dneckels Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -28,11 +28,11 @@ include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 # Dvi files
 ${ESMC_DOCDIR}/ESMF_reqdoc.dvi:
-	${DO_LATEX} esmf req
+	${DO_LATEX} ESMF req
 	mv -f ESMF_reqdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi:
-	${DO_LATEX} esmf usr
+	${DO_LATEX} ESMF usr
 	mv -f ESMF_usrdoc.dvi ${ESMC_DOCDIR}
 
 
@@ -46,10 +46,10 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ${ESMC_DOCDIR}/ESMF_usrdoc.dvi
 
 # Html Files
 ${ESMC_DOCDIR}/ESMF_reqdoc: 
-	${DOL2H} esmf req
+	${DOL2H} ESMF req
 	mv -f ESMF_reqdoc ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc: 
-	${DOL2H} esmf usr
+	${DOL2H} ESMF usr
 	mv -f ESMF_usrdoc ${ESMC_DOCDIR}
 
