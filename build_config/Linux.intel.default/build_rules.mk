@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2004/10/28 22:11:29 nscollins Exp $
+# $Id: build_rules.mk,v 1.19 2004/11/02 17:11:28 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -179,14 +179,33 @@ CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CCV		   = ${CXX_CC} -V -v
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+# by default append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if it is not set, default to where the intel
+# compilers try to install themselves.  if your compiler is someplace else
+# either set LD_LIBRARY_PATH first, or make a site specific file and
+# edit the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
 ifeq ($(ESMF_COMPILER_VERSION),81)
-C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_81/lib -L/opt/intel_cc_81/lib \
-                     -L/usr/lib/gcc-lib/ia64-redhat-linux/3.2.3 -lstdc++ -lrt
+C_LIB_NEEDED = -lstdc++
+#C_LIB_NEEDED = -L/usr/lib/gcc-lib/ia64-redhat-linux/3.2.3 -lstdc++
 else
-C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_80/lib -L/opt/intel_cc_80/lib \
-                     -lcprts -lrt
+C_LIB_NEEDED = -lcprts
 endif
-C_CXXF90LIBS       =  -lrt
+else
+ifeq ($(ESMF_COMPILER_VERSION),81)
+LIB_PATHS       = -L/opt/intel_cc_81/lib
+LD_PATHS        = $(C_FLINKER_SLFLAG)/opt/intel_cc_81/lib
+else
+LIB_PATHS       = -L/opt/intel_cc_80/lib
+LD_PATHS        = $(C_FLINKER_SLFLAG)/opt/intel_cc_80/lib
+endif
+endif
+C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lifcore -lrt -ldl
+C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) -lifcore -lrt -ldl
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
