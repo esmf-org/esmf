@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.8 2003/08/29 22:07:09 eschwab Exp $
+! $Id: CoupledFlowApp.F90,v 1.9 2003/09/11 20:51:52 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -113,8 +113,8 @@
       !
       ! Read in input file
       !
-      open(15, status="old", file="coupled_app_input")
-      read(15, input, end=20)
+      open(9, status="old", file="coupled_app_input")
+      read(9, input, end=20)
    20 continue
 
 !------------------------------------------------------------------------------
