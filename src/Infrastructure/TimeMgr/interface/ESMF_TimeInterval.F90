@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.64 2004/07/21 18:30:43 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.65 2004/08/21 00:00:25 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -110,11 +110,19 @@
       private ESMF_TimeIntervalLE
       private ESMF_TimeIntervalGT
       private ESMF_TimeIntervalGE
+      private ESMF_TimeIntervalSetDur
+      private ESMF_TimeIntervalSetDurStart
+      private ESMF_TimeIntervalSetDurCal
+      private ESMF_TimeIntervalSetDurCalTyp
+      private ESMF_TimeIntervalGetDur
+      private ESMF_TimeIntervalGetDurStart
+      private ESMF_TimeIntervalGetDurCal
+      private ESMF_TimeIntervalGetDurCalTyp
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.64 2004/07/21 18:30:43 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.65 2004/08/21 00:00:25 eschwab Exp $'
 
 !==============================================================================
 !
@@ -855,6 +863,46 @@
 
       end interface
 !
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
+!
+! !INTERFACE:
+      interface ESMF_TimeIntervalSet
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalSetDur
+      module procedure ESMF_TimeIntervalSetDurStart
+      module procedure ESMF_TimeIntervalSetDurCal
+      module procedure ESMF_TimeIntervalSetDurCalTyp
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_TimeInterval}
+!     Set methods.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value
+!
+! !INTERFACE:
+      interface ESMF_TimeIntervalGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalGetDur
+      module procedure ESMF_TimeIntervalGetDurStart
+      module procedure ESMF_TimeIntervalGetDurCal
+      module procedure ESMF_TimeIntervalGetDurCalTyp
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_TimeInterval}
+!     Get methods.
+!
+!EOPI
+      end interface
+!
 !==============================================================================
 
       contains
@@ -895,21 +943,19 @@
 ! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalGet(timeinterval, &
-                                      yy, yy_i8, &
-                                      mm, mm_i8, &
-                                      d, d_i8, &
-                                      h, m, &
-                                      s, s_i8, &
-                                      ms, us, ns, &
-                                      d_r8, h_r8, m_r8, s_r8, &
-                                      ms_r8, us_r8, ns_r8, &
-                                      sN, sD, &
-                                      startTime, endTime, &
-                                      calendar, calendarType, &
-                                      startTimeIn, endTimeIn, &
-                                      calendarIn, calendarTypeIn, &
-                                      timeString, rc)
+      ! Private name; call using ESMF_TimeIntervalGet()
+      subroutine ESMF_TimeIntervalGetDur(timeinterval, &
+                                         yy, yy_i8, &
+                                         mm, mm_i8, &
+                                         d, d_i8, &
+                                         h, m, &
+                                         s, s_i8, &
+                                         ms, us, ns, &
+                                         d_r8, h_r8, m_r8, s_r8, &
+                                         ms_r8, us_r8, ns_r8, &
+                                         sN, sD, &
+                                         startTime, calendar, calendarType, &
+                                         timeString, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeinterval
@@ -936,13 +982,8 @@
       integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
       integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
       type(ESMF_Time),         intent(out), optional :: startTime
-      type(ESMF_Time),         intent(out), optional :: endTime
       type(ESMF_Calendar),     intent(out), optional :: calendar
       type(ESMF_CalendarType), intent(out), optional :: calendarType
-      type(ESMF_Time),         intent(in),  optional :: startTimeIn    ! Input
-      type(ESMF_Time),         intent(in),  optional :: endTimeIn      ! Input
-      type(ESMF_Calendar),     intent(in),  optional :: calendarIn     ! Input
-      type(ESMF_CalendarType), intent(in),  optional :: calendarTypeIn ! Input
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: rc
 
@@ -1021,35 +1062,11 @@
 !     \item[{[startTime]}]
 !          Starting time, if set, of an absolute calendar interval
 !          (yy, mm, and/or d).
-!     \item[{[endTime]}]
-!          Ending time, if set, of an absolute calendar interval
-!          (yy, mm, and/or d).
 !     \item[{[calendar]}]
 !          Associated {\tt Calendar}, if any.
 !     \item[{[calendarType]}]
 !          Associated {\tt CalendarType}, if any.
-!     \item[{[startTimeIn]}]
-!          INPUT argument:  pins a calendar interval to a specific point
-!          in time to allow conversion between relative units (yy, mm, d) and
-!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
-!          previously set.  Mutually exclusive with endTimeIn and calendarIn.
-!     \item[{[endTimeIn]}]
-!          INPUT argument:  pins a calendar interval to a specific point
-!          in time to allow conversion between relative units (yy, mm, d) and
-!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
-!          previously set.  Mutually exclusive with startTimeIn and calendarIn.
-!     \item[{[calendarIn]}]
-!          INPUT argument:  pins a calendar interval to a specific calendar
-!          to allow conversion between relative units (yy, mm, d) and
-!          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
-!          and endTimeIn since they contain a calendar.  Alternate to, and
-!          mutually exclusive with, calendarTypeIn below.  Primarily for
-!          specifying a custom calendar type.
-!     \item[{[calendarTypeIn]}]
-!          INPUT argument:  Alternate to, and mutually exclusive with,
-!          calendarIn above.  More convenient way of specifying a built-in
-!          calendar type.
-!     \item[timeString]
+!     \item[{[timeString]}]
 !          The string to return.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1074,14 +1091,370 @@
       end if
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalGet(timeinterval, yy, yy_i8, mm, mm_i8, &
+      call c_ESMC_TimeIntervalGetDur(timeinterval, yy, yy_i8, mm, mm_i8, &
+                                     d, d_i8, h, m, s, s_i8, ms, &
+                                     us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
+                                     us_r8, ns_r8, sN, sD, &
+                                     startTime, calendar, calendarType, &
+                                     timeStringLen, tempTimeStringLen, &
+                                     tempTimeString, rc)
+
+      ! copy temp time string back to given time string to restore
+      !   native Fortran storage style
+      if (present(timeString)) then
+        timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+    
+      end subroutine ESMF_TimeIntervalGetDur
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalGet()
+      subroutine ESMF_TimeIntervalGetDurStart(timeinterval, &
+                                              yy, yy_i8, &
+                                              mm, mm_i8, &
+                                              d, d_i8, &
+                                              h, m, &
+                                              s, s_i8, &
+                                              ms, us, ns, &
+                                              d_r8, h_r8, m_r8, s_r8, &
+                                              ms_r8, us_r8, ns_r8, &
+                                              sN, sD, &
+                                              startTime, &
+                                              calendar, calendarType, &
+                                              startTimeIn, &
+                                              timeString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      integer(ESMF_KIND_I4),   intent(out), optional :: yy
+      integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: mm
+      integer(ESMF_KIND_I8),   intent(out), optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: d
+      integer(ESMF_KIND_I8),   intent(out), optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: h
+      integer(ESMF_KIND_I4),   intent(out), optional :: m
+      integer(ESMF_KIND_I4),   intent(out), optional :: s
+      integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      type(ESMF_Time),         intent(out), optional :: startTime
+      type(ESMF_Calendar),     intent(out), optional :: calendar
+      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_Time),         intent(in)            :: startTimeIn    ! Input
+      character (len=*),       intent(out), optional :: timeString
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Gets the value of {\tt timeinterval} in units specified by the
+!     user via Fortran optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally from integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Units are bound (normalized) to the next larger unit specified.  For
+!     example, if a time interval is defined to be one day, then
+!     {\tt ESMF\_TimeIntervalGet(d = days, s = seconds)} would return
+!       {\tt days = 1}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
+!       {\tt seconds = 86400}.
+!
+!     See {\tt ../include/ESMC\_BaseTime.h} and
+!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
+!     
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
+!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to query.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).
+!     \item[{[h]}]
+!          Integer hours.
+!     \item[{[m]}]
+!          Integer minutes.
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).
+!     \item[{[ms]}]
+!          Integer milliseconds.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
+!     \item[{[startTime]}]
+!          Starting time, if set, of an absolute calendar interval
+!          (yy, mm, and/or d).
+!     \item[{[calendar]}]
+!          Associated {\tt Calendar}, if any.
+!     \item[{[calendarType]}]
+!          Associated {\tt CalendarType}, if any.
+!     \item[startTimeIn]
+!          INPUT argument:  pins a calendar interval to a specific point
+!          in time to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Overrides any startTime and/or endTime
+!          previously set.  Mutually exclusive with endTimeIn and calendarIn.
+!     \item[{[timeString]}]
+!          The string to return.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.1
+
+      ! temp time string for C++ to fill
+      character (len=ESMF_MAXSTR) :: tempTimeString
+
+      ! initialize time string lengths to zero for non-existent time string
+      integer :: timeStringLen
+      integer :: tempTimeStringLen
+      timeStringLen = 0     
+      tempTimeStringLen = 0
+
+      ! if used, get length of given timeString for C++ validation
+      if (present(timeString)) then
+        timeStringLen = len(timeString)
+      end if
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalGetDurStart(timeinterval, yy, yy_i8, mm, mm_i8, &
+                                       d, d_i8, h, m, s, s_i8, ms, &
+                                       us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
+                                       us_r8, ns_r8, sN, sD, &
+                                       startTime, &
+                                       calendar, calendarType, &
+                                       startTimeIn, &
+                                       timeStringLen, tempTimeStringLen, &
+                                       tempTimeString, rc)
+
+      ! copy temp time string back to given time string to restore
+      !   native Fortran storage style
+      if (present(timeString)) then
+        timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+    
+      end subroutine ESMF_TimeIntervalGetDurStart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalGet()
+      subroutine ESMF_TimeIntervalGetDurCal(timeinterval, &
+                                            yy, yy_i8, &
+                                            mm, mm_i8, &
+                                            d, d_i8, &
+                                            h, m, &
+                                            s, s_i8, &
+                                            ms, us, ns, &
+                                            d_r8, h_r8, m_r8, s_r8, &
+                                            ms_r8, us_r8, ns_r8, &
+                                            sN, sD, &
+                                            startTime, &
+                                            calendar, calendarType, &
+                                            calendarIn, &
+                                            timeString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      integer(ESMF_KIND_I4),   intent(out), optional :: yy
+      integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: mm
+      integer(ESMF_KIND_I8),   intent(out), optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: d
+      integer(ESMF_KIND_I8),   intent(out), optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: h
+      integer(ESMF_KIND_I4),   intent(out), optional :: m
+      integer(ESMF_KIND_I4),   intent(out), optional :: s
+      integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      type(ESMF_Time),         intent(out), optional :: startTime
+      type(ESMF_Calendar),     intent(out), optional :: calendar
+      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_Calendar),     intent(in)            :: calendarIn     ! Input
+      character (len=*),       intent(out), optional :: timeString
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Gets the value of {\tt timeinterval} in units specified by the
+!     user via Fortran optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally from integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Units are bound (normalized) to the next larger unit specified.  For
+!     example, if a time interval is defined to be one day, then
+!     {\tt ESMF\_TimeIntervalGet(d = days, s = seconds)} would return
+!       {\tt days = 1}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
+!       {\tt seconds = 86400}.
+!
+!     See {\tt ../include/ESMC\_BaseTime.h} and
+!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
+!     
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
+!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to query.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).
+!     \item[{[h]}]
+!          Integer hours.
+!     \item[{[m]}]
+!          Integer minutes.
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).
+!     \item[{[ms]}]
+!          Integer milliseconds.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
+!     \item[{[startTime]}]
+!          Starting time, if set, of an absolute calendar interval
+!          (yy, mm, and/or d).
+!     \item[{[calendar]}]
+!          Associated {\tt Calendar}, if any.
+!     \item[{[calendarType]}]
+!          Associated {\tt CalendarType}, if any.
+!     \item[{[calendarIn]}]
+!          INPUT argument:  pins a calendar interval to a specific calendar
+!          to allow conversion between relative units (yy, mm, d) and
+!          absolute units (d, h, m, s).  Mutually exclusive with startTimeIn
+!          and endTimeIn since they contain a calendar.  Alternate to, and
+!          mutually exclusive with, calendarTypeIn below.  Primarily for
+!          specifying a custom calendar type.
+!     \item[[{timeString]}]
+!          The string to return.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.1
+
+      ! temp time string for C++ to fill
+      character (len=ESMF_MAXSTR) :: tempTimeString
+
+      ! initialize time string lengths to zero for non-existent time string
+      integer :: timeStringLen
+      integer :: tempTimeStringLen
+      timeStringLen = 0     
+      tempTimeStringLen = 0
+
+      ! if used, get length of given timeString for C++ validation
+      if (present(timeString)) then
+        timeStringLen = len(timeString)
+      end if
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalGetDurCal(timeinterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
                                   us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
                                   us_r8, ns_r8, sN, sD, &
-                                  startTime, endTime, &
-                                  calendar, calendarType, &
-                                  startTimeIn, endTimeIn, &
-                                  calendarIn, calendarTypeIn, &
+                                  startTime, calendar, calendarType, &
+                                  calendarIn, &
                                   timeStringLen, tempTimeStringLen, &
                                   tempTimeString, rc)
 
@@ -1091,7 +1464,184 @@
         timeString = tempTimeString(1:tempTimeStringLen)
       endif
     
-      end subroutine ESMF_TimeIntervalGet
+      end subroutine ESMF_TimeIntervalGetDurCal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalGet()
+      subroutine ESMF_TimeIntervalGetDurCalTyp(timeinterval, &
+                                               yy, yy_i8, &
+                                               mm, mm_i8, &
+                                               d, d_i8, &
+                                               h, m, &
+                                               s, s_i8, &
+                                               ms, us, ns, &
+                                               d_r8, h_r8, m_r8, s_r8, &
+                                               ms_r8, us_r8, ns_r8, &
+                                               sN, sD, &
+                                               startTime, &
+                                               calendar, calendarType, &
+                                               calendarTypeIn, &
+                                               timeString, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in)            :: timeinterval
+      integer(ESMF_KIND_I4),   intent(out), optional :: yy
+      integer(ESMF_KIND_I8),   intent(out), optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: mm
+      integer(ESMF_KIND_I8),   intent(out), optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: d
+      integer(ESMF_KIND_I8),   intent(out), optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: h
+      integer(ESMF_KIND_I4),   intent(out), optional :: m
+      integer(ESMF_KIND_I4),   intent(out), optional :: s
+      integer(ESMF_KIND_I8),   intent(out), optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(out), optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(out), optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(out), optional :: sD    ! not implemented
+      type(ESMF_Time),         intent(out), optional :: startTime
+      type(ESMF_Calendar),     intent(out), optional :: calendar
+      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalendarType), intent(in)            :: calendarTypeIn ! Input
+      character (len=*),       intent(out), optional :: timeString
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Gets the value of {\tt timeinterval} in units specified by the
+!     user via Fortran optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally from integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Units are bound (normalized) to the next larger unit specified.  For
+!     example, if a time interval is defined to be one day, then
+!     {\tt ESMF\_TimeIntervalGet(d = days, s = seconds)} would return
+!       {\tt days = 1}, {\tt seconds = 0},
+!     whereas {\tt ESMF\_TimeIntervalGet(s = seconds)} would return
+!       {\tt seconds = 86400}.
+!
+!     See {\tt ../include/ESMC\_BaseTime.h} and
+!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
+!     
+!     For timeString, converts {\tt ESMF\_TimeInterval}'s value into ISO 8601
+!     format PyYmMdDThHmMsS.  See ~\cite{ISO}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to query.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).
+!     \item[{[h]}]
+!          Integer hours.
+!     \item[{[m]}]
+!          Integer minutes.
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).
+!     \item[{[ms]}]
+!          Integer milliseconds.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          (Not implemented yet).
+!     \item[{[startTime]}]
+!          Starting time, if set, of an absolute calendar interval
+!          (yy, mm, and/or d).
+!     \item[{[calendar]}]
+!          Associated {\tt Calendar}, if any.
+!     \item[{[calendarType]}]
+!          Associated {\tt CalendarType}, if any.
+!     \item[{[calendarTypeIn]}]
+!          INPUT argument:  Alternate to, and mutually exclusive with,
+!          calendarIn above.  More convenient way of specifying a built-in
+!          calendar type.
+!     \item[[{timeString]}]
+!          The string to return.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG1.1
+
+      ! temp time string for C++ to fill
+      character (len=ESMF_MAXSTR) :: tempTimeString
+
+      ! initialize time string lengths to zero for non-existent time string
+      integer :: timeStringLen
+      integer :: tempTimeStringLen
+      timeStringLen = 0     
+      tempTimeStringLen = 0
+
+      ! if used, get length of given timeString for C++ validation
+      if (present(timeString)) then
+        timeStringLen = len(timeString)
+      end if
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalGetDurCalTyp(timeinterval, yy, yy_i8, mm, mm_i8, &
+                                  d, d_i8, h, m, s, s_i8, ms, &
+                                  us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
+                                  us_r8, ns_r8, sN, sD, &
+                                  startTime, calendar, calendarType, &
+                                  calendarTypeIn, &
+                                  timeStringLen, tempTimeStringLen, &
+                                  tempTimeString, rc)
+
+      ! copy temp time string back to given time string to restore
+      !   native Fortran storage style
+      if (present(timeString)) then
+        timeString = tempTimeString(1:tempTimeStringLen)
+      endif
+    
+      end subroutine ESMF_TimeIntervalGetDurCalTyp
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1211,18 +1761,17 @@
 ! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalSet(timeinterval, &
-                                      yy, yy_i8, &
-                                      mm, mm_i8, &
-                                      d, d_i8, &
-                                      h, m, &
-                                      s, s_i8, &
-                                      ms, us, ns, &
-                                      d_r8, h_r8, m_r8, s_r8, &
-                                      ms_r8, us_r8, ns_r8, &
-                                      sN, sD, &
-                                      startTime, endTime, &
-                                      calendar, calendarType, rc)
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetDur(timeinterval, &
+                                         yy, yy_i8, &
+                                         mm, mm_i8, &
+                                         d, d_i8, &
+                                         h, m, &
+                                         s, s_i8, &
+                                         ms, us, ns, &
+                                         d_r8, h_r8, m_r8, s_r8, &
+                                         ms_r8, us_r8, ns_r8, &
+                                         sN, sD, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeinterval
@@ -1248,10 +1797,6 @@
       real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
       integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
       integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
-      type(ESMF_Time),         intent(in),  optional :: startTime
-      type(ESMF_Time),         intent(in),  optional :: endTime
-      type(ESMF_Calendar),     intent(in),  optional :: calendar
-      type(ESMF_CalendarType), intent(in),  optional :: calendarType
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1316,28 +1861,392 @@
 !     \item[{[sD]}]
 !          Integer denominator portion of fractional seconds (sN/sD).
 !          Default = 1.  (Not implemented yet).
-!     \item[{[startTime]}]
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalSetDur(timeinterval, yy, yy_i8, &
+                                     mm, mm_i8, &
+                                     d, d_i8, h, m, s, s_i8, ms, &
+                                     us, ns, d_r8, h_r8, m_r8, s_r8, &
+                                     ms_r8, us_r8, ns_r8, sN, sD, rc)
+
+      end subroutine ESMF_TimeIntervalSetDur
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetDurStart(timeinterval, &
+                                              yy, yy_i8, &
+                                              mm, mm_i8, &
+                                              d, d_i8, &
+                                              h, m, &
+                                              s, s_i8, &
+                                              ms, us, ns, &
+                                              d_r8, h_r8, m_r8, s_r8, &
+                                              ms_r8, us_r8, ns_r8, &
+                                              sN, sD, startTime, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      integer(ESMF_KIND_I4),   intent(in),  optional :: yy
+      integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: mm
+      integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: d
+      integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: h
+      integer(ESMF_KIND_I4),   intent(in),  optional :: m
+      integer(ESMF_KIND_I4),   intent(in),  optional :: s
+      integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      type(ESMF_Time),         intent(in)            :: startTime
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
+!     the user via Fortran optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally to integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Ranges are limited only by machine word size.  Numeric defaults are 0,
+!     except for sD, which is 1.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).  Default = 0
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).  Default = 0
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).  Default = 0
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).  Default = 0
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).  Default = 0
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).  Default = 0
+!     \item[{[h]}]
+!          Integer hours.  Default = 0
+!     \item[{[m]}]
+!          Integer minutes.  Default = 0
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).  Default = 0
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).  Default = 0
+!     \item[{[ms]}]
+!          Integer milliseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  Default = 0.0.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  Default = 0.0.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  Default = 0.0. (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  Default = 0.0. (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          Default = 0.  (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          Default = 1.  (Not implemented yet).
+!     \item[startTime]
 !          Starting time of an absolute calendar interval (yy, mm, and/or d);
 !          pins a calendar interval to a specific point in time.  If not set,
-!          and endTime and calendar also not set, calendar interval "floats"
-!          across all calendars and times.
-!          Mutually exclusive with calendar since it contains a calendar.
-!     \item[{[endTime]}]
-!          Ending time of an absolute calendar interval (yy, mm, and/or d);
-!          pins a calendar interval to a specific point in time.  If not set,
-!          and startTime and calendar also not set, calendar interval "floats"
-!          across all calendars and times.
-!          Mutually exclusive with calendar since it contains a calendar.
+!          and calendar also not set, calendar interval "floats" across all
+!          calendars and times.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalSetDurStart(timeinterval, yy, yy_i8, &
+                                          mm, mm_i8, &
+                                          d, d_i8, h, m, s, s_i8, ms, &
+                                          us, ns, d_r8, h_r8, m_r8, s_r8, &
+                                          ms_r8, us_r8, ns_r8, sN, sD, &
+                                          startTime, rc)
+
+      end subroutine ESMF_TimeIntervalSetDurStart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetDurCal(timeinterval, &
+                                            yy, yy_i8, &
+                                            mm, mm_i8, &
+                                            d, d_i8, &
+                                            h, m, &
+                                            s, s_i8, &
+                                            ms, us, ns, &
+                                            d_r8, h_r8, m_r8, s_r8, &
+                                            ms_r8, us_r8, ns_r8, &
+                                            sN, sD, calendar, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      integer(ESMF_KIND_I4),   intent(in),  optional :: yy
+      integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: mm
+      integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: d
+      integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: h
+      integer(ESMF_KIND_I4),   intent(in),  optional :: m
+      integer(ESMF_KIND_I4),   intent(in),  optional :: s
+      integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      type(ESMF_Calendar),     intent(in)            :: calendar
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
+!     the user via Fortran optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally to integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Ranges are limited only by machine word size.  Numeric defaults are 0,
+!     except for sD, which is 1.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).  Default = 0
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).  Default = 0
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).  Default = 0
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).  Default = 0
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).  Default = 0
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).  Default = 0
+!     \item[{[h]}]
+!          Integer hours.  Default = 0
+!     \item[{[m]}]
+!          Integer minutes.  Default = 0
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).  Default = 0
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).  Default = 0
+!     \item[{[ms]}]
+!          Integer milliseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  Default = 0.0.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  Default = 0.0.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  Default = 0.0. (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  Default = 0.0. (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          Default = 0.  (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          Default = 1.  (Not implemented yet).
 !     \item[{[calendar]}]
 !          {\tt Calendar} used to give better definition to calendar interval
 !          (yy, mm, and/or d) for arithmetic, comparison, and conversion
 !          operations.  Allows calendar interval to "float" across all times
 !          on a specific calendar.
-!          Default = NULL; if startTime and endTime also not specified, calendar
+!          Default = NULL; if startTime also not specified, calendar
 !          interval "floats" across all calendars and times.
-!          Mutually exclusive with startTime and endTime since they contain
+!          Mutually exclusive with startTime since it contains
 !          a calendar.  Alternate to, and mutually exclusive with, calendarType
 !          below.  Primarily for specifying a custom calendar type.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalSetDurCal(timeinterval, yy, yy_i8, &
+                                        mm, mm_i8, &
+                                        d, d_i8, h, m, s, s_i8, ms, &
+                                        us, ns, d_r8, h_r8, m_r8, s_r8, &
+                                        ms_r8, us_r8, ns_r8, sN, sD, &
+                                        calendar, rc)
+
+      end subroutine ESMF_TimeIntervalSetDurCal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
+
+! !INTERFACE:
+      ! Private name; call using ESMF_TimeIntervalSet()
+      subroutine ESMF_TimeIntervalSetDurCalTyp(timeinterval, &
+                                               yy, yy_i8, &
+                                               mm, mm_i8, &
+                                               d, d_i8, &
+                                               h, m, &
+                                               s, s_i8, &
+                                               ms, us, ns, &
+                                               d_r8, h_r8, m_r8, s_r8, &
+                                               ms_r8, us_r8, ns_r8, &
+                                               sN, sD, calendarType, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeinterval
+      integer(ESMF_KIND_I4),   intent(in),  optional :: yy
+      integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: mm
+      integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: d
+      integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: h
+      integer(ESMF_KIND_I4),   intent(in),  optional :: m
+      integer(ESMF_KIND_I4),   intent(in),  optional :: s
+      integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
+!     the user via Fortran optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally to integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Ranges are limited only by machine word size.  Numeric defaults are 0,
+!     except for sD, which is 1.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeinterval]
+!          The object instance to initialize.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).  Default = 0
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).  Default = 0
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).  Default = 0
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).  Default = 0
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).  Default = 0
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).  Default = 0
+!     \item[{[h]}]
+!          Integer hours.  Default = 0
+!     \item[{[m]}]
+!          Integer minutes.  Default = 0
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).  Default = 0
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).  Default = 0
+!     \item[{[ms]}]
+!          Integer milliseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  Default = 0.0.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  Default = 0.0.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  Default = 0.0. (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  Default = 0.0. (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          Default = 0.  (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          Default = 1.  (Not implemented yet).
 !     \item[{[calendarType]}]
 !          Alternate to, and mutually exclusive with, calendar above.  More
 !          convenient way of specifying a built-in calendar type.
@@ -1350,14 +2259,14 @@
 !     TMGn.n.n
 
       ! use optional args for any subset
-      call c_ESMC_TimeIntervalSet(timeinterval, yy, yy_i8, mm, mm_i8, &
-                                  d, d_i8, h, m, s, s_i8, ms, &
-                                  us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
-                                  us_r8, ns_r8, sN, sD, &
-                                  startTime, endTime, &
-                                  calendar, calendarType, rc)
+      call c_ESMC_TimeIntervalSetDurCalTyp(timeinterval, yy, yy_i8, &
+                                           mm, mm_i8, &
+                                           d, d_i8, h, m, s, s_i8, ms, &
+                                           us, ns, d_r8, h_r8, m_r8, s_r8, &
+                                           ms_r8, us_r8, ns_r8, sN, sD, &
+                                           calendarType, rc)
 
-      end subroutine ESMF_TimeIntervalSet
+      end subroutine ESMF_TimeIntervalSetDurCalTyp
 
 !------------------------------------------------------------------------------
 !BOP
