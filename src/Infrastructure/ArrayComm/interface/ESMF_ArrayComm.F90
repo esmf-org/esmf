@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.29 2004/03/22 21:17:47 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.30 2004/03/22 21:24:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.29 2004/03/22 21:17:47 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.30 2004/03/22 21:24:48 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -171,9 +171,10 @@
       integer :: gridrank, datarank
       integer :: i, j, nDEs
       type(ESMF_DELayout) :: layout
+      type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       integer, dimension(ESMF_MAXDIM) :: decompids
       integer, dimension(:,:), pointer :: localAxisLengths, tempCCPDEPD
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
+      integer, dimension(ESMF_MAXDIM) :: dimOrder, dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps
       integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
       integer, dimension(:), allocatable :: tempMLCCPD, tempGCCPD
@@ -195,7 +196,19 @@
       allocate(  tempGCCPD(     gridrank), stat=status)
       allocate(tempCCPDEPD(nDEs,gridrank), stat=status)
 
-      call ESMF_GridGet(grid, globalCellCountPerDim=tempGCCPD, &
+! Query the datamap and set info for grid so it knows how to match up the
+! array indices and the grid indices.
+      call ESMF_DataMapGet(datamap, dataIorder=dimOrder, &
+                           horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                           rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
+        return
+      endif
+
+      call ESMF_GridGet(grid, &
+                        horzRelLoc=horzRelLoc, vertRelLoc=vertRelLoc, &
+                        globalCellCountPerDim=tempGCCPD, &
                         cellCountPerDEPerDim=tempCCPDEPD, &
                         maxLocalCellCountPerDim=tempMLCCPD, rc=rc)
 !     call ESMF_GridGet(grid, decomps, rc=status)   !TODO: add decomps
@@ -211,14 +224,6 @@
                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ArrayAllGatherGrid: ArrayGet returned failure"
-        return
-      endif
-
-! Query the datamap and set info for grid so it knows how to match up the
-! array indices and the grid indices.
-      call ESMF_DataMapGet(datamap, dataIorder=dimorder, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayAllGatherGrid: DataMapGet returned failure"
         return
       endif
 
