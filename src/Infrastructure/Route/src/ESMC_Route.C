@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.73 2003/10/22 05:01:24 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.74 2003/10/22 13:41:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.73 2003/10/22 05:01:24 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.74 2003/10/22 13:41:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1519,11 +1519,13 @@ static int maxroutes = 10;
     // loop over DE's from DomainList to receive from
     offset = 0;
     for (k=0; k<recvDomainList->num_domains; k++) {
-      their_de = recvDomainList->domains[k].DE;
+      their_de = recvDomainList->ESMC_DomainListGetDE(k);
+      //their_de = recvDomainList->domains[k].DE;
       // get "their" AI
       count = 1;
       for (j=0; j<rank; j++) {
-        their_AI[j] = recvDomainList->domains[k].ai_list[j];
+        their_AI[j] = recvDomainList->ESMC_DomainListGetAI(k, j);
+        //their_AI[j] = recvDomainList->domains[k].ai_list[j];
         count = count * (their_AI[j].max - their_AI[j].min + 1);
       }
  
