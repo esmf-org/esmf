@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.46 2004/01/28 21:46:49 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.47 2004/02/06 20:10:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.46 2004/01/28 21:46:49 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.47 2004/02/06 20:10:43 jwolfe Exp $'
 
 !==============================================================================
 
@@ -977,7 +977,6 @@
       integer :: i
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
