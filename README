@@ -1,4 +1,4 @@
- $Id: README,v 1.16 2003/06/30 21:34:54 jwolfe Exp $
+ $Id: README,v 1.17 2003/06/30 22:07:52 cdeluca Exp $
 ================================================================================
                                    README
 
@@ -15,7 +15,7 @@ More information about the ESMF project can be found at the ESMF web site:
 	http://www.esmf.ucar.edu
 
 For additional documentation on building and running the ESMF please see the
-ESMF User's Guide on the ESMF Web pages, under the "Downloads and
+ESMF User's Guide on the ESMF Web pages, under the "Downloads &
 Documentation" link.
 
 The ESMF library source code is also available for download at:
@@ -34,8 +34,8 @@ QuickStart information for the impatient.
     (or 'gmake tests_uni' for non-mpi machines).
  - Type 'gmake system_tests' to make and run the system tests
     (or 'gmake system_tests_uni' for non-mpi machines).
- - Type 'gmake ESMF_COUPLED_FLOW' to compile and run a full Fluid Flow Demo
-   program.  It will run in parallel, 4-way, compute 3600 time steps, and
+ - Type 'gmake ESMF_COUPLED_FLOW' to compile and run a coupled fluid flow 
+   demo program.  It will run in parallel, 4-way, compute 3600 time steps, and
    produce 10 data dumps.
 
 
@@ -48,7 +48,7 @@ CVS:            Contains the CVSROOT information.
 
 build:          Contains the build system.
 
-include:
+include:        There are currently no files in this directory.
 
 scripts:        Contains scripts for testing and uniprocessor runs, and some
                 templates.
@@ -68,7 +68,8 @@ test:           Contains unit and system test executables and output.
 System Information
 ------------------
 
-The following platforms are supported: Alpha, IRIX64, IBM, Linux, Sun
+The following platforms are supported: Alpha, IRIX64, IBM 32-bit and 64-bit 
+addressing.
 
 
 Environment Variables
@@ -76,31 +77,29 @@ Environment Variables
 
 Currently the following environment variables must be set:
 
-ESMF_ARCH     alpha, IRIX64, rs6000_sp, rs6000_64
+ESMF_ARCH     alpha, IRIX64, rs6000_sp (32-bit), rs6000_64
 ESMF_DIR      top-level ESMF directory
 
-On rs6000 machines an additional environment variable needs to be
-set to execute any of the tests or examples:
+On rs6000 machines an additional environment variable needs to be set to 
+execute any of the tests or examples:
 
-MP_RMPOOL     Node allocation pool
+MP_RMPOOL     <Node allocation pool>
 
-On Alpha machines an additional environment variable needs
-to be set:
+On Alpha machines an additional environment variable needs to be set:
 
-ESMF_PROJECT  Load Sharing Facility (LSF) project name 
+ESMF_PROJECT  <Load Sharing Facility (LSF) project name>
 
-On an Alpha machine, test and demo applications are run using 
-the bsub command.  The value of ESMF_PROJECT is used as the 
-argument for bsub's -P option. The -P option assigns a job to 
-a specific project.  
+On an Alpha machine, test and demo applications are run using the bsub command.  
+The value of ESMF_PROJECT is used as the argument for bsub's -P option. The -P 
+option assigns a job to a specific project.  
 
-Environment variables must be set in the user's shell and not inside
-an ESMF makefile or build system file.  Here is an example of setting
-an environment variable in tcsh and csh shells:
+Environment variables must be set in the user's shell and not inside an ESMF 
+makefile or build system file.  Here is an example of setting an environment 
+variable in tcsh and csh shells:
 
 	setenv ESMF_ARCH rs6000_sp
 
-In Ksh shell environment variables are set this way:
+In ksh shell environment variables are set this way:
 
 	export ESMF_ARCH=rs6000_sp
 
@@ -108,11 +107,10 @@ In Ksh shell environment variables are set this way:
 Build Information
 -----------------
 
-GNU make is required to build the library.  On most
-systems this will be just the command gmake.  On others 
-it might be installed as gnumake or even just make.
-In any event, use the --version option with these make 
-commands to determine which is GNU make.
+GNU make is required to build the library.  On most systems this will be just 
+the command gmake.  On others it might be installed as gnumake or even just 
+make.  In any event, use the --version option with these make commands to 
+determine which is GNU make.
 
 Build the library with the command:
  
@@ -124,7 +122,7 @@ for a debug version or
 
 for an optimized version.
 
-To build and run the coupled flow demo:
+To build and run the coupled fluid flow demo:
 
   gmake BOPT=[g,O] ESMF_COUPLED_FLOW
 
@@ -150,25 +148,8 @@ The exhaustive unit tests option is a *compile* time option.  Use
 first if the unit tests have already been compiled without the 
 ESMF_EXHAUSTIVE=ON option.
 
-Output files from the tests are directed to files in $ESMF_DIR/test${BOPT}/${ESMF_ARCH}
-directories.
-
-There is an install target which will copy the library and mod files to an
-install location.  To invoke this target use:
-
-  gmake BOPT=[O,g] ESMF_LIB_INSTALL=dir_for_lib ESMF_MOD_INSTALL=dir_for_mod_files install 
-
-Some users may wish for the library to be built in a directory different from 
-where the source code resides.  To do this, build using:
-  
-   gmake ESMF_BUILD=build_directory_here BOPT=[O,g]
-
-The ESMF_BUILD variable gives an alternate path in which to place the libraries,
-mod files and object files.  This variable defaults to ESMF_DIR.  If it is 
-assigned another value, the ESMF_BUILD variable will need to be passed as
-an additional argument to the the above make commands.  (Alternatively the variable
-ESMF_BUILD can be set in the environment (using setenv or export) and then it
-need not be passed to any make calls).
+Output files from the tests are directed to files in 
+$ESMF_DIR/test${BOPT}/${ESMF_ARCH} directories.
 
 To build documentation:
 
@@ -183,15 +164,9 @@ Final documentation files will be located in the $ESMF_DIR/doc directory.
 Usage
 -----
 
-To use the library from C/C++, link with the appropriate library executable 
-under $ESMF_DIR/lib and include the "ESMC.h" file.
+<C++>
 
-To use the library from F90, link with the appropriate library executable under
-$ESMF_DIR/lib.  Create links to the modules mfm_timemgmt.mod and 
-mfm_timemgmt_types.mod in your application build directory.  Modules are 
-in the $ESMF_DIR/mod directory.  To include the library in application modules, 
-USE the module MFM_TimeMgmt.
-
+<F90>
 
 ================================================================================
 
