@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.181 2004/08/20 20:42:29 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.182 2004/08/24 20:12:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -146,11 +146,13 @@
         type (ESMF_Status) :: fieldstatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: gridstatus = ESMF_STATUS_UNINIT
         type (ESMF_Status) :: datastatus = ESMF_STATUS_UNINIT
+        type (ESMF_Status) :: datamapstatus = ESMF_STATUS_UNINIT
         type (ESMF_GridClass), pointer :: gridp => NULL()  ! for faster access
 #else
         type (ESMF_Status) :: fieldstatus
         type (ESMF_Status) :: gridstatus
         type (ESMF_Status) :: datastatus
+        type (ESMF_Status) :: datamapstatus
         type (ESMF_GridClass), pointer :: gridp
 #endif
         type (ESMF_Grid) :: grid             ! save to satisfy query routines
@@ -281,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.181 2004/08/20 20:42:29 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.182 2004/08/24 20:12:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3123,37 +3125,50 @@
 
       ftypep => field%ftypep
 
+      ! make sure the field is ready before trying to look at contents
       if (ftypep%fieldstatus .ne. ESMF_STATUS_READY) then
          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "Uninitialized or already destroyed Field", &
                                  ESMF_CONTEXT, rc)) return
       endif 
 
-      ! get needed info from datamap
-      call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
-                                dataRank=maprank, dataIndexList=maplist, &
-                                counts=otheraxes, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! make sure there is data before asking the datamap questions.
+      if (ftypep%datamapstatus .eq. ESMF_STATUS_READY) then
 
-      ! get grid dim and extents for the local piece
-      call ESMF_GridGet(ftypep%grid, dimCount=gridrank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
-      call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, &
-                                   localCellCountPerDim=gridcounts, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+          ! get needed info from datamap. 
+          call ESMF_FieldDataMapGet(ftypep%mapping, horzRelloc=horzRelloc, &
+                                    dataRank=maprank, dataIndexList=maplist, &
+                                    counts=otheraxes, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
-      ! get array counts and other info
-      call ESMF_ArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
-                         haloWidth=halo, rank=arrayrank, rc=status)
-      if (ESMF_LogMsgFoundError(status, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      ! make sure there is a grid before asking it questions.
+      if (ftypep%gridstatus .eq. ESMF_STATUS_READY) then
+
+          ! get grid dim and extents for the local piece
+          call ESMF_GridGet(ftypep%grid, dimCount=gridrank, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+          call ESMF_GridGetDELocalInfo(ftypep%grid, horzRelloc, &
+                                    localCellCountPerDim=gridcounts, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
+
+      ! make sure there is data before asking it questions.
+      if (ftypep%datastatus .eq. ESMF_STATUS_READY) then
+
+          ! get array counts and other info
+          call ESMF_ArrayGet(ftypep%localfield%localdata, counts=arraycounts, &
+                             haloWidth=halo, rank=arrayrank, rc=status)
+          if (ESMF_LogMsgFoundError(status, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+      endif
 
 #if 0
       ! and now see if it is at all consistent.
@@ -4210,6 +4225,7 @@
                                     ESMF_CONTEXT, rc)) return
       endif
 
+      ! this sets the grid status, and the datamap status
       call ESMF_FieldConstructNoArray(ftype, grid, horzRelloc, vertRelloc, &
                                       hwidth, dmap, name, &
                                       iospec, status)
@@ -4464,8 +4480,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! TODO: Check to see grid is valid first.
-
+      ! Check to see grid is valid first.
       call ESMF_GridValidate(grid, "", status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -4486,6 +4501,7 @@
                                 horzRelloc=horzRelloc, &
                                 vertRelloc=vertRelloc, rc=status)
       endif
+      ftype%datamapstatus = ESMF_STATUS_READY
 
       ! construct the array here - but TODO: we are missing the counts
       ! in case there are non-grid axes.  there has to be an additional
@@ -4622,6 +4638,7 @@
                                 vertRelloc=vertRelloc, rc=status)
         endif
       endif
+      ftype%datamapstatus = ESMF_STATUS_READY
 
 !
 ! add more code here
@@ -4690,10 +4707,9 @@
                                   ESMF_CONTEXT, rc)) return
 
       ! Initialize field contents
-      !ftypep%localfield%gridstatus = ESMF_STATUS_UNINIT
-      !ftypep%localfield%datastatus = ESMF_STATUS_UNINIT
       ftypep%gridstatus = ESMF_STATUS_UNINIT
       ftypep%datastatus = ESMF_STATUS_UNINIT
+      ftypep%datamapstatus = ESMF_STATUS_UNINIT
 
       ! Set the mapping as unknown/invalid
       call ESMF_FieldDataMapSetInvalid(ftypep%mapping, status)
