@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.19 2003/04/29 21:37:22 cdeluca Exp $
+// $Id: ESMC_BaseTime.C,v 1.20 2003/05/02 22:10:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.19 2003/04/29 21:37:22 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.20 2003/05/02 22:10:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -654,7 +654,8 @@
 //EOP
 // !REQUIREMENTS:  
 
-// Code goes here TODO
+    // must have positive denominator
+    if (Sd <= 0) return(ESMF_FAILURE);
 
     return(ESMF_SUCCESS);
 

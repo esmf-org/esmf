@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.24 2003/05/01 06:21:45 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.25 2003/05/02 22:10:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.24 2003/05/01 06:21:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.25 2003/05/02 22:10:25 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -598,7 +598,9 @@
 //EOP
 // !REQUIREMENTS: 
 
-    // TODO
+    if (Type < ESMC_CAL_GREGORIAN ||
+        Type > ESMC_CAL_NOCALENDAR) return(ESMF_FAILURE);
+
     return(ESMF_SUCCESS);
 
 }  // end ESMC_CalendarValidate
