@@ -1,4 +1,4 @@
-% $Id: PerfProf_req.tex,v 1.5 2002/05/15 08:02:48 wsawyer Exp $
+% $Id: PerfProf_req.tex,v 1.6 2002/05/15 18:19:21 dneckels Exp $
 
 \req{Code Section Timing}
 
@@ -28,6 +28,18 @@ the results of the timing are reported, each timer will be associated with its n
 {\bf Notes:} 
 \end{reqlist}
 
+\ssreq{Named Timer Reset}
+
+A named timer may be reset at any time.  All data will be cleared.
+
+\begin{reqlist}
+{\bf Priority:} \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
 \sreq{Types of Time}
 
 In the context of the profiler the word ``time'' is not well defined.  There are
@@ -38,6 +50,7 @@ as such.  The various types are enumerated below:
 \ssreq{User Time}
 
 Process user time can be recorded.
+The timer will provide a means to estimate and reconcile the extra time added by its usage.
 
 \begin{reqlist}
 {\bf Priority:}  \\
@@ -66,6 +79,29 @@ System time can be recorded.
 \ssreq{Wall Time}
 
 Wall clock time can be recorded.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+
+\req{Hardware Counters}
+
+Most computers have special registers which keep track of information such
+as floating point operations, cycles, and cache hits/misses.  The profiler will
+provide a high level interface for accessing these registers.
+Collection of the following data will be supported, where available:
+\begin{itemize}
+\item{Floating Point Ops}
+\item{Cache Utilization}
+\item{Cache Misses}
+\item{Floating Point Unit Utilization}
+\item{Cycle Counts}
+\end{itemize}
 
 \begin{reqlist}
 {\bf Priority:}  \\
@@ -114,6 +150,52 @@ identify and report which thread it was called from.
 {\bf Notes:} 
 \end{reqlist}
 
+\req{Reporting}
+
+The profiler will provide a means to output the data collected.  This output may
+be called at any point of execution, as many times as desired.
+
+\sreq{Log Output}
+
+The profiler will write its output via the Log.  
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{API Retrieval}
+
+The profiler data will be accessible to the program by means of an API.
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
+\sreq{Statistics}
+
+The profiler will be able to perform a variety of statistical analysis on its call
+data and report.
+
+\ssreq{Thread Statistics}
+
+A named timer can perform analysis across threads and report the 
+minimum amount of time spent in any thread, the maximum, and the mean.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Code Inspection \\
+{\bf Notes:} 
+\end{reqlist}
+
 \req{Call Deactivation}
 
 Calling profiling routines typically has a performance impact and should not
@@ -145,16 +227,3 @@ this flag and return.
 {\bf Notes:} 
 \end{reqlist}
 
-\req{Hardware Counter}
-
-Most computers have special registers which keep track of information such
-as floating point operations, cycles, and cache hits/misses.  The profiler will
-provide a high level interface for accessing these registers.
-
-\begin{reqlist}
-{\bf Priority:}  \\
-{\bf Source:} CAM-EUL, CAM-FV, CLM, CCSM-CPL, POP, CICE, PSAS \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection \\
-{\bf Notes:} 
-\end{reqlist}
