@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.14 2004/05/26 22:13:09 jwolfe Exp $
+! $Id: user_model2.F90,v 1.15 2004/06/11 23:33:19 svasquez Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -239,7 +239,7 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetData(importState, "humidity", field, rc=rc);
+      call ESMF_StateGetData(importState, "humidity", field, rc=rc)
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
         goto 30

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.30 2004/06/11 02:12:59 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.31 2004/06/11 23:25:19 svasquez Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -353,7 +353,7 @@
 
       ! Get the field from the import state
       print *, "About to get field from import state"
-      call ESMF_StateGetData(importState, "DE id", field1, rc=rc);
+      call ESMF_StateGetData(importState, "DE id", field1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "Returned from getting field from import state"
       call ESMF_FieldPrint(field1, "", rc)
@@ -410,7 +410,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get Field from import state
-      call ESMF_StateGetData(importState, "DE id", field1, rc=rc);
+      call ESMF_StateGetData(importState, "DE id", field1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the Grid in the Field, and then to the DELayout
