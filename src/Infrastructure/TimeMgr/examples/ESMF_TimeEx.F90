@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.3 2003/04/30 07:49:33 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.4 2003/04/30 21:58:32 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.3 2003/04/30 07:49:33 eschwab Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.4 2003/04/30 21:58:32 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -58,26 +58,27 @@
 
       ! initialize time to 5/12/2003 2:24:45
       call ESMF_TimeInit(Time, YR=int(2003,kind=ESMF_IKIND_I8), &
-                         MM=5, DD=12, H=2, M=24, S=int(45,kind=ESMF_IKIND_I8), &
-                         cal=gregorianCalendar, rc=rc)
+                       MM=5, DD=12, H=2, M=24, S=int(45,kind=ESMF_IKIND_I8), &
+                       cal=gregorianCalendar, rc=rc)
+
+      call ESMF_TimePrint(Time, "string", rc)
 
       call ESMF_TimeGetCalendar(Time, cal, rc)
       call ESMF_CalendarPrint(cal, rc=rc)
 
-      call ESMF_TimePrint(Time, "string", rc)
-
       call ESMF_TimeGetDayOfYear(Time, dayOfYear, rc)
       print *, "Day of the year = ", dayOfYear
 
-      call ESMF_TimeGetMidMonth(Time, midMonth, rc)
-      print *, "Middle of the month = "
-      call ESMF_TimePrint(midMonth, "string", rc)
+      call ESMF_TimeGetDayOfMonth(Time, dayOfMonth, rc)
+      print *, "Day of the month = ", dayOfMonth
 
       call ESMF_TimeGetDayOfWeek(Time, dayOfWeek, rc)
       print *, "Day of the week = ", dayOfWeek
 
-      call ESMF_TimeGetDayOfMonth(Time, dayOfMonth, rc)
-      print *, "Day of the month = ", dayOfMonth
+      call ESMF_TimeGetMidMonth(Time, midMonth, rc)
+      print *
+      print *, "Middle of the month = "
+      call ESMF_TimePrint(midMonth, "string", rc)
 
       ! get wall clock time
       call ESMF_TimeInit(wallClock, cal=gregorianCalendar, rc=rc)
