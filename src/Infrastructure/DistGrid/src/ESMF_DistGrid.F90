@@ -218,14 +218,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.108 2004/04/06 18:19:04 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.109 2004/04/09 14:36:40 jwolfe Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_DistGridCreate 
 
@@ -238,7 +238,7 @@
 !     This interface provides a single entry point for
 !     {\tt ESMF\_DistGrid} create methods.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
@@ -258,7 +258,7 @@
       end interface 
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_DistGridSetCounts
 
@@ -269,11 +269,11 @@
 !     This interface provides a single entry point for methods that set
 !     extent counts in a {\tt ESMF\_DistGrid}.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface ESMF_DistGridSetDE
 
@@ -284,7 +284,7 @@
 !     This interface provides a single entry point for methods that set
 !     extent counts in a {\tt ESMF\_DistGrid}.
 !
-!EOP
+!EOPI
       end interface 
 !
 !------------------------------------------------------------------------------
@@ -297,7 +297,7 @@
 ! This section includes the DistGrid Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateEmpty - Create a new DistGrid with no data
 
 ! !INTERFACE:
@@ -323,7 +323,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_DistGridType), pointer :: dgtype    ! Pointer to new distgrid
       integer :: status                             ! Error status
@@ -363,7 +363,7 @@
       end function ESMF_DistGridCreateEmpty
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridCreateInternal - Create a new DistGrid internally
 
 ! !INTERFACE:
@@ -428,7 +428,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       type(ESMF_DistGridType), pointer :: dgtype    ! Pointer to new distgrid
       integer :: status                             ! Error status
@@ -472,7 +472,7 @@
       end function ESMF_DistGridCreateInternal
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridDestroy - Free all resources associated with a DistGrid 
 
 ! !INTERFACE:
@@ -494,7 +494,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                            ! Error status
@@ -913,7 +913,7 @@
       end subroutine ESMF_DistGridDestruct
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGet - Get information from a DistGrid
 
 ! !INTERFACE:
@@ -973,7 +973,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1055,7 +1055,7 @@
       end subroutine ESMF_DistGridGet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridSet - Set information about a DistGrid
 
 ! !INTERFACE:
@@ -1103,7 +1103,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1166,7 +1166,7 @@
       end subroutine ESMF_DistGridSet
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetConfig - Get configuration information from a DistGrid
 
 ! !INTERFACE:
@@ -1190,7 +1190,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
 !
@@ -1199,7 +1199,7 @@
       end subroutine ESMF_DistGridGetConfig
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridSetConfig - Set configuration information for a DistGrid
 
 ! !INTERFACE:
@@ -1224,7 +1224,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
 !
@@ -1233,7 +1233,7 @@
       end subroutine ESMF_DistGridSetConfig
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetValue - Get <Value> for a DistGrid
 
 ! !INTERFACE:
@@ -1259,7 +1259,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
 !
@@ -1268,7 +1268,7 @@
       end subroutine ESMF_DistGridGetValue
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridSetValue - Set <Value> for a DistGrid
 
 ! !INTERFACE:
@@ -1294,7 +1294,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
 !
@@ -1303,7 +1303,7 @@
       end subroutine ESMF_DistGridSetValue
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetCounts - Get extent counts for a DistGrid for a given DE
 
 ! !INTERFACE:
@@ -1345,7 +1345,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1395,7 +1395,7 @@
       end subroutine ESMF_DistGridGetCounts
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
 
 ! !INTERFACE:
@@ -1439,7 +1439,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: i, j, de
@@ -1627,7 +1627,7 @@
       end subroutine ESMF_DistGridSetCountsInternal
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
@@ -1669,7 +1669,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1726,7 +1726,7 @@
       end subroutine ESMF_DistGridGetDE
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridSetDEInternal - Set DE information for a DistGrid
 
 ! !INTERFACE:
@@ -1748,7 +1748,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1833,7 +1833,7 @@
       end subroutine ESMF_DistGridSetDEInternal
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetAllAxisIndex - Get array of AxisIndices for DistGrid
 
 ! !INTERFACE:
@@ -1862,7 +1862,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1902,7 +1902,7 @@
       end subroutine ESMF_DistGridGetAllAxisIndex
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetAllCounts - Get array of counts for DistGrid
 
 ! !INTERFACE:
@@ -1932,7 +1932,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -1974,7 +1974,7 @@
       end subroutine ESMF_DistGridGetAllCounts
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGetDELayout - Get pointer to a DELayout for a DistGrid
 
 ! !INTERFACE:
@@ -1999,7 +1999,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                             ! Error status
@@ -2023,7 +2023,7 @@
       end subroutine ESMF_DistGridGetDELayout
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
@@ -2081,7 +2081,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 ! TODO: figure out the right way to translate AI's - should 1D refer to a number of AIs or rank?
 
@@ -2272,7 +2272,7 @@
       end subroutine ESMF_DistGridGlobalToLocalIndex
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridLocalToGlobalIndex - translate local indexing to global
 
 ! !INTERFACE:
@@ -2330,7 +2330,7 @@
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
       integer :: status                             ! Error status
@@ -2574,7 +2574,7 @@
       end subroutine ESMF_DistGridAllocate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridValidate - Check internal consistency of a DistGrid
 
 ! !INTERFACE:
@@ -2598,7 +2598,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  XXXn.n, YYYn.n
 
 !
@@ -2607,7 +2607,7 @@
       end subroutine ESMF_DistGridValidate
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_DistGridPrint - Print the contents of a DistGrid
 
 ! !INTERFACE:
@@ -2632,7 +2632,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
  
       integer :: i, j
