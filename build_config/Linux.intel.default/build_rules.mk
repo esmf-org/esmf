@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.29 2005/03/03 23:04:29 theurich Exp $
+# $Id: build_rules.mk,v 1.30 2005/03/04 20:19:55 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -60,51 +60,68 @@ endif
 # end of io bypass section
 
 #
-# Location of MPI (Message Passing Interface) software  
-#
-# We recommend using SGI's MPI implementation over MPICH on the Origin and 
-# Powerchallenge.
-#
-# If you are using the MPICH implementation of MPI with version BELOW 1.1,
-# you should remove the -DESMC_HAVE_INT_MPI_COMM. If you are using MPICH 
-# Version 1.1 or SGI's version of MPI you MUST retain it.
-#
-ifeq ($(ESMF_COMM),mpi)
-ESMC_MPIRUN      = mpirun 
-MPI_LIB        = -lmpi -lmpi++
-MPI_INCLUDE     = -DESMC_HAVE_INT_MPI_COMM
-MPIRUN          = ${ESMC_MPIRUN}
-endif
-
 # Location of MPI (Message Passing Interface) software
+#
 
+# This section is set up for LAM mpi.   If the lam include files, libs, and
+# mpirun executable are installed in the dirs normally searched by the
+# compiler/loader you do not have to set anything.  If installed in a 
+# nonstandard place, set MPI_HOME to the location where the include, lib, 
+# and bin subdirs will be found.
 ifeq ($(ESMF_COMM),lam)
-# this section is set up for LAM mpi
-MPI_HOME       =  
-MPI_LIB        = -llamf77mpi -lmpi -llam
+ifdef MPI_HOME
+MPI_INCLUDE    = -I${MPI_HOME}/include
+MPI_LIB        = -L${MPI_HOME} -llamf77mpi -lmpi -llam
+MPIRUN         =  ${MPI_HOME}/bin/mpirun
+else
 MPI_INCLUDE    = 
+MPI_LIB        = -llamf77mpi -lmpi -llam
 MPIRUN         =  mpirun
 endif
+endif
 
+# This section is set up for mpich mpi.   If the mpich include files, libs, and
+# mpirun executable are installed in the dirs normally searched by the
+# compiler/loader you do not have to set anything.  If installed in a 
+# nonstandard place, set MPI_HOME to the location where the include, lib, 
+# and bin subdirs will be found.   ESMF_NODES can be set if you must specify 
+# which nodes are to be used on the run command.
 ifeq ($(ESMF_COMM),mpich)
-MPI_HOME       = 
-MPI_LIB        = -lmpich
+ifdef MPI_HOME
+MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
+MPI_LIB        = -L${MPI_HOME} -lmpich
+MPIRUN         =  ${MPI_HOME}/bin/mpirun $(ESMF_NODES)
+else
 MPI_INCLUDE    = -DESMF_MPICH=1
+MPI_LIB        = -lmpich
 MPIRUN         =  mpirun $(ESMF_NODES)
 endif
+endif
 
+# This section is set up for mpich2 mpi.  These settings are currently the same
+# as the mpich section above, but if different flags or settings are needed
+# as we look at installing and supporting the newer mpich2 (with support for
+# mpi2 functions), this place is ready.  All comments from the mpich section 
+# apply to this one as well.
 ifeq ($(ESMF_COMM),mpich2)
-MPI_HOME       = 
-MPI_LIB        = -lmpich
+ifdef MPI_HOME
+MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
+MPI_LIB        = -L${MPI_HOME} -lmpich
+MPIRUN         =  ${MPI_HOME}/bin/mpirun $(ESMF_NODES)
+else
 MPI_INCLUDE    = -DESMF_MPICH=1
+MPI_LIB        = -lmpich
 MPIRUN         =  mpirun $(ESMF_NODES)
 endif
+endif
 
+# this section is set up to bypass all MPI calls by substituting a library
+# which will run correctly with 1 process only.  Unless ESMF_COMM is set to
+# select a specific version of mpi, this will be the default.
 ifeq ($(ESMF_COMM),mpiuni)
-# this section is set up to bypass all MPI
 MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
-MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
+MPI_LIB        = -lmpiuni
 MPIRUN         =  ${MPI_HOME}/mpirun
 endif
 
@@ -136,7 +153,6 @@ else
 C_CC	   = icc
 CXX_CC	   = icpc
 C_FC	   = ifort
-endif
 endif
 
 # if you are using mpich, then however the mpich wrappers have been built
@@ -179,7 +195,6 @@ ifeq ($(ESMF_PTHREADS),ON)
 C_CC    +=  -pthread
 CXX_CC  +=  -pthread
 C_FC    +=  -threads
-endif
 
 # Which compiler to call when
 C_CLINKER	   = ${C_CC}
