@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/02/05 17:10:24 nscollins Exp $ 
+# $Id: makefile,v 1.8 2003/02/05 17:27:14 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -47,7 +47,7 @@ RMMODFILES = $(addsuffix .mod, $(basename $(SOURCEF)))
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 lib:: 
-	rm `echo ${RMMODFILES} | tr [:upper:]  [:lower:] `
+	rm -f `echo ${RMMODFILES} | tr [:upper:]  [:lower:] `
 	echo "removing TimeMgmt module files to prevent name collisions with newer TimeMgr"
 
 
