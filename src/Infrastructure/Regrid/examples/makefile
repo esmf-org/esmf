@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/02/13 15:37:24 nscollins Exp $
+# $Id: makefile,v 1.6 2004/06/18 09:17:38 nscollins Exp $
 
 ALL: build_examples
 
@@ -53,29 +53,41 @@ TEXFILES  =
 # Where the ? is ether F or C.  The example linking rules
 # depend on this naming convention being followed.
 #
-EXAMPLES_BUILD = 
+
+#EXAMPLES_BUILD   = $(ESMF_EXDIR)/ESMF_RegridEx
+EXAMPLES_BUILD   = 
+                   
 
 #
-# List the example run targets in EXAMPLES_RUN and 
+# List the example run targets in EXAMPLES_RUN and
 # EXAMPLES_RUN_UNI.  All of the run targets should be defined
 # in this makefile.
 #
-EXAMPLES_RUN     = 
 
-EXAMPLES_RUN_UNI = 
+#EXAMPLES_RUN     = run_ESMF_RegridEx
+EXAMPLES_RUN     =
+
+#EXAMPLES_RUN_UNI = run_ESMF_RegridEx_uni
+EXAMPLES_RUN_UNI =
 
 
-LOCDIR	  = src/Infrastructure/Regrid/examples
+include ${ESMF_DIR}/makefile
 
-include $(ESMF_DIR)/makefile
+DIRS =
 
-DIRS	  = 
 
 CLEANDIRS   = coredir.*
 CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 
+#
+# ESMF_RegridEx
+#
+run_ESMF_RegridEx:
+        -${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx.stdout
 
+run_ESMF_RegridEx_uni:
+        -${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_RegridEx > $(ESMF_EXDIR)/ESMF_RegridEx_uni.stdout
 
 

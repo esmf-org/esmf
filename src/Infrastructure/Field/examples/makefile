@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2004/06/10 17:43:41 jwolfe Exp $ 
+# $Id: makefile,v 1.14 2004/06/18 09:17:34 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -72,7 +72,7 @@ EXAMPLES_RUN = run_ESMC_FieldCreateEx \
                run_ESMF_FieldCreateEx \
                run_ESMF_FieldWriteEx 
 
-EXAPMLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
+EXAMPLES_RUN_UNI = run_ESMC_FieldCreateEx_uni \
                    run_ESMF_FieldCreateEx_uni \
                    run_ESMF_FieldWriteEx_uni
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/06/11 18:37:16 svasquez Exp $
+# $Id: makefile,v 1.6 2004/06/18 09:17:32 nscollins Exp $
 
 # makefile template for the examples directory.
 
@@ -24,7 +24,7 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_ArrayDataMapEx
 #       
 EXAMPLES_RUN = run_ESMF_ArrayDataMapEx
 
-EXAPMLES_RUN_UNI = run_ESMF_ArrayDataMapEx_uni
+EXAMPLES_RUN_UNI = run_ESMF_ArrayDataMapEx_uni
 
 
 include ${ESMF_DIR}/makefile

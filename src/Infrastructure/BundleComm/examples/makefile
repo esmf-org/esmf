@@ -1,6 +1,4 @@
-# $Id: makefile,v 1.4 2004/06/11 18:47:39 svasquez Exp $
-
-# makefile template for the examples directory.
+# $Id: makefile,v 1.5 2004/06/18 09:17:33 nscollins Exp $
 
 ALL:  build_examples
 
@@ -16,33 +14,28 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/BundleComm/examples
 
-TESTEXAMPLES_3  = \
-	ESMF_BundleCommEx RUN_ESMF_BundleCommEx ESMF_BundleCommEx.rm
 
-TESTEXAMPLES_9  = \
-	ESMF_BundleCommEx RUN_ESMF_BundleCommExUNI ESMF_BundleCommEx.rm
+#EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_BundleCommEx
+EXAMPLES_BUILD   =
 
-EXAMPLESF       = ESMF_BundleCommEx.F90
+
+#EXAMPLES_RUN     =  run_ESMF_BundleCommEx
+EXAMPLES_RUN     =
+
+
+#EXAMPLES_RUN_UNI =  run_ESMF_BundleCommEx_uni
+EXAMPLES_RUN_UNI =
+
 
 include ${ESMF_DIR}/makefile
 
 DIRS = 
 
-ESMF_BundleCommDir:
-	mkdir -p ${ESMC_TESTDIR}
 
-ESMF_BundleCommEx: ESMF_BundleCommEx.o  chkopts
-	-${F90CXXLD} -g -o ESMF_BundleCommEx ESMF_BundleCommEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_BundleCommEx.o
 
-RUN_ESMF_BundleCommEx:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommEx.tmps
-	-${MPIRUN} -np 4 ESMF_BundleCommEx > ESMF_BundleCommEx.stdout
+run_ESMF_BundleCommEx:
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_BundleCommEx > $(ESMF_EXDIR)/ESMF_BundleCommEx.stdout
 
-RUN_ESMF_BundleCommExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCommEx.tmps
-	-${MPIRUN} -np 1 ESMF_BundleCommEx > ESMF_BundleCommEx.stdout
-
-ESMF_BundleCommEx.rm:
-	echo "ESMF_BundleCommEx.rm target called here."
+run_ESMF_BundleCommEx_uni:
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_BundleCommEx > $(ESMF_EXDIR)/ESMF_BundleCommEx.stdout
 
