@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.5 2003/07/01 14:52:42 nscollins Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.6 2003/07/01 22:37:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,15 +29,14 @@
 ! run with 8 MPI processes
 !-----------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseMod
+      use ESMF_Mod         ! the ESMF framework
       use ESMF_TestMod     ! test methods
-      use ESMF_DELayoutMod   ! the class to test
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.5 2003/07/01 14:52:42 nscollins Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.6 2003/07/01 22:37:45 nscollins Exp $
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -66,6 +65,8 @@
 ! Special strings (Non-exhaustive and exhaustive) have been
 ! added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
+
+      call ESMF_FrameworkInitialize(rc)
 
       !NEX_UTest
       ! test dynamic allocation of default 1D ESMF_DELayout
@@ -221,4 +222,7 @@
       call ESMF_Test((result.eq.0), &
                       name, failMsg, result, ESMF_SRCLINE)
  
+
+      call ESMF_FrameworkFinalize(rc)
+
       end program ESMF_DELayoutCreateTest
