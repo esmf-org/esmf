@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.5 2003/06/30 21:30:41 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.6 2003/07/02 19:31:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.5 2003/06/30 21:30:41 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.6 2003/07/02 19:31:50 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals
@@ -79,8 +79,8 @@
       quotient = timeInterval2 / timeInterval1
       print *, "TimeInterval2 divided by TimeInterval1 = ", quotient
 
-      ! modulus
-      remainder = (timeInterval2 .MODU. timeInterval1)
+      ! modulo
+      remainder = MOD(timeInterval2, timeInterval1)
       print *, "TimeInterval2 modulo TimeInterval1 = " 
       call ESMF_TimeIntervalPrint(remainder, "string", rc)
 
