@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.15 2004/04/23 15:00:47 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.16 2004/04/23 20:19:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.15 2004/04/23 15:00:47 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.16 2004/04/23 20:19:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -511,34 +511,6 @@ int ESMC_newDELayout::ESMC_newDELayoutGetDEMatch(
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_newDELayoutMyDE
-//
-// !INTERFACE:
-int ESMC_newDELayout::ESMC_newDELayoutMyDE(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//
-  int  DE,                // in  - DE index
-  ESMC_Logical *value){   // out - return value indicating whether DE is in PET
-//
-// !DESCRIPTION:
-//    Determine whether a certain DE is part of the instantiating PET
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *value = ESMF_FALSE;
-  for (int i=0; i<nmydes; i++)
-    if (mydes[i]==DE) *value = ESMF_TRUE;
-  return ESMF_SUCCESS;
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_newDELayoutPrint
 //
 // !INTERFACE:
@@ -643,14 +615,14 @@ int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
 //
 // !ARGUMENTS:
 //
-  void **srcData1,  // input array
-  void **srcData2,  // input array
-  void **dstData1,  // output array
-  void **dstData2,  // output array
-  int len1,         // size in bytes to copy from srcData1 to dstData2
-  int len2,         // size in bytes to copy from srcData2 to dstData1
-  int de1,          // de for data1
-  int de2,          // de for data2
+  void **srcData1,    // input array
+  void **srcData2,    // input array
+  void **dstData1,    // output array
+  void **dstData2,    // output array
+  int blen1,          // size in bytes to copy from srcData1 to dstData2
+  int blen2,          // size in bytes to copy from srcData2 to dstData1
+  int de1,            // de for data1
+  int de2,            // de for data2
   ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
@@ -658,13 +630,49 @@ int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
 //EOP
 //-----------------------------------------------------------------------------
   if (de1<=de2){
-    ESMC_newDELayoutCopy(srcData1, dstData2, len1, de1, de2, oneToOneFlag);
-    ESMC_newDELayoutCopy(srcData2, dstData1, len2, de2, de1, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
   }else{
-    ESMC_newDELayoutCopy(srcData2, dstData1, len2, de2, de1, oneToOneFlag);
-    ESMC_newDELayoutCopy(srcData1, dstData2, len1, de1, de2, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData2, dstData1, blen2, de2, de1, oneToOneFlag);
+    ESMC_newDELayoutCopy(srcData1, dstData2, blen1, de1, de2, oneToOneFlag);
   }
   return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCopyCopy
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutCopyCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcData1,    // input array
+  void **srcData2,    // input array
+  void **dstData1,    // output array
+  void **dstData2,    // output array
+  int len1,           // size in elements to copy from srcData1 to dstData2
+  int len2,           // size in elements to copy from srcData2 to dstData1
+  ESMC_DataKind dtk1, // data type kind
+  ESMC_DataKind dtk2, // data type kind
+  int de1,            // de for data1
+  int de2,            // de for data2
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen1 = len1 * ESMC_DataKindSize(dtk1);
+  int blen2 = len2 * ESMC_DataKindSize(dtk2);
+  return ESMC_newDELayoutCopyCopy(srcData1, srcData2, dstData1, dstData2, 
+    blen1, blen2, de1, de2, oneToOneFlag);
 }
 //-----------------------------------------------------------------------------
 
@@ -683,7 +691,7 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
 //
   void **srcdata, // input array
   void **destdata,// output array
-  int len,        // size in bytes that need to be copied from src to dest
+  int blen,       // size in bytes that need to be copied from src to dest
   int srcDE,      // input DE
   int destDE,     // output DE
   ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
@@ -700,7 +708,7 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
   if (srcpet==mypet && destpet==mypet){
     // srcDE and destDE are on my PET
     if (oneToOneFlag==ESMF_TRUE){
-      memcpy(destdata, srcdata, len);
+      memcpy(destdata, srcdata, blen);
     }else{
       int i, j;
       for (i=0; i<nmydes; i++)
@@ -708,27 +716,120 @@ int ESMC_newDELayout::ESMC_newDELayoutCopy(
       for (j=0; j<nmydes; j++)
         if (mydes[j]==destDE) break;
       // now i is this PETs srcDE index and j is this PETs destDE index
-      memcpy(destdata[j], srcdata[i], len);
+      memcpy(destdata[j], srcdata[i], blen);
     }
   }else if (srcpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
     if (oneToOneFlag==ESMF_TRUE){
-      vm.vmachine_send(srcdata, len, destpet);
+      vm.vmachine_send(srcdata, blen, destpet);
     }else{
       int i;
       for (i=0; i<nmydes; i++)
         if (mydes[i]==srcDE) break;
-      vm.vmachine_send(srcdata[i], len, destpet);
+      vm.vmachine_send(srcdata[i], blen, destpet);
     }
   }else if (destpet==mypet){
     // srcDE is on my PET, but destDE is on another PET
     if (oneToOneFlag==ESMF_TRUE){
-      vm.vmachine_recv(destdata, len, srcpet);
+      vm.vmachine_recv(destdata, blen, srcpet);
     }else{
       int i;
       for (i=0; i<nmydes; i++)
         if (mydes[i]==destDE) break;
-      vm.vmachine_recv(destdata[i], len, srcpet);
+      vm.vmachine_recv(destdata[i], blen, srcpet);
+    }
+  }
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutCopy
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutCopy(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata,   // input array
+  void **destdata,  // output array
+  int len,          // size in elements that need to be copied from src to dest
+  ESMC_DataKind dtk,// data type kind
+  int srcDE,        // input DE
+  int destDE,       // output DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  return ESMC_newDELayoutCopy(srcdata, destdata, blen, srcDE, destDE, 
+    oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutScatter
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
+  void **srcdata, // input array
+  void **destdata,// output array
+  int blen,       // message size in bytes
+  int rootDE,     // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // local reference to VM
+  ESMC_VM &vm = *myvm;
+  // very crude implementation of a layout wide scatter
+  int mypet = vm.vmachine_mypet();
+  if (des[rootDE].petid==mypet){
+    // my PET holds the rootDE
+    if (oneToOneFlag==ESMF_TRUE){
+      char *tempdata = (char *)srcdata;
+      for (int i=0; i<ndes; i++){
+        ESMC_newDELayoutCopy((void **)tempdata, destdata, blen, rootDE, i,
+          ESMF_TRUE);
+        tempdata += blen;
+      }
+    }else{
+      int j;
+      for (j=0; j<nmydes; j++)
+        if (mydes[j]==rootDE) break;
+      void *rootdata = srcdata[j]; // backup the correct start of rootDE's data
+      char *tempdata = (char *)srcdata[j];
+      for (int i=0; i<ndes; i++){
+        ESMC_newDELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
+        tempdata += blen;
+        srcdata[j] = tempdata;
+      }
+      srcdata[j] = rootdata;  // restore correct start of root's src data
+    }
+  }else{
+    if (oneToOneFlag==ESMF_TRUE){
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_TRUE);
+    }else{
+      for (int i=0; i<ndes; i++)
+        ESMC_newDELayoutCopy(srcdata, destdata, blen, rootDE, i, ESMF_FALSE);
     }
   }
   return ESMF_SUCCESS;
@@ -748,9 +849,38 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
 //
 // !ARGUMENTS:
 //
+  void **srcdata,   // input array
+  void **destdata,  // output array
+  int len,          // message size in elements
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,       // root DE
+  ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
+//
+// !DESCRIPTION:
+//
+//EOP
+//-----------------------------------------------------------------------------
+  int blen = len * ESMC_DataKindSize(dtk);
+  return ESMC_newDELayoutScatter(srcdata, destdata, blen, rootDE, oneToOneFlag);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_newDELayoutGather
+//
+// !INTERFACE:
+int ESMC_newDELayout::ESMC_newDELayoutGather(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//
   void **srcdata, // input array
   void **destdata,// output array
-  int len,        // message size in bytes
+  int blen,       // message size in bytes
   int rootDE,     // root DE
   ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
@@ -760,37 +890,37 @@ int ESMC_newDELayout::ESMC_newDELayoutScatter(
 //-----------------------------------------------------------------------------
   // local reference to VM
   ESMC_VM &vm = *myvm;
-  // very crude implementation of a layout wide scatter
+  // very crude implementation of a layout wide gather
   int mypet = vm.vmachine_mypet();
   if (des[rootDE].petid==mypet){
-    // my PET holds the rootDE
+    // my PET holds the rootDE -> receive chunks from all other DEs
     if (oneToOneFlag==ESMF_TRUE){
-      char *tempdata = (char *)srcdata;
+      char *tempdata = (char *)destdata;
       for (int i=0; i<ndes; i++){
-        ESMC_newDELayoutCopy((void **)tempdata, destdata, len, rootDE, i,
+        ESMC_newDELayoutCopy(srcdata, (void **)tempdata, blen, i, rootDE,
           ESMF_TRUE);
-        tempdata += len;
+        tempdata += blen;
       }
     }else{
       int j;
       for (j=0; j<nmydes; j++)
         if (mydes[j]==rootDE) break;
-      void *rootdata = srcdata[j]; // backup the correct start of rootDE's data
-      char *tempdata = (char *)srcdata[j];
+      void *rootdata = destdata[j]; // backup the correct start of rootDE's data
+      char *tempdata = (char *)destdata[j];
       for (int i=0; i<ndes; i++){
-        ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i, ESMF_FALSE);
-        tempdata += len;
-        srcdata[j] = tempdata;
+        ESMC_newDELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
+        tempdata += blen;
+        destdata[j] = tempdata;
       }
-      srcdata[j] = rootdata;  // restore correct start of root's src data
+      destdata[j] = rootdata;  // restore correct start of root's destdata
     }
   }else{
     if (oneToOneFlag==ESMF_TRUE){
       for (int i=0; i<ndes; i++)
-        ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i, ESMF_TRUE);
+        ESMC_newDELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_TRUE);
     }else{
       for (int i=0; i<ndes; i++)
-        ESMC_newDELayoutCopy(srcdata, destdata, len, rootDE, i, ESMF_FALSE);
+        ESMC_newDELayoutCopy(srcdata, destdata, blen, i, rootDE, ESMF_FALSE);
     }
   }
   return ESMF_SUCCESS;
@@ -810,52 +940,19 @@ int ESMC_newDELayout::ESMC_newDELayoutGather(
 //
 // !ARGUMENTS:
 //
-  void **srcdata, // input array
-  void **destdata,// output array
-  int len,        // message size in bytes
-  int rootDE,     // root DE
+  void **srcdata,   // input array
+  void **destdata,  // output array
+  int len,          // message size in bytes
+  ESMC_DataKind dtk,// data type kind
+  int rootDE,       // root DE
   ESMC_Logical oneToOneFlag){   // indicator whether this Layout is 1-to-1
 //
 // !DESCRIPTION:
 //
 //EOP
 //-----------------------------------------------------------------------------
-  // local reference to VM
-  ESMC_VM &vm = *myvm;
-  // very crude implementation of a layout wide gather
-  int mypet = vm.vmachine_mypet();
-  if (des[rootDE].petid==mypet){
-    // my PET holds the rootDE -> receive chunks from all other DEs
-    if (oneToOneFlag==ESMF_TRUE){
-      char *tempdata = (char *)destdata;
-      for (int i=0; i<ndes; i++){
-        ESMC_newDELayoutCopy(srcdata, (void **)tempdata, len, i, rootDE,
-          ESMF_TRUE);
-        tempdata += len;
-      }
-    }else{
-      int j;
-      for (j=0; j<nmydes; j++)
-        if (mydes[j]==rootDE) break;
-      void *rootdata = destdata[j]; // backup the correct start of rootDE's data
-      char *tempdata = (char *)destdata[j];
-      for (int i=0; i<ndes; i++){
-        ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE, ESMF_FALSE);
-        tempdata += len;
-        destdata[j] = tempdata;
-      }
-      destdata[j] = rootdata;  // restore correct start of root's destdata
-    }
-  }else{
-    if (oneToOneFlag==ESMF_TRUE){
-      for (int i=0; i<ndes; i++)
-        ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE, ESMF_TRUE);
-    }else{
-      for (int i=0; i<ndes; i++)
-        ESMC_newDELayoutCopy(srcdata, destdata, len, i, rootDE, ESMF_FALSE);
-    }
-  }
-  return ESMF_SUCCESS;
+  int blen = len * ESMC_DataKindSize(dtk);
+  return ESMC_newDELayoutGather(srcdata, destdata, blen, rootDE, oneToOneFlag);
 }
 //-----------------------------------------------------------------------------
 

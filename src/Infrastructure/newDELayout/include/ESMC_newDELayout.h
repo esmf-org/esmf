@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.16 2004/04/23 15:00:42 theurich Exp $
+// $Id: ESMC_newDELayout.h,v 1.17 2004/04/23 20:19:29 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,20 +92,29 @@ class ESMC_newDELayout : public ESMC_Base {    // inherits from ESMC_Base class
       int *DEcde, int len_cde, int *DEcw, int len_cw, int *nDEc);
     int ESMC_newDELayoutGetDEMatch(int DEid, ESMC_newDELayout &layoutMatch,
       int *deMatchCount, int *deMatchList, int len_deMatchList);
-    int ESMC_newDELayoutMyDE(int DE, ESMC_Logical *value);
     // IO and validation
     int ESMC_newDELayoutPrint(void);
     int ESMC_newDELayoutValidate(void);
     // Communication
     int ESMC_newDELayoutCopyCopy(void **srcData1, void **srcData2, 
-      void **dstData1, void **dstData2, int len1, int len2, int de1, int de2,
+      void **dstData1, void **dstData2, int blen1, int blen2, int de1, int de2,
       ESMC_Logical oneToOneFlag);
+    int ESMC_newDELayoutCopyCopy(void **srcData1, void **srcData2, 
+      void **dstData1, void **dstData2, int len1, int len2, ESMC_DataKind dtk1,
+      ESMC_DataKind dtk2, int de1, int de2, ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutCopy(void **srcdata, void **destdata, 
-      int len, int srcDE, int destDE, ESMC_Logical oneToOneFlag);
+      int blen, int srcDE, int destDE, ESMC_Logical oneToOneFlag);
+    int ESMC_newDELayoutCopy(void **srcdata, void **destdata, 
+      int len, ESMC_DataKind dtk, int srcDE, int destDE, 
+      ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutScatter(void **srcdata, void **destdata, 
-      int len, int rootDE, ESMC_Logical oneToOneFlag);
+      int blen, int rootDE, ESMC_Logical oneToOneFlag);
+    int ESMC_newDELayoutScatter(void **srcdata, void **destdata, 
+      int len, ESMC_DataKind dtk, int rootDE, ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutGather(void **srcdata, void **destdata, 
-      int len, int rootDE, ESMC_Logical oneToOneFlag);
+      int blen, int rootDE, ESMC_Logical oneToOneFlag);
+    int ESMC_newDELayoutGather(void **srcdata, void **destdata, 
+      int len, ESMC_DataKind dtk, int rootDE, ESMC_Logical oneToOneFlag);
     int ESMC_newDELayoutAllGlobalReduce(void **srcdata, void *result, int len,
       ESMC_DataKind dtk, ESMC_newOp op, ESMC_Logical oneToOneFlag);
   private:
