@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.48 2004/03/22 23:53:01 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.49 2004/03/23 17:56:52 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2975,7 +2975,7 @@
       ! Call PhysGridGet with valid PhysGrid
       if (present(centerCoord)) then
         index = 1
-        aSize = size(centerCoord)
+        aSize = min(gridRank, size(centerCoord))
         allocate(coord(aSize))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
@@ -3005,7 +3005,7 @@
 
       if (present(cornerCoord)) then
         index = 1
-        aSize = size(cornerCoord,2)
+        aSize = min(gridRank, size(cornerCoord,2))
         allocate(coord2(size(cornerCoord,1),aSize))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
@@ -3238,6 +3238,7 @@
         aSize = max(aSize, size(   globalStartPerDim))
       if (present(      globalAIPerDim)) &
         aSize = max(aSize, size(      globalAIPerDim))
+      aSize = min(gridRank, aSize)
 
       ! call DistGrid method to retrieve information otherwise not available
       ! to the application level
@@ -3304,7 +3305,7 @@
       ! now make PhysGrid calls
       if (present(minLocalCoordPerDim)) then
         index = 1
-        aSize = size(minLocalCoordPerDim)
+        aSize = min(gridRank, size(minLocalCoordPerDim))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           do i = 1,2
@@ -3334,7 +3335,7 @@
 
       if (present(maxLocalCoordPerDim)) then
         index = 1
-        aSize = size(maxLocalCoordPerDim)
+        aSize = min(gridRank, size(maxLocalCoordPerDim))
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index = 3
           do i = 1,2
@@ -3445,7 +3446,7 @@
 
       ! Get the size of the AI array and allocate horz and vert temp AI arrays
       sizeAI = size(globalAI,1)
-      aSize  = size(globalAI,2)
+      aSize  = min(gridRank, size(globalAI,2))
       allocate(horzAI(sizeAI,2))
       allocate(vertAI(sizeAI,1))
 
@@ -3629,6 +3630,9 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = grid%ptr%dimCount
+
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
       if (present(global1D)) then
@@ -3661,9 +3665,7 @@
           gtempAI2D(:,i) = globalAI2D(:,order(i))
         enddo
       endif
-
-      ! Get the grid rank -- to check if there is a vertical grid available
-      gridRank = grid%ptr%dimCount
+      aSize = min(gridRank, aSize)
 
       ! calculate default if dimOrder is not present
       allocate(dimOrderUse(aSize))
@@ -3921,6 +3923,9 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = grid%ptr%dimCount
+
       ! determine the largest input array size and allocate temp arrays
       aSize = 0
       if (present(local1D)) then
@@ -3953,9 +3958,7 @@
           ltempAI2D(:,i) = localAI2D(:,order(i))
         enddo
       endif
-
-      ! Get the grid rank -- to check if there is a vertical grid available
-      gridRank = grid%ptr%dimCount
+      aSize = min(gridRank, aSize)
 
       ! get distgrid identifiers from relative locations
       if (horzRelLoc.ne.ESMF_CELL_UNDEFINED) then
@@ -4512,7 +4515,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i, aSize
+      integer :: i, aSize, gridRank
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
       integer, dimension(ESMF_MAXGRIDDIM) :: order
@@ -4542,6 +4545,9 @@
       horzPhysIdUse = -1
       vertPhysIdUse = -1
 
+      ! Get the grid rank -- to check if there is a vertical grid available
+      gridRank = gridp%dimCount
+
       ! if present, gets information from the grid derived type
       if (present(horzGridType   )) horzGridType    = gridp%horzGridType
       if (present(vertGridType   )) vertGridType    = gridp%vertGridType
@@ -4563,14 +4569,14 @@
 
       ! Get global coordinate extents
       if (present(minGlobalCoordPerDim)) then
-        aSize = size(minGlobalCoordPerDim)
+        aSize = min(gridRank, size(minGlobalCoordPerDim))
         order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i=1,aSize
           minGlobalCoordPerDim(order(i)) = gridp%minGlobalCoordPerDim(i)
         enddo
       endif
       if (present(maxGlobalCoordPerDim)) then
-        aSize = size(maxGlobalCoordPerDim)
+        aSize = min(gridRank, size(maxGlobalCoordPerDim))
         order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i=1,aSize
           maxGlobalCoordPerDim(order(i)) = gridp%maxGlobalCoordPerDim(i)
@@ -4579,7 +4585,7 @@
 
       ! get the periodicity
       if (present(periodic)) then
-        aSize = size(periodic)
+        aSize = min(gridRank, size(periodic))
         order(:) = gridOrder(aSize,grid%ptr%coordOrder%order,:)
         do i=1,aSize
           periodic(order(i)) = gridp%periodic(i)
@@ -4602,6 +4608,7 @@
             aSize = max(aSize, size(globalStartPerDEPerDim,2))
         if (present(cellCountPerDEPerDim)) &
             aSize = max(aSize, size(cellCountPerDEPerDim,2))
+        aSize = min(gridRank, aSize)
 
         ! get distgrid identifiers from relative locations
         if (.not.(present(horzRelLoc))) then
@@ -4634,7 +4641,7 @@
 
         ! Get distgrid info with global coordinate counts
         if (present(globalCellCountPerDim)) then
-          aSize = size(globalCellCountPerDim)
+          aSize = min(gridRank, size(globalCellCountPerDim))
           allocate(gCCPDUse(aSize))
           call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
                                 globalCellCountPerDim=gCCPDUse(1:2), &
@@ -4660,7 +4667,7 @@
         endif
 
         if (present(globalStartPerDEPerDim)) then
-          aSize = size(globalStartPerDEPerDim,2)
+          aSize = min(gridRank, size(globalStartPerDEPerDim,2))
           allocate(gSPDEPDUse(size(globalStartPerDEPerDim,1), aSize))
           call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
                                 globalStartPerDEPerDim=gSPDEPDUse(:,1:2), &
@@ -4686,7 +4693,7 @@
         endif
 
         if (present(maxLocalCellCountPerDim)) then
-          aSize = size(maxLocalCellCountPerDim)
+          aSize = min(gridRank, size(maxLocalCellCountPerDim))
           allocate(mLCCPDUse(aSize))
           call ESMF_DistGridGet(gridp%distgrids(horzDistIdUse), &
                                 maxLocalCellCountPerDim=mLCCPDUse(1:2), &
@@ -4712,7 +4719,7 @@
         endif
 
         if (present(cellCountPerDEPerDim)) then
-          aSize = size(cellCountPerDEPerDim,2)
+          aSize = min(gridRank, size(cellCountPerDEPerDim,2))
           allocate(cCPDEPDUse(size(cellCountPerDEPerDim,1), aSize))
           call ESMF_DistGridGetAllCounts(gridp%distgrids(horzDistIdUse)%ptr, &
                                          cCPDEPDUse(:,1:2), rc=status)
