@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridEx.F90,v 1.2 2004/06/21 09:46:25 nscollins Exp $
+! $Id: ESMF_RegridEx.F90,v 1.3 2004/10/25 22:29:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !EOC
 
     integer :: x, y, mycell, finalrc, numdes
-    integer :: i, j
+    integer :: i, j, lb(2), ub(2), halo
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_FieldDataMap) :: datamap
     type(ESMF_VM) :: vm
@@ -83,24 +83,32 @@
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    ! allow for a halo width of 3
-    allocate(f90ptr1(96,186))
-    do j=1, 180
-      do i=1, 90
-        f90ptr1(i+3, j+3) = i*1000 + j
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+    ! allow for a halo width of 3, let field create data space
+    halo = 3
+    field1 = ESMF_FieldCreate(srcgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+                                haloWidth=3, name="src pressure", rc=rc)
+                                
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+    ! get a fortran pointer to the data spacd
+    call ESMF_FieldGetDataPointer(field1, f90ptr1, ESMF_DATA_REF, rc=rc)
+    
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    
+    lb(:) = lbound(f90ptr1)
+    ub(:) = ubound(f90ptr1)
+    
+    f90ptr1(:,:) = 0.0
+    do j=lb(2)+halo, ub(2)-halo
+      do i=lb(1)+halo, ub(1)-halo
+        f90ptr1(i, j) = i*1000 + j
       enddo
     enddo
 
-    arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    field1 = ESMF_FieldCreate(srcgrid, arraya, horzRelloc=ESMF_CELL_CENTER, &
-                                haloWidth=3, name="src pressure", rc=rc)
-
-    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
-
-    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
 
     field2 = ESMF_FieldCreate(dstgrid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                                    name="dst pressure", rc=rc)
