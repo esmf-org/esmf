@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.19 2004/04/26 14:02:13 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.20 2004/04/26 14:35:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.19 2004/04/26 14:02:13 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.20 2004/04/26 14:35:10 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -829,7 +829,7 @@ int ESMC_newDELayout::ESMC_newDELayoutBcast(
   int blen = len * ESMC_DataKindSize(dtk);
   // very crude implementation of a layout wide bcast
   for (int i=0; i<ndes; i++)
-    ESMC_newDELayoutCopy(data, data, blen, rootDE, i, ESMF_TRUE);
+    ESMC_newDELayoutCopy(data, data, blen, rootDE, i, oneToOneFlag);
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
