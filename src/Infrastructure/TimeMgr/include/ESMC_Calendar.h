@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.39 2004/04/09 20:13:38 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.40 2004/04/20 20:57:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -190,6 +190,8 @@ class ESMC_Calendar {
     ESMC_Time ESMC_CalendarDecrement(const ESMC_Time *time,
                                      const ESMC_TimeInterval &timeInterval)
                                      const;
+
+    int ESMC_CalendarIntervalMagnitude(ESMC_TimeInterval &timeInterval) const;
 
     bool operator==(const ESMC_Calendar &) const;
     bool operator!=(const ESMC_Calendar &) const;
