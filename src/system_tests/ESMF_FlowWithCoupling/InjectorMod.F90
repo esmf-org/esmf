@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.14 2004/04/20 21:29:54 jwolfe Exp $
+! $Id: InjectorMod.F90,v 1.15 2004/04/27 17:22:20 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -95,10 +95,10 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       ! Local variables
       !
-      integer :: i, j
+      integer :: npets
+      type(ESMF_VM) :: vm
       type(ESMF_newDELayout) :: layout
       type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
@@ -107,7 +107,6 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       type(ESMF_GridType) :: horz_gridtype
       type(ESMF_GridStagger) :: horz_stagger
       type(ESMF_CoordSystem) :: horz_coord_system
-      integer :: myde
       type(injectdata), pointer :: datablock
       type(wrapper) :: wrap
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
@@ -156,9 +155,12 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       datablock%inject_density = in_rho
 
       !
-      ! Query component for information.
+      ! Query component for number of PETs, and create a layout.
       !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=rc)
+
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      layout = ESMF_newDELayoutCreate(vm, (/ npets/4, 4 /), rc=rc)
 
       !
       ! Create the Grid
@@ -417,7 +419,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       !
       integer :: status
       logical :: rcpresent
-      integer :: ni, nj, i, j, de_id
+      integer :: de_id
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_newDELayout) :: layout
@@ -437,7 +439,8 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       ! 
       ! Get our layout from the component, and our de number
       !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
+      call ESMF_GridGet(grid, delayout=layout, rc=status)
       call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
       !
       ! Collect results on DE 0 and output to a file

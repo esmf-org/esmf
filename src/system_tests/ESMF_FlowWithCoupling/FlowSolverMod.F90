@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.12 2004/04/20 21:29:21 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.13 2004/04/27 17:22:20 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -107,18 +107,16 @@
 ! Local variables
 !
       integer :: status
-      integer :: i, j
       type(ESMF_newDELayout) :: layout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real(kind=ESMF_KIND_R8) :: g_min(2), g_max(2)
       real(kind=ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
       integer :: counts(2)
-      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
-      integer :: myde
+      type(ESMF_GridType) :: horz_gridtype
+      type(ESMF_GridStagger) :: horz_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system
+      integer :: npets
       namelist /input/ counts, x_min, x_max, y_min, y_max, &
                        uin, rhoin, siein, &
                        gamma, akb, q0, u0, v0, sie0, rho0, &
@@ -150,7 +148,15 @@
 !
 ! Query component for information.
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
+
+      ! Find out how many PETs we were given to run on
+      call ESMF_GridCompGet(gcomp, vm=vm, rc=status)
+      call ESMF_VMGet(vm, petCount=npets, rc=status)
+
+      ! Set up the component layouts so they are different, so we can show
+      !  we really are routing data between processors.
+      layout = ESMF_newDELayoutCreate(vm, (/ npets/2, 2 /), rc=rc)
+
 !
 ! Create the Grid
 !
@@ -302,7 +308,7 @@
 ! First, get size of layout and position of my DE to determine if
 ! this DE is on the domain boundary
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
+      call ESMF_GridGet(grid, delayout=layout, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  grid comp get"
         return
@@ -956,7 +962,6 @@
       integer :: i, j
       real(kind=ESMF_KIND_R4), dimension(imax,jmax) :: rho_new
       real(kind=ESMF_KIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p
-      real(kind=ESMF_KIND_R4) :: dsiedx2, dsiedy2
 !
 ! Set initial values
 !
@@ -1339,12 +1344,11 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: ni, nj, i, j, de_id
+      integer :: de_id
       integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_newDELayout) :: layout
-      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
       character(len=ESMF_MAXSTR) :: filename
 !
 ! Set initial values
@@ -1361,7 +1365,8 @@
 !
 ! Collect results on DE 0 and output to a file
 !
-      call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
+      call ESMF_GridCompGet(gcomp, grid=grid, rc=status)
+      call ESMF_GridGet(grid, delayout=layout, rc=status)
       call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
 !
 ! Frame number from computation

@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.9 2004/04/15 19:34:54 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.10 2004/04/27 17:22:19 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -67,6 +67,7 @@
       ! Local variables
       character (len=ESMF_MAXSTR) :: statename
       type(ESMF_Field) :: srcfield, dstfield
+      type(ESMF_VM) :: vm
       type(ESMF_newDELayout) :: cpllayout
 
       print *, "Coupler Init starting"
@@ -78,8 +79,9 @@
       call ESMF_StateGetField(importState, "SIE", srcfield, rc=rc)
       call ESMF_StateGetField(exportState, "SIE", dstfield, rc=rc)
      
-      ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
+      ! Get VM info from coupler component and create default layout
+      call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+      cpllayout = ESMF_newDELayoutCreate(vm, rc=rc)
 
       ! Now see which way we're going so we set the correct fields needed
       ! and compute the right routehandle
@@ -128,15 +130,8 @@
       integer :: rc
 
     ! Local variables
-      type(ESMF_State) :: toflow, toinjector
-      type(ESMF_State) :: mysource, mydest
       type(ESMF_Field) :: srcfield, dstfield
-      type(ESMF_Array) :: srcarray, dstarray
-      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
-      type(ESMF_newDELayout) :: cpllayout
-    
       character(len=ESMF_MAXSTR) :: statename
-     
       integer :: status
       integer :: i, datacount
       character(len=ESMF_MAXSTR), dimension(7) :: datanames
@@ -167,9 +162,6 @@
          rc = ESMF_FAILURE
          return
       endif
-
-      ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=status)
 
       do i=1, datacount
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.15 2004/04/15 22:14:02 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.16 2004/04/27 17:22:20 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -37,15 +37,13 @@
     ! Components
     type(ESMF_GridComp) :: INcomp, FScomp
     type(ESMF_CplComp) :: cpl
-
-    ! States and Layouts
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
-    type(ESMF_newDELayout) :: layoutDef, layoutIN, layoutFS
+
+    ! States and Virtual Machine
     type(ESMF_VM) :: vm
     type(ESMF_State) :: INimp, INexp, FSimp, FSexp
 
-    integer :: de_id, ndes, rc, delist(16)
-    integer :: i, mid, quart
+    integer :: pet_id, npets, rc
 
     ! instantiate a clock, a calendar, and timesteps
     type(ESMF_Clock) :: clock
@@ -76,60 +74,39 @@
 !------------------------------------------------------------------------------
 !
 
-    ! Initialize framework
-    call ESMF_Initialize(rc=rc)
+    ! Initialize framework, and get back default VM
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! get the default global VM
-    call ESMF_VMGetGlobal(vm, rc)
+    ! Find out how many PETs we were given, and our local PET number
+    call ESMF_VMGet(vm, petCount=npets, localPet=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! Query for the default layout
-    layoutDef = ESMF_newDELayoutCreate(vm, rc=rc)
-
-    ! Get our DE number for later
-    call ESMF_newDELayoutGet(layoutDef, localDe=de_id, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
-    ! Sanity check the number of DEs we were started on.
-    call ESMF_newDELayoutGet(layoutDef, deCount=ndes, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
-        print *, "This test needs to run at least 4-way and no more than 16-way."
-        print *, "The requested number of processors was ", ndes
+    ! Make sure we can run successfully on what we were started on.
+    if ((npets .lt. 4) .or. (npets .gt. 16)) then
+        print *, "This test needs to run at least 4-way and no more"
+        print *, " than 16-way, on a multiple of 4 processors."
+        print *, "The requested number of processors was ", npets
         goto 10
     endif
-    if (mod(ndes, 4) .ne. 0) then
-        print *, "This test needs to run on some multiple of 4 processors,"
+    if (mod(npets, 4) .ne. 0) then
+        print *, "This test needs to run on a multiple of 4 processors,"
         print *, " at least 4-way and no more than 16-way."
-        print *, "The requested number of processors was ", ndes
+        print *, "The requested number of processors was ", npets
         goto 10
     endif
 
-    ! Set up the component layouts so they are different, so we can show
-    !  we really are routing data between processors.
-    delist = (/ (i, i=0, ndes-1) /)
-    mid = ndes/2
-    quart = ndes/4
-
-
-    ! Create the 2 model components and coupler.  The first component will
-    !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
-    !  The coupler will run on the original default 1 x N layout.
+    ! Create the 2 model components and coupler.
     cnameIN = "Injector model"
-    layoutIN = ESMF_newDELayoutCreate(vm, (/ mid, 2 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    INcomp = ESMF_GridCompCreate(cnameIN, delayout=layoutIN, rc=rc)
+    INcomp = ESMF_GridCompCreate(vm, cnameIN, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cnameFS = "Flow Solver model"
-    layoutFS = ESMF_newDELayoutCreate(vm, (/ quart, 4 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    FScomp = ESMF_GridCompCreate(cnameFS, delayout=layoutFS, rc=rc)
+    FScomp = ESMF_GridCompCreate(vm, cnameFS, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cplname = "Two-way coupler"
-    cpl = ESMF_CplCompCreate(cplname, delayout=layoutDef, rc=rc)
+    cpl = ESMF_CplCompCreate(vm, cplname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
 
@@ -167,14 +144,14 @@
       call ESMF_TimeIntervalSet(timeStep, s=2, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      ! initialize start time to 12May2003, 9:00 am
-      call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=12, h=9, &
+      ! initialize start time to 12May2004, 9:00 am
+      call ESMF_TimeSet(startTime, yy=2004, mm=5, dd=12, h=9, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      ! initialize stop time to 12May2003, 3:00 pm
+      ! initialize stop time to 12May2004, 3:00 pm
       ! to keep runtime down
-      call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=12, h=15, &
+      call ESMF_TimeSet(stopTime, yy=2004, mm=5, dd=12, h=15, &
                         calendar=gregorianCalendar, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -300,17 +277,12 @@
       call ESMF_CplCompDestroy(cpl, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_newDELayoutDestroy(layoutIN, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      call ESMF_newDELayoutDestroy(layoutFS, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 10    print *, "Coupled Flow Demo complete!"
 
-      if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+      if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         write(failMsg, *)  "System Test failure"
         write(testname, *) "System Test FlowWithCoupling: Coupled Fluid Flow"
   
