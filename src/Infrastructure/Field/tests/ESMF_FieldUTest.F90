@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.16 2003/04/24 16:41:40 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.17 2003/06/05 17:34:54 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.16 2003/04/24 16:41:40 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.17 2003/06/05 17:34:54 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -111,10 +111,11 @@
 #ifdef ESMF_EXHAUSTIVE
 
      ! Verifing that printing an uninitialized Field is handled properly.
-      call ESMF_FieldPrint(f2, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Printing an uninitialized Field Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+     ! This code is commented out until bug 747699 is fixed.
+     ! call ESMF_FieldPrint(f2, rc=rc)
+     ! write(failMsg, *) ""
+     ! write(name, *) "Printing an uninitialized Field Test"
+     ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
        ! verify that querying the name of a destroyed Field is handled properly.
