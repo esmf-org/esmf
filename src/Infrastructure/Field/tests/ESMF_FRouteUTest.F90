@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.9 2003/04/24 16:41:39 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.10 2003/04/24 23:19:04 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.9 2003/04/24 16:41:39 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.10 2003/04/24 23:19:04 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,7 +55,7 @@
       integer, dimension(:,:), pointer :: f90ptr1, f90ptr2
       type(ESMF_DataMap) :: dm
       type(ESMF_RelLoc) :: rl
-      type(ESMF_DELayout) :: layout1, layout2
+      type(ESMF_DELayout) :: layout0, layout1, layout2
       integer :: delist(4)
       character (len = 20) :: fname, fname1, fname2, gname
       type(ESMF_IOSpec) :: ios
@@ -71,6 +71,11 @@
 
       print *, "*************FIELD ROUTE UNIT TESTS***************************"
       print *
+
+      call ESMF_FrameworkInitialize(rc)
+
+      ! Make a default 1xN layout
+      layout0 = ESMF_DELayoutCreate(rc)
 
       ! Make a 1x4 and 2x2 layout
       delist = (/ 0, 1, 2, 3 /)
@@ -200,5 +205,7 @@
       call ESMF_ArrayDestroy(arr2)
 
 10    print *, "end of Field Route test"
+
+      call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_FRouteUTest
