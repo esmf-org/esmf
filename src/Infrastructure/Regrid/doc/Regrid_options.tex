@@ -1,4 +1,22 @@
 
+%\subsubsection{ESMF\_RegridDistrb}
+%
+%{\sf DESCRIPTION:\\}
+%Regrid options for Field data motion supported by ESMF.
+%
+%Valid values are:
+%\begin{description}
+%   \item [ESMF\_REGRIDDISTRB\_BOTH]
+%         Redistribute both source and destination Fields.
+%   \item [ESMF\_REGRIDDISTRB\_DEST]
+%         Redistribute destination Field.
+%   \item [ESMF\_REGRIDDISTRB\_NONE]
+%         No data motion required or undefined.
+%   \item [ESMF\_REGRIDDISTRB\_SOURCE]
+%         Redistribute source Field.
+%\end{description}
+
+
 \subsubsection{ESMF\_RegridMethod}
 
 {\sf DESCRIPTION:\\}
@@ -6,8 +24,57 @@ General Regrid methods supported by ESMF.
 
 Valid values are:
 \begin{description}
-\item [ESMF\_REGRID\_METHOD\_NONE]
-     No regridding or undefined regrid.
+%  \item [ESMF\_REGRID\_METHOD\_ADJOINT]
+%        Create adjoint of existing regrid
+\item[ESMF\_REGRID\_METHOD\_BICUBIC ] not implemented yet
+
+     Like the bilinear remapping, bicubic remapping is applicable
+     only for logically-rectangular or block-structured logically-rectangular
+     grids.  The bicubic remapping exactly follows the bilinear remapping except
+     that four weights for each corner point are required.  Thus, num\_wts
+     is set to four for this option.  The bicubic remapping is
+
+\begin{eqnarray}\label{eq:bicubic}
+f_P & = & 
+    (1 - \beta^2(3-2\beta))(1 - \alpha^2(3-2\alpha))f(i  ,j  ) + \nonumber \\
+& & (1 - \beta^2(3-2\beta))     \alpha^2(3-2\alpha) f(i+1,j  ) + \nonumber \\
+& &      \beta^2(3-2\beta)      \alpha^2(3-2\alpha) f(i+1,j+1) + \nonumber \\
+& &      \beta^2(3-2\beta) (1 - \alpha^2(3-2\alpha))f(i  ,j+1) + \nonumber \\
+& & (1 - \beta^2(3-2\beta))\alpha  (\alpha-1)^2 
+                        {{\partial f}\over{\partial i}}(i  ,j  ) + \nonumber \\
+& & (1 - \beta^2(3-2\beta))\alpha^2(\alpha-1) 
+                        {{\partial f}\over{\partial i}}(i+1,j  ) + \nonumber \\
+& &      \beta^2(3-2\beta) \alpha^2(\alpha-1)
+                        {{\partial f}\over{\partial i}}(i+1,j+1) + \nonumber \\
+& &      \beta^2(3-2\beta) \alpha  (\alpha-1)^2 
+                        {{\partial f}\over{\partial i}}(i  ,j+1) + \nonumber \\
+& & \beta  (\beta-1)^2(1 - \alpha^2(3-2\alpha))
+                        {{\partial f}\over{\partial j}}(i  ,j  ) + \nonumber \\
+& & \beta  (\beta-1)^2     \alpha^2(3-2\alpha) 
+                        {{\partial f}\over{\partial j}}(i+1,j  ) + \nonumber \\
+& & \beta^2(\beta-1)       \alpha^2(3-2\alpha)
+                        {{\partial f}\over{\partial j}}(i+1,j+1) + \nonumber \\
+& & \beta^2(\beta-1)  (1 - \alpha^2(3-2\alpha)) 
+                        {{\partial f}\over{\partial j}}(i  ,j+1) + \nonumber \\
+& & \alpha  (\alpha-1)^2\beta  (\beta-1)^2
+           {{\partial^2 f}\over{\partial i \partial j}}(i  ,j  ) + \nonumber \\
+& & \alpha^2(\alpha-1)  \beta  (\beta-1)^2 
+           {{\partial^2 f}\over{\partial i \partial j}}(i+1,j  ) + \nonumber \\
+& & \alpha^2(\alpha-1)  \beta^2(\beta-1)
+           {{\partial^2 f}\over{\partial i \partial j}}(i+1,j+1) + \nonumber \\
+& & \alpha  (\alpha-1)^2\beta^2(\beta-1)
+           {{\partial^2 f}\over{\partial i \partial j}}(i  ,j+1)
+\end{eqnarray}
+
+     where $\alpha$ and $\beta$ are identical to those found in the bilinear
+     case and are found using an identical algorithm.  Note that unlike the
+     conservative remappings, the gradients here are gradients with respect to
+     the {\em logical} variable and not latitude or longitude.  Lastly, the four
+     weights corresponding to each address pair correspond to the weight
+     multiplying the field value at the point, the weight multiplying the
+     gradient with respect to $i$, the weight multiplying the gradient with
+     respect to $j$, and the weight multiplying the cross gradient in that order.
+
 \item [ESMF\_REGRID\_METHOD\_BILINEAR]
      The bilinear regridding methods uses a local bilinear approximation
      to interpolate to a point in a quadrilateral grid.  This is applicable
@@ -121,55 +188,6 @@ A = \left[\begin{array}{cc}
      the exception that instead of using cell corners, the relevant box is
      formed by neighbor cell centers as shown in Fig.~\ref{fig:quad}.
 
-\item[ESMF\_REGRID\_METHOD\_BICUBIC ] not implemented yet
-
-     Like the bilinear remapping, bicubic remapping is applicable
-     only for logically-rectangular or block-structured logically-rectangular
-     grids.  The bicubic remapping exactly follows the bilinear remapping except
-     that four weights for each corner point are required.  Thus, num\_wts
-     is set to four for this option.  The bicubic remapping is
-
-\begin{eqnarray}\label{eq:bicubic}
-f_P & = & 
-    (1 - \beta^2(3-2\beta))(1 - \alpha^2(3-2\alpha))f(i  ,j  ) + \nonumber \\
-& & (1 - \beta^2(3-2\beta))     \alpha^2(3-2\alpha) f(i+1,j  ) + \nonumber \\
-& &      \beta^2(3-2\beta)      \alpha^2(3-2\alpha) f(i+1,j+1) + \nonumber \\
-& &      \beta^2(3-2\beta) (1 - \alpha^2(3-2\alpha))f(i  ,j+1) + \nonumber \\
-& & (1 - \beta^2(3-2\beta))\alpha  (\alpha-1)^2 
-                        {{\partial f}\over{\partial i}}(i  ,j  ) + \nonumber \\
-& & (1 - \beta^2(3-2\beta))\alpha^2(\alpha-1) 
-                        {{\partial f}\over{\partial i}}(i+1,j  ) + \nonumber \\
-& &      \beta^2(3-2\beta) \alpha^2(\alpha-1)
-                        {{\partial f}\over{\partial i}}(i+1,j+1) + \nonumber \\
-& &      \beta^2(3-2\beta) \alpha  (\alpha-1)^2 
-                        {{\partial f}\over{\partial i}}(i  ,j+1) + \nonumber \\
-& & \beta  (\beta-1)^2(1 - \alpha^2(3-2\alpha))
-                        {{\partial f}\over{\partial j}}(i  ,j  ) + \nonumber \\
-& & \beta  (\beta-1)^2     \alpha^2(3-2\alpha) 
-                        {{\partial f}\over{\partial j}}(i+1,j  ) + \nonumber \\
-& & \beta^2(\beta-1)       \alpha^2(3-2\alpha)
-                        {{\partial f}\over{\partial j}}(i+1,j+1) + \nonumber \\
-& & \beta^2(\beta-1)  (1 - \alpha^2(3-2\alpha)) 
-                        {{\partial f}\over{\partial j}}(i  ,j+1) + \nonumber \\
-& & \alpha  (\alpha-1)^2\beta  (\beta-1)^2
-           {{\partial^2 f}\over{\partial i \partial j}}(i  ,j  ) + \nonumber \\
-& & \alpha^2(\alpha-1)  \beta  (\beta-1)^2 
-           {{\partial^2 f}\over{\partial i \partial j}}(i+1,j  ) + \nonumber \\
-& & \alpha^2(\alpha-1)  \beta^2(\beta-1)
-           {{\partial^2 f}\over{\partial i \partial j}}(i+1,j+1) + \nonumber \\
-& & \alpha  (\alpha-1)^2\beta^2(\beta-1)
-           {{\partial^2 f}\over{\partial i \partial j}}(i  ,j+1)
-\end{eqnarray}
-
-     where $\alpha$ and $\beta$ are identical to those found in the bilinear
-     case and are found using an identical algorithm.  Note that unlike the
-     conservative remappings, the gradients here are gradients with respect to
-     the {\em logical} variable and not latitude or longitude.  Lastly, the four
-     weights corresponding to each address pair correspond to the weight
-     multiplying the field value at the point, the weight multiplying the
-     gradient with respect to $i$, the weight multiplying the gradient with
-     respect to $j$, and the weight multiplying the cross gradient in that order.
-
 %\item[ESMF\_REGRID\_METHOD\_CONSERV1 and ESMF\_REGRID\_METHOD\_CONSERV2]
 \item[ESMF\_REGRID\_METHOD\_CONSERV1]
      First-order and second-order conservative remapping share a common
@@ -202,11 +220,12 @@ f_P & = &
      destination grid cell $k$, and $f_n$ is the local value of the flux in the
      source grid cell (see Figure~\ref{fig:grids}).  Note that (\ref{eq:rmpsum})
      is normalized by the destination area $A_k$ corresponding to the
-     normOpt value of {\tt ESMF\_RegridNormOpt\_DstArea}.  The sum of the weights for a
-     destination cell $k$ in this case would be between 0 and 1 and would be the
-     area fraction if $f_n$ were identically 1 everywhere on the source grid.
-     The normalization option {\tt ESMF\_RegridNormOpt\_FracArea} would actually
-     divide by the area of the source grid overlapped by cell $k$: 
+     {\tt ESMF\_RegridNormOpt} value of {\tt ESMF\_REGRID\_NORM\_DSTAREA}.  The
+     sum of the weights for a destination cell $k$ in this case would be between
+     0 and 1 and would be the area fraction if $f_n$ were identically 1 
+     everywhere on the source grid.  The normalization option
+     {\tt ESMF\_REGRID\_NORM\_FRACAREA} would actually divide by the area of the
+     source grid overlapped by cell $k$: 
 
 \begin{equation}
 \sum_{n=1}^N \int\int_{A_{nk}}dA.
@@ -216,7 +235,7 @@ f_P & = &
      everywhere on the source grid would result in a function $F$ that is
      exactly one wherever the destination grid overlaps a non-masked source
      grid cell and zero otherwise.  A normalization option of
-     {\tt ESMF\_RegridNormOpt\_None} would result in the actual angular area
+     {\tt ESMF\_REGRID\_NORM\_NONE} would result in the actual angular area
      participating in the remapping.
 
      Assuming $f_n$ is constant across a source grid cell, (\ref{eq:rmpsum})
@@ -467,51 +486,33 @@ Y &=& 2\sin\left({\pi \over 4} - {\theta \over 2}\right)\sin\phi
      are detected and used as a normal grid intersection to provide a clean break
      between the two coordinate systems.
 
-%  \item [ESMF\_REGRID\_METHOD\_RASTER]
-%        Regrid by rasterizing domain.
-%  \item [ESMF\_REGRID\_METHOD\_NEARNBR]
-%        Nearest-neighbor dist-weighted avg
+%  \item [ESMF\_REGRID\_METHOD\_FILE]
+%        Read a regrid from a file
 %  \item [ESMF\_REGRID\_METHOD\_FOURIER]
 %        Fourier transform.
-%  \item [ESMF\_REGRID\_METHOD\_LEGENDRE]
-%        Legendre transform.
 %  \item [ESMF\_REGRID\_METHOD\_INDEX]
 %        Index-space regrid (shift, stencil).
+%  \item [ESMF\_REGRID\_METHOD\_LEGENDRE]
+%        Legendre transform.
 \item[ESMF\_REGRID\_METHOD\_LINEAR  ]
      This is a standard linear regridding algorithm for 1-d grids only.  In ESMF,
      it is used to regrid between vertical grids.
 
-%  \item [ESMF\_REGRID\_METHOD\_SPLINE]
-%        Cubic spline for 1-d regridding
+%  \item [ESMF\_REGRID\_METHOD\_NEARNBR]
+%        Nearest-neighbor dist-weighted avg
+\item [ESMF\_REGRID\_METHOD\_NONE]
+     No regridding or undefined regrid.
+%  \item [ESMF\_REGRID\_METHOD\_RASTER]
+%        Regrid by rasterizing domain.
 %  \item [ESMF\_REGRID\_METHOD\_REGRIDCOPY]
 %        Copy existing regrid
 %  \item [ESMF\_REGRID\_METHOD\_SHIFT]
 %        Shift addresses of existing regrid
-%  \item [ESMF\_REGRID\_METHOD\_ADJOINT]
-%        Create adjoint of existing regrid
-%  \item [ESMF\_REGRID\_METHOD\_FILE]
-%        Read a regrid from a file
+%  \item [ESMF\_REGRID\_METHOD\_SPLINE]
+%        Cubic spline for 1-d regridding
 %  \item [ESMF\_REGRID\_METHOD\_USER]
 %        User-supplied method
 \end{description}
-
-
-%\subsubsection{ESMF\_RegridDistrb}
-%
-%{\sf DESCRIPTION:\\}
-%Regrid options for Field data motion supported by ESMF.
-%
-%Valid values are:
-%\begin{description}
-%   \item [ESMF\_REGRIDDISTRB\_NONE]
-%         No data motion required or undefined.
-%   \item [ESMF\_REGRIDDISTRB\_SOURCE]
-%         Redistribute source Field.
-%   \item [ESMF\_REGRIDDISTRB\_DEST]
-%         Redistribute destination Field.
-%   \item [ESMF\_REGRIDDISTRB\_BOTH]
-%         Redistribute both source and destination Fields.
-%\end{description}
 
 
 
@@ -522,13 +523,13 @@ Regrid normalization options supported by ESMF, for conservative regridding only
 
 Valid values are:
 \begin{description}
-   \item [ESMF\_REGRID\_NORM\_UNKNOWN]
-         Unknown or undefined normalization.
-   \item [ESMF\_REGRID\_NORM\_NONE]
-         No normalization applied to Regrid weights.
    \item [ESMF\_REGRID\_NORM\_DSTAREA]
          The Regrid weights are normalized by the destination area of each cell. 
    \item [ESMF\_REGRID\_NORM\_FRACAREA]
          The Regrid weights are normalized by the area of the source grid
          overlapped by each cell (default).
+   \item [ESMF\_REGRID\_NORM\_NONE]
+         No normalization applied to Regrid weights.
+   \item [ESMF\_REGRID\_NORM\_UNKNOWN]
+         Unknown or undefined normalization.
 \end{description}
