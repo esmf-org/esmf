@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.29 2003/03/04 14:59:50 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.30 2003/03/05 17:09:29 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,7 +38,7 @@
       use ESMF_LayoutMod
       use ESMF_ClockMod
       use ESMF_StateMod
-      use ESMF_XPacketMod
+      !use ESMF_RouteMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -103,7 +103,7 @@
          type(ESMF_State) :: exportstate               ! export state
          type(ESMF_State), dimension(:), pointer :: statelist  ! coupling list
          integer :: statecount                         ! length of statelist
-         type(ESMF_XPacket) :: xpacket                 ! exchange packets
+         !type(ESMF_Route) :: route                     ! route 
          type(ESMF_Layout) :: layout                   ! component layout
          type(ESMF_Clock) :: clock                     ! component clock
          character(len=ESMF_MAXSTR) :: filepath        ! resource filepath
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.29 2003/03/04 14:59:50 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.30 2003/03/05 17:09:29 nscollins Exp $'
 
 !==============================================================================
 ! 
