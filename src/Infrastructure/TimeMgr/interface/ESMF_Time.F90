@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.62 2004/02/11 21:48:54 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.63 2004/03/10 03:09:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,8 +45,11 @@
       use ESMF_IOMod
 
       ! associated derived types
-      use ESMF_TimeIntervalMod
+      use ESMF_TimeIntervalTypeMod
       use ESMF_CalendarMod
+
+      ! type definition for this module
+      use ESMF_TimeTypeMod
 
       implicit none
 !
@@ -54,27 +57,8 @@
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_Time
-!
-!     ! F90 class type to match C++ Time class in size only;
-!     !  all dereferencing within class is performed by C++ implementation
-
-!     ! Equivalent sequence and kind to C++:
-
-     type ESMF_Time
-     sequence                                    ! match C++ storage order
-     private                                     !  (members opaque on F90 side)
-       type(ESMF_BaseTime)          :: baseTime  ! inherit base class
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-       type(ESMF_Calendar), pointer :: calendar => NULL() ! associated calendar
-       integer                      :: timeZone = 0 ! local timezone
-       integer                      :: pad      = 0 ! to satisfy halem compiler
-#else
-       type(ESMF_Calendar), pointer :: calendar  ! associated calendar
-       integer                      :: timeZone  ! local timezone
-       integer                      :: pad       ! to satisfy halem compiler
-#endif
-     end type
+!     ! ESMF_Time definition in ESMF_TimeTypeMod to resolve mutual
+!     ! dependency with ESMF_TimeInterval
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -113,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.62 2004/02/11 21:48:54 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.63 2004/03/10 03:09:55 eschwab Exp $'
 
 !==============================================================================
 !
