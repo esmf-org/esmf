@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.16 2005/01/12 20:37:30 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.17 2005/01/12 22:04:15 eschwab Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -31,7 +31,6 @@
     
     ! Private data block
     type injectdata
-       type(ESMF_Calendar) :: gregorianCalendar
        type(ESMF_Time) :: inject_start_time
        type(ESMF_Time) :: inject_stop_time
        real :: inject_energy
@@ -214,22 +213,16 @@
       call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
       datablock => wrap%ptr
 
-      ! initialize calendar to be Gregorian type
-      datablock%gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
-                                                        ESMF_CAL_GREGORIAN, rc)
-
       ! initialize start time to 12May2003, 3:00 pm
       ! for testing, initialize start time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_start_time, &
                         yy=2003, mm=on_month, dd=on_day, &
-                        h=on_hour, m=on_min, s=0, &
-                        calendar=datablock%gregorianCalendar, rc=rc)
+                        h=on_hour, m=on_min, s=0, rc=rc)
 
       ! initialize stop time to 13May2003, 2:00 pm
       call ESMF_TimeSet(datablock%inject_stop_time, &
                         yy=2003, mm=off_month, dd=off_day, &
-                        h=off_hour, m=off_min, s=0, &
-                        calendar=datablock%gregorianCalendar, rc=rc)
+                        h=off_hour, m=off_min, s=0, rc=rc)
 
 
       datablock%inject_energy = in_energy
@@ -535,7 +528,6 @@
         call ESMF_GridCompGetInternalState(comp, wrap, rc)
 
         datablock => wrap%ptr
-        call ESMF_CalendarDestroy(datablock%gregorianCalendar, rc)
         deallocate(datablock, stat=allocrc)
         nullify(wrap%ptr)
 
