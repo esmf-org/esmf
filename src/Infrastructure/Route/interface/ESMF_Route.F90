@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.6 2003/03/17 21:34:13 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.7 2003/03/17 23:33:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.6 2003/03/17 21:34:13 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.7 2003/03/17 23:33:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -431,11 +431,11 @@
 ! !ARGUMENTS:
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_dst
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst
       integer, intent(in) :: AI_dst_count
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_src
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
       logical, intent(out), optional :: hascachedroute
@@ -562,11 +562,11 @@
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_dst
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_dst
       integer, intent(in) :: AI_dst_count
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_src
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI_src
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
       integer, intent(out), optional :: rc
