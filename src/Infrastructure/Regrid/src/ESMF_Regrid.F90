@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.24 2003/08/26 14:46:35 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.25 2003/08/26 16:24:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.24 2003/08/26 14:46:35 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.25 2003/08/26 16:24:55 nscollins Exp $'
 
 !==============================================================================
 !
@@ -110,12 +110,10 @@
       interface ESMF_RegridCreate
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         ! TODO: soon i hope FromArray is the only version here.
-         !  i'll leave the others for now just to keep the code.
+         ! TODO: this used to have an entry point for fields, bundles, etc.
+         !  now there should only be an array entry point and the need for
+         !  this interface has really gone away.
          module procedure ESMF_RegridCreateFromArray
-         !module procedure ESMF_RegridCreateFromField
-         !module procedure ESMF_RegridCreateFromBundle
-         !module procedure ESMF_RegridCreateFromRegrid
          
 !
 ! !DESCRIPTION:
@@ -133,9 +131,8 @@
       interface ESMF_RegridRun
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_RegridRunField
-         module procedure ESMF_RegridRunBundle
-         !module procedure ESMF_RegridRunArray
+         ! TODO: ditto for the comment above about create.
+         module procedure ESMF_RegridRunArray
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for performing the
@@ -414,9 +411,19 @@
 !EOP
 
    ! get the first route from the table and run it to gather the
-   ! data values.
+   ! data values which overlap this bounding box.
  
    !call ESMF_RouteHandleGet(routehandle, rhandle1=rh, rc=status)
+
+   ! from the domain or from someplace, get the counts of how many data points
+   ! we are expecting from other DEs.  we might also need to know what
+   ! data type is coming since this is user data and not coordinates at 
+   ! execution time.  or does the incoming data have to match the type
+   ! of the outgoing array?  so we can get the data type and shape from
+   ! the dstarray argument to this function.  and what about halo widths?
+
+   !tempdst = ESMF_ArrayCreate(rank, type, kind, counts, halo_widths, rc)
+   !call ESMF_RouteRun(rh, srcarray, tempdst, status)
 
    ! get the indirect indicies and weights from the routehandle
 
@@ -424,14 +431,23 @@
    !call ESMF_TransformValues(tv, ?=srcindex, ?=dstindex, ?=weights)
 
    ! get a real f90 pointer from all the arrays
+   ! i4ptr and r8ptr TKR can be fixed, but unfortunately the dptr can be
+   ! whatever the user wants - so this code might need to move into
+   ! another file and be macroized heavily for TKR.
    !call ESMF_ArrayGetData(srcindex, i4ptr, ESMF_DATA_REF, rc)
    !call ESMF_ArrayGetData(dstindex, i4ptr, ESMF_DATA_REF, rc)
    !call ESMF_ArrayGetData(weights, r8ptr, ESMF_DATA_REF, rc)
 
-   !call ESMF_ArrayGetData(srcaddr, i4ptr, ESMF_DATA_REF, rc)
-   !call ESMF_ArrayGetData(dstaddr, i4ptr, ESMF_DATA_REF, rc)
+   !call ESMF_ArrayGetData(tempdst, dptr, ESMF_DATA_REF, rc)
+   !call ESMF_ArrayGetData(dstaddr, dptr, ESMF_DATA_REF, rc)
 
    ! TODO: apply the weights from src to destination
+   !  does this need a nested loop and an array of ESMF_Arrays, one
+   !  for each DE which sends data?  i think the answer is not for now
+   !  because all data has been pushed into a single array.  but eventually
+   !  if we want to start supporting vectors or other complicated data 
+   !  shapes, we may have to start preserving the array and datamaps
+   !  from the original locations.
 
    !*** initialize dest field to zero
    
@@ -442,127 +458,12 @@
    ! will look something like   
    !do n=1,num_links
    !  dstarrayptr(dstindexptr(n)) = dstarrayptr(dstindexptr(n)) + &
-   !                                srcarrayptr(srcindexptr(n)) * weightptr(n))
+   !                                tempdstptr(srcindexptr(n)) * weightptr(n))
    !end do
 
    ! set return codes
 
    end subroutine ESMF_RegridRunArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RegridRunField - Performs a regridding between two fields
-
-! !INTERFACE:
-      subroutine ESMF_RegridRunField(srcfield, dstfield, routehandle, rc)
-!
-! !ARGUMENTS:
-
-      type (ESMF_Field), intent(in) :: &
-         srcfield            ! field to be regridded
-         
-      type (ESMF_RouteHandle), intent(in) :: &
-         routehandle          ! precomputed regrid structure with
-                              !  regridding info
-
-      type (ESMF_Field), intent(out) :: &
-         dstfield            ! resulting regridded field
-
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a source field and precomputed regridding information, this 
-!     routine regrids the source field to a new field on the destination
-!     grid.  
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-   !type (ESMF_Array) ::
-   !   src_data   ! source data necessary for regrid gathered
-   !              !  from potentially distributed source field
-
-   !*** gather remote data to local array
-
-   ! allocate local gathered source array
-   ! use route to gather data
-      
-   !*** initialize dest field to zero
-   
-   !dstfield = zero
-
-   !*** do the regrid
-
-   ! will look something like   
-   !do n=1,num_links
-   !   dstfield(regrid%dst_add(n)) = dstfield(regrid%dst_add(n)) + &
-   !                                  srcfield(regrid%src_add(n))* &
-   !                                  regrid%weights(n)
-   !end do
-
-   ! set return codes
-
-   end subroutine ESMF_RegridRunField
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_RegridRunBundle - Performs a regridding between two bundles of fields
-
-! !INTERFACE:
-      subroutine ESMF_RegridRunBundle(srcbundle, dstbundle, routehandle, rc)
-!
-! !ARGUMENTS:
-
-      type (ESMF_Bundle), intent(in) :: &
-         srcbundle            ! bundle of fields to be regridded
-         
-      type (ESMF_RouteHandle), intent(in) :: &
-         routehandle          ! precomputed regrid structure with
-                              !  regridding info
-
-      type (ESMF_Bundle), intent(out) :: &
-         dstbundle            ! resulting regridded bundle of fields
-
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Given a bundle of source fields and precomputed regridding information, 
-!     this routine regrids the bundle of source fields to a bundle of new 
-!     fields on the destination grid.  
-!
-! !REQUIREMENTS:  TODO
-!EOP
-
-   !type (ESMF_Array) ::
-   !   src_data   ! source data necessary for regrid gathered
-   !              !  from potentially distributed source field
-
-   !*** gather remote data to local array
-
-   ! allocate local gathered source array
-   ! must check for packed bundles, etc.
-   ! use route to gather data
-
-
-   !*** regrid every field in the bundle
-   ! this will look something like
-   !do ifield = 1,numfields
-   
-      !*** initialize dest field to zero
-   
-      !dstfield = zero
-
-      !*** do the regrid
-   
-      !do n=1,num_links
-      !   dstfield(regrid%dst_add(n)) = dstfield(regrid%dst_add(n)) + &
-      !                                  srcfield(regrid%src_add(n))* &
-      !                                  regrid%weights(n)
-      !end do
-   !end do ! ifield
-
-!EOC
-   end subroutine ESMF_RegridRunBundle
 
 !------------------------------------------------------------------------------
 !BOP
@@ -683,14 +584,14 @@
 ! !IROUTINE: ESMF_RegridDestroy - Free all resources associated with a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridDestroy(regrid, rc)
+      subroutine ESMF_RegridDestroy(routehandle, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(inout) :: regrid
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt Regrid} object previously allocated
+!     Destroys all a {\tt Regrid} object previously allocated
 !     via an {\tt ESMF\_RegridCreate routine}.
 !
 !     The arguments are:
@@ -713,9 +614,14 @@
         rc = ESMF_FAILURE
       endif
 
-      ! Call destruct method to free up internally-allocated memory
+      ! Does this destroy each of the routes?  it certainly needs to
+      !  destroy the arrays in the TransformValues object.  (i think the
+      !  answer is yes - this code should call route delete here.)
 
-      call ESMF_RegridDestruct(regrid%ptr, status)
+      !call ESMF_RouteHandleGet(routehandle, rhandle1=rh, transformvalues=tv, &
+      !                          rc=status)
+      !call ESMF_RouteDestroy(rh, status)
+      !call ESMF_TransformValuesDestroy(tv, status)
       if (status /= ESMF_SUCCESS) then
         ! Use error function eventually...
         print *, "ERROR in ESMF_RegridDestroy: Regrid destruct"
@@ -723,7 +629,6 @@
       endif
 
       ! Set return values.
-      nullify(regrid%ptr)
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestroy
@@ -733,10 +638,10 @@
 ! !IROUTINE: ESMF_RegridValidate - Check internal consistency of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridValidate(regrid, opt, rc)
+      subroutine ESMF_RegridValidate(routehandle, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
+      type(ESMF_RouteHandle), intent(in) :: routehandle
       character (len=*), intent(in), optional :: opt
       integer, intent(out), optional :: rc
 !
@@ -745,7 +650,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[regrid]
+!     \item[routehandle]
 !          Class to be queried.
 !     \item[[opt]]
 !          Validation options.
@@ -767,10 +672,10 @@
 ! !IROUTINE: ESMF_RegridPrint - Print the contents of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridPrint(regrid, opt, rc)
+      subroutine ESMF_RegridPrint(routehandle, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid
+      type(ESMF_RouteHandle), intent(in) :: routehandle
       character (len=*), intent(in) :: opt
       integer, intent(out), optional :: rc
 !
@@ -790,6 +695,9 @@
 !
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ! TODO: does this even need to be here?  it seems the print and
+      ! validate routines should be in the routehandle code only.
 
       ! 
       ! code goes here
