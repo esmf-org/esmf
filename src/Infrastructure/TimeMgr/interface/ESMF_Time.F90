@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.25 2003/04/30 18:48:22 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.26 2003/04/30 22:00:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -130,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.25 2003/04/30 18:48:22 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.26 2003/04/30 22:00:26 eschwab Exp $'
 
 !==============================================================================
 !
@@ -763,7 +763,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Convert {\tt Time}'s value into string format
+!     Convert {\tt Time}'s value into ISO 8601 format YYYY-MM-DDThh:mm:ss
 !
 !     The arguments are:
 !     \begin{description}
