@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2003/04/15 15:42:20 nscollins Exp $
+! $Id: user_coupler.F90,v 1.2 2003/04/17 17:31:23 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -60,15 +60,29 @@
         integer, optional :: rc
 
 !     ! Local variables
-        type(ESMF_Field) :: humidity
-        type(ESMF_State) :: state1, state2
+        type(ESMF_State) :: toflow, fromflow
+        type(ESMF_Field) :: toflow_sie, toflow_u, toflow_v 
+        type(ESMF_Field) :: fromflow_sie, fromflow_u, fromflow_v 
 
         print *, "User Coupler Init starting"
-        call ESMF_StateGetData(statelist, "comp1 export", state1, rc)
-        call ESMF_StatePrint(state1, rc=rc)
+        call ESMF_StateGetData(statelist, "Heat Energy", toflow_sie, rc)
+        call ESMF_StatePrint(toflow_sie, rc=rc)
 
-        call ESMF_StateGetData(statelist, "comp2 import", state2, rc)
-        call ESMF_StatePrint(state2, rc=rc)
+        call ESMF_StateGetData(statelist, "Heat U Velocity", toflow_u, rc)
+        call ESMF_StatePrint(toflow_u, rc=rc)
+
+        call ESMF_StateGetData(statelist, "Heat V Velocity", toflow_v, rc)
+        call ESMF_StatePrint(toflow_v, rc=rc)
+
+        call ESMF_StateGetData(statelist, "Flow Energy", fromflow_sie, rc)
+        call ESMF_StatePrint(fromflow_sie, rc=rc)
+
+        call ESMF_StateGetData(statelist, "Flow U Velocity", fromflow_u, rc)
+        call ESMF_StatePrint(fromflow_u, rc=rc)
+
+        call ESMF_StateGetData(statelist, "Flow V Velocity", fromflow_v, rc)
+        call ESMF_StatePrint(fromflow_v, rc=rc)
+
 
 
         ! This is where the model specific setup code goes.  
@@ -90,7 +104,7 @@
 
       ! Local variables
         type(ESMF_State) :: mysource, mydest
-        type(ESMF_Field) :: humidity1, humidity2
+        type(ESMF_Field) :: temperature1, temperature2
         type(ESMF_DELayout) :: cpllayout
 
        
@@ -99,28 +113,29 @@
         print *, "User Coupler Run starting"
 
         ! Get input data
-        call ESMF_StateGetData(statelist, "comp1 export", mysource, rc)
+        call ESMF_StateGetData(statelist, "Heat Source", mysource, rc)
         call ESMF_StatePrint(mysource, rc=rc)
-        call ESMF_StateGetData(mysource, "humidity", humidity1, rc=status)
-        call ESMF_FieldPrint(humidity1, "", rc=rc)
+        call ESMF_StateGetData(mysource, "temperature", temperature1, rc=status)
+        call ESMF_FieldPrint(temperature1, "", rc=rc)
 
         ! Get location of output data
-        call ESMF_StateGetData(statelist, "comp2 import", mydest, rc)
+        call ESMF_StateGetData(statelist, "Heat Injection", mydest, rc)
         call ESMF_StatePrint(mydest, rc=rc)
-        call ESMF_StateGetData(mydest, "humidity", humidity2, rc=status)
-        call ESMF_FieldPrint(humidity2, "", rc=rc)
+        call ESMF_StateGetData(mydest, "temperature", temperature2, rc=status)
+        call ESMF_FieldPrint(temperature2, "", rc=rc)
 
         ! Get layout from coupler component
         call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
 
+        ! Need to get temp2 on temp1 layout to add?
 
         ! These are fields on different layouts - call Route to rearrange
         !  the data using the Comm routines.
-        call ESMF_FieldRoute(humidity1, humidity2, cpllayout, status)
+        call ESMF_FieldRoute(temperature1, temperature2, cpllayout, status)
 
 
         ! Set output data
-        call ESMF_StateAddData(mydest, humidity2, rc=status)
+        call ESMF_StateAddData(mydest, temperature2, rc=status)
         call ESMF_StatePrint(mydest, rc=status)
 
  

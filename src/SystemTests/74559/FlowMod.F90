@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.2 2003/04/16 22:54:01 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.3 2003/04/17 17:31:22 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -12,20 +12,8 @@
 
     module FlowMod
     
-!   Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
-
 !   ESMF modules
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
-    use ESMF_StateMod
-    use ESMF_CompMod
+    use ESMF_ESMFMod
 
     use ArraysGlobalMod
     
@@ -54,10 +42,6 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
 
         print *, "Registered Initialize, Run, and Finalize routines"
-
-        ! If desired, this routine can register a private data block
-        ! to be passed in to the routines above:
-        ! call ESMF_CompSetData(comp, mydatablock, rc)
 
     end subroutine FlowMod_register
 

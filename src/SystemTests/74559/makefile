@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/04/15 15:42:20 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/04/17 17:31:23 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -9,7 +9,7 @@ SOURCEF	  = FlowMod.F90 ArraysGlobalMod.F90 ESMF_SysTest74559.F90
 
 SOURCEH	  = 
 OBJSC	  =  
-OBJSF	  =  FlowMod.o ArraysGlobalMod.o user_coupler.o
+OBJSF	  =  ArraysGlobalMod.o FlowMod.o user_coupler.o
 MANSEC	  = 
 LIBBASE	  = 
 LOCDIR	  = src/SystemTests/74559
@@ -33,7 +33,9 @@ CLOBBERDIRS =
 
 
 # user_models (and .mod files) have to be built first
-ESMF_SysTest74559.o: ArraysGlobalMod.o FlowMod.o
+ESMF_SysTest74559.o: FlowMod.o HeatMod.o user_coupler.o
+FlowMod.o: ArraysGlobalMod.o
+HeatMod.o: ArraysGlobalMod.o
 
 $(ESMC_TESTDIR)/ESMF_SysTest74559: ESMF_SysTest74559.o ${OBJSF} chkopts
 	$(SL_F_LINKER) -o ESMF_SysTest74559 ESMF_SysTest74559.o ${OBJSF} \
