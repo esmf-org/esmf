@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/05/07 20:07:34 nscollins Exp $
+# $Id: makefile,v 1.6 2003/05/07 20:44:34 nscollins Exp $
 
 ALL:  tests
 
@@ -52,11 +52,11 @@ $(ESMC_TESTDIR)/ESMF_ConfigUTest: chkopts ESMF_ConfigUTest.o
 
 RUN_ESMF_ConfigUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ConfigUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
 
 RUN_ESMF_ConfigUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ConfigUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ConfigUTest > $(ESMC_TESTDIR)/ESMF_ConfigUTest.stdout
 
 ESMF_ConfigUTest.rm:
 	echo "ESMF_ConfigTest.rm target called here."
@@ -68,11 +68,11 @@ $(ESMC_TESTDIR)/ESMC_ConfigUTest: chkopts ESMC_ConfigUTest.o
 
 RUN_ESMC_ConfigUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ConfigUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
 
 RUN_ESMC_ConfigUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ConfigUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ConfigUTest > $(ESMC_TESTDIR)/ESMC_ConfigUTest.stdout
 
 ESMC_ConfigUTest.rm:
 	echo "ESMC_ConfigTest.rm target called here."
