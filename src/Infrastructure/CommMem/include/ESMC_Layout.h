@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.h,v 1.1 2002/10/25 19:21:33 cdeluca Exp $
+// $Id: ESMC_Layout.h,v 1.2 2002/12/06 19:23:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMF Layout C++ definition include file
+// ESMF Layout C++ declaration include file
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
@@ -25,11 +25,11 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_CommMem.h> 
+// #include <ESMC_CommMem.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_Layout - one line general statement about this class
+// !CLASS:  ESMC_Layout - Topology of DE's mapped onto a PElist
 //
 // !DESCRIPTION:
 //
@@ -43,20 +43,26 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+ #include <ESMC_PE.h>  
+ #include <ESMC_PEList.h>  
+ #include <ESMC_DE.h>  
  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 
 // !PUBLIC TYPES:
- class ESMC_LayoutConfig;
+// class ESMC_LayoutConfig;
  class ESMC_Layout;
 
 // !PRIVATE TYPES:
 
  // class configuration type
- class ESMC_LayoutConfig {
-   private:
+ //class ESMC_LayoutConfig {
+ //  private:
  //   < insert resource items here >
- };
+ //};
+
+// hint type about the most performance critical communication direction
+enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 
  // class definition type
  class ESMC_Layout : public ESMC_Base {    // inherits from ESMC_Base class
@@ -64,6 +70,16 @@
    private:
  //  < insert class members here >  corresponds to type ESMF_Layout members
  //                                 in F90 modules
+    ESMC_DE ***layout;     // 3D topology (3D array) of DE's -- aligns
+                           //   with (maps to) a Distributed Grid
+    ESMC_PEList *peList;   // PE list on which the layout maps. 
+    int nxLayout;           // number of DE's laid out in the x-direction
+    int nyLayout;           // number of DE's laid out in the y-direction
+    int nzLayout;           // number of DE's laid out in the z-direction
+    ESMC_CommHint_e commHint;  // hint about direction of the most performance
+                               //   critical (frequent and/or voluminous)
+                               //   communication direction: x, y or z
+                            
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -75,30 +91,29 @@
 
   public:
  // the following methods apply to deep classes only
-    ESMC_Layout *ESMC_LayoutCreate(args, int rc);// interface only, deep class
-    int ESMC_LayoutDestroy(void);            // interface only, deep class
-    int ESMC_LayoutConstruct(args);          // internal only, deep class
+    int ESMC_LayoutConstruct(int nx, int ny, int nz, ESMC_PEList *pelist,
+                             ESMC_CommHint_e commhint); 
+                                             // internal only, deep class
     int ESMC_LayoutDestruct(void);           // internal only, deep class
-
- // or
- // the following method applies to a shallow class
-    int ESMC_LayoutInit(args);         // shallow class only
+//    int ESMC_LayoutInit(args);
 
  // optional configuration methods
-    int ESMC_LayoutGetConfig(ESMC_LayoutConfig *config) const;
-    int ESMC_LayoutSetConfig(const ESMC_LayoutConfig *config);
+//    int ESMC_LayoutGetConfig(ESMC_LayoutConfig *config) const;
+//    int ESMC_LayoutSetConfig(const ESMC_LayoutConfig *config);
 
  // accessor methods for class members
-    int ESMC_LayoutGet<Value>(<value type> *value) const;
-    int ESMC_LayoutSet<Value>(<value type>  value);
+//    int ESMC_LayoutGet<Value>(<value type> *value) const;
+//    int ESMC_LayoutSet<Value>(<value type>  value);
+    int ESMC_LayoutGetSize(int *nx, int *ny, int *nz) const;
+    int ESMC_LayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
     
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_LayoutValidate(const char *options) const;
-    int ESMC_LayoutPrint(const char *options) const;
+    int ESMC_LayoutValidate(void) const;
+    int ESMC_LayoutPrint(void) const;
 
  // native C++ constructors/destructors
-	ESMC_Layout(args);
-	~ESMC_Layout(args);
+	ESMC_Layout(void);
+	~ESMC_Layout(void);
   
  // < declare the rest of the public interface methods here >
   
@@ -113,17 +128,9 @@
 
  };   // end class ESMC_Layout
 
+    ESMC_Layout *ESMC_LayoutCreate(int nx, int ny, int nz, ESMC_PEList *pelist,
+                                   ESMC_CommHint_e commhint, int *rc);
+                                                 // interface only, deep class
+    int ESMC_LayoutDestroy(ESMC_Layout *layout); // interface only, deep class
+
  #endif  // ESMC_Layout_H
-
-
-
-
-
-
-
-
-
-
-
-
-

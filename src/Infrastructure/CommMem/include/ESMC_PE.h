@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.h,v 1.2 2002/12/06 19:23:48 eschwab Exp $
+// $Id: ESMC_PE.h,v 1.1 2002/12/06 19:23:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,7 +8,7 @@
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 
-// ESMF PEList C++ definition include file
+// ESMF PE C++ declaration include file
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)
@@ -17,8 +17,8 @@
  // these lines prevent this file from being read more than once if it
  // ends up being included multiple times
 
- #ifndef ESMC_PEList_H
- #define ESMC_PEList_H
+ #ifndef ESMC_PE_H
+ #define ESMC_PE_H
 
 //-----------------------------------------------------------------------------
 
@@ -29,13 +29,13 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_PEList - contains a list of processing elements
+// !CLASS:  ESMC_PE - one line general statement about this class
 //
 // !DESCRIPTION:
 //
-// The code in this file defines the C++ PEList members and declares method 
-// signatures (prototypes).  The companion file ESMC_PEList.C contains
-// the definitions (full code bodies) for the PEList methods.
+// The code in this file defines the C++ PE members and declares method 
+// signatures (prototypes).  The companion file ESMC_PE.C contains
+// the definitions (full code bodies) for the PE methods.
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
@@ -43,61 +43,69 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- #include <ESMC_PE.h>
+ #include <ESMC_Machine.h>  
  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 
 // !PUBLIC TYPES:
-// class ESMC_PEListConfig;
- class ESMC_PEList;
+// class ESMC_PEConfig;
+ class ESMC_PE;
 
 // !PRIVATE TYPES:
 
  // class configuration type
-// class ESMC_PEListConfig {
+// class ESMC_PEConfig {
 //   private:
  //   < insert resource items here >
 // };
 
- // class definition type
- class ESMC_PEList : public ESMC_Base {    // inherits from ESMC_Base class
+ // class declaration type
+ class ESMC_PE : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
  //  < insert class members here >  corresponds to type ESMF_PE members
  //                                 in F90 modules
-     ESMC_PE *peList;         // dynamically allocated list
-     int numPEs;              // number of PEs in list
+    int esmfID;    // ESMF assigned ID
+    int cpuID;     // Hardware assigned processor ID
+    int nodeID;    // hardware assigned associated node ID
+    static int peCount;  // number of PEs instantiated
+
+    ESMC_Machine *machine;  // interface to specific platform
+    // neighbor connections ?  see ESMC_Layout.h
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
- // the following methods apply to deep classes only
-    int ESMC_PEListConstruct(int numpes);    // internal only, deep class
-    int ESMC_PEListDestruct(void);           // internal only, deep class
-    int ESMC_PEListInit(int i, int esmfid, int cpuid, int nodeid);
-                                             // initialize ith PE
+ // the following method applies to a shallow class
+    int ESMC_PEInit(void);
+    int ESMC_PEInit(int esmfid, int cpuid, int nodeid);
 
  // optional configuration methods
-//    int ESMC_PEListGetConfig(ESMC_PEListConfig *config) const;
-//    int ESMC_PEListSetConfig(const ESMC_PEListConfig *config);
+//    int ESMC_PEGetConfig(ESMC_PEConfig *config) const;
+//    int ESMC_PESetConfig(const ESMC_PEConfig *config);
 
  // accessor methods for class members
-//    int ESMC_PEListGet<Value>(<value type> *value) const;
-//    int ESMC_PEListSet<Value>(<value type>  value);
-    int ESMC_PEListGetPE(int i, ESMC_PE **pe) const;
+    int ESMC_PEGetEsmfID(int *id) const;
+    int ESMC_PESetEsmfID(int  id);
+
+    int ESMC_PEGetCpuID(int *id) const;
+    int ESMC_PESetCpuID(int  id);
+
+    int ESMC_PEGetNodeID(int *id) const;
+    int ESMC_PESetNodeID(int  id);
     
  // required methods inherited and overridden from the ESMC_Base class
-    int ESMC_PEListValidate(void) const;
-    int ESMC_PEListPrint(void) const;
+    int ESMC_PEValidate(void) const;
+    int ESMC_PEPrint(void) const;
 
  // native C++ constructors/destructors
-	ESMC_PEList(void);
-	~ESMC_PEList(void);
+	ESMC_PE(void);
+	~ESMC_PE(void);
   
  // < declare the rest of the public interface methods here >
-    int ESMC_PEListSort(void);
 
-    friend ESMC_PEList *ESMC_PEListCreate(int firstpe, int lastpe, int *rc);
+    // friend int ESMC_PEListPECompare(const void *pe1, const void *pe2);
+    // friend class ESMC_PEList;  // TODO: ?? implement in ESMC_PEList
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -108,20 +116,6 @@
 //EOP
 //-----------------------------------------------------------------------------
 
- };   // end class ESMC_PEList
+ };   // end class ESMC_PE
 
-ESMC_PEList *ESMC_PEListCreate(int numpes, int *rc);
-ESMC_PEList *ESMC_PEListCreate(int firstpe, int lastpe, int *rc);
-                                              // interface only, deep class
-int ESMC_PEListDestroy(ESMC_PEList *pelist);  // interface only, deep class
-
-#ifdef __cplusplus
-extern "C" {
-#endif
- // class helper function for qsort() in ESMC_PEListSort()
- int ESMC_PEListPECompare(const void *pe1, const void *pe2);
-#ifdef __cplusplus
-}
-#endif
-
- #endif  // ESMC_PEList_H
+ #endif  // ESMC_PE_H
