@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.2 2003/04/14 14:51:35 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.3 2003/04/16 01:21:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -490,6 +490,7 @@ end function
       ! Local variables
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType), pointer :: btype
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -500,13 +501,14 @@ end function
       endif    
 
       ! If already destroyed or never created, return ok
-      if (.not. associated(bundle%btypep)) then
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
         if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
         return
       endif
 
       ! Destruct all bundle internals and then free field memory.
-      call ESMF_BundleDestruct(bundle%btypep, status)
+      call ESMF_BundleDestruct(btype, status)
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
@@ -521,6 +523,7 @@ end function
         print *, "ERROR in ESMF_BundleDestroy: Deallocate of Bundle class"
         return
       endif
+      nullify(bundle%btypep)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -795,8 +798,17 @@ end function
 
       found = .FALSE.
 
-! TODO: add bundle checks here
       btype => bundle%btypep
+
+!     Validate bundle before using it.
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        return
+      endif
 
 !     Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
@@ -878,8 +890,17 @@ end function
 
       found = .FALSE.
 
-! TODO: add bundle checks here
       btype => bundle%btypep
+
+!     Validate bundle before using it.
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleGetFields: bad Bundle object"
+        return
+      endif
 
 !     Check for an empty Bundle first
       if(btype%field_count .eq. 0) then
@@ -947,10 +968,22 @@ end function
 ! !REQUIREMENTS:  FLD2.5.2
 !EOP
       type(ESMF_Field) :: temp_list(1)
+      type(ESMF_BundleType), pointer :: btype
 
       temp_list(1) = field
-     
-      call ESMF_BundleTypeAddFieldList(bundle%btypep, 1, temp_list, rc)
+
+      ! validate bundle before going further
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+    
+      call ESMF_BundleTypeAddFieldList(btype, 1, temp_list, rc)
 
       end subroutine ESMF_BundleAddField
 
@@ -991,8 +1024,20 @@ end function
 ! 
 ! !REQUIREMENTS:  FLD2.5.2
 !EOP
+      type(ESMF_BundleType), pointer :: btype
 
-      call ESMF_BundleTypeAddFieldList(bundle%btypep, fieldcount, fields, rc)
+      ! validate bundle before going further
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleAddField: bad Bundle object"
+        return
+      endif
+    
+      call ESMF_BundleTypeAddFieldList(btype, fieldcount, fields, rc)
       
       end subroutine ESMF_BundleAddFieldList
 
@@ -1134,6 +1179,8 @@ end function
 !
 !  TODO: code goes here
 !
+      print *, "ESMF_BundleDeleteField not implemented yet"
+
       end subroutine ESMF_BundleDeleteField
 
 
@@ -1193,8 +1240,17 @@ end function
         rc = ESMF_FAILURE
       endif
 
-! TODO: add error checking - is bundle good?  is ptr set?
       btype => bundle%btypep
+
+!     Validate bundle before using it.
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundlePackGrid: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundlePackGrid: bad Bundle object"
+        return
+      endif
 
 !     pkarray = ESMF_ArrayCreate(arrayspec, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1702,6 +1758,7 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType), pointer :: btype     ! internal data
 
 !     Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1712,18 +1769,20 @@ end function
       endif
 
 ! TODO: make this a common subroutine; all entry points need to do this
+
 !     Validate bundle before using it.
-      if (.not. associated(bundle%btypep)) then
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
         print *, "ERROR in ESMF_BundleGetName: bad Bundle object"
         return
       endif
-      if (bundle%btypep%bundlestatus .ne. ESMF_STATE_READY) then
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
         print *, "ERROR in ESMF_BundleGetName: bad Bundle object"
         return
       endif
 
 !     OK to query for name
-      call ESMF_GetName(bundle%btypep%base, name, status)
+      call ESMF_GetName(btype%base, name, status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_BundleGetName"
         return
@@ -1793,6 +1852,7 @@ end function
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType), pointer :: btype     ! internal data
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1801,6 +1861,17 @@ end function
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif    
+
+!     Validate bundle before using it.
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleGetFieldCount: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleGetFieldCount: bad Bundle object"
+        return
+      endif
 
 !     Return Field count
       count = bundle%btypep%field_count
