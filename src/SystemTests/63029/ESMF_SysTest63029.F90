@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.9 2003/04/04 21:10:28 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.10 2003/04/08 23:09:58 nscollins Exp $
 !
 ! System test code #63029
 
@@ -23,10 +23,10 @@
     implicit none
     
 !   Local variables
-    integer, dimension(4) :: delist
-    integer :: de_id, rc
+    integer :: delist(64), dummy(2)
+    integer :: i, de_id, ndes, mid, rc
     character(len=ESMF_MAXSTR) :: cname
-    type(ESMF_DELayout) :: layout1 
+    type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_GridComp) :: comp1
     type(ESMF_State) :: imp, exp
         
@@ -42,16 +42,20 @@
 !-------------------------------------------------------------------------
 !
 
-!   Create a DELayout for the Component
-    delist = (/ 0, 1, 2, 3 /)
-    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
+
+    ! Create a default 1xN DELayout
+    layout1 = ESMF_DELayoutCreate(rc)
+    call ESMF_DELayoutGetNumDEs(layout1, ndes, rc)
+    mid = ndes/2
+
+    ! Create a child DELayout for the Component which is 2 by half the
+    !  total number of procs.
+    delist = (/ (i, i=0, ndes-1) /)
+    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
+                                                   de_indices=delist, rc=rc)
 
     cname = "System Test #63029"
-    comp1 = ESMF_GridCompCreate(cname, layout=layout1, mtype=ESMF_ATM, rc=rc)
-
-!   Figure out our local processor id
-    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
-
+    comp1 = ESMF_GridCompCreate(cname, layout=layout2, mtype=ESMF_ATM, rc=rc)
     call ESMF_GridCompPrint(comp1)
 
     print *, "Comp Create finished, name = ", trim(cname)
@@ -101,6 +105,7 @@
 
       call ESMF_GridCompFinalize(comp1, imp, exp, rc=rc)
 
+      call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
       print *, "-----------------------------------------------------------------"
       print *, "-----------------------------------------------------------------"
@@ -119,6 +124,7 @@
 !     Clean up
 
       call ESMF_GridCompDestroy(comp1, rc)
+      call ESMF_DELayoutDestroy(layout2, rc)
       call ESMF_DELayoutDestroy(layout1, rc)
       print *, "All Destroy routines done"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.7 2003/04/04 21:10:27 nscollins Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.8 2003/04/08 23:09:57 nscollins Exp $
 !
 ! System test code #62502
 
@@ -61,6 +61,7 @@
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
+    call ESMF_DELayoutPrint(layout1, rc=rc)
 
 
     ! Create the 2 model components and coupler
@@ -69,11 +70,13 @@
     layout2 = ESMF_DELayoutCreate(delist, 2, (/ 4, 1 /), (/ 0, 0 /), rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
+    call ESMF_DELayoutPrint(layout2, rc=rc)
 
     cname2 = "user model 2"
     layout3 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
+    call ESMF_DELayoutPrint(layout3, rc=rc)
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(cplname, layout=layout1, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.4 2003/04/07 14:54:57 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.5 2003/04/08 23:09:57 nscollins Exp $
 !
 ! System test code #62503
 
@@ -26,7 +26,7 @@
     implicit none
     
     ! Local variables
-    integer :: i, de_id, ndes, mid, rc, delist(4)
+    integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
     character(len=ESMF_MAXSTR) :: aname, cname1, cname2, cplname
     type(ESMF_DELayout) :: layout1, layout2, layout3
     type(ESMF_State) :: c1exp, c2imp, cplstate(2)
@@ -46,7 +46,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test #62503:"
+    print *, "--------------------------- "
+    print *, "Start of System Test #62503:"
+    print *, "--------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -59,6 +61,7 @@
     aname = "System Test #62503"
     app = ESMF_AppCompCreate(aname, rc=rc)
     print *, "Created component ", trim(aname), ",  rc =", rc
+    call ESMF_AppCompPrint(app, "", rc)
 
     ! Query application for layout.
     call ESMF_AppCompGet(app, layout=layout1, rc=rc)
@@ -69,19 +72,27 @@
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
     delist = (/ (i, i=0, mid-1) /)
-    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, ndes/4 /), (/ 0, 0 /), rc)
+    layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, ndes/4 /), (/ 0, 0 /), &
+                                                      de_indices=delist, rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
+    call ESMF_GridCompPrint(comp1, "", rc)
+
 
     cname2 = "user model 2"
     delist = (/ (i, i=mid, ndes-1) /)
-    layout3 = ESMF_DELayoutCreate(delist, 2, (/ 2, ndes/4 /), (/ 0, 0 /), rc)
+    layout3 = ESMF_DELayoutCreate(layout1, 2, (/ 1, ndes/2 /), (/ 0, 0 /), &
+                                                      de_indices=delist, rc=rc)
+
+
     comp2 = ESMF_GridCompCreate(cname2, layout=layout3, rc=rc)
     print *, "Created component ", trim(cname2), "rc =", rc
+    call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
     cpl = ESMF_CplCompCreate(cplname, layout=layout1, rc=rc)
     print *, "Created component ", trim(cplname), ", rc =", rc
+    call ESMF_CplCompPrint(cpl, "", rc)
 
 
     print *, "Comp Creates finished"
@@ -117,7 +128,7 @@
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 3/29/2003
-      call ESMF_TimeInit(stopTime, YR=2003, MM=1, DD=2, &
+      call ESMF_TimeInit(stopTime, YR=2003, MM=5, DD=2, &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values

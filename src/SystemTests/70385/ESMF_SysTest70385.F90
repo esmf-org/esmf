@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.9 2003/04/04 21:10:32 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.10 2003/04/08 23:09:58 nscollins Exp $
 !
 ! System test code #70385
 
@@ -24,6 +24,7 @@
     external setserv
 
     ! Local variables
+    type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1 
     integer, dimension(12) :: delist
@@ -34,7 +35,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
+    print *, "------------------"
     print *, "System Test #70385:"
+    print *, "------------------"
 
 !
 !-------------------------------------------------------------------------
@@ -43,7 +46,8 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-
+    app = ESMF_AppCompCreate(name="Application #70385", rc=rc)
+    
 !   Create a DELayout for the Component
     delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
     layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
