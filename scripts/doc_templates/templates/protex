@@ -490,7 +490,7 @@ KEY:       foreach $key ( @keys ) {
               $verb = 0;
 }#         end if
            $prologue = 0;
-           &check_if_all_there(); # check if all required keyword are there.
+#           &check_if_all_there(); # check if all required keyword are there.
            if ( $opt_l ) {
               $Fld[1] = $boc_string;}
            else { next LINE; }
