@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.5 2004/01/07 22:09:42 svasquez Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.6 2004/01/28 20:42:00 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -34,7 +34,6 @@
     type(ESMF_Field) :: field(10), returnedfield1, returnedfield2, simplefield
     type(ESMF_Bundle) :: bundle1, bundle2, bundle3, bundle4
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
-    integer :: i, x, y, rc, mycell, fieldcount, finalrc
 !\end{verbatim}
 !EOP
 
