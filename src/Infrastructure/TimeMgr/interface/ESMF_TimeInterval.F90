@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.62 2004/06/21 22:52:04 cdeluca Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.63 2004/07/02 20:20:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.62 2004/06/21 22:52:04 cdeluca Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.63 2004/07/02 20:20:55 eschwab Exp $'
 
 !==============================================================================
 !
@@ -1059,6 +1059,25 @@
 ! !REQUIREMENTS:
 !     TMG1.1
 
+      ! temp time string for C++ to fill
+      character (len=ESMF_MAXSTR) :: tempTimeString
+
+      ! initialize time string lengths to zero for non-existent time string
+#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+      integer :: timeStringLen = 0
+      integer :: tempTimeStringLen = 0 
+#else
+      integer :: timeStringLen
+      integer :: tempTimeStringLen
+      timeStringLen = 0     
+      tempTimeStringLen = 0
+#endif
+
+      ! if used, get length of given timeString for C++ validation
+      if (present(timeString)) then
+        timeStringLen = len(timeString)
+      end if
+
       ! use optional args for any subset
       call c_ESMC_TimeIntervalGet(timeinterval, yy, yy_i8, mm, mm_i8, &
                                   d, d_i8, h, m, s, s_i8, ms, &
@@ -1068,7 +1087,14 @@
                                   calendar, calendarType, &
                                   startTimeIn, endTimeIn, &
                                   calendarIn, calendarTypeIn, &
-                                  timeString, rc)
+                                  timeStringLen, tempTimeStringLen, &
+                                  tempTimeString, rc)
+
+      ! copy temp time string back to given time string to restore
+      !   native Fortran storage style
+      if (present(timeString)) then
+        timeString = tempTimeString(1:tempTimeStringLen)
+      endif
     
       end subroutine ESMF_TimeIntervalGet
 
