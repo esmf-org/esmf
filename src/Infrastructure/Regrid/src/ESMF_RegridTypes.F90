@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.55 2004/06/14 22:32:25 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.56 2004/06/15 22:48:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.55 2004/06/14 22:32:25 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.56 2004/06/15 22:48:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -574,9 +574,8 @@
                                      ESMF_CONTEXT, rc)) return
 
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
-                                   globalAIPerDim=myAI, reorder=reorder, &
-                                   total=totalUse, rc=localrc)
+      call ESMF_GridGetDELocalAI(srcGrid, myAI, horzRelLoc, &
+                                 reorder=reorder, total=totalUse, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.46 2004/06/15 08:51:17 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.47 2004/06/15 22:48:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.46 2004/06/15 08:51:17 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.47 2004/06/15 22:48:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1598,17 +1598,17 @@
                                        compindex=src_AI, rc=status)       
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalAI(ftypep%grid, horzRelLoc=horzRelLoc, &
-                                    vertRelLoc=vertRelLoc, &
-                                    localAI2D=dst_AI, &
-                                    globalAI2D=gl_dst_AI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(ftypep%grid, horzRelLoc=horzRelLoc, &
+                                      vertRelLoc=vertRelLoc, &
+                                      localAI2D=dst_AI, &
+                                      globalAI2D=gl_dst_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      call ESMF_GridLocalToGlobalAI(ftypep%grid, horzRelLoc=horzRelLoc, &
-                                    vertRelLoc=vertRelLoc, &
-                                    localAI2D=src_AI, &
-                                    globalAI2D=gl_src_AI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(ftypep%grid, horzRelLoc=horzRelLoc, &
+                                      vertRelLoc=vertRelLoc, &
+                                      localAI2D=src_AI, &
+                                      globalAI2D=gl_src_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return

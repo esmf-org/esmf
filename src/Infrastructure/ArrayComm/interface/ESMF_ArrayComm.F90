@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.52 2004/06/14 22:38:56 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.53 2004/06/15 22:46:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.52 2004/06/14 22:38:56 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.53 2004/06/15 22:46:31 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -790,17 +790,17 @@
                                        compindex=src_AI, rc=status)
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
-                                    vertRelLoc=vertRelloc, &
-                                    localAI2D=dst_AI, &
-                                    globalAI2D=gl_dst_AI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
+                                      vertRelLoc=vertRelloc, &
+                                      localAI2D=dst_AI, &
+                                      globalAI2D=gl_dst_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
-      call ESMF_GridLocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
-                                    vertRelLoc=vertRelloc, &
-                                    localAI2D=src_AI, &
-                                    globalAI2D=gl_src_AI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(grid, horzRelLoc=horzRelLoc, &
+                                      vertRelLoc=vertRelloc, &
+                                      localAI2D=src_AI, &
+                                      globalAI2D=gl_src_AI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1172,38 +1172,38 @@
                                        totalindex=srcTLocalAI, rc=status)
 
       ! translate AI's into global numbering
-      call ESMF_GridLocalToGlobalAI(dstGrid, &
-                                    horzRelLoc=dstHorzRelLoc, &
-                                    vertRelLoc=dstVertRelLoc, &
-                                    localAI2D=dstCLocalAI, &
-                                    globalAI2D=dstCompAI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(dstGrid, &
+                                      horzRelLoc=dstHorzRelLoc, &
+                                      vertRelLoc=dstVertRelLoc, &
+                                      localAI2D=dstCLocalAI, &
+                                      globalAI2D=dstCompAI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridLocalToGlobalAI(dstGrid, &
-                                    horzRelLoc=dstHorzRelLoc, &
-                                    vertRelLoc=dstVertRelLoc, &
-                                    localAI2D=dstTLocalAI, &
-                                    globalAI2D=dstTotalAI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(dstGrid, &
+                                      horzRelLoc=dstHorzRelLoc, &
+                                      vertRelLoc=dstVertRelLoc, &
+                                      localAI2D=dstTLocalAI, &
+                                      globalAI2D=dstTotalAI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridLocalToGlobalAI(srcGrid, &
-                                    horzRelLoc=srcHorzRelLoc, &
-                                    vertRelLoc=srcVertRelLoc, &
-                                    localAI2D=srcCLocalAI, &
-                                    globalAI2D=srcCompAI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(srcGrid, &
+                                      horzRelLoc=srcHorzRelLoc, &
+                                      vertRelLoc=srcVertRelLoc, &
+                                      localAI2D=srcCLocalAI, &
+                                      globalAI2D=srcCompAI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridLocalToGlobalAI(srcGrid, &
-                                    horzRelLoc=srcHorzRelLoc, &
-                                    vertRelLoc=srcVertRelLoc, &
-                                    localAI2D=srcTLocalAI, &
-                                    globalAI2D=srcTotalAI, rc=status)
+      call ESMF_GridDELocalToGlobalAI(srcGrid, &
+                                      horzRelLoc=srcHorzRelLoc, &
+                                      vertRelLoc=srcVertRelLoc, &
+                                      localAI2D=srcTLocalAI, &
+                                      globalAI2D=srcTotalAI, rc=status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
