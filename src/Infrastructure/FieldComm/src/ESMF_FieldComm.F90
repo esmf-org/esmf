@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.49 2004/06/23 13:40:33 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.50 2004/07/23 16:45:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.49 2004/06/23 13:40:33 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.50 2004/07/23 16:45:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -231,7 +231,7 @@
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field                 
+      type(ESMF_Field), intent(in) :: field                 
       integer, intent(in) :: dstDe
       type(ESMF_Array), intent(out) :: array
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -974,7 +974,7 @@
       !                            ESMF_CONTEXT, rc)) return
 
 !     Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
+      !if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldReduce
 
