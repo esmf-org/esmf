@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.14 2003/04/07 19:38:18 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.15 2003/04/09 21:34:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,11 +37,11 @@
       use ESMF_BaseMod
 
       ! inherit from base time class
-      use ESMF_BaseTimeMod,     only : ESMF_BaseTime
+      use ESMF_BaseTimeMod
 
       ! associated derived types
-      use ESMF_TimeIntervalMod, only : ESMF_TimeInterval
-      use ESMF_CalendarMod,     only : ESMF_Calendar
+      use ESMF_TimeIntervalMod
+      use ESMF_CalendarMod
 
       implicit none
 !
@@ -93,21 +93,168 @@
 
 ! Inherited and overloaded from ESMF_BaseTime
 
-      private ESMF_TimeEQ
-      private ESMF_TimeNE
-      private ESMF_TimeLT
-      private ESMF_TimeGT
-      private ESMF_TimeLE
-      private ESMF_TimeGE
+      public operator(+)
       private ESMF_TimeInc
+
+      public operator(-)
       private ESMF_TimeDec
       private ESMF_TimeDiff
+
+      public operator(.EQ.)
+      private ESMF_TimeEQ
+
+      public operator(.NE.)
+      private ESMF_TimeNE
+
+      public operator(.LT.)
+      private ESMF_TimeLT
+
+      public operator(.GT.)
+      private ESMF_TimeGT
+
+      public operator(.LE.)
+      private ESMF_TimeLE
+
+      public operator(.GE.)
+      private ESMF_TimeGE
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.14 2003/04/07 19:38:18 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.15 2003/04/09 21:34:38 eschwab Exp $'
+
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOP
+! !INTERFACE:
+      interface operator(+)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeInc
+
+! !DESCRIPTION:
+!     This interface overloads the + operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(-)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeDec
+
+! !DESCRIPTION:
+!     This interface overloads the - operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(-)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeDiff
+
+! !DESCRIPTION:
+!     This interface overloads the - operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.EQ.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeEQ
+
+! !DESCRIPTION:
+!     This interface overloads the .EQ. operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.NE.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeNE
+
+! !DESCRIPTION:
+!     This interface overloads the .NE. operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.LT.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeLT
+
+! !DESCRIPTION:
+!     This interface overloads the .LT. operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.GT.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGT
+
+! !DESCRIPTION:
+!     This interface overloads the .GT. operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.LE.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeLE
+
+! !DESCRIPTION:
+!     This interface overloads the .LE. operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface operator(.GE.)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeGE
+
+! !DESCRIPTION:
+!     This interface overloads the .GE. operator for the {\tt Time} class
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
 
 !==============================================================================
 
@@ -127,7 +274,7 @@
                                Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(out) :: time
       integer, intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
@@ -148,7 +295,7 @@
       integer, intent(in), optional :: Sn
       integer, intent(in), optional :: Sd
       type(ESMF_Calendar), intent(in), optional :: cal
-      integer, intent(out), optional :: tz
+      integer, intent(in), optional :: tz
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -233,7 +380,7 @@
                               d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       integer, intent(out), optional :: YR
       integer, intent(out), optional :: MM
       integer, intent(out), optional :: DD
@@ -324,7 +471,7 @@
                               d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(out) :: time
       integer, intent(in), optional :: YR
       integer, intent(in), optional :: MM
       integer, intent(in), optional :: DD
@@ -344,7 +491,7 @@
       double precision, intent(in), optional :: ns_
       integer, intent(in), optional :: Sn
       integer, intent(in), optional :: Sd
-      integer, intent(in), optional :: rc
+      integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Set the value of the {\tt Time} in units specified by the user
@@ -414,7 +561,7 @@
       subroutine ESMF_TimeGetCalendar(time, cal, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       type(ESMF_Calendar), intent(out) :: cal
       integer, intent(out), optional :: rc
 
@@ -447,7 +594,7 @@
       subroutine ESMF_TimeSetCalendar(time, cal, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(out) :: time
       type(ESMF_Calendar), intent(in) :: cal
       integer, intent(out), optional :: rc
 
@@ -517,7 +664,7 @@
       subroutine ESMF_TimeGetTimezone(time, Timezone, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       integer, intent(out) :: Timezone
       integer, intent(out), optional :: rc
 !
@@ -550,9 +697,9 @@
       subroutine ESMF_TimeSetTimezone(time, Timezone, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(out) :: time
       integer, intent(in) :: Timezone
-      integer, intent(in), optional :: rc
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Set the time zone of the given {\tt Time} instant
@@ -583,7 +730,7 @@
       subroutine ESMF_TimeGetString(time, TimeString, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       character, dimension(ESMF_MAXSTR), intent(out) :: TimeString
       integer, intent(out), optional :: rc
 
@@ -616,7 +763,7 @@
       subroutine ESMF_TimeGetDayOfYear(time, DayOfYear, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       double precision, intent(out) :: DayOfYear
       integer, intent(out), optional :: rc
 !
@@ -651,7 +798,7 @@
       subroutine ESMF_TimeGetDayOfWeek(time, DayOfWeek, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       integer, intent(out) :: DayOfWeek
       integer, intent(out), optional :: rc
 !
@@ -684,7 +831,7 @@
       subroutine ESMF_TimeGetDayOfMonth(time, DayOfMonth, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       integer, intent(out) :: DayOfMonth
       integer, intent(out), optional :: rc
 !
@@ -717,7 +864,7 @@
       subroutine ESMF_TimeGetMidMonth(time, MidMonth, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       type(ESMF_Time), intent(out) :: MidMonth
       integer, intent(out), optional :: rc
 !
@@ -773,6 +920,168 @@
       call c_ESMC_TimeGetRealTime(time, rc)
 
       end subroutine ESMF_TimeGetRealTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeInc - Increment time instant with a time interval
+!
+! !INTERFACE:
+      function ESMF_TimeInc(time, timeinterval)
+!
+! !RETURN VALUE:
+      type(ESMF_Time) :: ESMF_TimeInc
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+!
+! !DESCRIPTION:
+!     Increment {\tt Time} instant with a {\tt TimeInterval},
+!     return resulting {\tt Time} instant
+!
+!     Maps overloaded (+) operator interface function to
+!     {\tt ESMF\_BaseTime} base class
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The given {\tt Time} to increment
+!     \item[timeinterval]
+!          The {\tt TimeInterval} to add to the given {\tt Time}
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
+!EOP
+
+      type(ESMF_BaseTime) :: basetime
+      integer(ESMF_IKIND_I8) :: S
+      integer :: Sn, Sd
+      integer :: rc
+
+      ! get basetime from timeinterval
+      call ESMF_TimeIntervalGet(timeinterval, S=S, Sn=Sn, Sd=Sd, rc=rc)
+      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeSum(time%basetime, basetime, &
+                              ESMF_TimeInc%basetime)
+
+!  TODO: Below would be the ideal way of doing it, but ESMF_Time would need to
+!  be a "friend" of ESMF_TimeInterval in order to access its private member
+!  'basetime.' Can't do in F90!  So the above is a work-around.
+!     ! call ESMC_BaseTime base class function
+!      call c_ESMC_BaseTimeSum(time%basetime, timeinterval%basetime, &
+!                               ESMF_TimeInc%basetime)
+
+      end function ESMF_TimeInc
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeDec - Decrement time instant with a time interval
+!
+! !INTERFACE:
+      function ESMF_TimeDec(time, timeinterval)
+!
+! !RETURN VALUE:
+      type(ESMF_Time) :: ESMF_TimeDec
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time
+      type(ESMF_TimeInterval), intent(in) :: timeinterval
+!
+! !DESCRIPTION:
+!     Decrement {\tt Time} instant with a {\tt TimeInterval},
+!     return resulting {\tt Time} instant
+!
+!     Maps overloaded (-) operator interface function to
+!     {\tt ESMF\_BaseTime} base class
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The given {\tt Time} to decrement
+!     \item[timeinterval]
+!          The {\tt TimeInterval} to subtract from the given {\tt Time}
+!     \end{description}
+!     
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
+!EOP
+
+      type(ESMF_BaseTime) :: basetime
+      integer(ESMF_IKIND_I8) :: S
+      integer :: Sn, Sd
+      integer :: rc
+
+      ! get basetime from timeinterval
+      call ESMF_TimeIntervalGet(timeinterval, S=S, Sn=Sn, Sd=Sd, rc=rc)
+      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeDiff(time%basetime, basetime, &
+                               ESMF_TimeDec%basetime)
+
+!  TODO: Below would be the ideal way of doing it, but ESMF_Time would need to
+!  be a "friend" of ESMF_TimeInterval in order to access its private member
+!  'basetime.' Can't do in F90!  So the above is a work-around.
+!     ! call ESMC_BaseTime base class function
+!       call c_ESMC_BaseTimeDiff(time%basetime, timeinterval%basetime, &
+!                                ESMF_TimeDec%basetime)
+
+      end function ESMF_TimeDec
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeDiff - Return the difference between two time instants
+!
+! !INTERFACE:
+      function ESMF_TimeDiff(time1, time2)
+!
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeDiff
+!
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in) :: time1
+      type(ESMF_Time), intent(in) :: time2
+
+! !DESCRIPTION:
+!     Return the {\tt TimeInterval} difference between two {\tt Time} instants
+!
+!     Maps overloaded (-) operator interface function to
+!     {\tt ESMF\_BaseTime} base class
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time1]
+!          The first {\tt Time} instant
+!     \item[time2]
+!          The second {\tt Time} instant
+!     \end{description}
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
+!EOP
+
+      type(ESMF_BaseTime) :: basetime
+      integer(ESMF_IKIND_I8) :: S
+      integer :: Sn, Sd
+      integer :: rc
+
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, basetime)
+
+      ! set timeinterval return value from basetime
+      call c_ESMC_BaseTimeGet(basetime, S, Sn, Sd, rc)
+      call ESMF_TimeIntervalSet(ESMF_TimeDiff, S=S, Sn=Sn, Sd=Sd, rc=rc)
+
+!  TODO: Below would be the ideal way of doing it, but ESMF_Time would need to
+!  be a "friend" of ESMF_TimeInterval in order to access its private member
+!  'basetime.' Can't do in F90!  So the above is a work-around.
+!     ! call ESMC_BaseTime base class function
+!      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, &
+!                               ESMF_TimeDiff%basetime)
+
+      end function ESMF_TimeDiff
 
 !------------------------------------------------------------------------------
 !BOP
@@ -995,167 +1304,6 @@
       end function ESMF_TimeGE
 
 !------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeInc - Increment time instant with a time interval
-!
-! !INTERFACE:
-      function ESMF_TimeInc(time, timeinterval)
-!
-! !RETURN VALUE:
-      type(ESMF_Time) :: ESMF_TimeInc
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      type(ESMF_TimeInterval), intent(in) :: timeinterval
-!
-! !DESCRIPTION:
-!     Increment {\tt Time} instant with a {\tt TimeInterval},
-!     return resulting {\tt Time} instant
-!
-!     Maps overloaded (+) operator interface function to
-!     {\tt ESMF\_BaseTime} base class
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The given {\tt Time} to increment
-!     \item[timeinterval]
-!          The {\tt TimeInterval} to add to the given {\tt Time}
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
-
-      type(ESMF_BaseTime) :: basetime
-      integer(ESMF_IKIND_I8) :: S
-      integer :: Sn, Sd
-      integer :: rc
-
-      ! TODO remove when ESMF_TimeInc fully defined
-      type(ESMF_Time) :: temp
-      ESMF_TimeInc = temp
-
-      ! get time from timeinterval (really need C++ "friend" feature TODO ?? )
-!      call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
-!      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
-
-      ! call ESMC_BaseTime base class function
-!      call c_ESMC_BaseTimeSum(time%basetime, basetime, &
-!                              ESMF_TimeInc%basetime)
-
-!      call c_ESMC_BaseTimeSum(time%basetime, timeinterval%basetime, &
-!                               ESMF_TimeInc%basetime)
-!  "Derived type "ESMF_TIMEINTERVAL" has private components, which means
-!  component name "BASETIME" must not be referenced."  TODO
-
-      end function ESMF_TimeInc
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeDec - Decrement time instant with a time interval
-!
-! !INTERFACE:
-      function ESMF_TimeDec(time, timeinterval)
-!
-! !RETURN VALUE:
-      type(ESMF_Time) :: ESMF_TimeDec
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time
-      type(ESMF_TimeInterval), intent(in) :: timeinterval
-!
-! !DESCRIPTION:
-!     Decrement {\tt Time} instant with a {\tt TimeInterval},
-!     return resulting {\tt Time} instant
-!
-!     Maps overloaded (-) operator interface function to
-!     {\tt ESMF\_BaseTime} base class
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The given {\tt Time} to decrement
-!     \item[timeinterval]
-!          The {\tt TimeInterval} to subtract from the given {\tt Time}
-!     \end{description}
-!     
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
-
-      type(ESMF_BaseTime) :: basetime
-      integer(ESMF_IKIND_I8) :: S
-      integer :: Sn, Sd
-      integer :: rc
-
-      ! TODO remove when ESMF_TimeDec fully defined
-      type(ESMF_Time) :: temp
-      ESMF_TimeDec = temp
-
-!     ! get time from timeinterval (really need C++ "friend" feature TODO ?? )
-!      call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
-!      call c_ESMC_TimeInit(basetime, S, Sn, Sd, rc)
-
-!     ! call ESMC_BaseTime base class function
-!      call c_ESMC_BaseTimeDiff(time%basetime, basetime, &
-!                               ESMF_TimeDec%basetime)
-
-!       call c_ESMC_BaseTimeDiff(time%basetime, timeinterval%basetime, &
-!                                ESMF_TimeDec%basetime)
-!  "Derived type "ESMF_TIMEINTERVAL" has private components, which means
-!  component name "BASETIME" must not be referenced."  TODO
-
-      end function ESMF_TimeDec
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeDiff - Return the difference between two time instants
-!
-! !INTERFACE:
-      function ESMF_TimeDiff(time1, time2)
-!
-! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeDiff
-!
-! !ARGUMENTS:
-      type(ESMF_Time), intent(in) :: time1
-      type(ESMF_Time), intent(in) :: time2
-
-! !DESCRIPTION:
-!     Return the {\tt TimeInterval} difference between two {\tt Time} instants
-!
-!     Maps overloaded (-) operator interface function to
-!     {\tt ESMF\_BaseTime} base class
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time1]
-!          The first {\tt Time} instant
-!     \item[time2]
-!          The second {\tt Time} instant
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
-!EOP
-      integer :: rc
-
-      ! TODO remove when ESMF_TimeDiff fully defined
-      type(ESMF_TimeInterval) :: temp
-      ESMF_TimeDiff = temp
-
-      ! silence compiler for now  TODO
-!      call c_ESMC_BaseTimeDummy(ESMF_TimeDiff, rc)
-
-!     ! call ESMC_BaseTime base class function
-!      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, &
-!                               ESMF_TimeDiff%basetime)
-!  "Derived type "ESMF_TIMEINTERVAL" has private components, which means
-!  component name "BASETIME" must not be referenced."  TODO
-
-      end function ESMF_TimeDiff
-
-!------------------------------------------------------------------------------
 !
 ! This section defines the overridden Read, Write, Validate and Print methods
 ! inherited from the ESMF_Base class
@@ -1168,7 +1316,7 @@
       subroutine ESMF_TimeRead(time, S, Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(out) :: time
       integer(ESMF_IKIND_I8), intent(in) :: S
       integer, intent(in) :: Sn
       integer, intent(in) :: Sd
@@ -1213,7 +1361,7 @@
       subroutine ESMF_TimeWrite(time, S, Sn, Sd, cal, tz, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       integer(ESMF_IKIND_I8), intent(out) :: S
       integer, intent(out) :: Sn
       integer, intent(out) :: Sd
@@ -1258,7 +1406,7 @@
       subroutine ESMF_TimeValidate(time, opts, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
@@ -1291,7 +1439,7 @@
       subroutine ESMF_TimePrint(time, opts, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Time), intent(inout) :: time
+      type(ESMF_Time), intent(in) :: time
       character (len=*), intent(in), optional :: opts
       integer, intent(out), optional :: rc
 
