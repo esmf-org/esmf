@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.18 2004/04/15 22:05:12 nscollins Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.19 2004/04/19 17:06:41 jwolfe Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -717,8 +717,8 @@
       if (rc .ne. ESMF_SUCCESS) goto 40
      
       ! for the calculations below we need the first xpos=0, not 1
-      xpos = xpos - 1
-      ypos = ypos - 1
+      ! xpos = xpos - 1     TODO:  need to figure this out once and for all -- newDE
+      ! ypos = ypos - 1
 
 
       !!
