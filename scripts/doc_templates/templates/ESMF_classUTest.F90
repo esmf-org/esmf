@@ -1,4 +1,4 @@
-! $Id: ESMF_classUTest.F90,v 1.3 2003/03/17 18:43:27 nscollins Exp $
+! $Id: ESMF_classUTest.F90,v 1.4 2003/03/26 14:48:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_classUTest.F90,v 1.3 2003/03/17 18:43:27 nscollins Exp $'
+      '$Id: ESMF_classUTest.F90,v 1.4 2003/03/26 14:48:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -56,9 +56,9 @@
       type(ESMF_<Class>Config) :: config_set
       type(ESMF_<Class>Config) :: config_get
       ! when get/set value routines enabled, comment these in and set
-      ! the appropriate values.  then remove the temporary integers.
+      ! the appropriate values, and remove the temporary integers.
       !<value type> :: value_set, value_get
-      ! integer :: value_set, value_get 
+      integer :: value_set, value_get
 
       ! instantiate a <Class> 
       type(ESMF_<Class>) :: <class>
@@ -120,7 +120,6 @@
 
       ! test getting of ESMF_<Class> members values,
       !   compare to values set previously
-      !<value type> :: value_get
       !call ESMF_<Class>Get<Value>(<class>, value_get, rc)
       rc = ESMF_FAILURE  ! remove this when this test enabled
       write(name, *) "ESMF_<Class>Get<Value>"
