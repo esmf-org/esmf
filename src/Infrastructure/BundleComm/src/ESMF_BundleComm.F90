@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.30 2004/06/09 21:53:25 cdeluca Exp $
+! $Id: ESMF_BundleComm.F90,v 1.31 2004/06/10 21:18:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.30 2004/06/09 21:53:25 cdeluca Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.31 2004/06/10 21:18:29 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleAllGather"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleAllGather - Data AllGather operation on a Bundle
 
 ! !INTERFACE:
@@ -170,7 +170,7 @@
 !           
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -204,7 +204,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleGather"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleGather - Data gather operation on a Bundle
 
 ! !INTERFACE:
@@ -254,7 +254,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -288,7 +288,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHalo"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleHalo - Execute a halo operation on a Bundle
 
 ! !INTERFACE:
@@ -325,7 +325,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -355,7 +355,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHaloRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleHaloRelease - Release resources associated w/ handle
 
 ! !INTERFACE:
@@ -378,7 +378,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
@@ -387,7 +387,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleHaloStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleHaloStore - Precompute a data halo operation on a Bundle
 
 ! !INTERFACE:
@@ -433,7 +433,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -479,7 +479,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedist"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRedist - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
@@ -535,7 +535,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -569,7 +569,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedistRelease"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRedistRelease - Release resources associated with handle
 
 ! !INTERFACE:
@@ -592,7 +592,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       call ESMF_RouteHandleDestroy(routehandle, rc)
 
@@ -601,7 +601,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleRedistStore"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleRedistStore - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
@@ -647,7 +647,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -705,7 +705,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleReduce"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleReduce - Reduction operation on a Bundle
 
 ! !INTERFACE:
@@ -748,7 +748,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
@@ -969,7 +969,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleScatter"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_BundleScatter - Data scatter operation on a Bundle
 
 ! !INTERFACE:
@@ -1025,7 +1025,7 @@
 !         Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.17 2004/06/10 13:42:26 cdeluca Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.18 2004/06/10 21:18:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.17 2004/06/10 13:42:26 cdeluca Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.18 2004/06/10 21:18:29 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -184,11 +184,11 @@ end function
 ! !IROUTINE: ESMF_BundleDataMapGet - Get values from a BundleDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapGet(bundledatamap, bundleInterleave, rc)
+      subroutine ESMF_BundleDataMapGet(bundledatamap, bundleinterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(out), optional :: bundleInterleave
+      type(ESMF_BundleInterleave), intent(out), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -198,7 +198,7 @@ end function
 !     \begin{description}
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap}.
-!     \item [{[bundleInterleave]}]
+!     \item [{[bundleinterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Possible values are 
 !           {\tt ESMF\_INTERLEAVE\_BY\_ITEM} and
@@ -223,7 +223,7 @@ end function
         endif
 
         ! if specified, return value
-        if (present(bundleInterleave)) bundleInterleave = bundledatamap%bil
+        if (present(bundleinterleave)) bundleinterleave = bundledatamap%bil
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -234,7 +234,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_BundleDataMapPrint"
 !BOP
-! !IROUTINE: ESMF_BundleDataMapPrint - Print a BundleDataMap type
+! !IROUTINE: ESMF_BundleDataMapPrint - Print information about a BundleDataMap
 !
 !
 ! !INTERFACE:
@@ -247,14 +247,20 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Print information about a {\tt ESMF\_BundleDataMap}.
+!           Prints diagnostic information about the {\tt bundledatamap}
+!           to {\tt stdout}.  The {\tt options} control the type of 
+!           information and level of detail; the "brief" option is
+!           the only one implemented and is executed by default.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
 !           {\tt ESMF\_BundleDataMap} to print.
 !     \item [{[options]}]
-!           Print options.
+!           Print options.  See Section~\ref{sec:printoptions} for a list
+!           of standard options.  The "brief" option is the only one 
+!           currently implemented, and is executed no matter what value
+!           (if any) is passed in for this argument.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -293,11 +299,11 @@ end function
 ! !IROUTINE: ESMF_BundleDataMapSet - Set values in a BundleDataMap 
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapSet(bundledatamap, bundleInterleave, rc)
+      subroutine ESMF_BundleDataMapSet(bundledatamap, bundleinterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -307,7 +313,7 @@ end function
 !     \begin{description}
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap}.
-!     \item [{[bundleInterleave]}]
+!     \item [{[bundleinterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Options are {\tt ESMF\_INTERLEAVE\_BY\_ITEM} and
 !           {\tt ESMF\_INTERLEAVE\_BY\_FIELD}.
@@ -331,7 +337,7 @@ end function
 
 
         ! if specified, set value
-        if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
+        if (present(bundleinterleave)) bundledatamap%bil = bundleinterleave
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -346,11 +352,11 @@ end function
 ! !IROUTINE:  ESMF_BundleDataMapSetDefault - Set BundleDataMap default values
 
 ! !INTERFACE:
-      subroutine ESMF_BundleDataMapSetDefault(bundledatamap, bundleInterleave, rc)
+      subroutine ESMF_BundleDataMapSetDefault(bundledatamap, bundleinterleave, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap) :: bundledatamap
-      type(ESMF_BundleInterleave), intent(in), optional :: bundleInterleave
+      type(ESMF_BundleInterleave), intent(in), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -362,7 +368,7 @@ end function
 !     \begin{description} 
 !     \item [bundledatamap]
 !           An {\tt ESMF\_BundleDataMap}.
-!     \item [{[bundleInterleave]}]
+!     \item [{[bundleinterleave]}]
 !           Type of interleave for {\tt ESMF\_Bundle} data if packed into
 !           a single array.  Options are {\tt ESMF\_INTERLEAVE\_BY\_ITEM} and
 !           {\tt ESMF\_INTERLEAVE\_BY\_FIELD}.  If not specified, the default
@@ -390,7 +396,7 @@ end function
         bundledatamap%bil = ESMF_INTERLEAVE_BY_FIELD
 
         ! initialize the contents of the bundle datamap
-        if (present(bundleInterleave)) bundledatamap%bil = bundleInterleave
+        if (present(bundleinterleave)) bundledatamap%bil = bundleinterleave
   
         ! mark object as initialized and ready to be used
         bundledatamap%status = ESMF_STATE_READY
@@ -466,7 +472,8 @@ end function
 !     \item [{[options]}]
 !           Validation options.  See Section \ref{sec:validateoptions} for 
 !           standard option strings.  Please note that only the "brief" option 
-!           is currently supported; other values will be ignored.
+!           is currently supported and will be executed no matter what value
+!           (if any) is passed in for this argument.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundledatamap}
 !           is valid.

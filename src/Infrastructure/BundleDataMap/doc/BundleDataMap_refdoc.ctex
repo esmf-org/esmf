@@ -1,4 +1,4 @@
-% $Id: BundleDataMap_refdoc.ctex,v 1.5 2004/06/04 13:16:30 nscollins Exp $
+% $Id: BundleDataMap_refdoc.ctex,v 1.6 2004/06/10 21:18:29 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -33,7 +33,7 @@
 \newpage
 #endif
 
-\section{Bundle DataMap Class}
+\section{BundleDataMap Class}
 
 \subsection{Description}
 #ifdef STANDALONE
@@ -42,7 +42,7 @@
 \input{../Infrastructure/BundleDataMap/doc/BundleDataMap_desc}
 #endif
 
-\subsection{Bundle DataMap Options}
+\subsection{BundleDataMap Options}
 #ifdef STANDALONE
 \input{BundleDataMap_options}
 #elif defined(CONSTITUENT)
@@ -65,12 +65,12 @@
 \input{../Infrastructure/BundleDataMap/doc/BundleDataMap_rest}
 #endif
 
-\subsection{Design and Implementation Notes}
-#ifdef STANDALONE
-\input{BundleDataMap_implnotes}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_implnotes}
-#endif
+%\subsection{Design and Implementation Notes}
+%#ifdef STANDALONE
+%\input{BundleDataMap_implnotes}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/BundleDataMap/doc/BundleDataMap_implnotes}
+%#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
