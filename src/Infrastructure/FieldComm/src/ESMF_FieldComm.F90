@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.63 2004/12/03 20:47:46 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.64 2004/12/07 23:26:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.63 2004/12/03 20:47:46 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.64 2004/12/07 23:26:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1124,6 +1124,7 @@
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
+      type(ESMF_VM) :: parentVM
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
@@ -1156,7 +1157,8 @@
         call ESMF_LogWrite("uninitialized routehandle: calling FieldRegridStore", &
                            ESMF_LOG_WARNING, &
                            ESMF_CONTEXT)
-        call ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
+        call ESMF_DELayoutGetVM(parentDelayout, parentVM, rc=localrc)
+        call ESMF_FieldRegridStore(srcField, dstField, parentVM, &
                                    routehandle, regridmethod, regridnorm, &
                                    srcMask, dstMask, localrc)
       endif
@@ -1264,7 +1266,7 @@
 ! !IROUTINE: ESMF_FieldRegridStore - Data regrid operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRegridStore(srcField, dstField, parentDelayout, &
+      subroutine ESMF_FieldRegridStore(srcField, dstField, parentVM, &
                                        routehandle, regridmethod, regridnorm, &
                                        srcMask, dstMask, rc)
 !
@@ -1272,7 +1274,7 @@
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
-      type(ESMF_DELayout), intent(in) :: parentDelayout
+      type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_RegridMethod), intent(in) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
@@ -1295,10 +1297,10 @@
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid and data map.
-!     \item [parentDelayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
-!           most commonly the layout of the Coupler if the regridding is
-!           inter-component, but could also be the individual layout for
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s, 
+!           most commonly the vm of the Coupler if the regridding is
+!           inter-component, but could also be the individual vm for
 !           a component if the regridding is intra-component.  
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
@@ -1320,7 +1322,7 @@
 ! !REQUIREMENTS: 
 
       integer :: localrc              ! Error status
-      integer :: myDE, dstCount, srcCount
+      integer :: dstCount, srcCount
       logical :: hasSrcData           ! does this DE contain localdata from src?
       logical :: hasDstData           ! does this DE contain localdata from dst?
       type(ESMF_Array) :: srcArray, dstArray
@@ -1332,9 +1334,6 @@
    
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
-
-      ! Our DE number in the parent layout
-      call ESMF_DELayoutGet(parentDelayout, localDE=myDE, rc=localrc)
 
       ! This routine is called on every processor in the parent layout.
       !  It is quite possible that the source and destination fields do
@@ -1349,9 +1348,6 @@
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
       call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=srcRelLoc, &
                                    localCellCount=srcCount, rc=localrc)
- !jw   call ESMF_GridGet(srcGrid, delayout=srcDelayout, rc=localrc)
- !jw   call ESMF_DELayoutGetDEExists(parentDelayout, myDE, srcDelayout, hasdata)
- !jw   if (hasData.eq.ESMF_FALSE .OR. srcCount.le.0) then
       if (srcCount.le.0) then
         hasSrcData = .false.
       else
@@ -1364,9 +1360,6 @@
       call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
       call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=dstRelLoc, &
                                    localCellCount=dstCount, rc=localrc)
- !jw   call ESMF_GridGet(dstGrid, delayout=dstDelayout, rc=localrc)
- !jw   call ESMF_DELayoutGetDEExists(parentDelayout, myDE, dstDelayout, hasData)
- !jw   if (hasData.eq.ESMF_FALSE .OR. dstCount.le.0) then
       if (dstCount.le.0) then
         hasDstData = .false.
       else
@@ -1382,7 +1375,7 @@
 
       call ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, hasSrcData, &      
                                  dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentDelayout, routehandle, &
+                                 parentVM, routehandle, &
                                  regridmethod, regridnorm, &    
                                  srcMask, dstMask, localrc)
 
