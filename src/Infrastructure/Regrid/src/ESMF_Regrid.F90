@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.34 2003/08/29 22:26:36 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.35 2003/09/02 18:56:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.34 2003/08/29 22:26:36 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.35 2003/09/02 18:56:00 nscollins Exp $'
 
 !==============================================================================
 
@@ -247,6 +247,7 @@
 
       !! TODO:  TEMPORARY CODE TO BYPASS REAL REGRID CODE
       !!  remove these next 2 lines to finish debugging regrid code.
+      routehandle = ESMF_RouteHandleCreate(rc)
       if(present(rc)) rc = ESMF_SUCCESS
       return
       !! END BYPASS
@@ -1361,8 +1362,6 @@
 ! !REQUIREMENTS:
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
-      type(ESMF_LocalArray) :: srclocalarray, dstlocalarray
-      type(ESMF_Route) :: route
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -1372,18 +1371,14 @@
         rc = ESMF_FAILURE
       endif
  
-      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
-
       ! Execute the communications call.
-      srclocalarray = srcarray  ! this is only a cast
-      dstlocalarray = dstarray  ! ditto
-      call ESMF_RouteRun(route, srclocalarray, dstlocalarray, status)
+      call ESMF_RegridRun(srcarray, dstarray, routehandle, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ArrayRegrid: RouteRun returned failure"
+        print *, "ERROR in ArrayRegrid: RegridRun returned failure"
         return
       endif
 
-! set return code if user specified it
+        ! Set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayRegrid
