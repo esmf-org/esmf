@@ -1,6 +1,6 @@
-! $Id: ArrayRedist.F90,v 1.1 2003/09/18 21:26:46 cdeluca Exp $
+! $Id: ArrayRedist.F90,v 1.2 2003/09/18 21:59:21 cdeluca Exp $
 !
-! System test code #70384
+! System test ArrayRedist
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,12 +8,12 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 70384.
+! System test ArrayRedist.
 !
 !
 !\begin{verbatim}
 
-    program ESMF_SysTest70384
+    program ESMF_ArrayRedist
 
 #include <ESMF_Macros.inc>
 
@@ -53,7 +53,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test #70384:"
+    print *, "System Test ArrayRedist:"
 
 !
 !-------------------------------------------------------------------------
@@ -315,11 +315,11 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test #70384 complete!"
+20    print *, "System Test ArrayRedist complete!"
 
     if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Transposed transpose not same as original"
-      write(testname, *) "System Test 70384: Array Transpose/Redistribute"
+      write(testname, *) "System Test ArrayRedist: Array Transpose/Redistribute"
 
       call ESMF_Test((miscount.eq.0) .and. (rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
@@ -340,7 +340,7 @@
     
     call ESMF_FrameworkFinalize(rc)
 
-    end program ESMF_SysTest70384
+    end program ESMF_ArrayRedist
     
 !\end{verbatim}
     
