@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.4 2003/10/20 19:54:37 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.5 2003/10/20 23:21:48 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -59,25 +59,18 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Bundle_usage}
-\input{Bundle_fex}
+\input{ESMF_BundleCreateEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Bundle/doc/Bundle_usage}
-\input{../Infrastructure/Bundle/doc/Bundle_fex}
+\input{../Infrastructure/Bundle/doc/ESMF_BundleCreateEx_fapi}
 #endif
 
-%\subsubsection{Restrictions}
-%#ifdef STANDALONE
-%\input{Bundle_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Bundle/doc/Bundle_rest}
-%#endif
-
-%\subsection{Use and Examples}
-%% #ifdef STANDALONE
-%% \input{bundleex_fapi}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Bundle/doc/bundleex_fapi}
-%% #endif
+\subsubsection{Restrictions}
+#ifdef STANDALONE
+\input{Bundle_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Bundle/doc/Bundle_rest}
+#endif
 
 % \subsection{Parameters and Definitions}
 % #ifdef STANDALONE
