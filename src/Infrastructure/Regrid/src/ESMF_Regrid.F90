@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.16 2003/06/12 14:56:34 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.17 2003/06/19 16:56:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.16 2003/06/12 14:56:34 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.17 2003/06/19 16:56:50 nscollins Exp $'
 
 !==============================================================================
 !
@@ -124,7 +124,7 @@
 !
 ! !DESCRIPTION:
 !     This interface provides a single entry point for various Regrid create
-!     methods, including a regrid copied from an existing regrid, a regrid
+!     methods, including a regrid
 !     created from a field pair, a regrid created from input field bundles
 !     and a regrid created by shifting addresses of an existing regrid.
 !
@@ -167,14 +167,10 @@
       type(ESMF_Regrid) :: ESMF_RegridCreateFromField
 !
 ! !ARGUMENTS:
+      type (ESMF_Field), intent(in) :: src_field
+      type (ESMF_Field), intent(in) :: dst_field 
+      integer, intent(in) :: method
       character (len = *), intent(in), optional :: name
-
-      type (ESMF_Field), intent(in) :: &
-         src_field,          &! field to be regridded
-         dst_field            ! destination (incl grid) of resulting regridded field
-
-      integer, intent(in) :: method   ! method to use for regridding
-
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -187,15 +183,15 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name]
-!          {\tt Regrid} name.
 !     \item[src\_field]
 !          Field to be regridded.
 !     \item[dst\_field]
 !          Resultant field where regridded source field will be stored.
 !     \item[method]
 !          Method to use for regridding.
-!     \item[[rc]]
+!     \item[{[name]}]
+!          {\tt Regrid} name.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
