@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.73 2004/06/17 18:48:10 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.74 2004/08/06 22:32:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.73 2004/06/17 18:48:10 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.74 2004/08/06 22:32:03 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -921,6 +921,8 @@ int ESMC_Calendar::count=0;
 //     Gregorian Reformation where 10 days were eliminated from the calendar
 //     in September 1752.
 //
+//     See also:  http://www.hermetic.ch/cal\_stud/jdn.htm\#comp
+//
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
@@ -1129,6 +1131,8 @@ int ESMC_Calendar::count=0;
 //     account leap years.  However, it does not take into account the
 //     Gregorian Reformation where 10 days were eliminated from the calendar
 //     in September 1752.
+//
+//     See also:  http://www.hermetic.ch/cal\_stud/jdn.htm\#comp
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
