@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.15 2003/10/15 17:39:36 jwolfe Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.16 2003/10/17 16:02:24 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -437,7 +437,7 @@ void FTN(c_esmf_logclosefile)(
 // !IROUTINE: C_ESMF_LogGetUnit - Fortran style method to write to log file.
 //
 // !INTERFACE:
-     int  FTN(c_esmf_loggetunit)(
+     void  FTN(c_esmf_loggetunit)(
 //  !RETURN VALUE:
 //    A Fortran Unit Number
 //
@@ -446,15 +446,12 @@ void FTN(c_esmf_logclosefile)(
      ESMC_Log *aLog)
 //
 // !DESCRIPTION:
-//    This function called from with a Fortran write statement, e.g.
-//    write(LogWrite(aLog),*)"Hi".  The {\tt ESMC\_LogWrite} function
-//    appends some
-//    header information (time,date etc.) to what ever is printed out
-//    from the write, e.g. Hi.
+//    This function called from {tt\ ESMF\_GetUnit.}  See this function
+//    for more details.
 //EOP
 //------------------------------------------------------------------------------
 {
-    return aLog->ESMC_LogGetUnit();
+    aLog->ESMC_LogGetUnit();
 }
 
 

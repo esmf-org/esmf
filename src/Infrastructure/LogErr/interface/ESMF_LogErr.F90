@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.26 2003/10/15 21:10:20 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.27 2003/10/17 16:02:23 shep_smith Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@ end type ESMF_Log
 
 
 
-   public ESMF_Log,ESMF_LogGet
+   public ESMF_Log,ESMF_LogGet, ESMF_LogGetUnit
    public ESMF_LogSet, ESMF_LogOpenFortran, ESMF_LogCloseFortran
    public ESMF_LogPrintString, ESMF_LogPrintNewline
    public ESMF_LogCloseFile,ESMF_LogOpenFile
@@ -555,6 +555,33 @@ subroutine ESMF_LogWarnMsg_(aLog, errCode, line, file, dir, msg)
  end subroutine ESMF_LogErr_
 
 !----------------------------------------------------------------------------
+
+!----------------------------------------------------------------------------
+!BOP
+ 
+! !IROUTINE: ESMF_LogGetUnit - Returns the Fortran unit number.
+ 
+! !INTERFACE:
+ function ESMF_LogGetUnit(aLog) result(unitNum)
+! !ARGUMENTS:
+    type(ESMF_Log) :: aLog
+    integer :: unitNum
+! !DESCRIPTION:
+!   This function called from with a Fortran write statement, e.g.
+!   write(ESMF\_LogGetUnit(aLog),*)"Hi".  The {\tt ESMF\_LogUnit} 
+!   calls {\tt C\_ESMC\_GetUnit} and the C routine calls the C++ method
+!   {\tt ESMC\_Log\_GetUnit}.  The C++ routine returns  
+!   appends some header information (time,date etc.) to what ever is printed out
+!   from the write, e.g. Hi.
+!EOP
+!------------------------------------------------------------------------------
+   call C_ESMF_LogGetUnit(aLog)
+   unitNum=aLog%unitNumber
+
+end function ESMF_LogGetUnit
+
+!------------------------------------------------------------------------------
+
 !BOPI
 ! !IROUTINE: ESMF_LogOpenFortran
 !
@@ -656,7 +683,7 @@ end subroutine ESMF_LogCloseFortran
 
 
 !----------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_LogPrintNewLine - Print a newline character
 !
 ! !INTERFACE:
@@ -679,7 +706,7 @@ end subroutine ESMF_LogCloseFortran
 ! standard Fortran unit number for I/O
 !
 ! \end{description}
-!EOP
+!EOPI
 
   integer :: istat
 
