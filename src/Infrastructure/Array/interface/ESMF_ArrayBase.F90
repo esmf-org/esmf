@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.18 2003/08/22 21:34:22 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.19 2003/08/28 17:43:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,7 +125,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.18 2003/08/22 21:34:22 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.19 2003/08/28 17:43:25 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -486,6 +486,7 @@ end subroutine
         logical :: rcpresent      ! did user specify rc?
         integer :: size_rank_trans
         integer :: size_decomp
+        type(ESMF_Array) :: dstarray     ! is this really needed?
 
         ! assume failure until success certain
         status = ESMF_FAILURE
@@ -502,6 +503,11 @@ end subroutine
         !  here will be internal interfaces and not public.  The interfaces
         !  need to be as useful to the regrid code as possible.
 
+        call ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &   
+                               dstarray, dstgrid, dstdatamap, &
+                               routehandle, regridtype, &
+                               srcmask, dstmask, &
+                               blocking, status)
 
         ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
