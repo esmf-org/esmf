@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.14 2004/03/04 22:22:31 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.15 2004/03/05 20:39:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -205,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.14 2004/03/04 22:22:31 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.15 2004/03/05 20:39:08 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -12154,7 +12154,8 @@ end interface
  offsets = 0 
  
  wrap %I21Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12315,7 +12316,8 @@ end interface
  offsets = 0 
  
  wrap %I41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12476,7 +12478,8 @@ end interface
  offsets = 0 
  
  wrap %I81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12637,7 +12640,8 @@ end interface
  offsets = 0 
  
  wrap %I22Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12798,7 +12802,8 @@ end interface
  offsets = 0 
  
  wrap %I42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -12959,7 +12964,8 @@ end interface
  offsets = 0 
  
  wrap %I82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13120,7 +13126,8 @@ end interface
  offsets = 0 
  
  wrap %I23Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13281,7 +13288,8 @@ end interface
  offsets = 0 
  
  wrap %I43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13442,7 +13450,8 @@ end interface
  offsets = 0 
  
  wrap %I83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13603,7 +13612,8 @@ end interface
  offsets = 0 
  
  wrap %I24Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13764,7 +13774,8 @@ end interface
  offsets = 0 
  
  wrap %I44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -13925,7 +13936,8 @@ end interface
  offsets = 0 
  
  wrap %I84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14086,7 +14098,8 @@ end interface
  offsets = 0 
  
  wrap %I25Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14247,7 +14260,8 @@ end interface
  offsets = 0 
  
  wrap %I45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14408,7 +14422,8 @@ end interface
  offsets = 0 
  
  wrap %I85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14569,7 +14584,8 @@ end interface
  offsets = 0 
  
  wrap %R41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14730,7 +14746,8 @@ end interface
  offsets = 0 
  
  wrap %R81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -14891,7 +14908,8 @@ end interface
  offsets = 0 
  
  wrap %R42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15052,7 +15070,8 @@ end interface
  offsets = 0 
  
  wrap %R82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15213,7 +15232,8 @@ end interface
  offsets = 0 
  
  wrap %R43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15374,7 +15394,8 @@ end interface
  offsets = 0 
  
  wrap %R83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15535,7 +15556,8 @@ end interface
  offsets = 0 
  
  wrap %R44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15696,7 +15718,8 @@ end interface
  offsets = 0 
  
  wrap %R84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -15857,7 +15880,8 @@ end interface
  offsets = 0 
  
  wrap %R45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -16018,7 +16042,8 @@ end interface
  offsets = 0 
  
  wrap %R85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, ESMF_DATA_ADDRESS(newp), counts, & 
+ call c_ESMC_ArraySetInfo(array, wrap, & 
+ ESMF_DATA_ADDRESS(newp(lb(1),lb(1),lb(1),lb(1),lb(1))), counts, & 
  lb, ub, offsets, & 
  ESMF_TRUE, do_dealloc, hwidth, status) 
  
@@ -19069,7 +19094,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI21D, & 
- ESMF_DATA_ADDRESS(localI21D%I21Dptr ), & 
+ ESMF_DATA_ADDRESS(localI21D%I21Dptr (lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19094,7 +19119,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI41D, & 
- ESMF_DATA_ADDRESS(localI41D%I41Dptr ), & 
+ ESMF_DATA_ADDRESS(localI41D%I41Dptr (lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19119,7 +19144,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI81D, & 
- ESMF_DATA_ADDRESS(localI81D%I81Dptr ), & 
+ ESMF_DATA_ADDRESS(localI81D%I81Dptr (lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19148,7 +19173,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI22D, & 
- ESMF_DATA_ADDRESS(localI22D%I22Dptr ), & 
+ ESMF_DATA_ADDRESS(localI22D%I22Dptr (lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19173,7 +19198,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI42D, & 
- ESMF_DATA_ADDRESS(localI42D%I42Dptr ), & 
+ ESMF_DATA_ADDRESS(localI42D%I42Dptr (lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19198,7 +19223,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI82D, & 
- ESMF_DATA_ADDRESS(localI82D%I82Dptr ), & 
+ ESMF_DATA_ADDRESS(localI82D%I82Dptr (lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19227,7 +19252,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI23D, & 
- ESMF_DATA_ADDRESS(localI23D%I23Dptr ), & 
+ ESMF_DATA_ADDRESS(localI23D%I23Dptr (lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19252,7 +19277,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI43D, & 
- ESMF_DATA_ADDRESS(localI43D%I43Dptr ), & 
+ ESMF_DATA_ADDRESS(localI43D%I43Dptr (lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19277,7 +19302,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI83D, & 
- ESMF_DATA_ADDRESS(localI83D%I83Dptr ), & 
+ ESMF_DATA_ADDRESS(localI83D%I83Dptr (lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19306,7 +19331,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI24D, & 
- ESMF_DATA_ADDRESS(localI24D%I24Dptr ), & 
+ ESMF_DATA_ADDRESS(localI24D%I24Dptr (lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19331,7 +19356,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI44D, & 
- ESMF_DATA_ADDRESS(localI44D%I44Dptr ), & 
+ ESMF_DATA_ADDRESS(localI44D%I44Dptr (lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19356,7 +19381,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI84D, & 
- ESMF_DATA_ADDRESS(localI84D%I84Dptr ), & 
+ ESMF_DATA_ADDRESS(localI84D%I84Dptr (lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19385,7 +19410,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI25D, & 
- ESMF_DATA_ADDRESS(localI25D%I25Dptr ), & 
+ ESMF_DATA_ADDRESS(localI25D%I25Dptr (lb(1),lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19410,7 +19435,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI45D, & 
- ESMF_DATA_ADDRESS(localI45D%I45Dptr ), & 
+ ESMF_DATA_ADDRESS(localI45D%I45Dptr (lb(1),lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19435,7 +19460,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localI85D, & 
- ESMF_DATA_ADDRESS(localI85D%I85Dptr ), & 
+ ESMF_DATA_ADDRESS(localI85D%I85Dptr (lb(1),lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19468,7 +19493,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR41D, & 
- ESMF_DATA_ADDRESS(localR41D%R41Dptr ), & 
+ ESMF_DATA_ADDRESS(localR41D%R41Dptr (lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19493,7 +19518,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR81D, & 
- ESMF_DATA_ADDRESS(localR81D%R81Dptr ), & 
+ ESMF_DATA_ADDRESS(localR81D%R81Dptr (lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19522,7 +19547,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR42D, & 
- ESMF_DATA_ADDRESS(localR42D%R42Dptr ), & 
+ ESMF_DATA_ADDRESS(localR42D%R42Dptr (lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19547,7 +19572,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR82D, & 
- ESMF_DATA_ADDRESS(localR82D%R82Dptr ), & 
+ ESMF_DATA_ADDRESS(localR82D%R82Dptr (lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19576,7 +19601,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR43D, & 
- ESMF_DATA_ADDRESS(localR43D%R43Dptr ), & 
+ ESMF_DATA_ADDRESS(localR43D%R43Dptr (lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19601,7 +19626,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR83D, & 
- ESMF_DATA_ADDRESS(localR83D%R83Dptr ), & 
+ ESMF_DATA_ADDRESS(localR83D%R83Dptr (lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19630,7 +19655,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR44D, & 
- ESMF_DATA_ADDRESS(localR44D%R44Dptr ), & 
+ ESMF_DATA_ADDRESS(localR44D%R44Dptr (lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19655,7 +19680,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR84D, & 
- ESMF_DATA_ADDRESS(localR84D%R84Dptr ), & 
+ ESMF_DATA_ADDRESS(localR84D%R84Dptr (lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19684,7 +19709,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR45D, & 
- ESMF_DATA_ADDRESS(localR45D%R45Dptr ), & 
+ ESMF_DATA_ADDRESS(localR45D%R45Dptr (lb(1),lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
@@ -19709,7 +19734,7 @@ end interface
  offsets = 0 
  
  call c_ESMC_ArraySetInfo(array, localR85D, & 
- ESMF_DATA_ADDRESS(localR85D%R85Dptr ), & 
+ ESMF_DATA_ADDRESS(localR85D%R85Dptr (lb(1),lb(1),lb(1),lb(1),lb(1)) ), & 
  counts, lb, ub, offsets, & 
  ESMF_TRUE, ESMF_TRUE, hwidth, status) 
  
