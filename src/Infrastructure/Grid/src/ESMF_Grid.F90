@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.120 2004/01/07 18:20:46 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.121 2004/01/07 22:28:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -230,7 +230,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.120 2004/01/07 18:20:46 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.121 2004/01/07 22:28:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4167,7 +4167,7 @@
       ! Get distgrid info with global coordinate counts
       if(present(global_cell_dim) .or. present(globalStart) &
                                   .or. present(local_cell_max_dim)) then
-        call ESMF_DistGridGet(gridp%distgrid%ptr, &
+        call ESMF_DistGridGet(gridp%distgrid, &
                               global_cell_dim=global_cell_dim, &
                               globalStart=globalStart, &
                               local_cell_max_dim=local_cell_max_dim, &
