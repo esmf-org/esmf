@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/02/25 00:00:52 jwolfe Exp $ 
+# $Id: makefile,v 1.6 2004/06/21 13:17:08 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -58,7 +58,6 @@ LOCDIR	  = src/Superstructure/Xform/examples
 #
 
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_XformEx
-#                 $(ESMF_EXDIR)/ESMC_XformEx 
 
 #
 # List the example run targets in EXAMPLES_RUN and 
@@ -67,11 +66,9 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_XformEx
 #
 
 EXAMPLES_RUN   = run_ESMF_XformEx
-#                 run_ESMC_XformEx   
 
 
-EXAPMLES_RUN_UNI = run_ESMF_XformEx_uni \
-#                   run_ESMC_XformEx_uni   
+EXAMPLES_RUN_UNI = run_ESMF_XformEx_uni \
 
 include $(ESMF_DIR)/makefile
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2004/02/13 15:38:06 nscollins Exp $ 
+# $Id: makefile,v 1.18 2004/06/21 13:16:35 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -78,7 +78,7 @@ EXAMPLES_RUN   = run_ESMC_AppMainEx \
                  run_ESMF_GCompEx 
 
 
-EXAPMLES_RUN_UNI = run_ESMC_AppMainEx_uni \
+EXAMPLES_RUN_UNI = run_ESMC_AppMainEx_uni \
                    run_ESMC_CplEx_uni \
                    run_ESMC_GCompEx_uni \
                    run_ESMF_AppMainEx_uni \
