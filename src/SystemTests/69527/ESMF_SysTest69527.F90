@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.4 2003/04/02 18:50:17 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.5 2003/04/04 16:11:59 nscollins Exp $
 !
 ! System test code #69527
 
@@ -15,17 +15,8 @@
 
     program ESMF_SysTest69527
 
-#include "ESMF.h"
-
-!   ! Modules needed
-!   ! TODO: (these will be collapsed into a single ESMF_Mod soon)
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
+    ! ESMF Framework module
+    use ESMF_Mod
     
     implicit none
     

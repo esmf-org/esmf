@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.1 2003/04/02 20:52:51 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.2 2003/04/04 16:11:53 nscollins Exp $
 !
 ! System test code #62503
 
@@ -16,23 +16,12 @@
 
     program ESMF_SysTest62503
 
-#include "ESMF.h"
+    ! ESMF Framework module
+    use ESMF_Mod
 
-    ! Modules needed
-    ! TODO: (these will be collapsed into a single ESMF_Mod soon)
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_TimeMod
-    use ESMF_TimeIntervalMod
-    use ESMF_CalendarMod
-    use ESMF_ClockMod
-    use ESMF_StateMod
-    use ESMF_CompMod
-    
-    use user_model1
-    use user_model2
-    use user_coupler
+    use user_model1, only userm1_register
+    use user_model2, only userm2_register
+    use user_coupler, only usercpl_register
 
     implicit none
     

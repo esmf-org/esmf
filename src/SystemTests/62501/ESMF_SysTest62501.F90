@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.3 2003/03/10 05:40:48 cdeluca Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.4 2003/04/04 16:11:47 nscollins Exp $
 !
 ! System test code #62501
 
@@ -15,18 +15,8 @@
 
     program ESMF_SysTest62501
 
-#include "ESMF.h"
-
-!   ! Modules needed
-!   ! TODO: (these will be collapsed into a single ESMD_Mod soon)
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
-    use ESMF_CompMod
+    ! ESMF Framework module
+    use ESMF_Mod
     
     implicit none
     
@@ -49,7 +39,7 @@
     type(ESMF_Grid) :: grid1
     type(ESMF_Array) :: array1, array2
     type(ESMF_Field) :: field1
-    type(ESMF_Comp) :: comp1
+    type(ESMF_GridComp) :: comp1
         
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -70,7 +60,7 @@
     layout1 = ESMF_DELayoutCreate(2, 1, delist, ESMF_XFAST, rc)
 
     cname = "Atmosphere"
-    comp1 = ESMF_CompCreate(cname, layout1, ESMF_GRIDCOMP, &
+    comp1 = ESMF_GridCompCreate(cname, layout1, ESMF_GRIDCOMP, &
                                        ESMF_ATM, "/usr/local", rc=rc)
 
     print *, "Comp Create finished, name = ", trim(cname)
@@ -82,7 +72,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_CompInit(comp1, rc)
+    call ESMF_GridCompInit(comp1, rc)
 
 !   !  The user creates a simple horizontal Grid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
@@ -161,7 +151,7 @@
 !
 
     timestep = 1
-    call ESMF_CompRun(comp1, timestep, rc)
+    call ESMF_GridCompRun(comp1, timestep, rc)
 
 
 !   Call Reduction operator here
@@ -210,7 +200,7 @@
 !-------------------------------------------------------------------------
 !   Print result
 
-    call ESMF_CompFinalize(comp1, rc)
+    call ESMF_GridCompFinalize(comp1, rc)
 
     call ESMF_DELayoutGetDEID(layout1, de_id, rc)
 
@@ -230,7 +220,7 @@
 !-------------------------------------------------------------------------
 !   Clean up
 
-    call ESMF_CompDestroy(comp1, rc)
+    call ESMF_GridCompDestroy(comp1, rc)
     call ESMF_FieldDestroy(field1, rc)
     call ESMF_GridDestroy(grid1, rc)
     call ESMF_ArrayDestroy(array1, rc)

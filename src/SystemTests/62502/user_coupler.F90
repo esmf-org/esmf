@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2003/04/01 23:49:00 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2003/04/04 16:11:50 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -14,18 +14,10 @@
 !\begin{verbatim}
 
     module user_coupler
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! ESMF modules
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_FieldMod
-    use ESMF_StateMod
-    use ESMF_CompMod
-    
+    ! ESMF Framework module
+    use ESMF_Mod
+
     implicit none
     
     public usercpl_register
@@ -71,7 +63,7 @@
         type(ESMF_Field) :: humidity
 
         print *, "User Coupler Init starting"
-        call ESMF_StatePrint(statelist(1), "", rc)
+        call ESMF_StatePrint(statelist(1), rc=rc)
         call ESMF_StatePrint(statelist(2), rc=rc)
 
         !print *, "statelist size is ", size(statelist, 1)
@@ -102,8 +94,8 @@
         integer :: status
 
         print *, "User Coupler Run starting"
-        call ESMF_StatePrint(statelist(1), "", rc)
-        call ESMF_StatePrint(statelist(2), "", rc)
+        call ESMF_StatePrint(statelist(1), rc=rc)
+        call ESMF_StatePrint(statelist(2), rc=rc)
 
         ! Get layout from coupler component
         call ESMF_CplCompGet(comp, layout=cpllayout, rc=status)
@@ -151,8 +143,8 @@
 !     ! Local variables
 
         print *, "User Coupler Final starting"
-        call ESMF_StatePrint(statelist(1), "", rc)
-        call ESMF_StatePrint(statelist(2), "", rc)
+        call ESMF_StatePrint(statelist(1), rc=rc)
+        call ESMF_StatePrint(statelist(2), rc=rc)
     
         print *, "User Coupler Final returning"
    

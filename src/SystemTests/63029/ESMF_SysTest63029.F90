@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.7 2003/04/01 23:49:00 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.8 2003/04/04 16:11:57 nscollins Exp $
 !
 ! System test code #63029
 
@@ -15,19 +15,8 @@
 
     program ESMF_SysTest63029
 
-#include "ESMF.h"
-
-!   ! Modules needed
-!   TODO: (these will be collapsed into a single ESMF_Mod soon)
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
-    use ESMF_StateMod
-    use ESMF_CompMod
+    ! ESMF Framework module
+    use ESMF_Mod
     
     use user_model
 

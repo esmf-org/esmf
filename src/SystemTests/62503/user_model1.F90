@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2003/04/02 20:52:52 nscollins Exp $
+! $Id: user_model1.F90,v 1.2 2003/04/04 16:11:55 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -14,22 +14,10 @@
 !\begin{verbatim}
 
     module user_model1
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! ESMF modules
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_ArrayMod
-    use ESMF_GridMod
-    use ESMF_DataMapMod
-    use ESMF_FieldMod
-    use ESMF_StateMod
-    use ESMF_CompMod
-    
+    ! ESMF Framework module
+    use ESMF_Mod
+
     implicit none
     
     type mylocaldata

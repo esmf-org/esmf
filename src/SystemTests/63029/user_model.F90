@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.8 2003/04/01 23:49:00 nscollins Exp $
+! $Id: user_model.F90,v 1.9 2003/04/04 16:11:58 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -8,24 +8,16 @@
 !BOP
 !
 ! !DESCRIPTION:
-!  User-supplied Component, Version A (minimalist)
+!  User-supplied Component
 !
 !
 !\begin{verbatim}
 
     module user_model
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! ESMF modules
-    use ESMF_IOMod
-    use ESMF_DELayoutMod
-    use ESMF_ClockMod
-    use ESMF_FieldMod
-    use ESMF_StateMod
-    use ESMF_CompMod
-    
+    ! ESMF Framework module
+    use ESMF_Mod
+
     implicit none
     
     public user_register
