@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.16 2004/04/29 21:09:46 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.17 2004/05/14 23:03:16 cdeluca Exp $
 
 \section{Overview of Infrastructure Data Handling}
 
@@ -11,8 +11,13 @@ fields that are discretized on the same grid.  Data class methods
 are called both from user-written code and from other classes 
 internal to the framework. 
 
-Data classes are distributed over DEs, or Decomposition Elements.  
-This abstract concept enables a data decomposition to be defined in 
+Data classes are distributed over {\bf DE}s, or {\bf Decomposition Elements}.  
+A DE represents a piece of a decomposition.  A DELayout is a collection
+of DEs with some associated connectivity that describes a specific 
+distribution.  For example, the distribution of a grid divided 
+into four segments in the x-dimension would be expressed in ESMF as
+a DELayout with four DEs lying along an x-axis. This abstract concept 
+enables a data decomposition to be defined in 
 terms of threads, MPI processes, virtual decomposition elements, or
 combinations of these without changes to user code.  This is a
 primary strategy for ensuring optimal performance and portability

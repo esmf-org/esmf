@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.17 2004/04/23 16:38:20 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.18 2004/05/14 23:03:16 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,7 +101,7 @@ The parent Gridded Component is responsible for creating the child
 Gridded Components that are exchanging data and creating the Coupler, 
 for creating the necessary Import and Export States, and for 
 setting up the desired sequencing.  The AppDriver ``main'' routine
-calls the parent Gridded Component's Initialize, Run, and Finalize 
+calls the parent Gridded Component's initialize, run, and finalize 
 methods in order to execute the application.  For each of these
 standard methods, the parent Gridded Component in turn calls the 
 corresponding methods in the child Gridded Components and the 
@@ -127,14 +127,11 @@ extended easily.}
 \subsection{Distribution and Scoping of Components}
 \label{sec:scoping}
 
-Components are distributed across Distribution Elements, or {\bf DEs}.
-A DE represents a piece of a decomposition.  A DELayout is a collection
-of DEs with some associated connectivity that describes a specific 
-distribution.  For example, the distribution of a grid divided 
-into four segments in the x-dimension would be expressed in ESMF as
-a DELayout with four DEs lying along an x-axis. On parallel computing
-systems, a DE is often associated with a distinct computational resource, 
-such as a processor or a Posix thread.  
+Components are allocated computational resources in the form of
+{\bf Persistent Execution Threads}, or {\bf PET}s.  A list of a Component's 
+PETs is contained in a structure called a {\bf Virtual Machine},
+or {\bf VM}.  The VM also contains information about the topology and 
+characteristics of the underlying computer.  
 
 All data transfers within an ESMF application occur {\it within} a 
 component.  For example, a Gridded Component may contain halo updates.
@@ -145,25 +142,25 @@ communication mechanism, and new communication schemes can be
 introduced without affecting the overall structure of the application.
 
 Since all data communication happens within a component, a Coupler 
-Component must be created on the union of the DEs of all
+Component must be created on the union of the PETs of all
 the Gridded Components that it couples.  
 
-A Gridded Component may exist across all the DEs in an application.  
-A Gridded Component may also reside on a subset of DEs in an 
-application.  These DEs may wholly coincide with, be wholly contained 
+A Gridded Component may exist across all the PETs in an application.  
+A Gridded Component may also reside on a subset of PETs in an 
+application.  These PETs may wholly coincide with, be wholly contained 
 within, or wholly contain another component.  
 
 When a set of Gridded  Components and a Coupler runs in sequence 
-on the same set of DEs the application is executing in a {\bf sequential} 
+on the same set of PETs the application is executing in a {\bf sequential} 
 mode. When Gridded Components are created and run on mutually exclusive
-sets of DEs, and are coupled by a Coupler Component that extends over
+sets of PETs, and are coupled by a Coupler Component that extends over
 the union of these sets, the mode of execution is {\bf concurrent}.
 
 It is possible for ESMF applications to contain some component sets
 that are executing sequentially and others that are executing concurrently.
 We might have, for example, atmosphere and land components created 
-on the same subset of DEs, ocean and sea ice components created on 
-the remainder of DEs, and a Coupler created across all the DEs in
+on the same subset of PETs, ocean and sea ice components created on 
+the remainder of PETs, and a Coupler created across all the PETs in
 the application.
 
 \begin{center}
@@ -185,7 +182,7 @@ to another, without requiring that it be copied or sent to a different data
 buffer as an interim step.  This is likely to be the most efficient way 
 of performing inter-component coupling.  However, if desired, an 
 application can also be configured so that data from a source component 
-is sent to a distinct set of Coupler Component DEs for processing 
+is sent to a distinct set of Coupler Component PETs for processing 
 before being sent to its destination.
 
 The ability to overlap computation with communication is essential for
