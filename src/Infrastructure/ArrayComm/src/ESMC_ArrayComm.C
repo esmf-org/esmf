@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.C,v 1.18 2004/09/21 18:03:16 jwolfe Exp $
+// $Id: ESMC_ArrayComm.C,v 1.19 2005/01/10 23:52:19 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -26,7 +26,6 @@
 //
 
 // for printf
-#include <iostream.h>   // for cout
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -40,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.18 2004/09/21 18:03:16 jwolfe Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.19 2005/01/10 23:52:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -317,7 +316,7 @@ static int ESMC_newDELayoutGatherArray(
       }
       break;
     default:
-      cout << "no code to handle array rank " << size_decomp << " yet\n";
+      printf("no code to handle array rank %d yet\n", size_decomp);
       break;
   }
 
