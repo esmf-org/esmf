@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.16 2003/04/23 21:39:33 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.17 2003/04/25 09:11:59 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -127,8 +127,6 @@
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_CalendarInit
       public ESMF_CalendarInitGeneric
-      public ESMF_CalendarConvertToTime
-      public ESMF_CalendarConvertToDate
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -141,7 +139,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.16 2003/04/23 21:39:33 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.17 2003/04/25 09:11:59 eschwab Exp $'
 
 !==============================================================================
 
@@ -228,102 +226,12 @@
 !EOP
 
 !     invoke C to C++ entry point
-!      call c_ESMC_CalendarInitGeneric(calendar, DaysPerMonth, &
-!                                      SecondsPerDay, DaysPerYear, &
-!                                      DaysPerYearDn, DaysPerYearDd, rc)
+      call c_ESMC_CalendarInitGeneric(calendar, DaysPerMonth, &
+                                      SecondsPerDay, DaysPerYear, &
+                                      DaysPerYearDn, DaysPerYearDd, rc)
     
       end subroutine ESMF_CalendarInitGeneric
     
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarConvertToTime - Convert user time units to ESMF_BaseTime
-
-! !INTERFACE:
-      subroutine ESMF_CalendarConvertToTime(YR, MM, DD, D, basetime, rc)
-
-! !ARGUMENTS:
-      integer(ESMF_IKIND_I8), intent(in), optional :: YR
-      integer, intent(in), optional :: MM
-      integer, intent(in), optional :: DD
-      integer(ESMF_IKIND_I8), intent(in), optional :: D
-      type(ESMF_BaseTime), intent(out) :: basetime
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Convert user-specified time unit set into {\tt ESMF\_BaseTime}.
-!     Date <--> Time conversion routines, use F90 optional arguments.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[YR]]}]
-!          Integer year CCYR (64-bit)
-!     \item[{[MM]}]
-!          Integer month 1-12
-!     \item[{[DD]}]
-!          Integer day of the month 1-31
-!     \item[{[D]}]
-!          Integer Julian days (64-bit)
-!     \item[basetime]
-!          Returned {\tt BaseTime} value
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG2.4.5, TMG2.5.6
-!EOP
-
-      ! invoke C to C++ entry point
-      ! use optional args for any subset
-!       call c_ESMC_CalendarConvertToTime(YR, MM, DD, D, basetime, rc)
-    
-      end subroutine ESMF_CalendarConvertToTime
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarConvertToDate - Convert ESMF_BaseTime into user units
-
-! !INTERFACE:
-      subroutine ESMF_CalendarConvertToDate(basetime, YR, MM, DD, D, rc)
-
-! !ARGUMENTS:
-      type(ESMF_BaseTime), intent(in) :: basetime
-      integer(ESMF_IKIND_I8), intent(out), optional :: YR
-      integer, intent(out), optional :: MM
-      integer, intent(out), optional :: DD
-      integer(ESMF_IKIND_I8), intent(out), optional :: D
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Convert {\tt ESMF\_BaseTime} into user-specified time unit set. 
-!     Date <--> Time conversion routines, use F90 optional arguments.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[basetime]
-!          Given {\tt BaseTime} value
-!     \item[{[YR]}]
-!          Integer year CCYR (64-bit)
-!     \item[{[MM]}]
-!          Integer month 1-12
-!     \item[{[DD]}]
-!          Integer day of the month 1-31
-!     \item[{[D]}]
-!          Integer Julian days (64-bit)
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMG2.4.5, TMG2.5.6
-!EOP
-
-!     invoke C to C++ entry point
-      ! use optional args for any subset
-!       call c_ESMC_CalendarConvertToDate(basetime, YR, MM, DD, D, rc)
-    
-      end subroutine ESMF_CalendarConvertToDate
-
 !------------------------------------------------------------------------------
 ! 
 ! This section defines the overridden Read, Write, Validate and Print methods
