@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.13 2003/08/13 22:59:16 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.14 2003/08/14 21:50:05 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -540,41 +540,61 @@
 
       ! Local variables
       type(ESMF_Field) :: field1
+      integer :: localrc, finalrc
+  
 
       if (verbose) print *, "Entering Finalize routine"
+
+      ! set this up to run the validate code on all fields
+      ! so we can see and compare the output.  but if any of
+      ! the verify routines return error, return error at the end.
+      finalrc = ESMF_SUCCESS
 
 
       ! Get Fields from import state
       call ESMF_StateGetData(importstate, "Periodic in X", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call verifyhalo(field1, rc)
-      !if (rc .ne. ESMF_SUCCESS) goto 30
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
       call ESMF_StateGetData(importstate, "Periodic in Y", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call verifyhalo(field1, rc)
-      !if (rc .ne. ESMF_SUCCESS) goto 30
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
       call ESMF_StateGetData(importstate, "Periodic in both X and Y", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call verifyhalo(field1, rc)
-      !if (rc .ne. ESMF_SUCCESS) goto 30
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
     
 
       call ESMF_StateGetData(importstate, "Not Periodic", field1, rc=rc);
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call verifyhalo(field1, rc)
-      !if (rc .ne. ESMF_SUCCESS) goto 30
-    
+      if (rc .ne. ESMF_SUCCESS) then 
+        finalrc = ESMF_FAILURE
+        goto 30
+      endif
+      call verifyhalo(field1, localrc)
+      if (localrc .ne. ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+30 continue
+      ! come straight here if you cannot get the data from the state.
+      ! otherwise error codes are accumulated but ignored until the
+      ! end so we can see the output from all the cases to help track
+      ! down errors.
 
       if (verbose) print *, "Exiting finalize routine"
-
-30    continue
-      ! you come directly here on errors.  you also fall into this code
-      ! if all is well.  rc already contains the return code, so there's
-      ! nothing to do here but return.
+      rc = finalrc
 
     end subroutine myfinal
 
@@ -583,8 +603,8 @@
       use ESMF_Mod
       use global_data
 
-      type(ESMF_Field) :: thisfield
-      integer :: rc
+      type(ESMF_Field), intent(in) :: thisfield
+      integer, intent(out) :: rc
 
 
       ! Local variables
