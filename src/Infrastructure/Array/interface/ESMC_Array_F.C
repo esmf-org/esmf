@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.13 2003/09/26 21:48:53 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.14 2003/10/07 22:33:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,11 +40,10 @@ extern "C" {
      void FTN(c_esmc_arraycreateall)(ESMC_Array **ptr, int *rank, 
                                      ESMC_DataType *dt, ESMC_DataKind *dk,
                                      int *counts, int *lbounds, int *ubounds,
-                                     int *strides, int *status)  {
+                                     int *status)  {
          (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, 
-                                    lbounds, ubounds, strides, NULL, 
-                                    0, status);
+                                    lbounds, ubounds, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
@@ -60,13 +59,12 @@ extern "C" {
  
      void FTN(c_esmc_arraysetinfo)(ESMC_Array **ptr, 
                                struct c_F90ptr *fptr, void *base, int *counts,
-                               int *lbounds, int *ubounds,
-                               int *strides, int *offsets,
+                               int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
 			       int *hwidth, int *status) {
       
          *status = (*ptr)->ESMC_ArraySetInfo(fptr, base, counts, 
-                                            lbounds, ubounds, strides, offsets, 
+                                            lbounds, ubounds, offsets, 
                                             *contig, *dealloc, *hwidth);
      }
 
@@ -137,50 +135,6 @@ extern "C" {
                                                            NULL, NULL, ai);
                break;
          }
-     }
-
-     void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                  int *global_start, int *global_dimlengths, 
-                                  int *rank_trans, int *size_rank_trans, 
-                                  int *olddecompids, int *decompids,  int *size_decomp,
-                                  ESMC_Array **RedistArray, int *status) {
-          *status = (*ptr)->ESMC_ArrayRedist(*layout, global_start, 
-                                  global_dimlengths, rank_trans,
-                                  *size_rank_trans, olddecompids, decompids, 
-                                  *size_decomp, *RedistArray);
-     }
-
-     void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                ESMC_AxisIndex *ai_global, 
-                                int *global_dimlengths,
-                                int *decompids,  int *size_decomp, 
-                                ESMC_Logical *periodic, int *status) {
-          *status = (*ptr)->ESMC_ArrayHalo(*layout, ai_global, 
-                                  global_dimlengths, decompids, *size_decomp, 
-                                  periodic);
-     }
-
-     void FTN(c_esmc_arrayallgather)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                     int *decompids,  int *size_decomp,
-                                     int *global_dimlengths, 
-                                     ESMC_Array **Array_out, int *status) {
-          *status = (*ptr)->ESMC_ArrayAllGather(*layout, decompids, *size_decomp,
-                                                global_dimlengths, Array_out);
-     }
-
-     void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                  int *decompids,  int *size_decomp, int *deid,
-                                  int *global_dimlengths, 
-                                  ESMC_Array **Array_out, int *status) {
-          *status = (*ptr)->ESMC_ArrayGather(*layout, decompids, *size_decomp,
-                                             global_dimlengths, *deid, Array_out);
-     }
-
-     void FTN(c_esmc_arrayscatter)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                   int *decompids,  int *size_decomp, int *deid,
-                                   ESMC_Array **Array_out, int *status) {
-          *status = (*ptr)->ESMC_ArrayScatter(*layout, decompids, *size_decomp,
-                                              *deid, Array_out);
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, void *base, int *status) {

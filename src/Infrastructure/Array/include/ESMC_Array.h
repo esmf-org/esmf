@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.14 2003/09/04 22:24:20 cdeluca Exp $
+// $Id: ESMC_Array.h,v 1.15 2003/10/07 22:33:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,6 @@
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 #include <ESMC_DELayout.h>    // communications code
 #include <ESMC_LocalArray.h>  // functions to interoperate F90/C++ arrays
-#include <ESMC_Grid.h>        // grid info
 
 // !PUBLIC TYPES:
  class ESMC_ArrayConfig;
@@ -86,7 +85,7 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
             ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
             ESMC_ArrayDoAllocate aflag, 
             ESMC_DataCopy docopy, ESMC_Logical dflag, 
-            int *lbounds, int *ubounds, int *strides, int *offsets,
+            int *lbounds, int *ubounds, int *offsets,
             int halo_widths);
     int ESMC_ArrayDestruct(void);
 
@@ -166,8 +165,7 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
 
     // get and set useful combinations of values that fortran cares about
     int ESMC_ArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
-                          int *lbounds, int *ubounds, 
-                          int *strides, int *offsets, 
+                          int *lbounds, int *ubounds, int *offsets, 
                           ESMC_Logical contig, ESMC_Logical dealloc,
                           int halo_width);
     // TODO: add Get method
@@ -220,7 +218,7 @@ ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk,
                     void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *lbounds = NULL, int *ubounds = NULL, 
-                    int *strides = NULL, int *offsets = NULL, 
+                    int *offsets = NULL, 
                     int halo_widths = 0, int *rc = NULL);
 ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,

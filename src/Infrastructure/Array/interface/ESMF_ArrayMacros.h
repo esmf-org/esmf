@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.6 2003/09/22 22:51:52 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.7 2003/10/07 22:33:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -741,7 +741,7 @@
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
         integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds @\
-        integer, dimension(ESMF_MAXDIM) :: strides, offsets @\
+        integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -791,17 +791,16 @@
         ! Now set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for strides/lbounds/ubounds/offsets/whatever @\
+        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
         !  and set them in the array object.  For now, used fixed values. @\
         lbounds = 1 @\
         ubounds = 1 @\
         ubounds(1:mrank) = counts(1:mrank) @\
-        strides = 0 @\
         offsets = 0 @\
  @\
         wrap%##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
-                                 lbounds, ubounds, strides, offsets, & @\
+                                 lbounds, ubounds, offsets, & @\
                                  ESMF_TRUE, do_dealloc, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_AllocMacros.h,v 1.3 2003/09/04 22:24:20 cdeluca Exp $
+! $Id: ESMF_AllocMacros.h,v 1.4 2003/10/07 22:33:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,17 +34,16 @@
         ! Set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for strides/lbounds/ubounds/offsets/whatever @\
+        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
         !  and set them in the array object.  For now, used fixed values. @\
         lbounds = 1 @\
         ubounds = 1 @\
         ubounds(1:mrank) = counts(1:mrank) @\
-        strides = 0 @\
         offsets = 0 @\
  @\
         call c_ESMC_ArraySetInfo(array, local##mtypekind##mrank##D, & @\
                         local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mloc ), & @\
-                        counts, lbounds, ubounds, strides, offsets, & @\
+                        counts, lbounds, ubounds, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
