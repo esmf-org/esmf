@@ -206,10 +206,10 @@
 \subsection{Use and Examples}
 #ifdef STANDALONE
 \input{Clock_usage}
-\input{Clock_fex}
+\input{ESMF_ClockEx_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/TimeMgr/doc/Clock_usage}
-\input{../Infrastructure/TimeMgr/doc/Clock_fex}
+\input{../Infrastructure/TimeMgr/doc/ESMF_ClockEx_fapi}
 #endif
 
 \subsection{Restrictions}
