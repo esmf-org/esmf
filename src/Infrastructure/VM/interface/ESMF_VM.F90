@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.32 2004/06/21 22:52:04 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.33 2004/07/19 19:46:22 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.32 2004/06/21 22:52:04 cdeluca Exp $'
+      '$Id: ESMF_VM.F90,v 1.33 2004/07/19 19:46:22 theurich Exp $'
 
 !==============================================================================
 
@@ -217,7 +217,7 @@ module ESMF_VMMod
 
 ! -------------------------- ESMF-public method -------------------------------
 !BOPI
-! !IROUTINE: ESMF_VMScatter -- Generic interface
+! !IROUTINE: ESMF_VMRecv -- Generic interface
 
 ! !INTERFACE:
       interface ESMF_VMRecv
