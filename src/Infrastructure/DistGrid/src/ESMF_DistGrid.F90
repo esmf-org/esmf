@@ -41,7 +41,9 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_DELayoutMod
+#ifdef ESMF_ENABLE_VM
       use ESMF_newDELayoutMod
+#endif      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -148,7 +150,9 @@
         integer :: dimCount               ! Number of dimensions
         integer :: gridBoundaryWidth      ! # of exterior cells/edge
         type (ESMF_DELayout) :: layout    ! the layout for this grid
+#ifdef ESMF_ENABLE_VM      
         type(ESMF_newDELayout) :: delayout    ! the delayout for this grid
+#endif        
 
       ! 1 per dimension of the Grid
 
@@ -214,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.105 2004/04/05 21:02:03 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.106 2004/04/06 12:22:30 theurich Exp $'
 
 !==============================================================================
 !
@@ -366,7 +370,11 @@
       function ESMF_DistGridCreateInternal(dimCount, counts, layout, decompIDs, &
                                            countsPerDEDim1, countsPerDEDim2, &
                                            periodic, coversDomain, &
-                                           name, rc, delayout)
+                                           name, rc &
+#ifdef ESMF_ENABLE_VM      
+                                           , delayout &
+#endif
+                                           )
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
@@ -381,8 +389,10 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: periodic
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
-      integer, intent(out), optional :: rc               
+      integer, intent(out), optional :: rc       
+#ifdef ESMF_ENABLE_VM      
       type(ESMF_newDELayout), intent(in), optional :: delayout
+#endif
 
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_DistGrid} object, constructs its
@@ -449,7 +459,11 @@
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
-                                  name=name, rc=rc, delayout=delayout)
+                                  name=name, rc=rc
+#ifdef ESMF_ENABLE_VM      
+                                  , delayout=delayout &
+#endif
+                                  )
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => dgtype
@@ -629,8 +643,11 @@
                                                 decompIDs, counts, &
                                                 countsPerDEDim1, countsPerDEDim2, &
                                                 gridBoundaryWidth, periodic, &
-                                                coversDomain, name, rc, &
-                                                delayout)
+                                                coversDomain, name, rc &
+#ifdef ESMF_ENABLE_VM      
+                                                , delayout &
+#endif
+                                                )
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -645,7 +662,9 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
+#ifdef ESMF_ENABLE_VM      
       type(ESMF_newDELayout), intent(in), optional :: delayout
+#endif
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
@@ -746,9 +765,11 @@
         enddo
       endif
 
+#ifdef ESMF_ENABLE_VM      
       if(present(delayout)) then
         dgtype%delayout  = delayout
       endif
+#endif
 
       ! Calculate values for computational cells
       glob => dgtype%globalComp
