@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.51 2004/06/08 14:59:15 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.52 2004/06/08 20:27:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.51 2004/06/08 14:59:15 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.52 2004/06/08 20:27:49 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -729,7 +729,7 @@
 !
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompFinalize(gridcomp, importState, &
-                                   exportState, clock, phase, blockingFlag, rc)
+                                   exportState, clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_GridComp)                              :: gridcomp
@@ -737,7 +737,7 @@
       type (ESMF_State),        intent(inout), optional :: exportState
       type (ESMF_Clock),        intent(in),    optional :: clock
       integer,                  intent(in),    optional :: phase
-      type (ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+      type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
       integer,                  intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
@@ -770,7 +770,7 @@
 !      if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !      For multiple-phase child components, this is the integer phase
 !      number to be invoked.
-!   \item[{[blockingFlag]}]  
+!   \item[{[blockingflag]}]  
 !    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -779,7 +779,7 @@
 !EOP
 
         call ESMF_CompFinalize(gridcomp%compp, importState, exportState, &
-          clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
+          clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_GridCompFinalize
 
@@ -850,7 +850,7 @@
 
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompInitialize(gridcomp, importState, &
-                                  exportState, clock, phase, blockingFlag, rc)
+                                  exportState, clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_GridComp)                              :: gridcomp
@@ -858,7 +858,7 @@
       type (ESMF_State),        intent(inout), optional :: exportState
       type (ESMF_Clock),        intent(in),    optional :: clock
       integer,                  intent(in),    optional :: phase
-      type (ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+      type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
       integer,                  intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
@@ -890,7 +890,7 @@
 !    if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !    For multiple-phase child components, this is the integer phase
 !    number to be invoked.
-!   \item[{[blockingFlag]}]
+!   \item[{[blockingflag]}]
 !    Valid values are {\tt ESMF\_BLOCKING} (the default)
 !    or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
@@ -900,7 +900,7 @@
 !EOP
 
         call ESMF_CompInitialize(gridcomp%compp, importState, exportState, &
-                    clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
+                    clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_GridCompInitialize
 
@@ -946,14 +946,14 @@
 !
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompReadRestart(gridcomp, iospec, clock, &
-                                                    phase, blockingFlag, rc)
+                                                    phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_GridComp), intent(inout) :: gridcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
-      type (ESMF_BlockingFlag), intent(in), optional :: blockingFlag
+      type (ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -986,7 +986,7 @@
 !    number to be invoked.
 !    If multiple-phase restore, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[blockingFlag]}]
+!   \item[{[blockingflag]}]
 !    Valid values are {\tt ESMF\_BLOCKING} (the default)  
 !    or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
@@ -996,7 +996,7 @@
 !EOP
 
         call ESMF_CompReadRestart(gridcomp%compp, iospec, clock, phase, &
-                                  blockingFlag, rc)
+                                  blockingflag, rc)
 
         end subroutine ESMF_GridCompReadRestart
 
@@ -1008,7 +1008,7 @@
 !
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompRun(gridcomp, importState, exportState,&
-                                            clock, phase, blockingFlag, rc)
+                                            clock, phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_GridComp)                              :: gridcomp
@@ -1016,7 +1016,7 @@
       type (ESMF_State),        intent(inout), optional :: exportState
       type (ESMF_Clock),        intent(in),    optional :: clock
       integer,                  intent(in),    optional :: phase
-      type (ESMF_BlockingFlag), intent(in),    optional :: blockingFlag
+      type (ESMF_BlockingFlag), intent(in),    optional :: blockingflag
       integer,                  intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1052,7 +1052,7 @@
 !    number to be invoked.
 !    If multiple-phase restore, which phase number this is.
 !    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!   \item[{[blockingFlag]}]  
+!   \item[{[blockingflag]}]  
 !    Use {\tt ESMF\_BLOCKING} (default) or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1061,7 +1061,7 @@
 !EOP
 
         call ESMF_CompRun(gridcomp%compp, importState, exportState, &
-                    clock=clock, phase=phase, blockingFlag=blockingFlag, rc=rc)
+                    clock=clock, phase=phase, blockingflag=blockingflag, rc=rc)
 
         end subroutine ESMF_GridCompRun
 
@@ -1344,14 +1344,14 @@
 !
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompWriteRestart(gridcomp, iospec, clock, &
-                                                     phase, blockingFlag, rc)
+                                                     phase, blockingflag, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_GridComp), intent(inout) :: gridcomp
       type (ESMF_IOSpec), intent(inout), optional :: iospec
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
-      type(ESMF_BlockingFlag), intent(in), optional :: blockingFlag
+      type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -1381,7 +1381,7 @@
 !    if specified it must be {\tt ESMF\_SINGLEPHASE}.
 !    For multiple-phase child components, this is the integer phase
 !    number to be invoked.
-!   \item[{[blockingFlag]}]
+!   \item[{[blockingflag]}]
 !    Valid values are {\tt ESMF\_BLOCKING} (the default)
 !    or {\tt ESMF\_NONBLOCKING}.
 !   \item[{[rc]}]
@@ -1391,7 +1391,7 @@
 !EOP
 
         call ESMF_CompWriteRestart(gridcomp%compp, iospec, clock, phase, &
-                                   blockingFlag, rc)
+                                   blockingflag, rc)
 
         end subroutine ESMF_GridCompWriteRestart
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.28 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_VM.F90,v 1.29 2004/06/08 20:27:48 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.28 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_VM.F90,v 1.29 2004/06/08 20:27:48 cdeluca Exp $'
 
 !==============================================================================
 
@@ -307,16 +307,16 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGlobalReduce()
   subroutine ESMF_VMAllGlobalReduceI4(vm, sendData, recvData, count, &
-    reduceFlag,  blockingFlag, commHandle, rc)
+    reduceflag,  blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
     integer(ESMF_KIND_I4),    intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -337,9 +337,9 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[reduceFlag] 
+!   \item[reduceflag] 
 !        Reduction operation.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -347,9 +347,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -364,8 +364,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -375,7 +375,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_I4, &
-      reduceFlag, localrc)
+      reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -394,16 +394,16 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGlobalReduce()
   subroutine ESMF_VMAllGlobalReduceR4(vm, sendData, recvData, count, &
-    reduceFlag, blockingFlag, commHandle, rc)
+    reduceflag, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R4),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -424,9 +424,9 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[reduceFlag] 
+!   \item[reduceflag] 
 !        Reduction operation.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -434,9 +434,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -451,8 +451,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -462,7 +462,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_R4, &
-      reduceFlag, localrc)
+      reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -481,16 +481,16 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllGlobalReduce()
   subroutine ESMF_VMAllGlobalReduceR8(vm, sendData, recvData, count, &
-    reduceFlag, blockingFlag, commHandle, rc)
+    reduceflag, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R8),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -511,9 +511,9 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[reduceFlag] 
+!   \item[reduceflag] 
 !        Reduction operation.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -521,9 +521,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -538,8 +538,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -549,7 +549,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllGlobalReduce(vm, sendData, recvData, count, ESMF_R8, &
-      reduceFlag, localrc)
+      reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -567,17 +567,17 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceFlag, &
-    blockingFlag, commHandle, rc)
+  subroutine ESMF_VMAllReduceI4(vm, sendData, recvData, count, reduceflag, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
     integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -598,9 +598,9 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[reduceFlag] 
+!   \item[reduceflag] 
 !        Reduction operation.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -608,9 +608,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -625,8 +625,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -636,7 +636,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_I4, &
-      reduceFlag, localrc)
+      reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -654,17 +654,17 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceR4(vm, sendData, recvData, count, reduceFlag, &
-    blockingFlag, commHandle, rc)
+  subroutine ESMF_VMAllReduceR4(vm, sendData, recvData, count, reduceflag, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -685,9 +685,9 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[reduceFlag] 
+!   \item[reduceflag] 
 !        Reduction operation.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -695,9 +695,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -712,8 +712,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -723,7 +723,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R4, &
-      reduceFlag, localrc)
+      reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -741,17 +741,17 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMAllReduce()
-  subroutine ESMF_VMAllReduceR8(vm, sendData, recvData, count, reduceFlag, &
-    blockingFlag, commHandle, rc)
+  subroutine ESMF_VMAllReduceR8(vm, sendData, recvData, count, reduceflag, &
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
-    type(ESMF_ReduceFlag),    intent(in)              :: reduceFlag
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_ReduceFlag),    intent(in)              :: reduceflag
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -772,9 +772,9 @@ module ESMF_VMMod
 !        valid destination array.
 !   \item[count] 
 !        Number of elements in sendData on each of the PETs.
-!   \item[reduceFlag] 
+!   \item[reduceflag] 
 !        Reduction operation.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -782,9 +782,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -799,8 +799,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -810,7 +810,7 @@ module ESMF_VMMod
 
     ! Call into the C++ interface, which will sort out optional arguments.
     call c_ESMC_VMAllReduce(vm, sendData, recvData, count, ESMF_R8, &
-      reduceFlag, localrc)
+      reduceflag, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
@@ -873,7 +873,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherI4(vm, sendData, recvData, count, root, &
-    blockingFlag, commHandle, rc)
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -881,8 +881,8 @@ module ESMF_VMMod
     integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -904,7 +904,7 @@ module ESMF_VMMod
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -912,9 +912,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -929,8 +929,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -959,7 +959,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR4(vm, sendData, recvData, count, root, &
-    blockingFlag, commHandle, rc)
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -967,8 +967,8 @@ module ESMF_VMMod
     real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -990,7 +990,7 @@ module ESMF_VMMod
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -998,9 +998,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1015,8 +1015,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1045,7 +1045,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
   subroutine ESMF_VMGatherR8(vm, sendData, recvData, count, root, &
-    blockingFlag, commHandle, rc)
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -1053,8 +1053,8 @@ module ESMF_VMMod
     real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -1076,7 +1076,7 @@ module ESMF_VMMod
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1084,9 +1084,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1101,8 +1101,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1351,16 +1351,16 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvI4(vm, recvData, count, src, blockingFlag, &
-    commHandle, rc)
+  subroutine ESMF_VMRecvI4(vm, recvData, count, src, blockingflag, &
+    commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     integer(ESMF_KIND_I4),    intent(in)              :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -1377,7 +1377,7 @@ module ESMF_VMMod
 !        Number of elements to be received.
 !   \item[src] 
 !        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1385,9 +1385,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1402,8 +1402,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1431,16 +1431,16 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR4(vm, recvData, count, src, blockingFlag, &
-    commHandle, rc)
+  subroutine ESMF_VMRecvR4(vm, recvData, count, src, blockingflag, &
+    commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R4),       intent(in)              :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -1457,7 +1457,7 @@ module ESMF_VMMod
 !        Number of elements to be received.
 !   \item[src] 
 !        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1465,9 +1465,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1482,8 +1482,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1511,16 +1511,16 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR8(vm, recvData, count, src, blockingFlag, &
-    commHandle, rc)
+  subroutine ESMF_VMRecvR8(vm, recvData, count, src, blockingflag, &
+    commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R8),       intent(in)              :: recvData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -1537,7 +1537,7 @@ module ESMF_VMMod
 !        Number of elements to be received.
 !   \item[src] 
 !        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1545,9 +1545,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1562,8 +1562,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1592,7 +1592,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterI4(vm, sendData, recvData, count, root, &
-    blockingFlag, commHandle, rc)
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -1600,8 +1600,8 @@ module ESMF_VMMod
     integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -1623,7 +1623,7 @@ module ESMF_VMMod
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1631,9 +1631,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1648,8 +1648,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1678,7 +1678,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR4(vm, sendData, recvData, count, root, &
-    blockingFlag, commHandle, rc)
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -1686,8 +1686,8 @@ module ESMF_VMMod
     real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -1710,7 +1710,7 @@ module ESMF_VMMod
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1718,9 +1718,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1735,8 +1735,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1765,7 +1765,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
   subroutine ESMF_VMScatterR8(vm, sendData, recvData, count, root, &
-    blockingFlag, commHandle, rc)
+    blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -1773,8 +1773,8 @@ module ESMF_VMMod
     real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc
 !         
 !
@@ -1797,7 +1797,7 @@ module ESMF_VMMod
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
 !        Id of the {\tt root} PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1805,9 +1805,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1822,8 +1822,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1851,16 +1851,16 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendI4(vm, sendData, count, dst, blockingFlag, &
-    commHandle, rc)
+  subroutine ESMF_VMSendI4(vm, sendData, count, dst, blockingflag, &
+    commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -1877,7 +1877,7 @@ module ESMF_VMMod
 !        Number of elements to be send.
 !   \item[dst] 
 !        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1885,9 +1885,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1902,8 +1902,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -1931,16 +1931,16 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR4(vm, sendData, count, dst, blockingFlag, &
-    commHandle, rc)
+  subroutine ESMF_VMSendR4(vm, sendData, count, dst, blockingflag, &
+    commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -1957,7 +1957,7 @@ module ESMF_VMMod
 !        Number of elements to be send.
 !   \item[dst] 
 !        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -1965,9 +1965,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1982,8 +1982,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -2011,16 +2011,16 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR8(vm, sendData, count, dst, blockingFlag, &
-    commHandle, rc)
+  subroutine ESMF_VMSendR8(vm, sendData, count, dst, blockingflag, &
+    commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -2037,7 +2037,7 @@ module ESMF_VMMod
 !        Number of elements to be send.
 !   \item[dst] 
 !        Id of the destination PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -2045,9 +2045,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2062,8 +2062,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -2092,7 +2092,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvI4(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingFlag, commHandle, rc)
+    recvData, recvCount, src, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -2102,8 +2102,8 @@ module ESMF_VMMod
     integer(ESMF_KIND_I4),    intent(in)              :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -2127,7 +2127,7 @@ module ESMF_VMMod
 !        Number of elements to be received.
 !   \item[src] 
 !        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -2135,9 +2135,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2152,8 +2152,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -2184,7 +2184,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvR4(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingFlag, commHandle, rc)
+    recvData, recvCount, src, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -2194,8 +2194,8 @@ module ESMF_VMMod
     real(ESMF_KIND_R4),       intent(in)              :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -2219,7 +2219,7 @@ module ESMF_VMMod
 !        Number of elements to be received.
 !   \item[src] 
 !        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -2227,9 +2227,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2244,8 +2244,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -2276,7 +2276,7 @@ module ESMF_VMMod
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSendRecv()
   subroutine ESMF_VMSendRecvR8(vm, sendData, sendCount, dst, &
-    recvData, recvCount, src, blockingFlag, commHandle, rc)
+    recvData, recvCount, src, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
@@ -2286,8 +2286,8 @@ module ESMF_VMMod
     real(ESMF_KIND_R8),       intent(in)              :: recvData(:)  
     integer,                  intent(in)              :: recvCount
     integer,                  intent(in)              :: src
-    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
-    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingflag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commhandle
     integer,                  intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
@@ -2311,7 +2311,7 @@ module ESMF_VMMod
 !        Number of elements to be received.
 !   \item[src] 
 !        Id of the source PET within the {\tt ESMF\_VM} object.
-!   \item[{[blockingFlag]}] 
+!   \item[{[blockingflag]}] 
 !        Flag indicating whether this call behaves blocking or non-blocking:
 !        \begin{description}
 !        \item[{\tt ESMF\_BLOCKING}]
@@ -2319,9 +2319,9 @@ module ESMF_VMMod
 !        \item[{\tt ESMF\_NONBLOCKING}]
 !             Return immediately without blocking.
 !        \end{description}
-!   \item[{[commHandle]}]
+!   \item[{[commhandle]}]
 !        A communication handle will be returned in case of a non-blocking
-!        request (see argument {\tt blockingFlag}).
+!        request (see argument {\tt blockingflag}).
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -2336,8 +2336,8 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_FAILURE
 
     ! Flag not implemented features
-    if (present(blockingFlag)) then
-      if (blockingFlag == ESMF_NONBLOCKING) then
+    if (present(blockingflag)) then
+      if (blockingflag == ESMF_NONBLOCKING) then
         if (ESMF_LogWrite('Non-blocking not yet implemented', &
           ESMF_LOG_WARNING, &
           ESMF_CONTEXT)) continue
@@ -2411,11 +2411,11 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMWait - Wait for non-blocking VM communication to complete
 
 ! !INTERFACE:
-  subroutine ESMF_VMWait(vm, commHandle, rc)
+  subroutine ESMF_VMWait(vm, commhandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),          intent(in)              :: vm
-    type(ESMF_CommHandle),  intent(in)              :: commHandle
+    type(ESMF_CommHandle),  intent(in)              :: commhandle
     integer,                intent(out),  optional  :: rc
 !         
 !
@@ -2426,7 +2426,7 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[commHandle] 
+!   \item[commhandle] 
 !        Handle specifying a previous non-blocking communication request.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
