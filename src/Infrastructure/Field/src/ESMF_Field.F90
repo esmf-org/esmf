@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.89 2003/12/09 23:38:57 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.90 2003/12/12 20:24:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.89 2003/12/09 23:38:57 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.90 2003/12/12 20:24:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1676,7 +1676,7 @@
           return
         endif
  
-        ftypep = field%ftypep
+        ftypep => field%ftypep
         if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
           print *, "ERROR: Field not ready"
           return
@@ -3884,7 +3884,7 @@
         ! Get filename out of IOSpec, if specified.  Otherwise use the
         ! name of the Field.
         if (present(IOSpec)) then
-            !call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
+            call ESMF_IOSpecGet(IOSpec, filename=filename, rc=status)
         else
             call ESMF_FieldGet(field, name=filename, rc=status)
         endif
