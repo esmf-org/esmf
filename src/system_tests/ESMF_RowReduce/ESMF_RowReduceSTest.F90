@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.20 2004/04/14 21:52:19 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.21 2004/04/15 19:23:47 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -71,7 +71,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! get the global VM
-    call ESMF_VMGlobalGet(vm, rc=rc)
+    call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1 x N DELayout 
