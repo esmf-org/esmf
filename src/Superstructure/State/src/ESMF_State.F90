@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.81 2004/12/28 07:19:25 theurich Exp $
+! $Id: ESMF_State.F90,v 1.82 2005/01/11 21:46:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.81 2004/12/28 07:19:25 theurich Exp $'
+      '$Id: ESMF_State.F90,v 1.82 2005/01/11 21:46:57 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -4942,6 +4942,7 @@ end interface
       integer :: localrc                   ! local error status
       type(ESMF_StateItem), pointer :: nextitem, dataitem
       integer, allocatable, dimension(:) :: ntodo
+      type(ESMF_DataHolder), pointer :: ldatap
       integer :: i
       integer :: newcount, nindex
       logical :: exists
@@ -5044,12 +5045,31 @@ end interface
             ! Add name
             nextitem%namep = namelist(i)
 
-            nullify(nextitem%datap)
- 
             nextitem%needed = stypep%needed_default
             nextitem%ready = stypep%ready_default
             nextitem%valid = stypep%stvalid_default
             nextitem%reqrestart = stypep%reqrestart_default
+ 
+            ldatap => nextitem%datap
+            nullify(ldatap)
+            ! this *should* work, but causes errors on the intel optimized
+            ! build (compiler 8.1).  i moved the previous 4 lines up from
+            ! where they used to be (below this line) and now it seems to
+            ! work either way, but i'll leave the intermediate pointer just
+            ! to be on the safe side.   nsc 11jan05
+            !nullify(nextitem%datap)
+
+            ! DEBUG
+            !if (.not. associated(nextitem)) then
+            !    print *, "nextitem not associated"
+            !else
+            !    print *, "nextitem still associated"
+            !    if (associated(nextitem%datap)) then
+            !        print *, "datap still associated"
+            !    else
+            !        print *, "datap cleared"
+            !    endif
+            !endif
  
         endif
 
