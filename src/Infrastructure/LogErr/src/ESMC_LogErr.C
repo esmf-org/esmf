@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.59 2004/05/19 00:52:05 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.60 2004/05/19 22:11:08 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,6 @@
 #include <stdio.h>        
 #include <stdlib.h>
 #include <stdarg.h>
-//#include <ctype.h>
 #include <string.h>
 #include <time.h>
 #include <sys/time.h>
@@ -48,11 +47,127 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.59 2004/05/19 00:52:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.60 2004/05/19 22:11:08 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
 //
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+bool ESMC_Log::ESMC_LogAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int *rcToReturn
+      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+    int result=false;
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+    ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
+    result=true;
+    return result;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+
+bool ESMC_Log::ESMC_LogAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int LINE,
+    char FILE[],
+    char method[],
+    int *rcToReturn      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+	int result=false;
+	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,method);
+	result=ESMF_TRUE;
+	return true;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogMsgAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+bool ESMC_Log::ESMC_LogMsgAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    char msg[],
+    int *rcToReturn
+      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+    int result=false;
+    char logMsg[ESMF_MAXSTR];
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
+    ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR);
+    result=true;
+    return result;
+
+}
+
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
+//
+// !INTERFACE:
+
+
+bool ESMC_Log::ESMC_LogMsgAllocError(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    char msg[],
+    int LINE,
+    char FILE[],
+    char method[],
+    int *rcToReturn      
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{
+    int result=false;
+    char logMsg[ESMF_MAXSTR];
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
+    ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
+    result=ESMF_TRUE;
+    return true;
+}
 //----------------------------------------------------------------------------
 //
 //
@@ -467,123 +582,7 @@ bool ESMC_Log::ESMC_LogMsgFoundError(
     return result;
 }
 
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
-//
-// !INTERFACE:
 
-bool ESMC_Log::ESMC_LogAllocError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-	int *rcToReturn
-      
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-	int result=false;
-	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
-	result=true;
-	return result;
-
-}
-
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
-//
-// !INTERFACE:
-
-
-bool ESMC_Log::ESMC_LogAllocError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    int LINE,
-    char FILE[],
-    char method[],
-    int *rcToReturn      
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-	int result=false;
-	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,method);
-	result=ESMF_TRUE;
-	return true;
-}
-
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_LogMsgAllocErr - LogAllocErr
-//
-// !INTERFACE:
-
-bool ESMC_Log::ESMC_LogMsgAllocError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    char msg[],
-    int *rcToReturn
-      
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-    int result=false;
-    char logMsg[ESMF_MAXSTR];
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
-    ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR);
-    result=true;
-    return result;
-
-}
-
-//----------------------------------------------------------------------------
-//BOP
-// !IROUTINE: ESMC_LogAllocErr - LogAllocErr
-//
-// !INTERFACE:
-
-
-bool ESMC_Log::ESMC_LogMsgAllocError(
-
-// !RETURN VALUE:
-//  none
-//
-// !ARGUMENTS:
-    char msg[],
-    int LINE,
-    char FILE[],
-    char method[],
-    int *rcToReturn      
-    )
-// !DESCRIPTION:
-// Prints log messsge, line number, file, directory
-//EOP
-{
-    int result=false;
-    char logMsg[ESMF_MAXSTR];
-    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    strcpy(logMsg, ESMC_LogGetErrMsg(ESMC_RC_MEM));
-    ESMC_LogWrite(strcat(logMsg,msg),ESMC_LOG_ERROR,LINE,FILE,method);
-    result=ESMF_TRUE;
-    return true;
-}
 
 //----------------------------------------------------------------------------
 //BOP

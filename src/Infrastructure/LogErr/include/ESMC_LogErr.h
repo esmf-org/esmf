@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.47 2004/05/18 22:36:53 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.48 2004/05/19 22:11:08 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,11 +40,11 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
-enum ESMC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};                   
+enum ESMC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
+int ESMC_LogFinalize();         
+char *ESMC_LogGetErrMsg(int rc);          
 int ESMC_LogSetFilename(char filename[]);
-int ESMC_LogFinalize();
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
-char *ESMC_LogGetErrMsg(int rc);
 
 class ESMC_Log {
 private:
@@ -54,7 +54,8 @@ private:
                                 // for C++ I/O
     ESMC_Logical FileIsOpen;
 
-    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log messages written out.
+    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log messages written 
+                                // out.
 
     ESMC_Logical flush;         // If true, all output is flushed
 
@@ -75,21 +76,26 @@ private:
   public:
 // !PUBLIC MEMBER FUNCTIONS:
 // (see ESMC\_LogErr.C for a description of these methods)
-    void ESMC_LogOpen(char filename[]);
-    void ESMC_LogClose();
-    bool ESMC_LogWrite(char msg[],int logtype);
-    bool ESMC_LogWrite(char msg[],int logtype,int LINE,char FILE[],char method[]);    
-    bool ESMC_LogFoundError(int rcToCheck,int *rcToReturn);
-    bool ESMC_LogFoundError(int rcToCheck,int LINE,char FILE[],char method[],int *rcToReturn);
-    bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
-    bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],char method[],int *rcToReturn);
+    
     bool ESMC_LogAllocError(int *rcToReturn);
     bool ESMC_LogAllocError(int LINE,char FILE[],char method[],int *rcToReturn);
+    void ESMC_LogClose();
+    bool ESMC_LogFoundError(int rcToCheck,int *rcToReturn);
+    bool ESMC_LogFoundError(int rcToCheck,int LINE,char FILE[],char method[],
+         int *rcToReturn);
     bool ESMC_LogMsgAllocError(char msg[],int *rcToReturn);
-    bool ESMC_LogMsgAllocError(char msg[],int LINE,char FILE[],char method[],int *rcToReturn);
-    char nameLogErrFile[32];
+    bool ESMC_LogMsgAllocError(char msg[],int LINE,char FILE[],char method[],
+    int *rcToReturn);
+        bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int *rcToReturn);
+    bool ESMC_LogMsgFoundError(int rcToCheck,char msg[],int LINE,char FILE[],
+         char method[],int *rcToReturn);
+    void ESMC_LogOpen(char filename[]);
+    bool ESMC_LogWrite(char msg[],int logtype);
+    bool ESMC_LogWrite(char msg[],int logtype,int LINE,char FILE[],
+         char method[]);       
+// !PUBLIC Variables:          
     FILE *ESMC_LogFile;
-    //ESMC_Log();
+    char nameLogErrFile[32];
 
   private:
 // !PRIVATE MEMBER FUNCIONS:
