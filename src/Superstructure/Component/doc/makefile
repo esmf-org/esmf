@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/01/28 23:58:44 nscollins Exp $ 
+# $Id: makefile,v 1.4 2003/01/29 21:49:14 nscollins Exp $ 
 
 all: alldocs
 
@@ -52,13 +52,8 @@ REFREXFILES = Component_refdoc.ctex
 #                     do_ccprotex comp ../src/ESMC_Component.C
 #
 
-## sorry, i cannot make this work with the larger build env.
-## TODO: fix this so you can build the docs as part of the
-## larger system.  in the meantime, this just work locally
-## and not with the nested make system.  nsc  01/07/2003
-#
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
-#
+
 
 # Dvi files
 Component_desdoc.dvi: Component_desdoc.ctex fsrc ccsrc
@@ -98,8 +93,13 @@ Component_refdoc.ps: Component_refdoc.dvi
 	mv -f Component_refdoc.ps ${ESMC_DOCDIR}
 
 # Html Files
+# the original rules have a problem - if the dir already exists the mv -f
+# will fail.  (also, i didn't have a doc dir and no rule created it the
+# first time - but that's another problem.)  i put in the following
+# hack which tries to remove the old dir first and then move the new dir.
 Component_desdoc: 
 	${DO_L2H} Component des
+	rm -fr ${ESMC_DOCDIR}/Component_desdoc
 	mv -f Component_desdoc ${ESMC_DOCDIR}
 
 Component_reqdoc: 
@@ -119,6 +119,7 @@ fsrc:
 	do_fprotex app ../src/ESMF_App.F90
 	do_fprotex xform ../src/ESMF_Xform.F90
 	do_fprotex cpl ../src/ESMF_Cpl.F90
+	touch gcomp_fapi.tex
 
 ccsrc:
 	do_ccprotex state ../interface/ESMC_State.C
@@ -126,5 +127,6 @@ ccsrc:
 	do_ccprotex app ../interface/ESMC_App.C
 	do_ccprotex xform ../interface/ESMC_Xform.C
 	do_ccprotex cpl ../interface/ESMC_Cpl.C
+	touch gcomp_ccapi.tex
 
 
