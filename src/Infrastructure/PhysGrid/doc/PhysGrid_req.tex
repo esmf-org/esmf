@@ -1,4 +1,4 @@
-%$Id: PhysGrid_req.tex,v 1.19 2002/05/23 20:07:18 jwolfe Exp $
+%$Id: PhysGrid_req.tex,v 1.20 2002/05/24 11:50:48 cdeluca Exp $
 
 %===============================================================================
 \req{Physical locations}
@@ -7,12 +7,11 @@
 A mechanism shall be provided for describing physical locations in space in 1,
 2, or 3 dimensions, including both specification of points and of ranges.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} System test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
+              CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
 \end{reqlist}
 
 \sreq{Horizontal locations}
@@ -25,42 +24,40 @@ systems in the horizontal directions.  Units for these coordinates are meters
 and degrees for the radius and angle in cylindrical coordinates.
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, CAM-FV, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, CAM-FV, PSAS, MIT \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.\\
 {\bf Notes:}  This suggestion follows common practice, but is an explicit
-exception to the requirement that MKS units are used by ESMF codes where ever
+exception to the requirement that MKS units are used by ESMF codes wherever
 units must be assumed.
 \end{reqlist}
 
 \ssreq{Horizontal locations may be points}
 
-   Horizontal locations may be specified as a pair of real values in the order
+Horizontal locations may be specified as a pair of real values in the order
 (X,Y) or (longitude, latitude).
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, NCEP-SSI,
-              PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, Regrid, NCEP-GSM, NCEP-SSI,
+              PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 
 \ssreq{Horizontal locations may be polygonal regions}
 
-  Horizontal Locations may be specified to be regions by providing the number
+  Horizontal locations may be specified to be regions by providing the number
 of vertices and the list of the vertex points.  Vertex points must be specified
 either clockwise or counterclockwise around the region.  The vertex points
 may be redundant.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.3, POP, CICE, ReGrid, 
-              PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} Fundamental to allowing conservative interpolation, and for an
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, Regrid, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
+{\bf Notes:} Fundamental to allowing conservative interpolation, and for a
 precise description of data locations.
 \end{reqlist}
  
@@ -70,11 +67,10 @@ precise description of data locations.
 location.  The points may provide a convenient nominal location, even when
 a value actually pertains to a region.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, 
-              PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, Regrid, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
 \end{reqlist}
 
@@ -85,11 +81,10 @@ influence to the central point.  This may be the radius of a Gaussian
 distribution of influence. The exact interpretation of this radius is
 the responsibility of user-provided software.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} General Req. 8.0.2, 
-              PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 2. \\
+{\bf Source:} Required by PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} This is necessary for describing certain observational data streams.
 \end{reqlist}
 
@@ -98,7 +93,7 @@ the responsibility of user-provided software.
 
 A method for determining the path connecting grid locations 
 is required.  This path would be used to accurately compute
-intersections for regridding, lengths of cell sides, grid
+intersections for Regridding, lengths of cell sides, grid
 cell areas and a variety of other grid metrics.  A linear 
 approximation between points is a proper assumption for 
 cartesian grids and for computing sides of latitude/longitude
@@ -114,10 +109,10 @@ approximation to the cell side given a midpoint in addition
 to the two endpoints).
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.3, ReGrid \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Regrid, required by codes that use conservative interpolation. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Necessary for allowing conservative interpolation.
 \end{reqlist}
 
@@ -133,22 +128,19 @@ coordinate must be self-consistent.  (See the CF convention for a full
 discussion of options for vertical coordinates at
 http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CAM-EUL, POP, NCEP-GSM, NCEP-SSI, CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \ssreq{Vertical locations may be points}
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-SSI,
-              CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CAM-EUL, POP, NCEP-SSI,
+              CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Vertical locations may be regions}
@@ -157,11 +149,10 @@ Vertical locations may be specified by providing the values of the top and
 bottom bounding points.  Such regions have the same extent regardless of the
 order in which the bounding points are specified.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Vertical regions have central points}
@@ -170,11 +161,10 @@ order in which the bounding points are specified.
 location.  The points may provide a convenient nominal location, even when
 a value actually pertains to a region.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, NCEP-GSM,
-              PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, NCEP-GSM, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
 \end{reqlist}
 
@@ -185,24 +175,23 @@ influence to the central point.  This may be the radius of a Gaussian
 distribution of influence. The exact interpretation of this radius is
 the responsibility of user-provided software.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} General Req. 8.0.2 \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} This is necessary for describing certain observational data streams.
+{\bf Priority:} 3. \\
+{\bf Source:} \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
+{\bf Notes:} This appears superfluous. It is more than enough to specify a range 
+in 1D - Arlindo.
 \end{reqlist}
-{\bf Arlindo Notes: } This appears superfluous. It is more than enough to specify a range in 1D.
  
 \ssreq{Vertical locations may include lopped cells}
 
   Vertical locations may include a region whose bounds vary between the
 horizontal corners of a region.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} MIT, NSIPP, POP \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by MIT, NSIPP, POP. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 %===============================================================================
@@ -214,29 +203,27 @@ locations associated with streams of data.  Streams of locations differ from
 physical grids (see below) in that there are no concept of neighboring values,
 topology, covering a space, or of locations being exclusive.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, NCEP-SSI,
-              PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} System test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by NCEP-SSI, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
 \end{reqlist}
 
 \sreq{Location streams may be created}
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Priority:} 1. \\
+{\bf Source:} NCEP-SSI, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
 
 \sreq{Location streams may be destroyed}
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Priority:} 1. \\
+{\bf Source:} NCEP-SSI, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} 
 \end{reqlist}
 
@@ -244,42 +231,41 @@ topology, covering a space, or of locations being exclusive.
 Given an existing location stream, a new stream may be generated with a new name and
 possibly a different length.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Reading streams}
 Location streams may be read from files.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Arlindo Notes:} I npo longer find this necessary. It is sufficient top have an IO requirement for fields (which can be defined on location streams). - ditto CNH.
+{\bf Priority:} 1. \\
+{\bf Source:} Required by NCEP-SSI, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} I no longer find this necessary. It is sufficient to have an IO requirement for fields (which can be defined on location streams) - Arlindo. - ditto CNH.
 \end{reqlist}
 
 \sreq{Writing streams}
 Location streams may be written to files.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Arlindo Notes:} see previous 
+{\bf Priority:} 1. \\
+{\bf Source:} Required NCEP-SSI, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} See previous - Arlindo.
 \end{reqlist}
 
-\sreq{Underlying grid}
+\sreq{Background grid}
 A location stream may have associated with it an underlying physical grid, so that each
 location stream element may be uniquely associated with a single grid cell. (A single
 grid cell may contain multiple location stream elements.)
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by NCEP-SSI, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} This is necessary for such operations as halo updates on a location
 stream.
 \end{reqlist}
@@ -289,11 +275,10 @@ stream.
 \ssreq{Fixed length location streams}
 Location streams may be of fixed length, specified at the time of generation.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Extensible length location streams}
@@ -302,12 +287,12 @@ with an initial length specified at the time of generation.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test\\
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Are we sure we want to reject? Could they just be
-not as optimised. Imagine a location stream that is representing lagrangian
+not as optimised. Imagine a location stream that is representing Lagrangian
 elements in a decomposed fluid simulation. It could be useful to
-be able to add particals as needed (CNH).
+be able to add particles as needed - CNH.
 \end{reqlist}
 
 \ssreq{Global attributes: location stream name}
@@ -315,8 +300,8 @@ Each location stream has a unique name by which it can be referred.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} I think this should be deferred - CNH.
 \end{reqlist}
 
@@ -324,10 +309,10 @@ Each location stream has a unique name by which it can be referred.
 Upon creation, the name and a pointer to each location stream shall be stored in a
 registry.  A pointer to any location stream may be determined given its name.
 \begin{reqlist}
-{\bf Priority:}  \\
+{\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} I think this should be deferred - CNH.
 \end{reqlist}
 
@@ -335,47 +320,43 @@ registry.  A pointer to any location stream may be determined given its name.
 A location stream may be queried for the number of dimensions, which is
 set at the time of creation of the stream.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \ssreq{Global attributes: dimension names}
 Each dimension has a name, which may be set and queried.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Global attributes: dimension units}
 A location stream contains the units of each dimension, which may be set and queried.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Global attributes: text or numeric attributes}
 
 A location stream may have an arbitrary number of text or numeric attributes,
 which may be added, set and queried.  Each attribute has a text name by which it
-can be queried.  Also, a Location Stream can be queried for a list of all global
+can be queried.  Also, a location stream can be queried for a list of all global
 attribute names.
 
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} NCEP-SSI, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Arlindo Notes:} Not quite sure what this is. Again, since we can define fields on location streams, notr sure we need this here. 
-- ditto CNH.
+{\bf Priority:} 2. \\
+{\bf Source:} Required by NCEP-SSI, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Not quite sure what this is. Again, since we can define fields on location streams, not sure we need this here - Arlindo - ditto CNH.
 \end{reqlist}
 
 \ssreq{Global attributes: number of elements and number in use}
@@ -383,11 +364,10 @@ The number of elements in a location stream is available.  For a fixed length st
 both the total number of elements and the number of elements before the last
 active element location may be queried.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} NCEP-SSI, PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by NCEP-SSI, PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Global attributes: null element location value}
@@ -396,8 +376,8 @@ Each location stream may indicate whether a particular location is active.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Code inspection \\
+{\bf Status:} Rejected. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} This functionality may be obtained with user-defined element
 attributes, but this use will not be explicitly supported by ESMF.
 \end{reqlist}
@@ -408,21 +388,20 @@ All elements in a location stream will have the same numbers of dimensions, use 
 same physical coordinates, the same units, the same element attributes (attributes at
 some locations may be missing).
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Arlindo Notes:} MAJOR OBJECTION. Where did this come from? I'd like to be able to represent the whole observation vector for a given synoptic time on a single location stream. While data have horizontal coordinates in (lat,lon), vertical coordinates may vary widely (winds at 10m above sfc, temperature at 500 hPa, to name a few). So, each element would contain the (lat,lon,lev,levunits); it is conceivable that at  some point one would need (lat,lon,lev,xunits,yunits,zunits).
+{\bf Priority:} 2. \\
+{\bf Source:} MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
+{\bf Notes:} MAJOR OBJECTION. Where did this come from? I'd like to be able to represent the whole observation vector for a given synoptic time on a single location stream. While data have horizontal coordinates in (lat,lon), vertical coordinates may vary widely (winds at 10m above sfc, temperature at 500 hPa, to name a few). So, each element would contain the (lat,lon,lev,levunits); it is conceivable that at  some point one would need (lat,lon,lev,xunits,yunits,zunits) - Arlindo.
 \end{reqlist}
 
 \ssreq{Elements include values of locations}
 Methods shall be provided to set and query each element's location.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} PSAS, MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Source:} Required by PSAS, MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Elements may be copied}
@@ -432,23 +411,22 @@ properties and attributes will be copied, while missing attributes will be
 set to missing or a user-provided default.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} PSAS\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Source:} Required by PSAS.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Elements may have attributes}
 Text or data attributes may be attached to each element.  These
 attributes may be null for any particular element.  Methods shall be provided to set
 and query each element's attribute.  Element attributes may use standard names to
-promote interoperabilty.
+promote interoperability.
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Arlindo Notes:} I don't see the point of this as one can define fields on location streams 
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} I don't see the point of this as one can define fields on location streams - Arlindo.
 \end{reqlist}
 
 \ssreq{Location streams may contain null (discarded) elements}
@@ -459,8 +437,8 @@ to specify the elements that are irrelevant for a particular subdomain.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} This "reject" seems inconsistent with earlier notes? - CNH
 \end{reqlist}
 
@@ -472,9 +450,8 @@ pointers to) all valid elements.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -485,8 +462,8 @@ possible.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} I don't know what this means - CNH.
 \end{reqlist}
 
@@ -497,108 +474,109 @@ manipulated in compatible ways.
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} see previous req (what is a "data stream") - CNH.
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} See previous req (what is a "data stream") - CNH.
 \end{reqlist}
+
 \ssreq{Extensible location streams may be extended}
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Who rejected extensible location streams? Who proposed them? - CMD
 \end{reqlist}
+
 \ssreq{Extensible location streams may be shortened}
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
+
 \ssreq{Extensible length location streams may be converted to fixed length}
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
+
 \ssreq{Fixed length location streams may be converted to extensible length}
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
+
 \ssreq{Fixed length streams may have null elements moved to end}
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} \\
-{\bf Status:} Rejected \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Rejected. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 %===============================================================================
 \req{Physical grids}
 %-------------------------------------------------------------------------------
 
-Physical grids provide the locations of each of the cells/points
-associated with the range of indices in a distributed grid.  A physical grid is a
-distributed object associated with a single distributed grid.  A physical grid may have
-undistributed dimensions that are not present in the underlying distributed grid. 
-Multiple physical grids may be derived from the same global, undistributed physical grid. 
+A physical grid identifies a set of locations in physical space.  
+Local physical grids provide the locations of each of the cells/points
+associated with the range of indices in a distributed grid.  A local physical grid is
+associated with a single distributed grid.  It may have undistributed dimensions that 
+are not present in the underlying distributed grid. Multiple local 
+physical grids may be derived from the same global, undistributed physical grid. 
+
 Physical grids may be purely horizontal, purely vertical, or 3-dimensional. 
 Structured grids assume that adjacent locations in index space share boundaries
 in a predictable way.  Unstructured grids also have concepts of neighboring
 cells, but the relative indices of neighbors are unpredictable.
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-     CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
+     CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
 {\bf Verification:} System test.
 \end{reqlist}
 
 \sreq{Reading grids}
-Given a distributed grid, a physical grid can be read from a standard file containing a
-global physical grid. If no distributed grid is provided, the entire global physical grid will
+Given a distributed grid, a local physical grid can be read from a standard file containing a
+global physical grid. If no distributed grid is provided, the global physical grid will
 be read in.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, 
+              CAM-FV, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Writing grids}
 Physical grids can be output to standard files.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CCSM-CPL, POP, CICE, 
-              CAM-FV, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CCSM-CPL, POP, CICE, 
+              CAM-FV, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} 
 \end{reqlist}
 
-\sreq{Physical grids may be internally generated}
+\sreq{Local physical grids may be internally generated}
 For an arbitrary number of points in the global domain of the associated
 distributed grid, it may be possible to specify an algorithm for internally
-determining the physical grid.
+determining the local physical grid.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, NCEP-GSM, NCEP-SSI,
+              CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Null physical grid creation}
@@ -606,104 +584,102 @@ It shall be possible to create any data objects associated with a physical grid 
 providing the data that a physical grid will contain.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Source:} Required by CCSM-CPL, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
-\sreq{Physical grid query}
+\sreq{Physical grid query.}
 Methods shall be provided to query a physical grid for all information in contains.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
+              CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Cell specification}
 Physical grids shall specify both the locations of cell vertices, and the locations
 of cell centers.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, Regrid, NCEP-GSM, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
 \end{reqlist}
 
 \sreq{Refinement}
-A physical grid may be interpolated to generate a physical grid with an equivalent physical
-domain at finer or coarser resolution.  Methods should be provided to accomplish such
+A physical grid may be interpolated to generate a physical grid with an equivalent span
+ at finer or coarser resolution.  Methods should be provided to accomplish such
 interpolation via a simple interface that uses the Regrid facility.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 1.5.2, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Necessary for runtime configurable resolution.  Also, note that 
 there may be a Catch-22 here, as Regrid would naturally provide the facility
-for regridding, but Regrid will typically require the target physical grid for
-creating the regridding.  This requirement is also explicitly addressed within the
+for Regridding, but Regrid will typically require the target physical grid for
+creating the Regridding.  This requirement is also explicitly addressed within the
 Regrid requirement document.
 \end{reqlist}
 
 \sreq{Regeneration}
-A new physical grid may be generated for a given distributed grid from another physical grid.
-The global domain of the source physical grid may be the same as or a superset of
-the target global domain.
+A new local physical grid may be generated for a given distributed grid from another 
+physical grid.
+The span of the source physical grid may be the same as or a superset of
+the span of the target.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 1.5.2, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Necessary for support of transposes, or of moving nests.
 \end{reqlist}
 
 \sreq{Distributed grid reference}
-A physical grid may be queried for the distributed grid upon which it is based.
+A local physical grid may be queried for the distributed grid upon which it is based.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:}  MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:}  Required by MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{Horizontal coordinate independent of vertical}
-Horizontal grid locations can be assumed independent of the vertical coordinate.
+Horizontal physical grid locations can be assumed independent of the vertical coordinate.
 The horizontal metrics, however, may be function of the vertical coordinate, as
 in thick-shell spherical coordinates.
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 2. \\
 {\bf Source:} Any Objections? \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.\\
 {\bf Notes:} If this assumption can be made, it greatly simplifies implementation.
 No widely used counterexamples are known.
 \end{reqlist}
 
-\sreq{Vertical coordinate potentially dependent on horizontal}
-Vertical grid locations may be functions of the horizontal coordinates, or may be
+\sreq{Vertical coordinate potentially dependent on horizontal.}
+Vertical physical grid locations may be functions of the horizontal coordinates, or may be
 independent of them.
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 2. \\
 {\bf Source:} GFDL-MOM4 (required), NSIPP, POP, 
               CAM-FV, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.\\
 {\bf Notes:} This is necessary to support, for example, partial cells in
 Z-coordinate ocean models.
 \end{reqlist}
 
 \sreq{Dimension extension}
-A new physical grid may be generated by adding a dimension to an existing physical grid.
-The global domain of the source physical grid may be the same as or a superset of
-the target global domain.  The new dimension will be independent of the underlying
-distributed grid, and both physical grids share the same distributed grid.  The new
-dimension be in any order with respect to existing dimensions.
+A new physical grid may be generated by adding a dimension to an existing 
+physical grid.  The span of the source physical grid may be the same as or a superset of
+the span of the target.  For a local physical grid, the new dimension will be independent 
+of the underlying distributed grid, and both local physical grids share the same 
+distributed grid.  The new dimension may be in any order with respect to existing dimensions.
 \begin{reqlist}
 {\bf Priority:} 2 \\
 {\bf Source:} CCSM-CPL \\
@@ -715,8 +691,9 @@ coordinates.
 
 \sreq{Dimension reduction}
 A new physical grid may be generated by removing a dimension from an existing physical grid.
-If the dimension that is removed is one that is present in the original underlying
-distributed grid, an appropriately reduced must also be provided.  Otherwise the new physical
+For a local physical grid, if the dimension that is removed is one that is present 
+in the original underlying distributed grid, an appropriately reduced distributed 
+grid must also be provided.  Otherwise the new local physical
 grid is based on the same distributed grid as the original physical grid.
 \begin{reqlist}
 {\bf Priority:} 2 \\
@@ -731,21 +708,21 @@ Physical grids may have an arbitrary number of dimensions.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} ? \\
-{\bf Status:} Rejected\\
-{\bf Verification:} Unit test\\
+{\bf Status:} Rejected.\\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
 without adding much functionality.
 \end{reqlist}
 
-\sreq{1- 2- or 3- dimensional physical grids}
-Physical grids may have up to 3 dimensions, but must have at least as many dimensions as the
+\sreq{1- 2- or 3- dimensional local physical grids}
+Local physical grids may have up to 3 dimensions, but must have at least as many dimensions as the
 underlying distributed grid. 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
-              CAM-FV, PSAS, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Source:} Required by CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI,
+              CAM-FV, PSAS, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
 without adding much functionality. Don't understand this note - without dimensions
 there is no physical grid - CNH?
@@ -758,28 +735,28 @@ also be possible (if not efficient) to extract physical grid information in any 
 order.
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} Please list required orders in Fortran notation. CCSM-CPL(XY), C
-AM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY), NCEP(XYZ,XZY,YXZ,ZXY,ZYX), 
+{\bf Source:} Please list required orders in Fortran notation. CCSM-CPL(XY), 
+CAM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY), NCEP(XYZ,XZY,YXZ,ZXY,ZYX), 
 WRF(XYZ,XZY,YXZ,ZXY,ZYX),
 MIT(XYZ, XZY, ZXY, YZX),
 PSAS (XYZ,XZY) \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Necessary for support of transposes.
 \end{reqlist}
 
 \sreq{Dimension reordering}
-A new physical grid may be generated with reordered dimensions from another physical grid.
+A new local physical grid may be generated with reordered dimensions from another local physical grid.
 If the new dimension order is inconsistent with the original distributed grid, a new
-consistent physical grid must also be provided.  To be consistent, all dimensions present
-in a distributed grid must have the same relative order in the physical grid.  (i.e. if the
-distributed grid uses XY, physical grids using XYZ, ZXY, or XZY are all consistent, while one using
+consistent local physical grid must also be provided.  To be consistent, all dimensions present
+in a distributed grid must have the same relative order in the local physical grid.  (i.e. if the
+distributed grid uses XY, local physical grids using XYZ, ZXY, or XZY are all consistent, while one using
 ZYX is not.)
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 1.5.2 \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} \\
+{\bf Source:} \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Necessary for support of transposes.
 \end{reqlist}
 
@@ -792,10 +769,9 @@ range of the global physical grid.  The index locations should be floating point
 facilitate interpolation.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, Regrid, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Source:} Required by CCSM-CPL, POP, Regrid, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Index location determination}
@@ -805,10 +781,9 @@ used, although there may be performance differences between points that are on
 and off of the local physical grid.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} Regrid (maybe - depending on implementation) \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Source:} Regrid (maybe - depending on implementation). \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Horizontal physical grids}
@@ -819,25 +794,23 @@ traditional and Mercator grids on a sphere, rotated latitude-longitude,
 tripolar, and Gaussian cylindrical grids.  Additional requested grids include 
 cubed-sphere, polar stereographic, and Lambert conformal projections.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI,
-PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, NCEP-GSM, NCEP-SSI,
+PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:}  Perhaps some of these should be read in from a file, rather than
-internally generated.
-{\bf Arlindo Notes} The underlying (background?) grid associated with a location stream may be in one of these map projections.
+internally generated - CNH?  The underlying (background?) grid associated with a location stream may be in one of these map projections - Arlindo.
 \end{reqlist}
 
 \ssreq{Unstretched cartesian internal generation}
 A simple interface shall be provided to internally generate a uniform Cartesian
 coordinate physical grid, given the lengths of the edges of a square domain.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Latitude-longitude internal generation}
@@ -845,24 +818,23 @@ A simple interface shall be provided to internally generate a uniform (constant
 grid-spacing in degrees) latitude-longitude physical grid, given the extent of the domain
 in latitude and longitude.                                                           
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CCSM-CPL, 
-CAM-FV, PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CCSM-CPL, 
+CAM-FV, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
-\ssreq{Stand-alone physical grid generation examples}
+\ssreq{Stand-alone global physical grid generation examples}
 Stand-alone software examples shall be provided to demonstrate the generation of a
 global physical grid file on a stretched latitude-longitude grid, a rotated
 latitude-longitude grid and a tripolar grid. 
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL, NCAR, 
-DAO, MIT \\
+{\bf Priority:} 2. \\
+{\bf Source:} Required by GFDL, NCAR, 
+DAO, MIT. \\
 {\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} These are intended both for real use, and for use as patterns in the
 creation of physical grid files for more complicated grids.  The above list may be
 altered, extended or reduced following discussions.
@@ -874,28 +846,27 @@ northern and southern tripolar (Murray 1996), sphere, icosahedral, and unstructu
 grids.  Unstructured arrays of logically rectangular grids [for cubed-sphere (Rancic
 et al. 1996), reduced grids, and arbitrary nesting] will also be supported.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM,
-CAM-FV, PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, NCEP-GSM,
+CAM-FV, PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:}  Topologies are intrinsic to both distributed grids and physical grids.  Since
 the topology information is so widely used in distributed grids, and since distributed grids
-are used to initiate physical grids, it is perhaps reasonable to make topology a
-property of a distributed grid, which is then inherited and checked by a physical grid.
+are used to initiate local physical grids, it is perhaps reasonable to make topology a
+property of a distributed grid, which is then inherited and checked by a local physical grid.
 \end{reqlist}
 
-\ssreq{Physical grid topology consistency checking}
+\ssreq{Local physical grid topology consistency checking}
 A mechanism shall be provided to verify that the locations of the points in
-a physical grid are consistent with the topology of the underlying distributed grid.  An
+a local physical grid are consistent with the topology of the underlying distributed grid.  An
 exception shall be generated in case of inconsistency.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CCSM-CPL, POP, CICE, 
-CAM-FV, PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:}
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CCSM-CPL, POP, CICE, 
+CAM-FV, PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Areas tile sphere}
@@ -903,22 +874,20 @@ It may be specified that grid areas should be calculated using algorithms that
 guarantee that the grid exactly (algorithmically to within 1 part in $10^{12}$) tiles
 the sphere (or a portion of it). 
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL (required), Regrid, 
-CAM-FV, PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL (required), Regrid, CAM-FV, PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Needed to permit exact conservation of fluxes between models.
 \end{reqlist}
 
 \ssreq{Staggered grids}
 Staggered grids will be supported as a single physical grid.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} POP, CICE, 
-CAM-FV, PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection\\
+{\bf Priority:} 2. \\
+{\bf Source:} Required by POP, CICE, CAM-FV, PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.\\
 {\bf Notes:} Standard requirement of a staggered grid.
 \end{reqlist}
 
@@ -929,10 +898,10 @@ point,  cells centered on the east face, north face, and northeast corner of
 the t-cell will also be provided in the case of a NorthEast underlying
 distributed grid.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL, MIT (required), POP, CICE \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection\\
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL, MIT (required), POP, CICE. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.\\
 {\bf Notes:} Standard requirement of a staggered grid.
 \end{reqlist}
 
@@ -944,10 +913,10 @@ amongst the framework community. For example it should be possible
 to add an icosahedral grid.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} General Req. 8.0.2, POP(future icosahedral), CICE(future), 
-PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Source:} Required by POP(future icosahedral), CICE(future), 
+PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} This is basic to the extensibility of ESMF.
 \end{reqlist}
 
@@ -956,22 +925,20 @@ PSAS, MIT  \\
 A spectral horizontal description may be used.  More generally, the horizontal
 structure of information may be given by specifying functional decompositions.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:}
+{\bf Priority:} 1. \\
+{\bf Source:} Required by MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Horizontal Fourier grids} 
 Cartesian Fourier grids will be supported.  Associated with this grid are the
 wavenumbers (in units of $m^{-1}$) of each of the elements on the grid.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:}
+{\bf Priority:} 1. \\
+{\bf Source:} \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Horizontal spherical harmonics grids} 
@@ -979,11 +946,10 @@ Spherical harmonics grids will be supported.  Associated with this grid are the
 wavenumbers (nondimensional m,n) of each of the elements on the grid.  At a
 minimum, rhomboidal and triangular truncations will be supported.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CCSM-CPL, CAM-EUL, NCEP-GSM, NCEP-SSI \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:}
+{\bf Priority:} 1. \\
+{\bf Source:} Required by CCSM-CPL, CAM-EUL, NCEP-GSM, NCEP-SSI. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Mixed physical and Fourier grids}
@@ -991,21 +957,20 @@ Mixed physical and Fourier grids will be supported. In particular, a grid on the
 sphere that is latitude in one dimension and Fourier zonal wavenumber
 (nondimensional m) in the other dimension will be supported.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI, NCEP-GSM \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:}
+{\bf Priority:} 1. \\
+{\bf Source:} Required by NCEP-SSI, NCEP-GSM. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Extensible horizontal functional representations}
 The physical grid design should not preclude the user from using alternative
 functional horizontal representations, such as spectral elements.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 , MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} This is basic to the extensibility of ESMF.
 \end{reqlist}
 
@@ -1013,27 +978,26 @@ functional horizontal representations, such as spectral elements.
 \ssreq{Vertical user defined functions}
 The physical grid design should not preclude the user from using 
 functional vertical representations, such as EOFs, eigenfunctions,
-and finite elements.  The vertical coordinate of such a grid might be a wavenumer
+and finite elements.  The vertical coordinate of such a grid might be a wavenumber
 or a similar quantity.
-(???THIS PART MAY BE MORE APPROPRIATE FOR REGRID...) Support will provided for
+(???THIS PART MAY BE MORE APPROPRIATE FOR Regrid...) Support will provided for
 accepting a user supplied matrix or function that would transform the function into some
 vertical physical space. Regridding would then be able to perform the transform, the
 inverse transform, and the adjoint transform.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} NCEP-SSI \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} NCEP-SSI. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \sreq{Area overlap checking}
 A method shall be provided to check that physical grid cells do not overlap. 
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL, CCSM-CPL, Regrid, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
+{\bf Priority:} 2. \\
+{\bf Source:} Required by GFDL, CCSM-CPL, Regrid, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.\\
 {\bf Notes:} Standard self-consistency test.
 \end{reqlist}
 
@@ -1045,10 +1009,9 @@ Each physical grid has a unique name by which it can be referred.  If no name is
 specified, one will automatically be generated.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Source:} Required by CCSM-CPL, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Number of dimensions}
@@ -1056,47 +1019,39 @@ A physical grid may be queried for the number of dimensions, which is
 set at the time of its creation.  Corresponding local and global physical grids have
 the same number of dimensions.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, Regrid, 
-PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by CCSM-CPL, Regrid, PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Dimension names}
 Each dimension has a name, which may be set and queried.  If no name is specified
 for a dimension, a name will be automatically generated.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, 
-PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} CCSM-CPL, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Dimension lengths}
 A physical grid may be queried for the local or global lengths of each of its dimensions.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, Regrid, 
-PSAS, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by CCSM-CPL, Regrid, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Dimension attributes and units}
 A physical grid contains the units of each dimension, which may be set and queried. 
 Dimensions may also have additional named attributes.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, Regrid, 
-PSAS, MIT  \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by CCSM-CPL, Regrid, PSAS, MIT.  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Global attributes}
@@ -1106,12 +1061,10 @@ can be queried.  Also, a physical grid can be queried for a list of all global
 attribute names.
 
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, 
-PSAS , MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by CCSM-CPL, PSAS, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 %===============================================================================
@@ -1124,39 +1077,36 @@ fields that vary with time (thicknesses in isopycnal/isentropic coordinates
 or node locations in fully Lagrangian codes) are not handled by the physical grid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, MIT \\
+{\bf Source:} Required by POP, CICE, MIT. \\
 {\bf Status:} Proposed \\
-{\bf Verification:} System test\\
-{\bf Notes:} 
+{\bf Verification:} System test.
 \end{reqlist}
 
 \sreq{Calculation of metrics}
 All metrics may be calculated from grid locations.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 , MIT\\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by MIT.\\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Reading metrics}
 All metrics may be read from a standard grid file.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{MKS metric units}
 Metrics have units of m or $m^2$, or other appropriate MKS units.
 \begin{reqlist}
-{\bf Priority:} 1 \\
+{\bf Priority:} 1. \\
 {\bf Source:} Standard MKS requirement? \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} Does MKS allow things like Pascals? or is that SI - CNH.
 Some metrics may not have units i.e. scale factors with latitude etc... - CNH.
 \end{reqlist}
@@ -1166,12 +1116,12 @@ All metrics are optional.  In a particular instance of a physical grid it shall 
 possible to specify which metric terms are available.  Typically, available
 metric information includes an extensive list of grid lengths, cell areas, and
 the angle between logical and physical north.  Some functionality (e.g. certain
-regridding) may be limited if certain common metric terms are omitted.
+Regridding) may be limited if certain common metric terms are omitted.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} All? (required), POP, CICE, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Priority:} 1. \\
+{\bf Source:} All? (required), POP, CICE, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} All models require some subset of this information.
 \end{reqlist}
 
@@ -1181,9 +1131,9 @@ or from other metrics or from another physical grid, a method may be provided to
 that metric field only once it is clear that it will be needed.
 \begin{reqlist}
 {\bf Priority:} ? \\
-{\bf Source:} ? (required), POP(desired), MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Source:} ? (required), POP(desired), MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} With extensive metric information, this may be necessary to save space.
 \end{reqlist}
 
@@ -1192,9 +1142,8 @@ It shall be possible to query for a reference to a metric field by name.
 \begin{reqlist}
 {\bf Priority:} ? \\
 {\bf Source:} ? (required) \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Standard metric naming convention}
@@ -1204,9 +1153,8 @@ follow this convention, but may not achieve full functionality without it.
 \begin{reqlist}
 {\bf Priority:} ? \\
 {\bf Source:} ? \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \sreq{Dimensionality of metrics}
@@ -1214,9 +1162,9 @@ In cases where metric terms are independent of one or more dimensions, they may 
 stored in arrays that omit those dimensions.
 \begin{reqlist}
 {\bf Priority:} ? \\
-{\bf Source:} GFDL/HIM, POP, CICE, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Source:} GFDL/HIM, POP, CICE, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} This may be necessary for adequate cache/register performance.  This may
 need to be done at compile time?
 \end{reqlist}
@@ -1225,21 +1173,20 @@ need to be done at compile time?
 Available metric information may include an extensive list of grid lengths, cell
 areas, and the angle between logical and physical north.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} All? (required), POP, CICE, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Priority:} 1. \\
+{\bf Source:} All? (required), POP, CICE, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} All using quadrilateral horizontal models require some subset of this information.
 \end{reqlist}
 
 \ssreq{Cell areas}
 Cell areas may be available for each of the 4 related subgrids.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} GFDL (required), POP(some), CICE(some), MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} GFDL (required), POP(some), CICE(some), MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \ssreq{Half-edge lengths}
@@ -1247,22 +1194,20 @@ Each of the 8 half-edge lengths may be available for each of the 4 related
 subgrids.  Since neighboring cells share edges, it is desirable (although it violates
 the proposed CF convention) to include only 4 fields.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL/MOM (required), MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL/MOM (required), MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \ssreq{Center-to-edge distances}
 Each of the 4 center to edge distances may be available for each of the 4 related
 subgrids.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL/MOM (required), MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL/MOM (required), MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \ssreq{Full-edge lengths}
@@ -1273,29 +1218,27 @@ the proposed CF convention) to include only 2 fields.
 {\bf Priority:} 2 \\
 {\bf Source:} GFDL/HIM (required), POP, CICE, MIT \\
 {\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \ssreq{Edge-to-edge distances}
 Both of the cell edge to edge distances may be available for each of the 4 related
 subgrids.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL/HIM (required), MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL/HIM (required), MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. 
 \end{reqlist}
 
 \ssreq{Center-to-corner distances}
 Each of the 4 center to corner distances may be available for each of the 4
 related subgrids.
 \begin{reqlist}
-{\bf Priority:} 3 \\
-{\bf Source:} MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Priority:} 3. \\
+{\bf Source:} MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} This is used in some E-grid implementations.
 \end{reqlist}
 
@@ -1303,10 +1246,10 @@ related subgrids.
 The angle at the cell center between logical and physical north may be available
 for each of the 4 related subgrids.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} GFDL (required), POP, CICE, Regrid, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Priority:} 2. \\
+{\bf Source:} GFDL (required), POP, CICE, Regrid, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} This is required for almost any non-latitude-longitude grid.
 \end{reqlist}
 
@@ -1314,10 +1257,10 @@ for each of the 4 related subgrids.
 Available metric information may include cell areas, edge lengths, and distances between
 adjacent cell centers.
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 2. \\
 {\bf Source:} Land Model? \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} All using unstructured horizontal grids require some subset of this
 information.
 \end{reqlist}
@@ -1326,10 +1269,10 @@ information.
 Available metric information may include spacing between cell centers and faces, in
 units consistent with the vertical coordinate.
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} All? (required) \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
+{\bf Priority:} 1. \\
+{\bf Source:} Required by all? \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection. \\
 {\bf Notes:} All models require some subset of this information.
 \end{reqlist}
 
@@ -1337,22 +1280,21 @@ units consistent with the vertical coordinate.
 Available metric information may include 3-D cell volumes (or masses).  This is not
 intended for use with models for which this quantity varies with time.
 \begin{reqlist}
-{\bf Priority:} 1 \\
+{\bf Priority:} 1. \\
 {\bf Source:} GFDL/MOM, MIT (required), POP \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code inspection \\
-{\bf Notes:} 
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \sreq{Methods for calculating metrics}
 Metrics may be calculated by either standard or user-provided algorithms.
-The following subrequirements provided a partial list of such algorithms,
+The following subrequirements provide a partial list of such algorithms,
 which may be augmented later.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} POP, CICE, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Priority:} 2. \\
+{\bf Source:} Required by POP, CICE, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} This is basic to the extensibility of ESMF. 
 \end{reqlist}
 
@@ -1362,10 +1304,9 @@ partial derivatives of the physical coordinates with respect to logical
 coordinates (i.e. index space)], either in discrete form or as a series of function pointers.
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} Regrid(desired) \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:} 
+{\bf Source:} Regrid (desired). \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \ssreq{Spline metric calculation}
@@ -1373,20 +1314,19 @@ Metrics may be calculated by discrete estimates of the grid Jacobians based upon
 the discrete grid locations.
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} Regrid \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
-{\bf Notes:}
+{\bf Source:} Regrid. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \ssreq{Distance-based metric calculation}
 Metrics may be calculated from distances (Great Circle on a sphere) between
-the point locations of a grid.
+the point locations of a physical grid.
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 2. \\
 {\bf Source:} ? \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} This is basic to the extensibility of ESMF. 
 \end{reqlist}
 
@@ -1394,10 +1334,10 @@ the point locations of a grid.
 It shall be possible for a user to specify additional metric terms to be associated
 with a physical grid.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} CCSM-CPL, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test \\
+{\bf Priority:} 2. \\
+{\bf Source:} CCSM-CPL, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\
 {\bf Notes:} This is basic to the extensibility of ESMF. 
 \end{reqlist}
 
@@ -1412,21 +1352,19 @@ masks are used to indicate which points are a part of the ocean and which are
 land.  Masks are also important for nested applications.
 
 \begin{reqlist}
-{\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
-{\bf Status:} Proposed \\
-{\bf Verification:} System test\\
-{\bf Notes:} 
+{\bf Priority:} 1. \\
+{\bf Source:} Required by POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.
 \end{reqlist}
 
 \sreq{Arbitrary number of masks}
 A physical grid may have an arbitrary number of masks associated with it.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} POP, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Code Inspection\\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by POP, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Code inspection.
 \end{reqlist}
 
 \sreq{Mask names}
@@ -1434,1591 +1372,38 @@ Each of the masks associated with a physical grid is associated with a
 unique name.  A method shall be specified to return a pointer to a mask given
 its name.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Category masks}
 Masks may have an arbitrary number of categories. (e.g. 1 for points in the
 Atlantic, 2 for the Pacific, 3 for the Mediterranean, etc.)
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} POP, CICE, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} POP, CICE, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
 \sreq{Multiplicative masks}
 Masks may consist only of the values 0 or 1, for multiplicative masking.
 \begin{reqlist}
-{\bf Priority:} 2 \\
-{\bf Source:} POP, MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 2. \\
+{\bf Source:} Required by POP, MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. 
 \end{reqlist}
 
 \sreq{Mask complement}
 A method shall be provided to generate the complement of a mask.
 \begin{reqlist}
-{\bf Priority:} 3 \\
-{\bf Source:} MIT \\
-{\bf Status:} Proposed \\
-{\bf Verification:} Unit test\\
-{\bf Notes:} 
+{\bf Priority:} 3. \\
+{\bf Source:} MIT. \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test.
 \end{reqlist}
 
-
-%cnh m%titude
-%cnh ===============================================================================
-%cnh \req{Initialization of a Physical Grid}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
-%cnh {\bf Notes:} Two style of initialization are required for setting up the
-%cnh sets of mappings, $g$, for a PhysGrid. One is based on numerical values
-%cnh and one is based on functions. For numerical style setting of values
-%cnh a number of different forms are desirable for specifying physical space
-%cnh information. For functional form style both pre-defined ESMF supplied
-%cnh functions and user defined functions are desirable.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Initialization of a zero-sized Physical Grid}
-%cnh It should be possible to create a zero-sized physical grid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
-%cnh {\bf Notes:} A zero sized physical grid will be used to allow
-%cnh valid (i.e. non-error or exception generating) physical grid operations on data which 
-%cnh does not have a realizable physical grid, for example linear algebra space data values.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Initialization of rotated regions}
-%cnh It should be possible to create a physical grid composed of distinct regions that
-%cnh are rotated with respect to one another.
-%cnh Each region can be rotated by 0, 90, 180, or 270 degrees with respect
-%cnh to its neighbor(s) at each interface.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\
-%cnh {\bf Notes:}
-%cnh This adds a dimension to the PhysGrid index space that allows a limited
-%cnh form of rotation between grid locations. The tripolar and cube-sphere
-%cnh grids can take advantage of this capability.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{It should be possible to Set a Physical Grid using Numerical Values}
-%cnh Numerical initialization of a Physical grid is specified through a combination
-%cnh of grid cell locations, grid cell areas and grid cell volumes.
-%cnh Mechanisms shall be provided to specify grids numerically
-%cnh using numerical values pre-defined by component code (i.e. user code).
-%cnh The values required will be dependent on 
-%cnh the component application, the details of the grid being represented
-%cnh and on the Regridding requirements associted with the component. 
-%cnh The mechanisms will need to support grids that are staggered in both
-%cnh the horizontal (e.g. Arakawa B,C,D,E type grids) and vertical (e.g
-%cnh Charney-Phillips and Lorenz style vertical grids). Support for different
-%cnh conventions for the index origin is also required. Index origins
-%cnh in the horizontal can be south and west based, north and east based.
-%cnh Index origins in the vertical could either orient
-%cnh so that the origin is at the top of the domain (as defined by
-%cnh the direction of gravity) or so that the origin is at the
-%cnh bottom of the domain.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{When setting using Numerical Values the caller can select copying of values or storing a reference.}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ 
-%cnh {\bf Notes: It would be easier if there were only one mode - would it be 
-%cnh practical to have just copying?}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Mechanisms should be provided for components to set grid cell locations}
-%cnh \label{pg_reqdoc:cell_loc_init}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ 
-%cnh {\bf Notes: Locations in a Physical Grid are to be given in standard, S.I., units
-%cnh as follows. For true physical quantities the horizontal locations, 
-%cnh coordinates of meters (Cartesian domain), degrees latitude and degrees 
-%cnh longitude (spherical polar domain) and meters and degrees (Cylindrical coordinates} 
-%cnh are used. For vertical locations, coordinates can be given in units of pressure 
-%cnh and normalized pressure, isotherms and isopyncnals and as a user
-%cnh interpretable proxy. This latter vertical coordinate allows fields to be 
-%cnh constructed that have a ``vertical'' index correpsonding to a location
-%cnh in sattelite channel space. For spectral information the physical location 
-%cnh values, $\underline{p}$, correspond to the wave numbers associated with the 
-%cnh index, $\uderline{i}$.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Initialization of grid cell areas with vertex based numerical values}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh A list of vertices can be used to specify horizontal and vertical areas associated
-%cnh with a grid. Vertices will be specified in either clockwise or anti-clockwise form.
-%cnh The vertex locations can use units as described in \ref{pg_reqdoc:cell_loc_init}.
-%cnh }
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Initialization of grid cell areas with area based numerical values}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh The units used to specify grid areas directly are square meters in the horizontal
-%cnh and the product of meters and the vertical coordinate for vertically oriented 
-%cnh areas.
-%cnh }
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Initialization of grid cell volumes with area based numerical values}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh The units used to specify grid volumes directly are square meters multiplied
-%cnh by a vertical coordinate unit.  }
-%cnh \ssreq{Initialization of grid cell volumes with fractional extent}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh The units used to specify grid volumes directly are square meters multiplied
-%cnh by a vertical coordinate unit ( see \ref{pg_reqdoc:cell_loc_init}).  }
-%cnh \ssreq{Initialization from Internal Application Numerical Values}
-%cnh The source for the numerical values used to initialize a Physical Grid can be 
-%cnh component code.
-%cnh \ssreq{Initialization from File}
-%cnh The source for the numerical values used to initialize a Physical Grid can be 
-%cnh a file.
-%cnh \sreq{Initialization from a Functional Form}
-%cnh For some cases it is more appropriate to use a functional
-%cnh form for the Physical Grid $\underline{i} \mapsto \underline{p}$ mapping.
-%cnh 
-%cnh \ssreq{Initialization from predefined functional forms for Spectral Spherical Harmonics Grids}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh A spectral spherical harmonics grid can be defined by a simple interface
-%cnh that just requires specifying the wave number truncation in two dimensions.
-%cnh At a minimum, rhomboidal and triangular truncations will be supported.
-%cnh }
-%cnh \ssreq{Initialization from predefined functional forms for Spectral FFT Grids}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh A spectral FFT grid can be defined from a function which is given
-%cnh wave number truncation in X and Y.
-%cnh }
-%cnh \ssreq{Initialization from predefined functional forms for Grid Point Cartesian Grids}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh A grid-point cartesian grid can be defined from a function which is given
-%cnh a set of grid spacings independent in latitude, longitude and the vertical. The 
-%cnh spacings can be an array of numbers or an constant for each axis.
-%cnh A scale factor function for each axis can also be defined 
-%cnh (e.g. $\delta \lambda_{\theta} = \delta \lambda_{\theta=0}\cos^{2}(\theta)$) to support
-%cnh constant aspect ratio grids or deep atmosphere grids.
-%cnh }
-%cnh \ssreq{Initialization from predefined functional forms for Grid Point Spherical Polar Grids}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh A grid-point spherical polar grid can be defined from a function which is given
-%cnh a set of grid spacings independent in latitude, logitude and the vertical. The spacings can be an array
-%cnh of numbers or a constant for each axis. Additionally a minimum latitude 
-%cnh can be specified and an origin meridian.
-%cnh }
-%cnh \ssreq{Initialization from functional forms for User Supplied Function}
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh It should be possible to provide a set of functions that will provide 
-%cnh approriate grid information when queried. The interface for these functions will be 
-%cnh user specified.
-%cnh }
-%cnh 
-%cnh \sreq{Modification Tracking is Required}
-%cnh It should be possible to determine when a Physical Grid has been modified.
-%cnh {\bf Priority:} \\ {\bf Source:} \\ {\bf Status:} \\ {\bf Verification:} \\ {\bf Notes:
-%cnh Communication and setup costs can be ammortized, especially in a component
-%cnh doing Regridding, if it is possible to determine that a Physical Grid is
-%cnh unmodified from a previous use.
-%cnh This could be implemented through a montonically incresing counter
-%cnh that is incremented every time a modification is made. However, see section
-%cnh on parallelism for notes on issues of behavior in a distributed environment.
-%cnh }
-%cnh 
-%cnh \req{Physical Grid Attributes and Queries}
-%cnh \sreq{Horizontal x-axis index labeling}
-%cnh A standard for labeling the X-axis is required.
-%cnh \sreq{Horizontal y-axis index labeling}
-%cnh A standard for labeling the y-axis is required.
-%cnh \sreq{Vertical index labeling}
-%cnh A standard for labeling the vertical axis is required.
-%cnh \sreq{Region index labeling}
-%cnh A standard for labeling a region axis is required.
-%cnh \sreq{Labeling of quantities}
-%cnh A standard for labeling staggered grid locations, areas and volumes is
-%cnh required.
-%cnh \sreq{Queries}
-%cnh It should be possible to query attributes, individual values and to query 
-%cnh regions of
-%cnh \ssreq{Index based}
-%cnh \ssreq{Lines of constant index}
-%cnh \ssreq{Coordinate based}
-%cnh \ssreq{Cuts - Lines of constant coordinate}
-%cnh \sreq{Underlying Physical space extents}
-%cnh \ssreq{X low and X high for cartesian}
-%cnh \ssreq{R for sphere and cylinder}
-%cnh \ssreq{Correctness queries}
-%cnh 
-%cnh \req{Physical Grid Parallelism and Scalability}
-%cnh \sreq{Physical Grids Can Be Decomposed}
-%cnh \sreq{Memory Footprint}
-%cnh \begin{reqlist}
-%cnh {bf Notes:} Interaction With Index Range
-%cnh \end{reqlist}
-%cnh \sreq{Valid Physical Grid Indexing Range}
-%cnh \begin{reqlist}
-%cnh \end{reqlist}
-%cnh \sreq{Thread Safety}
-%cnh \begin{reqlist}
-%cnh {bf Notes:} Optional
-%cnh \end{reqlist}
-%cnh \sreq{Modification flags can change independently across tasks}
-%cnh \begin{reqlist}
-%cnh {bf Notes:} Optional
-%cnh \end{reqlist}
-%cnh 
-%cnh \req{Physical Grid I/O}
-%cnh \sreq{Write}
-%cnh \sreq{Read}
-%cnh 
-%cnh \req{Physical Grid Operations}
-%cnh \sreq{Copy}
-%cnh \begin{reqlist}
-%cnh {\bf Notes: Copying creates a new PhysGrid with all data copied.} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Delete}
-%cnh \begin{reqlist}
-%cnh {\bf Notes:} It should not be possible to delete a PhysGrid that has a reference
-%cnh from a Field or Grid i.e. a PhysGrid must be {\it detached} before it can be deleted.
-%cnh \end{reqlist}
-%cnh 
-%cnh 
-%cnh 
-%cnh \req{Physical locations}
-%cnh %-------------------------------------------------------------------------------
-%cnh 
-%cnh A mechanism shall be provided for describing physical locations in space in 1,
-%cnh 2, or 3 dimensions, including both specification of points and of ranges.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} System test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Horizontal locations}
-%cnh 
-%cnh \ssreq{Horizontal coordinates}
-%cnh 
-%cnh Physical domains may use Cartesian, spherical, or cylindrical coordinate
-%cnh systems in the horizontal directions.  Units for these coordinates are meters
-%cnh (for Cartesian), degrees of latitude and longitude (for spherical), and meters
-%cnh and degrees for the radius and angle in cylindrical coordinates.
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection\\
-%cnh {\bf Notes:}  This suggestion follows common practice, but is an explicit
-%cnh exception to the requirement that MKS units are used by ESMF codes where ever
-%cnh units must be assumed.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Horizontal locations may be points}
-%cnh 
-%cnh    Horizontal locations may be specified as a pair of real values in the order
-%cnh (X,Y) or (longitude, latitude).
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh 
-%cnh \ssreq{Horizontal locations may be polygonal regions}
-%cnh 
-%cnh   Horizontal Locations may be specified to be regions by providing the number
-%cnh of vertices and the list of the vertex points.  Vertex points must be specified
-%cnh either clockwise or counterclockwise around the region.  The vertex points
-%cnh may be redundant.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.3 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Fundamental to allowing conservative interpolation, and for an
-%cnh precise description of data locations.
-%cnh \end{reqlist}
-%cnh  
-%cnh \ssreq{Horizontal regions may have central points}
-%cnh 
-%cnh   Both a central point and a region may be specified in describing a horizontal
-%cnh location.  The points may provide a convenient nominal location, even when
-%cnh a value actually pertains to a region.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Many models mix finite difference and finite volume concepts.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Horizontal locations may have radii of influence}
-%cnh 
-%cnh   A horizontal location may be specified by adding a nominal radius of
-%cnh influence to the central point.  This may be the radius of a Gaussian
-%cnh distribution of influence. The exact interpretation of this radius is
-%cnh the responsibility of user-provided software.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} This is necessary for describing certain observational data streams.
-%cnh \end{reqlist}
-%cnh 
-%cnh 
-%cnh \ssreq{Paths between grid locations may be specified} 
-%cnh 
-%cnh A method for determining the path connecting grid locations 
-%cnh is required.  This path would be used to accurately compute
-%cnh intersections for regridding, lengths of cell sides, grid
-%cnh cell areas and a variety of other grid metrics.  A linear 
-%cnh approximation between points is a proper assumption for 
-%cnh cartesian grids and for computing sides of latitude/longitude
-%cnh or reduced grid cells.  A linear approximation is also 
-%cnh adequate in many other cases and would be a logical default choice. 
-%cnh The most accurate solution would permit users to pass a 
-%cnh subroutine which provides analytic or highly-accurate discrete 
-%cnh forms of the grid Jacobian (the matrix of partial derivatives of 
-%cnh the physical coordinates with respect to logical coordinates).  An 
-%cnh additional possibility might internally support analytic forms like 
-%cnh great circles or higher-order approximations (eg quadratic
-%cnh approximation to the cell side given a midpoint in addition
-%cnh to the two endpoints).
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.3 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Necessary for allowing conservative interpolation.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Vertical locations}
-%cnh 
-%cnh \ssreq{Vertical coordinates}
-%cnh 
-%cnh Physical domains may use a variety of vertical coordinates, including pressure,
-%cnh height, density, isotherms, sigma, other terrain-following, or any other
-%cnh vertically monotonic quantity.  In addition, a user-interpretable vertical
-%cnh proxy (such as a satellite measurement channel) may be used.  Units of this
-%cnh coordinate must be self-consistent.  (See the CF convention for a full
-%cnh discussion of options for vertical coordinates at
-%cnh http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code Inspection\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Vertical locations may be points}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Vertical locations may be regions}
-%cnh 
-%cnh Vertical locations may be specified by providing the values of the top and
-%cnh bottom bounding points.  Such regions have the same extent regardless of the
-%cnh order in which the bounding points are specified.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Vertical regions have central points}
-%cnh 
-%cnh   Both a central point and a region may be specified in describing a vertical
-%cnh location.  The points may provide a convenient nominal location, even when
-%cnh a value actually pertains to a region.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Many models mix finite difference and finite volume concepts.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Vertical locations may have radii of influence}
-%cnh 
-%cnh   A vertical location may be specified by adding a nominal radius of
-%cnh influence to the central point.  This may be the radius of a Gaussian
-%cnh distribution of influence. The exact interpretation of this radius is
-%cnh the responsibility of user-provided software.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} This is necessary for describing certain observational data streams.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Vertical locations may include lopped cells}
-%cnh 
-%cnh   Vertical locations may include a region whose bounds vary between the
-%cnh horizontal corners of a region.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} MIT \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh %===============================================================================
-%cnh \req{Location streams}
-%cnh %-------------------------------------------------------------------------------
-%cnh 
-%cnh Streams of locations are used to describe the physical (and potentially temporal)
-%cnh locations associated with streams of data.  Streams of locations differ from
-%cnh Physical Grids (see below) in that there are no concept of neighboring values,
-%cnh topology, covering a space, or of locations being exclusive.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} System test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Location streams may be created}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Location streams may be destroyed}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Location streams may be copied}
-%cnh Given an existing location stream, a new stream may be generated with a new name and
-%cnh possibly a different length.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Reading streams}
-%cnh Location streams may be read from files.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Writing streams}
-%cnh Location streams may be written to files.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Underlying grid}
-%cnh A location stream may have associated with it an underlying PhysGrid, so that each
-%cnh location stream element may be uniquely associated with a single grid cell. (A single
-%cnh grid cell may contain multiple location stream elements.)
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} This is necessary for such operations as halo updates on a location
-%cnh stream.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Location stream attributes}
-%cnh 
-%cnh \ssreq{Fixed length location streams}
-%cnh Location streams may be of fixed length, specified at the time of generation.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Extensible length location streams}
-%cnh Location streams may be of extensible length (e.g. a linked list),
-%cnh with an initial length specified at the time of generation.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: location stream name}
-%cnh Each location stream has a unique name by which it can be referred.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Location stream registry}
-%cnh Upon creation, the name and a pointer to each location stream shall be stored in a
-%cnh registry.  A pointer to any location stream may be determined given its name.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: Number of dimensions}
-%cnh A location stream may be queried for the number of dimensions, which is
-%cnh set at the time of creation of the stream.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: dimension names}
-%cnh Each dimension has a name, which may be set and queried.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: dimension units}
-%cnh A location stream contains the units of each dimension, which may be set and queried.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: text attributes}
-%cnh 
-%cnh A location stream may have an arbitrary number of text (???or numeric???) attributes,
-%cnh which may be added, set and queried.  Each attribute has a text name by which it
-%cnh can be queried.  Also, a Location Stream can be queried for a list of all global
-%cnh attribute names.
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: number of elements}
-%cnh The number of elements in a location stream is available.  For a fixed length stream,
-%cnh both the total number of elements and the number of elements before the last valid
-%cnh element location may be queried.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes: null element location value}
-%cnh Each location stream may indicate whether a particular location is valid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh 
-%cnh \ssreq{Elements in stream have similar attributes}
-%cnh All elements in a location stream will have the same numbers of dimensions, use the
-%cnh same physical coordinates, the same units, the same element attributes (attributes at
-%cnh some locations may be missing).
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Elements include values of locations}
-%cnh Methods shall be provided to set and query each element's location.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Elements may have attributes}
-%cnh An appropriate text or data attribute may be attached to each element.  These
-%cnh attributes may be null for any particular element.  Methods shall be provided to set
-%cnh and query each element's attribute.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Location streams may contain null (discarded) elements}
-%cnh 
-%cnh Some elements within a location stream may be set to be invalid.  This may be a way
-%cnh to specify the elements that are irrelevant for a particular subdomain.
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Location streams may be queried for valid elements}
-%cnh 
-%cnh Location streams may be queried to obtain an ordered list of the indices of (or
-%cnh pointers to) all valid elements.
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh %-------------------------------------------------------------------------------
-%cnh \sreq{Location stream methods requiring registries of dependent data}
-%cnh If all of the data streams that use a particular location stream are known,
-%cnh additional methods for manipulating location streams and associated data streams are
-%cnh possible.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Registry of data streams}
-%cnh Each location stream includes a registry of all the data streams that rely upon a
-%cnh location stream.  This is necessary for location streams and data streams to be
-%cnh manipulated in compatible ways.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh \ssreq{Extensible location streams may be extended}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh \ssreq{Extensible location streams may be shortened}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh \ssreq{Extensible length location streams may be converted to fixed length}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh \ssreq{Fixed length location streams may be converted to extensible length}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh \ssreq{Fixed length streams may have null elements moved to end}
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh %===============================================================================
-%cnh \req{Physical grids}
-%cnh %-------------------------------------------------------------------------------
-%cnh 
-%cnh Physical grids (PhysGrids) provide the locations of each of the cells/points
-%cnh associated with the range of indices in a distributed grid.  A PhysGrid is a
-%cnh distributed object associated with a single DistGrid.  A PhysGrid may have
-%cnh undistributed dimensions that are not present in the underlying DistGrid. 
-%cnh Multiple PhysGrids may be derived from the same global, undistributed
-%cnh PhysGrid.  Physical grids may be purely horizontal, purely vertical, or both. 
-%cnh Structured grids assume that adjacent locations in index space share boundaries
-%cnh in a predictable way.  Unstructured grids also have concepts of neighboring
-%cnh cells, but the relative indices of neighbors are unpredictable.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} System test\\
-%cnh {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Reading grids}
-%cnh Given a DistGrid, a PhysGrid can be read from a standard file containing a
-%cnh global PhysGrid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Writing grids}
-%cnh Grids can be output to standard files.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{PhysGrids may be internally generated}
-%cnh For an arbitrary number of points in the global domain of the associated
-%cnh DistGrid, it may be possible to specify an algorithm for internally
-%cnh determining the PhysGrid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Cell specification}
-%cnh PhysGrids shall specify both the locations of cell vertices, and the locations
-%cnh of cell centers.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Many models mix finite difference and finite volume concepts.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Interpolation}
-%cnh A PhysGrid may be interpolated to generate an equivalent PhysGrid on a coarser
-%cnh or finer global DistGrid.  Methods should be provided to accomplish such
-%cnh interpolation, probably via a simple interface that uses the Regrid facility.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 1.5.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Necessary for runtime configurable resolution.  Also, note that 
-%cnh there may be a Catch-22 here, as Regrid would naturally provide the facility
-%cnh for regridding, but Regrid will typically require the target PhysGrid for
-%cnh creating the regridding.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Regeneration}
-%cnh A new PhysGrid may be generated for a given DistGrid from another PhysGrid.
-%cnh The global domain of the source PhysGrid may be the same as or a superset of
-%cnh the target global domain.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 1.5.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Necessary for support of transposes, or of moving nests.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{DistGrid reference}
-%cnh A PhysGrid may be queried for the DistGrid upon which it is based.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Horizontal coordinate independent of vertical}
-%cnh Horizontal grid locations can be assumed independent of the vertical coordinate.
-%cnh The horizontal metrics, however, may be function of the vertical coordinate, as
-%cnh in thick-shell spherical coordinates.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} Any Objections? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection\\
-%cnh {\bf Notes:} If this assumption can be made, it greatly simplifies implementation.
-%cnh No widely used counterexamples are known.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Vertical coordinate potentially dependent on horizontal}
-%cnh Vertical grid locations may be functions of the horizontal coordinates, or may be
-%cnh independent of them.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL-MOM4, NSIPP (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection\\
-%cnh {\bf Notes:} This is necessary to support, for example, partial cells in
-%cnh Z-coordinate ocean models.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Dimension extension}
-%cnh A new PhysGrid may be generated by adding a dimension to an existing PhysGrid.
-%cnh The global domain of the source PhysGrid may be the same as or a superset of
-%cnh the target global domain.  The new dimension will be independent of the underlying
-%cnh DistGrid, and both PhysGrids share the same DistGrid.  The new dimension be in any
-%cnh order with respect to existing dimensions.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Valuable for separating generation of vertical and horizontal
-%cnh coordinates.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Dimension reduction}
-%cnh A new PhysGrid may be generated by removing a dimension from an existing PhysGrid.
-%cnh If the dimension that is removed is one that is present in the original underlying
-%cnh DistGrid, an appropriately reduced must also be provided.  Otherwise the new PhysGrid
-%cnh is based on the same DistGrid as the original PhysGrid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Arbitrary dimensional PhysGrids}
-%cnh PhysGrids may have an arbitrary number of dimensions. 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed (suggest rejection)\\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} If supported, this facility would dramatically complicate implementation,
-%cnh without adding much functionality.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{1- 2- or 3- dimensional PhysGrids}
-%cnh PhysGrids may have up to dimensions, but must have at least as many dimensions as the
-%cnh underlying DistGrid. 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 1.5.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} If supported, this facility would dramatically complicate implementation,
-%cnh without adding much functionality.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Index order}
-%cnh A PhysGrid may use any index order (XYZ, XZY, etc.).  Methods shall be provided to
-%cnh specify the order upon creation and to query the order of a PhysGrid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} Please list required orders in Fortran notation. \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Necessary for support of transposes.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Dimension reordering}
-%cnh A new PhysGrid may be generated with reordered dimensions from another PhysGrid.
-%cnh If the new dimension order is inconsistent with the original DistGrid, a new
-%cnh consistent PhysGrid must also be provided.  To be consistent, all dimensions present
-%cnh in a DistGrid must have the same relative order in the PhysGrid.  (i.e. if the
-%cnh DistGrid uses XY, PhysGrids using XYZ, ZXY, or XZY are all consistent, while one using
-%cnh ZYX is not.)
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 1.5.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Necessary for support of transposes.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Location index determination}
-%cnh A method shall be provided to return the cell index of a location.  An option shall
-%cnh be provided to either create an exception for any location outside of the valid
-%cnh range of the coordinate system, or to produce a gracefully treatable return value if
-%cnh the location is (1) outside of the range of the local PhysGrid, or (2) outside of the
-%cnh range of the global PhysGrid.  The index locations should be floating point numbers to
-%cnh facilitate interpolation.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Horizontal physical grids}
-%cnh 
-%cnh \ssreq{PhysGrids map projections}
-%cnh PhysGrids may be generated from a number of standard map projections, including
-%cnh traditional and Mercator grids on a sphere, rotated latitude-longitude,
-%cnh tripolar, and Gaussian cylindrical grids.  Additional requested grids include 
-%cnh cubed-sphere, polar stereographic, and Lambert conformal projections.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}  Perhaps some of these should be read in from a file, rather than
-%cnh internally generated.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Unstretched Cartesian internal generation}
-%cnh A simple interface shall be provided to internally generate a uniform Cartesian
-%cnh coordinate PhysGrid, given the lengths of the edges of a square domain.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Latitude-longitude internal generation}
-%cnh A simple interface shall be provided to internally generate a uniform (constant
-%cnh grid-spacing in degrees) latitude-longitude PhysGrid, given the extent of the domain
-%cnh in latitude and longitude.                                                           
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Stand-alone PhysGrid generation examples}
-%cnh Stand-alone software examples shall be provided to demonstrate the generation of a
-%cnh global PhysGrid file on a stretched latitude-longitude grid, a rotated
-%cnh latitude-longitude grid and a tripolar grid. 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL, NCAR \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} These are intended both for real use, and for use as patterns in the
-%cnh creation of PhysGrid files for more complicated grids.  The above list may be
-%cnh altered, extended or reduced following discussions.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Supported topologies} Supported horizontal grid topologies will include
-%cnh logically rectangular grids that are reentrant (periodic) in 0, 1, or 2 directions,
-%cnh northern and southern tripolar (Murray 1996), sphere, icosahedral, and unstructured
-%cnh grids.  Unstructured arrays of logically rectangular grids [for cubed-sphere (Rancic
-%cnh et al. 1996), reduced grids, and arbitrary nesting] will also be supported.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}  Topologies are intrinsic to both DistGrid and PhysGrid.  Since
-%cnh the topology information is so widely used in DistGrid, and since DistGrids
-%cnh are used to initiate PhysGrids, it is perhaps reasonable to make topology a
-%cnh property of DistGrid, which is then inherited and checked by a PhysGrid.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{PhysGrid topology consistency checking}
-%cnh A mechanism shall be provided to verify that the locations of the points in
-%cnh a PhysGrid are consistent with the topology of the underlying DistGrid.  An
-%cnh exception shall be generated in case of inconsistency.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Areas tile sphere}
-%cnh It may be specified that grid areas should be calculated using algorithms that
-%cnh guarantee that the grid exactly (algorithmically to within 1 part in $10^{12}$) tiles
-%cnh the sphere (or a portion of it). 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Needed to permit exact conservation of fluxes between models.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Available subgrids}
-%cnh For locally quadrilateral horizontal grids, information shall be available for
-%cnh each of the 4 related subgrids.  That is if a t-cell is centered at a tracer
-%cnh point,  cells centered on the east face, north face, and northeast corner of
-%cnh the t-cell will also be provided in the case of a NorthEast underlying
-%cnh distributed grid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL, MIT, NSIPP (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection\\
-%cnh {\bf Notes:} Standard requirement of a staggered grid.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Extensible grid point representations}
-%cnh It is not anticipated that all possible grids will be included in
-%cnh ESMF. It must, therefore, be relatively straightforward to add
-%cnh new grids to the framework and to share those grid "extensions"
-%cnh amongst the framework community. For example it should be possible
-%cnh to add an icosahedral grid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} This is basic to the extensibility of ESMF.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Unstructured grid connectivity}
-%cnh An unstructured PhysGrid contains information about the intercell connectivity that
-%cnh can be set and queried.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:}  \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit Test \\
-%cnh {\bf Notes:} This requirement should be extended with input from someone familiar with
-%cnh the practical use of unstructured grids.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Horizontal functional representations}
-%cnh A spectral horizontal description may be used.  More generally, the horizontal
-%cnh structure of information may be given by specifying functional decompositions.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Horizontal Fourier grids} 
-%cnh Cartesian Fourier grids will be supported.  Associated with this grid are the
-%cnh wavenumbers (in units of $m^{-1}$) of each of the elements on the grid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Horizontal spherical harmonics grids} 
-%cnh Spherical harmonics grids will be supported.  Associated with this grid are the
-%cnh wavenumbers (nondimensional m,n) of each of the elements on the grid.  At a
-%cnh minimum, rhomboidal and triangular truncations will be supported.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Mixed physical and Fourier grids}
-%cnh Mixed physical and Fourier grids will be supported. In particular, a grid on the
-%cnh sphere that is latitude in one dimension and Fourier zonal wavenumber
-%cnh (nondimensional m) in the other dimension will be supported.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} NCEP \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:}
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Extensible horizontal functional representations}
-%cnh The Physical Grid element design should not preclude the user from using alternative
-%cnh functional horizontal representations, such as spectral elements.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} This is basic to the extensibility of ESMF.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Vertical functional representations}
-%cnh \ssreq{Vertical user defined functions}
-%cnh The PhysGrid design should not preclude the user from using 
-%cnh functional vertical representations, such as EOFs, eigenfunctions,
-%cnh and finite elements.
-%cnh (???THIS PART MAY BE MORE APPROPRIATE FOR REGRID...) Support will provided for
-%cnh accepting a user must supplied matrix that would transform the function into some
-%cnh vertical physical space. Regridding would then be able to perform the transform, the
-%cnh inverse transform, and the adjoint transform.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} NCEP, NSIPP \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Area overlap checking}
-%cnh A method shall be provided to check that physical grid cells do not overlap. 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL, NCAR (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} Standard self-consistency test.
-%cnh \end{reqlist}
-%cnh 
-%cnh %-------------------------------------------------------------------------------
-%cnh \sreq{PhysGrid attributes}
-%cnh 
-%cnh \ssreq{PhysGrid name}
-%cnh Each PhysGrid has a unique name by which it can be referred.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{PhysGrid registry}
-%cnh Upon creation, the name and a pointer to each physical grid shall be stored in a
-%cnh registry.  A pointer to any physical grid may be determined given its name.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Number of dimensions}
-%cnh A physical grid may be queried for the number of dimensions, which is
-%cnh set at the time of its creation.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Dimension names}
-%cnh Each dimension has a name, which may be set and queried.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Dimension lengths}
-%cnh A physical grid may be queried for the local or global lengths of each of its dimensions.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Dimension attributes and units}
-%cnh A PhysGrid contains the units of each dimension, which may be set and queried. 
-%cnh Dimensions may also have additional named attributes.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Global attributes}
-%cnh A physical grid may have an arbitrary number of text or numeric attributes,
-%cnh which may be added, set and queried.  Each attribute has a text name by which it
-%cnh can be queried.  Also, a physical grid can be queried for a list of all global
-%cnh attribute names.
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh %===============================================================================
-%cnh \req{Grid metrics}
-%cnh %-------------------------------------------------------------------------------
-%cnh Grid metrics are all of the lengths (or partial derivatives of distances with
-%cnh index number) and related quantities required to do a variety of calculations. 
-%cnh All metrics are a function of the grid and must be static with time.  Metric-like
-%cnh fields that vary with time (like layer thicknesses in isopycnal/isentropic coordinates
-%cnh or node locations in fully Lagrangian codes) are to be handled via the Fields
-%cnh facility.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} System test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Calculation of metrics}
-%cnh All metrics may be calculated from grid locations.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Reading metrics}
-%cnh All metrics may be read from a standard grid file.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{MKS metric units}
-%cnh Metrics have units of m or $m^2$, or other appropriate MKS units.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} Standard MKS requirement? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Available metrics}
-%cnh Available metric information includes an extensive list of grid lengths, cell
-%cnh areas, and the angle between logical and physical north.  (This list will be
-%cnh developed as a part of the requirement.)
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} All? (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} All models require some subset of this information.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{On-demand metrics}
-%cnh In cases where one metric can be generated internally either from grid information
-%cnh or from other metrics or from another PhysGrid, a method may be provided to create
-%cnh that metric field only once it is clear that it will be needed.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} ? \\
-%cnh {\bf Source:} ? (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} With extensive metric information, this may be necessary to save space.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Dimensionality of metrics}
-%cnh In cases where metric terms are independent of one or more dimensions, they may be
-%cnh stored in arrays that omit those dimensions.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} ? \\
-%cnh {\bf Source:} NSIPP, GFDL/HIM currently uses this. \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} This may be necessary for adequate cache/register performance.  This may
-%cnh need to be done at compile time?
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Available structured horizontal quadrilateral grid metrics}
-%cnh Available metric information includes an extensive list of grid lengths, cell
-%cnh areas, and the angle between logical and physical north.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} All? (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} All using quadrilateral horizontal models require some subset of this information.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Cell areas}
-%cnh Cell areas shall be available for each of the 4 related subgrids.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} GFDL (required), NSIPP \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Half-edge lengths}
-%cnh Each of the 8 half-edge lengths shall be available for each of the 4 related
-%cnh subgrids.  Since neighboring cells share edges, it is desirable (although it violates
-%cnh the proposed CF convention) to include only 4 fields.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL/MOM (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Center-to-edge distances}
-%cnh Each of the 4 center to edge distances shall be available for each of the 4 related
-%cnh subgrids.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL/MOM (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Full-edge lengths}
-%cnh Each of the 4 edge lengths shall be available for each of the 4 related
-%cnh subgrids.  Since neighboring cells share edges, it is desirable (although it violates
-%cnh the proposed CF convention) to include only 2 fields.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL/HIM (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Edge-to-edge distances}
-%cnh Both of the cell edge to edge distances shall be available for each of the 4 related
-%cnh subgrids.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL/HIM (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Center-to-corner distances}
-%cnh Each of the 4 center to corner distances shall be available for each of the 4
-%cnh related subgrids.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:}  \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} This is used in some E-grid implementations.
-%cnh \end{reqlist}
-%cnh 
-%cnh \ssreq{Cell orientation}
-%cnh The angle at the cell center between logical and physical north shall be available
-%cnh for each of the 4 related subgrids.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} This is required for almost any non-latitude-longitude grid.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Available unstructured horizontal grid metrics}
-%cnh Available metric information includes an cell areas, edge lengths, distances between
-%cnh adjacent cell centers?
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} Land Model? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} All using unstructured horizontal grids require some subset of this
-%cnh information.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Vertical metrics}
-%cnh Available metric information includes spacing between cell centers and faces, in
-%cnh units consistent with the vertical coordinate.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} All? (required) \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} All models require some subset of this information.
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Cell volumes}
-%cnh Available metric information may include 3-D cell volumes (or masses).  This is not
-%cnh intended for use with models for which this quantity varies with time.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} GFDL/MOM, MIT (required), NSIPP \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code inspection \\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Methods for calculating metrics}
-%cnh Metrics may be calculated by either standard or user-provided algorithms. 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} This is basic to the extensibility of ESMF. 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Additional metrics}
-%cnh It shall be possible for a user to specify additional metric terms to be associated
-%cnh with a PhysGrid.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test \\
-%cnh {\bf Notes:} This is basic to the extensibility of ESMF. 
-%cnh \end{reqlist}
-%cnh 
-%cnh 
-%cnh %===============================================================================
-%cnh \req{Grid masks}
-%cnh %-------------------------------------------------------------------------------
-%cnh 
-%cnh Grid masks are logical arrays on a grid that indicates whether the various
-%cnh points on the grid are a part of a physically similar subdomain. For example,
-%cnh masks are used to indicate which points are a part of the ocean and which are
-%cnh land.  Masks are also important for nested applications.
-%cnh 
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} General Req. 8.0.2 \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} System test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Arbitrary number of masks}
-%cnh A physical grid may have an arbitrary number of masks associated with it.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Code Inspection\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Mask names}
-%cnh Each of the masks associated with a PhysGrid is associated with a
-%cnh unique name.  A method shall be specified to return a pointer to a mask given
-%cnh its name.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Category masks}
-%cnh Masks may have an arbitrary number of categories. (e.g. 1 for points in the
-%cnh Atlantic, 2 for the Pacific, 3 for the Mediterranean, etc.)
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Multiplicative masks}
-%cnh Masks may consist only of the values 0 or 1, for multiplicative masking.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh \sreq{Mask complement}
-%cnh A method shall be provided to generate the complement of a mask.
-%cnh \begin{reqlist}
-%cnh {\bf Priority:} 3 \\
-%cnh {\bf Source:} ? \\
-%cnh {\bf Status:} Proposed \\
-%cnh {\bf Verification:} Unit test\\
-%cnh {\bf Notes:} 
-%cnh \end{reqlist}
-%cnh 
-%cnh 
-%%%%zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz%%%%%
 
