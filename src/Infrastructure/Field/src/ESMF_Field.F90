@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.186 2004/10/13 22:21:55 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.187 2004/10/13 23:06:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.186 2004/10/13 22:21:55 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.187 2004/10/13 23:06:18 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3187,6 +3187,7 @@
           hasarray = .TRUE.
       endif
 
+#if 0
       ! and now see if it is at all consistent.
       if (hasarray .and. hasmap) then
           if (arrayrank .ne. maprank) then
@@ -3225,6 +3226,7 @@
               endif
           enddo
       endif
+#endif
 
       
       if (present(rc)) rc = ESMF_SUCCESS
