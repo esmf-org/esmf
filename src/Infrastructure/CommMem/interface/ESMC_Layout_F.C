@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout_F.C,v 1.6 2003/02/21 21:01:53 jwolfe Exp $
+// $Id: ESMC_Layout_F.C,v 1.7 2003/02/26 20:14:47 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,10 +73,11 @@ extern "C" {
                                            int *DistArray, int *decompids, 
                                            int *size_decomp, 
                                            ESMC_AxisIndex *AIPtr, 
+                                           ESMC_AxisIndex *AIPtr2, 
                                            int *GlobalArray, int *status) {
            *status = (*ptr)->ESMC_LayoutGatherArrayI(DistArray, decompids, 
                                                      *size_decomp, AIPtr,
-                                                     GlobalArray);
+                                                     AIPtr2, GlobalArray);
        }
 
 //     void FTN(c_esmc_layoutprint)(ESMC_Layout **ptr, char *opts, int *status){
