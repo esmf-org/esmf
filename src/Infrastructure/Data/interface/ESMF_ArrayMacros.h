@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.5 2003/02/13 15:10:37 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.6 2003/02/13 22:27:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -199,7 +199,6 @@
         endif @\
  @\
         copyreq = .FALSE. @\
-        array%this = ESMF_NULL_POINTER @\
  @\
         ! check copyflag to see if we are making a reference @\
         ! or making a new array and a copy @\
