@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.78 2004/10/27 00:24:29 nscollins Exp $
+#  $Id: common.mk,v 1.79 2004/10/27 20:48:54 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -77,13 +77,15 @@ ifndef ESMF_SITE
 export ESMF_SITE = default
 endif
 
+# For IRIX64 the default is MPI_Comm_c2f not supported
+ifeq ($(ESMF_ARCH),IRIX64)
+CPPFLAGS       += -DVM_DONT_HAVE_MPI_COMM_C2F
+endif
+
 
 # Comment out the following flags if you want to allow VM to use Pthreads
 #FPPFLAGS       += $(FPP_PREFIX)-DVM_DONT_SPAWN_PTHREADS
 #CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
-
-# Comment in the following line if your MPI does not support MPI_Comm_c2f
-#CPPFLAGS       += -DVM_DONT_HAVE_MPI_COMM_C2F
 
 # Comment out the following lines if you want to include the IO code
 FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
