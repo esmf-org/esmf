@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.82 2005/02/07 23:38:18 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.83 2005/04/02 00:19:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -76,6 +76,7 @@
       public operator(>)
       public operator(>=)
       public ESMF_TimeGet
+      public ESMF_TimeIsLeapYear
       public ESMF_TimeIsSameCalendar
       public ESMF_TimePrint
       public ESMF_TimeReadRestart
@@ -99,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.82 2005/02/07 23:38:18 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.83 2005/04/02 00:19:28 eschwab Exp $'
 
 !==============================================================================
 !
@@ -539,24 +540,24 @@
 !     For {\tt timeString}, {\tt timeStringISOFrac}, {\tt dayOfWeek},
 !     {\tt midMonth}, {\tt dayOfYear}, {\tt dayOfYear\_r8}, and
 !     {\tt dayOfYear\_intvl} described below, valid calendars are Gregorian,
-!     Julian Date, No Leap, 360 Day and Custom calendars.  Not valid for
-!     Julian day or no calendar. \\
+!     Julian, No Leap, 360 Day and Custom calendars.  Not valid for
+!     Julian Day or No Calendar. \\
 !
 !     For {\tt timeString} and {\tt timeStringISOFrac}, YYYY format returns
 !     at least 4 digits; years <= 999 are padded on the left with zeroes and
 !     years >= 10000 return the number of digits required.
 !
 !     For timeString, convert {\tt ESMF\_Time}'s value into partial ISO 8601
-!     format YYYY-MM-DDThh:mm:ss[:n/d].  See ~\cite{ISO}.  See also method
-!     {\tt ESMF\_TimePrint()}.
+!     format YYYY-MM-DDThh:mm:ss[:n/d].  See ~\cite{ISO} and ~\cite{ISOnotes}.
+!     See also method {\tt ESMF\_TimePrint()}.
 !     
 !     For timeStringISOFrac, convert {\tt ESMF\_Time}'s value into full ISO 8601
-!     format YYYY-MM-DDThh:mm:ss[.f].  See ~\cite{ISO}.  See also method
-!     {\tt ESMF\_TimePrint()}.
+!     format YYYY-MM-DDThh:mm:ss[.f].  See ~\cite{ISO} and ~\cite{ISOnotes}.
+!     See also method {\tt ESMF\_TimePrint()}.
 !     
 !     For dayOfWeek, gets the day of the week the given {\tt ESMF\_Time}
 !     instant falls on.  ISO 8601 standard:  Monday = 1 through Sunday = 7.
-!     See ~\cite{ISO}.
+!     See ~\cite{ISO} and ~\cite{ISOnotes}.
 !
 !     For midMonth, gets the middle time instant of the month that the given
 !     {\tt ESMF\_Time} instant falls on.
@@ -631,12 +632,13 @@
 !     \item[{[timeString]}]
 !          Convert time value to format string YYYY-MM-DDThh:mm:ss[:n/d],
 !          where n/d is numerator/denominator of any fractional seconds and
-!          all other units are in ISO 8601 format.  See ~\cite{ISO}.
-!          See also method {\tt ESMF\_TimePrint()}.
+!          all other units are in ISO 8601 format.  See ~\cite{ISO} and
+!          ~\cite{ISOnotes}.  See also method {\tt ESMF\_TimePrint()}.
 !     \item[{[timeStringISOFrac]}]
 !          Convert time value to strict ISO 8601 format string
 !          YYYY-MM-DDThh:mm:ss[.f], where f is decimal form of any fractional
-!          seconds.  See ~\cite{ISO}.  See also method {\tt ESMF\_TimePrint()}.
+!          seconds.  See ~\cite{ISO} and ~\cite{ISOnotes}.  See also method
+!          {\tt ESMF\_TimePrint()}.
 !     \item[{[dayOfWeek]}]
 !          The time instant's day of the week [1-7].
 !     \item[{[MidMonth]}]
@@ -702,6 +704,40 @@
       endif
 
       end subroutine ESMF_TimeGet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIsLeapYear - Determine if a Time is in a leap year
+
+! !INTERFACE:
+      function ESMF_TimeIsLeapYear(time, rc)
+
+! !RETURN VALUE:
+      logical :: ESMF_TimeIsLeapYear
+
+! !ARGUMENTS:
+      type(ESMF_Time), intent(in)            :: time
+      integer,         intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Returns true if given time is in a leap year, and false otherwise.
+!     See also {\tt ESMF\_CalendarIsLeapYear()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[time]
+!          The {\tt ESMF\_Time} to check for leap year.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      call c_ESMC_TimeIsLeapYear(time, ESMF_TimeIsLeapYear, rc)
+    
+      end function ESMF_TimeIsLeapYear
 
 !------------------------------------------------------------------------------
 !BOP
@@ -771,13 +807,14 @@
 !                     prints in integer rational fraction form n/d.  Format is
 !                     YYYY-MM-DDThh:mm:ss[:n/d], where [:n/d] is the 
 !                     integer numerator and denominator of the fractional
-!                     seconds value, if present.  See ~\cite{ISO}.
-!                     See also method {\tt ESMF\_TimeGet(..., timeString= , ...)} \\
+!                     seconds value, if present.  See ~\cite{ISO} and
+!                     ~\cite{ISOnotes}.  See also method
+!                     {\tt ESMF\_TimeGet(..., timeString= , ...)} \\
 !          "string isofrac" - prints {\tt time}'s value in strict ISO 8601
 !                     format for all units, including any fractional seconds
 !                     part.  Format is YYYY-MM-DDThh:mm:ss[.f] where [.f]
 !                     represents fractional seconds in decimal form, if present.
-!                     See ~\cite{ISO}.  See also method
+!                     See ~\cite{ISO} and ~\cite{ISOnotes}.  See also method
 !                     {\tt ESMF\_TimeGet(..., timeStringISOFrac= , ...)} \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -890,32 +927,32 @@
 !     invalid inputs, since these calendars do not define them.  When valid,
 !     the yy and yy\_i8 arguments should be fully specified, e.g. 2003 instead
 !     of 03.  yy and yy\_i8 ranges are only limited by machine word size, 
-!     except for the Gregorian calendar, where the lower year limit is -4800.
-!     This is a limitation of the Gregorian date-to-Julian day conversion
-!     algorithm used to convert a Gregorian date to the internal representation
-!     of seconds.  The algorithm is from Henry F. Fliegel and Thomas C. Van
-!     Flandern, in Communications of the ACM, CACM, volume 11, number 10,
-!     October 1968, p. 657.  The Custom calendar will have a user-defined
-!     definition of yy, yy\_i8, mm, and dd.
+!     except for the Gregorian and Julian calendars, where the lowest date
+!     limits are 3/1/-4800 and 3/1/-4712, respectively.  This is a limitation
+!     of the Gregorian date-to-Julian day and Julian date-to-Julian day
+!     conversion algorithms used to convert Gregorian and Julian dates to the
+!     internal representation of seconds.  See~\cite{Fli68} for a description
+!     of the Gregorian date-to-Julian day algorithm and~\cite{Hat84} for a
+!     description of the Julian date-to-Julian day algorithm.
+!     The Custom calendar will have user-defined values for yy, yy\_i8, mm,
+!     and dd.
 !
-!     The Julian day specifier, d or d\_i8, can be used with either the
-!     Julian-day or No-calendar, and has a valid range depending on the
-!     word size.  For a 32-bit d, the range is [-24855 to 24855].   For a
-!     64-bit d or d\_i8, the valid range is [-32045 to 1,067,519,911].
-!     The reference day of d=0 corresponds to 11/24/-4713 in the Gregorian
-!     calendar, which is derived from the Julian-day to Gregorian conversion
-!     algorithm by Fliegel/Van Flandern (see above).  The lower range day
-!     value of -32045 is the lowest for which the Fliegel/Van Flandern 
-!     algorithm works.  The upper range of the algorithm is only limited by
-!     machine word size.
+!     The Julian day specifier, d or d\_i8, can only be used with the
+!     Julian-day calendar, and has a valid range depending on the
+!     word size.  For a signed 32-bit d, the range is [+/- 24855].  For a
+!     signed 64-bit d or d\_i8, the valid range is [+/- 106,751,991,167,300].
+!     The Julian day number system adheres to the conventional standard where
+!     the reference day of d=0 corresponds to 11/24/-4713 in the Gregorian
+!     calendar and 1/1/-4712 in the Julian calendar.  See~\cite{Meyer2} and
+!     ~\cite{JDNcalculator}.
 !
 !     Hours, minutes, seconds, and sub-seconds can be used with any calendar.
 !
 !     Time manager represents and manipulates time internally with integers
 !     to maintain precision. Hence, user-specified floating point values are
-!     converted internally to integers.  Sub-second values will be represented
+!     converted internally to integers.  Sub-second values are represented
 !     internally with an integer numerator and denominator fraction (sN/sD).
-!     The smallest resolution will be nanoseconds (denominator), as per Time
+!     The smallest resolution is nanoseconds (denominator), as per Time
 !     Manager requirement TMG3.1.  Anything smaller will be truncated.  For
 !     example, pi would be represented as s=3, sN=141592654, sD=1000000000.
 !     (Reals not implemented yet).
