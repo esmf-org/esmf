@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.41 2003/04/16 21:44:45 pwjones Exp $
+! $Id: ESMF_Grid.F90,v 1.42 2003/04/17 20:25:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,6 +132,7 @@
     !public ESMF_GridGetRegionID
     public ESMF_GridSetRegionID
     public ESMF_GridHalo
+    public ESMF_GridAllGather
     public ESMF_GridValidate
     public ESMF_GridPrint
     !public ESMF_GridSearch
@@ -204,7 +205,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.41 2003/04/16 21:44:45 pwjones Exp $'
+      '$Id: ESMF_Grid.F90,v 1.42 2003/04/17 20:25:51 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2680,6 +2681,63 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_GridAllGather - Data AllGather operation on a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridAllGather(grid, srcarray, dstarray, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: srcarray
+      type(ESMF_Array), intent(out) :: dstarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Call {\tt DistGrid} routines to perform a AllGather operation over the 
+!     data in a {\tt Grid}.  It returns the data in the {\tt dstarray}.
+!
+!     \begin{description}
+!     \item [grid]
+!           Grid on which data is defined.
+!     \item [srcarray]
+!           Array containing data to be allgather'ed.
+!     \item [dstarray]
+!           Array containing the resulting data.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Call DistGrid method to perform actual work
+      call ESMF_DistGridAllGather(grid%ptr%distgrid%ptr, srcarray, dstarray, &
+                                                                       status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in GridAllGather: DistGrid AllGather returned failure"
+        return
+      endif
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAllGather
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_GridHalo - Data Halo operation on a Grid
 
 ! !INTERFACE:
@@ -2798,7 +2856,7 @@
 !  code goes here
 !
       print *, "Grid Print:"
-      print *, ""
+      print *, "  (coming soon)"
 
       end subroutine ESMF_GridPrint
 
