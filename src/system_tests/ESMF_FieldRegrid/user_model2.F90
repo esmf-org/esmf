@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.27 2004/06/15 13:34:44 nscollins Exp $
+! $Id: user_model2.F90,v 1.28 2004/10/07 22:06:26 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -151,7 +151,7 @@
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                   horzRelloc=ESMF_CELL_NFACE, &
-                                  haloWidth=0, name="humidity", rc=rc)
+                                  haloWidth=3, name="humidity", rc=rc)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       ! Get the allocated array back and get an F90 array pointer
@@ -277,7 +277,7 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status, i, j, myDE, counts(2)
+      integer :: status, i, j, i1, j1, haloWidth, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
       type(ESMF_Array) :: array
       type(ESMF_Array), dimension(:), pointer :: coordArray
@@ -292,7 +292,8 @@
 
       ! get the grid and coordinates
       allocate(coordArray(2))
-      call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, rc=status)
+      call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, &
+                         haloWidth=haloWidth, rc=status)
       call ESMF_GridGetDELocalInfo(grid, myDE=myDE, &
                                    localCellCountPerDim=counts, &
                                    horzRelLoc=relloc, rc=status)
@@ -328,12 +329,14 @@
       maxDValue   = 0.0
       minDValue   = 1000.0
       do j   = 1,counts(2)
+        j1   = j + haloWidth
         do i = 1,counts(1)
-          error       = abs(data(i,j)) - abs(calc(i,j))
+          i1 = i + haloWidth
+          error       = abs(data(i1,j1)) - abs(calc(i,j))
           minCValue   = min(minCValue, abs(calc(i,j)))
           maxCValue   = max(maxCValue, abs(calc(i,j)))
-          minDValue   = min(minDValue, abs(data(i,j)))
-          maxDValue   = max(maxDValue, abs(data(i,j)))
+          minDValue   = min(minDValue, abs(data(i1,j1)))
+          maxDValue   = max(maxDValue, abs(data(i1,j1)))
           maxError    = max(maxError, abs(error))
           maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
         enddo

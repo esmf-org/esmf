@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.41 2004/10/05 22:52:00 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.42 2004/10/07 22:07:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.41 2004/10/05 22:52:00 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.42 2004/10/07 22:07:02 jwolfe Exp $'
 
 !==============================================================================
 
@@ -168,14 +168,19 @@
       integer :: &
            aSize,                 &!
            nC,                    &!
-           datarank,              &!
+           dataRank,              &!
+           haloWidth,             &!
            orderUse,              &!
            i,                     &! loop counter
            numDstCorners,         &!
            numSrcCorners           !
+      integer, dimension(2) :: &
+           srcIndexMod, dstIndexMod !
       integer, dimension(3) :: &
            srcOrder, dstOrder,    &!
            srcCounts, dstCounts    !
+      integer, dimension(:), allocatable :: &
+           dataOrder, lbounds
       integer(ESMF_KIND_I4), dimension(:), pointer :: &
            srcGatheredMask         !
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: &
@@ -268,13 +273,21 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
+      ! get dataRank and allocate rank-sized arrays
+      call ESMF_ArrayGet(srcArray, rank=dataRank, rc=localrc)
+      allocate(dataOrder(dataRank), &
+                 lbounds(dataRank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dataRank arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       ! set reordering information
       srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
       dstOrder(:) = gridOrder(:,dstGrid%ptr%coordOrder%order,2)
 
       ! get destination grid info
       !TODO: Get grid masks?
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, &
+                                dataIndexList=dataOrder, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -365,8 +378,7 @@
       !              is used internal to this routine to get coordinate 
       !              information locally to calculate the regrid weights
 
-      call ESMF_ArrayGet(srcArray, rank=datarank, rc=localrc)
-      route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
+      route = ESMF_RegridRouteConstruct(dataRank, srcGrid, dstGrid, &
                          recvDomainList, parentDELayout, &
                          srcArray=srcArray, srcDataMap=srcDataMap, &
                          dstArray=dstArray, dstDataMap=dstDataMap, &
@@ -514,12 +526,25 @@
         numSrcCorners = size(dstLocalCornerX,1)   ! TODO: should be from a Grid call
         numDstCorners = size(dstLocalCornerX,1)
 
+        ! calculate the offsets due to haloWidths
+        call ESMF_ArrayGet(dstArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        dstIndexMod = 0
+        srcIndexMod = 0
+        do i = 1,dataRank
+          if (dataOrder(i).eq.1) dstIndexMod(1) = haloWidth + lbounds(i) - 1
+          if (dataOrder(i).eq.2) dstIndexMod(2) = haloWidth + lbounds(i) - 1
+        enddo
+
         if (order .eq. 1) then
           call ESMF_RegridConservSearch(tv, orderUse, coordSystem, &
                                         aSize, numSrcCorners, &
                                         dstCounts(1), dstCounts(2), &
                                         numDstCorners, &
-                                        srcOrder, dstOrder, &
+                                        srcIndexMod, srcOrder, &
+                                        dstIndexMod, dstOrder, &
                                         dstLocalCoordX, dstLocalCoordY, &
                                         dstArea, dstUsrArea, dstFracArea, &
                                         dstUserMask, &
@@ -531,7 +556,8 @@
                                         rc=localrc)
           call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
                                         aSize, dstCounts(1), dstCounts(2), &
-                                        srcOrder, dstOrder, &
+                                        srcIndexMod, srcOrder, &
+                                        dstIndexMod, dstOrder, &
                                         dstArea, dstUsrArea, dstFracArea, &
                                         srcArea, srcUsrArea, srcFracArea, &
                                         rc=localrc)
@@ -540,7 +566,8 @@
                                         aSize, numSrcCorners, &
                                         dstCounts(1), dstCounts(2), &
                                         numDstCorners, &
-                                        srcOrder, dstOrder, &
+                                        srcIndexMod, srcOrder, &
+                                        dstIndexMod, dstOrder, &
                                         dstLocalCoordX, dstLocalCoordY, &
                                         dstArea, dstUsrArea, dstFracArea, &
                                         dstUserMask, &
@@ -553,7 +580,8 @@
                                         srcCentroidX, srcCentroidY, localrc)
           call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
                                         aSize, dstCounts(1), dstCounts(2), &
-                                        srcOrder, dstOrder, &
+                                        srcIndexMod, srcOrder, &
+                                        dstIndexMod, dstOrder, &
                                         dstArea, dstUsrArea, dstFracArea, &
                                         srcArea, srcUsrArea, srcFracArea, &
                                         dstCentroidX, dstCentroidY, &
@@ -567,6 +595,12 @@
 
       ! Clean up some allocatables and return
       call ESMF_RouteDestroy(tempRoute, localrc)
+      deallocate(dataOrder, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+      deallocate(  lbounds, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
       if (hasSrcData) then
         deallocate( srcLocalCoordArray, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
@@ -653,7 +687,8 @@
       subroutine ESMF_RegridConservSearch(tv, order, coordSystem, &
                                           srcSize, numSrcCorners, &
                                           dstSizeX, dstSizeY, numDstCorners, &
-                                          srcOrder, dstOrder, &
+                                          srcIndexMod, srcOrder, &
+                                          dstIndexMod, dstOrder, &
                                           dstCenterX, dstCenterY, &
                                           dstArea, dstUsrArea, dstFracArea, &
                                           dstMask, dstCornerX, dstCornerY, &
@@ -672,7 +707,9 @@
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
       integer, intent(in) :: numDstCorners
+      integer, dimension(:), intent(in) :: srcIndexMod
       integer, dimension(:), intent(in) :: srcOrder
+      integer, dimension(:), intent(in) :: dstIndexMod
       integer, dimension(:), intent(in) :: dstOrder
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(inout) :: dstCenterX
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(inout) :: dstCenterY
@@ -899,8 +936,8 @@
               ! also add contributions to cell areas and centroids.
               if (iDst /= 0 .AND. jDst /= 0) then  ! found appropriate dest cell
                 if (dstMask(iDst,jDst)) then
-                  dstAdd(dstOrder(1)) = iDst
-                  dstAdd(dstOrder(2)) = jDst
+                  dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
+                  dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
                   call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
                                           aggregate=.true., rc=localrc)
                   if (ESMF_LogMsgFoundError(localrc, &
@@ -1022,8 +1059,8 @@
               ! also add contributions to cell areas and centroids.
               if (srcAdd /= 0 .AND. (.not.lcoinc)) then
                 if (srcMask(srcAdd)) then
-                  dstAdd(dstOrder(1)) = iDst
-                  dstAdd(dstOrder(2)) = jDst
+                  dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
+                  dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
                   call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
                                           aggregate=.true., rc=localrc)
                   if (ESMF_LogMsgFoundError(localrc, &
@@ -1108,8 +1145,8 @@
         endif
 
         if (srcAdd.ne.0 .AND. iDst.ne.0 .AND. jDst.ne.0) then
-          dstAdd(dstOrder(1)) = iDst
-          dstAdd(dstOrder(2)) = jDst
+          dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
+          dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
           call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
                                   aggregate=.true., rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -1162,8 +1199,8 @@
         endif
 
         if (srcAdd.ne.0 .AND. iDst.ne.0 .AND. jDst.ne.0) then
-          dstAdd(dstOrder(1)) = iDst
-          dstAdd(dstOrder(2)) = jDst
+          dstAdd(dstOrder(1)) = iDst + dstIndexMod(1)
+          dstAdd(dstOrder(2)) = jDst + dstIndexMod(2)
           call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
                                   aggregate=.true., rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
@@ -1203,7 +1240,8 @@
 ! !INTERFACE:
       subroutine ESMF_RegridConservNormalize(tv, order, regridnorm, &
                                              srcSize, dstSizeX, dstSizeY, &
-                                             srcOrder, dstOrder, &
+                                             srcIndexMod, srcOrder, &
+                                             dstIndexMod, dstOrder, &
                                              dstArea, dstUsrArea, dstFracArea, &
                                              srcArea, srcUsrArea, srcFracArea, &
                                              dstCentroidX, dstCentroidY, &
@@ -1216,7 +1254,9 @@
       integer, intent(in) :: srcSize
       integer, intent(in) :: dstSizeX
       integer, intent(in) :: dstSizeY
+      integer, dimension(:), intent(in) :: srcIndexMod
       integer, dimension(:), intent(in) :: srcOrder
+      integer, dimension(:), intent(in) :: dstIndexMod
       integer, dimension(:), intent(in) :: dstOrder
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(inout) :: dstArea
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(inout) :: dstUsrArea
@@ -1324,8 +1364,8 @@
 
       do n = 1,numlinks
         srcAdd     = srcIndex(n)
-        iDst       = dstIndex((n-1)*2 + dstOrder(1))
-        jDst       = dstIndex((n-1)*2 + dstOrder(2))
+        iDst       = dstIndex((n-1)*2 + dstOrder(1)) - dstIndexMod(1)
+        jDst       = dstIndex((n-1)*2 + dstOrder(2)) - dstIndexMod(2)
         weights(1) = weightsData(n)            ! TODO: fix this for second order
 
         select case (regridnorm%regridNormOpt)
@@ -1391,8 +1431,8 @@
 
       do n = 1,numlinks
         srcAdd     = srcIndex(n)
-        iDst       = dstIndex((n-1)*2 + dstOrder(1))
-        jDst       = dstIndex((n-1)*2 + dstOrder(2))
+        iDst       = dstIndex((n-1)*2 + dstOrder(1)) - dstIndexMod(1)
+        jDst       = dstIndex((n-1)*2 + dstOrder(2)) - dstIndexMod(2)
         weights(1) = weightsData(n)             ! TODO: fix this for second order
 
         if (weightsData(n) < -.05) then

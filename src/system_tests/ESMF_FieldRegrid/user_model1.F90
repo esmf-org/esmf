@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.26 2004/06/15 13:34:43 nscollins Exp $
+! $Id: user_model1.F90,v 1.27 2004/10/07 22:06:04 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -142,7 +142,7 @@
         ! Create the field and have it create the array internally
         humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                     horzRelloc=ESMF_CELL_CENTER, &
-                                    haloWidth=0, name="humidity", rc=status)
+                                    haloWidth=4, name="humidity", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
@@ -188,7 +188,7 @@
         type(ESMF_Grid) :: grid
         real(ESMF_KIND_R8) :: pi
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
-        integer :: status, i, j, counts(2)
+        integer :: status, i, j, i1, j1, haloWidth, counts(2)
         type(mylocaldata), pointer :: mydatablock
         type(wrapper) :: wrap
 
@@ -216,7 +216,8 @@
       
         ! get the grid and coordinates
         allocate(coordArray(2))
-        call ESMF_FieldGet(humidity, grid=grid, horzRelLoc=relloc, rc=status)
+        call ESMF_FieldGet(humidity, grid=grid, horzRelLoc=relloc, &
+                           haloWidth=haloWidth, rc=status)
         call ESMF_GridGetDELocalInfo(grid, localCellCountPerDim=counts, &
                                      horzRelLoc=relloc, rc=status)
         call ESMF_GridGetCoord(grid, horzRelLoc=relloc, &
@@ -231,11 +232,12 @@
         call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 
         ! increment data values in place
-    !    idata = idata + 10.0
         do j   = 1,counts(2)
+          j1   = j + haloWidth
           do i = 1,counts(1)
-            idata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                              + 2.0*sin(coordY(i,j)/50.0*pi)
+            i1 = i + haloWidth
+            idata(i1,j1) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                                + 2.0*sin(coordY(i,j)/50.0*pi)
           enddo
         enddo
 
