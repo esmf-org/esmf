@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.21.2.2 2005/03/02 05:31:23 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.21.2.3 2005/03/08 04:24:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -64,6 +64,7 @@
 // Note that SIGUSR1 interferes with MPICH's CH_P4 device!
 #endif
 // - communication identifiers
+#define VM_COMM_TYPE_MPIUNI   (-1)
 #define VM_COMM_TYPE_MPI1     (0)
 #define VM_COMM_TYPE_PTHREAD  (1)
 #define VM_COMM_TYPE_SHMHACK  (2)
@@ -244,7 +245,11 @@ void ESMC_VMK::vmk_init(void){
   // and the main_vmachine is all MPI pets we can do the following:
   npets=size;           // user is required to start with #processes=#cores!!!!
   mypet=rank;
-  mpionly = 1;          // the default VM can only be MPI-only
+#ifdef ESMF_MPIUNI
+  mpionly = 0;          // this way the commtype will be checked in comm calls
+#else
+  mpionly = 1;          // normally the default VM can only be MPI-only
+#endif
   // set up private MPI_COMM_WORLD Group and Comm
   MPI_Comm_group(MPI_COMM_WORLD, &mpi_g);
   MPI_Comm_create(MPI_COMM_WORLD, mpi_g, &mpi_c);
@@ -262,8 +267,16 @@ void ESMC_VMK::vmk_init(void){
   for (int i=0; i<npets; i++){
     commarray[i] = new comminfo[npets];
     for (int j=0; j<npets; j++){
-      // for the default ESMC_VMK all communication is via MPI-1
+#ifdef ESMF_MPIUNI
+      // todo: check here that npets = 1
+      // for mpiuni the default ESMC_VMK communication is via MPIUNI branch
+      commarray[0][0].comm_type = VM_COMM_TYPE_MPIUNI;
+      commarray[0][0].shmp = new shared_mp;
+      sync_reset(&(commarray[0][0].shmp->shms));
+#else      
+      // normally for the default ESMC_VMK all communication is via MPI-1
       commarray[i][j].comm_type = VM_COMM_TYPE_MPI1;
+#endif      
 //gjt - don't use yet:      commarray[i][j].mpitag_send = 0; // reset the tag counter
 //gjt - don't use yet:      commarray[i][j].mpitag_recv = 0; // reset the tag counter
     }
@@ -432,10 +445,15 @@ void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
       }
     }
   }
+#ifdef ESMF_MPIUNI
+  // don't set mpionly flag so that comm call check for commtype
+  this->mpionly=0;
+#else
   // determine whether we are dealing with an MPI-only ESMC_VMK
   this->mpionly=1;  // assume this is MPI-only ESMC_VMK until found otherwise
   for (int i=0; i<npets; i++)
     if (this->tid[i]>0) this->mpionly=0;    // found multi-threading PET
+#endif
   // need a barrier here before any of the PETs get into user code...
   //vmk_barrier();
 }
@@ -476,7 +494,8 @@ void ESMC_VMK::vmk_destruct(void){
     for (int pet1=0; pet1<npets; pet1++){
       for (int pet2=0; pet2<npets; pet2++){
         if(commarray[pet1][pet2].comm_type==VM_COMM_TYPE_SHMHACK
-          ||commarray[pet1][pet2].comm_type==VM_COMM_TYPE_PTHREAD){
+          ||commarray[pet1][pet2].comm_type==VM_COMM_TYPE_PTHREAD
+          ||commarray[pet1][pet2].comm_type==VM_COMM_TYPE_MPIUNI){
           // intra-process shared memory structure to be deleted
           shared_mp *shmp=commarray[pet1][pet2].shmp;
           if(commarray[pet1][pet2].comm_type==VM_COMM_TYPE_PTHREAD){                         pthread_mutex_destroy(&(shmp->mutex1));
@@ -1210,16 +1229,19 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
         // set up the shared_mp structure within the commarray
         for (int pet1=0; pet1<new_npets; pet1++){
           for (int pet2=0; pet2<new_npets; pet2++){
-            if (pet1!=pet2 && new_pid[pet1]==new_pid[pet2] 
-                && new_pid[pet1]==pid[mypet]){
+            if (new_pid[pet1]==new_pid[pet2] && new_pid[pet1]==pid[mypet]){
               // pet1 and pet2 will be threads under the same process as mypet
-              // for now hardcode VM_COMM_TYPE_SHMHACK for intra-process comm.
-              // -> allocate shared_mp structure 
+              // -> allocate shared_mp structure for such PETs
               new_commarray[pet1][pet2].shmp = new shared_mp;
+              // reset the shms structure in shared_mp preparing for use
+              sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
+#ifdef ESMF_MPIUNI
+              // todo: check that pet1 and pet2 are both really 0
+              // todo: and that new_nptes == 1 
+              new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_MPIUNI;
+#else
               if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
                 new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_SHMHACK;
-                // initialize the shms structure in shared_mp
-                sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
               }else if(vmp->pref_intra_process == PREF_INTRA_PROCESS_PTHREAD){
                 new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_PTHREAD;
                 // initialize pthread variables in shared_mp
@@ -1232,9 +1254,8 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
                 pthread_cond_init(&(new_commarray[pet1][pet2].shmp->cond2),
                   NULL);
                 new_commarray[pet1][pet2].shmp->tcounter = 0;
-                // also initialize the shms structure in shared_mp for barrier()
-                sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
               }
+#endif
             }
           }
         }
@@ -2129,6 +2150,23 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
     // set flag indicating that send's memcpy() is done and buffer is valid
     sync_buffer_flag_fill(&pipcmp->shms, i);
     break;
+  case VM_COMM_TYPE_MPIUNI:
+    // Shared memory hack for mpiuni
+    shmp = commarray[mypet][dest].shmp;  // shared memory mp channel
+    if (size<=SHARED_BUFFER){
+      // buffer is sufficient
+      pdest = shmp->buffer;
+      // wait until buffer is ready to be used
+      sync_buffer_wait_empty(&shmp->shms, 0);
+      // do the actual memcpy
+      memcpy(pdest, message, size);
+      // set flag indicating that send's memcpy() is done and buffer is valid
+      sync_buffer_flag_fill(&shmp->shms, 0);
+    }else{
+      // buffer is insufficient
+      // todo: need to throw error
+    }
+    break;
   default:
     break;
   }
@@ -2380,6 +2418,23 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
     memcpy(mess, psrc, size);
     // set flag indicating that send's memcpy() is done and buffer is valid
     sync_buffer_flag_empty(&pipcmp->shms, i);
+    break;
+  case VM_COMM_TYPE_MPIUNI:
+    // Shared memory hack for mpiuni
+    shmp = commarray[source][mypet].shmp;   // shared memory mp channel
+    if (size<=SHARED_BUFFER){
+      // buffer is sufficient
+      psrc = shmp->buffer;
+      // wait until buffer is ready to be used
+      sync_buffer_wait_fill(&shmp->shms, 0);
+      // do actual memcpy
+      memcpy(message, psrc, size);
+      // set flag indicating that recv's memcpy() is done and buffer is empty
+      sync_buffer_flag_empty(&shmp->shms, 0);
+    }else{
+      // buffer is insufficient
+      // todo: need to throw error
+    }
     break;
   default:
     break;
