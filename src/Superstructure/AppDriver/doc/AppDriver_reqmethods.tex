@@ -1,4 +1,4 @@
-% $Id: AppDriver_reqmethods.tex,v 1.2 2004/12/28 18:59:23 nscollins Exp $
+% $Id: AppDriver_reqmethods.tex,v 1.3 2004/12/29 21:03:03 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@ writer, but must be provided as part of the component documentation.
 
 The required function of the set services subroutine is to
 register the rest of the required functions in the component,
-currently initialize, run, and finalize methods.  The ESMF method
+currently initialize, run, and finalize methods.  The ESMF method \\
 {\tt ESMF\_<Grid/Cpl>CompSetEntryPoint()} should be called for
 each of the required subroutines.  
 
@@ -39,8 +39,8 @@ for them to be private to lower the chances of public symbol clashes
 between different components.
 
 Within the set services routine, the user can also register a 
-private data block by calling the {\tt ESMF\_<Grid|Cpl>CompSetInternalState} 
-method.
+private data block by calling the 
+{\tt ESMF\_<Grid|Cpl>CompSetInternalState} method.
 
 Note that a component does not call its own set services routine;
 the AppDriver or parent component code which is creating a component 
