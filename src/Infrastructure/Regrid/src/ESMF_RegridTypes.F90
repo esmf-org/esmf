@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.48 2004/05/24 23:04:05 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.49 2004/05/25 20:11:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -150,7 +150,8 @@
                                      ! gather data
     public ESMF_RegridGet            ! returns a regrid attribute
     public ESMF_RegridSet            ! sets    a regrid attribute
-    public ESMF_RegridConstructEmpty ! creates an empty regrid structure
+    public ESMF_RegridCreate         ! creates an empty regrid structure
+    public ESMF_RegridConstructEmpty ! constructs an empty regrid structure
     public ESMF_RegridDestruct       ! deallocate memory associated with a regrid
 
 !
@@ -158,7 +159,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.48 2004/05/24 23:04:05 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.49 2004/05/25 20:11:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -777,6 +778,68 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridCreate"
+!BOPI
+! !IROUTINE: ESMF_RegridCreate - Create empty regrid structure
+
+! !INTERFACE:
+      function ESMF_RegridCreate(rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Regrid) :: ESMF_RegridCreate
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which creates and initializes a regrid structure.
+!     The structure is later filled with appropriate data using the
+!     set function. Intended for internal ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[name]}]
+!          {\tt Regrid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+      integer :: localrc
+      type(ESMF_RegridType), pointer :: rgtype    ! Pointer to new regrid
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+!     Initialize pointers
+      nullify(rgtype)
+      nullify(ESMF_RegridCreate%ptr)
+
+      allocate(rgtype, stat=localrc)        ! TODO
+!     If error write message and return.
+      if(localrc .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_RegridCreate: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize regrid internals.
+      call ESMF_RegridConstructEmpty(rgtype, localrc)
+      if(localrc .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_RegridCreate: Regrid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_RegridCreate%ptr => rgtype
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_RegridCreate
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridConstructEmpty"
 !BOPI
 ! !IROUTINE: ESMF_RegridConstructEmpty - Create empty regrid structure
@@ -833,7 +896,7 @@
       subroutine ESMF_RegridDestruct(regrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_RegridType), intent(inout) :: regrid
+      type(ESMF_Regrid), intent(inout) :: regrid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -859,11 +922,11 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      regrid%method         = ESMF_REGRID_METHOD_NONE
-      regrid%redistrbOption = ESMF_REGRID_DISTRB_NONE
+      regrid%ptr%method         = ESMF_REGRID_METHOD_NONE
+      regrid%ptr%redistrbOption = ESMF_REGRID_DISTRB_NONE
 
       ! and free anything associated with the base object
-      call ESMF_BaseDestroy(regrid%base, localrc)
+      call ESMF_BaseDestroy(regrid%ptr%base, localrc)
 
       if (present(rc)) rc = ESMF_SUCCESS
 
