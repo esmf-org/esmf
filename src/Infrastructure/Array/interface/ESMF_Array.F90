@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.20 2004/12/09 23:50:22 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.21 2005/01/10 22:19:46 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.20 2004/12/09 23:50:22 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.21 2005/01/10 22:19:46 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -496,7 +496,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArrayGetInt8Attr"
 
 !BOP
-! !IROUTINE: ESMF_ArrayGetAttribute  - Retrieve a 8-byte integer attribute
+! !IROUTINE: ESMF_ArrayGetAttribute  - Retrieve an 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayGetAttribute()
@@ -510,7 +510,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!     Returns an integer attribute from the {\tt array}.
+!     Returns an 8-byte integer attribute from the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -545,7 +545,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArrayGetInt8ListAttr"
 
 !BOP
-! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a 8-byte integer list attribute
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve an 8-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayGetAttribute()
@@ -560,7 +560,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Returns a 8-byte integer list attribute from the {\tt array}.
+!      Returns an 8-byte integer list attribute from the {\tt array}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -715,7 +715,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArrayGetReal8Attr"
 
 !BOP
-! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a 8-byte real attribute
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve an 8-byte real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayGetAttribute()
@@ -729,7 +729,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Returns a 8-byte real attribute from the {\tt array}.
+!      Returns an 8-byte real attribute from the {\tt array}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -763,7 +763,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArrayGetReal8ListAttr"
 
 !BOP
-! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve a 8-byte real list attribute
+! !IROUTINE: ESMF_ArrayGetAttribute - Retrieve an 8-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayGetAttribute()
@@ -778,7 +778,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Returns a 8-byte real attribute from an {\tt ESMF\_Array}.
+!      Returns an 8-byte real attribute from an {\tt ESMF\_Array}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -1570,7 +1570,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArraySetInt8Attr"
 
 !BOP
-! !IROUTINE: ESMF_ArraySetAttribute - Set a 8-byte integer attribute
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArraySetAttribute()
@@ -1584,7 +1584,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Attaches a 8-byte integer attribute to the {\tt array}.
+!      Attaches an 8-byte integer attribute to the {\tt array}.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -1620,7 +1620,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArraySetInt8ListAttr"
 
 !BOP
-! !IROUTINE: ESMF_ArraySetAttribute - Set a 8-byte integer list attribute
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArraySetAttribute()
@@ -1635,7 +1635,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!     Attaches a 8-byte integer list attribute to the {\tt array}.
+!     Attaches an 8-byte integer list attribute to the {\tt array}.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of integer items in the {\tt valueList} is
 !     given by {\tt count}.
@@ -1795,7 +1795,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArraySetReal8Attr"
 
 !BOP
-! !IROUTINE: ESMF_ArraySetAttribute - Set a 8-byte real attribute
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArraySetAttribute()
@@ -1809,7 +1809,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!      Attaches a 8-byte real attribute to the {\tt array}.
+!      Attaches an 8-byte real attribute to the {\tt array}.
 !      The attribute has a {\tt name} and a {\tt value}.
 ! 
 !     The arguments are:
@@ -1844,7 +1844,7 @@ end subroutine
 #define ESMF_METHOD "ESMF_ArraySetReal8ListAttr"
 
 !BOP
-! !IROUTINE: ESMF_ArraySetAttribute - Set a 8-byte real list attribute
+! !IROUTINE: ESMF_ArraySetAttribute - Set an 8-byte real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_ArraySetAttribute()
@@ -1859,7 +1859,7 @@ end subroutine
 
 !
 ! !DESCRIPTION:
-!     Attaches a 8-byte real list attribute to the {\tt array}.
+!     Attaches an 8-byte real list attribute to the {\tt array}.
 !     The attribute has a {\tt name} and a {\tt valueList}.
 !     The number of real items in the {\tt valueList} is
 !     given by {\tt count}.
