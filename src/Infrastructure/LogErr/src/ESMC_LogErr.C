@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.31 2004/04/27 20:16:35 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.32 2004/04/27 21:12:40 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,6 +32,7 @@
 #include "ESMC_LogErr.h"
 
 //Global Variables
+char nameLogErrFile[32];    // name of logfile.
 FILE* logErrCFilePtr[10];
 int numCFiles=0;
 int logErrFortFile[10];
@@ -42,7 +43,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.31 2004/04/27 20:16:35 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.32 2004/04/27 21:12:40 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -114,11 +115,77 @@ void ESMC_Log::ESMC_LogOpen(
   }*/
      
 }   //end ESMC_LogOpen
+
+int ESMC_LogInitialize(
+//
+// !RETURN VALUE:
+//   none
+//
+// !ARGUMENTS:
+
+     char filename[]     //string to form name of log file (input)
+
+   )
+//
+// !DESCRIPTION:
+// {\tt ESMC\_LogOpen} takes two
+// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
+// ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
+// ESMF\_LogConstants.h, set whether one file should be written for all 
+// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
+// be written (ESMF\_MULT\_LOG\_FILE).
+//
+// The second argument is a string and is used to form the name of the
+// logfile.
+//
+// This routine is called from native C or C++ code. C I/O libraries are used.
+//
+//EOP
+// 
+//
+
+{
+    strcpy(nameLogErrFile,filename);
+    return ESMF_SUCCESS;
+}   //end ESMC_LogInitialize
+
+int ESMC_LogFinalize(
+//
+// !RETURN VALUE:
+//   none
+//
+// !ARGUMENTS:
+
+
+   )
+//
+// !DESCRIPTION:
+// {\tt ESMC\_LogOpen} takes two
+// arguments.  The first should be set to ESMF\_SINGLE\_LOG\_FILE or
+// ESMF\_MULT\_LOG\_FILE. These are symbolic constants, defined in
+// ESMF\_LogConstants.h, set whether one file should be written for all 
+// processes (ESMF\_SINGLE\_LOG\_FILE), or whether one file per process should
+// be written (ESMF\_MULT\_LOG\_FILE).
+//
+// The second argument is a string and is used to form the name of the
+// logfile.
+//
+// This routine is called from native C or C++ code. C I/O libraries are used.
+//
+//EOP
+// 
+//
+
+{
+    return ESMF_SUCCESS;
+}   //end ESMC_LogInitialize
+
 //----------------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMC_LogClose - closes log file. 
 //
 // !INTERFACE:
+
 void ESMC_Log::ESMC_LogClose(
 //
 // ! RETURN VALUE:
@@ -201,17 +268,17 @@ int ESMC_Log::ESMC_LogWrite(
 	  return ESMF_FAILURE;
 	switch(logtype)
 	{
-		case ESMF_LOG_INFO:
+		case ESMC_LOG_INFO:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"INFO",__FILE__,__LINE__,msg);
 			break;
-		case ESMF_LOG_WARN:
+		case ESMC_LOG_WARN:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"WARNING",__FILE__,__LINE__,msg);
 			break;
-		case ESMF_LOG_ERROR:
+		case ESMC_LOG_ERROR:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"ERROR",__FILE__,__LINE__,msg);
@@ -259,17 +326,17 @@ int ESMC_Log::ESMC_LogWrite(
 	  return ESMF_FAILURE;
 	switch(logtype)
 	{
-		case ESMF_LOG_INFO:
+		case ESMC_LOG_INFO:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"INFO",__FILE__,__LINE__,modmeth,msg);
 			break;
-		case ESMF_LOG_WARN:
+		case ESMC_LOG_WARN:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"WARNING",__FILE__,__LINE__,modmeth,msg);
 			break;
-		case ESMF_LOG_ERROR:
+		case ESMC_LOG_ERROR:
 			fprintf(ESMC_LogFile, "%.2d%.2d%.2d %.2d%.2d%.2d %s %s %d %s %s\n",
 	  		ti.tm_year+1900,ti.tm_mon,ti.tm_mday,ti.tm_hour,ti.tm_min,
 			ti.tm_sec,"ERROR",__FILE__,__LINE__,modmeth,msg);

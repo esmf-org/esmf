@@ -37,26 +37,26 @@
 !------------------------------------------------------------------------------
 ! !USES:
    use ESMF_BaseMod
-
-!EOPI
-   implicit none
-   private
-
+   
 !------------------------------------------------------------------------------
 !     ! ESMF_LogFileType
 !
 !     ! Log File Types
 
-      type ESMF_LogFileType
+
+!EOPI
+   implicit none
+
+type ESMF_LogFileType
       sequence
-      private
-        integer :: filetype
+        integer :: ftype
       end type
 
       type(ESMF_LogFileType), parameter ::  &
                                ESMF_LOG_INFO  = ESMF_LogFileType(1), &
                                ESMF_LOG_WARNING = ESMF_LogFileType(2), &
                                ESMF_LOG_ERROR = ESMF_LogFileType(3)
+
                                   
 type ESMF_LOGENTRY
 	private
@@ -251,10 +251,10 @@ end subroutine ESMF_LogOpen
 	if (present(aLog)) then	  
 		if (aLog%FileIsOpen .eq. ESMF_TRUE) then
 			call DATE_AND_TIME(d,t)	
-			select case (logtype)
-				case (ESMF_LOG_INFO)
+			select case (logtype%ftype)
+				case (1)
 					lt="INFO"
-				case (ESMF_LOG_WARNING)
+				case (2)
 					lt="WARNING"
 				case default
 					lt="ERROR"
@@ -297,10 +297,10 @@ end subroutine ESMF_LogOpen
 	else
 		if (gLog%FileIsOpen .eq. ESMF_TRUE) then
 			call DATE_AND_TIME(d,t)	
-			select case (logtype)
-				case (ESMF_LOG_INFO)
+			select case (logtype%ftype)
+				case (1)
 					lt="INFO"
-				case (ESMF_LOG_WARNING)
+				case (2)
 					lt="WARNING"
 				case default
 					lt="ERROR"
@@ -403,7 +403,7 @@ end function ESMF_LogFoundError
 ! !IROUTINE: ESMF_LogSet - Sets Log Parameters
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSet(aLog,verbose,flush,root_only,halt,filetype,stream,max_elements,rc)
+	subroutine ESMF_LogSet(aLog,verbose,flush,root_only,halt,logtype,stream,max_elements,rc)
 !
 ! !ARGUMENTS:
 !	
@@ -442,7 +442,7 @@ end function ESMF_LogFoundError
 	if (present(flush)) aLog%flush=flush
 	if (present(root_only)) aLog%root_only=root_only
 	if (present(halt)) aLog%halt=halt
-	if (present(filetype)) aLog%filetype=filetype
+	if (present(logtype)) aLog%logtype=logtype
 	if (present(stream)) aLog%stream=stream
 	if (present(max_elements)) aLog%max_elements=max_elements
 	if (present(rc)) rc=ESMF_SUCCESS 
@@ -453,7 +453,7 @@ end subroutine ESMF_LogSet
 ! !IROUTINE: ESMF_LogGet - Returns logical associated with finding an error
 
 ! !INTERFACE: 
-	subroutine ESMF_LogGet(aLog,verbose,flush,root_only,halt,filetype,stream,max_elements,rc)
+	subroutine ESMF_LogGet(aLog,verbose,flush,root_only,halt,logtype,stream,max_elements,rc)
 !
 ! !ARGUMENTS:
 !	
@@ -476,7 +476,7 @@ end subroutine ESMF_LogSet
 !	     Root only flag
 !      \item [halt]
 !	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
-!      \item [filetype]
+!      \item [logtype]
 !             The type of file (singlelog(0), multilog(1)).
 !      \item [stream]
 !            The type of stream (free(0), preordered(1))
@@ -502,9 +502,9 @@ end subroutine ESMF_LogSet
 	if (present(halt)) then
 	  halt=aLog%halt
 	endif
-	if (present(filetype)) then
-	  filetype=aLog%filetype
-	endif
+	!if (present(logtype)) then
+	!  logtype=aLog%logtype
+	!endif
 	if (present(stream)) then
 	  stream=aLog%stream
 	endif
