@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.21 2003/04/23 18:55:32 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.22 2003/04/28 23:11:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.21 2003/04/23 18:55:32 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.22 2003/04/28 23:11:43 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -208,8 +208,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 YR, int MM, int DD, ESMF_IKIND_I8 D,          // in
-      ESMC_BaseTime *T) const {                                   // out
+      ESMF_IKIND_I8 YR, int MM, int DD, ESMF_IKIND_I8 D,    // in
+      ESMC_BaseTime *T) const {                             // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -323,8 +323,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_BaseTime *T,                                          // in
-      ESMF_IKIND_I8 *YR, int *MM, int *DD, ESMF_IKIND_I8 *D) const {   // out
+      const ESMC_BaseTime *T,                 // in
+      ESMF_IKIND_I8 *YR, int *MM, int *DD,    // out
+      ESMF_IKIND_I8 *D, double *d_) const {   // out
 //
 // !DESCRIPTION:
 //     Converts a core {\tt ESMC\_BaseTime} representation to a
@@ -358,6 +359,9 @@
             ESMF_IKIND_I8 jdays = T->S / SecondsPerDay;
             if (D != ESMC_NULL_POINTER) {
               *D = jdays;
+            }
+            if (d_ != ESMC_NULL_POINTER) {
+              *d_ = (double) T->S / (double) SecondsPerDay;
             }
 
             // convert Julian days to Gregorian date
@@ -412,6 +416,9 @@
             if (D != ESMC_NULL_POINTER) {
               *D = T->S / SecondsPerDay;
             }
+            if (d_ != ESMC_NULL_POINTER) {
+              *d_ = (double) T->S / (double) SecondsPerDay;
+            }
 
             break;
         }
@@ -443,6 +450,9 @@
             if (D != ESMC_NULL_POINTER) {
               *D = T->S / SecondsPerDay;
             }
+            if (d_ != ESMC_NULL_POINTER) {
+              *d_ = (double) T->S / (double) SecondsPerDay;
+            }
 
             break;
         }
@@ -452,6 +462,9 @@
             // convert basetime seconds to Julian days
             if (D != ESMC_NULL_POINTER) {
               *D = T->S / SecondsPerDay;
+            }
+            if (d_ != ESMC_NULL_POINTER) {
+              *d_ = (double) T->S / (double) SecondsPerDay;
             }
             break;
         }
