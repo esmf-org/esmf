@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.8 2003/07/28 17:36:38 jwolfe Exp $
+// $Id: ESMC_Array.h,v 1.9 2003/07/29 16:30:05 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -172,13 +172,13 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     // TODO: add Get method
 
     // most important array methods
-    int ESMC_ArrayRedist(ESMC_DELayout *layout,
-                         ESMC_AxisIndex *ai_global,
-                         int rank_trans[], int size_rank_trans,
-                         int olddecompids[], int decompids[], int size_decomp,
-                         ESMC_Array *RedistArray);
+    int ESMC_ArrayRedist(ESMC_DELayout *layout, int global_start[], 
+                         int global_dimlengths[], int rank_trans[], 
+                         int size_rank_trans, int olddecompids[], 
+                         int decompids[], int size_decomp,
+                          ESMC_Array *RedistArray);
     int ESMC_ArrayHalo(ESMC_DELayout *layout,
-                       ESMC_AxisIndex *ai_global,
+                       ESMC_AxisIndex *ai_global, int global_dimlengths[],
                        int decompids[], int size_decomp);
     int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[], 
                             int size_decomp, int global_dimlengths[],
