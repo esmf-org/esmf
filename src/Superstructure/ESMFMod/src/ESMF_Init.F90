@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.14 2004/10/11 19:38:05 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.15 2004/10/20 17:18:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,6 +216,14 @@
       endif
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error initializing the default log/error manager"
+          return
+      endif
+
+      ! Write our version number out into the log
+      call ESMF_LogWrite("Running with ESMF Version " // ESMF_VERSION_STRING, &
+                          ESMF_LOG_INFO, rc=status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error writing into the default log"
           return
       endif
 
