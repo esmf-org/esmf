@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.3 2003/03/13 22:56:12 cdeluca Exp $
+! $Id: ESMF_DELayout.F90,v 1.4 2003/03/14 00:29:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.3 2003/03/13 22:56:12 cdeluca Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.4 2003/03/14 00:29:57 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -119,7 +119,7 @@
 !
       module procedure ESMF_DELayoutCreateIntDE2D
       module procedure ESMF_DELayoutCreateDefault1D
-      module procedure ESMF_DELayoutCreateDELayout2D
+      module procedure ESMF_DELayoutCreateLayout2D
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -197,18 +197,18 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateDELayout2D - Create 2D DELayout from a given layout
+! !IROUTINE: ESMF_DELayoutCreateLayout2D - Create 2D DELayout from a given layout
 
 ! !INTERFACE:
-      function ESMF_DELayoutCreateDELayout2D(nx, ny, parentDELayout, commhint, &
-                                         exclusive, rc)
+      function ESMF_DELayoutCreateLayout2D(nx, ny, parentLayout, commhint, &
+                                           exclusive, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DELayout) :: ESMF_DELayoutCreateDELayout2D
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateLayout2D
 !
 ! !ARGUMENTS:
       integer, intent(in) :: nx, ny                 ! x, y layout dimensions
-      type(ESMF_DELayout), intent(inout) :: parentDELayout ! to allocate DEs from
+      type(ESMF_DELayout), intent(inout) :: parentLayout ! to allocate DEs from
       integer, intent(in) :: commhint               ! communications hint
       integer, intent(in), optional :: exclusive    ! consume parent layout DEs?
       integer, intent(out), optional :: rc          ! return code
@@ -238,7 +238,7 @@
 ! !REQUIREMENTS:
 
 !       local vars
-        type (ESMF_DELayout) :: layout        ! opaque pointer to new C++ DELayout
+        type (ESMF_DELayout) :: layout      ! opaque pointer to new C++ DELayout
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
 
@@ -253,12 +253,12 @@
 
 !       Routine which interfaces to the C++ creation routine.
         if (present(exclusive)) then
-          call c_ESMC_DELayoutCreateDELayout2D(layout, nx, ny, parentDELayout, &
-                                           commhint, exclusive, status)
+          call c_ESMC_DELayoutCreateLayout2D(layout, nx, ny, parentLayout, &
+                                             commhint, exclusive, status)
         else
-          call c_ESMC_DELayoutCreateDELayout2Dnexc(layout, nx, ny, &
-                                               parentDELayout, commhint, &
-                                               status)
+          call c_ESMC_DELayoutCreateLayout2Dnexc(layout, nx, ny, &
+                                                 parentLayout, commhint, &
+                                                 status)
         endif
 
         if (status .ne. ESMF_SUCCESS) then
@@ -267,10 +267,10 @@
         endif
 
 !       set return values
-        ESMF_DELayoutCreateDELayout2D = layout 
+        ESMF_DELayoutCreateLayout2D = layout 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_DELayoutCreateDELayout2D
+        end function ESMF_DELayoutCreateLayout2D
 
 !------------------------------------------------------------------------------
 !BOP
