@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2004/10/28 22:11:28 nscollins Exp $
+# $Id: build_rules.mk,v 1.13 2004/10/29 14:38:02 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -119,7 +119,7 @@ CXX_FLINKER	   = CC -n32 -mp -Wl,-woff,84,-woff,85,-woff,134
 C_CXXF90LD         = CC -n32
 C_F90CXXLD         = f90 -n32
 C_CXXF90LIBS       = -rpath . -lftn90 -lftn -lfortran
-C_F90CXXLIBS       = -rpath . -lCsup -lC -lCio -lc 
+C_F90CXXLIBS       = -rpath . -lpthread -lCsup -lC -lCio -lc 
 SL_ABIOPTS         = -check_registry /usr/lib32/so_locations
 endif
 
@@ -146,7 +146,7 @@ CXX_FLINKER	   = CC -64 -mp -Wl,-woff,84,-woff,85,-woff,134
 C_CXXF90LD         = CC -64
 C_F90CXXLD         = f90 -64
 C_CXXF90LIBS       = -rpath . -lftn90 -lftn -lfortran
-C_F90CXXLIBS       = -rpath . -lC -lCio -lc
+C_F90CXXLIBS       = -rpath . -lpthread -lC -lCio -lc
 C_CXXSO            =  CC -64 -shared -rpath .
 SL_ABIOPTS         = -check_registry /usr/lib64/so_locations
 ###########################################################################
