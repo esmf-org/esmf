@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.12 2003/04/28 23:10:53 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.13 2003/05/02 01:03:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -130,8 +130,8 @@ class ESMC_Calendar {
     int ESMC_CalendarConvertToTime(ESMF_IKIND_I8 YR, int MM, int DD,
                              ESMF_IKIND_I8 D, ESMC_BaseTime *T) const;
     int ESMC_CalendarConvertToDate(const ESMC_BaseTime *T,
-                             ESMF_IKIND_I8 *YR, int *MM, int *DD,
-                             ESMF_IKIND_I8 *D, double *d_) const;
+                             ESMF_IKIND_I8 *YR=0, int *MM=0, int *DD=0,
+                             ESMF_IKIND_I8 *D=0, double *d_=0) const;
 
     // TODO:  add method to convert calendar interval to core time ?
 
