@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.4 2002/11/08 22:43:18 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.5 2002/12/10 22:30:37 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -35,10 +35,11 @@
 !
 ! !USES:
       use ESMF_BaseMod
-
-! !PUBLIC TYPES:
       implicit none
 
+! !PUBLIC TYPES:
+      private
+    
       integer, parameter :: UNKNOWN=0, NETCDF=1
 
       type ESMF_IOType
@@ -57,10 +58,12 @@
           logical :: async_io
       end type
 
-      private ESMF_IOSpecCreateNew, ESMF_IOSpecCreateCopy
-
+   
 ! !DESCRIPTION:
 !     The following routines apply to general I/O characteristics.
+
+! !PUBLIC MEMBER TYPES:
+      public ESMF_IOSpec
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
