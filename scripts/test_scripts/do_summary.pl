@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_summary.pl,v 1.3 2004/08/05 16:39:00 svasquez Exp $
+# $Id: do_summary.pl,v 1.4 2004/11/18 20:17:42 nscollins Exp $
 # This prints a summary of system tests, unit tests ansd examples.
 
 # Options:
@@ -27,22 +27,20 @@ getopts("d:e:", \%options);
 	$EX_DIR   = "$options{e}"; 
 
 	#go to the test directory
+
+	# set all unit and system test variables to zero.
+	$ut_exe_count = 0;
+        $ut_std_count = 0;
+        $ut_pass_count = 0;
+        $ut_fail_count = 0;
+
+        $st_exe_count = 0;
+        $st_std_count = 0;
+        $st_pass_count = 0;
+        $st_fail_count = 0;
+
 	$ok = chdir "$TEST_DIR/";
-
-	if  (not $ok) {
-		# There is no test directory
-		# set all test variables to zero.
-	        $ut_exe_count = 0;
-        	$ut_std_count = 0;
-        	$ut_pass_count = 0;
-        	$ut_fail_count = 0;
-
-        	$st_exe_count = 0;
-        	$st_std_count = 0;
-        	$st_pass_count = 0;
-        	$st_fail_count = 0;
-	}
-	else {
+	if  ($ok) {
 		# The test directory exists
 		find(\&wanted, '.'); 
 		sub wanted {
@@ -128,18 +126,15 @@ getopts("d:e:", \%options);
 	# start with cleared lists.
 	@ex_files = ();
 	@all_files = ();
-        #go to the examples directory
 
+       	$ex_exe_count = 0;
+       	$ex_std_count = 0;
+       	$ex_pass_count = 0;
+       	$ex_fail_count = 0;
+
+        #go to the examples directory
         $ok = chdir "$EX_DIR/";
-	if  (not $ok) {
-		# There is no examples directory
-		# set all examples variables to zero.
-        	$ex_exe_count = 0;
-        	$ex_std_count = 0;
-        	$ex_pass_count = 0;
-        	$ex_fail_count = 0;
-	}
-	else {
+	if  ($ok) {
 		# The examples directory exists
         	find(\&wanted, '.'); 
         	sub wanted {
