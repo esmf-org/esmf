@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.33 2003/02/26 20:21:20 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.34 2003/02/27 21:54:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.33 2003/02/26 20:21:20 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.34 2003/02/27 21:54:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -428,8 +428,8 @@
     for (i=1; i<rank; i++)
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
-    fprintf(stderr, "getting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
-                     (long int)(&this->f90dopev), (long int)p, bytes, rank);
+    //fprintf(stderr, "getting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
+    //                 (long int)(&this->f90dopev), (long int)p, bytes, rank);
 
     memcpy((void *)p, (void *)(&this->f90dopev), bytes);
 
@@ -463,8 +463,8 @@
     for (i=1; i<rank; i++)
 	bytes += ESMF_F90_PTR_PLUS_RANK;
    
-    fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
-                      (long int)p,  (long int)(&this->f90dopev), bytes, rank);
+    //fprintf(stderr, "setting f90 ptr, from %lx to %lx, %d bytes for rank %d\n", 
+    //                  (long int)p,  (long int)(&this->f90dopev), bytes, rank);
 
     memcpy((void *)(&this->f90dopev), (void *)p, bytes);
 
