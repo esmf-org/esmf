@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.3 2003/10/13 19:31:20 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.4 2003/10/23 17:33:55 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -207,9 +207,9 @@
       counts(2) = j_max
       g_min(1) = x_min
       g_min(2) = y_min
-      g_min(1) = x_max
-      g_min(2) = y_max
-      grid = ESMF_GridCreate(2, counts = counts, &
+      g_max(1) = x_max
+      g_max(2) = y_max
+      grid = ESMF_GridCreate(2, counts=counts, &
                              min=g_min, max=g_max, &
                              layout=layoutApp, &   
                              horz_gridtype=ESMF_GridType_XY, &
