@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.17 2003/04/25 09:11:59 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.18 2003/04/25 21:10:50 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,43 +77,34 @@
 !
 !     ! F90 class type to match C++ Calendar class in size only;
 !     !  all dereferencing within class is performed by C++ implementation
-
-      type ESMF_Calendar
-      sequence
-      private
-        ! keep dimensions even to avoid compiler alignment warnings
-        integer, &
-            dimension(MONTHS_PER_YEAR+mod(MONTHS_PER_YEAR,2)+6) :: memoryBlock
-      end type
-
-!------------------------------------------------------------------------------
-!      ! Equivalent sequence and kind to C++:
+!
+!     ! Equivalent sequence and kind to C++:
 !------------------------------------------------------------------------------
 !
 !     ! ESMF_DaysPerYear
 !
-!      type ESMF_DaysPerYear
-!      sequence
-!      private
-!        integer :: D     ! whole days per year
-!        integer :: Dn    ! fractional days per year numerator
-!        integer :: Dd    ! fractional days per year denominator
-!      end type           ! e.g. for Venus, D=0, Dn=926, Dd=1000
+      type ESMF_DaysPerYear
+      sequence
+      private
+        integer :: D     ! whole days per year
+        integer :: Dn    ! fractional days per year numerator
+        integer :: Dd    ! fractional days per year denominator
+      end type           ! e.g. for Venus, D=0, Dn=926, Dd=1000
 !
 !------------------------------------------------------------------------------
 !     ! ESMF_Calendar
 !
 !     ! F90 class to match C++ Calendar class in size and sequence
 !
-!      type ESMF_Calendar
-!      sequence
-!      private
-!        type(ESMF_CalendarType) :: Type
-!        integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
-!        integer :: SecondsPerDay
-!        integer :: SecondsPerYear
-!        type(ESMF_DaysPerYear) :: DaysPerYear
-!      end type
+      type ESMF_Calendar
+      sequence
+      private
+        type(ESMF_CalendarType) :: Type
+        integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
+        integer :: SecondsPerDay
+        integer :: SecondsPerYear
+        type(ESMF_DaysPerYear) :: DaysPerYear
+      end type
 !
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -139,7 +130,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.17 2003/04/25 09:11:59 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.18 2003/04/25 21:10:50 eschwab Exp $'
 
 !==============================================================================
 

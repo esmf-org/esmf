@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.17 2003/04/25 09:15:14 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.18 2003/04/25 21:10:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,23 +55,15 @@
 !     ! F90 class type to match C++ TimeInterval class in size only;
 !     !  all dereferencing within class is performed by C++ implementation
 
+!     ! Equivalent sequence and kind to C++:
+
       type ESMF_TimeInterval
       sequence                           ! match C++ storage order
       private                            !   (members opaque on F90 side)
-        ! keep dimensions even to avoid compiler alignment warnings
-        integer(ESMF_IKIND_I8), dimension(4) :: memoryBlock1
-        integer, dimension(6)                :: memoryBlock2
+        type(ESMF_BaseTime) :: basetime  ! inherit base class
+        integer(ESMF_IKIND_I8) :: YY     ! calendar interval number of years
+        integer(ESMF_IKIND_I8) :: MO     ! calendar interval number of months
       end type
-
-!      ! Equivalent sequence and kind to C++:
-!
-!      type ESMF_TimeInterval
-!      sequence                           ! match C++ storage order
-!      private                            !   (members opaque on F90 side)
-!        type(ESMF_BaseTime) :: basetime  ! inherit base class
-!        integer(ESMF_IKIND_I8) :: YY     ! calendar interval number of years
-!        integer(ESMF_IKIND_I8) :: MO     ! calendar interval number of months
-!      end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -140,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.17 2003/04/25 09:15:14 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.18 2003/04/25 21:10:53 eschwab Exp $'
 
 !==============================================================================
 !

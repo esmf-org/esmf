@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.13 2003/04/25 09:10:34 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.14 2003/04/25 21:10:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -53,28 +53,20 @@
 !     ! F90 class type to match C++ Alarm class in size only;
 !     !  all dereferencing within class is performed by C++ implementation
 
+!     ! Equivalent sequence and kind to C++:
+
       type ESMF_Alarm
       sequence
       private
-        ! keep dimensions even to avoid compiler alignment warnings
-        integer(ESMF_IKIND_I8), dimension(4) :: memoryBlock1
-        integer, dimension(28)               :: memoryBlock2
+        type(ESMF_TimeInterval) :: RingInterval
+        type(ESMF_Time)  :: RingTime
+        type(ESMF_Time)  :: PrevRingTime
+        type(ESMF_Time)  :: StopTime
+        integer :: ID
+        integer :: AlarmMutex
+        logical :: Ringing
+        logical :: Enabled
       end type
-
-!      ! Equivalent sequence and kind to C++:
-!
-!      type ESMF_Alarm
-!      sequence
-!      private
-!        type(ESMF_TimeInterval) :: RingInterval
-!        type(ESMF_Time)  :: RingTime
-!        type(ESMF_Time)  :: PrevRingTime
-!        type(ESMF_Time)  :: StopTime
-!        logical :: Ringing
-!        logical :: Enabled
-!        integer :: ID
-!        integer :: AlarmMutex
-!      end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -112,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.13 2003/04/25 09:10:34 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.14 2003/04/25 21:10:48 eschwab Exp $'
 
 !==============================================================================
 !
