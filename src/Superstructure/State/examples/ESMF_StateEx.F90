@@ -1,7 +1,8 @@
-! $Id: ESMF_StateEx.F90,v 1.4 2003/12/16 22:20:06 svasquez Exp $
+! $Id: ESMF_StateEx.F90,v 1.5 2004/01/07 22:12:02 svasquez Exp $
 
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP

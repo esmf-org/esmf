@@ -1,8 +1,9 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.8 2003/12/17 20:55:34 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.9 2004/01/07 22:07:45 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP

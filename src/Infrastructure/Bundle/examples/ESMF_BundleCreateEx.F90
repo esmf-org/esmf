@@ -1,8 +1,9 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.4 2003/12/16 18:11:31 svasquez Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.5 2004/01/07 22:09:42 svasquez Exp $
 !
 ! Example/test code which creates a new bundle.
 
 !-------------------------------------------------------------------------
+!EXAMPLE        String used by test script to count examples.
 !-------------------------------------------------------------------------
 
 !BOP
