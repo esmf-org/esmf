@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.17 2005/03/11 23:20:19 jwolfe Exp $
+# $Id: build_rules.mk,v 1.18 2005/03/14 21:59:06 jwolfe Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -160,7 +160,7 @@ PGI_C_LIB_FLAG = -cxxlib-gcc
 PGI_C_LIB_NEEDED = -lstdc++
 else
 PGI_C_LIB_FLAG =
-PGI_C_LIB_NEEDED = -lC
+PGI_C_LIB_NEEDED =
 endif
 endif
 
@@ -240,7 +240,7 @@ LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib
 endif
 
 C_F90CXXLIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lC -lc
-C_CXXF90LIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
+C_CXXF90LIBS       = $(LD_PATHS) $(LIB_PATHS) $(PGI_C_LIB_NEEDED) -lrt -lC -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 ###############################################################################
 
 PARCH		   = linux_pgi
