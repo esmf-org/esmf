@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.32 2004/03/19 07:16:52 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.33 2004/03/23 23:02:50 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -18,7 +18,7 @@
 module ESMF_LogErrMod
 
    use ESMF_BaseMod
-   use ESMF_IOMod
+   use ESMF_IOSpecMod
 
 !BOPI
 !============================================================================

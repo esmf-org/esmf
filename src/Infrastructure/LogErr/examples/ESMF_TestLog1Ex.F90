@@ -1,7 +1,9 @@
 program test_log_2
-    use ESMF_Mod
-    implicit none
 #include "ESMF_LogErr.inc"
+    use ESMF_Mod
+    use ESMF_LogErrMod
+    implicit none
+
     
     character(len=4) shep
     character :: ch
