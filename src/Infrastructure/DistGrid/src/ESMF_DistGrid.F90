@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.97 2004/02/24 21:30:04 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.98 2004/03/03 17:47:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1582,7 +1582,7 @@
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells along each axis.
-!     \item[{[global\_start]}]
+!     \item[{[globalStartPerDim]}]
 !          Global index of starting count for cells.
 !     \item[{[globalAIPerDim]}]
 !          Axis indices for cells on this DE.
