@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.10 2003/03/13 16:59:53 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.11 2003/03/13 21:17:20 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.10 2003/03/13 16:59:53 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.11 2003/03/13 21:17:20 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -159,13 +159,12 @@
 //
 // !ARGUMENTS:
       struct ESMC_XPacket *xpacket1,      // in  - first XPacket
-      struct ESMC_XPacket *xpacket2,      // in  - second XPacket
-      struct ESMC_XPacket *intxp) {       // out - intersection XPacket
+      struct ESMC_XPacket *xpacket2) {    // in  - second XPacket
 //
 // !DESCRIPTION:
 //      Finds the intersection of two XPackets, which is itself an XPacket.
 //      Assumes the XPackets have the same strides.  TODO: always true?  If not?
-//      Returns error code if problems are found.
+//      Returns an XPacket and error code if problems are found.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -177,40 +176,40 @@
     if (xpacket1->rank != xpacket2->rank) {
       return ESMF_FAILURE;
     }
-    intxp->rank = xpacket1->rank;
+    this->rank = xpacket1->rank;
 
     // check that the xpacket strides are the same
-    if (intxp->rank > 0) { 
+    if (this->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
         if (xpacket1->strides[i] != xpacket2->strides[i]) {
           return ESMF_FAILURE;
         }
-        intxp->strides[i] = xpacket1->strides[i];
+        this->strides[i] = xpacket1->strides[i];
       }
     }
 
     // set left, right, and nums to zero as default
-    intxp->left = 0;
-    intxp->right = 0;
-    if (intxp->rank > 0) { 
+    this->left = 0;
+    this->right = 0;
+    if (this->rank > 0) { 
       for (i=0; i<xpacket1->rank-1; i++) {
-        intxp->num[i] = 0;
+        this->num[i] = 0;
       }
     }
 
     // switch based on xpacket rank  TODO: is this necessary?
-    switch (intxp->rank) {
+    switch (this->rank) {
       case 1:
         {
           if (xpacket1->left >= xpacket2->left)
-            intxp->left  = xpacket1->left;
+            this->left  = xpacket1->left;
           else
-            intxp->left  = xpacket2->left;
+            this->left  = xpacket2->left;
           if (xpacket1->right <= xpacket2->left)
-            intxp->right = xpacket1->right;
+            this->right = xpacket1->right;
           else
-            intxp->right = xpacket2->right;
-          intxp->num[0] = 1;
+            this->right = xpacket2->right;
+          this->num[0] = 1;
         }
       break;
       case 2:
@@ -230,32 +229,32 @@
           int L2_left  = xpacket2->left  + i2*xpacket2->strides[0];
           int L2_right = xpacket2->right + i2*xpacket2->strides[0];
           if (L1_left >= L2_left)
-            intxp->left  = L1_left;
+            this->left  = L1_left;
           else
-            intxp->left  = L2_left;
+            this->left  = L2_left;
           if (L1_right <= L2_right)
-            intxp->right = L1_right;
+            this->right = L1_right;
           else
-            intxp->right = L2_right;
+            this->right = L2_right;
           if (xpacket1->num[0]-i1 <= xpacket2->num[0]-i2) 
-            intxp->num[0] = xpacket1->num[0]-i1;
+            this->num[0] = xpacket1->num[0]-i1;
           else
-            intxp->num[0] = xpacket2->num[0]-i2;
+            this->num[0] = xpacket2->num[0]-i2;
         }
       break;
       case 3:
         {
-          printf("no code to handle xpacket rank %d yet\n", intxp->rank);
+          printf("no code to handle xpacket rank %d yet\n", this->rank);
         }
       break;
       case 4:
         {
-          printf("no code to handle xpacket rank %d yet\n", intxp->rank);
+          printf("no code to handle xpacket rank %d yet\n", this->rank);
         }
       break;
       case 5:
         {
-          printf("no code to handle xpacket rank %d yet\n", intxp->rank);
+          printf("no code to handle xpacket rank %d yet\n", this->rank);
         }
       break;
     } 
@@ -278,12 +277,11 @@
 //
 // !ARGUMENTS:
       ESMC_AxisIndex *indexlist,  // in  - set of AxisIndices
-      int size_axisindex,         // in  - size of AxisIndex array
-      ESMC_XPacket *xpacket) {    // out - translated XPacket
+      int size_axisindex) {       // in  - size of AxisIndex array
 //
 // !DESCRIPTION:
 //      Translates a set of AxisIndices into a corresponding XPacket.
-//      Returns error code if problems are found.
+//      Returns an XPacket and error code if problems are found.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -302,16 +300,16 @@
         {
           int global_l[2];
           int global_r[2];
-          xpacket->rank = 2;
+          this->rank = 2;
           // calculate global lefts and rights for the index space
           for (i=0; i<size_axisindex; i++) {
             global_l[i] = indexlist[i].l + indexlist[i].gstart;
             global_r[i] = indexlist[i].r + indexlist[i].gstart;
           }
-          xpacket->left  = global_l[1]*indexlist[0].max + global_l[0];
-          xpacket->right = global_r[1]*indexlist[0].max + global_r[0];
-          xpacket->strides[0] = indexlist[0].max;
-          xpacket->num[0] = indexlist[1].r - indexlist[1].l + 1;
+          this->left  = global_l[1]*indexlist[0].max + global_l[0];
+          this->right = global_r[1]*indexlist[0].max + global_r[0];
+          this->strides[0] = indexlist[0].max;
+          this->num[0] = indexlist[1].r - indexlist[1].l + 1;
         }
       break;
       case 3:
