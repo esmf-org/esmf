@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.2 2004/02/24 00:35:04 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.3 2004/03/18 00:29:04 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,4 +14,4 @@ Licensed under the GPL.
 prevent use of esmf derived type initializers.  causes some compilers problems.
 #endif
 
-#define ESMF_NO_INITIALIZERS
+#define ESMF_NO_INITIALIZERS 1
