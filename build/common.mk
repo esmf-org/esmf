@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.64 2004/07/28 22:45:01 nscollins Exp $
+#  $Id: common.mk,v 1.65 2004/07/29 21:20:33 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -1063,7 +1063,7 @@ build_shared:
 # \input and \includegraphics LaTeX commands.
 #
 
-TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:" 
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:"
 
 #-------------------------------------------------------------------------------
 #  dvi rules
