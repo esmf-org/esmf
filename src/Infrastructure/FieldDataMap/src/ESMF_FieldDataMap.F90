@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.26 2004/11/30 21:01:13 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.26.2.1 2005/02/09 16:19:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.26 2004/11/30 21:01:13 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.26.2.1 2005/02/09 16:19:09 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -319,7 +319,12 @@
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-! Set values in an {\tt ESMF\_FieldDataMap}.
+! Set values in an {\tt ESMF\_FieldDataMap}.   Any of the arguments which
+!  are not specified will retain their original values; only those given
+!  to this call will have their values changed.  If you want to initialize
+!  a new {\tt ESMF_FieldDataMap} variable, setting reasonable defaults to
+!  all non-specified arguments, call {\tt ESMF\_FieldDataMapSetDefault()}
+!  instead.
 !
 ! The arguments are:
 !  \begin{description}
@@ -409,6 +414,8 @@
 !     Set default values of an {\tt ESMF\_FieldDataMap}.  This differs
 !     from {\tt ESMF\_FieldDataMapSet()} in that all values which are
 !     not specified here will be overwritten with default values.
+!     This routine is intended to initialize a newly declared variable
+!     before being used for the first time.
 !            
 !     \begin{description}
 !     \item [fielddatamap]
@@ -505,6 +512,8 @@
 !     Set default values of an {\tt ESMF\_FieldDataMap}.  This differs
 !     from {\tt ESMF\_FieldDataMapSet()} in that all values which are
 !     not specified here will be overwritten with default values.
+!     This routine is intended to initialize a newly declared variable
+!     before being used for the first time.
 !       
 !     \begin{description}
 !     \item [fielddatamap]
