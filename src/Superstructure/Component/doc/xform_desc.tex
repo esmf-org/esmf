@@ -1,4 +1,4 @@
-% $Id: xform_desc.tex,v 1.1 2003/01/07 21:35:50 nscollins Exp $
+% $Id: xform_desc.tex,v 1.2 2003/01/30 23:42:36 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,20 @@
 
 %\subsection{Description}
 
-<Describe class function and relation to other classes.>
+Transform objects contains lists of transformations to be
+applied to Export States in order to create new Import States.
+In a sequential execution model, Transform methods can be called 
+directly from a Coupler Component and a Transform object is
+not needed.  
+In a concurrent execution model, where
+the exchange of States between Components is done internally to
+the Component, a Transform object is passed into the Component
+to provide the call-back functions which perform the transformations.
+This method allows the Component code to be independent of
+what other Components it is being coupled with.
+
+Transformation methods include such operations as 
+regridding, interpolation, unit conversion, accumulation and averaging.
+Methods may be required to be conservative of some total quantity.
+
+

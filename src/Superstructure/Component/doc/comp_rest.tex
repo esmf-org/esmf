@@ -1,4 +1,4 @@
-% $Id: comp_rest.tex,v 1.1 2003/01/07 21:34:46 nscollins Exp $
+% $Id: comp_rest.tex,v 1.2 2003/01/30 23:42:35 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,15 @@
 
 %\subsubsection{Restrictions}
 
-<List class restrictions due to design or implementation strategies.>
+Components can be written to run either sequentially or concurrently.
+A sequential Component is expected to be called after
+its Import State is ready, and to return at the end of the requested
+time interval with a finished Export State.  A concurrent Component
+is expected to have an internal time advance loop, and to make 
+Transform calls when data is ready to be Imported or Exported.
+It is not expected that a single Application will be able to 
+transparently replace sequential Components with concurrent ones
+or visa versa.
+It is also not expected that a single Component should be able 
+to function in both modes.  
+

@@ -1,4 +1,4 @@
-% $Id: Component_syn.tex,v 1.1 2003/01/07 21:34:29 nscollins Exp $
+% $Id: Component_syn.tex,v 1.2 2003/01/30 23:42:34 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,4 +10,60 @@
 
 %\section{Synopsis}
 
-<Brief synopsis of component or library.>
+Component, State, and Transform objects are part of the Superstructure 
+layer of the Earth System Modeling Framework (ESMF).  They encapsulate
+the computational models and the exchange of data between them.
+They are designed to meet the requirements as specified in the
+ESMF Requirements document~\ref{esmf_req}.
+
+A {\bf Component} 
+is the highest level object in the ESMF object
+hierarchy.  Components are a combination of user written code and
+data structures and interfaces defined by the ESMF framework.
+Components must provide a set of predefined subroutine interfaces
+which will be called by higher level code.  They must encapsulate
+their input and output data in an ESMF {\tt State} object.  They
+must able to interpret an ESMF {\tt Time} object in order
+to execute the requested number of model timesteps or time interval
+before exchanging data with other Components.
+
+Components are identified as being one or more of the
+following subtypes: {\bf Application}, {\bf Gridded}, and {\bf Coupler}.  
+An Application Component contains other Components which
+cooperate in a computation. An Application Component can also be itself a
+Component nested in a higher level Application.  A Gridded Component
+does the actual model computation.  A Coupler Component executes or
+arranges the execution of the necessary data transformations between one
+or more Gridded Components.
+
+
+A {\bf State} 
+encapsulates the data and sufficient description information
+to allow the data computed by one Gridded Component to be
+used as input to another Gridded Component.  A Gridded Component has
+two states, an {\bf Import State} and an {\bf Export State}.
+The Import State encapsulates all data needed as input to the
+next run of the Component.  The Export State encapsulates all
+data produced by the Component which is required by another
+Component as input.  Data inside states are one or more of
+the following ESMF Objects: Bundles, Fields, or Arrays.
+Components must exchange information with other Components
+only by passing the data through State objects.
+
+A Coupler Component takes a list of State objects consisting of
+both Export States and Import States.
+The Coupler Component is responsible for transforming data 
+so the appropriate Import States can be provided the corresponding
+Component or Components.
+The framework supplies
+methods to do basic transformations which may include regridding,
+interpolation, unit conversions, accumulations, averaging,
+transformations which conserve specific values.
+
+
+A {\bf Transform} object encapsulates a list of operations to be
+performed on a {\tt State} object.  For Components where it is not
+feasible to return to the calling routine each time Coupling is
+required, the Transform methods can be called from within the
+Component to perform the proper data transformations.
+

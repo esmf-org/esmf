@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateEx.F90,v 1.4 2003/01/29 23:36:05 nscollins Exp $
+! $Id: ESMF_CompCreateEx.F90,v 1.5 2003/01/30 23:42:36 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -18,7 +18,7 @@
     program ESMF_CompCreateEx
     
 !   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
+    #include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod

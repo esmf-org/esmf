@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.3 2003/01/29 23:32:39 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.4 2003/01/30 23:42:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,6 @@
 ! {\tt State} class and associated functions and subroutines.  
 !
 !
-!------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
@@ -158,14 +157,8 @@
         type(ESMF_Base) :: base
         type(ESMF_StateImpExpType) :: st
         character (len=ESMF_MAXSTR) :: compname
-        ! this will be either an allocatable array (simpler to random access but
-        ! harder to resize), or a linked list (slightly more overhead to iterate
-        ! (less memory contiguity) but easy to add and delete items from.
-        !integer :: listlength
-        !type(ESMF_StateData), pointer :: listhead
-        ! or
         integer :: datacount
-        type(ESMF_StateData), dimension(:), pointer :: data
+        type(ESMF_StateData), dimension(:), pointer :: datalist
       end type
 
 !------------------------------------------------------------------------------
@@ -199,6 +192,7 @@
       public ESMF_StateGetInfo
       public ESMF_StateAddNameOnly 
       public ESMF_StateSetNeeded, ESMF_StateGetNeeded
+      !public ESMF_StateGetNeededList   ! returns an array of values
       !public ESMF_State{Get/Set}Ready  ! is data ready
       !public ESMF_State{Get/Set}CompName  ! set only if not given at create time
  
@@ -213,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.3 2003/01/29 23:32:39 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.4 2003/01/30 23:42:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -401,7 +395,7 @@ end function
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[[rc]]
+!   \item[\[rc\]]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}

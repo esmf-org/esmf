@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.3 2003/01/30 23:42:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 #include "ESMF.h"
 !------------------------------------------------------------------------------
 !BOP
-! !MODULE: ESMF_CompMod - Manage data components uniformly between F90 and C++     
+! !MODULE: ESMF_CompMod - Component class.
 !
 ! !DESCRIPTION:
 !
@@ -32,7 +32,6 @@
 ! {\tt Component} class and associated functions and subroutines.  
 !
 !
-!------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
@@ -139,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.3 2003/01/30 23:42:38 nscollins Exp $'
 
 !==============================================================================
 ! 

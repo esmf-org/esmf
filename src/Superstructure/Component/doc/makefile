@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/01/29 23:33:15 nscollins Exp $ 
+# $Id: makefile,v 1.6 2003/01/30 23:42:35 nscollins Exp $ 
 
 all: alldocs
 
@@ -130,5 +130,7 @@ ccsrc:
 	do_ccprotex xform ../interface/ESMC_Xform.C
 	do_ccprotex cpl ../interface/ESMC_Cpl.C
 	touch gcomp_ccapi.tex
+	#do_ccprotex stateex ../examples/ESMC_StateCreateEx.C
+	#do_ccprotex compex ../examples/ESMC_CompCreateEx.C
 
 

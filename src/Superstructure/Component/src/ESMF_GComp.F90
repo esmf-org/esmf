@@ -1,4 +1,4 @@
-! $Id: ESMF_GComp.F90,v 1.1 2003/01/29 00:00:26 nscollins Exp $
+! $Id: ESMF_GComp.F90,v 1.2 2003/01/30 23:42:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,6 @@
 ! {\tt GComp} class and associated functions and subroutines.  
 !
 !
-!------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOMod
@@ -79,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GComp.F90,v 1.1 2003/01/29 00:00:26 nscollins Exp $'
+      '$Id: ESMF_GComp.F90,v 1.2 2003/01/30 23:42:38 nscollins Exp $'
 
 !==============================================================================
 ! 

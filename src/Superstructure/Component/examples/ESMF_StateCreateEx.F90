@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreateEx.F90,v 1.2 2003/01/29 23:50:31 nscollins Exp $
+! $Id: ESMF_StateCreateEx.F90,v 1.3 2003/01/30 23:42:37 nscollins Exp $
 !
 ! Example code for creating States.
 
@@ -16,7 +16,7 @@
     program ESMF_StateCreateExample
     
 !   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
+    #include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by States
     use ESMF_IOMod
@@ -41,7 +41,8 @@
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
-!   !  Create/Destroy an Empty State.
+!   !  The simplest creation of an empty State, specifying the name of the
+!   !   current component, and the type of state.  
  
     print *, "State Example 1: Empty State"
 
@@ -49,8 +50,8 @@
     state1 = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc)  
     print *, "State Create returned, name = ", trim(cname)
 
-    call ESMF_StatePrint(state1, rc=rc)
-    print *, "State Print returned", rc
+    ! Data would be added here and the State reused inside the inner
+    !  time loop of a sequential application.
 
     call ESMF_StateDestroy(state1, rc)
     print *, "State Destroy returned", rc
@@ -69,14 +70,14 @@
     state2 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc)  
     print *, "State Create returned, name = ", trim(cname)
 
-    bundle1 = ESMF_BundleCreate(rc=rc)
+    bname = "Temperature"
+    bundle1 = ESMF_BundleCreate(bname, rc=rc)
     print *, "Bundle Create returned", rc
 
     call ESMF_StateAddData(state2, bundle1, rc)
     print *, "StateAddData returned", rc
     
-    call ESMF_StatePrint(state2, rc=rc)
-    print *, "State Print returned", rc
+    ! Loop here, updating Bundle contents each time step
 
     call ESMF_StateDestroy(state2, rc)
     print *, "State Destroy returned", rc
@@ -91,9 +92,15 @@
 !   ! Example 3:
 !   !
 !   !  Create, Add Placeholder, Query, then Destroy a State.
+!   !  This example applies to a Gridded Component which potentially
+!   !  could create a large number of export items but it is unlikely
+!   !  that any other component would require all of them.  This allows
+!   !  the consuming component to mark those needed, and the producer
+!   !  only has to fill the data items requested.
  
     print *, "State Example 3: Export State with Placeholder"
 
+    ! The producing Component creates the menu of data items available.
     cname = "Ocean"
     state3 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc)  
     print *, "State Create returned", rc, " name = ", trim(cname)
@@ -102,10 +109,7 @@
     call ESMF_StateAddNameOnly(state3, sname, rc)
     print *, "StateAddNameOnly returned", rc, " name = ", trim(sname)
     
-    call ESMF_StatePrint(state3, rc=rc)
-    print *, "State Print returned", rc
-
-    ! save for next test, do not destroy yet
+    ! See next example for how this is used.
 
     print *, "State Example 3 finished"
 
@@ -117,15 +121,16 @@
  
     print *, "State Example 4: Get/Set Needed flags in Export State"
 
-    ! inherit state3 from test above
+    ! Given state3 from the previous example, the consuming Component
+    ! is given an opportunity to mark which data items are needed.
 
     sname = "Downward wind"
     isneeded = ESMF_STATEDATAISNEEDED
     call ESMF_StateSetNeeded(state3, sname, isneeded, rc)
     print *, "StateSetNeeded returned", rc
     
-    call ESMF_StatePrint(state3, rc=rc)
-    print *, "State Print returned", rc
+    ! Back in the producing Component, it can check the state to see
+    ! which data items are needed.
 
     call ESMF_StateGetNeeded(state3, sname, isneeded, rc)
     print *, "StateGetNeeded returned", rc
