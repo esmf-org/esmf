@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/04/18 17:18:33 flanigan Exp $ 
+# $Id: makefile,v 1.11 2003/05/22 20:35:35 flanigan Exp $ 
 
 ALL: system_tests
 
@@ -33,7 +33,7 @@ include $(ESMF_DIR)/makefile
 DIRS = 
 
 CLEANDIRS   =
-CLEANFILES  = *.o *.mod
+CLEANFILES  = *.o *.mod $(SYSTEM_TESTS_BUILD)
 CLOBBERDIRS =
 
 RUN_ESMF_SysTest70384:
