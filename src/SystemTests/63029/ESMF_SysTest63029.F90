@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.2 2003/02/27 23:03:27 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.3 2003/02/28 21:46:10 nscollins Exp $
 !
 ! System test code #63029
 
@@ -33,24 +33,10 @@
     implicit none
     
 !   Local variables
-    integer :: nx, ny, i, j, ni, nj, rc
-    integer, dimension(04) :: delist
-    integer :: timestep
-    integer :: de_id
-    integer :: i_max, j_max
-    integer :: horz_gridtype, vert_gridtype, halo_width
-    integer :: horz_stagger, vert_stagger
-    integer :: horz_coord_system, vert_coord_system
-    integer :: status
-    real :: x_min, x_max, y_min, y_max
-    integer(ESMF_IKIND_I4), dimension(:,:), pointer :: idata, idata2, &
-                                                       ldata
-    character(len=ESMF_MAXSTR) :: cname, gname, fname
-    type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+    integer, dimension(4) :: delist
+    integer :: de_id, rc
+    character(len=ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout1 
-    type(ESMF_Grid) :: grid1
-    type(ESMF_Array) :: array1, array2
-    type(ESMF_Field) :: field1
     type(ESMF_Comp) :: comp1
         
 !-------------------------------------------------------------------------
@@ -66,7 +52,6 @@
 !
 
 !   Create a Layout for the Component
-!   delist = (/ 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 /)
     delist = (/ 0, 1, 2, 3 /)
     layout1 = ESMF_LayoutCreate(2, 2, delist, ESMF_XFAST, rc)
 
