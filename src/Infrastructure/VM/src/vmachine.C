@@ -346,13 +346,15 @@ struct contrib_id{
 
 struct vmachine_spawn_arg{
   // members which are different for each new pet
-  vmachine *myvm;             // pointer to vm instance on heap
+  void *myvm;                 // pointer to vm instance on heap
   pthread_t pthid;            // pthread id of the spawned thread
   int mypet;                  // new mypet 
   int *ncontributors;         // number of pets that contributed cores 
   contrib_id **contributors;  // array of contributors
   // members which are identical for all new pets
-  void *(*fctp)(vmachine &, void *);  // pointer to the user function
+  void *(*fctp)(void *, void *);  // pointer to the user function
+  // 1st (void *) points to the provided object (child of vmachine class)
+  // 2nd (void *) points to data that shall be passed to the user function
   int npets;                  // new number of pets
   int *lpid;
   int *pid;
@@ -380,7 +382,7 @@ static void *vmachine_spawn(void *arg){
   printf("hello from within vmachine_spawn, mypet=%d\n", sarg->mypet);
 #endif
   // obtain reference to the vm instance on heap
-  vmachine &vm = *(sarg->myvm);
+  vmachine &vm = *((vmachine *)sarg->myvm);
   // setup the pet section in this vm instance
   vm.vmachine_construct(sarg->mypet, sarg->npets, sarg->lpid, sarg->pid,
     sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
@@ -388,7 +390,7 @@ static void *vmachine_spawn(void *arg){
     sarg->commarray, sarg->pref_intra_ssi);
   // call the function pointer with the new vmachine as its argument
   // this is where we finally enter the user code again...  
-  sarg->fctp(vm, sarg->cargo);
+  sarg->fctp(sarg->myvm, sarg->cargo);
   // wrap-up...
   vm.vmachine_destruct();
   // before pet terminates it must send a signal indicating that core is free
@@ -482,14 +484,14 @@ static void *vmachine_block(void *arg){
 
 
 void *vmachine::vmachine_enter(class vmplan &vmp, 
-  void *(fctp)(vmachine &, void *), void *cargo){
+  void *(fctp)(void *, void *), void *cargo){
 #ifdef VM_DONT_SPAWN_PTHREADS
   // Ensure that vmplan does not indicate multi-threading or multi-PE PET
   for (int i=0; i<npets; i++){
     if (vmp.spawnflag[i]!=1){
       fprintf(stderr, "VM_ERROR: Cannot use multi-threaded or multi-PE PETs"
         " in VM_DONT_SPAWN_PTHREADS mode.\n");
-      exit(0);
+      MPI_Abort(MPI_COMM_WORLD, 0);
     }
   }
 #endif
@@ -505,8 +507,13 @@ void *vmachine::vmachine_enter(class vmplan &vmp,
   //    sarg[] has as many elements as mypet spawns threads, but at least one
   // next, allocate as many vm objects off the heap as there will be spawned
   // next, set pointers in sarg to the vmachine instances on the heap
-  for (int i=0; i<vmp.spawnflag[mypet]; i++)
+  for (int i=0; i<vmp.spawnflag[mypet]; i++){
+    if (vmp.myvms == NULL){
+      fprintf(stderr, "VM_ERROR: No vm objects provided.\n");
+      MPI_Abort(MPI_COMM_WORLD, 0);
+    } 
     sarg[i].myvm = vmp.myvms[i];
+  }
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
   int new_npets=0;
@@ -1101,12 +1108,20 @@ void vmplan::vmplan_garbage(void){
     spawnflag = NULL;
     contribute = NULL;
     cspawnid = NULL;
+    myvms = NULL;     // this does NOT deallocate VM objects!
   }
-  if (myvms != NULL){
-    for (int i=0; i<nspawn; i++)
-      delete myvms[i];
-    delete [] myvms;
-  }
+}
+
+
+int vmplan::vmplan_nspawn(void){
+  // return number of PETs that are being spawned out of current PET
+  return nspawn;
+}
+
+
+void vmplan::vmplan_myvms(void **myvms){
+  // set the internal myvms pointer array
+  this->myvms = myvms;
 }
 
 
@@ -1209,9 +1224,6 @@ void vmplan::vmplan_maxthreads(vmachine &vm, int max, int *plist, int nplist){
   delete [] nssiid;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
-  myvms = new vmachine*[nspawn];
-  for (int i=0; i<nspawn; i++)
-    myvms[i] = new vmachine;
 }
 
 
@@ -1296,9 +1308,6 @@ void vmplan::vmplan_minthreads(vmachine &vm, int max, int *plist, int nplist){
   delete [] first_pet_index;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
-  myvms= new vmachine*[nspawn];
-  for (int i=0; i<nspawn; i++)
-    myvms[i] = new vmachine;
 }
 
 
@@ -1388,9 +1397,6 @@ void vmplan::vmplan_maxcores(vmachine &vm, int max, int *plist, int nplist){
   delete [] nssiid;
   // now deal with mypet specific members
   nspawn = spawnflag[vm.mypet];
-  myvms = new vmachine*[nspawn];
-  for (int i=0; i<nspawn; i++)
-    myvms[i] = new vmachine;
 }
 
 
