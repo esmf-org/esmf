@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/03/28 17:21:52 svasquez Exp $
+# $Id: makefile,v 1.6 2003/03/28 17:57:44 jwolfe Exp $
 
 # makefile template for the examples directory.
 
@@ -58,8 +58,7 @@ RUN_ESMF_GridCreateEx:
 	${MPIRUN} -np 4 ESMF_GridCreateEx > ESMF_GridCreateEx.stdout
 
 RUN_ESMF_GridCreateExUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_GridCreateEx.tmps
-	${MPIRUN} -np 1 ESMF_GridCreateEx > ESMF_GridCreateEx.stdout
+	echo "ESMF_GridCreateEx not set up to run on one processor."
 
 ESMF_GridCreateEx.rm:
 	echo "ESMF_GridCreateEx.rm target called here."
