@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desdoc.ctex,v 1.6 2003/01/23 17:18:57 nscollins Exp $
+% $Id: TimeMgr_desdoc.ctex,v 1.7 2003/02/11 18:55:08 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -6,6 +6,7 @@
 \usepackage{epsf}
 \usepackage{html}
 \usepackage{times}
+\usepackage{alltt}
 \usepackage[T1]{fontenc}
 \usepackage[dvips]{graphics,color}
 
@@ -61,84 +62,86 @@
 \input{../Infrastructure/TimeMgr/doc/TimeMgr_param}
 #endif
 
-% ----------
-% Time Class
-% ----------
+% --------------
+% BaseTime Class
+% --------------
 
-\section{Time Class Design}
+\section{Base Time Class Design}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Time_desc}
+\input{BaseTime_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_desc}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
-\input{Time_design}
+\input{BaseTime_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_design}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{Time_def}
+\input{BaseTime_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_def}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-\input{Time_rest}
+\input{BaseTime_rest}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_rest}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_rest}
 #endif
 
-\section{Time Class F90 Interface}
+\section{BaseTime Class F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Time_fex}
+\input{BaseTime_fex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_fex}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{Time_fparam}
+%\input{BaseTime_fparam}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Time_fparam}
+%\input{../Infrastructure/TimeMgr/doc/BaseTime_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Time_fapi}
+\input{BaseTime_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_fapi}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_fapi}
 #endif
 
-\section{Time Class C++ Interface}
+\section{BaseTime Class C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Time_ccex}
+\input{BaseTime_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_ccex}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{Time_ccparam}
+%\input{BaseTime_ccparam}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Time_ccparam}
+%\input{../Infrastructure/TimeMgr/doc/BaseTime_ccparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Time_ccapi}
+\input{BaseTime_chapi}
+%\input{BaseTime_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_ccapi}
+\input{../Infrastructure/TimeMgr/doc/BaseTime_chapi}
+%\input{../Infrastructure/TimeMgr/doc/BaseTime_ccapi}
 #endif
 
 % -------------------
@@ -216,91 +219,93 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{TimeInterval_ccapi}
+\input{TimeInterval_chapi}
+%\input{TimeInterval_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_ccapi}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_chapi}
+%\input{../Infrastructure/TimeMgr/doc/TimeInterval_ccapi}
 #endif
 
-% ------------------
-% Time Instant Class
-% ------------------
+% ----------
+% Time Class
+% ----------
 
-\section{Time Instant Class Design}
+\section{Time Class Design}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{TimeInstant_desc}
+\input{Time_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_desc}
+\input{../Infrastructure/TimeMgr/doc/Time_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
-\input{TimeInstant_design}
+\input{Time_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_design}
+\input{../Infrastructure/TimeMgr/doc/Time_design}
 #endif
 
 \subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{TimeInstant_def}
+\input{Time_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_def}
+\input{../Infrastructure/TimeMgr/doc/Time_def}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
-%\input{TimeInstant_rest}
+%\input{Time_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeInstant_rest}
+%\input{../Infrastructure/TimeMgr/doc/Time_rest}
 #endif
 
-\section{Time Instant Class F90 Interface}
+\section{Time Class F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{TimeInstant_fex}
+\input{Time_fex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_fex}
+\input{../Infrastructure/TimeMgr/doc/Time_fex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{TimeInstant_fparam}
+%\input{Time_fparam}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeInstant_fparam}
+%\input{../Infrastructure/TimeMgr/doc/Time_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{TimeInstant_fapi}
+\input{Time_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_fapi}
+\input{../Infrastructure/TimeMgr/doc/Time_fapi}
 #endif
 
-\section{Time Instant Class C++ Interface}
+\section{Time Class C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{TimeInstant_ccex}
+\input{Time_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_ccex}
+\input{../Infrastructure/TimeMgr/doc/Time_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{TimeInstant_ccparam}
+%\input{Time_ccparam}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/TimeInstant_ccparam}
+%\input{../Infrastructure/TimeMgr/doc/Time_ccparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{TimeInstant_chapi}
-\input{TimeInstant_ccapi}
+\input{Time_chapi}
+%\input{Time_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_chapi}
-\input{../Infrastructure/TimeMgr/doc/TimeInstant_ccapi}
+\input{../Infrastructure/TimeMgr/doc/Time_chapi}
+%\input{../Infrastructure/TimeMgr/doc/Time_ccapi}
 #endif
 
 % --------------
@@ -378,9 +383,11 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Calendar_ccapi}
+\input{Calendar_chapi}
+%\input{Calendar_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_ccapi}
+\input{../Infrastructure/TimeMgr/doc/Calendar_chapi}
+%\input{../Infrastructure/TimeMgr/doc/Calendar_ccapi}
 #endif
 
 % -----------
@@ -458,9 +465,11 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Clock_ccapi}
+\input{Clock_chapi}
+%\input{Clock_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_ccapi}
+\input{../Infrastructure/TimeMgr/doc/Clock_chapi}
+%\input{../Infrastructure/TimeMgr/doc/Clock_ccapi}
 #endif
 
 % -----------
@@ -538,9 +547,11 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Alarm_ccapi}
+\input{Alarm_chapi}
+%\input{Alarm_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Alarm_ccapi}
+\input{../Infrastructure/TimeMgr/doc/Alarm_chapi}
+%\input{../Infrastructure/TimeMgr/doc/Alarm_ccapi}
 #endif
 
 #ifdef STANDALONE
