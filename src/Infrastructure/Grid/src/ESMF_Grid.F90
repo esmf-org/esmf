@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.189 2004/08/16 23:10:12 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.190 2004/08/17 23:18:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.189 2004/08/16 23:10:12 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.190 2004/08/17 23:18:30 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2855,7 +2855,13 @@
 
 ! !DESCRIPTION:
 !     Translates an array of integer cell identifiers from global indexing 
-!     to DE-local indexing.
+!     to DE-local indexing.  This routine is intended to identify equivalent
+!     positions of grid elements in distributed (local) arrays and gathered
+!     (global) arrays, either by memory location or index pairs.
+!     WARNING:  This routine is meant for very limited user access.  It works
+!               with Grid indices and will give erroneous results if applied to
+!               Field or Array indices.  In the future, this should be a Field
+!               method, but in the meantime it will be left available here.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2868,17 +2874,36 @@
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
 !     \item[{[global1D]}]
-!          One-dimensional array of global identifiers to be
-!          translated.  Infers translating between positions in memory.
+!          One-dimensional array of global identifiers to be translated.
+!          Usage of this optional argument infers translating between positions
+!          in memory from a global array to a local (or distributed) one.
+!          This array is dimensioned (N), where N is the number of memory
+!          locations to be translated.
 !     \item[{[local1D]}]
-!          One-dimensional array of local identifiers
-!          corresponding to global identifiers.
+!          One-dimensional array of local identifiers for the return of the
+!          translation.  This array must be the same size as [{[global1D]}],
+!          and must be present if [{[global1D]}] is present.  If either of
+!          these conditions is not met, an error is issued.
 !     \item[{[global2D]}]
-!          Two-dimensional array of global identifiers to be
-!          translated.  Infers translating between indices in ij space.
+!          Two-dimensional array of global identifiers to be translated.
+!          Usage of this optional argument infers translating between indices
+!          in ij space.  This array is assumed to be dimensioned (N,2), where
+!          N is the number of index locations to be translated and the second
+!          dimension corresponds to the two grid indices that are distributed 
+!          (currently any two dimensions of a three-dimensional grid can be
+!          distributed).  So to translate three sets of global indices to
+!          local indexing,
+!                [{[global2D(1,1)]}] = index1(1)
+!                [{[global2D(1,2)]}] = index1(2)
+!                [{[global2D(2,1)]}] = index2(1)
+!                [{[global2D(2,2)]}] = index2(2)
+!                [{[global2D(3,1)]}] = index3(1)
+!                [{[global2D(3,2)]}] = index3(2)
 !     \item[{[local2D]}]
-!          Two-dimensional array of local identifiers
-!          corresponding to global identifiers.
+!          Two-dimensional array of local identifiers for the return of the
+!          translation.  This array must be the same size as [{[global2D]}],
+!          and must be present if [{[global2D]}] is present.  If either of
+!          these conditions is not met, an error is issued.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2977,7 +3002,13 @@
 
 ! !DESCRIPTION:
 !     Translates an array of integer cell identifiers from DE-local indexing 
-!     to global indexing.
+!     to global indexing.  This routine is intended to identify equivalent
+!     positions of grid elements in distributed (local) arrays and gathered
+!     (global) arrays, either by memory location or index pairs.
+!     WARNING:  This routine is meant for very limited user access.  It works
+!               with Grid indices and will give erroneous results if applied to
+!               Field or Array indices.  In the future, this should be a Field
+!               method, but in the meantime it will be left available here.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2990,17 +3021,36 @@
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
 !     \item[{[local1D]}]
-!          One-dimensional array of local identifiers to be
-!          translated.  Infers translating between positions in memory.
+!          One-dimensional array of global identifiers to be translated.
+!          Usage of this optional argument infers translating between positions
+!          in memory from a local (or distributed) grid array to a global one.
+!          This array is dimensioned (N), where N is the number of memory
+!          locations to be translated.
 !     \item[{[global1D]}]
-!          One-dimensional array of global identifiers
-!          corresponding to local identifiers.
+!          One-dimensional array of global identifiers for the return of the
+!          translation.  This array must be the same size as [{[local1D]}],
+!          and must be present if [{[local1D]}] is present.  If either of
+!          these conditions is not met, an error is issued.
 !     \item[{[local2D]}]
-!          Two-dimensional array of local identifiers to be
-!          translated.  Infers translating between indices in ij space.
+!          Two-dimensional array of local identifiers to be translated.
+!          Usage of this optional argument infers translating between indices
+!          in ij space.  This array is assumed to be dimensioned (N,2), where
+!          N is the number of index locations to be translated and the second
+!          dimension corresponds to the two grid indices that are distributed 
+!          (currently any two dimensions of a three-dimensional grid can be
+!          distributed).  So to translate three sets of local indices to
+!          global indexing,
+!                [{[local2D(1,1)]}] = index1(1)
+!                [{[local2D(1,2)]}] = index1(2)
+!                [{[local2D(2,1)]}] = index2(1)
+!                [{[local2D(2,2)]}] = index2(2)
+!                [{[local2D(3,1)]}] = index3(1)
+!                [{[local2D(3,2)]}] = index3(2)
 !     \item[{[global2D]}]
-!          Two-dimensional array of global identifiers
-!          corresponding to local identifiers.
+!          Two-dimensional array of global identifiers for the return of the
+!          translation.  This array must be the same size as [{[local2D]}],
+!          and must be present if [{[local2D]}] is present.  If either of
+!          these conditions is not met, an error is issued.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
