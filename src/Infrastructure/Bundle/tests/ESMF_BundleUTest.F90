@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.16 2004/05/20 16:47:18 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.17 2004/06/07 17:46:45 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.16 2004/05/20 16:47:18 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.17 2004/06/07 17:46:45 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -164,12 +164,34 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Add a field to an empty Bundle
+      ! Creating a layout
       layout = ESMF_DELayoutCreate(vm, rc=rc)
-      mincoord = (/ 0.0, 0.0 /)
-      grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), mincoord, &
-                                           delayout=layout, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a Layout Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Creating a Grid
+      grid = ESMF_GridCreate(name="Grid", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Creating a Field Test
       simplefield = ESMF_FieldCreateNoData(grid=grid, name="rh", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Create a Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Add a field to an empty Bundle
       call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       write(failMsg, *) ""
       write(name, *) "Adding a field to an Empty Bundle"
