@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.38 2003/04/14 16:34:23 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.39 2003/04/14 19:42:28 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.38 2003/04/14 16:34:23 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.39 2003/04/14 19:42:28 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -681,6 +681,57 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_GridCompDestroy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompRun -- Call the Component's run routine
+
+! !INTERFACE:
+      subroutine ESMF_GridCompRun(component, importstate, &
+                                           exportstate, clock, phase, rc)
+!
+!
+! !ARGUMENTS:
+      type (ESMF_GridComp) :: component
+      type (ESMF_State), intent(inout), optional :: importstate
+      type (ESMF_State), intent(inout), optional :: exportstate
+      type (ESMF_Clock), intent(in), optional :: clock
+      integer, intent(in), optional :: phase
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Call the associated user run code for a component.
+!
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[component]
+!    Component to call Run routine for.
+!
+!   \item[{[importstate]}]  Import data for run.
+!
+!   \item[{[exportstate]}]  Export data for run.
+!
+!   \item[{[clock]}]  External clock for passing in time information.
+!
+!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
+!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_CompRun(component%compp, ESMF_GRIDCOMPTYPE, importstate, &
+                                 exportstate, clock=clock, phase=phase, &
+                                 gcomp=component, rc=rc)
+
+        end subroutine ESMF_GridCompRun
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -1361,57 +1412,6 @@
 
 
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCompRun -- Call the Component's run routine
-
-! !INTERFACE:
-      subroutine ESMF_GridCompRun(component, importstate, &
-                                           exportstate, clock, phase, rc)
-!
-!
-! !ARGUMENTS:
-      type (ESMF_GridComp) :: component
-      type (ESMF_State), intent(inout), optional :: importstate
-      type (ESMF_State), intent(inout), optional :: exportstate
-      type (ESMF_Clock), intent(in), optional :: clock
-      integer, intent(in), optional :: phase
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Call the associated user run code for a component.
-!
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!   \item[component]
-!    Component to call Run routine for.
-!
-!   \item[{[importstate]}]  Import data for run.
-!
-!   \item[{[exportstate]}]  Export data for run.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_CompRun(component%compp, ESMF_GRIDCOMPTYPE, importstate, &
-                                 exportstate, clock=clock, phase=phase, &
-                                 gcomp=component, rc=rc)
-
-        end subroutine ESMF_GridCompRun
-
-
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CplCompRun -- Call the Component's run routine
