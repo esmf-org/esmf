@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.2 2003/03/05 20:58:56 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.3 2003/03/10 23:42:01 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -65,13 +65,17 @@
  class ESMC_XPacket : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
+     int destid;             // one XPacket per destination?
      int chunkcount;
       
      // linked list of these, one per chunk:
-     void *base_addr;
-     int rank;
-     //the memaxis stuff, based on rank
-     int destid;
+     void *base_addr;        // this one I'm still not sure of
+     int rank;               // do you think each xpacket should have
+                             // chunks with different rank?  it almost
+                             // infers different data being moved, instead
+                             // of parts of the same array, but maybe that's
+                             // reasonable and more general
+     ESMC_MemAxis tuple;     // the memaxis stuff, based on rank
      
      ESMC_XPacket *nextp;
 
