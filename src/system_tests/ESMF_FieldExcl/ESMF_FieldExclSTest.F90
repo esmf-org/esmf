@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.6 2004/10/11 22:51:38 jwolfe Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.7 2004/10/12 21:16:49 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -85,12 +85,33 @@
     call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
+#ifdef VM_DONT_SPAWN_PTHREADS
+    write(failMsg, *) "This system test must be compiled WITHOUT defining"
+    print *, failMsg
+    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
+
+    write(failMsg, *) "VM_DONT_SPAWN_PTHREADS in $ESMF_DIR/build/common.mk"
+    print *, failMsg
+    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
+
+    write(failMsg, *) "(Both this test and the whole ESMF library must be"
+    print *, failMsg
+    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
+
+    write(failMsg, *) "recompiled without this symbol.)"
+    print *, failMsg
+    call ESMF_LogWrite(failMsg, ESMF_LOG_INFO)
+
+    rc = ESMF_FAILURE
+    goto 10
+#endif
+   
     if (npets .lt. 8) then
       print *, "This system test needs to run at least 8-way, current np = ", &
                npets
+      rc = ESMF_FAILURE
       goto 10
     endif
-
    
     ! give PETs (0 to splitnum-1) to comp1, (splitnum to npets-1) to comp2
     splitnum = npets / 2
@@ -147,8 +168,8 @@
                                             ESMF_CAL_GREGORIAN, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! initialize time interval to 6 hours
-    call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
+    ! initialize time interval to 4 hours
+    call ESMF_TimeIntervalSet(timeStep, h=4, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize start time to 5/01/2003
@@ -157,7 +178,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! initialize stop time to 5/02/2003
-    call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=1, h=6, &
+    call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
                       calendar=gregorianCalendar, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -196,17 +217,28 @@
 
     do while (.not. ESMF_ClockIsStopTime(clock, rc))
 
-      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, rc=rc)
+      call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
+                            blockingFlag=ESMF_BLOCKING, rc=rc)
+                            !blockingFlag=ESMF_NONBLOCKING, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+ 
+      call ESMF_GridCompWait(comp1, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Comp 1 Run returned, rc =", rc
 
-      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompWait(comp2, rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      print *, "Comp 2 Run returned, rc =", rc
+
+      call ESMF_CplCompRun(cpl, c1exp, c2imp, clock=clock, &
+                            blockingFlag=ESMF_BLOCKING, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Run returned, rc =", rc
 
-      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, rc=rc)
+      call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
+                            blockingFlag=ESMF_BLOCKING, rc=rc)
+                            !blockingFlag=ESMF_NONBLOCKING, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "Comp 2 Run returned, rc =", rc
 
       call ESMF_ClockAdvance(clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
@@ -214,6 +246,14 @@
 
     enddo
  
+    call ESMF_GridCompWait(comp1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp 1 Run returned, rc =", rc
+
+    call ESMF_GridCompWait(comp2, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+    print *, "Comp 2 Run returned, rc =", rc
+
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
