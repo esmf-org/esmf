@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.1 2004/11/19 17:56:44 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.2 2004/11/19 18:35:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.1 2004/11/19 17:56:44 svasquez Exp $'
+      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.2 2004/11/19 18:35:16 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -102,7 +102,7 @@
       write(name, *) "Verifying array1 data before scatter/gather Test"
       rc = ESMF_SUCCESS
       do i=1, nlen
-	if (array1(i)/=(localPet * 100 + 1)) rc = ESMF_FAILURE
+	if (array1(i)/=(localPet * 100 + i)) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
@@ -153,7 +153,7 @@
       rc = ESMF_SUCCESS
       if (localPet==gatherRoot) then
       	do i=1, nlen
-		if (array1(i)/=(scatterRoot * 100 + 1)) rc = ESMF_FAILURE
+		if (array1(i)/=(scatterRoot * 100 + i)) rc = ESMF_FAILURE
       	enddo
       else
       	do i=1, nlen
