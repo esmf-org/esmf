@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.62 2004/02/06 22:49:44 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.63 2004/02/11 06:53:24 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.62 2004/02/06 22:49:44 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.63 2004/02/11 06:53:24 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -296,26 +296,28 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
       ! Verify the calendar is set correctly
-      !write(name, *) "Get Calendar Type Test"
-      !call ESMF_CalendarGet(gregorianCalendar, type=cal_type, rc=rc)
-      !write(failMsg, *) " Did not return ESMF_SUCCESS and/or calendar not correct value"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(cal_type%calendarType.eq.ESMF_CAL_GREGORIAN), &
-      !               name, failMsg, result, ESMF_SRCLINE)
-
-#ifdef ESMF_EXHAUSTIVE
-      ! This code crashes, bug 79753 has been opened.
-      ! Attempt to get un-initialized year from stop time
-      ! write(name, *) "Get Uninitialized StopTime Year Test"
-      ! call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
-      ! write(failMsg, *) " Returned ESMF_SUCCESS"
-      ! call ESMF_Test((rc.eq.ESMF_FAILURE), &
-      !                name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Get Calendar Type Test"
+      call ESMF_CalendarGet(gregorianCalendar, calendarType=cal_type, rc=rc)
+      write(failMsg, *) " Did not return ESMF_SUCCESS and/or calendar not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(cal_type.eq.ESMF_CAL_GREGORIAN), &
+                     name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! This code crashes, bug 79753 has been opened.
+      ! Attempt to get un-initialized year from stop time
+      !write(name, *) "Get Uninitialized StopTime Year Test"
+      !call ESMF_TimeGet(stopTime, yy=YY, rc=rc)
+      !write(failMsg, *) " Returned ESMF_SUCCESS"
+      !call ESMF_Test((rc.eq.ESMF_FAILURE), &
+      !               name, failMsg, result, ESMF_SRCLINE)
 
-      !EX_UTest
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
       ! Set time to illegite month
       write(name, *) "Stop Time Initialization to illegite month (0) Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS."
@@ -326,7 +328,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Set time to illegite month
       write(name, *) "Stop Time Initialization to illegite month (13) Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS."
@@ -335,10 +337,9 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Set time to illegite day
       write(name, *) "Stop Time Initialization to  Feb. 31st. Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
@@ -346,10 +347,11 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
 
-      !EX_UTest
+      !NEX_UTest
       ! Set time to lower bound of Fliegel algoritm
       write(name, *) "Test lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_SUCCESS."
@@ -360,7 +362,7 @@
 
       ! ----------------------------------------------------------------------------
 
-      !EX_UTest
+      !NEX_UTest
       ! Set time beyond lower bound of Fliegel algoritm
       write(name, *) "Test beyond lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
@@ -368,8 +370,6 @@
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
-
-#endif
 
       ! ----------------------------------------------------------------------------
 
