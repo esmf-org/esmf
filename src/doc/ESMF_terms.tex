@@ -91,8 +91,7 @@ distributions.  See \htmladdnormallink{sequential execution}
 roughly the same calculation is performed by all processors at the same 
 time on the same data set, which is partitioned among multiple memory 
 locations.  Operations within many model components are essentially data 
-parallel.  See \htmladdnormallink{task parallel}{glos:TaskParallel}, 
-\htmladdnormallink{SPMD}{glos:SPMD}, \htmladdnormallink{MPMD}{glos:MPMD}.
+parallel.  
 
 \item[Data transpose] \label{glos:DataTranspose} Rearrangement of data arrays 
   between two distributed grids sharing the same global domain.
@@ -288,6 +287,10 @@ Document.
   Multiple executables, any of which could itself be an SPMD
   executable, executing independently within an application.
 
+\item[Node] \label{glos:Node} A node is a set of computational resources
+  that is typically located in close proximity on a computing platform
+  and that is associated with a single shared memory buffer.
+
 \item [No-leap calendar] \label{glos:NoLeap} Every year uses the same months 
 and days per month as in a non-leap year of a Gregorian calendar.
 
@@ -315,6 +318,11 @@ and days per month as in a non-leap year of a Gregorian calendar.
 \item[Platform] \label{glos:Platform} 
   The processor hardware, operating system, compiler and
   parallel library that together form a unique compilation target.
+
+\item[Process] \label{glos:Process}
+  A process is a computational workspace that is associated with a single,
+  private address space.  Data defined within a process must be communicated
+  via message passing to another process.
 
 \item[Processing element (PE)] \label{glos:Processing_Element}
 A processing element is associated with a single hardware processor.  It may
@@ -356,8 +364,7 @@ include time spent running other processes on a multiprocessor system.
 different calculations are performed by different processors at the same time
 on what are usually different data sets.  Operations on different model 
 components running within either a SPMD or MPMD application may be task 
-parallel.  See \htmladdnormallink{data parallel}{glos:DataParallel}, 
-\htmladdnormallink{SPMD}{glos:SPMD}, \htmladdnormallink{MPMD}{glos:MPMD}.
+parallel.  
 
 \item [Time instant] \label{glos:TimeInstant}
 Generic name for an absolute time and date specification. A time instant is made 

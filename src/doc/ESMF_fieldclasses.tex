@@ -19,7 +19,8 @@ interacting components, perhaps being regridded, redistributed, or
 otherwise transformed along the way.  The ESMF embodies these concepts 
 in the {\tt Field}, {\tt Grid}, and {\tt Field Bundle} classes.
 These data structures are each decomposed across multiple {\tt Decomposition
-Elements}, or {\tt DE}s, that are arranged in some topology (like a 2D grid).
+Elements}, or {\tt DE}s (see Section~\ref{sec:progmodel} that are arranged 
+in some topology such as a 2D grid.
 
 It is a difficult software engineering problem to write both flexible 
 and efficient parallel software for grid-based computations on current 
@@ -28,7 +29,7 @@ systems vary so widely.  We seek to preserve efficiency of scaling
 for a variety of grid communications on a range of platforms.  
 Differences between scalar and vector processors affect 
 the optimal arrangement of data and loop indices.  Also, many hardware 
-platforms have asymmetric communications bandwidths and possibly 
+platforms have asymmetric communications bandwidths and 
 non-uniform memory access times ({\it NUMA architecture}).
 Since many Earth system applications themselves have non-uniform 
 communication patterns, the mapping between software tasks and 
@@ -40,12 +41,12 @@ the hardware characteristics and the decomposition decisions from the
 user code and encapsulate them so the tradeoffs can be 
 weighed clearly and can be easily changed as the code is 
 run on different systems.  The design of the {\tt Layout} object
-(see Section~\ref{sec:utilclasses}) allows users to indicate 
-expected communication patterns so the framework can optimize if possible.
+allows users to indicate expected communication patterns so 
+the framework can optimize if possible.
 
-In order to efficiently compute numerically intensive equations on 
-each point on a grid, it can be useful to forego information about 
-the global grid and use local indices.  {\tt Field} routines
+In order to compute numerically intensive equations on grid
+cells, it can be efficient to use local rather 
+than global indices.  {\tt Field} routines
 must supply an efficient interface for local access to a
 subset of the data, as well as interfaces for access to
 global information about the entire data set.
@@ -243,7 +244,7 @@ between the local grid decompositions and the global logical grid.
 It contains methods to 
 synchronize data values between the boundaries of subsets, and to
 collect and communicate global data values.  It interacts closely with
-the Physical Grid object (see Section~\ref{physgrid}).
+the Physical Grid object (see Section~\ref{sec:physgrid}).
 It uses a Layout object to identify and manage the processing elements 
 available for the computation.
 

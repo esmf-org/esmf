@@ -11,28 +11,27 @@ their relationships, and typical action sequences for component interactions.
 One of the primary goals of the ESMF project is to increase interoperability
 across a range of Earth system modeling components.  Initially these 
 components will be large scale, such as land models, ocean models, 
-data assimilation systems and diagnostics packages.  Earth system research 
-often requires that such components be coupled together in different
-ways.  We identify user-supplied components discretized on grids with 
+and data assimilation systems.  Earth system research 
+often requires that such components be coupled together in multiple
+configurations.  We identify user-supplied components discretized on grids with 
 a {\tt Gridded Component} class, and the software used to couple them together
-with a {\tt Coupler Component} class.  Other types of framework components
-may be defined in the future.
+with a {\tt Coupler Component} class.  
 
 As the framework evolves, we plan to utilize ESMF coupling services for 
 smaller-scale tasks within model components, such as the transformation of 
 data between the 
 physics and dynamics in a spectral atmospheric model, and the creation 
 of nested higher resolution regions within a coarser grid.  The goal is 
-to couple components at varying scales both flexibly and efficiently,
-which requires careful design and implementation.  Our strategies for 
-accomplishing this are as follows.
+to couple components at varying scales both flexibly and efficiently.  
+Our strategies for accomplishing this are as follows.
 
 We aim to keep the coupling specification entirely external 
 to {\tt Gridded Component}s involved in an interaction, which makes it easier 
-for the same {\tt Gridded Component} to be reconfigured for a variety of scenarios.
+for the same {\tt Gridded Component} to be reconfigured for a different 
+coupled application.
 This is the recognized ``mediator'' strategy for handling complexity in 
 software that requires many inter-component interactions (see Section~\ref{sec:oop}).  
-We avoid undue complication in the {\tt Coupler Component} by limiting
+We avoid excessive complication in the {\tt Coupler Component} by limiting
 its responsibility; the Coupler component does not instantiate 
 interacting components, schedule, or run them.  These tasks are performed
 by an {\tt Application Component} or other parent component (see 
@@ -241,7 +240,7 @@ configures any resources needed to run the framework.  The {\tt Application}
 class can be queried for information such as an experiment name, model name, and run 
 type (ESMF\_INIT, ESMF\_BRANCH, etc.).  
 
-\subsubsection{Coupler Component (ESMF\_Coupler)}
+\subsubsection{Coupler Component (ESMF\_Cpl)}
 A {\tt Coupler} is a user-customized type of {\tt Component} that 
 encompasses all the functionality needed to communicate data between two or 
 more {\tt Component}s.  A {\tt Coupler} has a coupling initiation method that 
