@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.43 2003/04/25 18:10:22 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.44 2003/04/25 22:10:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.43 2003/04/25 18:10:22 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.44 2003/04/25 22:10:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1576,7 +1576,7 @@
 
       integer :: status=ESMF_FAILURE                 ! Error status
       logical :: rcpresent=.FALSE.                   ! Return code present
-      integer :: i, base
+      integer :: i, base, l1, r1, l2, r2
 
 !     Initialize return code
       if(present(rc)) then
@@ -1627,15 +1627,18 @@
           return
         endif
 
+        l1 = distgrid%MyDE%lcelltot_index(1)%l + distgrid%MyDE%lcelltot_index(1)%gstart
+        r1 = distgrid%MyDE%lcelltot_index(1)%r + distgrid%MyDE%lcelltot_index(1)%gstart
+        l2 = distgrid%MyDE%lcelltot_index(2)%l + distgrid%MyDE%lcelltot_index(2)%gstart
+        r2 = distgrid%MyDE%lcelltot_index(2)%r + distgrid%MyDE%lcelltot_index(2)%gstart
         do i = 1, size(global2D,1)
-          local2D(i,1) = -1    ! TODO:  make an ESMF_NOTFOUND to use instead of -1
-          local2D(i,2) = -1
-          if(global2D(i,1).ge.distgrid%MyDE%lcellexc_index(1)%l .and. &
-             global2D(i,1).le.distgrid%MyDE%lcellexc_index(1)%r .and. &
-             global2D(i,2).ge.distgrid%MyDE%lcellexc_index(2)%l .and. &
-             global2D(i,2).le.distgrid%MyDE%lcellexc_index(2)%r ) then
-            local2D(i,1) = global2D(i,1) - distgrid%MyDE%lcellexc_index(1)%gstart
-            local2D(i,2) = global2D(i,2) - distgrid%MyDE%lcellexc_index(2)%gstart
+          if(global2D(i,1).ge.l1 .and. global2D(i,1).le.r1 .and. &
+             global2D(i,2).ge.l2 .and. global2D(i,2).le.r2 ) then
+            local2D(i,1) = global2D(i,1) - distgrid%MyDE%lcelltot_index(1)%gstart
+            local2D(i,2) = global2D(i,2) - distgrid%MyDE%lcelltot_index(2)%gstart
+          else
+            local2D(i,1) = -1    ! TODO:  make an ESMF_NOTFOUND to use instead of -1
+            local2D(i,2) = -1
           endif
         enddo
   
@@ -1742,8 +1745,8 @@
 
         base = distgrid%MyDE%gcellexc_start
         do i = 1, size(local2D,1)
-          global2D(i,1) = local2D(i,1) + distgrid%MyDE%lcellexc_index(1)%gstart
-          global2D(i,2) = local2D(i,2) + distgrid%MyDE%lcellexc_index(2)%gstart
+          global2D(i,1) = local2D(i,1) + distgrid%MyDE%lcelltot_index(1)%gstart
+          global2D(i,2) = local2D(i,2) + distgrid%MyDE%lcelltot_index(2)%gstart
         enddo
   
       endif
