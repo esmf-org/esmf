@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayTest.F90,v 1.3 2003/01/23 20:31:41 nscollins Exp $
+! $Id: ESMF_ArrayTest.F90,v 1.4 2003/02/14 23:08:36 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -25,9 +25,10 @@
 
 !   ! Local variables
     integer :: nx, ny, arank, rc 
-    integer :: i, j, ni, nj
+    integer :: i, j, k, l, m, ni, nj, nk, nl, nm
     type(ESMF_ArraySpec) :: arrayspec
-    type(ESMF_Array) :: array1, array2, array3
+    type(ESMF_Array) :: array1, array2, array3, array4
+    real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: real3dptr
     real(ESMF_IKIND_R8), dimension(:,:), pointer :: realptr, realptr2
     integer(ESMF_IKIND_I4), dimension(:), pointer :: intptr, intptr2
 
@@ -124,7 +125,7 @@
        realptr(i,j) = i + ((j-1)*ni) + 0.1
      enddo
     enddo
-    print *, "realptr data = ", realptr
+    print *, "partial print of realptr data = ", realptr(1:3,1:3)
 
     array2 = ESMF_ArrayCreate(realptr, ESMF_NO_COPY, rc)
     print *, "array 2 create returned"
@@ -141,7 +142,7 @@
 
     call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
     print *, "array 2 getdata returned"
-    print *, "realptr2 data = ", realptr2
+    print *, "partial print of realptr2 data = ", realptr2(1:3,1:3)
 
     call ESMF_ArrayDestroy(array2)
     print *, "array 2 destroy returned"
@@ -202,11 +203,11 @@
        realptr(i,j) = (i*2) + ((j-1)*ni) 
      enddo
     enddo
-    print *, "realptr data changed after docopy set, now = ", realptr
+    print *, "realptr data changed after docopy set, now = ", realptr(1:3,1:3)
 
     call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
     print *, "array 2 getdata returned"
-    print *, "realptr2 data = ", realptr2
+    print *, "realptr2 data = ", realptr2(1:3,1:3)
 
     call ESMF_ArrayDestroy(array2)
     print *, "array 2 destroy returned"
@@ -214,6 +215,91 @@
 
 !-------------------------------------------------------------------------------
 !   ! Test 6:
+!   !  Create based on an existing, allocated F90 pointer. 
+!   !  Data is type Real, 2D.  DO_COPY set
+    print *, ">>> Test 6:"
+ 
+ 
+!   ! Allocate and set initial data values
+    ni = 15 
+    nj = 13 
+    nk = 9
+    allocate(real3dptr(ni,nj,nk))
+    do i=1,ni
+     do j=1,nj
+       do k=1,nk
+        real3dptr(i,j,k) = i + ((j-1)*ni) + ((k-1)*ni*nj) + 0.1
+       enddo
+     enddo
+    enddo
+
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_DO_COPY, rc)
+    print *, "array 4 create returned"
+
+    ! with do copy, the original can go now
+    deallocate(real3dptr)
+
+    call ESMF_ArrayPrint(array4, "foo", rc)
+    print *, "array 4 print returned"
+
+    call ESMF_ArrayDestroy(array4)
+    print *, "array 4 destroy returned"
+
+
+ 
+ 
+!   ! Allocate and free different sizes testing end of array printing code
+    ni = 3 
+    nj = 7 
+    nk = 60
+    allocate(real3dptr(ni,nj,nk))
+
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_NO_COPY, rc)
+    print *, "array 4 create returned"
+
+    call ESMF_ArrayPrint(array4, "foo", rc)
+    print *, "array 4 print returned"
+
+    ! this deletes the space
+    call ESMF_ArrayDestroy(array4)
+    print *, "array 4 destroy returned"
+
+!   ! Allocate and free different sizes testing end of array printing code
+    ni = 10 
+    nj = 3 
+    nk = 40
+    allocate(real3dptr(ni,nj,nk))
+
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_NO_COPY, rc)
+    print *, "array 4 create returned"
+
+    call ESMF_ArrayPrint(array4, "foo", rc)
+    print *, "array 4 print returned"
+
+    ! this deletes the space
+    call ESMF_ArrayDestroy(array4)
+    print *, "array 4 destroy returned"
+
+
+!   ! Allocate and free different sizes testing end of array printing code
+    ni = 11 
+    nj = 3 
+    nk = 40
+    allocate(real3dptr(ni,nj,nk))
+
+    array4 = ESMF_ArrayCreate(real3dptr, ESMF_NO_COPY, rc)
+    print *, "array 4 create returned"
+
+    call ESMF_ArrayPrint(array4, "foo", rc)
+    print *, "array 4 print returned"
+
+    ! this deletes the space
+    call ESMF_ArrayDestroy(array4)
+    print *, "array 4 destroy returned"
+
+
+!-------------------------------------------------------------------------------
+!   ! Test 7:
 !   !  Create based on an array specification.
     ! print *, ">>> Test 6:"
  
