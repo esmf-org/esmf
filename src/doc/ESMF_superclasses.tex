@@ -7,7 +7,7 @@ across a range of Earth system modeling components.  Initially these
 components will be large scale, such as land models, ocean models, 
 and other systems representing physical domains; data assimilation systems
 and diagnostics packages; and computational tools such as couplers and 
-I/O packages.  ESMF coupling services will facilitate component 
+I/O subsystems.  ESMF coupling services will facilitate component 
 interoperability and efficient inter-component communication.  As the 
 framework evolves, we plan to utilize coupling services for smaller-scale 
 tasks within model components, such as the transformation of data between the 
@@ -26,27 +26,31 @@ configuration in which model components execute concurrently.
 An ESMF coupled application involves an application component
 ({\tt ESMF\_App})
 containing two or more gridded components ({\tt ESMF\_GComp}s) that require an 
-inter-component data exchange, and a coupling component ({\tt ESMF\_Coupler}).
+inter-component data exchange, and one or more coupling 
+components ({\tt ESMF\_Coupler}).
 
 There are restrictions on how objects within an application may be scoped
-on a parallel platform.  The application is required to exist on all 
-decomposition elements or DEs ({\tt ESMF\_DE}s) in its layout ({\tt ESMF\_Layout}), 
-no matter whether the application contains a single executable or multiple 
-executables.
+on a parallel platform.  The application component is required to exist on 
+any decomposition elements or DEs ({\tt ESMF\_DE}s) on which other components
+within the application are defined.  This is true whether the 
+application contains a single executable or multiple 
+executables.  There is only one application component defined for any
+application; it initially allocates resources and tracks application-wide 
+information.
 
 A coupler or gridded component may exist across all DEs in 
 the application.  When 
 a set of gridded  components and a coupler all reside on the same set of 
 DEs and are contained within an application running as a single 
-executable we have an SPMD, sequential execution model.
+executable we have an SPMD, sequential execution model.  
 
 Within an application, a coupler or gridded component may also reside on 
 a subset of DEs.  Either of these may wholly coincide with, be
 wholly 
-contained within or wholly contain another component.  Multiple coupler 
-or gridded components may be defined as separate executables.  An MPMD, 
-concurrent execution configuration is one in which gridded components and 
-a coupler are defined on separate ESMF\_DEs running simultaneously as multiple 
+contained within or wholly contain another component.  Multiple gridded 
+components or couplers may be defined as separate executables.  A typical 
+MPMD, concurrent execution configuration is one in which gridded components 
+and a coupler are defined on separate DEs running simultaneously as multiple 
 executables.
 
 It is possible for ESMF applications to be a combination of the SPMD, 
@@ -55,7 +59,8 @@ execution model and the MPMD, concurrent execution model.  We might have,
 for example, atmosphere and land components defined on the same set of 
 DEs and running as one executable, and ocean and sea ice 
 components defined on a separate set of DEs and running as 
-another executable.  As required, the application component is defined
+another executable, with a separate coupler executable running on yet 
+another set.  The application component must be defined
 on all sets of DEs.
 
 \subsection{Flow of Control and Data}
@@ -73,22 +78,23 @@ have an {\tt ESMF\_IMPORT} or {\tt ESMF\_EXPORT} value.  In addition to
 providing an import state, gridded components are required to check that 
 initial or imported data is valid and complete.
 
-The coupler component performs all the computations necessary for effecting
-communication between components, both scientific and computational.  
-It is responsible for computing fluxes, time averages, and interpolation 
-weights for regridding.  The coupler is not responsible for transferring
-data between components or for managing the synchronization of components;
-this is handled by the application.  The coupler simply returns a transform 
-specification that directs exactly how sequencing and data transfers should 
-occur.  The coupler is also responsible for checking the correctness of 
-the transfer, through means such as computing conserved quantities.
-
-The application component manages the sequencing and synchronization of
-components, and activates the transforms specified by the coupler.  The
+The coupler component produces a specification of the sequence of 
+transforms that are 
+necessary to effect communication between components, both scientific and 
+computational.  This specification includes the transforms to be
+called, on which DEs they should take place, any sequencing restrictions 
+on the transforms, and what data is to be acted on.  For example, the
 coupler may specify that transformations occur on either the data sending 
 or receiving end (or both), that data be sent directly between components,
 or that data be sent to the coupler for intermediate processing before 
-it is sent to its destination.
+it is sent to its destination.  The coupler is not responsible for 
+transferring data between components or for managing synchronization; 
+these tasks are handled by the application.  
+
+The application component manages the sequencing and synchronization of
+components, and applies the transforms specified by the coupler.  The 
+configurations that it can support are subject to the restrictions
+determined by the coupler.
 
 \subsection{Examples}
 
