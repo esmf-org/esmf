@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.23 2004/04/19 20:30:52 jwolfe Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.24 2004/04/26 22:32:47 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -29,14 +29,13 @@
 
     ! Module Local variables
     type(ESMF_GridComp) :: comp1
-    type(ESMF_newDELayout) :: delayout1, defDElayout
     type(ESMF_VM) :: vm
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: ndes, de_id, rc
+    integer :: npets, my_id, rc
 
-    ! width of halo region
-    integer, parameter :: halo_width = 2
+    ! width of halo region - moved to "shared" module
+    !integer, parameter :: halo_width = 2
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -67,30 +66,16 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    defDElayout = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGet(defDElayout, deCount=ndes, rc=rc)
+    call ESMF_VMGet(vm, npets=npets, mypet=my_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    !if (ndes .ne. 12) then
-    !    print *, "This system test needs to run 12-way, current np = ", ndes
-    !    goto 10
-    !endif
-    if (ndes .ne. 4) then
-        print *, "This system test needs to run 4-way, current np = ", ndes
+    if (npets .ne. 4) then
+        print *, "This system test needs to run 4-way, current np = ", npets
         goto 10
     endif
 
-    call ESMF_newDELayoutGet(defDElayout, localDE=de_id, rc=rc) 
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    
-!   Create a DELayout for the Component
-    delayout1 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
     cname = "System Test FieldHalo"
- !jw   comp1 = ESMF_GridCompCreate(name=cname, delayout=delayout1, rc=rc)
-    comp1 = ESMF_GridCompCreate(vm, name=cname, delayout=delayout1, rc=rc)
+    comp1 = ESMF_GridCompCreate(vm, name=cname, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     print *, "Comp Create finished, name = ", trim(cname)
@@ -133,8 +118,6 @@
 !     Destroy section
 ! 
 
-    call ESMF_newDELayoutDestroy(delayout1, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompDestroy(comp1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
@@ -145,7 +128,7 @@
 !-------------------------------------------------------------------------
 10    print *, "System Test FieldHalo complete!"
 
-    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if ((my_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *) "System Test failure"
       write(testname, *) "System Test FieldHalo: Field Halo Test"
 
@@ -228,6 +211,7 @@
 
       ! Local variables
       integer :: i, j
+      type(ESMF_VM) :: vm
       type(ESMF_newDELayout) :: delayout1 
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Grid) :: grid1
@@ -245,9 +229,22 @@
 
       print *, "Entering Initialization routine"
 
-      ! Query component for layout
-      call ESMF_GridCompGet(comp, delayout=delayout1, rc=rc)
-      print *, "myinit: getting layout, rc = ", rc
+      ! Query the component for how many pets we have, and make a layout 
+      ! based on that.
+      call ESMF_GridCompGet(comp, vm=vm, rc=rc)
+
+      ! Make sure we were given enough pets for what we expected.
+      call ESMF_VMGet(vm, npets=npets, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+   
+      if (npets .ne. 4) then
+         print *, "This component needs to run 4-way"
+         rc = ESMF_FAILURE
+         goto 30
+      endif
+
+      ! Create a DELayout for the Component
+      delayout1 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! The user creates a simple horizontal Grid internally by passing all
@@ -417,27 +414,28 @@
       call ESMF_FieldHaloRelease(routehandle, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
-      ! Get layout from component
-      call ESMF_GridCompGet(comp, delayout=delayout, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
-
       ! Get Field from import state
       call ESMF_StateGetData(importState, "DE id", field1, rc=rc);
       if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! Get a pointer to the Grid in the Field, and then to the DELayout
+      ! associated with that Grid
       call ESMF_FieldGet(field1, grid=grid1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+      call ESMF_GridGet(grid1, delayout=delayout, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+
+      ! get our local de number from the layout
+      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get a pointer to the data Array in the Field
       call ESMF_FieldGetArray(field1, array1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "data back from field"
 
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      print *, "data back from array"
 
       ! Get size of local array
       call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
