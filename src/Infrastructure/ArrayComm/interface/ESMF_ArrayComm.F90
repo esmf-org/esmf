@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.18 2004/03/04 23:49:11 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.19 2004/03/05 23:58:38 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.18 2004/03/04 23:49:11 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.19 2004/03/05 23:58:38 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -275,8 +275,7 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
-                                       parentLayout, routehandle, blocking, &
-                                       total, rc)
+                                       parentLayout, routehandle, blocking, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
@@ -286,9 +285,8 @@
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DataMap), intent(in) :: dstDataMap
       type(ESMF_DELayout) :: parentLayout
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_RouteHandle), intent(out) :: routehandle
       type(ESMF_Async), intent(inout), optional :: blocking
-      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -311,8 +309,10 @@
       logical :: rcpresent      ! did user specify rc?
       type(ESMF_DELayout) :: dstLayout, srcLayout
       type(ESMF_Logical), dimension(:), allocatable :: periodic
-      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstAI, srcAI, &
-                                                       dstLocalAI, srcLocalAI
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: dstCompAI, srcCompAI, &
+                                                     dstTotalAI, srcTotalAI, &
+                                                   dstCLocalAI, srcCLocalAI, &
+                                                   dstTLocalAI, srcTLocalAI
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
                            dstVertRelLoc, srcVertRelLoc
       type(ESMF_Route) :: route
@@ -324,8 +324,7 @@
       integer :: nDEs, dstMyDE, srcMyDE
       integer :: gridrank, datarank
       integer :: i, numDims
-      logical :: hascachedroute, &  ! can we reuse an existing route?
-                 totalUse
+      logical :: hascachedroute     ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
@@ -335,12 +334,9 @@
         rc = ESMF_FAILURE
       endif
 
-      ! set optional arguments if not present
-      totalUse = .false.
-      if (present(total)) then
-        totalUse = total
-      endif
- 
+      ! create the routehandle
+      routehandle = ESMF_RouteHandleCreate(status)
+
       ! Extract layout information from the Grids
       call ESMF_GridGetDELayout(dstGrid, dstLayout, status)
       call ESMF_GridGetDELayout(srcGrid, srcLayout, status)
@@ -358,10 +354,14 @@
       allocate(dstStartPerDEPerDim(nDEs, gridrank), stat=status)
       allocate( srcCellCountPerDim(      gridrank), stat=status)
       allocate(srcStartPerDEPerDim(nDEs, gridrank), stat=status)
-      allocate(              dstAI(nDEs, gridrank), stat=status)
-      allocate(              srcAI(nDEs, gridrank), stat=status)
-      allocate(         dstLocalAI(nDEs, gridrank), stat=status)
-      allocate(         srcLocalAI(nDEs, gridrank), stat=status)
+      allocate(          dstCompAI(nDEs, gridrank), stat=status)
+      allocate(          srcCompAI(nDEs, gridrank), stat=status)
+      allocate(         dstTotalAI(nDEs, gridrank), stat=status)
+      allocate(         srcTotalAI(nDEs, gridrank), stat=status)
+      allocate(        dstCLocalAI(nDEs, gridrank), stat=status)
+      allocate(        srcCLocalAI(nDEs, gridrank), stat=status)
+      allocate(        dstTLocalAI(nDEs, gridrank), stat=status)
+      allocate(        srcTLocalAI(nDEs, gridrank), stat=status)
      
       ! Extract more information from the Grids
       ! TODO: get decompids?
@@ -405,24 +405,28 @@
       ! TODO: apply dimorder and decompids to get mapping of array to data
 
       ! set up things we need to find a cached route or precompute one
-      if (totalUse) then
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
-                                         totalindex=dstLocalAI, rc=status)
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                         totalindex=srcLocalAI, rc=status)
-      else
-        call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
-                                         compindex=dstLocalAI, rc=status)
-        call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                         compindex=srcLocalAI, rc=status)
-      endif
+      call ESMF_ArrayGetAllAxisIndices(dstArray, dstGrid, dstDataMap, &
+                                       compindex =dstCLocalAI, &
+                                       totalindex=dstTLocalAI, rc=status)
+      call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
+                                       compindex =srcCLocalAI, &
+                                       totalindex=srcTLocalAI, rc=status)
 
       ! translate AI's into global numbering
       call ESMF_GridLocalToGlobalIndex(dstGrid, &
                                        horzRelLoc=dstHorzRelLoc, &
                                        vertRelLoc=dstVertRelLoc, &
-                                       localAI2D=dstLocalAI, &
-                                       globalAI2D=dstAI, rc=status)
+                                       localAI2D=dstCLocalAI, &
+                                       globalAI2D=dstCompAI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+      call ESMF_GridLocalToGlobalIndex(dstGrid, &
+                                       horzRelLoc=dstHorzRelLoc, &
+                                       vertRelLoc=dstVertRelLoc, &
+                                       localAI2D=dstTLocalAI, &
+                                       globalAI2D=dstTotalAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
          return
@@ -430,8 +434,17 @@
       call ESMF_GridLocalToGlobalIndex(srcGrid, &
                                        horzRelLoc=srcHorzRelLoc, &
                                        vertRelLoc=srcVertRelLoc, &
-                                       localAI2D=srcLocalAI, &
-                                       globalAI2D=srcAI, rc=status)
+                                       localAI2D=srcCLocalAI, &
+                                       globalAI2D=srcCompAI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+         print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
+         return
+      endif
+      call ESMF_GridLocalToGlobalIndex(srcGrid, &
+                                       horzRelLoc=srcHorzRelLoc, &
+                                       vertRelLoc=srcVertRelLoc, &
+                                       localAI2D=srcTLocalAI, &
+                                       globalAI2D=srcTotalAI, rc=status)
       if(status .NE. ESMF_SUCCESS) then
          print *, "ERROR in ArrayRedist: GridLocalToGlobalIndex returned failure"
          return
@@ -439,18 +452,19 @@
 
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, dstMyDE, dstAI, dstAI, nDEs, dstLayout, &
-                                         srcMyDE, srcAI, srcAI, nDEs, srcLayout, &
+      call ESMF_RouteGetCached(datarank, &
+                               dstMyDE, dstCompAI, dstTotalAI, nDEs, dstLayout, &
+                               srcMyDE, srcCompAI, srcTotalAI, nDEs, srcLayout, &
                                periodic, hascachedroute, route, status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
           route = ESMF_RouteCreate(parentLayout, rc)
 
-          call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstAI, &
-                                          dstStartPerDEPerDim, &
+          call ESMF_RoutePrecomputeRedist(route, datarank, dstMyDE, dstCompAI, &
+                                          dstTotalAI, dstStartPerDEPerDim, &
                                           dstCellCountPerDim, dstLayout, &
-                                          srcMyDE, srcAI, &
+                                          srcMyDE, srcCompAI, srcTotalAI, &
                                           srcStartPerDEPerDim, &
                                           srcCellCountPerDim, srcLayout, status)
       endif
@@ -465,10 +479,14 @@
       if (allocated( srcCellCountPerDim)) deallocate(srcCellCountPerDim)
       if (allocated(dstStartPerDEPerDim)) deallocate(dstStartPerDEPerDim)
       if (allocated(srcStartPerDEPerDim)) deallocate(srcStartPerDEPerDim)
-      if (associated(             dstAI)) deallocate(dstAI)
-      if (associated(             srcAI)) deallocate(srcAI)
-      if (associated(        dstLocalAI)) deallocate(dstLocalAI)
-      if (associated(        srcLocalAI)) deallocate(srcLocalAI)
+      if (associated(         dstCompAI)) deallocate(dstCompAI)
+      if (associated(         srcCompAI)) deallocate(srcCompAI)
+      if (associated(        dstTotalAI)) deallocate(dstTotalAI)
+      if (associated(        srcTotalAI)) deallocate(srcTotalAI)
+      if (associated(       dstCLocalAI)) deallocate(dstCLocalAI)
+      if (associated(       srcCLocalAI)) deallocate(srcCLocalAI)
+      if (associated(       dstTLocalAI)) deallocate(dstTLocalAI)
+      if (associated(       srcTLocalAI)) deallocate(srcTLocalAI)
 
 ! set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
