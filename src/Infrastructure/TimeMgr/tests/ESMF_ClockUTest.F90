@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.3 2003/04/03 22:43:57 nscollins Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.4 2003/04/14 17:55:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.3 2003/04/03 22:43:57 nscollins Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.4 2003/04/14 17:55:35 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,29 +70,29 @@
 #ifdef ESMF_EXHAUSTIVE
       ! initialize clock time intervals and instants
       call ESMF_TimeIntervalInit(timeStep, S=1, rc=rc)
-      call ESMF_TimeInit(startTime, YY=2003, MM=3, DD=13,
+      call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=13, &
                          cal=gregorianCalendar, rc=rc)
-      call ESMF_TimeInit(stopTime, YY=2003, MM=3, DD=14,
+      call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=14, &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
 
       ! print out initialized variables
-      call ESMF_BasePrint(gregorianCalendar, rc)
-      call ESMF_BasePrint(timeStep, rc)
-      call ESMF_BasePrint(startTime, rc)
-      call ESMF_BasePrint(stopTime, rc)
-      call ESMF_BasePrint(clock, rc)
+      call ESMF_CalendarPrint(gregorianCalendar, "", rc)
+      call ESMF_TimeIntervalPrint(timeStep, "", rc)
+      call ESMF_TimePrint(startTime, "", rc)
+      call ESMF_TimePrint(stopTime, "", rc)
+      call ESMF_ClockPrint(clock, "", rc)
 
       ! time step from start time to stop time
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
         call ESMF_ClockAdvance(clock, rc=rc)
-        call ESMF_BasePrint(clock, rc)
+        call ESMF_ClockPrint(clock, "", rc)
       end do
 
       ! print out ending clock state
-      call ESMF_BasePrint(clock, rc)
+      call ESMF_ClockPrint(clock, "", rc)
 
 
 #if 0
@@ -142,6 +142,77 @@
 
       ! perform non-exhaustive tests here;
       !   use same templates as above
+
+      ! initialize clock time intervals and instants
+      !call ESMF_TimeIntervalInit(timeStep, S=1, rc=rc)
+      call ESMF_TimeIntervalInit(timeStep, rc=rc)
+      call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=13, &
+                                   cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=14, &
+                                   cal=gregorianCalendar, rc=rc)
+
+      ! initialize the clock
+      call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
+
+      ! print out initialized variables
+      call ESMF_CalendarPrint(gregorianCalendar, "", rc)
+      call ESMF_TimeIntervalPrint(timeStep, "", rc)
+      call ESMF_TimePrint(startTime, "", rc)
+      call ESMF_TimePrint(stopTime, "", rc)
+      call ESMF_ClockPrint(clock, "", rc)
+
+      ! time step from start time to stop time
+      do while (.not.ESMF_ClockIsStopTime(clock, rc))
+        call ESMF_ClockAdvance(clock, rc=rc)
+        call ESMF_ClockPrint(clock, "", rc)
+      end do
+
+      ! print out ending clock state
+      call ESMF_ClockPrint(clock, "", rc)
+
+
+#if 0
+      ! test initialization of members of statically allocated ESMF_Clock
+      !   may want to read back values via Get methods for comparison
+      call ESMF_ClockInit(clock, args, rc)
+      write(name, *) "ESMF_ClockInit"
+      write(failMsg, *) "rc =", rc, ", args =", args
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! test setting of ESMF_Clock members values
+      <value type> :: value_set
+      call ESMF_ClockSet<Value>(clock, value_set, rc)
+      write(name, *) "ESMF_ClockSet<Value>"
+      write(failMsg, *) "rc =", rc, ", value_set =", value_set
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! test getting of ESMF_Clock members values,
+      !   compare to values set previously
+      <value type> :: value_get
+      call ESMF_ClockGet<Value>(clock, value_get, rc)
+      write(name, *) "ESMF_ClockGet<Value>"
+      write(failMsg, *) "rc =", rc, ", value_get =", value_get
+      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. value_get .eq. value_set), &
+                      name, failMsg, result, ESMF_SRCLINE)
+    
+      ! test validate method via option string
+      character(ESMF_MAXSTR) :: validate_options
+      call ESMF_ClockValidate(clock, validate_options, rc)
+      write(name, *) "ESMF_ClockValidate"
+      write(failMsg, *) "rc =", rc, ", validate_options =", validate_options
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! test print method via option string
+      character(ESMF_MAXSTR) :: print_options
+      call ESMF_ClockPrint(clock, print_options, rc)
+      write(name, *) "ESMF_ClockPrint"
+      write(failMsg, *) "rc =", rc, ", print_options =", print_options
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+#endif
 
 #endif
 
