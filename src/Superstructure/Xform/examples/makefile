@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/22 21:00:54 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/10/22 21:22:22 cdeluca Exp $ 
 
 ALL:  examples
 
@@ -40,7 +40,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
-LOCDIR	  = src/Superstructure/Component/examples
+LOCDIR	  = src/Superstructure/Xform/examples
 
 #
 # Set EXAMPLES_BUILD to full path of the examples to be
