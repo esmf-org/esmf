@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.2 2003/09/23 15:27:31 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.3 2004/03/02 23:49:17 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -195,13 +195,8 @@
        public :: ESMF_ConfigLoadFile   ! loads resource file into memory
        public :: ESMF_ConfigFindLabel  ! selects a label (key)
        public :: ESMF_ConfigNextLine   ! selects next line (for tables)
-       public :: ESMF_ConfigGetFloat   ! returns next float number (function)
-       public :: ESMF_ConfigGetFloats  ! returns float array  
-       public :: ESMF_ConfigGetInt     ! returns next integer number (function)
-       public :: ESMF_ConfigGetInts    ! returns integer array
-       public :: ESMF_ConfigGetChar    ! returns next char or char array
-       public :: ESMF_ConfigGetString  ! retutns next string (word)
-       public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
+       public :: ESMF_ConfigGetValue   ! returns next float number (function)
+        public :: ESMF_ConfigGetLen ! gets number of words in the line(funcion)
        public :: ESMF_ConfigGetDim ! gets number of lines in the table
                                    ! and max number of columns by word 
 !                                  ! counting disregarding type (function)
@@ -210,6 +205,37 @@
 !------------------------------------------------------------------------------
        public :: ESMF_Config
 !EOPI
+
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOPI
+! !IROUTINE: ESMF_ConfigGet - Get an item from a Config
+!
+! !INTERFACE:
+      interface ESMF_ConfigGetValue
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_ConfigGetString
+        module procedure ESMF_ConfigGetFloat
+        module procedure ESMF_ConfigGetFloats
+        module procedure ESMF_ConfigGetInt
+        module procedure ESMF_ConfigGetInts
+        module procedure ESMF_ConfigGetChar        
+
+
+! !DESCRIPTION:
+!     This interface provides an entry point for getting
+!     items from an {\tt ESMF\_Config} object.
+!    
+ 
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+
 
 ! PRIVATE PARAMETER  SETTINGS:
 !------------------------------------------------------------------------------
@@ -246,7 +272,7 @@
 	integer,parameter :: MX_LU=255
 
 !------------------------------------------------------------------------------
-! !OPEQUE TYPES:
+! !OPAQUE TYPES:
 !------------------------------------------------------------------------------
        type ESMF_Config
           sequence
@@ -264,7 +290,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigCreate - Create Configuration
+! !IROUTINE: ESMF_ConfigCreate - Create a Config 
 !
 ! !INTERFACE:
 
@@ -302,7 +328,7 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigDestroy - destroys configuration
+! !IROUTINE: ESMF_ConfigDestroy - Destroy a Config
 !
 ! !INTERFACE:
 
@@ -337,7 +363,598 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigLoadFile - load resource file into memory
+! !IROUTINE: ESMF_ConfigFindLabel - Find a label
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigFindLabel( cf, label, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(inout)  :: cf    ! ESMF Configuration
+      character(len=*), intent(in)   :: label    ! label
+      integer, intent(out), optional  :: rc      ! Error code
+                                                 !   0  no error
+                                                 !  -1  buffer not loaded
+                                                 !  -2  could not find label
+                                                 !  -3  invalid operation
+                                                 !      with index_
+      
+
+! !DESCRIPTION: Finds the label (key) in the resource file. 
+!
+!               Since the search is done by looking for a word in the 
+!               whole resource file, it is important to use special 
+!               conventions to distinguish labels from other words 
+!               in the resource files. The DAO convention is to finish 
+!               line labels by : and table labels by ::..
+!
+!
+!EOP -------------------------------------------------------------------
+	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
+
+      integer i, j, iret
+
+      iret = 0
+
+!     Determine whether label exists
+!     ------------------------------    
+
+      i = index_ ( cf%buffer(1:cf%nbuf), EOL//label ) + 1
+      if ( i .eq. 1 ) then
+         cf%this_line = BLK // EOL
+         iret = -2
+         if ( present (rc )) rc = iret
+         return
+      elseif(i.le.0) then
+         ! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
+         print *, myname_,'invalid index_() return',i
+         iret = -3
+         if ( present (rc )) rc = iret
+         return
+      end if
+
+!     Extract the line associated with this label
+!     -------------------------------------------
+      i = i + len ( label )
+      j = i + index_(cf%buffer(i:cf%nbuf),EOL) - 2
+      cf%this_line = cf%buffer(i:j) // BLK // EOL
+      
+      cf%next_line = j + 2
+      
+      iret = 0
+      if ( present (rc )) rc = iret
+      
+      return
+    end subroutine ESMF_ConfigFindLabel
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetValue - Get a character string
+!
+! !DESCRIPTION: Gets a sequence of characters (string, word). It will be 
+!               terminated by the first white space.
+
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
+
+      implicit none
+      
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(out)          :: string    ! string (word)
+      
+      character(len=*), intent(in), optional :: label    ! label
+      
+      character(len=*), intent(in), optional :: default  ! default value
+      
+      integer, intent(out), optional         :: rc       ! Error code
+!
+!EOP -------------------------------------------------------------------
+      character*1   ch
+      integer       ib, ie, iret
+      
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         string = default
+      else
+         string = BLK
+      endif
+
+! Processing
+      if(present( label )) then
+         call ESMF_ConfigFindLabel( cf, label, iret )
+         if ( iret /= 0 ) then
+            if ( present (rc )) rc = iret
+            return
+         endif
+      endif
+
+      call ESMF_Config_trim ( cf%this_line )
+      
+      ch = cf%this_line(1:1)
+      if ( ch .eq. '"' .or. ch .eq. "'" ) then
+         ib = 2
+         ie = index_ ( cf%this_line(ib:), ch ) 
+      else
+         ib = 1
+         ie = min(index_(cf%this_line,BLK),	&
+              index_(cf%this_line,EOL)) - 1
+      end if
+      
+      if ( ie .lt. ib ) then
+         string = BLK
+         if ( present ( default )) string = default
+         iret = -1
+         if ( present (rc )) rc = iret
+         return
+      else
+         ! Get the string, and shift the rest of %this_line to
+         ! the left
+         
+         string = cf%this_line(ib:ie) 
+         cf%this_line = cf%this_line(ie+2:)
+         iret = 0
+      end if
+
+      if ( present (rc )) rc = iret
+      return
+      
+      
+    end subroutine ESMF_ConfigGetString
+    
+    
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetValue - Get a real number
+
+!
+! !INTERFACE:
+
+    real function ESMF_ConfigGetFloat( cf, label, default, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label 
+      real, intent(in), optional             :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !DESCRIPTION: Gets a floating point number
+!
+!EOP -------------------------------------------------------------------
+!
+      integer:: iret
+      character*256 :: string
+      real ::     x
+      
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         ESMF_ConfigGetFloat = default
+      else
+         ESMF_ConfigGetFloat = 0.0
+      endif
+
+! Processing
+      if (present (label ) ) then
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetString( cf, string, rc = iret )
+      endif
+
+      if ( iret .eq. 0 ) then
+           read(string,*,iostat=iret) x
+           if ( iret .ne. 0 ) iret = -2
+      end if
+
+      if ( iret .eq. 0 ) then
+         ESMF_ConfigGetFloat = x
+      endif
+
+      if( present( rc )) rc = iret 
+      return
+
+    end function ESMF_ConfigGetFloat
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetValue - Get a list of real numbers
+
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
+                                    default, rc )
+      
+      implicit none
+      real, intent(inout)                 :: array(*)    ! real array 
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+      integer, intent(in)                    :: nsize    ! number of floating 
+                                                         ! point numbers
+      real, intent(in), optional             :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !DESCRIPTION: Gets a floating point array of a given size.
+!
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
+      integer iret, i 
+      
+      iret = 0
+
+
+
+      
+      if (nsize.le.0) then
+         print *,myname_,' invalid SIZE =', nsize
+         iret = -1
+         if(present( rc )) rc = iret
+         return
+      endif
+       
+! Default setting
+      if( present( default ) ) then 
+         array(1:nsize) = default
+      else
+         array(1:nsize) = 0.0
+      endif
+
+! Processing
+      do i = 1, nsize
+         
+         if (present( label )) then
+            if(present( default )) then
+              array(i) = ESMF_ConfigGetFloat( cf, label, default, iret)
+            else
+               array(i) = ESMF_ConfigGetFloat( cf, label, rc = iret)
+            endif
+         else
+            if(present( default )) then
+               array(i) = ESMF_ConfigGetFloat( cf, default=default, rc=iret )
+            else
+               array(i) = ESMF_ConfigGetFloat( cf, rc = iret)
+            endif
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetFloats
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetValue - Get an integer number
+
+!
+! !INTERFACE:
+
+    integer function ESMF_ConfigGetInt( cf, label, default, rc )
+      implicit none
+
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+      integer, intent(in), optional          :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+
+!
+! !DESCRIPTION: Gets an integer number
+!
+!EOP -------------------------------------------------------------------
+      character*256 string
+      real*8        x
+      integer       n, iret
+
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         ESMF_ConfigGetInt = default
+      else
+         ESMF_ConfigGetInt = 0
+      endif
+
+! Processing
+      if (present (label ) ) then
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetString( cf, string, rc = iret )
+      endif
+
+      if ( iret .eq. 0 ) then
+           read(string,*,iostat=iret) x
+           if ( iret .ne. 0 ) iret = -2
+      end if
+      if ( iret .eq. 0 ) then
+         n = nint(x)
+      else
+         if( present( default )) then
+            n = default
+         else
+            n = 0
+         endif
+      endif
+
+      if ( iret .eq. 0 ) then
+         ESMF_ConfigGetInt = n
+      endif
+
+      if( present( rc )) rc = iret
+      
+      return
+    end function ESMF_ConfigGetInt
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetValue - Get a list of integers
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
+                                   default, rc )
+      
+      implicit none
+      integer, intent(inout)              :: array(*)    ! real array 
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+      integer, intent(in)                    :: nsize    ! number of integer 
+                                                         ! numbers
+      integer, intent(in), optional          :: default  ! default value
+
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !DESCRIPTION: Gets an integer array of given size.
+!
+!EOP -------------------------------------------------------------------
+      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
+      integer iret, i 
+      
+      iret = 0
+
+      if (nsize.le.0) then
+         print *,myname_,' invalid SIZE =', nsize
+         iret = -1
+         if(present( rc )) rc = iret
+         return
+      endif
+       
+ ! Default setting
+      if( present( default ) ) then 
+         array(1:nsize) = default
+      else
+         array(1:nsize) = 0
+      endif
+
+! Processing 
+      do i = 1, nsize
+         
+         if (present( label )) then
+            if(present( default )) then
+              array(i) = ESMF_ConfigGetInt( cf, label, default, iret)
+            else
+               array(i) = ESMF_ConfigGetInt( cf, label, rc = iret)
+            endif
+         else
+            if(present( default )) then
+               array(i) = ESMF_ConfigGetInt( cf, default = default, rc = iret)
+            else
+               array(i) = ESMF_ConfigGetInt( cf, rc = iret)
+            endif
+         endif
+      enddo
+
+      if(present( rc )) rc = iret
+      return
+    end subroutine ESMF_ConfigGetInts
+
+
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetValue - Get a character
+!
+! !INTERFACE:
+!
+!!    character function ESMF_ConfigGetChar( cf, label, nsize, default, rc )
+    function ESMF_ConfigGetChar( cf, label, default, rc )
+      implicit none
+      character ESMF_ConfigGetChar
+      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
+      character(len=*), intent(in), optional :: label    ! label
+!      integer, intent(in), optional          :: nsize   ! number of  
+!                                                        ! characters
+      character, intent(in), optional        :: default  ! default value
+      integer, intent(out), optional         :: rc       ! Error code
+!
+! !DESCRIPTION: Gets a character.
+!
+!
+!EOP -------------------------------------------------------------------
+      character*256 string
+      integer       iret
+
+      iret = 0
+
+! Default setting
+      if( present( default ) ) then 
+         ESMF_ConfigGetChar = default
+      else
+         ESMF_ConfigGetChar = BLK
+      endif
+
+! Processing
+      if (present (label ) ) then
+         call ESMF_ConfigGetString( cf, string, label, rc = iret )
+      else
+         call ESMF_ConfigGetString( cf, string, rc = iret )
+      endif
+
+      if ( iret .eq. 0 ) then
+         ESMF_ConfigGetChar = string(1:1)
+      end if
+
+      if (present( rc )) rc = iret
+
+      return
+
+    end function ESMF_ConfigGetChar
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigGetDim - gets table sizes
+!
+! !INTERFACE:
+
+    subroutine ESMF_ConfigGetDim( cf, label, lines, columns, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
+
+     integer, intent(out)                    :: lines
+     integer, intent(out)                    :: columns  
+
+      character(len=*), intent(in), optional :: label ! label (if present)
+                                                      ! otherwise, current
+                                                      ! line
+
+      integer, intent(out), optional        :: rc     ! Error code
+!
+! !DESCRIPTION: Gets number of lines in the table and max number of 
+!               words in a table line
+!
+!EOP -------------------------------------------------------------------
+      integer n, iret
+      logical tend
+
+      lines = 0
+      columns = 0
+      
+
+      call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
+      if ( iret /= 0 ) then
+         if ( present( rc )) rc = iret
+         return
+      endif
+
+      do 
+         call ESMF_ConfigNextLine( cf, tend, rc = iret)
+         if (iret /=0 ) then
+            lines = 0
+            columns = 0
+            exit
+         endif
+         if ( tend ) then
+            exit
+         else
+            lines = lines + 1
+            n = ESMF_ConfigGetLen( cf, rc = iret)
+            if ( iret /= 0 ) then
+               lines = 0
+               columns = 0
+               if ( present( rc )) rc = iret
+               return
+            else
+               columns = max(columns, n)
+            endif
+         endif 
+      enddo
+      
+      if ( present( rc )) rc = iret
+      return
+
+    end subroutine ESMF_ConfigGetDim
+    
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+! !IROUTINE: ESMF_ConfigGetLen - gets the length of the line in words
+!
+! !INTERFACE:
+
+    integer function ESMF_ConfigGetLen( cf, label, rc )
+
+      implicit none
+
+      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
+
+      character(len=*), intent(in), optional :: label ! label (if present)
+                                                      ! otherwise, current
+                                                      ! line
+
+      integer, intent(out), optional :: rc            ! Error code
+!
+! !DESCRIPTION: Gets the length of the line in words by counting words
+!               disregarding types
+!
+!EOP -------------------------------------------------------------------
+      character*256 string
+      integer iret
+      integer count 
+
+      iret = 0
+      count = 0
+      
+      if( present( label )) then
+         call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
+         if( iret /= 0) then
+            if (present( rc )) rc = iret
+            return
+         endif
+      endif
+
+      do
+         call ESMF_ConfigGetString( cf, string, rc = iret )
+         if ( iret .eq. 0 ) then
+            count = count + 1
+         else
+            if (iret .eq. -1) iret  = 0  ! end of the line
+            exit
+         endif
+      enddo
+ 
+
+      ESMF_ConfigGetLen = count
+
+      if( present ( rc )) rc = iret
+      return
+    end function ESMF_ConfigGetLen
+
+
+!-----------------------------------------------------------------------
+! Earth System Modeling Framework
+!BOP -------------------------------------------------------------------
+!
+! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into memory
 !
 ! !INTERFACE:
 
@@ -391,9 +1008,9 @@
 
 !-----------------------------------------------------------------------
 ! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
+!BOPI -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigLoadFile_1proc - load resource file into memory
+! !IROUTINE: ESMF_ConfigLoadFile_1proc - Load resource file into memory
 !
 
 ! !INTERFACE:
@@ -421,7 +1038,7 @@
 !
 ! !DESCRIPTION: Resource file fname is loaded is loaded into memory
 !
-!EOP -------------------------------------------------------------------
+!EOPI -------------------------------------------------------------------
       integer         lu, ios, loop, ls, ptr, iret
       character*256   line
       character(len=*), parameter :: myname_= 'ESMF_ConfigLoadFile_1proc'
@@ -509,76 +1126,6 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigFindLabel - finds the label (key)
-!
-! !INTERFACE:
-
-    subroutine ESMF_ConfigFindLabel( cf, label, rc )
-
-      implicit none
-
-      type(ESMF_Config), intent(inout)  :: cf    ! ESMF Configuration
-      character(len=*), intent(in)   :: label    ! label
-      integer, intent(out), optional  :: rc      ! Error code
-                                                 !   0  no error
-                                                 !  -1  buffer not loaded
-                                                 !  -2  could not find label
-                                                 !  -3  invalid operation
-                                                 !      with index_
-      
-
-! !DESCRIPTION: Finds the label (key) in the resource file. 
-!
-!               Since the search is done by looking for a word in the 
-!               whole resource file, it is important to use special 
-!               conventions to distinguish labels from other words 
-!               in the resource files. The DAO convention is to finish 
-!               line labels by : and tabel labels by ::..
-!
-!
-!EOP -------------------------------------------------------------------
-	character(len=*),parameter :: myname_=myname//'ESMF_ConfigFindLabel'
-
-      integer i, j, iret
-
-      iret = 0
-
-!     Determine whether label exists
-!     ------------------------------    
-
-      i = index_ ( cf%buffer(1:cf%nbuf), EOL//label ) + 1
-      if ( i .eq. 1 ) then
-         cf%this_line = BLK // EOL
-         iret = -2
-         if ( present (rc )) rc = iret
-         return
-      elseif(i.le.0) then
-         ! SUBSTITUTE:	   call die(myname_,'invalid index_() return',i)
-         print *, myname_,'invalid index_() return',i
-         iret = -3
-         if ( present (rc )) rc = iret
-         return
-      end if
-
-!     Extract the line associated with this label
-!     -------------------------------------------
-      i = i + len ( label )
-      j = i + index_(cf%buffer(i:cf%nbuf),EOL) - 2
-      cf%this_line = cf%buffer(i:j) // BLK // EOL
-      
-      cf%next_line = j + 2
-      
-      iret = 0
-      if ( present (rc )) rc = iret
-      
-      return
-    end subroutine ESMF_ConfigFindLabel
-
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
 ! !IROUTINE: ESMF_ConfigNextLine - finds next line
 !
 ! !DESCRIPTION: selects the next line (for tables)
@@ -632,532 +1179,8 @@
     end subroutine ESMF_ConfigNextLine
 
 
-
-
 !-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetString - gets a string
-!
-! !DESCRIPTION: Gets a sequence of characters (string, word). It will be 
-!               terminated by the first white space.
 
-!
-! !INTERFACE:
-
-    subroutine ESMF_ConfigGetString( cf, string, label, default, rc )
-
-      implicit none
-      
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(out)          :: string    ! string (word)
-      
-      character(len=*), intent(in), optional :: label    ! label
-      
-      character(len=*), intent(in), optional :: default  ! default value
-      
-      integer, intent(out), optional         :: rc       ! Error code
-!
-!EOP -------------------------------------------------------------------
-      character*1   ch
-      integer       ib, ie, iret
-      
-      iret = 0
-
-! Default setting
-      if( present( default ) ) then 
-         string = default
-      else
-         string = BLK
-      endif
-
-! Processing
-      if(present( label )) then
-         call ESMF_ConfigFindLabel( cf, label, iret )
-         if ( iret /= 0 ) then
-            if ( present (rc )) rc = iret
-            return
-         endif
-      endif
-
-      call ESMF_Config_trim ( cf%this_line )
-      
-      ch = cf%this_line(1:1)
-      if ( ch .eq. '"' .or. ch .eq. "'" ) then
-         ib = 2
-         ie = index_ ( cf%this_line(ib:), ch ) 
-      else
-         ib = 1
-         ie = min(index_(cf%this_line,BLK),	&
-              index_(cf%this_line,EOL)) - 1
-      end if
-      
-      if ( ie .lt. ib ) then
-         string = BLK
-         if ( present ( default )) string = default
-         iret = -1
-         if ( present (rc )) rc = iret
-         return
-      else
-         ! Get the string, and shift the rest of %this_line to
-         ! the left
-         
-         string = cf%this_line(ib:ie) 
-         cf%this_line = cf%this_line(ie+2:)
-         iret = 0
-      end if
-
-      if ( present (rc )) rc = iret
-      return
-      
-      
-    end subroutine ESMF_ConfigGetString
-    
-    
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetFloat - gets a floating point number
-
-!
-! !INTERFACE:
-
-    real function ESMF_ConfigGetFloat( cf, label, default, rc )
-
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label 
-      real, intent(in), optional             :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !DESCRIPTION: Gets a floating point number
-!
-!EOP -------------------------------------------------------------------
-!
-      integer:: iret
-      character*256 :: string
-      real ::     x
-      
-      iret = 0
-
-! Default setting
-      if( present( default ) ) then 
-         ESMF_ConfigGetFloat = default
-      else
-         ESMF_ConfigGetFloat = 0.0
-      endif
-
-! Processing
-      if (present (label ) ) then
-         call ESMF_ConfigGetString( cf, string, label, rc = iret )
-      else
-         call ESMF_ConfigGetString( cf, string, rc = iret )
-      endif
-
-      if ( iret .eq. 0 ) then
-           read(string,*,iostat=iret) x
-           if ( iret .ne. 0 ) iret = -2
-      end if
-
-      if ( iret .eq. 0 ) then
-         ESMF_ConfigGetFloat = x
-      endif
-
-      if( present( rc )) rc = iret 
-      return
-
-    end function ESMF_ConfigGetFloat
-
-
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetFloats - gets a floating point array
-
-!
-! !INTERFACE:
-
-    subroutine ESMF_ConfigGetFloats( cf, array, nsize, label,  &
-                                    default, rc )
-      
-      implicit none
-      real, intent(inout)                 :: array(*)    ! real array 
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in)                    :: nsize    ! number of floating 
-                                                         ! point numbers
-      real, intent(in), optional             :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !DESCRIPTION: Gets a floating point array of a given size.
-!
-!EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetFloat_array'
-      integer iret, i 
-      
-      iret = 0
-
-
-
-      
-      if (nsize.le.0) then
-         print *,myname_,' invalid SIZE =', nsize
-         iret = -1
-         if(present( rc )) rc = iret
-         return
-      endif
-       
-! Default setting
-      if( present( default ) ) then 
-         array(1:nsize) = default
-      else
-         array(1:nsize) = 0.0
-      endif
-
-! Processing
-      do i = 1, nsize
-         
-         if (present( label )) then
-            if(present( default )) then
-              array(i) = ESMF_ConfigGetFloat( cf, label, default, iret)
-            else
-               array(i) = ESMF_ConfigGetFloat( cf, label, rc = iret)
-            endif
-         else
-            if(present( default )) then
-               array(i) = ESMF_ConfigGetFloat( cf, default=default, rc=iret )
-            else
-               array(i) = ESMF_ConfigGetFloat( cf, rc = iret)
-            endif
-         endif
-      enddo
-
-      if(present( rc )) rc = iret
-      return
-    end subroutine ESMF_ConfigGetFloats
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetInt - gets an integer number
-
-!
-! !INTERFACE:
-
-    integer function ESMF_ConfigGetInt( cf, label, default, rc )
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in), optional          :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
-
-!
-! !DESCRIPTION: Gets an integer number
-!
-!EOP -------------------------------------------------------------------
-      character*256 string
-      real*8        x
-      integer       n, iret
-
-      iret = 0
-
-! Default setting
-      if( present( default ) ) then 
-         ESMF_ConfigGetInt = default
-      else
-         ESMF_ConfigGetInt = 0
-      endif
-
-! Processing
-      if (present (label ) ) then
-         call ESMF_ConfigGetString( cf, string, label, rc = iret )
-      else
-         call ESMF_ConfigGetString( cf, string, rc = iret )
-      endif
-
-      if ( iret .eq. 0 ) then
-           read(string,*,iostat=iret) x
-           if ( iret .ne. 0 ) iret = -2
-      end if
-      if ( iret .eq. 0 ) then
-         n = nint(x)
-      else
-         if( present( default )) then
-            n = default
-         else
-            n = 0
-         endif
-      endif
-
-      if ( iret .eq. 0 ) then
-         ESMF_ConfigGetInt = n
-      endif
-
-      if( present( rc )) rc = iret
-      
-      return
-    end function ESMF_ConfigGetInt
-
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetInts - gets an integer array
-!
-! !INTERFACE:
-
-    subroutine ESMF_ConfigGetInts( cf, array, nsize, label,  &
-                                   default, rc )
-      
-      implicit none
-      integer, intent(inout)              :: array(*)    ! real array 
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-      integer, intent(in)                    :: nsize    ! number of integer 
-                                                         ! numbers
-      integer, intent(in), optional          :: default  ! default value
-
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !DESCRIPTION: Gets an integer array of given size.
-!
-!EOP -------------------------------------------------------------------
-      character(len=*),parameter :: myname_=myname//'ESMF_ConfigGetInt_array'
-      integer iret, i 
-      
-      iret = 0
-
-      if (nsize.le.0) then
-         print *,myname_,' invalid SIZE =', nsize
-         iret = -1
-         if(present( rc )) rc = iret
-         return
-      endif
-       
- ! Default setting
-      if( present( default ) ) then 
-         array(1:nsize) = default
-      else
-         array(1:nsize) = 0
-      endif
-
-! Processing 
-      do i = 1, nsize
-         
-         if (present( label )) then
-            if(present( default )) then
-              array(i) = ESMF_ConfigGetInt( cf, label, default, iret)
-            else
-               array(i) = ESMF_ConfigGetInt( cf, label, rc = iret)
-            endif
-         else
-            if(present( default )) then
-               array(i) = ESMF_ConfigGetInt( cf, default = default, rc = iret)
-            else
-               array(i) = ESMF_ConfigGetInt( cf, rc = iret)
-            endif
-         endif
-      enddo
-
-      if(present( rc )) rc = iret
-      return
-    end subroutine ESMF_ConfigGetInts
-
-
-
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetChar - gets a character
-!
-! !INTERFACE:
-!
-!!    character function ESMF_ConfigGetChar( cf, label, nsize, default, rc )
-    function ESMF_ConfigGetChar( cf, label, default, rc )
-      implicit none
-      character ESMF_ConfigGetChar
-      type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
-      character(len=*), intent(in), optional :: label    ! label
-!      integer, intent(in), optional          :: nsize   ! number of  
-!                                                        ! characters
-      character, intent(in), optional        :: default  ! default value
-      integer, intent(out), optional         :: rc       ! Error code
-!
-! !DESCRIPTION: Gets a character
-!
-!
-!EOP -------------------------------------------------------------------
-      character*256 string
-      integer       iret
-
-      iret = 0
-
-! Default setting
-      if( present( default ) ) then 
-         ESMF_ConfigGetChar = default
-      else
-         ESMF_ConfigGetChar = BLK
-      endif
-
-! Processing
-      if (present (label ) ) then
-         call ESMF_ConfigGetString( cf, string, label, rc = iret )
-      else
-         call ESMF_ConfigGetString( cf, string, rc = iret )
-      endif
-
-      if ( iret .eq. 0 ) then
-         ESMF_ConfigGetChar = string(1:1)
-      end if
-
-      if (present( rc )) rc = iret
-
-      return
-
-    end function ESMF_ConfigGetChar
-
-
-
-
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-! !IROUTINE: ESMF_ConfigGetLen - gets the length of the line in words
-!
-! !INTERFACE:
-
-    integer function ESMF_ConfigGetLen( cf, label, rc )
-
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
-
-      character(len=*), intent(in), optional :: label ! label (if present)
-                                                      ! otherwise, current
-                                                      ! line
-
-      integer, intent(out), optional :: rc            ! Error code
-!
-! !DESCRIPTION: Gets the length of the line in words by counting words
-!               disregarding types
-!
-!EOP -------------------------------------------------------------------
-      character*256 string
-      integer iret
-      integer count 
-
-      iret = 0
-      count = 0
-      
-      if( present( label )) then
-         call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
-         if( iret /= 0) then
-            if (present( rc )) rc = iret
-            return
-         endif
-      endif
-
-      do
-         call ESMF_ConfigGetString( cf, string, rc = iret )
-         if ( iret .eq. 0 ) then
-            count = count + 1
-         else
-            if (iret .eq. -1) iret  = 0  ! end of the line
-            exit
-         endif
-      enddo
- 
-
-      ESMF_ConfigGetLen = count
-
-      if( present ( rc )) rc = iret
-      return
-    end function ESMF_ConfigGetLen
-
-
-!-----------------------------------------------------------------------
-! Earth System Modeling Framework
-!BOP -------------------------------------------------------------------
-!
-! !IROUTINE: ESMF_ConfigGetDim - gets table sizes
-!
-! !INTERFACE:
-
-    subroutine ESMF_ConfigGetDim( cf, label, lines, columns, rc )
-
-      implicit none
-
-      type(ESMF_Config), intent(inout)       :: cf    ! ESMF Configuration
-
-     integer, intent(out)                    :: lines
-     integer, intent(out)                    :: columns  
-
-      character(len=*), intent(in), optional :: label ! label (if present)
-                                                      ! otherwise, current
-                                                      ! line
-
-      integer, intent(out), optional        :: rc     ! Error code
-!
-! !DESCRIPTION: Gets number of lines in the table and max number of 
-!               words in a table line
-!
-!EOP -------------------------------------------------------------------
-      integer n, iret
-      logical tend
-
-      lines = 0
-      columns = 0
-      
-
-      call ESMF_ConfigFindLabel(cf, label = label, rc = iret )
-      if ( iret /= 0 ) then
-         if ( present( rc )) rc = iret
-         return
-      endif
-
-      do 
-         call ESMF_ConfigNextLine( cf, tend, rc = iret)
-         if (iret /=0 ) then
-            lines = 0
-            columns = 0
-            exit
-         endif
-         if ( tend ) then
-            exit
-         else
-            lines = lines + 1
-            n = ESMF_ConfigGetLen( cf, rc = iret)
-            if ( iret /= 0 ) then
-               lines = 0
-               columns = 0
-               if ( present( rc )) rc = iret
-               return
-            else
-               columns = max(columns, n)
-            endif
-         endif 
-      enddo
-      
-      if ( present( rc )) rc = iret
-      return
-
-    end subroutine ESMF_ConfigGetDim
-    
 
 
       integer function index_ (string,tok)
