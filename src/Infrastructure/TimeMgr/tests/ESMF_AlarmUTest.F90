@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.16 2004/08/06 22:33:09 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.17 2004/08/09 22:29:57 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.16 2004/08/06 22:33:09 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.17 2004/08/09 22:29:57 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,8 +64,9 @@
                              no_leapCalendar, esmf_360dayCalendar
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep, alarmStep
-      type(ESMF_Time) :: startTime, stopTime, alarmTime, nextTime
+      type(ESMF_TimeInterval) :: timeStep, alarmStep, ringDuration
+      type(ESMF_Time) :: startTime, stopTime, nextTime
+      type(ESMF_Time) :: alarmTime, alarmStopTime
       type(ESMF_Time) :: currentTime
       character(ESMF_MAXSTR) :: aName
 
@@ -746,8 +747,8 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      !Test Non-Sticky Alarms
-      !  from Chris Hill via support issue 996229
+      !Test Non-Sticky Alarms 1
+      !  from Chris Hill via support issue 988241, bug 996229
       write(failMsg, *) " Did not return nstep=48, sstep=73, i=144, and ESMF_SUCCESS"
       write(name, *) "Non-Sticky Alarm Test 1"
       call ESMF_TimeIntervalSet(timeStep, s=100, rc=rc)
@@ -782,9 +783,47 @@
         call ESMF_ClockAdvance(clock2, rc=rc)
       enddo
 
-      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.48) &
-                                         .and.(sstep.eq.73) &
-                                         .and.(i.eq.144), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS) &
+                      .and.(nstep.eq.48).and.(sstep.eq.73).and.(i.eq.144), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Non-Sticky Alarms 2
+      !  Test ringDuration and stopTime
+      write(failMsg, *) " Did not return nstep=12 and ESMF_SUCCESS"
+      write(name, *) "Non-Sticky Alarm Test 2"
+      call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2 = ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
+      call ESMF_TimeIntervalSet(ringDuration, m=30, rc=rc)
+      call ESMF_TimeSet(alarmStopTime, yy=2000, mm=1, dd=1, h=13, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, &
+                                ringDuration=ringDuration, &
+                                stopTime=alarmStopTime, sticky=.false., rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! run the clock
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        if (ESMF_AlarmIsRinging(alarm4)) then
+          nstep = nstep + 1
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.12), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       call ESMF_AlarmDestroy(alarm4, rc=rc)
@@ -792,6 +831,89 @@
 
       ! ----------------------------------------------------------------------------
 
+      !EX_UTest
+      !Test Non-Sticky Alarms 3
+      !  Test ringTimeStepCount and stopTime
+      write(failMsg, *) " Did not return nstep=18 and ESMF_SUCCESS"
+      write(name, *) "Non-Sticky Alarm Test 3"
+      call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
+      call ESMF_TimeSet(alarmStopTime, yy=2000, mm=1, dd=1, h=13, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, &
+                                ringTimeStepCount=3, &
+                                stopTime=alarmStopTime, sticky=.false., rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! run the clock
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        if (ESMF_AlarmIsRinging(alarm4)) then
+          nstep = nstep + 1
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.18), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      !Test Non-Sticky Alarms 4
+      !  Test ringTimeStepCount precedence over ringDuration
+      write(failMsg, *) " Did not return nstep=18 and ESMF_SUCCESS"
+      write(name, *) "Non-Sticky Alarm Test 4"
+      call ESMF_TimeIntervalSet(timeStep, m=15, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, h=2, rc=rc)
+
+      call ESMF_TimeIntervalSet(ringDuration, m=30, rc=rc)
+
+      call ESMF_TimeSet(alarmStopTime, yy=2000, mm=1, dd=1, h=13, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, &
+
+                                ringTimeStepCount=3, &
+                                ringDuration=ringDuration, &
+
+                                stopTime=alarmStopTime, sticky=.false., rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! run the clock
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        if (ESMF_AlarmIsRinging(alarm4)) then
+          nstep = nstep + 1
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.18), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
+
+      ! ----------------------------------------------------------------------------
 #endif
 
       ! finalize ESMF framework
