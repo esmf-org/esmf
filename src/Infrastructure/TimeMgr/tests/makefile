@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/04/15 20:51:06 svasquez Exp $
+# $Id: makefile,v 1.7 2003/04/17 19:14:19 eschwab Exp $
 
 ALL:  tests
 
@@ -12,6 +12,7 @@ OBJSC	  =
 OBJSF	  = 
 MANSEC	  = 
 LIBBASE	  = 
+DIRS	  =
 LOCDIR	  = src/Infrastructure/TimeMgr/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ClockUTest \
@@ -26,15 +27,17 @@ TESTS_RUN_UNI = RUN_ESMF_ClockUTestUNI \
 TESTS_RM      = ESMF_ClockUTest.rm \
                 ESMC_ClockUTest.rm
 
-
 include ${ESMF_DIR}/makefile
 
-DIRS	  = 
+CLEANDIRS   =$
+CLEANFILES  = *.o *.mod $
+CLOBBERDIRS =$
+
 
 #
 #
 #
-$(ESMC_TESTDIR)/ESMF_ClockUTest: chkopts ESMF_ClockUTest.o
+$(ESMC_TESTDIR)/ESMF_ClockUTest: ESMF_ClockUTest.o
 	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_ClockUTest ESMF_ClockUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_ClockUTest.o
 
@@ -52,7 +55,7 @@ ESMF_ClockUTest.rm:
 #
 #
 #
-$(ESMC_TESTDIR)/ESMC_ClockUTest: chkopts ESMC_ClockUTest.o
+$(ESMC_TESTDIR)/ESMC_ClockUTest: ESMC_ClockUTest.o
 	-$(SL_C_LINKER) -o $(ESMC_TESTDIR)/ESMC_ClockUTest ESMC_ClockUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMC_ClockUTest.o
 
