@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.11 2004/03/20 03:55:03 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.12 2004/04/10 00:34:17 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -124,7 +124,7 @@
 !
 
     ! Initialize the ESMF Framework
-    call ESMF_Initialize(rc)
+    call ESMF_Initialize(rc=rc)
 
     ! Create a default layout and save our DE id number.
     layoutTop = ESMF_DELayoutCreate(rc=rc)
