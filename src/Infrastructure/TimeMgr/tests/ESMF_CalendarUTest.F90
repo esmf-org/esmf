@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.1 2003/09/22 21:29:31 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.2 2003/09/22 22:49:30 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.1 2003/09/22 21:29:31 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.2 2003/09/22 22:49:30 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -55,6 +55,7 @@
       logical :: bool
       ! instantiate a clock 
       type(ESMF_Clock) :: clock, clock1, clock_gregorian, clock_julian, clock_no_leap, clock_360day
+      type(ESMF_Time) :: startTime, stopTime
 
       ! Random number
       real :: ranNum
@@ -118,6 +119,65 @@
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_CalendarSet(esmf_360dayCalendar, ESMF_CAL_360DAY, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting the Start Time for the Gregorian Calencar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Set Start Time at lower limit of Gregorian Calendar Test"
+      call ESMF_TimeSet(startTime, yr=-4800, mm=2, dd=29, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Start Time Print Test"
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Test Setting the Stop Time for the Gregorian Calencar
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Set Stop Time at upper limit of Gregorian Calendar Test"
+      call ESMF_TimeSet(stopTime, yr_i8=292277019914, mm=10, dd=30, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Start Time Print Test"
+      call ESMF_TimePrint(stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! Verify the year is set correctly
+      write(name, *) "Get Start Time Year Test"
+      call ESMF_TimeGet(startTime, yr=YR, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Year not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.-4800), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Verify the month is set correctly
+      write(name, *) "Get StartTime Month Test"
+      call ESMF_TimeGet(startTime, mm=MM, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Month not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.2), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
