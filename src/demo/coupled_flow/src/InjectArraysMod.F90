@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+! $Id: InjectArraysMod.F90,v 1.2 2003/10/23 17:37:03 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -59,7 +59,8 @@
       integer :: nobsdesc
       integer :: iflo_min, iflo_max
       type(ESMF_TimeInterval) :: time_step
-      real(kind=ESMF_KIND_R4) :: dt, dx, dy
+      real(kind=ESMF_KIND_R8) :: dt
+      real(kind=ESMF_KIND_R4) :: dx, dy
       real(kind=ESMF_KIND_R4) :: uin, rhoin, siein
       real(kind=ESMF_KIND_R4) :: vin2, rhoin2, siein2
       real(kind=ESMF_KIND_R4) :: gamma, akb
