@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayUTest.F90,v 1.7 2004/08/03 16:39:30 svasquez Exp $
+! $Id: ESMF_ArrayUTest.F90,v 1.8 2004/08/26 19:18:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayUTest.F90,v 1.7 2004/08/03 16:39:30 svasquez Exp $'
+      '$Id: ESMF_ArrayUTest.F90,v 1.8 2004/08/26 19:18:05 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !   ! Local variables
@@ -46,15 +46,19 @@
     real :: attribute3, attribute4
     type(ESMF_DataType) :: att_datatype
     type(ESMF_DataKind) :: att_datakind
+    type(ESMF_VM):: vm
 
 
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name, array_name
-    integer :: rc, att_count, result = 0
+    integer :: rc, att_count, result = 0, npets
 
     
-    call ESMF_Initialize()
+     call ESMF_Initialize(vm=vm, rc=rc)
+     call ESMF_VMGet(vm, petCount=npets, rc=rc)
+     print *, "NUMBER_OF_PROCESSORS ", npets
+
 
 
 !-------------------------------------------------------------------------------
