@@ -1,4 +1,4 @@
- $Id: README,v 1.13 2003/10/17 19:33:25 nscollins Exp $
+ $Id: README,v 1.14 2003/11/12 17:39:57 svasquez Exp $
 
 ================================================================================
 
@@ -21,7 +21,7 @@ The ESMF build system consists of:
    makefile syntax defining build rules and actions, but do not 
    constitute a complete build system.
 
-There are kinds of two makefile fragment files that are used by the build.  
+There are two kinds of makefile fragment files that are used by the build.  
 The first is the file common.mk, located in the build directory.  This file 
 defines build rules and variables that are used across all platforms.  Users 
 should have no need to edit it.
@@ -59,11 +59,11 @@ Current site files for supported platforms:
       build_config/AIX.default.default
                    IRIX64.default.default
                    OSF1.default.default
+                   Linux.intel.default
 
 Current site files for unsupported platforms:
 
       build_config/Linux.lahey.default
-                   Linux.intel.default
                    Linux.pgi.default
                    Linux.absoft.default
                    Darwin.absoft.default
@@ -141,4 +141,9 @@ described in the top-level README file of the ESMF code you are trying to
 build.  For example, for the ESMF source this variable is ESMF_DIR.
 
 
+Usage
+-----
 
+To link your application to the ESMF shared libraries refer to the link_rules file
+in the makefile fragment directories. The link_rules are provided only for the 
+supported platforms. 
