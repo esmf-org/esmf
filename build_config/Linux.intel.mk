@@ -1,20 +1,24 @@
-# $Id: Linux.intel.mk,v 1.6 2003/09/10 21:18:29 nscollins Exp $ 
+# $Id: Linux.intel.mk,v 1.7 2003/09/12 19:01:52 nscollins Exp $ 
 
 # Location of MPI (Message Passing Interface) software
+
+ifeq ($(ESMF_MPI),lam)
 # this section is set up for LAM mpi
 #ESMC_MPIRUN   = 
 MPI_HOME       = 
 MPI_LIB        = -lmpi -llam
-MPI_INCLUDE    = -I/usr/include
-MPIRUN         =  /usr/bin/mpirun
+MPI_INCLUDE    = 
+MPIRUN         =  mpirun
+endif
 
-# need an ifeq() section for mpi bypass using the uni libs
+ifeq ($(ESMF_MPI),)
+# this section is set up to bypass all MPI
 # #ESMC_MPIRUN      = 
 # MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
 # MPI_LIB        = -lmpiuni
 # MPI_INCLUDE    = -I${MPI_HOME}
 # MPIRUN         =  ${MPI_HOME}/mpirun
-#endif
+endif
 
 
 # MP_LIB is for openMP
