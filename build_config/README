@@ -106,8 +106,8 @@ A brief list of the environment variables most likely to need to be set are:
                    
 On platforms that don't support Pthreads the following option is critical:
 
- ESMF_PTHREADS     The default option is set to YES. Setting this variable to
-                   NO will turn ESMF's pthreads feature set off and a stubs
+ ESMF_PTHREADS     The default option is set to ON. Setting this variable to
+                   OFF will turn ESMF's pthreads feature set off and a stubs
                    header file will be used instead of the Pthreads header
                    during library compilation. This may be necessary on systems
                    that do not supply a working Pthreads implementation.
@@ -167,7 +167,7 @@ provided only for the supported platforms.
 
 
 ================================================================================
- $Id: README,v 1.20 2005/03/29 18:33:06 theurich Exp $
+ $Id: README,v 1.21 2005/04/01 17:29:38 theurich Exp $
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
