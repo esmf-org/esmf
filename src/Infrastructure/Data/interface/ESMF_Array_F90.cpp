@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.6 2003/02/13 23:40:16 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.7 2003/02/14 16:37:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.6 2003/02/13 23:40:16 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.7 2003/02/14 16:37:21 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -182,10 +182,14 @@
         module procedure ESMF_ArrayCreateByPtrI81D
         module procedure ESMF_ArrayCreateByPtrI42D
         module procedure ESMF_ArrayCreateByPtrI82D
+        module procedure ESMF_ArrayCreateByPtrI43D
+        module procedure ESMF_ArrayCreateByPtrI83D
         module procedure ESMF_ArrayCreateByPtrR41D
         module procedure ESMF_ArrayCreateByPtrR81D
         module procedure ESMF_ArrayCreateByPtrR42D
         module procedure ESMF_ArrayCreateByPtrR82D
+        module procedure ESMF_ArrayCreateByPtrR43D
+        module procedure ESMF_ArrayCreateByPtrR83D
 
 ! ! TODO: ...to be expanded to all types, kinds, ranks
 
@@ -245,10 +249,14 @@ end interface
         module procedure ESMF_ArrayGetDataI81D
         module procedure ESMF_ArrayGetDataI42D
         module procedure ESMF_ArrayGetDataI82D
+        module procedure ESMF_ArrayGetDataI43D
+        module procedure ESMF_ArrayGetDataI83D
         module procedure ESMF_ArrayGetDataR41D
         module procedure ESMF_ArrayGetDataR81D
         module procedure ESMF_ArrayGetDataR42D
         module procedure ESMF_ArrayGetDataR82D
+        module procedure ESMF_ArrayGetDataR43D
+        module procedure ESMF_ArrayGetDataR83D
 
 ! ! TODO: ...to be expanded to all types, kinds, ranks
 
@@ -273,10 +281,14 @@ end interface
         module procedure ESMF_ArrayDeallocateI81D
         module procedure ESMF_ArrayDeallocateI42D
         module procedure ESMF_ArrayDeallocateI82D
+        module procedure ESMF_ArrayDeallocateI43D
+        module procedure ESMF_ArrayDeallocateI83D
         module procedure ESMF_ArrayDeallocateR41D
         module procedure ESMF_ArrayDeallocateR81D
         module procedure ESMF_ArrayDeallocateR42D
         module procedure ESMF_ArrayDeallocateR82D
+        module procedure ESMF_ArrayDeallocateR43D
+        module procedure ESMF_ArrayDeallocateR83D
 
 ! ! TODO: ...to be expanded to all types, kinds, ranks
 
@@ -513,8 +525,8 @@ end function
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
+!! < start of macros which become actual function bodies after expansion >
 
-      ! < these expand into actual function bodies >
 ArrayCreateMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayCreateMacro(integer, I8, 1, COL1, LEN1, LOC1)
@@ -522,6 +534,10 @@ ArrayCreateMacro(integer, I8, 1, COL1, LEN1, LOC1)
 ArrayCreateMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayCreateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayCreateMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateMacro(integer, I8, 3, COL3, LEN3, LOC3)
 
 ArrayCreateMacro(real, R4, 1, COL1, LEN1, LOC1)
 
@@ -531,12 +547,16 @@ ArrayCreateMacro(real, R4, 2, COL2, LEN2, LOC2)
 
 ArrayCreateMacro(real, R8, 2, COL2, LEN2, LOC2)
 
+ArrayCreateMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayCreateMacro(real, R8, 3, COL3, LEN3, LOC3)
+
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
+!! < start of macros which become actual function bodies after expansion >
 
-      ! < these expand into actual function bodies >
 ArrayGetDataMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayGetDataMacro(integer, I8, 1, COL1, LEN1, LOC1)
@@ -544,6 +564,10 @@ ArrayGetDataMacro(integer, I8, 1, COL1, LEN1, LOC1)
 ArrayGetDataMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayGetDataMacro(integer, I8, 2, COL2, LEN2, LOC2)
+
+ArrayGetDataMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayGetDataMacro(integer, I8, 3, COL3, LEN3, LOC3)
 
 ArrayGetDataMacro(real, R4, 1, COL1, LEN1, LOC1)
 
@@ -553,11 +577,15 @@ ArrayGetDataMacro(real, R4, 2, COL2, LEN2, LOC2)
 
 ArrayGetDataMacro(real, R8, 2, COL2, LEN2, LOC2)
 
+ArrayGetDataMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayGetDataMacro(real, R8, 3, COL3, LEN3, LOC3)
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-
-      ! < these expand into actual function bodies >
+!! < start of macros which become actual function bodies after expansion >
+      
 ArrayDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
 
 ArrayDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
@@ -566,6 +594,10 @@ ArrayDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
 
 ArrayDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
 
+ArrayDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)
+
+ArrayDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+
 ArrayDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
 
 ArrayDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
@@ -573,6 +605,12 @@ ArrayDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
 ArrayDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
 
 ArrayDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+
+ArrayDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)
+
+ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+
+!! < end of automatically generated function >
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
