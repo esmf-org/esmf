@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.3 2002/10/25 20:10:13 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.4 2002/11/08 22:43:18 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -167,9 +167,7 @@
 ! !REQUIREMENTS: 
 
 !EOP
-      type (ESMF_IOSpec) ios !! = ESMF_Allocate(47)    ! how does this work?
-
-      ESMF_IOSpecCreateCopy = ios
+      ESMF_IOSpecCreateCopy = iospec
 
       end function ESMF_IOSpecCreateCopy
 
