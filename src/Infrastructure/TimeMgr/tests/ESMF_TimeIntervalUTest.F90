@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.20 2004/04/21 21:40:23 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.21 2004/04/23 00:26:40 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.20 2004/04/21 21:40:23 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.21 2004/04/23 00:26:40 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -717,6 +717,32 @@
                                 calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((timeStep == timeStep2), name, failMsg, result, &
                       ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval Abs test"
+      write(failMsg, *) " Did not return mm=32, d=10 or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=-3, mm=4, d=-10, &
+                                calendar=gregorianCalendar, rc=rc)
+      timeStep2 = ESMF_TimeIntervalAbsValue(timeStep)
+      call ESMF_TimeIntervalGet(timeStep2, mm=months, d=days, rc=rc)
+      call ESMF_Test((months==32 .and. days==10 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months, days, rc = ", months, days, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval Negative Abs test"
+      write(failMsg, *) " Did not return mm=-32, d=-10 or ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-4, d=10, &
+                                calendar=gregorianCalendar, rc=rc)
+      timeStep2 = ESMF_TimeIntervalNegAbsValue(timeStep)
+      call ESMF_TimeIntervalGet(timeStep2, mm=months, d=days, rc=rc)
+      call ESMF_Test((months==-32 .and. days==-10 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months, days, rc = ", months, days, rc
 
       ! ----------------------------------------------------------------------------
       ! No Leap calendar 2004 tests
