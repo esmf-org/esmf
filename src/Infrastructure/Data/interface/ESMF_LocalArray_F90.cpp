@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.8 2003/07/21 18:34:51 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.9 2003/07/21 19:54:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -177,7 +177,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.8 2003/07/21 18:34:51 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.9 2003/07/21 19:54:22 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1058,22 +1058,22 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
         !   (we will ignore the data) and call deallocate themselves.
 
         ! Call Destruct first, then free this memory
-        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
+        call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
-          call c_ESMC_ArrayGetRank(array, rank, status)
-          call c_ESMC_ArrayGetType(array, type, status)
-          call c_ESMC_ArrayGetKind(array, kind, status)
+          call c_ESMC_LocalArrayGetRank(array, rank, status)
+          call c_ESMC_LocalArrayGetType(array, type, status)
+          call c_ESMC_LocalArrayGetKind(array, kind, status)
           call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, status)
           if (status .ne. ESMF_SUCCESS) then
             print *, "LocalArray contents destruction error"
             return
           endif
-          call c_ESMC_ArraySetNoDealloc(array, status)
+          call c_ESMC_LocalArraySetNoDealloc(array, status)
         endif
 
         ! Calling deallocate first means this will not return back to F90
         !  before returning for good.
-        call c_ESMC_ArrayDestroy(array, status)
+        call c_ESMC_LocalArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "LocalArray destruction error"
           return
@@ -1235,21 +1235,21 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 
       if (present(rank)) then
-         call c_ESMC_ArrayGetRank(array, rank, status)
+         call c_ESMC_LocalArrayGetRank(array, rank, status)
          ! TODO: test status
       endif
 
       if (present(type)) then
-         call c_ESMC_ArrayGetType(array, type, status)
+         call c_ESMC_LocalArrayGetType(array, type, status)
       endif
 
       if (present(kind)) then
-         call c_ESMC_ArrayGetKind(array, kind, status)
+         call c_ESMC_LocalArrayGetKind(array, kind, status)
       endif
 
       if (present(counts)) then
-         call c_ESMC_ArrayGetRank(array, lrank, status)
-         call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
+         call c_ESMC_LocalArrayGetRank(array, lrank, status)
+         call c_ESMC_LocalArrayGetLengths(array, lrank, counts, status)
       endif
 
    
@@ -1297,7 +1297,7 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       endif
 
       ! TODO: add an interface to the C code here
-      !call c_ESMC_ArrayGetName(array, name, status)
+      !call c_ESMC_LocalArrayGetName(array, name, status)
       !if(status .NE. ESMF_FAILURE) then
       !  print *, "ERROR in ESMF_LocalArrayGetName"
       !  return
@@ -1793,9 +1793,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
        defaultfile = "datafile"
 
        if(present(filename)) then
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status) 
+           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(filename), status) 
        else
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status) 
+           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(defaultfile), status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
@@ -1889,9 +1889,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
        endif
 
        if(present(options)) then
-           !call c_ESMC_ArrayValidate(array, options, status) 
+           !call c_ESMC_LocalArrayValidate(array, options, status) 
        else
-           !call c_ESMC_ArrayValidate(array, defaultopts, status) 
+           !call c_ESMC_LocalArrayValidate(array, defaultopts, status) 
        endif
 
        !if (status .ne. ESMF_SUCCESS) then
@@ -1942,9 +1942,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
        defaultopts = "brief"
 
        if(present(options)) then
-           call c_ESMC_ArrayPrint(array, options, status) 
+           call c_ESMC_LocalArrayPrint(array, options, status) 
        else
-           call c_ESMC_ArrayPrint(array, defaultopts, status) 
+           call c_ESMC_LocalArrayPrint(array, defaultopts, status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then

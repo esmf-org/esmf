@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.2 2003/07/17 20:45:36 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.3 2003/07/21 19:54:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -288,7 +288,7 @@
         !endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -399,7 +399,7 @@
         counts = shape(f90arr) @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -489,7 +489,7 @@
         endif @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -596,7 +596,7 @@
         counts = shape(f90ptr) @\
  @\
         ! Call create routine @\
-        call c_ESMC_ArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
+        call c_ESMC_LocalArrayCreateNoData(array, mrank, ESMF_DATA_##mname, ESMF_KIND_##mtypekind, & @\
                                              ESMF_FROM_FORTRAN, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array initial construction error" @\
@@ -746,7 +746,7 @@
         offsets = 0 @\
  @\
         wrap%##mtypekind##mrank##Dptr => newp @\
-        call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
+        call c_ESMC_LocalArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
                                  lbounds, ubounds, strides, offsets, & @\
                                  ESMF_TF_TRUE, do_dealloc, status) @\
  @\
@@ -812,7 +812,7 @@
           if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. @\
         endif @\
  @\
-        call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
+        call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "LocalArray - get pointer error" @\
           return @\
@@ -820,7 +820,7 @@
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_ArrayGetLengths(array, mrank, counts, status) @\
+          call c_ESMC_LocalArrayGetLengths(array, mrank, counts, status) @\
           if (status .ne. ESMF_SUCCESS) then @\
             print *, "LocalArray - cannot retrieve array dim sizes" @\
             return @\
@@ -874,7 +874,7 @@
  @\
         status = ESMF_FAILURE  @\
  @\
-        call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
+        call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) @\
         deallocate(wrap%##mtypekind##mrank##Dptr) @\
  @\
         if (present(rc)) rc = status @\

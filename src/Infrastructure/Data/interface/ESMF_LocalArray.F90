@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.8 2003/07/21 18:35:03 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.9 2003/07/21 19:54:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -286,7 +286,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.8 2003/07/21 18:35:03 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.9 2003/07/21 19:54:21 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -811,7 +811,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -897,7 +897,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -983,7 +983,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1069,7 +1069,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1155,7 +1155,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1241,7 +1241,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1327,7 +1327,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1413,7 +1413,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1499,7 +1499,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1585,7 +1585,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1671,7 +1671,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1757,7 +1757,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1843,7 +1843,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1929,7 +1929,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2015,7 +2015,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2101,7 +2101,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2187,7 +2187,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2273,7 +2273,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2359,7 +2359,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2445,7 +2445,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2531,7 +2531,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2617,7 +2617,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2703,7 +2703,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2789,7 +2789,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2875,7 +2875,7 @@ end function
  !endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2982,7 +2982,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3086,7 +3086,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3190,7 +3190,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3294,7 +3294,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3398,7 +3398,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3502,7 +3502,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3606,7 +3606,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3710,7 +3710,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3814,7 +3814,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3918,7 +3918,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4022,7 +4022,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4126,7 +4126,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4230,7 +4230,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4334,7 +4334,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4438,7 +4438,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4542,7 +4542,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4646,7 +4646,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4750,7 +4750,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4854,7 +4854,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4958,7 +4958,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5062,7 +5062,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5166,7 +5166,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5270,7 +5270,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5374,7 +5374,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5478,7 +5478,7 @@ end function
  counts = shape(f90arr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5564,7 +5564,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5646,7 +5646,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5728,7 +5728,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5810,7 +5810,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5892,7 +5892,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5974,7 +5974,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6056,7 +6056,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6138,7 +6138,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6220,7 +6220,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6302,7 +6302,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6384,7 +6384,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6466,7 +6466,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6548,7 +6548,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6630,7 +6630,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6712,7 +6712,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6794,7 +6794,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6876,7 +6876,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6958,7 +6958,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7040,7 +7040,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7122,7 +7122,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7204,7 +7204,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7286,7 +7286,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7368,7 +7368,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7450,7 +7450,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7532,7 +7532,7 @@ end function
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7635,7 +7635,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7735,7 +7735,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7835,7 +7835,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7935,7 +7935,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8035,7 +8035,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8135,7 +8135,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8235,7 +8235,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8335,7 +8335,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8435,7 +8435,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8535,7 +8535,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8635,7 +8635,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8735,7 +8735,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8835,7 +8835,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8935,7 +8935,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9035,7 +9035,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9135,7 +9135,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9235,7 +9235,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9335,7 +9335,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9435,7 +9435,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9535,7 +9535,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9635,7 +9635,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9735,7 +9735,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9835,7 +9835,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9935,7 +9935,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10035,7 +10035,7 @@ end function
  counts = shape(f90ptr) 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
+ call c_ESMC_LocalArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10180,7 +10180,7 @@ end function
  offsets = 0 
  
  wrap%I21Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -10318,7 +10318,7 @@ end function
  offsets = 0 
  
  wrap%I41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -10456,7 +10456,7 @@ end function
  offsets = 0 
  
  wrap%I81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -10594,7 +10594,7 @@ end function
  offsets = 0 
  
  wrap%I22Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -10732,7 +10732,7 @@ end function
  offsets = 0 
  
  wrap%I42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -10870,7 +10870,7 @@ end function
  offsets = 0 
  
  wrap%I82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11008,7 +11008,7 @@ end function
  offsets = 0 
  
  wrap%I23Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11146,7 +11146,7 @@ end function
  offsets = 0 
  
  wrap%I43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11284,7 +11284,7 @@ end function
  offsets = 0 
  
  wrap%I83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11422,7 +11422,7 @@ end function
  offsets = 0 
  
  wrap%I24Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11560,7 +11560,7 @@ end function
  offsets = 0 
  
  wrap%I44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11698,7 +11698,7 @@ end function
  offsets = 0 
  
  wrap%I84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11836,7 +11836,7 @@ end function
  offsets = 0 
  
  wrap%I25Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -11974,7 +11974,7 @@ end function
  offsets = 0 
  
  wrap%I45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12112,7 +12112,7 @@ end function
  offsets = 0 
  
  wrap%I85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12250,7 +12250,7 @@ end function
  offsets = 0 
  
  wrap%R41Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12388,7 +12388,7 @@ end function
  offsets = 0 
  
  wrap%R81Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12526,7 +12526,7 @@ end function
  offsets = 0 
  
  wrap%R42Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12664,7 +12664,7 @@ end function
  offsets = 0 
  
  wrap%R82Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12802,7 +12802,7 @@ end function
  offsets = 0 
  
  wrap%R43Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -12940,7 +12940,7 @@ end function
  offsets = 0 
  
  wrap%R83Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -13078,7 +13078,7 @@ end function
  offsets = 0 
  
  wrap%R44Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -13216,7 +13216,7 @@ end function
  offsets = 0 
  
  wrap%R84Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -13354,7 +13354,7 @@ end function
  offsets = 0 
  
  wrap%R45Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -13492,7 +13492,7 @@ end function
  offsets = 0 
  
  wrap%R85Dptr => newp 
- call c_ESMC_ArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
+ call c_ESMC_LocalArraySetInfo(array, wrap, newp ( 1,1,1,1,1 ), counts, & 
  lbounds, ubounds, strides, offsets, & 
  ESMF_TF_TRUE, do_dealloc, status) 
  
@@ -13554,7 +13554,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -13562,7 +13562,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -13629,7 +13629,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -13637,7 +13637,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -13704,7 +13704,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -13712,7 +13712,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -13779,7 +13779,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -13787,7 +13787,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -13854,7 +13854,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -13862,7 +13862,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -13929,7 +13929,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -13937,7 +13937,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14004,7 +14004,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14012,7 +14012,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14079,7 +14079,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14087,7 +14087,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14154,7 +14154,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14162,7 +14162,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14229,7 +14229,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14237,7 +14237,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14304,7 +14304,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14312,7 +14312,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14379,7 +14379,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14387,7 +14387,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14454,7 +14454,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14462,7 +14462,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14529,7 +14529,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14537,7 +14537,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14604,7 +14604,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14612,7 +14612,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14679,7 +14679,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14687,7 +14687,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14754,7 +14754,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14762,7 +14762,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 1, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 1, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14829,7 +14829,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14837,7 +14837,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14904,7 +14904,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14912,7 +14912,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 2, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 2, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -14979,7 +14979,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -14987,7 +14987,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -15054,7 +15054,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -15062,7 +15062,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 3, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 3, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -15129,7 +15129,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -15137,7 +15137,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -15204,7 +15204,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -15212,7 +15212,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 4, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 4, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -15279,7 +15279,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -15287,7 +15287,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -15354,7 +15354,7 @@ end function
  if (docopy .eq. ESMF_DATA_COPY) copyreq = .TRUE. 
  endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - get pointer error" 
  return 
@@ -15362,7 +15362,7 @@ end function
  
  ! Allocate a new buffer if requested and return a copy 
  if (copyreq) then 
- call c_ESMC_ArrayGetLengths(array, 5, counts, status) 
+ call c_ESMC_LocalArrayGetLengths(array, 5, counts, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "LocalArray - cannot retrieve array dim sizes" 
  return 
@@ -15412,7 +15412,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I21Dptr) 
  
  if (present(rc)) rc = status 
@@ -15445,7 +15445,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I41Dptr) 
  
  if (present(rc)) rc = status 
@@ -15478,7 +15478,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I81Dptr) 
  
  if (present(rc)) rc = status 
@@ -15511,7 +15511,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I22Dptr) 
  
  if (present(rc)) rc = status 
@@ -15544,7 +15544,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I42Dptr) 
  
  if (present(rc)) rc = status 
@@ -15577,7 +15577,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I82Dptr) 
  
  if (present(rc)) rc = status 
@@ -15610,7 +15610,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I23Dptr) 
  
  if (present(rc)) rc = status 
@@ -15643,7 +15643,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I43Dptr) 
  
  if (present(rc)) rc = status 
@@ -15676,7 +15676,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I83Dptr) 
  
  if (present(rc)) rc = status 
@@ -15709,7 +15709,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I24Dptr) 
  
  if (present(rc)) rc = status 
@@ -15742,7 +15742,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I44Dptr) 
  
  if (present(rc)) rc = status 
@@ -15775,7 +15775,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I84Dptr) 
  
  if (present(rc)) rc = status 
@@ -15808,7 +15808,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I25Dptr) 
  
  if (present(rc)) rc = status 
@@ -15841,7 +15841,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I45Dptr) 
  
  if (present(rc)) rc = status 
@@ -15874,7 +15874,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%I85Dptr) 
  
  if (present(rc)) rc = status 
@@ -15907,7 +15907,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R41Dptr) 
  
  if (present(rc)) rc = status 
@@ -15940,7 +15940,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R81Dptr) 
  
  if (present(rc)) rc = status 
@@ -15973,7 +15973,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R42Dptr) 
  
  if (present(rc)) rc = status 
@@ -16006,7 +16006,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R82Dptr) 
  
  if (present(rc)) rc = status 
@@ -16039,7 +16039,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R43Dptr) 
  
  if (present(rc)) rc = status 
@@ -16072,7 +16072,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R83Dptr) 
  
  if (present(rc)) rc = status 
@@ -16105,7 +16105,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R44Dptr) 
  
  if (present(rc)) rc = status 
@@ -16138,7 +16138,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R84Dptr) 
  
  if (present(rc)) rc = status 
@@ -16171,7 +16171,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R45Dptr) 
  
  if (present(rc)) rc = status 
@@ -16204,7 +16204,7 @@ end function
  
  status = ESMF_FAILURE 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap%R85Dptr) 
  
  if (present(rc)) rc = status 
@@ -16269,21 +16269,21 @@ end function
         ! space. otherwise, the user needs to destroy the array
         ! (we will ignore the data) and call deallocate themselves.
         ! Call Destruct first, then free this memory
-        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
+        call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
-          call c_ESMC_ArrayGetRank(array, rank, status)
-          call c_ESMC_ArrayGetType(array, type, status)
-          call c_ESMC_ArrayGetKind(array, kind, status)
+          call c_ESMC_LocalArrayGetRank(array, rank, status)
+          call c_ESMC_LocalArrayGetType(array, type, status)
+          call c_ESMC_LocalArrayGetKind(array, kind, status)
           call ESMF_LocalArrayF90Deallocate(array, rank, type, kind, status)
           if (status .ne. ESMF_SUCCESS) then
             print *, "LocalArray contents destruction error"
             return
           endif
-          call c_ESMC_ArraySetNoDealloc(array, status)
+          call c_ESMC_LocalArraySetNoDealloc(array, status)
         endif
         ! Calling deallocate first means this will not return back to F90
         ! before returning for good.
-        call c_ESMC_ArrayDestroy(array, status)
+        call c_ESMC_LocalArrayDestroy(array, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "LocalArray destruction error"
           return
@@ -16421,18 +16421,18 @@ end function
           rc = ESMF_FAILURE
       endif
       if (present(rank)) then
-         call c_ESMC_ArrayGetRank(array, rank, status)
+         call c_ESMC_LocalArrayGetRank(array, rank, status)
          ! TODO: test status
       endif
       if (present(type)) then
-         call c_ESMC_ArrayGetType(array, type, status)
+         call c_ESMC_LocalArrayGetType(array, type, status)
       endif
       if (present(kind)) then
-         call c_ESMC_ArrayGetKind(array, kind, status)
+         call c_ESMC_LocalArrayGetKind(array, kind, status)
       endif
       if (present(counts)) then
-         call c_ESMC_ArrayGetRank(array, lrank, status)
-         call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
+         call c_ESMC_LocalArrayGetRank(array, lrank, status)
+         call c_ESMC_LocalArrayGetLengths(array, lrank, counts, status)
       endif
       ! TODO: add these methods
       !integer, dimension(:), intent(out), optional :: lbounds
@@ -16470,7 +16470,7 @@ end function
           rc = ESMF_FAILURE
       endif
       ! TODO: add an interface to the C code here
-      !call c_ESMC_ArrayGetName(array, name, status)
+      !call c_ESMC_LocalArrayGetName(array, name, status)
       !if(status .NE. ESMF_FAILURE) then
       ! print *, "ERROR in ESMF_LocalArrayGetName"
       ! return
@@ -17631,9 +17631,9 @@ end function
        defaultopts = "singlefile"
        defaultfile = "datafile"
        if(present(filename)) then
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status)
+           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(filename), status)
        else
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status)
+           call c_ESMC_LocalArrayWrite(array, defaultopts, trim(defaultfile), status)
        endif
        if (status .ne. ESMF_SUCCESS) then
          print *, "LocalArray write error"
@@ -17710,9 +17710,9 @@ end function
            return
        endif
        if(present(options)) then
-           !call c_ESMC_ArrayValidate(array, options, status)
+           !call c_ESMC_LocalArrayValidate(array, options, status)
        else
-           !call c_ESMC_ArrayValidate(array, defaultopts, status)
+           !call c_ESMC_LocalArrayValidate(array, defaultopts, status)
        endif
        !if (status .ne. ESMF_SUCCESS) then
        ! print *, "LocalArray validate error"
@@ -17754,9 +17754,9 @@ end function
        endif
        defaultopts = "brief"
        if(present(options)) then
-           call c_ESMC_ArrayPrint(array, options, status)
+           call c_ESMC_LocalArrayPrint(array, options, status)
        else
-           call c_ESMC_ArrayPrint(array, defaultopts, status)
+           call c_ESMC_LocalArrayPrint(array, defaultopts, status)
        endif
        if (status .ne. ESMF_SUCCESS) then
          print *, "LocalArray print error"
