@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.10 2004/06/13 05:25:42 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.11 2004/06/13 19:17:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,17 +51,17 @@ implicit none
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
 !------------------------------------------------------------------------------
-!     ! ESMF_LogMsgType
-type ESMF_LogMsgType
+!     ! ESMF_MsgType
+type ESMF_MsgType
     sequence
-    integer                                 :: ftype
+    integer      :: ftype
 end type
 
-!     ! Log File Types
-type(ESMF_LogMsgType), parameter           ::  &
-    ESMF_LOG_INFO  = ESMF_LogMsgType(1), &
-    ESMF_LOG_WARNING = ESMF_LogMsgType(2), &
-    ESMF_LOG_ERROR = ESMF_LogMsgType(3)
+!     ! Msg Types
+type(ESMF_MsgType), parameter           ::  &
+    ESMF_LOG_INFO  = ESMF_MsgType(1), &
+    ESMF_LOG_WARNING = ESMF_MsgType(2), &
+    ESMF_LOG_ERROR = ESMF_MsgType(3)
      
 !     ! Log Entry                            
 type ESMF_LOGENTRY
@@ -83,7 +83,7 @@ type ESMF_Log
     type(ESMF_Logical)                      ::  flush
     integer                                     halt
     type(ESMF_LOGENTRY), dimension(1)       ::  LOG_ENTRY
-    type(ESMF_LogMsgType)                  ::  logtype
+    type(ESMF_MsgType)                      ::  msgtype ! TODO: this is wrong
     integer                                     maxElements
     character(len=32)                           nameLogErrFile 
     type(ESMF_Logical)                      ::  rootOnly
@@ -132,20 +132,20 @@ contains
 ! !IROUTINE: ESMF_LogClose - Close Log file(s)
 
 ! !INTERFACE: 
-    subroutine ESMF_LogClose(log,rc)
+    subroutine ESMF_LogClose(log, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)			            :: log
-    integer, intent(out),optional	    :: rc
+    type(ESMF_Log)	            :: log
+    integer, intent(out),optional   :: rc
 
 ! !DESCRIPTION:
-!      This routine closes the file(s) associated with {\tt log}.
+!      This routine closes the file(s) associated with the {\tt log}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 
 !      \item [log]
-!            Log object.
+!            An {\tt ESMF\_Log} object.
 !      \item [{[rc]}]
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -172,7 +172,7 @@ end subroutine ESMF_LogClose
 
 !--------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LogFinalize - Finalizes the Log file(s)
+! !IROUTINE: ESMF_LogFinalize - Finalize Log file(s)
 
 ! !INTERFACE: 
 	subroutine ESMF_LogFinalize(rc)
@@ -207,32 +207,35 @@ end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_LogFoundAllocError - Returns logical associated with finding an error
+! !IROUTINE:  ESMF_LogFoundAllocError - Check Fortran status for allocation error
 
 ! !INTERFACE: 
-	function ESMF_LogFoundAllocError(rcToCheck,line,file,method,rcToReturn)
+	function ESMF_LogFoundAllocError(statusToCheck, line, file, & 
+                                         method, rcToReturn)
 !
 ! !RETURN VALUE:
 	logical                                 ::ESMF_LogFoundAllocError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                     :: rcToCheck
+	integer, intent(in)                     :: statusToCheck
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional  :: method
 	integer, intent(out),optional           :: rcToReturn
 
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate a
-!      memory allocation error.  A predefined memory allocation error message
-!      will be added to the log along with line, file and method.  Addtionally,
-!      rcToReturn will bet set to rcToCheck.
+!      This function returns a logical true when a Fortran status code
+!      returned from a memory allocation indicates an allocation error.  
+!      An ESMF predefined memory allocation error 
+!      message will be added to the {\tt ESMF\_Log} along with {\tt line}, 
+!      {\tt file} and {\tt method}.  Additionally, the 
+!      {\tt statusToCheck} will be converted to a {\tt rcToReturn}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [rcToCheck]
-!            Return code to check.
+!      \item [statusToCheck]
+!            Fortran allocation status to check.
 !      \item [line]
 !            cpp provided line number.
 !      \item [file]
@@ -240,7 +243,7 @@ end subroutine ESMF_LogFinalize
 !      \item [method]
 !            cpp provided method string.
 !      \item [rcToReturn]
-!            Return code to Return.
+!            Return code to return.
 !      
 !      \end{description}
 ! 
@@ -251,8 +254,8 @@ end subroutine ESMF_LogFinalize
 	integer::msglen=0
 	
     ESMF_LogFoundAllocError=.FALSE.
-    if (present(rcToReturn)) rcToReturn=rcToCheck
-    if (rcToCheck .NE. 0) then
+    if (present(rcToReturn)) rcToReturn=statusToCheck
+    if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
 	    logrc = ESMF_LogWrite(trim(allocmsg),ESMF_LOG_ERROR,line,file,method)
@@ -268,10 +271,10 @@ end function ESMF_LogFoundAllocError
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogFoundError - Returns logical associated with finding an error
+! !IROUTINE: ESMF_LogFoundError - Check ESMF return code for error
 
 ! !INTERFACE: 
-	function ESMF_LogFoundError(rcToCheck,line,file,method,rcToReturn)
+	function ESMF_LogFoundError(rcToCheck, line, file, method, rcToReturn)
 !
 ! !RETURN VALUE:
 	logical                                         ::ESMF_LogFoundError
@@ -284,9 +287,10 @@ end function ESMF_LogFoundAllocError
 	integer, intent(out), optional                  :: rcToReturn
 	
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate a
-!      an error.  A predefined error message will added to the log along with
-!      line, file and method.  Addtionally, rcToReturn will bet set to rcToCheck.
+!      This function returns a logical true for ESMF return codes that indicate 
+!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
+!      along with {\tt line}, {\tt file} and {\tt method}.  Additionally, 
+!      {\tt rcToReturn} will be set to {\tt rcToCheck}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -302,7 +306,7 @@ end function ESMF_LogFoundAllocError
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
-!            If specified, copy the {\tt status} value to {\tt rc}.
+!            If specified, copy the {\tt rcToCheck} value to {\tt rc}.
 !            This is not the return code for this function; it allows
 !            the calling code to do an assignment of the error code
 !            at the same time it is testing the value.
@@ -328,10 +332,10 @@ end function ESMF_LogFoundError
 
 !--------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LogGet - Returns information about a log object
+! !IROUTINE: ESMF_LogGet - Return information about a log object
 
 ! !INTERFACE: 
-	subroutine ESMF_LogGet(log,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
+	subroutine ESMF_LogGet(log,verbose,flush,rootOnly,halt,msgtype,stream,maxElements,rc)
 !
 ! !ARGUMENTS:
 !	
@@ -339,8 +343,8 @@ end function ESMF_LogFoundError
 	type(ESMF_Logical), intent(out),optional		:: verbose
 	type(ESMF_Logical), intent(out),optional		:: flush
 	type(ESMF_Logical), intent(out),optional		:: rootOnly
-	integer, intent(out),optional		            :: halt
-	type(ESMF_LogMsgType), intent(in),optional	    :: logtype
+	integer, intent(out),optional		                :: halt
+	type(ESMF_MsgType), intent(in),optional	                :: msgtype
 	integer, intent(out),optional			        :: stream  
 	integer, intent(out),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -360,8 +364,8 @@ end function ESMF_LogFoundError
 !	     Root only flag
 !      \item [halt]
 !	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
-!      \item [logtype]
-!             The type of file (singlelog(0), multilog(1)).
+!      \item [msgtype]
+!            TODO: This argument is wrong.
 !      \item [stream]
 !            The type of stream (free(0), preordered(1))
 !      \item [maxElements]
@@ -386,8 +390,8 @@ end function ESMF_LogFoundError
 	if (present(halt)) then
 	  halt=log%halt
 	endif
-	!if (present(logtype)) then
-	!  logtype=log%logtype
+	!if (present(msgtype)) then
+	!  msgtype=log%msgtype
 	!endif
 	if (present(stream)) then
 	  stream=log%stream
@@ -402,19 +406,19 @@ end subroutine ESMF_LogGet
 
 !--------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LogInitialize - Initializes Log file(s)
+! !IROUTINE: ESMF_LogInitialize - Initialize Log file(s)
 
 ! !INTERFACE: 
       subroutine ESMF_LogInitialize(filename, rc)
 !
 ! !ARGUMENTS:
       character(len=*)                          :: filename
-      integer, intent(out),optional	            :: rc
+      integer, intent(out),optional	        :: rc
 
 ! !DESCRIPTION:
-!      This routine initializes the global default log.  The filename for the 
-!      log object will be set to the default log and associated with an open
-!      unit number.
+!      This routine initializes the global default {\tt ESMF\_Log}.  
+!      The default {\tt ESMF\_Log} is assigned the {\tt filename} and 
+!      is associated with an open Fortran unit number.
 !
 !      The arguments are:
 !      \begin{description}
@@ -449,16 +453,17 @@ end subroutine ESMF_LogInitialize
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogMsgFoundAllocError - Returns logical associated with finding an error
+! !IROUTINE: ESMF_LogMsgFoundAllocError - Check Fortran status for allocation error and write message
 
 ! !INTERFACE: 
-	function ESMF_LogMsgFoundAllocError(rcToCheck,msg,line,file,method,rcToReturn)
+	function ESMF_LogMsgFoundAllocError(statusToCheck,msg,line,file, &
+                                            method,rcToReturn)
 !
 ! !RETURN VALUE:
 	logical                                 ::ESMF_LogMsgFoundAllocError
 ! !ARGUMENTS:
 !	
-	integer, intent(in)                     :: rcToCheck
+	integer, intent(in)                     :: statusToCheck
 	character(len=*), intent(in)            :: msg
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
@@ -466,16 +471,19 @@ end subroutine ESMF_LogInitialize
     integer, intent(out),optional           :: rcToReturn	
 
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate a
-!      memory allocation error.  A predefined memory allocation error message 
-!      will be added to the log along with a user added message, line, file and 
-!      method.  Addtionally, rcToReturn will bet set to rcToCheck.
+!      This function returns a logical true when a Fortran status code
+!      returned from a memory allocation indicates an allocation error.
+!      An ESMF predefined memory allocation error message 
+!      will be added to the {\tt ESMF\_Log} along with a user added {\tt msg}, 
+!      {\tt line}, {\tt file} and 
+!      {\tt method}.  Additionally, statusToCheck will be converted to 
+!      {\tt rcToReturn}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 	
-!      \item [rcToCheck]
-!            Return code to check.
+!      \item [statusToCheck]
+!            Fortran allocation status to check.
 !      \item [msg]
 !            User-provided context string.
 !      \item [line]
@@ -496,8 +504,8 @@ end subroutine ESMF_LogInitialize
 	integer::msglen=0
     
     ESMF_LogMsgFoundAllocError=.FALSE.
-    if (present(rcToReturn)) rcToReturn=rcToCheck
-    if (rcToCheck .NE. 0) then
+    if (present(rcToReturn)) rcToReturn=statusToCheck
+    if (statusToCheck .NE. 0) then
         call c_esmc_loggeterrormsg(ESMF_RC_MEM,tempmsg,msglen)
         allocmsg=tempmsg(1:msglen)
 	    logrc = ESMF_LogWrite(trim(allocmsg)//msg,ESMF_LOG_ERROR,line,file,method)
@@ -513,10 +521,11 @@ end function ESMF_LogMsgFoundAllocError
 
 !--------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogMsgFoundError - Returns logical associated with finding an error
+! !IROUTINE: ESMF_LogMsgFoundError - Check ESMF return code for error and write message
 
 ! !INTERFACE: 
-	function ESMF_LogMsgFoundError(rcToCheck,msg,line,file,method,rcToReturn)
+	function ESMF_LogMsgFoundError(rcToCheck, msg, line, file, method, &
+                                       rcToReturn)
 !
 ! !RETURN VALUE:
 	logical                                         ::ESMF_LogMsgFoundError
@@ -531,10 +540,11 @@ end function ESMF_LogMsgFoundAllocError
 	
 
 ! !DESCRIPTION:
-!      This function returns a logical true for return codes that indicate a
-!      an error.  A predefined error message will added to the log along with
-!      a user added message. line, file and method.  Addtionally, rcToReturn 
-!      will bet set to rcToCheck.
+!      This function returns a logical true for ESMF return codes that indicate
+!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
+!      along with
+!      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
+!      Additionally, {\tt rcToReturn} will be set to {\tt rcToCheck}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -550,7 +560,11 @@ end function ESMF_LogMsgFoundAllocError
 !      \item [method]
 !            cpp provided method string.
 !      \item [rcToReturn]
-!            Return code to Return.
+!      \item [{[rcToReturn]}]
+!            If specified, copy the {\tt rcToCheck} value to {\tt rc}.
+!            This is not the return code for this function; it allows
+!            the calling code to do an assignment of the error code 
+!            at the same time it is testing the value.
 !      
 !      \end{description}
 ! 
@@ -579,19 +593,20 @@ end function ESMF_LogMsgFoundError
     subroutine ESMF_LogOpen(log, filename, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_Log)			        :: log
+    type(ESMF_Log)			    :: log
     character(len=*)			    :: filename
-    integer, intent(out),optional	:: rc
+    integer, intent(out),optional	    :: rc
 
 ! !DESCRIPTION:
-!      This routine opens the file associated with a Log.  This is only
-!      used when the user does not want to use the default log.
+!      This routine opens a file with {\tt filename} and associates
+!      it with the {\tt log}.  This is only
+!      used when the user does not want to use the default {\tt ESMF\_Log}.
 !
 !      The arguments are:
 !      \begin{description}
 ! 
 !      \item [log]
-!            Log object.
+!            An {\tt ESMF\_Log} object.
 !      \item [filename]
 !            Name of file.
 !      \item [{[rc]}]
@@ -623,10 +638,11 @@ end subroutine ESMF_LogOpen
 
 !--------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_LogSet - Sets Log Parameters
+! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
-	subroutine ESMF_LogSet(log,verbose,flush,rootOnly,halt,logtype,stream,maxElements,rc)
+	subroutine ESMF_LogSet(log,verbose,flush,rootOnly,halt,msgtype, &
+                               stream,maxElements,rc)
 !
 ! !ARGUMENTS:
 !	
@@ -635,7 +651,7 @@ end subroutine ESMF_LogOpen
 	type(ESMF_Logical), intent(in),optional			:: flush
 	type(ESMF_Logical), intent(in),optional			:: rootOnly
 	integer, intent(in),optional			        :: halt
-	type(ESMF_LogMsgType), intent(in),optional     :: logtype
+	type(ESMF_MsgType), intent(in),optional                 :: msgtype
 	integer, intent(in),optional			        :: stream  
 	integer, intent(in),optional			        :: maxElements
 	integer, intent(out),optional			        :: rc
@@ -654,8 +670,8 @@ end subroutine ESMF_LogOpen
 !	     Root only flag
 !      \item [halt]
 !	     Halt definitions (halterr(0), haltwarn(1),haltnever(2))
-!      \item [filetype]
-!            The type of file (singlelog(0), multilog(1)).
+!      \item [msgtype]
+!            TODO:  This argument is wrong.
 !      \item [stream]
 !            The type of stream (free(0), preordered(1))
 !      \item [maxElements]
@@ -670,7 +686,7 @@ end subroutine ESMF_LogOpen
 	if (present(flush)) log%flush=flush
 	if (present(rootOnly)) log%rootOnly=rootOnly
 	if (present(halt)) log%halt=halt
-	if (present(logtype)) log%logtype=logtype
+	if (present(msgtype)) log%msgtype=msgtype
 	if (present(stream)) log%stream=stream
 	if (present(maxElements)) log%maxElements=maxElements
 	if (present(rc)) rc=ESMF_SUCCESS 
@@ -681,31 +697,36 @@ end subroutine ESMF_LogSet
 ! !IROUTINE: ESMF_LogWrite - Write to Log file(s)
 
 ! !INTERFACE: 
-	function ESMF_LogWrite(msg,logtype,line,file,method)
+	function ESMF_LogWrite(msg,MsgType,line,file,method)
 !
 !
 ! !RETURN VALUE:
 	logical                                 ::ESMF_LogWrite
 ! !ARGUMENTS:
 	character(len=*), intent(in)            :: msg
-	type(ESMF_LogMsgType), intent(in)      :: logtype
+	type(ESMF_MsgType), intent(in)          :: msgtype
 	integer, intent(in), optional           :: line
 	character(len=*), intent(in), optional  :: file
 	character(len=*), intent(in), optional	:: method
 
 ! !DESCRIPTION:
-!      This function writes to the file associated with a Log.  A message is
-!      passed in along with logtype, line, file and method.  If the write to
-!      the Log is successful, the function will return True.  This function
-!      is the base function used by all the other Log writing methods.
+!      This function writes to the file associated with an {\tt ESMF\_Log}.
+!      A message is
+!      passed in along with the {\tt msgtype}, {\tt line}, {\tt file} and 
+!      {\ttt method}.  If the write to
+!      the {\tt ESMF\_Log} is successful, the function will return a 
+!      logical {\tt true}.  This function
+!      is the base function used by all the other {\tt ESMF\_Log} 
+!      writing methods.
 !
 !      The arguments are:
 !      \begin{description}
 ! 
 !      \item [msg]
 !            User-provided context string.
-!      \item [logtype]
-!            The type of message (info(0), warning(1), error(2))..
+!      \item [msgtype]
+!            The type of message.  See Section~\ref{opt:msgtype} for
+!            possible values.
 !      \item [line]
 !            cpp provided line number.
 !      \item [file]
@@ -740,7 +761,7 @@ end subroutine ESMF_LogSet
     
     if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
     	call DATE_AND_TIME(d,t)	
-    	select case (logtype%ftype)
+    	select case (msgtype%ftype)
           case (1)
     	    lt="INFO"
           case (2)
