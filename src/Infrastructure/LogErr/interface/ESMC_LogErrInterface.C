@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.2 2003/03/28 21:36:14 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.3 2003/03/31 18:27:51 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@ extern int logErrFileFortran[10];
 extern int numFileFortGlobal;
 extern char listOfFileNames[20][32];
 extern char listOfFortFileNames[20][32];
-#include "/home/sjs/ESMF/esmf/src/Infrastructure/LogErr/include/ESMC_LogErr.h"
+#include "../include/ESMC_LogErr.h"
 
 extern "C" {
 //------------------------------------------------------------------------
