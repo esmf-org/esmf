@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.64 2003/09/05 16:50:15 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.65 2003/09/22 22:28:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -353,7 +353,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.64 2003/09/05 16:50:15 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.65 2003/09/22 22:28:34 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -501,7 +501,7 @@ subroutine ESMF_tfas(lval, tfval)
  logical, intent(out) :: lval
  type(ESMF_Logical), intent(in) :: tfval
 
- lval = (tfval%value .eq. 2)    ! this must match initializer
+ lval = (tfval%value .eq. ESMF_TRUE)    ! this must match initializer
 end subroutine
 
 !------------------------------------------------------------------------------
