@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.22 2004/06/16 04:53:16 nscollins Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.23 2004/06/18 21:57:51 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.22 2004/06/16 04:53:16 nscollins Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.23 2004/06/18 21:57:51 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -115,7 +115,7 @@
       grid_min(2) =   0.0
       grid_max(2) = 180.0
       grid_min(3) =  90.0
-      grid_max(2) = 100.0
+      grid_max(3) = 100.0
       delta(1:15) = 6.6667
       gName = "test grid 1"
       !NEX_UTest
@@ -132,9 +132,9 @@
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzStagger=horz_stagger, &
+                              horzstagger=horz_stagger, &
                               name=gName, rc=status)
-      call ESMF_GridAddVertHeight(grid, delta, vertStagger=vert_stagger, &
+      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
                                   rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
@@ -161,10 +161,10 @@
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzStagger=horz_stagger, &
+                              horzstagger=horz_stagger, &
                               name=gName, rc=status)
 
-      call ESMF_GridAddVertHeight(grid, delta, vertStagger=vert_stagger, &
+      call ESMF_GridAddVertHeight(grid, delta, vertstagger=vert_stagger, &
                                   rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
@@ -184,7 +184,7 @@
       !------------------------------------------------------------------------
       !EX_UTest
       ! Get the Grid horzStagger
-      call ESMF_GridGet(grid, horzStagger=Rhorz_stagger, rc=rc)
+      call ESMF_GridGet(grid, horzstagger=Rhorz_stagger, rc=rc)
       write(name, *) "Get the Grid horzStagger Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS or the horzStagger is not correct"
       call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rhorz_Stagger.eq.horz_stagger), &
@@ -216,7 +216,8 @@
       call ESMF_GridGet(grid, name=RgName, rc=rc)
       write(name, *) "Get the Grid name Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS or the name is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. RgName.eq."test grid 1"),  name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. trim(RgName).eq."test grid 1"), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -258,8 +259,9 @@
       call ESMF_GridGet(grid1, name=RgName, rc=rc)
       write(name, *) "Get the Grid name Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS or the name is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. RgName.eq."test grid 2"),  name, failMsg, result, ESMF_SRCLINE)
-      print *, "Rgname = ", RgName
+      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. trim(RgName).eq."test grid 2"), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "Rgname = ", trim(RgName)
       print *, " rc = ", rc
 
 
