@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.118 2004/03/11 16:13:51 svasquez Exp $
+! $Id: ESMF_Field.F90,v 1.119 2004/03/15 16:18:09 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.118 2004/03/11 16:13:51 svasquez Exp $'
+      '$Id: ESMF_Field.F90,v 1.119 2004/03/15 16:18:09 svasquez Exp $'
 
 !==============================================================================
 !
@@ -3026,7 +3026,7 @@
 ! !DESCRIPTION:
 !      Attaches a real list attribute to a {\tt ESMF\_Field}.
 !
-!!     The arguments are:
+!     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           A {\tt ESMF\_Field} object.
