@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.19 2003/08/27 14:26:06 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.20 2003/09/11 22:54:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,13 +68,15 @@ extern "C" {
                                  ESMC_LocalArray **dst, int *status) {
            void *src_base_addr = NULL;
            void *dst_base_addr = NULL;
+           ESMC_DataKind dk;
 
 	   if (((long int)*src != 0) && ((long int)*src != -1))
                (*src)->ESMC_LocalArrayGetBaseAddr(&src_base_addr);
 	   if (((long int)*dst != 0) && ((long int)*dst != -1))
                (*dst)->ESMC_LocalArrayGetBaseAddr(&dst_base_addr);
+           dk = (*src)->ESMC_LocalArrayGetKind();
 
-           *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr);
+           *status = (*ptr)->ESMC_RouteRun(src_base_addr, dst_base_addr, dk);
        }
 
        void FTN(c_esmc_routeprecomputeregrid)(ESMC_Route **ptr, int *rank, 

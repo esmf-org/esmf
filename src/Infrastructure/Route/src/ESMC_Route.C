@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.66 2003/09/04 22:24:21 cdeluca Exp $
+// $Id: ESMC_Route.C,v 1.67 2003/09/11 22:54:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.66 2003/09/04 22:24:21 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.67 2003/09/11 22:54:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -588,7 +588,8 @@ static int maxroutes = 10;
 //
 // !ARGUMENTS:
       void *srcaddr,       // in, local send buffer base address
-      void *dstaddr) {     // in, local receive buffer base address
+      void *dstaddr,       // in, local receive buffer base address
+      ESMC_DataKind dk) {  // in, data kind for both src & dest
 //
 // !DESCRIPTION:
 //     Calls the communications routines to send/recv the information
@@ -612,6 +613,7 @@ static int maxroutes = 10;
     int srep_count[ESMF_MAXDIM], rrep_count[ESMF_MAXDIM];
     void *srcmem, *rcvmem;
     int srccount, rcvcount;
+    int nbytes;
 
     rc = layout->ESMC_DELayoutGetDEID(&mydeid);
     rc = ct->ESMC_CommTableGetCount(&ccount);
@@ -692,14 +694,11 @@ static int maxroutes = 10;
                for (l=0; l<srep_count[j] || l<rrep_count[j]; l++, 
                                srcbytes += sstride[j], rcvbytes += rstride[j]) {
          
-                     // TODO!!!  we need to standardize on either byte counts
-                     // and void * from here down to the MPI level, or we need
-                     // to compute # of items and item type and pass it down.
-                     // this "sizeof(int)" is WRONG and just a hack to test the
-                     // code for now.
+                    // This is a new fix - should take care of byte size issues.
+                    nbytes = ESMC_DataKindSize(dk);
          
-                    srcmem = (void *)((char *)srcaddr+(srcbytes*sizeof(int))); 
-                    rcvmem = (void *)((char *)dstaddr+(rcvbytes*sizeof(int))); 
+                    srcmem = (void *)((char *)srcaddr+(srcbytes*nbytes)); 
+                    rcvmem = (void *)((char *)dstaddr+(rcvbytes*nbytes)); 
               // jw   srccount = sendxp ? scontig_length-soffset+1 : 0;
               // jw   rcvcount = recvxp ? rcontig_length-roffset+1 : 0;
                     srccount = sendxp ? scontig_length : 0;
@@ -726,17 +725,11 @@ static int maxroutes = 10;
                     //  srcmem and rcvmem are the mem addresses 
                     //  srccount and rcvcount are the byte counts.  they are 0
                     //    if there is nothing to send or receive, respectively.
+                    //  at the MPI level, src and rcv could be different types,
+                    //  but for now make them be the same.
 
                     rc = layout->ESMC_DELayoutSendRecv(srcmem, rcvmem,
-                                                       srccount, rcvcount, 
-                                                       theirdeid, theirdeid
-#if 1 
-// NEW_SEND_RECV_INTERFACE
-                                                   , ESMF_R4);
-#else 
-// old interface
-                                                       );
-#endif
+                                srccount, rcvcount, theirdeid, theirdeid, dk);
                 }
             }
 	}

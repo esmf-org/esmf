@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.31 2003/09/04 19:40:26 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.32 2003/09/11 22:54:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,7 +129,7 @@
                        ESMC_DomainList *recvDomainList);
 
     // execute the communication routines set up in this route object
-    int ESMC_RouteRun(void *srcaddr, void *dstaddr);
+    int ESMC_RouteRun(void *srcaddr, void *dstaddr, ESMC_DataKind dk);
 
     // add a route to the cache table
     int ESMC_RouteAddCache(int rank, 
