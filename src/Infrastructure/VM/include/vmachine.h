@@ -145,6 +145,7 @@ class vmachine{
     MPI_Comm vmachine_mpi_comm(void);   // return mpi_c
     int vmachine_nthreads(int i);       // return number of threads in group PET
     int vmachine_tid(int i);            // return tid for PET
+    int vmachine_pid(int i);            // return pid for PET
     
     
     // communication calls

@@ -1075,6 +1075,10 @@ int vmachine::vmachine_tid(int i){
   return tid[i];
 }
 
+int vmachine::vmachine_pid(int i){
+  return pid[i];
+}
+
 // --- vmplan methods ---
 
 
