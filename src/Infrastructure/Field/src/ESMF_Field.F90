@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.75 2003/09/09 20:40:44 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.76 2003/09/12 22:35:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -234,7 +234,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.75 2003/09/09 20:40:44 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.76 2003/09/12 22:35:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3983,6 +3983,7 @@
       real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
       type(ESMF_DELayout) :: parentlayout, srclayout, dstlayout
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Grid) :: src_grid, dst_grid
@@ -4026,6 +4027,7 @@
       if (hassrcdata) then
         ! don't ask for our de number if this de isn't part of the layout
         call ESMF_DELayoutGetDEID(srclayout, my_src_DE, status)
+        call ESMF_GridGetDE(stypep%grid, ai_global=myAI, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
@@ -4063,8 +4065,8 @@
         ! From the grid get the bounding box on this DE
         call ESMF_GridGetPhysGrid(src_grid, src_relloc, local_min=src_min, &
                                   local_max=src_max, rc=status)
-        call ESMF_GridBoxIntersect(dst_grid, src_min, src_max, sendDomainList, &
-                                   status)
+        call ESMF_GridBoxIntersectSend(dst_grid, src_min, src_max, myAI, &
+                                       sendDomainList, status)
       endif
 
       ! if dst field exists on this DE, query it for information
@@ -4085,8 +4087,8 @@
         ! From the grid get the bounding box on this DE
         call ESMF_GridGetPhysGrid(dst_grid, dst_relloc, local_min=dst_min, &
                                   local_max=dst_max, rc=status)
-        call ESMF_GridBoxIntersect(src_grid, dst_min, dst_max, recvDomainList, &
-                                   status)
+        call ESMF_GridBoxIntersectRecv(src_grid, dst_min, dst_max, &
+                                       recvDomainList, status)
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
