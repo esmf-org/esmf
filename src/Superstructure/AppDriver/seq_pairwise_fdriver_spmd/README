@@ -1,7 +1,8 @@
 
 This directory contains the starting files needed to build an ESMF
-Application with sequential execution, a pair-wise Coupling Component,
-and a main program in Fortran. 
+Application with sequential execution, a pairwise Coupling Component,
+a main program in Fortran, where the same executable is started on each
+computational node.
 
 
 To compile as-is for testing, simply run 'gmake' in this directory.
@@ -10,7 +11,11 @@ The resulting skeleton and driver files should produce an executable
 which can be run and will print out messages during each stage of execution.
 
 
-Then to begin to customize the Component files.  The AppDriver file
-can be used as-is with most applications.
+To use these files as a basis for a real application begin by copying these
+files to another directory.  Then edit the child Coupler and Grid
+Component Template files to reflect the actual data passed between
+components and the computations necessary.  If needed, edit the Parent
+Grid Component file.  The AppDriver file should be useable as-is for
+most applications without changes.
 
 

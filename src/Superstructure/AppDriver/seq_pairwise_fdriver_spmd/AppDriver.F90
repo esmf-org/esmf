@@ -17,7 +17,7 @@
 
 ! The file which defines the user application and config file.
 ! This must be edited before building this file.
-#include "custom.F90"
+#include "ChangeMe.F90"
 
     program ESMF_ApplicationDriver
 
@@ -67,7 +67,7 @@
 !------------------------------------------------------------------------------
 
     call ESMF_Initialize(rc)
-    if (rc .ne. ESMF_SUCCESS) stop -1
+    if (rc .ne. ESMF_SUCCESS) stop 99 
 
 
     ! call ESMF_LogErrMsg("ESMF AppDriver start")
@@ -91,6 +91,12 @@
     !  ndays = ESMF_ConfigGetInt( config, label ='Number_of_Days:', &
     !                             default=30, rc = rc )
     !
+    i_max = 20
+    y_max = 40  
+    x_min = 0.0
+    y_min = 0.0
+    x_max = 180.0
+    y_max = 90.0
 
 
 !------------------------------------------------------------------------------
@@ -103,6 +109,10 @@
     ! Create a default layout, which is 1xN in topology, where N is the
     !  number of DEs this program was started on.
     defaultlayout = ESMF_DELayoutCreate(rc=rc)
+    print *, "rc = ", rc
+    print *, "default layout:"
+    call ESMF_DELayoutPrint(defaultlayout, "", rc)
+
 
     ! Create the top Gridded component, passing in the default layout.
     compGridded = ESMF_GridCompCreate("ESMF Gridded Component", &
@@ -138,15 +148,16 @@
 
       call ESMF_TimeIntervalSet(timeStep, S=2, rc=rc)
 
-      call ESMF_TimeSet(startTime, YR=2003, &
-                         MM=s_month, DD=s_day, H=s_hour, M=s_min, S=0, &
-                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(startTime, yr=2003, &
+                         mm=s_month, dd=s_day, h=s_hour, m=s_min, s=0, &
+                         calendar=gregorianCalendar, rc=rc)
 
-      call ESMF_TimeSet(stopTime, YR=2003, &
-                         MM=e_month, DD=e_day, H=e_hour, M=e_min, S=0, &
-                         cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yr=2003, &
+                         mm=e_month, dd=e_day, h=e_hour, m=e_min, s=0, &
+                         calendar=gregorianCalendar, rc=rc)
 
-      call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate("Application Clock", timeStep, startTime, &
+                                stopTime, rc=rc)
 
 
       ! Same with the grid.
@@ -204,6 +215,8 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !     Clean up
+
+      call ESMF_ClockDestroy(clock, rc)
 
       call ESMF_StateDestroy(defaultstate, rc)
 

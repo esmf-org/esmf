@@ -9,10 +9,15 @@
 !   real Module name, SetServices subroutine name, and name of the
 !   configuration file for the entire application.
 !
+!  The current settings match the empty Template and example files,
+!   but will need to be changed if any of the modules or config files
+!   are renamed.
+!
 !EOP
 
 
-#define USER_APP_Mod            user_module_name
-#define USER_APP_SetServices    user_services_subroutine_name
-#define USER_CONFIG_FILE       "user_config_filename.rc"
+#define USER_APP_Mod            UserParentGridCompMod
+#define USER_APP_SetServices    UserPComp_SetServices
+
+#define USER_CONFIG_FILE       "sample.rc"
 

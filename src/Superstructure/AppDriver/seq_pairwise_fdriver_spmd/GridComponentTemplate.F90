@@ -1,6 +1,14 @@
-! $Id: GridComponentTemplate.F90,v 1.1 2003/11/06 00:09:17 nscollins Exp $
+! $Id: GridComponentTemplate.F90,v 1.2 2003/11/06 21:05:51 nscollins Exp $
 !
-! Test code which supplies a user-written component.
+! Template code for a child Grid Component, which has no subcomponents
+!  below it.  This is where the bulk of the computation is expected to be
+!  placed.  There are three phases where code is run:  Initialization,
+!  the Run routine, and Finalization.  Init and Finalize are expected to
+!  be called only once.  Run may be called once or many times from the
+!  higher level components in the application.   Data which is needed from
+!  other components or is produced here for other components must be
+!  placed in an ESMF State object.
+
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,36 +16,26 @@
 !BOP
 !
 ! !DESCRIPTION:
-!  A skeletal user-written component for testing framework.
+!  A Template for a User-Written Gridded Component.
 !
 !
 !\begin{verbatim}
 
     module UserGridCompMod
     
-!   ! ESMF Framework module
+    ! ESMF Framework module
     use ESMF_Mod
     
     implicit none
     private
     
-    public User_SetServices
-
-    type mydata
-        integer :: per_instance_data
-    end type
-
-    type datawrapper
-        type(mydata), pointer :: wrap
-    end type
+    public UserGrid_SetServices
 
     contains
 
-    subroutine User_SetServices(gcomp, rc)
+    subroutine UserGrid_SetServices(gcomp, rc)
        type(ESMF_GridComp) :: gcomp
        integer :: rc
-       type(mydata), pointer :: privatedata
-       type(datawrapper) :: wrapper
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
@@ -46,12 +44,7 @@
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
                                                      ESMF_SINGLEPHASE, rc)
 
-       allocate(privatedata)
-       wrapper%wrap => privatedata
-
-       call ESMF_GridCompSetInternalState(gcomp, wrapper, rc)
-
-    end subroutine User_SetServices
+    end subroutine UserGrid_SetServices
 
 
     subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)

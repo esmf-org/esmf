@@ -1,6 +1,8 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.1 2003/11/06 16:42:43 nscollins Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.2 2003/11/06 21:05:51 nscollins Exp $
 !
-! Test code which supplies a user-written component.
+! Template code for a Gridded Component which creates 3 child Components:
+!  two Gridded Components which perform a computation and a Coupler component
+!  which mediates the data exchange between them.
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -8,36 +10,29 @@
 !BOP
 !
 ! !DESCRIPTION:
-!  A skeletal user-written component for testing framework.
+!  A template for a user-written Gridded Component which creates 3 child
+!  Components:
+!  two Gridded Components which perform a computation and a Coupler component
+!  which mediates the data exchange between them.
 !
 !
 !\begin{verbatim}
 
-    module UserGridCompMod
+    module UserParentGridCompMod
     
-!   ! ESMF Framework module
+    ! ESMF Framework module
     use ESMF_Mod
     
     implicit none
     private
     
-    public User_SetServices
-
-    type mydata
-        integer :: per_instance_data
-    end type
-
-    type datawrapper
-        type(mydata), pointer :: wrap
-    end type
+    public UserPComp_SetServices
 
     contains
 
-    subroutine User_SetServices(gcomp, rc)
+    subroutine UserPComp_SetServices(gcomp, rc)
        type(ESMF_GridComp) :: gcomp
        integer :: rc
-       type(mydata), pointer :: privatedata
-       type(datawrapper) :: wrapper
 
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
                                                      ESMF_SINGLEPHASE, rc)
@@ -46,12 +41,7 @@
        call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
                                                      ESMF_SINGLEPHASE, rc)
 
-       allocate(privatedata)
-       wrapper%wrap => privatedata
-
-       call ESMF_GridCompSetInternalState(gcomp, wrapper, rc)
-
-    end subroutine User_SetServices
+    end subroutine UserPComp_SetServices
 
 
     subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
@@ -89,7 +79,7 @@
 
     end subroutine my_final
 
-    end module UserGridCompMod
+    end module UserParentGridCompMod
 
 !\end{verbatim}
     
