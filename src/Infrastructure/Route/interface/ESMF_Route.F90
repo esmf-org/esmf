@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.5 2003/03/17 20:57:37 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.6 2003/03/17 21:34:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.5 2003/03/17 20:57:37 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.6 2003/03/17 21:34:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -431,11 +431,11 @@
 ! !ARGUMENTS:
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), intent(in) :: AI_dst(:)
+      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_dst
       integer, intent(in) :: AI_dst_count
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), intent(in) :: AI_src(:)
+      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_src
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
       logical, intent(out), optional :: hascachedroute
@@ -448,13 +448,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[parentlayout] 
-!          Layout containing all DEs where data from srcfield and dstfield
-!          are located.
-!     \item[srcfield]
-!          {\tt Field} containing data to be sent.
-!     \item[dstfield]
-!          {\tt Field} containing data to be received.
+!     \item [ needs to be updated ]
 !     \item[{[hascachedroute]}]
 !          Logical return code for whether a {\tt Route} was found.
 !     \item[{[route]}]
@@ -486,7 +480,7 @@
         call c_ESMC_RouteGetCached(rank, &
                        my_DE_dst, AI_dst, AI_dst_count, layout_dst, &
                        my_DE_src, AI_src, AI_src_count, layout_src, &
-                       hascachedroute, route, rc)
+                       lcache, lroute, rc)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route Get Cached error"
           return  
@@ -568,11 +562,11 @@
       type(ESMF_Route), intent(in) :: route
       integer, intent(in) :: rank
       integer, intent(in) :: my_DE_dst
-      type(ESMF_AxisIndex), intent(in) :: AI_dst(:)
+      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_dst
       integer, intent(in) :: AI_dst_count
       type(ESMF_DELayout), intent(in) :: layout_dst
       integer, intent(in) :: my_DE_src
-      type(ESMF_AxisIndex), intent(in) :: AI_src(:)
+      type(ESMF_AxisIndex), dimension(:,:), pointer, intent(in) :: AI_src
       integer, intent(in) :: AI_src_count
       type(ESMF_DELayout), intent(in) :: layout_src
       integer, intent(out), optional :: rc
@@ -585,7 +579,7 @@
 !     \begin{description}
 !     \item[route] 
 !          Route to be executed.
-!     \item[ TBD ]  
+!     \item[ TBDocd ]  
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

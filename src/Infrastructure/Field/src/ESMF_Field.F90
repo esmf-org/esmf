@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.6 2003/03/13 22:58:32 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.7 2003/03/17 21:34:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -192,7 +192,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.6 2003/03/13 22:58:32 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.7 2003/03/17 21:34:12 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2173,7 +2173,7 @@
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       integer :: my_src_DE, my_dst_DE
-      type(ESMF_AxisIndex) :: src_AI(ESMF_MAXDIM), dst_AI(ESMF_MAXDIM)
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -2192,12 +2192,12 @@
       !   but also the de id for both src & dest fields
 
       ! if srclayout ^ parentlayout == NULL, nothing to send
-      ! call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
+      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
       ! call ESMF_DELayoutThisDEExists(parentlayout, srclayout, hassrcdata)
       hassrcdata = .true.
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv
-      ! call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
+      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
       ! call ESMF_DELayoutThisDEExists(parentlayout, dstlayout, hasdstdata)
       hasdstdata = .true.
 
@@ -2250,14 +2250,14 @@
 
       ! set up things we need to find a cached route or precompute one
       if (hassrcdata) then
-          ! call ESMF_GridGetAllAIs(stypep%grid, src_AI)
+          call ESMF_GridGetAllAxisIndex(stypep%grid, src_AI)
           call ESMF_DELayoutGetSize(srclayout, nx, ny);
           AI_snd_count = nx * ny
       else
           AI_snd_count = 0
       endif
       if (hasdstdata) then
-          ! call ESMF_GridGetAllAIs(dtypep%grid, dst_AI)
+          call ESMF_GridGetAllAxisIndex(dtypep%grid, dst_AI)
           call ESMF_DELayoutGetSize(dstlayout, nx, ny);
           AI_rcv_count = nx * ny
       else

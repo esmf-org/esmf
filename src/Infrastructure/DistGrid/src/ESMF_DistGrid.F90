@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.34 2003/03/17 18:56:04 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.35 2003/03/17 21:34:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.34 2003/03/17 18:56:04 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.35 2003/03/17 21:34:12 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1481,7 +1481,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
-      type(ESMF_DELayout), pointer :: layout
+      type(ESMF_DELayout) :: layout
       integer, intent(out), optional :: rc            
 
 !
@@ -1493,7 +1493,7 @@
 !     \item[distgrid]
 !          Class to be modified.
 !     \item[[layout]]
-!          Pointer to the {\tt DELayout} corresponding to the {\tt DistGrid}.
+!          The {\tt DELayout} corresponding to the {\tt DistGrid}.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

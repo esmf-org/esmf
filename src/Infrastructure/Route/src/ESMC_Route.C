@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.17 2003/03/17 20:57:44 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.18 2003/03/17 21:34:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.17 2003/03/17 20:57:44 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.18 2003/03/17 21:34:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -471,8 +471,10 @@
     if (my_DE_snd != -1) {
  
       // get "my" AI out of the AI_snd array
+      // TODO:  this is NOT going to work for data dims which are not
+      //  equal the grid dims, e.g. a 2d grid with 4d data.
       for (k=0; k<rank; k++) {
-        my_AI[k] = AI_snd[my_DE_snd,k];
+        my_AI[k] = AI_snd[my_DE_snd + k*ESMF_MAXGRIDDIM];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -489,7 +491,7 @@
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
-            their_AI[k] = AI_rcv[their_de,k];
+            their_AI[k] = AI_rcv[their_de + k*ESMF_MAXGRIDDIM];
           }
  
           // calculate "their" XPacket in the sense of the global data
@@ -512,7 +514,7 @@
  
       // get "my" AI out of the AI_rcv array
       for (k=0; k<rank; k++) {
-        my_AI[k] = AI_rcv[my_DE_rcv,k];
+        my_AI[k] = AI_rcv[my_DE_rcv + k*ESMF_MAXGRIDDIM];
       }
 
       // calculate "my" (local DE's) XPacket in the sense of the global data
@@ -528,7 +530,7 @@
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
-            their_AI[k] = AI_snd[their_de,k];
+            their_AI[k] = AI_snd[their_de + k*ESMF_MAXGRIDDIM];
           }
  
           // calculate "their" XPacket in the sense of the global data
