@@ -1,14 +1,19 @@
-#  $Id: common.mk,v 1.20 2003/10/20 20:09:02 nscollins Exp $
+#  $Id: common.mk,v 1.21 2003/10/20 22:39:15 nscollins Exp $
 #
 #  common.mk
 #
 
 #
-#  If environment variables are not set, then set them to
-#  their default values.
+#  If environment variables are not set give them default values.
+#  For some variables having the literal string 'default' is ok; 
+#  for others, look for this string and override it the same as 
+#  if it was unset originally.
 #
 
 ifndef ESMF_ARCH
+export ESMF_ARCH := $(shell uname -s)
+endif
+ifeq ($(ESMF_ARCH),default)
 export ESMF_ARCH := $(shell uname -s)
 endif
 
@@ -23,12 +28,14 @@ endif
 # and...
 #
 # When ESMF_ARCH is Linux, then default value 
-# for ESMF_COMPILER is lehay.
+# for ESMF_COMPILER is lahey.
 # 
 
 ifndef ESMF_COMPILER
-
 export ESMF_COMPILER := default
+endif
+
+ifeq ($(ESMF_COMPILER),default)
 
 ifeq ($(ESMF_ARCH),Darwin)
 export ESMF_COMPILER := absoft
@@ -43,7 +50,11 @@ endif
 ifndef ESMF_PREC
 export ESMF_PREC := 64
 endif
+ifeq ($(ESMF_PREC),default)
+export ESMF_PREC := 64
+endif
 
+# this is ok to remain as default
 ifndef ESMF_SITE
 export ESMF_SITE := default
 endif
@@ -53,6 +64,9 @@ endif
 #
 
 ifndef ESMF_BOPT
+export ESMF_BOPT := O
+endif
+ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT := O
 endif
 
@@ -997,4 +1011,5 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #  Include site specific makefile fragment.
 #
 include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
+
 

@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.1 2003/10/20 20:08:08 nscollins Exp $
+#  $Id: build_rules.mk,v 1.2 2003/10/20 22:39:38 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -9,6 +9,10 @@
 ifndef ESMF_COMM
 export ESMF_COMM := mpi
 endif
+ifeq ($(ESMF_COMM),default)
+export ESMF_COMM := mpi
+endif
+
 
 
 ############################################################

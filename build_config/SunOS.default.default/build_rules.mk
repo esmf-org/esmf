@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2003/10/20 20:09:18 nscollins Exp $
+# $Id: build_rules.mk,v 1.2 2003/10/20 22:40:06 nscollins Exp $
 #
 # SunOs.default.default.mk
 #
@@ -8,6 +8,9 @@
 # Default MPI setting.
 #
 ifndef ESMF_COMM
+export ESMF_COMM := mpi
+endif
+ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpi
 endif
 

@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2003/10/20 20:08:27 nscollins Exp $
+# $Id: build_rules.mk,v 1.2 2003/10/20 22:39:45 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -7,6 +7,9 @@
 # Default MPI setting.
 #
 ifndef ESMF_COMM
+export ESMF_COMM := mpi
+endif
+ifeq ($(ESMF_COMM),default)
 export ESMF_COMM := mpi
 endif
 
