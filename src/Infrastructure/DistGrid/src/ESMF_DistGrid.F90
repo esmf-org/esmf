@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.59 2003/07/24 21:54:21 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.60 2003/07/25 23:14:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,6 +81,9 @@
         integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
                                        ! global number of cells in each
                                        ! dimension
+        integer, dimension(:), pointer :: local_cell_count
+                                       ! array of the numbers of cells on each
+                                       ! DE
         integer :: local_cell_max      ! maximum number of cells on any DE
         integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
                                        ! maximum DE cell counts in each
@@ -135,7 +138,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.59 2003/07/24 21:54:21 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.60 2003/07/25 23:14:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1540,8 +1543,7 @@
 !     organized (indexed) by DE  !TODO add coding for other cases
 !     TODO: decide where enumerator for grid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
-!jw        base = distgrid%MyDE%global_start
-        base = 1
+! jw        base = distgrid%MyDE%global_start
         do i = 1, size(local1D)
           global1D(i) = local1D(i) + base
         enddo
