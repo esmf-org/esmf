@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.18 2004/04/20 19:11:02 svasquez Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.19 2004/04/21 17:52:06 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.18 2004/04/20 19:11:02 svasquez Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.19 2004/04/21 17:52:06 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -96,7 +96,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/29/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
@@ -111,7 +111,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/29/2004 by mm= -1 Test"
       write(failMsg, *) " Did not return 12/29/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
@@ -126,7 +126,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "Gregorian Calendar Interval decrement 3/31/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=31, h=12, m=17, s=58, &
@@ -141,7 +141,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "Gregorian Calendar Interval decrement 1/31/2004 by mm= -1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -158,7 +158,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/30/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -173,7 +173,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -188,7 +188,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by (mm=1, d=1) Test"
       write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -203,7 +203,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=2 Test"
       write(failMsg, *) " Did not return 3/31/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -218,7 +218,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=3 Test"
       write(failMsg, *) " Did not return 4/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -233,7 +233,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2004 by mm=49 Test"
       write(failMsg, *) " Did not return 2/29/2008 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -248,7 +248,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time1, timestep)
       write(name, *) "Gregorian Calendar Interval decrement 1/31/2004 by mm=49 Test"
       write(failMsg, *) " Did not return 12/31/1999 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -265,7 +265,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 2/28/2004 by d=2 Test"
       write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
@@ -280,7 +280,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 2/29/2004 by yy=1 Test"
       write(failMsg, *) " Did not return 2/28/2005 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=29, h=12, m=17, s=58, &
@@ -295,7 +295,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 12/1/2004 by (yy=2, mm=24, d=90) Test"
       write(failMsg, *) " Did not return 3/1/2009 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
@@ -310,7 +310,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 12/1/2004 by (yy= -2, mm=24, d= -90) Test"
       write(failMsg, *) " Did not return 9/2/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
@@ -325,7 +325,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "Gregorian Calendar Interval decrement 3/1/2004 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
       write(failMsg, *) " Did not return 12/1/1999 22:14:50 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
@@ -340,7 +340,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "Gregorian Calendar Interval decrement 3/1/2004 by (yy=2, mm=-24, d=90, h=-13, m=62, s=-68) Test"
       write(failMsg, *) " Did not return 12/3/2003 00:17:06 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
@@ -449,7 +449,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/29/2003 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=29, h=12, m=17, s=58, &
@@ -464,7 +464,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/30/2003 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=30, h=12, m=17, s=58, &
@@ -479,7 +479,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
@@ -494,7 +494,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by (mm=1, d=1) Test"
       write(failMsg, *) " Did not return 3/1/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
@@ -509,7 +509,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=2 Test"
       write(failMsg, *) " Did not return 3/31/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
@@ -524,7 +524,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=3 Test"
       write(failMsg, *) " Did not return 4/30/2003 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
@@ -539,7 +539,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 1/31/2003 by mm=49 Test"
       write(failMsg, *) " Did not return 2/28/2007 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=1, dd=31, h=12, m=17, s=58, &
@@ -554,7 +554,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 2/28/2003 by d=2 Test"
       write(failMsg, *) " Did not return 3/2/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=28, h=12, m=17, s=58, &
@@ -569,7 +569,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 2/28/2003 by yy=1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=28, h=12, m=17, s=58, &
@@ -584,7 +584,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 12/1/2003 by (yy=2, mm=24, d=90) Test"
       write(failMsg, *) " Did not return 2/29/2008 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2003, mm=12, dd=1, h=12, m=17, s=58, &
@@ -691,7 +691,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 12/31/2004 by d=1 Test"
       write(failMsg, *) " Did not return 1/1/2005 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=31, h=12, m=17, s=58, &
@@ -710,7 +710,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/29/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
@@ -725,7 +725,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 3/31/2004 by mm= -1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=31, h=12, m=17, s=58, &
@@ -742,7 +742,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "No Leap Calendar Interval decrement 3/31/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=31, h=12, m=17, s=58, &
@@ -757,7 +757,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "No Leap Calendar Interval decrement 1/31/2004 by mm= -1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -774,7 +774,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/30/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -790,7 +790,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/28/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -805,7 +805,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/31/2004 by (mm=1, d=1) Test"
       write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -820,7 +820,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=2 Test"
       write(failMsg, *) " Did not return 3/31/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -835,7 +835,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=3 Test"
       write(failMsg, *) " Did not return 4/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -850,7 +850,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 1/31/2004 by mm=49 Test"
       write(failMsg, *) " Did not return 2/28/2008 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -865,7 +865,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "No Leap Calendar Interval decrement 1/31/2004 by mm=49 Test"
       write(failMsg, *) " Did not return 12/31/1999 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=31, h=12, m=17, s=58, &
@@ -880,7 +880,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 2/28/2004 by d=2 Test"
       write(failMsg, *) " Did not return 3/2/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
@@ -895,7 +895,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 2/28/2004 by yy=1 Test"
       write(failMsg, *) " Did not return 2/28/2005 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
@@ -910,7 +910,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "No Leap Calendar Interval increment 12/1/2004 by (yy=2, mm=24, d=90) Test"
       write(failMsg, *) " Did not return 3/1/2009 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
@@ -925,7 +925,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "No Leap Calendar Interval decrement 3/1/2004 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
       write(failMsg, *) " Did not return 11/30/1999 22:14:50 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
@@ -954,7 +954,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 1/29/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/29/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=29, h=12, m=17, s=58, &
@@ -969,7 +969,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 3/30/2004 by mm= -1 Test"
       write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=30, h=12, m=17, s=58, &
@@ -984,7 +984,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "360 Day Calendar Interval decrement 3/30/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=30, h=12, m=17, s=58, &
@@ -999,7 +999,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "360 Day Calendar Interval decrement 1/30/2004 by mm= -1 Test"
       write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1014,7 +1014,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=1 Test"
       write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1029,7 +1029,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 1/30/2004 by (mm=1, d=1) Test"
       write(failMsg, *) " Did not return 3/1/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1044,7 +1044,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=2 Test"
       write(failMsg, *) " Did not return 3/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1059,7 +1059,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=3 Test"
       write(failMsg, *) " Did not return 4/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1074,7 +1074,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 1/30/2004 by mm=49 Test"
       write(failMsg, *) " Did not return 2/30/2008 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1089,7 +1089,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "360 Day Calendar Interval decrement 1/30/2004 by mm=49 Test"
       write(failMsg, *) " Did not return 12/30/1999 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=30, h=12, m=17, s=58, &
@@ -1104,7 +1104,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 2/28/2004 by d=2 Test"
       write(failMsg, *) " Did not return 2/30/2004 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
@@ -1119,7 +1119,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 2/28/2004 by yy=1 Test"
       write(failMsg, *) " Did not return 2/28/2005 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=2, dd=28, h=12, m=17, s=58, &
@@ -1134,7 +1134,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "360 Day Calendar Interval increment 12/1/2004 by (yy=2, mm=24, d=90) Test"
       write(failMsg, *) " Did not return 3/1/2009 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=1, h=12, m=17, s=58, &
@@ -1149,7 +1149,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "360 Day Calendar Interval decrement 3/1/2004 by (yy=2, mm=24, d=90, h=13, m=62, s=68) Test"
       write(failMsg, *) " Did not return 11/30/1999 22:14:50 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=3, dd=1, h=12, m=17, s=58, &
@@ -1180,7 +1180,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Julian Day Calendar Interval increment d=1200 by d=34 Test"
       write(failMsg, *) " Did not return d=1234 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, d=1200, h=12, m=17, s=58, &
@@ -1194,7 +1194,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "Julian Day Calendar Interval decrement d=4350 by d=29 Test"
       write(failMsg, *) " Did not return d=4321 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, d=4350, h=12, m=17, s=58, &
@@ -1208,7 +1208,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the + operator
-      ! resultTime = ESMF_TimeIntervalOperator(+)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Julian Day Calendar Interval increment d=4350 by d=-29 Test"
       write(failMsg, *) " Did not return d=4350 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, d=4350, h=12, m=17, s=58, &
@@ -1222,7 +1222,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the - operator
-      ! resultTime = ESMF_TimeIntervalOperator(-)(time1, Time2)
+      ! resultTime = ESMF_TimeOperator(-)(time, timestep)
       write(name, *) "Julian Day Calendar Interval decrement d=1200 by d=-34 Test"
       write(failMsg, *) " Did not return d=1234 12:17:58 or ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, d=1200, h=12, m=17, s=58, &
@@ -1358,6 +1358,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the + operator
+      ! resultTime = ESMF_TimeIntervalOperator(+)(timestep, timestep)
       write(name, *) "No Calendar sum of 2 Time intervals Test 1"
       write(failMsg, *) " Did not return (yy=5, mm=-19, d=120, h=-4, m=-50, s=-50) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=5, d=30, h=7, m=8, s=18, rc=rc)
@@ -1372,6 +1374,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the - operator
+      ! resultTime = ESMF_TimeIntervalOperator(-)(timestep, timestep)
       write(name, *) "No Calendar difference of 2 Time intervals Test 1"
       write(failMsg, *) " Did not return (yy=1, mm=29, d=-60, h=-4, m=-50, s=-50) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=5, d=30, h=7, m=8, s=18, rc=rc)
@@ -1386,6 +1390,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the * operator
+      ! resultTime = ESMF_TimeIntervalOperator(*)(timestep, integer)
       write(name, *) "No Calendar multiplication of a Time interval Test 1"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -1399,6 +1405,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the * operator
+      ! resultTime = ESMF_TimeIntervalOperator(*)(integer, timestep)
       write(name, *) "No Calendar multiplication of a Time interval Test 2"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -1646,7 +1654,7 @@
 
       !EX_UTest
       ! Testing the / operator
-      ! resultTime = ESMF_TimeIntervalOperator(/)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(/)(timestep, timestep)
       write(failMsg, *) "The answer should be 2."
       ans=timeStep/timeStep2
       write(name, *) "Time Step division Test"
@@ -1683,7 +1691,7 @@
 
       !EX_UTest
       ! Testing the /= operator
-      ! resultTime = ESMF_TimeIntervalOperator(/=)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(/=)(timestep, timestep)
       write(failMsg, *) "The time steps are not equal."
       write(name, *) "TimeInterval NE operator Test"
       call ESMF_Test((timeStep.ne.timeStep2), &
@@ -1712,7 +1720,7 @@
 
       !EX_UTest
       ! Testing the /= operator
-      ! resultTime = ESMF_TimeIntervalOperator(/=)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(/=)(timestep, timestep)
       write(failMsg, *) "The time steps are not equal."
       write(name, *) "TimeInterval NE operator Test"
       call ESMF_Test((timeStep.ne.timeStep2), &
@@ -1776,7 +1784,7 @@
 
       !EX_UTest
       ! Testing the /= operator
-      ! resultTime = ESMF_TimeIntervalOperator(/=)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(/=)(timestep, Timestep)
       write(failMsg, *) "The time steps are not equal."
       write(name, *) "TimeInterval NE operator Test"
       call ESMF_Test((timeStep.ne.timeStep2), &
@@ -1796,7 +1804,7 @@
 
       !EX_UTest
       ! Testing the == operator
-      ! resultTime = ESMF_TimeIntervalOperator(==)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(==)(timestep, timestep)
       write(failMsg, *) "The time steps are equal."
       write(name, *) "TimeInterval EQ operator Test"
       call ESMF_Test((timeStep.eq.timeStep2), &
@@ -1818,7 +1826,7 @@
 
       !EX_UTest
       ! Testing the /= operator
-      ! resultTime = ESMF_TimeIntervalOperator(/=)(time1, Time2)
+      ! resultTime = ESMF_TimeIntervalOperator(/=)(timestep, timestep)
       write(failMsg, *) "The time steps are equal."
       write(name, *) "TimeInterval NE operator Test"
       call ESMF_Test((timeStep.ne.timeStep2), &
@@ -1838,7 +1846,7 @@
 
       !NEX_UTest
       ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(time1, integer)
+      ! resultTime = ESMF_TimeIntervalOperator(*)(timestep, integer)
       write(failMsg, *) "The time steps is not correct."
       write(name, *) "TimeInterval * operator Test"
       timeStep = timeStep2 * 86400    
@@ -1886,7 +1894,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the <=  operator
-      ! resultTime = ESMF_TimeIntervalOperator(<=)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(<=)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval <= operator Test"
       bool = timeStep2 <= timeStep    
@@ -1896,7 +1904,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the <=  operator
-      ! resultTime = ESMF_TimeIntervalOperator(<=)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(<=)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval <= operator Test"
       bool = timeStep <= timeStep3    
@@ -1906,7 +1914,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the <=  operator
-      ! resultTime = ESMF_TimeIntervalOperator(<=)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(<=)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval <= operator Test"
       bool = timeStep <= timeStep2    
@@ -1916,7 +1924,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the <  operator
-      ! resultTime = ESMF_TimeIntervalOperator(<)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(<)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval < operator Test"
       bool = timeStep2 < timeStep    
@@ -1926,7 +1934,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the <  operator
-      ! resultTime = ESMF_TimeIntervalOperator(<)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(<)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval < operator Test"
       bool = timeStep3 < timeStep    
@@ -1936,7 +1944,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the <  operator
-      ! resultTime = ESMF_TimeIntervalOperator(<)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(<)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval < operator Test"
       bool = timeStep < timeStep2    
@@ -1946,7 +1954,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the >=  operator
-      ! resultTime = ESMF_TimeIntervalOperator(>=)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(>=)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval >= operator Test"
       bool = timeStep2 >= timeStep    
@@ -1956,7 +1964,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the >=  operator
-      ! resultTime = ESMF_TimeIntervalOperator(>=)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(>=)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval >= operator Test"
       bool = timeStep3 >= timeStep    
@@ -1966,7 +1974,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the >=  operator
-      ! resultTime = ESMF_TimeIntervalOperator(>=)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(>=)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval >= operator Test"
       bool = timeStep >= timeStep2    
@@ -1976,7 +1984,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the >  operator
-      ! resultTime = ESMF_TimeIntervalOperator(>)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(>)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval > operator Test"
       bool = timeStep2 > timeStep    
@@ -1986,7 +1994,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the >  operator
-      ! resultTime = ESMF_TimeIntervalOperator(>)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(>)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval > operator Test"
       bool = timeStep3 > timeStep    
@@ -1996,7 +2004,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       ! Testing the >  operator
-      ! resultTime = ESMF_TimeIntervalOperator(>)(time1, time2)
+      ! resultTime = ESMF_TimeIntervalOperator(>)(timestep, timestep)
       write(failMsg, *) "The result is not correct."
       write(name, *) "TimeInterval > operator Test"
       bool = timeStep > timeStep2    
