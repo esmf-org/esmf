@@ -1,0 +1,88 @@
+% $ Id: $
+
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{html}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+
+\newcommand{\docmttype}{Risk Report}
+\newcommand{\req}[1]{\section{\hspace{.2in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
+\newcommand{\mytitle}{DRAFT \longname \docmttype ~~}
+
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{ESMF }
+\newcommand{\funcname}{ESMF }
+\newcommand{\shortname}{RSK}
+\newcommand{\myauthors}{ESMF Technical Leads:  V. Balaji, Cecelia DeLuca, Chris Hill}
+%===============================================================================
+\setlength{\textwidth}{6.5truein}
+\setlength{\textheight}{8.5truein}
+\setlength{\oddsidemargin}{0in}
+\setlength{\unitlength}{1truecm}
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+% Title page
+
+\input{../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+%\section{Synopsis}
+
+\req{Assesing Community Requirements}
+\sreq{Inadequate community dialog}
+\sreq{Unable to respond to all commuity needs}
+\sreq{Overcommitment to support community}
+\sreq{Unable to Achieve Community Adoption}
+
+\req{Superstructure Level Issues}
+\sreq{Arbitrary SPMD and MPMD support}
+The {\it Control}
+\begin{reqlist}
+{\bf Potential Imapact:} Serious \\
+{\bf Problem Likelihood:} All codes\\
+{\bf Action Being Taken:} Approved-1. \\
+{\bf Fallback:} Milestone demonstrations.\\
+{\bf Notes:} Some form of component versioning, labeling and naming
+is required that enables experiment configuration logs
+to include information of which components were used.
+\end{reqlist}
+
+\req{System Issues}
+\sreq{Interoperation between languages}
+\sreq{F90 Continued Availability}
+\sreq{Vector Platform Availability}
+\sreq{Windows Availability}
+\sreq{Other OS Validation}
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
