@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.176 2004/07/27 15:48:17 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.177 2004/08/13 21:29:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.176 2004/07/27 15:48:17 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.177 2004/08/13 21:29:07 nscollins Exp $'
 
 !==============================================================================
 !
@@ -4215,6 +4215,12 @@
 !           Relative location of data per grid cell/vertex in the vertical grid.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
+!           This input is currently ignored; the halo depth is taken
+!           from the existing {\tt array}.  It must have been created with
+!           the desired {\tt haloWidth} setting, and space for the halo region
+!           must be added to all axes of the array.  This will change in
+!           future versions of the system; the halo region will only need
+!           to be added to axes which correspond to {\tt ESMF\_Grid} axes.
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 

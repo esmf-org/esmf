@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.7 2004/06/12 15:27:24 cdeluca Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.8 2004/08/13 21:29:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.7 2004/06/12 15:27:24 cdeluca Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.8 2004/08/13 21:29:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -240,6 +240,7 @@ InterfaceMacro(FieldCreateEPtr)
 !           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Includes data specification and allocated memory. 
+!           It must already include space for the halo regions.
 !     \item [{[copyflag]}]
 !           Indicates whether to reference the array or make a 
 !           copy of it.  Valid values are {\tt ESMF\_DATA\_COPY} and 
@@ -251,6 +252,12 @@ InterfaceMacro(FieldCreateEPtr)
 !           Relative location of data per grid cell/vertex in the vertical grid.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
+!           This input is currently ignored; the halo depth is taken
+!           from the existing {\tt array}.  It must have been created with
+!           the desired {\tt haloWidth} setting, and space for the halo region
+!           must be added to all axes of the array.  This will change in 
+!           future versions of the system; the halo region will only need
+!           to be added to axes which correspond to {\tt ESMF\_Grid} axes.
 !     \item [{[datamap]}]
 !           Describes the mapping of data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
