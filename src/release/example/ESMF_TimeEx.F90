@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.4 2004/01/26 21:35:43 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.5 2004/01/27 20:54:16 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,7 +40,7 @@
       integer :: mm, dd, h, m
       integer(ESMF_KIND_I8) :: s
       type(ESMF_Calendar) :: cal
-      character, dimension(ESMF_MAXSTR) :: tS
+      character (len=ESMF_MAXSTR) :: tS
       integer :: dayOfYear, dayOfWeek, dayOfMonth
 
       ! Result code
@@ -52,32 +52,32 @@
       ! Initialize time to 5/12/2003 2:24:45
       call ESMF_TimeSet(time, yy=2003, &
                        mm=5, dd=12, h=2, m=24, s=45, &
-                       cal=gregorianCalendar, rc=rc)
+                       calendar=gregorianCalendar, rc=rc)
 
       call ESMF_TimePrint(time, "string", rc)
 
-      call ESMF_TimeGet(time, calendar=cal, rc)
+      call ESMF_TimeGet(time, calendar=cal, rc=rc)
       call ESMF_CalendarPrint(cal, rc=rc)
 
-      call ESMF_TimeGet(time, dayOfYear=dayOfYear, rc)
+      call ESMF_TimeGet(time, dayOfYear=dayOfYear, rc=rc)
       print *, "Day of the year = ", dayOfYear
 
-      call ESMF_TimeGet(time, dd=dayOfMonth, rc)
+      call ESMF_TimeGet(time, dd=dayOfMonth, rc=rc)
       print *, "Day of the month = ", dayOfMonth
 
-      call ESMF_TimeGet(time, dayOfWeek=dayOfWeek, rc)
+      call ESMF_TimeGet(time, dayOfWeek=dayOfWeek, rc=rc)
       print *, "Day of the week = ", dayOfWeek
 
-      call ESMF_TimeGet(time, midMonth=midMonth, rc)
+      call ESMF_TimeGet(time, midMonth=midMonth, rc=rc)
       print *
       print *, "Middle of the month = "
       call ESMF_TimePrint(midMonth, "string", rc)
 
-      call ESMF_TimeGet(time, timeString=tS, rc)
+      call ESMF_TimeGet(time, timeString=tS, rc=rc)
       print *, "Time in string format = ", tS
 
       ! Get wall clock time
-      call ESMF_TimeSet(wallClock, cal=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(wallClock, calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeSyncToRealTime(wallClock, rc)
       print *, "Wall Clock Time = "
       call ESMF_TimePrint(wallClock, "string", rc)
