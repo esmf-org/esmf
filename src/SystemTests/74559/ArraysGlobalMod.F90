@@ -1,4 +1,4 @@
-! $Id: ArraysGlobalMod.F90,v 1.3 2003/04/24 16:43:18 nscollins Exp $
+! $Id: ArraysGlobalMod.F90,v 1.4 2003/04/25 16:49:45 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -10,50 +10,64 @@
 !
 !\begin{verbatim}
 
-    module ArraysGlobalMod
-    
+      module ArraysGlobalMod
+!
 ! Some common definitions.  This requires the C preprocessor.
+!
 #include "ESMF.h"
-
+!
 ! ESMF modules
-    use ESMF_Mod
+!
+      use ESMF_Mod
     
-    implicit none
-    save
+      implicit none
+      save
 !
 ! arrays
 !
-    public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
-    public :: nbc
+      public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+      public :: nbc
+      public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-    real, dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
-    integer, dimension(4) :: nbc
+      real, dimension(:,:), pointer :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+      integer, dimension(4) :: nbc
+      integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
 !
 ! Fields
 !
-    public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-              field_rhov, field_p, field_q, field_flag
+      public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
+                field_rhov, field_p, field_q, field_flag
 
-    type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                        field_rhou, field_rhov, field_p, field_q, field_flag
+      type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
+                          field_rhou, field_rhov, field_p, field_q, field_flag
 !
 ! scalars here
 !
-    public :: imin, imax, jmin, jmax
-    public :: imin_t, imax_t, jmin_t, jmax_t
-    public :: dt, dx, dy
-    public :: uin, rhoin, siein
-    public :: gamma, akb
-    public :: q0, u0, v0, sie0, rho0
-    integer :: imin, imax, jmin, jmax
-    integer :: imin_t, imax_t, jmin_t, jmax_t
-    type(ESMF_TimeInterval) :: time_step
-    real :: dt, dx, dy
-    real :: uin, rhoin, siein
-    real :: gamma, akb
-    real :: q0, u0, v0, sie0, rho0
+      public :: imin, imax, jmin, jmax
+      public :: imin_t, imax_t, jmin_t, jmax_t
+      public :: printout
+      public :: nobsdesc
+      public :: iflo_min, iflo_max
+      public :: dt, dx, dy
+      public :: uin, rhoin, siein
+      public :: vin2, rhoin2, siein2
+      public :: gamma, akb
+      public :: q0, u0, v0, sie0, rho0
+      public :: sieobs
+      integer :: imin, imax, jmin, jmax
+      integer :: imin_t, imax_t, jmin_t, jmax_t
+      integer :: printout
+      integer :: nobsdesc
+      integer :: iflo_min, iflo_max
+      type(ESMF_TimeInterval) :: time_step
+      real :: dt, dx, dy
+      real :: uin, rhoin, siein
+      real :: vin2, rhoin2, siein2
+      real :: gamma, akb
+      real :: q0, u0, v0, sie0, rho0
+      real :: sieobs
 
-    contains
+      contains
 
 !-------------------------------------------------------------------------
  
@@ -155,9 +169,6 @@
       imax_t = indext(1)%r
       jmin_t = indext(2)%l
       jmax_t = indext(2)%r
-! TODO  need to add calls to get dx and dy from physgrid -- just set for today
-      dx = 5.0
-      dy = 2.50
 
       if(rcpresent) rc = ESMF_SUCCESS
 

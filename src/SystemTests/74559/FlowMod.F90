@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.5 2003/04/24 16:43:18 nscollins Exp $
+! $Id: FlowMod.F90,v 1.6 2003/04/25 16:49:59 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -7,68 +7,35 @@
 ! !DESCRIPTION:
 !  Solves semi-compressible flow with energy PDE's.
 !
-!
 !\begin{verbatim}
 
-    module FlowMod
+      module FlowMod
+!
+! ESMF modules
+!
+      use ESMF_Mod
+      use ArraysGlobalMod
     
-!   ESMF modules
-    use ESMF_Mod
+      implicit none
+    
+      public FlowMod_register
 
-    use ArraysGlobalMod
-    
-    implicit none
-    
-    public FlowMod_register
-
-    contains
+      contains
 
 !-------------------------------------------------------------------------
 !   !  The Register routine sets the subroutines to be called
 !   !   as the init, run, and finalize routines.  Note that these are
 !   !   private to the module.
 
-    subroutine FlowMod_register(comp, rc)
+      subroutine FlowMod_register(comp, rc)
 
-        type(ESMF_GridComp) :: comp
-        integer :: rc
-
-        print *, "in user register routine"
-
-        ! Register the callback routines.
-
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, User1_Init, 0, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, rc)
-        call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, rc)
-
-        print *, "Registered Initialize, Run, and Finalize routines"
-
-    end subroutine FlowMod_register
-
-!-------------------------------------------------------------------------
- 
-    subroutine User1_Init(gcomp, import_state, export_state, clock, rc)
-
-      type(ESMF_GridComp) :: gcomp
-      type(ESMF_State) :: import_state
-      type(ESMF_State) :: export_state
-      type(ESMF_Clock) :: clock
-      integer, intent(out), optional :: rc
+      type(ESMF_GridComp) :: comp
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
       integer :: status
-      integer :: i, j
       logical :: rcpresent
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real :: x_min, x_max, y_min, y_max
-      integer :: i_max, j_max
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
-      integer :: horz_coord_system, vert_coord_system
-      integer :: myde, halo_width
 !
 ! Set initial values
 !
@@ -78,42 +45,101 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
+! Register the callback routines.
+!
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETINIT, User1_Init, 0, status)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETRUN, FlowSolve, 0, status)
+      call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, User1_Final, 0, status)
+
+      print *, "Registered Initialize, Run, and Finalize routines"
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine FlowMod_register
+
+!-------------------------------------------------------------------------
+ 
+      subroutine User1_Init(gcomp, import_state, export_state, clock, rc)
+
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: import_state
+      type(ESMF_State) :: export_state
+      type(ESMF_Clock) :: clock
+      integer, optional, intent(out) :: rc
+!
+! Local variables
+!
+      integer :: status
+      logical :: rcpresent
+      integer :: i, j
+      type(ESMF_DELayout) :: layout
+      type(ESMF_Grid) :: grid
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+      real :: x_min, x_max, y_min, y_max
+      integer :: i_max, j_max
+      integer :: horz_gridtype, vert_gridtype
+      integer :: horz_stagger, vert_stagger
+      integer :: horz_coord_system, vert_coord_system
+      integer :: myde, halo_width
+      namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
+                       uin, rhoin, siein, vin2, rhoin2, siein2, &
+                       gamma, akb, q0, u0, v0, sie0, rho0, &
+                       printout, sieobs, nobsdesc, iobs_min, iobs_max, &
+                       jobs_min, jobs_max, iflo_min, iflo_max
+!
+! Set initial values
+!
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+!
+! Initialize return code
+!
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+! Read in input file
+!
+      open(10, status="old", file="coupled_wave_input")
+      read(10, input, end=20)
+   20 continue
+!
+! Calculate some other quantities
+!
+      dx = (x_max - x_min)/i_max      ! Should be calls to PhysGrid
+      dy = (y_max - y_min)/j_max
+!
 ! Query component for information.
 !
-        call ESMF_GridCompGet(gcomp, layout=layout, rc=rc)
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
 !
 ! Create the Grid
 !
-        i_max = 40
-        j_max = 20
-        x_min = 0.0
-        x_max = 200.0
-        y_min = 0.0
-        y_max = 50.0
-        horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
-        horz_stagger = ESMF_GridStagger_A
-        vert_stagger = ESMF_GridStagger_Unknown
-        horz_coord_system = ESMF_CoordSystem_Cartesian
-        vert_coord_system = ESMF_CoordSystem_Unknown
-        halo_width = 1
+      horz_gridtype = ESMF_GridType_XY
+      vert_gridtype = ESMF_GridType_Unknown
+      horz_stagger = ESMF_GridStagger_A
+      vert_stagger = ESMF_GridStagger_Unknown
+      horz_coord_system = ESMF_CoordSystem_Cartesian
+      vert_coord_system = ESMF_CoordSystem_Unknown
+      halo_width = 1
 
-        grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                               x_min=x_min, x_max=x_max, &
-                               y_min=y_min, y_max=y_max, &
-                               layout=layout, &
-                               horz_gridtype=horz_gridtype, &
-                               vert_gridtype=vert_gridtype, &
-                               horz_stagger=horz_stagger, &
-                               vert_stagger=vert_stagger, &
-                               horz_coord_system=horz_coord_system, &
-                               vert_coord_system=vert_coord_system, &
-                               halo_width=halo_width, &
-                               name="source grid", rc=status)
+      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                             x_min=x_min, x_max=x_max, &
+                             y_min=y_min, y_max=y_max, &
+                             layout=layout, &
+                             horz_gridtype=horz_gridtype, &
+                             vert_gridtype=vert_gridtype, &
+                             horz_stagger=horz_stagger, &
+                             vert_stagger=vert_stagger, &
+                             horz_coord_system=horz_coord_system, &
+                             vert_coord_system=vert_coord_system, &
+                             halo_width=halo_width, &
+                             name="source grid", rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
         return
@@ -137,18 +163,18 @@
 
 !-------------------------------------------------------------------------
  
-    subroutine FlowInit(gcomp, clock, rc)
+      subroutine FlowInit(gcomp, clock, rc)
 
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gcomp
       type(ESMF_Clock), intent(inout) :: clock
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
       integer :: status
-      integer :: i, j, x, y, nx, ny
       logical :: rcpresent
+      integer :: i, j, n, x, y, nx, ny
       double precision :: s_
       type(ESMF_Grid) :: grid
       type(ESMF_DElayout) :: layout
@@ -161,7 +187,7 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -180,19 +206,6 @@
         print *, "ERROR in Flowinit:  arraysglobalalloc"
         return
       endif
-!
-! read in parameters   ! TODO: just set here for now
-!
-      uin = 1.00
-      rhoin = 6.0
-      siein= 0.50
-      gamma = 1.40
-      akb = 1.0
-      q0 = 0.05
-      u0 = 1.0
-      v0 = 0.0
-      sie0 = 0.50
-      rho0 = 6.0
 !
 ! flags for boundary conditions (ordered left, right, bottom, top):
 !     nbc(i) = 1       inflow
@@ -306,13 +319,19 @@
 !
 ! add an obstacle
 !
-      if (x.eq.1 .and. y.eq.1) then
-        do j = 1,4
-          do i = 4,9
+      do n = 1, nobsdesc
+        do j = jobs_min(n),jobs_max(n)
+          do i = iobs_min(n),iobs_max(n)
             flag(i,j) = -1
           enddo
         enddo
-      endif
+      enddo
+!
+! add inflow section
+!
+      do i = iflo_min, iflo_max
+        flag(i,1) = 10
+      enddo
 !
 ! obstacle normal boundary conditions here
 !
@@ -377,20 +396,22 @@
 
       end subroutine FlowInit
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
-    subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
+      subroutine FlowSolve(gcomp, import_state, export_state, clock, rc)
 
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: import_state
       type(ESMF_State) :: export_state
       type(ESMF_Clock) :: clock
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
       integer :: status
       logical :: rcpresent
+      integer :: counter = 0
+      integer :: print_count = 0
       double precision :: s_
 !
 ! Set initial values
@@ -401,9 +422,13 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
+!
+! Increment counter
+!
+      counter = counter + 1
 ! 
 ! Get timestep from clock
 !
@@ -421,38 +446,60 @@
 !
 ! calculate RHOU's and RHOV's
 !
-      call FlowRhoVel
+      call FlowRhoVel(status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: flowrhovel"
+        return
+      endif
 !    
 ! calculate RHOI's
 !
-      call FlowRhoI
+      call FlowRhoI(status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: flowrhoi"
+        return
+      endif
 !    
 ! determine new densities and internal energies
 !
-      call FlowRho
+      call FlowRho(status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: flowrho"
+        return
+      endif
 !
 !  update velocities
 !
-      call FlowVel
+      call FlowVel(status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve: flowvel"
+        return
+      endif
 !
 !  new p's and q's
 !
-      call FlowState
-
-!     if(status .NE. ESMF_SUCCESS) then
-!       print *, "ERROR in FlowSolve"
-!       return
-!     endif
+      call FlowState(status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in FlowSolve"
+        return
+      endif
+!
+! Print graphics every printout steps
+!
+      if(mod(counter, printout) .eq. 0) then
+        print_count = print_count + 1
+        call FlowPrint(gcomp, clock, print_count, status)
+      endif
 
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine FlowSolve
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowRhoVel(rc)
 
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
@@ -470,7 +517,7 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -554,11 +601,11 @@
 
       end subroutine FlowRhoVel
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
  
       subroutine FlowRhoI(rc)
 
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
@@ -575,7 +622,7 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !    
@@ -583,6 +630,7 @@
 !
       do j = jmin, jmax
         do i = imin, imax
+          if (flag(i,j).ge.0.0) then
           if (u(i-1,j) .ge. 0.0) then
             rhoiu_m = u(i-1,j) * rhoi(i-1,j)
           else
@@ -605,11 +653,23 @@
           endif
           dsiedx2 = (sie(i+1,j)+sie(i-1,j)-2.*sie(i,j))/dx**2
           dsiedy2 = (sie(i,j+1)+sie(i,j-1)-2.*sie(i,j))/dy**2
+          if (flag(i+1,j).eq.-1.0) dsiedx2 = (2.*sieobs+sie(i-1,j)-3.*sie(i,j))/dx**2
+          if (flag(i-1,j).eq.-1.0) dsiedx2 = (sie(i+1,j)+2.*sieobs-3.*sie(i,j))/dx**2
+          if (flag(i,j+1).eq.-1.0) dsiedy2 = (2.*sieobs+sie(i,j-1)-3.*sie(i,j))/dy**2
+          if (flag(i,j-1).eq.-1.0) dsiedy2 = (sie(i,j+1)+2.*sieobs-3.*sie(i,j))/dy**2
+          if (flag(i+1,j).eq.10.0) dsiedx2 = (2.*siein2+sie(i-1,j)-3.*sie(i,j))/dx**2
+          if (flag(i-1,j).eq.10.0) dsiedx2 = (sie(i+1,j)+2.*siein2-3.*sie(i,j))/dx**2
+          if (flag(i,j-1).eq.10.0) dsiedy2 = (sie(i,j+1)+2.*siein2-3.*sie(i,j))/dy**2
+          if (flag(i-1,j).eq.1.0) dsiedx2 = (sie(i+1,j)+2.*siein-3.*sie(i,j))/dx**2
+          if (flag(i+1,j).eq.2.0) dsiedx2 = (sie(i-1,j)-sie(i,j))/dx**2
+          if (flag(i,j-1).eq.3.0) dsiedy2 = (sie(i,j+1)-sie(i,j))/dy**2
+          if (flag(i,j+1).eq.4.0) dsiedy2 = (sie(i,j-1)-sie(i,j))/dy**2
           rhoi(i,j) = rhoi(i,j) + (dt/dx)*(rhoiu_m-rhoiu_p) &
                     + (dt/dy)*(rhoiv_m-rhoiv_p) &
                     - dt*(p(i,j)+q(i,j))*((u(i,j)-u(i-1,j))/dx &
                                         + (v(i,j)-v(i,j-1))/dy) &
                     + dt*akb*(dsiedx2+dsiedy2)
+          endif
         enddo
       enddo
 !
@@ -641,18 +701,18 @@
 
       end subroutine FlowRhoI
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowRho(rc)
 
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
       integer :: status
       logical :: rcpresent
-      real, dimension(imax,jmax) :: rho_new  ! sloppy, but OK for now
       integer :: i, j
+      real, dimension(imax,jmax) :: rho_new  ! sloppy, but OK for now
       real :: rhou_m, rhou_p, rhov_m, rhov_p, dsiedx2, dsiedy2
 !
 ! Set initial values
@@ -663,7 +723,7 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !    
@@ -709,10 +769,10 @@
 !
       do j = jmin_t, jmax_t
         do i = imin_t, imax_t
-          if (flag(i,j).eq.1.0) then
-            sie(i,j) = 2.*siein - sie(imin,j)
-            rho(i,j) = 2.*rhoin - rho(imin,j)
-          endif
+!         if (flag(i,j).eq.1.0) then
+!           sie(i,j) = 2.*siein - sie(imin,j)
+!           rho(i,j) = 2.*rhoin - rho(imin,j)
+!         endif
           if (flag(i,j).eq.2.0) then
             sie(i,j) = sie(imax,j)
             rho(i,j) = rho(imax,j)
@@ -722,6 +782,14 @@
           endif
           if (flag(i,j).eq.4.0) then
             sie(i,j) = sie(i,jmax)
+          endif
+          if (flag(i,j).eq.-1.0) then
+            sie(i,j) = sieobs
+            rho(i,j) = rho0
+          endif
+          if (flag(i,j).eq.10.0) then
+            sie(i,j) = siein2
+            rho(i,j) = rhoin2
           endif
         enddo
       enddo
@@ -740,11 +808,11 @@
 
       end subroutine FlowRho
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowVel(rc)
 
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
@@ -761,7 +829,7 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -811,13 +879,19 @@
             v(i,j) = 0.0
             rhov(i,j) = 0.0
           endif
+          if (flag(i,j).eq.10.0) then
+            u(i,j) = 0.0
+            rhou(i,j) = 0.0
+            v(i,j) = vin2
+            rhov(i,j) = rhoin2*vin2
+          endif
         enddo
       enddo
 !
 ! obstacle normal boundary conditions here
 !
-      do j = jmin, jmax
-        do i = imin, imax
+      do j = jmin_t, jmax
+        do i = imin_t, imax
           if (flag(i,j) .eq. -1.0) then
             u(i,j) = 0.0
             rhou(i,j) = 0.0
@@ -882,11 +956,11 @@
 
       end subroutine FlowVel
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       subroutine FlowState(rc)
 
-      integer, intent(out), optional :: rc
+      integer, optional, intent(out) :: rc
 !
 ! Local variables
 !
@@ -902,7 +976,7 @@
 ! Initialize return code
 !
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 !
@@ -955,6 +1029,90 @@
 
       end subroutine FlowState
 
+!------------------------------------------------------------------------------
+
+      subroutine FlowPrint(gcomp, clock, file_no, rc)
+
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_Clock) :: clock
+      integer, intent(in) :: file_no
+      integer, optional, intent(out) :: rc
+!
+! Local variables
+!
+      integer :: status
+      logical :: rcpresent
+      integer :: ni, nj, i, j, de_id
+      integer(kind=ESMF_IKIND_I8) :: frame
+      type(ESMF_Array) :: array2
+      type(ESMF_Grid) :: grid
+      type(ESMF_DELayout) :: layout
+      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
+      character(len=ESMF_MAXSTR) :: filename
+!
+! Set initial values
+!
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+!
+! Initialize return code
+!
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+!
+! Collect results on DE 0 and output to a file
+!
+      call ESMF_GridCompGet(gcomp, layout=layout, rc=status)
+      call ESMF_DELayoutGetDEID(layout, de_id, status)
+!
+! Frame number from computation
+!
+      call ESMF_ClockGetAdvanceCount(clock, frame, status)
+!
+! And now test output to a file
+!
+!     call ESMF_StateGetData(import_state, "U", field_u, status)
+      call ESMF_FieldAllGather(field_u, array2, status)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "U_velocity", file_no
+        call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+      endif
+!     call ESMF_ArrayDestroy(array2, status)
+
+!     call ESMF_StateGetData(import_state, "V", field_v, status)
+      call ESMF_FieldAllGather(field_v, array2, status)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "V_velocity", file_no
+        call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+      endif
+!     call ESMF_ArrayDestroy(array2, status)
+
+!     call ESMF_StateGetData(import_state, "SIE", field_sie, status)
+      call ESMF_FieldAllGather(field_sie, array2, status)
+      if (de_id .eq. 0) then
+        write(filename, 20)  "SIE", file_no
+        call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+      endif
+!     call ESMF_ArrayDestroy(array2, status)
+
+      if(file_no .eq. 1) then
+!       call ESMF_StateGetData(import_state, "FLAG", field_flag, status)
+        call ESMF_FieldAllGather(field_flag, array2, status)
+        if (de_id .eq. 0) then
+          write(filename, 20)  "FLAG", file_no
+          call ESMF_ArrayWrite(array2, filename=filename, rc=status)
+        endif
+!       call ESMF_ArrayDestroy(array2, status)
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+ 20   format(a,".",I3.3)
+
+      end subroutine FlowPrint
+
 !----------------------------------------------------------------------------------
 
       subroutine User1_Final(gcomp, import_state, export_state, clock, rc)
@@ -969,12 +1127,6 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: ni, nj, i, j, de_id
-      type(ESMF_Array) :: array1
-      type(ESMF_Grid) :: grid
-      type(ESMF_DELayout) :: layout
-      real, dimension(:,:), pointer :: ldata
-      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
 !
 ! Set initial values
 !
@@ -987,37 +1139,6 @@
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
-!
-! Print out some results before finalizing
-!
-      ! Get a pointer to the data Array in the Field
-      call ESMF_FieldGetData(field_u, array1, rc=rc)
-      print *, "data back from field"
-
-      ! Get size of local array
-      call ESMF_FieldGetGrid(field_u, grid, status)
-      call ESMF_GridGetDELayout(grid, layout, status)
-      call ESMF_GridGetDE(grid, lcelltot_index=indext, &
-                          lcellexc_index=indexe, rc=rc)
-      call ESMF_DELayoutGetDEID(layout, de_id, rc)
-      ni = indext(1)%r - indext(1)%l + 1
-      nj = indext(2)%r - indext(2)%l + 1
-      print *, "allocating", ni, " by ",nj," cells on DE", de_id
-      allocate(ldata(ni,nj))
-
-      ! Get a pointer to the start of the data
-      call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
-
-      ! output only the exclusive cells
-      ! Print results
-      print *, "------------------------------------------------------"
-      write(*,*) 'de_id = ',de_id
-      do j = indexe(2)%r,indexe(2)%l,-1
-        write(*,10) (ldata(i,j), i=indexe(1)%l,indexe(1)%r)
- 10     format(20(1x,1pe8.2))
-      enddo
-      print *, "------------------------------------------------------"
-
 
       call ArraysGlobalDealloc(status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1029,7 +1150,7 @@
 
       end subroutine User1_Final
 
-!----------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
     end module FlowMod
 !\end{verbatim}
     
