@@ -1,4 +1,4 @@
-# $Id: do_ex_results,v 1.1 2003/12/01 21:22:50 svasquez Exp $
+# $Id: do_ex_results,v 1.2 2004/01/20 18:15:55 svasquez Exp $
 #!/bin/ksh
 # This script runs at the end of the "run_example" target.
 # The purpose is to give the user the results of running the examples.
@@ -10,10 +10,10 @@ find $ESMF_DIR/examples/examples$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.
 if grep " 0" stdoutfiles > NULL # check if there are any examples executable files 
 then
 	echo "There are no executable examples files, either the 'gmake ESMF_BOPT=g/O build_examples' has "
-	echo "not been run or the 'build_build_examples' did not build successfully."
+	echo "not been run or the 'build_examples' did not build successfully."
 	echo "" 
 else
-	echo "Executable exanples found:"
+	echo "Executable examples found:"
 	cd $ESMF_DIR/examples/examples$ESMF_BOPT/$ESMF_ARCH.$ESMF_COMPILER.$ESMF_PREC.$ESMF_SITE
 	ls -l *Ex 
 	cd $ESMF_DIR
