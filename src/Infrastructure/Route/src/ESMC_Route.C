@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.113 2004/12/07 22:31:28 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.114 2004/12/07 23:35:25 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.113 2004/12/07 22:31:28 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.114 2004/12/07 23:35:25 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1756,7 +1756,7 @@ static int maxroutes = 10;
                                        &myXP, &myXPcount);
       
         // get PET from DE here.  Single DE per PET.  TODO: fix this
-        srcDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
+        dstDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
 
         // load the XPacket into the sending RTable
         sendRT->ESMC_RTableSetEntry(*theirPET, myXP);
@@ -1794,7 +1794,7 @@ static int maxroutes = 10;
         offset += count;
 
         // get PET from DE here.  Single DE per PET.  TODO: fix this
-        dstDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
+        srcDELayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, &nmatch, theirPET, 1);
 
         // load the XPacket into the sending RTable
         recvRT->ESMC_RTableSetEntry(*theirPET, theirXP);
