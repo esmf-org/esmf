@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.14 2004/05/27 21:34:31 jwolfe Exp $
+// $Id: ESMC_FTable.C,v 1.15 2004/06/07 15:45:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 // Licensed under the GPL.
 
 // ESMC Function table implementation (body) file
+#define ESMF_FILENAME "ESMC_FTable.C"
 
 //-----------------------------------------------------------------------------
 //
@@ -24,6 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "ESMC_Start.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_Comp.h"
 #include "ESMC_GridComp.h"
 #include "ESMC_CplComp.h"
@@ -48,7 +50,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.14 2004/05/27 21:34:31 jwolfe Exp $";
+           "$Id: ESMC_FTable.C,v 1.15 2004/06/07 15:45:27 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -61,6 +63,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableExtend"
 //BOP
 // !IROUTINE:  ESMC_FTableExtend - make space for additional functions/data
 //
@@ -98,6 +102,8 @@
  } // end ESMC_FTableExtend
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableQuery"
 //BOP
 // !IROUTINE:  ESMC_FTableQuery - return count of functions/data
 //
@@ -127,6 +133,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, no extra args
 //
@@ -164,6 +172,8 @@
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, type; no args yet.
 //
@@ -207,6 +217,8 @@
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set voidp, intp specifically
 //
@@ -250,6 +262,8 @@
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncPtr - set function pointer, arg list
 //
@@ -293,6 +307,8 @@
  } // end ESMC_FTableSetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetFuncArgs"
 //BOP
 // !IROUTINE:  ESMC_FTableSetFuncArgs - set arglist for existing function
 //
@@ -313,7 +329,8 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i, j;
+    int i, j, status;
+    char msgbuf[ESMF_MAXSTR];
 
     for (i=0; i<funccount; i++) {
         if (strcmp(name, funcs[i].funcname))
@@ -325,12 +342,17 @@
         return ESMF_SUCCESS;
     }
 
-    printf("Error: function '%s' not found\n", name);
-    return ESMF_FAILURE;
+   
+    sprintf(msgbuf, "Error: function '%s' not found\n", name);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, msgbuf, &status);
+
+    return status;
 
  } // end ESMC_FTableSetFuncArgs
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableSetDataPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableSetDataPtr - set data pointer
 //
@@ -369,6 +391,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableGetFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableGetFuncPtr - get function pointer from name
 //
@@ -406,6 +430,8 @@
  } // end ESMC_FTableGetFuncPtr
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableGetDataPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableGetDataPtr - get data pointer from name
 //
@@ -445,6 +471,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableCallVFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
 //
@@ -464,7 +492,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
+    int i, status;
 
     *rc = ESMF_FAILURE;
     for (i=0; i<funccount; i++) {
@@ -544,8 +572,9 @@
             break;
           }
           default:
-            fprintf(stderr, "unknown function type\n");
-            return ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                         "unknown function type", &status);
+            return status;
         }
 
         return ESMF_SUCCESS;
@@ -557,6 +586,8 @@
 
  
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableCallVFuncPtr"
 //BOP
 // !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
 //
@@ -577,7 +608,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    int i;
+    int i, status;
     ESMC_VM *vmm = vm_pointer;
     ESMC_VM **vm = &vmm;
     
@@ -724,8 +755,9 @@
             break;
           }
           default:
-            fprintf(stderr, "unknown function type\n");
-            return ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                         "unknown function type", &status);
+            return status;
         }
 
         return ESMF_SUCCESS;
@@ -736,6 +768,8 @@
  } // end ESMC_FTableCallVFuncPtr
  
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTableValidate"
 //BOP
 // !IROUTINE:  ESMC_FTableValidate - internal consistency check for a Component
 //
@@ -764,6 +798,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTablePrint"
 //BOP
 // !IROUTINE:  ESMC_FTablePrint - print contents of a Component
 //
@@ -792,6 +828,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_FTable()"
 //BOP
 // !IROUTINE:  ESMC_FTable - native C++ constructor
 //
@@ -824,6 +862,8 @@
  } // end ESMC_FTable
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "~ESMC_FTable()"
 //BOP
 // !IROUTINE:  ~ESMC_FTable - native C++ destructor
 //
