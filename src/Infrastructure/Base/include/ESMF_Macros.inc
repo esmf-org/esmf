@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Macros.inc,v 1.3 2004/03/04 16:36:59 nscollins Exp $
+$Id: ESMF_Macros.inc,v 1.4 2004/03/04 17:01:41 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@ the array.  but there are exceptions...
 
 
 #if 0
-the following macro is here for the framework's own internal use.
+the following macro is here for the frameworks own internal use.
 #endif
 
 #define ESMF_SRCLINE __FILE__, __LINE__
