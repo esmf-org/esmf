@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.7 2003/02/05 17:18:37 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.8 2003/02/05 18:38:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,9 +56,9 @@
       end type
 
       type(ESMF_CompType), parameter :: &
-                  ESMF_APPCOMP  = ESMF_CompType(B'001'), &
-                  ESMF_GRIDCOMP = ESMF_CompType(B'010'), &
-                  ESMF_CPLCOMP  = ESMF_CompType(B'100')
+                  ESMF_APPCOMP  = ESMF_CompType(1), &   ! binary 001
+                  ESMF_GRIDCOMP = ESMF_CompType(2), &   ! binary 010
+                  ESMF_CPLCOMP  = ESMF_CompType(4)      ! binary 100
 
 !------------------------------------------------------------------------------
 !     ! ESMF_ModelType
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.7 2003/02/05 17:18:37 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.8 2003/02/05 18:38:03 nscollins Exp $'
 
 !==============================================================================
 ! 
