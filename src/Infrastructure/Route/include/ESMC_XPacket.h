@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.27 2004/06/02 11:54:39 nscollins Exp $
+// $Id: ESMC_XPacket.h,v 1.28 2004/12/22 00:28:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,7 +89,7 @@
                                   int *global_start);
                          
     int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty
-    int ESMC_XPacketPrint(void);
+    int ESMC_XPacketPrint(const char *options);
 
  // native C++ constructors/destructors
 	ESMC_XPacket(void);

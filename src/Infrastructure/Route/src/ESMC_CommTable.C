@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.25 2004/11/01 23:39:13 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.26 2004/12/22 00:28:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,6 +26,7 @@
  #include <ESMC_Start.h>
  #include <stdio.h>
  #include <stdlib.h>
+ #include <string.h>
 
  // associated class definition file
  #include <ESMC_CommTable.h>
@@ -35,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.25 2004/11/01 23:39:13 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.26 2004/12/22 00:28:08 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -419,15 +420,20 @@
 
     int i;
     char msgbuf[ESMF_MAXSTR];
+    bool brief;
+
+    brief = strcmp(options, "brief") ? false : true;
 
     sprintf(msgbuf, " myid=%d, decount=%d, commcount=%d\n", myid, decount, commcount);
-    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     printf(msgbuf);
+    //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     for (i=0; i<commcount; i++) {
-        sprintf(msgbuf, " %2d: partner=%2d, needed=%1d\n", 
-                         i, commpartner[i], commneeded[i]);
-        //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
-        printf(msgbuf);
+        if ((commneeded[i] > 0) && !brief) {
+            sprintf(msgbuf, " %2d: partner=%2d, needed=%1d\n", 
+                             i, commpartner[i], commneeded[i]);
+            //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+            printf(msgbuf);
+        }
     }
 
     return ESMF_SUCCESS;

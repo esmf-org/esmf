@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.47 2004/11/01 23:39:13 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.48 2004/12/22 00:28:08 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.47 2004/11/01 23:39:13 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.48 2004/12/22 00:28:08 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -191,9 +191,9 @@
 
     // debug
     //printf("xpacket1: ");
-    //xpacket1->ESMC_XPacketPrint();
+    //xpacket1->ESMC_XPacketPrint("");
     //printf("xpacket2: ");
-    //xpacket2->ESMC_XPacketPrint();
+    //xpacket2->ESMC_XPacketPrint("");
 
     // check that the xpacket strides are the same
     if (this->rank > 0) { 
@@ -286,7 +286,7 @@
 
     // debug
     //printf("intersect: ");
-    //this->ESMC_XPacketPrint();
+    //this->ESMC_XPacketPrint("");
 
     rc = ESMF_SUCCESS;
     return rc;
@@ -579,8 +579,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void) {
-//     none
+      const char *options) {     // print options
 //
 // !DESCRIPTION:
 //     Print the contents of an XPacket
@@ -598,13 +597,13 @@
  
     sprintf(tempbuf,"strides=(");
     strcpy(msgbuf, tempbuf);
-    for (i=0; i<rank-1; i++) {
+    for (i=0; i<rank-2; i++) {
       sprintf(tempbuf,"%d,", stride[i]);
       strcat(msgbuf, tempbuf);
     }
     sprintf(tempbuf,"%d), rep_count=(", stride[i]);
     strcat(msgbuf, tempbuf);
-    for (i=0; i<rank-1; i++) {
+    for (i=0; i<rank-2; i++) {
       sprintf(tempbuf,"%d,", rep_count[i]);
       strcat(msgbuf, tempbuf);
     }

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.61 2004/12/17 19:39:17 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.62 2004/12/22 00:28:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,9 +59,22 @@
         type(ESMF_Pointer) :: this    ! opaque pointer to C++ class data
       end type
 
+      type ESMF_RouteOptions 
+      sequence
+      private
+          integer :: option
+      end type
+
+      ! must match C++ code, must increase by powers of 2
+      type(ESMF_RouteOptions), parameter ::  ESMF_ROUTE_OPTION_ASYNC = &
+                                              ESMF_RouteOptions(1)
+      type(ESMF_RouteOptions), parameter ::  ESMF_ROUTE_OPTION_VECTOR = &
+                                              ESMF_RouteOptions(2)
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_Route
+      public ESMF_Route, ESMF_RouteOptions
+      public ESMF_ROUTE_OPTION_ASYNC, ESMF_ROUTE_OPTION_VECTOR
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -99,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.61 2004/12/17 19:39:17 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.62 2004/12/22 00:28:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1496,12 +1509,13 @@
 ! !IROUTINE: ESMF_RouteRun - Execute the communications the Route represents
 
 ! !INTERFACE:
-      subroutine ESMF_RouteRun(route, srcArray, dstArray, rc)
+      subroutine ESMF_RouteRun(route, srcArray, dstArray, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
       type(ESMF_LocalArray), intent(in), optional :: srcarray
       type(ESMF_LocalArray), intent(in), optional :: dstarray
+      type(ESMF_RouteOptions), intent(in), optional :: options
       integer, intent(out), optional :: rc            
 
 !
@@ -1516,6 +1530,9 @@
 !          {\tt ESMF\_LocalArray} containing data to be sent.
 !     \item[{[dstarray]}]
 !          {\tt ESMF\_LocalArray} containing data to be received.
+!     \item[{[options]}]
+!          {\tt ESMF\_RouteOptions} contains optional instructions on
+!          what communication strategy to pursue.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1538,7 +1555,12 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteRunLA(route, srcarray, dstarray, status)
+        if (present(options)) then
+            call c_ESMC_RouteRunLA(route, srcarray, dstarray, options, status)
+        else
+            call c_ESMC_RouteRunLA(route, srcarray, dstarray, 0, status)
+        endif
+
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
