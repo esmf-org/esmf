@@ -1,0 +1,56 @@
+#!/bin/csh -f
+#
+# $Id: do_newclass,v 1.1 2002/10/07 16:35:44 eschwab Exp $
+#
+#===============================================================================
+# do_newclass
+#===============================================================================
+#
+# Create a new class template in the current directory
+#
+# Usage: do_newclass <class> <core language>> 
+#
+#        <class> is the name of the new class
+#
+#        <core language> is one of the following:
+#               f - f90
+#               c - C++
+#        
+# Template files that pertain to classes or modules have 
+# "class" as the root of their filename.
+#
+# E. Schwab                                                       Oct 7, 2002
+#===============================================================================
+ 
+if($#argv != 2) then
+  echo "Usage:  do_newclass <class> <core language [c|f]>"
+  exit
+else 
+  set class=$1
+  set classlow = `tolower $class`
+  set lang=$2
+  set comppath = `cd ..;pwd`
+  set comp = `getfn $comppath`
+endif
+
+  set DOCT_DIR=$DOC_DIR/templates
+
+# get a copy of the source template file, rename as requested class
+  switch ($lang) 
+  case f:
+      if(!(-r ESMF_$class.F90)) cat $DOCT_DIR/ESMF_class.F90 | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ESMF_$class.F90
+      breaksw
+  case c:
+      if(!(-r ESMC_$class.C)) cat $DOCT_DIR/ESMC_class.C | \
+        sed 's/<Class>/'$class'/g' > ESMC_$class.C
+      if(!(-r ../include/ESMC_$class.h)) cat $DOCT_DIR/ESMC_class.h | \
+        sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
+           > ../include/ESMC_$class.h
+      breaksw
+  default:
+    echo "Valid options are: [ c | f]"
+    exit
+  endsw
+endif
