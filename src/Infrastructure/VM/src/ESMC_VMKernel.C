@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.10 2004/11/11 15:51:56 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.11 2004/11/16 16:25:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -751,18 +751,18 @@ static void *vmk_block(void *arg){
 }
 
 
-void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp, 
+void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp, 
   void *(fctp)(void *, void *), void *cargo){
   // enter a vm derived from current vm according to the ESMC_VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
   // info to disappear while still accessing it
-  int at_least_1 = vmp.spawnflag[mypet];
+  int at_least_1 = vmp->spawnflag[mypet];
   if (at_least_1 < 1)
     at_least_1 = 1;
   vmk_spawn_arg *sarg = new vmk_spawn_arg[at_least_1];
   // first handle the simple case of using the parent VM
-  if (vmp.parentVMflag){
+  if (vmp->parentVMflag){
     sarg[0].myvm = this;
     sarg[0].fctp = fctp;
     sarg[0].cargo = cargo;
@@ -772,20 +772,20 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
   //    sarg[] has as many elements as mypet spawns threads, but at least one
   // next, allocate as many vm objects off the heap as there will be spawned
   // next, set pointers in sarg to the ESMC_VMK instances on the heap
-  for (int i=0; i<vmp.spawnflag[mypet]; i++){
-    if (vmp.myvms == NULL){
+  for (int i=0; i<vmp->spawnflag[mypet]; i++){
+    if (vmp->myvms == NULL){
       fprintf(stderr, "VM_ERROR: No vm objects provided.\n");
       MPI_Abort(MPI_COMM_WORLD, 0);
     } 
-    sarg[i].myvm = vmp.myvms[i];
+    sarg[i].myvm = vmp->myvms[i];
   }
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
   int new_npets=0;
   for (int i=0; i<npets; i++){
-    new_npets += vmp.spawnflag[i];
+    new_npets += vmp->spawnflag[i];
     if (i<mypet)
-      new_mypet_base += vmp.spawnflag[i];
+      new_mypet_base += vmp->spawnflag[i];
   }
   // now:
   //    new_npets is equal to the total number of pets in the new ESMC_VMK
@@ -833,7 +833,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
     //    local_tid is the tid index for the first pet this pet might spawn
     // next, if this pet spawns determine whether a previous spaner had same pid
     int temp_lpid;
-    if (vmp.spawnflag[i]){
+    if (vmp->spawnflag[i]){
       int j;
       // check all previous spawners
       for (j=0; j<new_petid; j++)
@@ -850,7 +850,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
     // now:
     //    temp_lpid is the lpid for all new pets spawned by this pet
     // next, handle this pet amd fill in info for _all_ the threads it spawns
-    for (int j=0; j<vmp.spawnflag[i]; j++){
+    for (int j=0; j<vmp->spawnflag[i]; j++){
       // here j is the counter over threads this pet spawns
       new_lpid[new_petid]=temp_lpid;  // new lpid is that previously determined
       new_pid[new_petid]=pid[i];      // new pid is equal to that of this pet
@@ -859,7 +859,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
       new_ncpet[new_petid]=0;         // reset the counter
       new_ncontributors[new_petid]=0; // reset the counter
       for (int k=0; k<npets; k++)
-        if (vmp.contribute[k]==i && vmp.cspawnid[k]==j){
+        if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
           // pet k contributes to this pet's spawned thread number j
           new_ncpet[new_petid]+=ncpet[k]; // add in all the cores from pet k
           if (k!=i){
@@ -881,7 +881,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
       int ncontrib_counter=0;   // reset contributor counter
       // loop over all current pets and see how they contribute tho this pet
       for (int k=0; k<npets; k++){
-        if (vmp.contribute[k]==i && vmp.cspawnid[k]==j){
+        if (vmp->contribute[k]==i && vmp->cspawnid[k]==j){
           // found a contributor pet (k) which contributes cores
           // to this pet (i) for its spawned thread (j)
           // next, determine the contrib_id of pet (k) and share info with pet i
@@ -992,7 +992,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
     pet_list[i] = new int[npets];  // npets is maximum possible number here!
   }
   for (int i=0; i<npets; i++){
-    if (vmp.spawnflag[i]){
+    if (vmp->spawnflag[i]){
       // this pet will spawn, so look if its lpid has already been recorded
       int j;
       for (j=0; j<num_diff_pids; j++)
@@ -1121,11 +1121,11 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
               // for now hardcode VM_COMM_TYPE_SHMHACK for intra-process comm.
               // -> allocate shared_mp structure 
               new_commarray[pet1][pet2].shmp = new shared_mp;
-              if (vmp.pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
+              if (vmp->pref_intra_process == PREF_INTRA_PROCESS_SHMHACK){
                 new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_SHMHACK;
                 // initialize the shms structure in shared_mp
                 sync_reset(&(new_commarray[pet1][pet2].shmp->shms));
-              }else if(vmp.pref_intra_process == PREF_INTRA_PROCESS_PTHREAD){
+              }else if(vmp->pref_intra_process == PREF_INTRA_PROCESS_PTHREAD){
                 new_commarray[pet1][pet2].comm_type = VM_COMM_TYPE_PTHREAD;
                 // initialize pthread variables in shared_mp
                 pthread_mutex_init(&(new_commarray[pet1][pet2].shmp->mutex1),
@@ -1176,7 +1176,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
   //    new_commarray now holds valid shared memory shared_mp objects
   //
   // next, enter the spawn-loop for mypet 
-  for (int i=0; i<vmp.spawnflag[mypet]; i++){
+  for (int i=0; i<vmp->spawnflag[mypet]; i++){
     // copy this threads information into the sarg structure
     sarg[i].fctp = fctp;
     sarg[i].mypet = new_mypet_base + i;   // different for each thread spawned
@@ -1207,7 +1207,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
     sarg[i].pth_mutex = new_pth_mutex;
     sarg[i].pth_finish_count = new_pth_finish_count;
     sarg[i].commarray = new_commarray;
-    sarg[i].pref_intra_ssi = vmp.pref_intra_ssi;
+    sarg[i].pref_intra_ssi = vmp->pref_intra_ssi;
     // cargo
     sarg[i].cargo = cargo;
     // finally spawn threads from this pet...
@@ -1232,7 +1232,7 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
   for (int i=0; i<num_diff_pids; i++)
     delete [] pet_list[i];
   delete [] pet_list;
-  if (vmp.spawnflag[mypet]==0){
+  if (vmp->spawnflag[mypet]==0){
     // mypet does not spawn an thus new_commarray needs to be deleted here
     for (int ii=0; ii<new_npets; ii++)
       delete [] new_commarray[ii];
@@ -1243,13 +1243,13 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
 }
 
 
-void ESMC_VMK::vmk_enter(class ESMC_VMKPlan &vmp, void *arg, void *argvmkt){
+void ESMC_VMK::vmk_enter(class ESMC_VMKPlan *vmp, void *arg, void *argvmkt){
   // Enter into ESMC_VMK by its registered function, i.e. release vmkt
   // First need to cast arg into its correct type
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
   // simple case is that where the child runs in the parent VM, then all this
   // degenerates into a simple blocking callback 
-  if (vmp.parentVMflag){
+  if (vmp->parentVMflag){
     if (argvmkt==NULL)
       sarg[0].fctp((void *)sarg[0].myvm, sarg[0].cargo);
     else
@@ -1259,37 +1259,37 @@ void ESMC_VMK::vmk_enter(class ESMC_VMKPlan &vmp, void *arg, void *argvmkt){
   // pets that do not spawn but contribute need to release their blocker and
   // sigcatcher _before_ the actual spawner threads get released 
   // (this is so that no signals get missed!)
-  if (vmp.spawnflag[mypet]==0){
-    if (vmp.contribute[mypet]>-1){
+  if (vmp->spawnflag[mypet]==0){
+    if (vmp->contribute[mypet]>-1){
       vmkt_release(&(sarg[0].vmkt), NULL);          // release blocker
       vmkt_release(&(sarg[0].vmkt_extra), NULL);    // release sigcatcher
-      vmk_send(NULL, 0, vmp.contribute[mypet]);     // tell spawner about me
+      vmk_send(NULL, 0, vmp->contribute[mypet]);     // tell spawner about me
     }
   }else{
     // wait on all the contributors to this spawner
     for (int i=0; i<npets; i++)
-      if (vmp.contribute[i]==mypet && i!=mypet)
+      if (vmp->contribute[i]==mypet && i!=mypet)
         vmk_recv(NULL, 0, i); // listen if contributor has released its threads
     // now all contributors are in, pets that spawn need to release their vmkts
-    for (int i=0; i<vmp.spawnflag[mypet]; i++)
+    for (int i=0; i<vmp->spawnflag[mypet]; i++)
       vmkt_release(&(sarg[i].vmkt), argvmkt);
   }
 }
 
 
-void ESMC_VMK::vmk_exit(class ESMC_VMKPlan &vmp, void *arg){
+void ESMC_VMK::vmk_exit(class ESMC_VMKPlan *vmp, void *arg){
   // Exit from ESMC_VMK's registered function, i.e. catch the vmkts
   // First need to cast arg into its correct type
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
   // simple case is that where the child runs in the parent VM, then there is
   // nothing to catch on exit.
-  if (vmp.parentVMflag) return;
+  if (vmp->parentVMflag) return;
   // pets that spawn need to catch their vmkts
-  for (int i=0; i<vmp.spawnflag[mypet]; i++)
+  for (int i=0; i<vmp->spawnflag[mypet]; i++)
     vmkt_catch(&(sarg[i].vmkt));
   // pets that did not spawn but contributed need to catch their blocker and
   // sigcatcher
-  if (vmp.spawnflag[mypet]==0 && vmp.contribute[mypet]>-1){
+  if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
     vmkt_catch(&(sarg[0].vmkt));
     vmkt_catch(&(sarg[0].vmkt_extra));
   }
@@ -1303,7 +1303,7 @@ void ESMC_VMK::vmk_exit(class ESMC_VMKPlan &vmp, void *arg){
 }
 
 
-void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan &vmp, void *arg){
+void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan *vmp, void *arg){
   // Block all pets of the current ESMC_VMK until their individual resources,
   // i.e. cores, become available. This means:
   //  1) pets which did not spawn nor contribute in the ESMC_VMKPlan are not
@@ -1316,12 +1316,12 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan &vmp, void *arg){
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
   // simple case is that where the child runs in the parent VM, then there is
   // nothing to clean up here except to free sarg;
-  if (vmp.parentVMflag){
+  if (vmp->parentVMflag){
     delete [] sarg;
     return;
   }
   // pets that spawned will be blocked by pthread_join() call...
-  for (int i=0; i<vmp.spawnflag[mypet]; i++){
+  for (int i=0; i<vmp->spawnflag[mypet]; i++){
     //pthread_join(sarg[i].pthid, NULL);
     vmkt_join(&(sarg[i].vmkt));
     // free arrays in sarg[i[ 
@@ -1338,7 +1338,7 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan &vmp, void *arg){
     delete [] sarg[i].contributors;
   }
   // need to block pets that did not spawn but contributed in the ESMC_VMKPlan
-  if (vmp.spawnflag[mypet]==0 && vmp.contribute[mypet]>-1){
+  if (vmp->spawnflag[mypet]==0 && vmp->contribute[mypet]>-1){
     // wait for the blocker thread to return, maybe already is done...
 #if (VERBOSITY > 9)
     printf("I am pet, pid %d, tid %d. I'll block on a pthread_join until "
