@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.28 2004/09/03 20:18:05 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.29 2004/09/03 22:20:09 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@ type(ESMF_LogType), parameter		:: &
 type ESMF_LOGENTRY
     private
     sequence  	
-    character(len=32)				msg	
+    character(len=64)				msg	
     character(len=32) 				file,method	
     character(len=8) 				d		                                     
     character(len=8)				lt  			   				
@@ -105,7 +105,7 @@ end type ESMF_LOGENTRY
 type ESMF_Log
     private
     sequence       
-    character(len=32)                           nameLogErrFile   
+    character(len=64)                           nameLogErrFile   
 #ifndef ESMF_NO_INITIALIZERS
     type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
 #else
@@ -1021,9 +1021,8 @@ end subroutine ESMF_LogFlush
     else
         ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
-   
-   ESMF_LogDefault%flushed = ESMF_FALSE
-   if (present(rc)) rc=ESMF_SUCCESS
+    ESMF_LogDefault%flushed = ESMF_FALSE
+    if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
 
 end module ESMF_LogErrMod

@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.13 2004/09/03 20:18:06 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.14 2004/09/03 22:20:10 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,9 +54,9 @@
     end if
 !BOC
     ! LogWrite 
-    call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
+    call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO,rc=rc2)
 !EOC
-    if (.NOT.ret) then
+    if (rc2.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 !BOC
@@ -92,9 +92,9 @@
     end if
 !BOC
     ! LogWrite
-    call ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog)
+    call ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog,rc=rc2)
 !EOC
-    if (.NOT.ret) then
+    if (rc2.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 !BOC
@@ -124,7 +124,9 @@
     ! Finalize ESMF to close the default log
     call ESMF_Finalize(rc=rc1)
 !EOC
-    finalrc = rc1
+    if (rc1.NE.ESMF_SUCCESS) then
+        finalrc = ESMF_FAILURE
+    end if
 
     if (finalrc.EQ.ESMF_SUCCESS) then
         print *, "PASS: ESMF_LogErrEx.F90"
