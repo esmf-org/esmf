@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.21 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.22 2003/09/12 22:39:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.21 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.22 2003/09/12 22:39:36 jwolfe Exp $'
 
 !==============================================================================
 
@@ -129,12 +129,13 @@
       integer :: start, stop, my_DE
       integer :: src_size_x, src_size_y, dst_size_x, dst_size_y, size
       integer :: size_xy(2), size_x0(2)
-      integer :: i, num_domains, counts(3)
+      integer :: i, j, counter, num_domains, counts(3)
       logical, dimension(:), pointer :: src_mask, dst_mask
       real(ESMF_KIND_R8), dimension(:), pointer :: src_center_x, src_center_y
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: centerCoordX, centerCoordY
+      real(ESMF_KIND_R8), dimension(:), pointer :: centerCoordX, centerCoordY
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: center_coord
       real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_LocalArray) :: srcCenterX, srcCenterY, centerCoordArray
@@ -159,7 +160,7 @@
       ! Construct an empty regrid structure
       rh = ESMF_RouteHandleCreate(rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: RouteHandleCreate ", &
+        print *, "ERROR in RegridConstructBilinear: RouteHandleCreate ", &
                  "returned failure"
         return
       endif
@@ -171,7 +172,7 @@
                                          method = ESMF_RegridMethod_Bilinear, &
                                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: RegridTypeSet ", &
+        print *, "ERROR in RegridConstructBilinear: RegridTypeSet ", &
                  "returned failure"
         return
       endif
@@ -179,29 +180,35 @@
       ! Extract some grid information for use in this regrid.
       !TODO: Get grid sizes?
       !TODO: Get grid masks?
+      call ESMF_GridGetDE(srcGrid, ai_global=myAI, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
+                 "returned failure"
+        return
+      endif
       call ESMF_GridGetDELayout(srcGrid, srcDELayout, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: GridGetDELayout ", &
+        print *, "ERROR in RegridConstructBilinear: GridGetDELayout ", &
                  "returned failure"
         return
       endif
       call ESMF_DELayoutGetDEID(srcDELayout, my_DE, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: DELayoutGetDEID ", &
+        print *, "ERROR in RegridConstructBilinear: DELayoutGetDEID ", &
                  "returned failure"
         return
       endif
       call ESMF_DataMapGet(srcDataMap, relloc=srcRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: DataMapGet ", &
+        print *, "ERROR in RegridConstructBilinear: DataMapGetRelloc ", &
                  "returned failure"
         return
       endif
 
-      counts(1) = 2
-      call ESMF_GridGetDE(srcGrid, local_axis_length=counts(2:3), rc=status)
+      counts(3) = 2
+      call ESMF_GridGetDE(srcGrid, local_axis_length=counts(1:2), rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: GridGetDE ", &
+        print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
         return
       endif
@@ -210,14 +217,14 @@
       kind = ESMF_R8
       centerCoordArray = ESMF_LocalArrayCreate(3, type, kind, counts, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: LocalArrayCreate ", &
+        print *, "ERROR in RegridConstructBilinear: LocalArrayCreate ", &
                  "returned failure"
         return
       endif
       call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
                              center_coord=centerCoordArray, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: GridGetCoord ", &
+        print *, "ERROR in RegridConstructBilinear: GridGetCoord ", &
                  "returned failure"
         return
       endif
@@ -228,19 +235,13 @@
       hassrcdata = .true.   ! temp for now
       hasdstdata = .true.   ! temp for now
 
-      ! Retrieve the relative location of source data
-      call ESMF_DataMapGet(srcDataMap, relloc=srcRelLoc, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in BoxIntersect: DataMapGetRelloc returned failure"
-        return
-      endif
       ! From the grid get the bounding box on this DE
       call ESMF_GridGetPhysGrid(srcGrid, srcRelLoc, local_min=src_min, &   
                                 local_max=src_max, rc=status)
-      call ESMF_GridBoxIntersect(dstGrid, src_min, src_max, sendDomainList, &
-                                 status)
+      call ESMF_GridBoxIntersectSend(dstGrid, src_min, src_max, myAI, &
+                                     sendDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: GridBoxIntersect ", &
+        print *, "ERROR in RegridConstructBilinear: GridBoxIntersectSend ", &
                  "returned failure"
         return
       endif
@@ -248,16 +249,17 @@
       ! Retrieve the relative location of destination data
       call ESMF_DataMapGet(dstDataMap, relloc=dstRelLoc, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in BoxIntersect: DataMapGetRelloc returned failure"
+        print *, "ERROR in RegridConstructBilinear: DataMapGetRelloc ", &
+                 "returned failure"
         return
       endif
       ! From the grid get the bounding box on this DE
       call ESMF_GridGetPhysGrid(dstGrid, dstRelLoc, local_min=dst_min, &
                                 local_max=dst_max, rc=status)
-      call ESMF_GridBoxIntersect(srcGrid, dst_min, dst_max, recvDomainList, &
-                                 status)
+      call ESMF_GridBoxIntersectRecv(srcGrid, dst_min, dst_max, &
+                                     recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: GridBoxIntersect ", &
+        print *, "ERROR in RegridConstructBilinear: GridBoxIntersectRecv ", &
                  "returned failure"
         return
       endif
@@ -269,7 +271,7 @@
       call ESMF_RoutePrecomputeDomList(route, 2, my_DE, sendDomainList, &
                                        recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConsByFieldBilinear: ", &
+        print *, "ERROR in RegridConstructBilinear: ", &
                  "RoutePrecomputeDomList returned failure"
         return
       endif
@@ -280,25 +282,35 @@
       ! This same Route will be executed at RegridRun time to bring over
       !  data values using the same patterns.
       size = recvDomainList%total_points
-      srcCenterX = ESMF_LocalArrayCreate(1, type, kind, size, status)
-      srcCenterY = ESMF_LocalArrayCreate(1, type, kind, size, status)
+      allocate(src_center_x(size))
+      allocate(src_center_y(size))
+      srcCenterX = ESMF_LocalArrayCreate(src_center_x, ESMF_DATA_REF, status)
+      srcCenterY = ESMF_LocalArrayCreate(src_center_y, ESMF_DATA_REF, status)
 
       ! create local arrays of the x and y coords
       ! TODO: a better design?
-      centerCoordXArray = ESMF_LocalArraySlice(centerCoordArray, 1, 1, status)
-      centerCoordYArray = ESMF_LocalArraySlice(centerCoordArray, 1, 2, status)
+      size = counts(1)*counts(2)
+      allocate(centerCoordX(size))
+      allocate(centerCoordY(size))
+      centerCoordXArray = ESMF_LocalArrayCreate(centerCoordX, ESMF_DATA_REF, status)
+      centerCoordYArray = ESMF_LocalArrayCreate(centerCoordY, ESMF_DATA_REF, status)
+      call ESMF_LocalArrayPrint(centerCoordXArray, "", status)
+   !   centerCoordX = pack(center_coord(:,:,1:1), mask=.true.)
+   !   centerCoordY = pack(center_coord(1:counts(1),1:counts(2),2:2), mask=.true.)
+   !  problems in pack?  doing it the other way to check
+      counter = 0
+      do j = 1,counts(2)
+        do i = 1,counts(1)
+          counter = counter + 1
+          centerCoordX(counter) = center_coord(i,j,1)
+          centerCoordY(counter) = center_coord(i,j,2)
+        enddo
+      enddo 
 
       call ESMF_RouteRun(route, centerCoordXArray, srcCenterX, status)
+      call ESMF_LocalArrayPrint(srcCenterX, "", status)
       call ESMF_RouteRun(route, centerCoordYArray, srcCenterY, status)
 
-      ! Get pointers to data inside the LocalArrays
-      call ESMF_LocalArrayGetData(srcCenterX, src_center_x, ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(srcCenterY, src_center_y, ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(centerCoordXArray, centerCoordX, &
-                                  ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(centerCoordYArray, centerCoordY, &
-                                  ESMF_DATA_REF, status)
-      
       ! now all necessary data is local
 
       ! Allocate space for the search to put links between grids.
