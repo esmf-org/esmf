@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.14 2003/08/14 21:50:05 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.15 2003/08/29 22:12:57 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -659,6 +659,10 @@
       if (rc .ne. ESMF_SUCCESS) goto 40
       call ESMF_DELayoutGetDEPosition(layout, xpos, ypos, rc)
       if (rc .ne. ESMF_SUCCESS) goto 40
+     
+      ! for the calculations below we need the first xpos=0, not 1
+      xpos = xpos - 1
+      ypos = ypos - 1
 
 
       !!
