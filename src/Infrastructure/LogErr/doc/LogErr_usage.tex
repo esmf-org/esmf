@@ -1,4 +1,4 @@
-% $Id: LogErr_usage.tex,v 1.2 2004/03/17 22:42:30 cdeluca Exp $
+% $Id: LogErr_usage.tex,v 1.3 2004/03/17 22:46:39 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
@@ -15,9 +15,9 @@ Some of the assumptions implicit in using the Log utility are:
 
 \begin{enumerate}
 
-\item Prior to closing, ESMF_LogFlush is always executed.
-\item Prior to halting, ESMF_LogFlush is always executed.
-\item If the number of elements in an ESMF_Log exceeds max_elements, a message 
-   is written to file and the buffer flushes automatically.
+\item Prior to closing, {\tt ESMF\_LogFlush} is always executed.
+\item Prior to halting, {\tt ESMF\_LogFlush} is always executed.
+\item If the number of elements in a Log exceeds {\tt maxElements}, 
+a message is written to file and the buffer flushes automatically.
 
 \end{enumerate}
