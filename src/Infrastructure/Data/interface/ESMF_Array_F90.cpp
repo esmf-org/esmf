@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.14 2003/02/26 20:18:33 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.15 2003/02/28 23:38:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.14 2003/02/26 20:18:33 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.15 2003/02/28 23:38:31 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -980,10 +980,8 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
         do i = 1,size_AI
           AI_exc(i)%l = AI_exc(i)%l - 1
           AI_exc(i)%r = AI_exc(i)%r - 1
-          AI_exc(i)%gstart = AI_exc(i)%gstart - 1
           AI_tot(i)%l = AI_tot(i)%l - 1
           AI_tot(i)%r = AI_tot(i)%r - 1
-          AI_tot(i)%gstart = AI_tot(i)%gstart - 1
         enddo
 
 ! call c routine to halo
@@ -1000,10 +998,8 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
         do i = 1,size_AI
           AI_exc(i)%l = AI_exc(i)%l + 1
           AI_exc(i)%r = AI_exc(i)%r + 1
-          AI_exc(i)%gstart = AI_exc(i)%gstart + 1
           AI_tot(i)%l = AI_tot(i)%l + 1
           AI_tot(i)%r = AI_tot(i)%r + 1
-          AI_tot(i)%gstart = AI_tot(i)%gstart + 1
         enddo
 
 ! set return code if user specified it
