@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.24 2004/05/27 22:55:15 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.25 2004/06/03 22:55:34 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.24 2004/05/27 22:55:15 cdeluca Exp $'
+      '$Id: ESMF_VM.F90,v 1.25 2004/06/03 22:55:34 cdeluca Exp $'
 
 !==============================================================================
 
@@ -322,7 +322,7 @@ module ESMF_VMMod
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
     integer(ESMF_KIND_I4),    intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
-    type(ESMF_Operation),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),     intent(in)              :: operation
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -407,7 +407,7 @@ module ESMF_VMMod
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R4),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
-    type(ESMF_Operation),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),     intent(in)              :: operation
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -492,7 +492,7 @@ module ESMF_VMMod
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R8),       intent(out)             :: recvData(:)
     integer,                  intent(in)              :: count
-    type(ESMF_Operation),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),     intent(in)              :: operation
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -577,7 +577,7 @@ module ESMF_VMMod
     integer(ESMF_KIND_I4),    intent(in)              :: sendData(:)
     integer(ESMF_KIND_I4),    intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_Operation),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),     intent(in)              :: operation
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -662,7 +662,7 @@ module ESMF_VMMod
     real(ESMF_KIND_R4),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R4),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_Operation),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),     intent(in)              :: operation
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc
@@ -747,7 +747,7 @@ module ESMF_VMMod
     real(ESMF_KIND_R8),       intent(in)              :: sendData(:)
     real(ESMF_KIND_R8),       intent(out)             :: recvData
     integer,                  intent(in)              :: count
-    type(ESMF_Operation),     intent(in)              :: operation
+    type(ESMF_ReduceFlag),     intent(in)              :: operation
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
     type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
     integer,                  intent(out),  optional  :: rc

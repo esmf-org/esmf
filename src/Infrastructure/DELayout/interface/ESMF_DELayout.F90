@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.23 2004/05/21 19:03:31 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.24 2004/06/03 22:55:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.23 2004/05/21 19:03:31 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.24 2004/06/03 22:55:33 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -797,7 +797,7 @@ contains
     type(ESMF_DELayoutData),       intent(in)            :: srcData
     integer,                       intent(out)           :: dstData
     integer,                       intent(in)            :: count
-    type(ESMF_Operation),          intent(in)            :: operation
+    type(ESMF_ReduceFlag),          intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
     type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
@@ -868,7 +868,7 @@ contains
     type(ESMF_DELayoutData),       intent(in)            :: srcData
     real(ESMF_KIND_R4),            intent(out)           :: dstData
     integer,                       intent(in)            :: count
-    type(ESMF_Operation),          intent(in)            :: operation
+    type(ESMF_ReduceFlag),          intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
     type(ESMF_CommHandle), intent(out), optional :: commHandle
     integer,                       intent(out), optional :: rc
@@ -940,7 +940,7 @@ contains
     type(ESMF_DELayoutData),       intent(in)            :: srcData
     real(ESMF_KIND_R8),            intent(out)           :: dstData
     integer,                       intent(in)            :: count
-    type(ESMF_Operation),          intent(in)            :: operation
+    type(ESMF_ReduceFlag),          intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
     type(ESMF_CommHandle), intent(out), optional :: commHandle
     integer,                       intent(out), optional :: rc
@@ -1011,7 +1011,7 @@ contains
     integer(ESMF_KIND_I4),         intent(in)            :: srcData(:)
     integer,                       intent(out)           :: dstData
     integer,                       intent(in)            :: count
-    type(ESMF_Operation),          intent(in)            :: operation
+    type(ESMF_ReduceFlag),          intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
     type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
@@ -1082,7 +1082,7 @@ contains
     real(ESMF_KIND_R4),            intent(in)            :: srcData(:)
     real(ESMF_KIND_R4),            intent(out)           :: dstData
     integer,                       intent(in)            :: count
-    type(ESMF_Operation),          intent(in)            :: operation
+    type(ESMF_ReduceFlag),          intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
     type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc
@@ -1152,7 +1152,7 @@ contains
     real(ESMF_KIND_R8),            intent(in)            :: srcData(:)
     real(ESMF_KIND_R8),            intent(out)           :: dstData
     integer,                       intent(in)            :: count
-    type(ESMF_Operation),          intent(in)            :: operation
+    type(ESMF_ReduceFlag),          intent(in)            :: operation
     type(ESMF_BlockingFlag),       intent(in),  optional :: blockingFlag
     type(ESMF_CommHandle), intent(out), optional :: commHandle    
     integer,                       intent(out), optional :: rc

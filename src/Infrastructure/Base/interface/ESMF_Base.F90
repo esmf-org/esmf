@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.103 2004/06/02 09:13:27 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.104 2004/06/03 22:55:32 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -259,15 +259,15 @@
 
 !     ! WARNING: must match corresponding values in ../include/ESMC_Base.h
 
-      type ESMF_Operation
+      type ESMF_ReduceFlag
       sequence
       private
           integer :: value
       end type
 
-      type(ESMF_Operation), parameter ::  ESMF_SUM   = ESMF_Operation(1), &
-                                          ESMF_MIN   = ESMF_Operation(2), &
-                                          ESMF_MAX   = ESMF_Operation(3)
+      type(ESMF_ReduceFlag), parameter ::  ESMF_SUM   = ESMF_ReduceFlag(1), &
+                                          ESMF_MIN   = ESMF_ReduceFlag(2), &
+                                          ESMF_MAX   = ESMF_ReduceFlag(3)
                                      
 !------------------------------------------------------------------------------
 !
@@ -319,7 +319,7 @@
 
       public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
 
-      public ESMF_Operation, ESMF_SUM, ESMF_MIN, ESMF_MAX
+      public ESMF_ReduceFlag, ESMF_SUM, ESMF_MIN, ESMF_MAX
       public ESMF_BlockingFlag, ESMF_BLOCKING, ESMF_NONBLOCKING
 
       public ESMF_FAILURE, ESMF_SUCCESS
@@ -437,7 +437,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.103 2004/06/02 09:13:27 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.104 2004/06/03 22:55:32 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
