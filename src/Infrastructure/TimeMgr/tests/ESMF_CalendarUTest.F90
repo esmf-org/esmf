@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.19 2004/04/15 21:24:53 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.20 2004/05/18 20:34:23 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.19 2004/04/15 21:24:53 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.20 2004/05/18 20:34:23 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -141,6 +141,16 @@
       write(failMsg, *) " Should return ESMF_SUCCESS"
       write(name, *) "Initialized Gregorian Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! Set calendar  type
+      write(name, *) "Set Calendar Type Test"
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      call ESMF_CalendarSet(gregorianCalendar2, calendarType=ESMF_CAL_GREGORIAN, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
