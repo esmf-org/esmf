@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/10/22 23:56:26 svasquez Exp $
+# $Id: makefile,v 1.4 2004/01/30 04:40:59 nscollins Exp $
 
 ALL: demo
 
@@ -27,6 +27,14 @@ DEMO_OBJ      = FlowArraysMod.o InjectArraysMod.o \
 DEMO_RUN      = RUN_CoupledFlowApp  
 
 DEMO_RM       = ESMF_CoupledFlowApp.rm
+
+FlowSolverMod.o: FlowArraysMod.o
+
+InjectorMod.o: InjectArraysMod.o
+
+CoupledFlowDemo.o: FlowSolverMod.o InjectorMod.o CouplerMod.o
+
+CoupledFlowApp.o : CoupledFlowDemo.o
 
 include $(ESMF_DIR)/makefile
 

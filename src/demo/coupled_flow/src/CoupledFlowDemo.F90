@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.4 2003/10/23 21:55:41 jwolfe Exp $
+! $Id: CoupledFlowDemo.F90,v 1.5 2004/01/30 04:40:59 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -41,7 +41,7 @@
     character(len=ESMF_MAXSTR) :: cnameIN, cnameFS, cplname
     type(ESMF_DELayout) :: layoutTop, layoutIN, layoutFS
     type(ESMF_State), save :: INimp, INexp, FSimp, FSexp
-    type(ESMF_State), save :: cplstateF2I, cplstateI2F, cplbothlists
+    type(ESMF_State), save :: cplstateF2I, cplstateI2F
 
     ! Public entry point
     public CoupledFlow_register
@@ -140,8 +140,8 @@
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
     real(ESMF_KIND_R8) :: mincoords(ESMF_MAXGRIDDIM), maxcoords(ESMF_MAXGRIDDIM)
     integer :: counts(ESMF_MAXGRIDDIM)
-    integer :: horz_gridtype, vert_gridtype
-    integer :: horz_stagger, vert_stagger
+    type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+    type(ESMF_GridStagger) :: horz_stagger, vert_stagger
     type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
     integer :: halo_width = 1
 
@@ -235,39 +235,41 @@
     ! 
     ! Create and attach subgrids to the subcomponents.
     !
-    call ESMF_GridGet(gridTop, global_cell_dim=counts, &
-                               global_min_coord=mincoords, &
-                               global_max_coord=maxcoords, &
-                               horz_gridtype=horz_gridtype, &
-                               vert_gridtype=vert_gridtype, &       
-                               horz_stagger=horz_stagger, &      
-                               vert_stagger=vert_stagger, &
-                               horz_coord_system=horz_coord_system, &
-                               vert_coord_system=vert_coord_system, &
+    call ESMF_GridGet(gridTop, globalCellCountPerDim=counts, &
+                               minGlobalCoordPerDim=mincoords, &
+                               maxGlobalCoordPerDim=maxcoords, &
+                               horzGridKind=horz_gridkind, &
+                               vertGridKind=vert_gridkind, &       
+                               horzStagger=horz_stagger, &      
+                               vertStagger=vert_stagger, &
+                               horzCoordSystem=horz_coord_system, &
+                               vertCoordSystem=vert_coord_system, &
                                rc=rc)
 
-    gridIN = ESMF_GridCreate(2, counts=counts, &
-                             min=mincoords, max=maxcoords, &
+    gridIN = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                             minGlobalCoordPerDim=mincoords, &
+                             maxGlobalCoordPerDim=maxcoords, &
                              layout=layoutIN, &
-                             horz_gridtype=horz_gridtype, &
-                             vert_gridtype=vert_gridtype, &       
-                             horz_stagger=horz_stagger, &      
-                             vert_stagger=vert_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             vert_coord_system=vert_coord_system, &
+                             horzGridKind=horz_gridkind, &
+                             vertGridKind=vert_gridkind, &       
+                             horzStagger=horz_stagger, &      
+                             vertStagger=vert_stagger, &
+                             horzCoordSystem=horz_coord_system, &
+                             vertCoordSystem=vert_coord_system, &
                              name="Injector grid", rc=rc)
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
 
-    gridFS = ESMF_GridCreate(2, counts=counts, &
-                             min=mincoords, max=maxcoords, &
+    gridFS = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                             minGlobalCoordPerDim=mincoords, &
+                             maxGlobalCoordPerDim=maxcoords, &
                              layout=layoutFS, &
-                             horz_gridtype=horz_gridtype, &
-                             vert_gridtype=vert_gridtype, &       
-                             horz_stagger=horz_stagger, &      
-                             vert_stagger=vert_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             vert_coord_system=vert_coord_system, &
+                             horzGridKind=horz_gridkind, &
+                             vertGridKind=vert_gridkind, &       
+                             horzStagger=horz_stagger, &      
+                             vertStagger=vert_stagger, &
+                             horzCoordSystem=horz_coord_system, &
+                             vertCoordSystem=vert_coord_system, &
                              name="Flow Solver grid", rc=rc)
 
     call ESMF_GridCompSet(FScomp, grid=gridFS, rc=rc)
@@ -324,17 +326,9 @@
     call ESMF_StateAddData(cplstateF2I, INimp, rc=rc)
  
     !
-    ! Create a list of the previous 2 statelists for initialization
-    !
-    cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, cplname)
-
-    call ESMF_StateAddData(cplbothlists, cplstateI2F, rc=rc)
-    call ESMF_StateAddData(cplbothlists, cplstateF2I, rc=rc)
-
-    !
     ! Initialize the coupler (single phase, no need for second pass)
     !
-    call ESMF_CplCompInitialize(cpl, cplbothlists, clock, rc=rc)
+    call ESMF_CplCompInitialize(cpl, FSexp, INimp, clock, rc=rc)
     print *, "Coupler Initialize finished, rc =", rc
  
     !
@@ -397,13 +391,13 @@
         call ESMF_GridCompRun(FScomp, FSimp, FSexp, localclock, rc=rc)
 
         ! Couple export state of FlowSolver to import of Injector
-        call ESMF_CplCompRun(cpl, cplstateF2I, localclock, rc=rc)
+        call ESMF_CplCompRun(cpl, FSexp, INimp, localclock, rc=rc)
   
         ! Run Injector Component
         call ESMF_GridCompRun(INcomp, INimp, INexp, localclock, rc=rc)
   
         ! Couple export state of Injector to import of FlowSolver
-        call ESMF_CplCompRun(cpl, cplstateI2F, localclock, rc=rc)
+        call ESMF_CplCompRun(cpl, INexp, FSimp, localclock, rc=rc)
   
         ! Advance the time
         call ESMF_ClockAdvance(localclock, rc=rc)
@@ -459,7 +453,7 @@ end subroutine coupledflow_run
       call ESMF_GridCompFinalize(FScomp, FSimp, FSimp, clock, rc=rc)
 
       ! Finalize Coupler
-      call ESMF_CplCompFinalize(cpl, cplstateI2F, clock, rc=rc)
+      call ESMF_CplCompFinalize(cpl, INexp, FSimp, clock, rc=rc)
 
 
       ! Then clean them up

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/10/09 20:56:10 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2004/01/30 04:40:48 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -16,7 +16,7 @@ LOCDIR	  = src/system_tests/ESMF_ArrayRedist
 
 SYSTEM_TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_ArrayRedistSTest
 
-# Object files other than SysTest%.o that the
+# Object files other than %STest.o that the
 # system tests executable will depend on.
 # List objects files in the order that they
 # are to be compiled/created.

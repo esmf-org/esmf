@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.6 2003/11/18 01:07:57 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.7 2004/01/30 04:40:59 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -258,9 +258,9 @@
 !
       call ESMF_GridCompGet(gcomp, layout=layout, grid=grid, rc=rc)
 
-      call ESMF_GridGet(grid, global_cell_dim=global_nmax, &
-                              global_min_coord=global_min_coord, &
-                              global_max_coord=global_max_coord, rc=rc)
+      call ESMF_GridGet(grid, globalCellCountPerDim=global_nmax, &
+                              minGlobalCoordPerDim=global_min_coord, &
+                              maxGlobalCoordPerDim=global_max_coord, rc=rc)
 !
 ! Extract and calculate some other quantities
 !

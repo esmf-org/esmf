@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.2 2004/01/30 01:31:27 nscollins Exp $
+! $Id: user_coupler.F90,v 1.3 2004/01/30 04:40:48 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -102,13 +102,13 @@
         print *, "User Coupler Run starting"
 
         ! Get input data
-        call ESMF_StateGetField(importstates, "humidity", "comp1 export", &
-                                  humidity1, rc)
+        call ESMF_StateGetField(importstates, "humidity", humidity1, &
+                                  "comp1 export", rc)
         call ESMF_FieldPrint(humidity1, "", rc=rc)
 
         ! Get location of output data
-        call ESMF_StateGetField(exportstates, "humidity", "comp2 import", &
-                                  humidity2, rc)
+        call ESMF_StateGetField(exportstates, "humidity", humidity2, &
+                                  "comp2 import", rc)
         call ESMF_FieldPrint(humidity2, "", rc=rc)
 
         ! Get layout from coupler component
@@ -121,7 +121,7 @@
 
 
         ! Output data operated on in place, export state now has new values.
-        call ESMF_StatePrint(exportstate, rc=status)
+        call ESMF_StatePrint(exportstates, rc=status)
 
  
         print *, "User Coupler Run returning"
