@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.3 2003/01/29 23:32:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -184,7 +184,8 @@
       public ESMF_State
       public ESMF_StateImpExpType, ESMF_STATEIMPORT, ESMF_STATEEXPORT
       public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
-                                   ESMF_STATEDATANOTNEEDED
+                                   ESMF_STATEDATANOTNEEDED, &
+                                   ESMF_STATEDATADONOTCARE
       public ESMF_StateDataReady,  ESMF_STATEDATAREADYTOWRITE, &
                                    ESMF_STATEDATAREADYTOREAD, &
                                    ESMF_STATEDATAREADYUNKNOWN
@@ -192,14 +193,12 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_StateCreate           ! for import/for export
-      public ESMF_StateDestroy
+      public ESMF_StateCreate, ESMF_StateDestroy
 
-      public ESMF_StateAddData          ! interface does Bundles/Fields/Arrays
-      public ESMF_StateGetData          ! interface does Bundles/Fields/Arrays
-      public ESMF_StateGetInfo          ! comp name, type, data count
-      public ESMF_StateAddNameOnly      ! placeholder name but no data
-      !public ESMF_State{Get/Set}Needed ! set if data required
+      public ESMF_StateAddData, ESMF_StateGetData
+      public ESMF_StateGetInfo
+      public ESMF_StateAddNameOnly 
+      public ESMF_StateSetNeeded, ESMF_StateGetNeeded
       !public ESMF_State{Get/Set}Ready  ! is data ready
       !public ESMF_State{Get/Set}CompName  ! set only if not given at create time
  
@@ -207,12 +206,14 @@
       public ESMF_StateRestore
  
       public ESMF_StatePrint
+      public ESMF_imexeq, ESMF_needeq, ESMF_redyeq
+      public ESMF_imexne, ESMF_needne, ESMF_redyne
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.2 2003/01/29 21:48:00 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.3 2003/01/29 23:32:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -903,7 +904,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns the name of the {\tt Component) this state is associated with.
+!      Returns the name of the {\tt Component} this state is associated with.
 !      Also returns the type of {\tt State}, either {\tt Import} or 
 !      {\tt Export}.
 !
@@ -929,6 +930,86 @@ end function
 ! TODO: code goes here
 !
         end subroutine ESMF_StateGetInfo
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateGetNeeded(state, dataname, needed, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(in) :: dataname
+      type(ESMF_StateDataNeeded), intent(out) :: needed
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns the status of the {\tt needed} flag for the data item
+!      named by {\tt dataname} in the {\tt State}.
+!
+!  \begin{description}     
+!  \item[state]
+!    {\tt State} to query.
+!   \item[dataname]
+!    Name of the data item to query.
+!   \item[needed]
+!    Status of data item.  Returns either {\tt ESMF\_STATEDATAISNEEDED},
+!    {\tt ESMF\_STATEDATANOTNEEDED}, or {\tt ESMF\_STATEDATADONOTCARE}.
+!    When data is added to a {\tt State} the default status of this flag
+!    is {\tt ESMF\_STATEDATADONOTCARE}.
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_StateGetNeeded
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_StateSetNeeded(state, dataname, needed, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      character (len=*), intent(in) :: dataname
+      type(ESMF_StateDataNeeded), intent(in) :: needed
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Sets the status of the {\tt needed} flag for the data item
+!      named by {\tt dataname} in the {\tt State}.
+!
+!  \begin{description}     
+!  \item[state]
+!    {\tt State} to set..
+!   \item[dataname]
+!    Name of the data item to set..
+!   \item[needed]
+!    Set status of data item to this.  Valid values are 
+!    {\tt ESMF\_STATEDATAISNEEDED}, {\tt ESMF\_STATEDATANOTNEEDED}, 
+!    or {\tt ESMF\_STATEDATADONOTCARE}.
+!   \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        if (needed .ne. ESMF_STATEDATAISNEEDED) print *, "hi"
+        if (needed .eq. ESMF_STATEDATAISNEEDED) print *, "hi"
+        !state%statep%needed = needed
+        end subroutine ESMF_StateSetNeeded
 
 !------------------------------------------------------------------------------
 !BOP
