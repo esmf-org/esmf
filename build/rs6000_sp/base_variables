@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.4 2002/09/18 20:51:45 jwolfe Exp $ 
+# $Id: base_variables,v 1.5 2002/10/04 15:44:04 jwolfe Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -38,8 +38,8 @@ G_FOPTFLAGS		= -g  -qfullpath
 #O_COPTFLAGS	   = -O3 -qarch=pwr2  -qmaxmem=4000 -w -qspill=3000
 #O_FOPTFLAGS	   = -O3  -qarch=pwr2 -w
 
-O_COPTFLAGS		= -O3 -qfullpath -qmaxmem=4000 -w -qspill=3000
-O_FOPTFLAGS		= -O3 -qfullpath -w
+O_COPTFLAGS		= -O3 -qmaxmem=4000 -w -qspill=3000
+O_FOPTFLAGS		= -O3 -w
 FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 # ########################## C++ compiler ##################################
 #
