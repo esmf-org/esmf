@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCommEx.F90,v 1.1 2004/06/08 09:29:27 nscollins Exp $
+! $Id: ESMF_ArrayCommEx.F90,v 1.2 2004/06/15 19:02:03 svasquez Exp $
 !
 ! Example code which shows how to use Array Communication routines
 
@@ -110,14 +110,14 @@
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     ! Array data
-    call ESMF_GridGetDE(grid1, localCellCountPerDim=g1_cells, &
+    call ESMF_GridGetDELocalInfo(grid1, localCellCountPerDim=g1_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
     allocate(f90ptr1(g1_cells(1)+4, g1_cells(2)+4))
     f90ptr1 = 10
     array1 = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, haloWidth=2, rc=rc)
 
     ! Second array
-    call ESMF_GridGetDE(grid2, localCellCountPerDim=g2_cells, &
+    call ESMF_GridGetDELocalInfo(grid2, localCellCountPerDim=g2_cells, &
                           horzRelloc=ESMF_CELL_CENTER)
     allocate(f90ptr2(g2_cells(1)+4, g2_cells(2)+4))
     f90ptr2 = -1
