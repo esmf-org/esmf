@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.2 2002/10/08 18:18:01 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.3 2002/10/11 01:52:27 eschwab Exp $
 #ifndef ESMC_TIME_H
 #define ESMC_TIME_H
 
@@ -32,10 +32,10 @@ class ESMC_Time
     int Init(int64 S, int32 Sn, int32  Sd);
 
 	// for persistence/checkpointing
-	int Dump(int64 *S, int32 *Sn, int32 *Sd);
+	int ESMC_TimePrint(int64 *S, int32 *Sn, int32 *Sd) const;
 
 	// for testing/debugging
-	int Dump(void);
+	int ESMC_TimePrint(void) const;
 
     // direct, one-to-one access to each core element (no conversions)
     int Read_S (int64 *S);
