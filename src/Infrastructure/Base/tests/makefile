@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2004/06/18 13:11:36 nscollins Exp $ 
+# $Id: makefile,v 1.11 2004/06/18 14:30:51 nscollins Exp $ 
 
 ALL:  build_tests
 
@@ -59,11 +59,11 @@ ESMF_StringUTest.o : ESMC_StringSubr.o
 
 RUN_ESMF_StringUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
-	$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
+	-$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
 
 RUN_ESMF_StringUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
-	$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
+	-$(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
 
 
 
