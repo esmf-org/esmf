@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.4 2003/04/29 15:01:18 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.5 2003/05/07 17:39:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       use ESMF_MachineMod
-      !use ESMF_ConfigMod
+      use ESMF_ConfigMod
       use ESMF_DELayoutMod
       use ESMF_ClockMod
       use ESMF_GridMod
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.4 2003/04/29 15:01:18 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.5 2003/05/07 17:39:53 nscollins Exp $'
 
 !==============================================================================
 !
@@ -266,7 +266,8 @@
 !    Default grid associated with this component.
 !
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  
+!    Already created {\tt Config} object.   If specified, takes
+!    priority over filename.
 !  
 !   \item[{[configfile]}]
 !    Component-specific configuration filename. 
@@ -281,7 +282,6 @@
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
-        type(ESMF_Config) :: lconfig                     ! config obj
         integer :: status                                ! local error status
         logical :: rcpresent                             ! did user specify rc?
 
@@ -304,15 +304,10 @@
           return
         endif
    
-        if (present(configfile)) then
-          !lconfig = ESMF_CreateConfig(configfile, rc=status)
-        else
-          !lconfig = config
-        endif
-
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
-                                             mtype=mtype, grid=grid, rc=status)
+                                mtype=mtype, configfile=configfile, &
+                                config=config, grid=grid, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return

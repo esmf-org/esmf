@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.48 2003/05/07 16:35:10 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.49 2003/05/07 17:39:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -179,7 +179,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.48 2003/05/07 16:35:10 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.49 2003/05/07 17:39:52 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -311,6 +311,7 @@ end function
         ! Local vars
         integer :: status                            ! local error status
         logical :: rcpresent                         ! did user specify rc?
+        character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirpath
 
         ! Has the Full ESMF Framework initialization been run?
         ! This only happens once per process at the start.
@@ -362,24 +363,36 @@ end function
           compp%dirpath = "."
         endif
 
+        ! sort out what happens if both a already created config object and
+        ! a config filename are given.  the current rules are:  a config object
+        ! gets priority over a name if both are specified.
+        if (present(configfile) .and. present(config)) then
+            print *, "Warning: only 1 of Config object or filename should be given."
+            print *, "Using Config object; ignoring Config filename."
+            compp%config = config
+
         ! name of a specific config file.  open it and store the config object.
-        if (present(configfile)) then
+        else if (present(configfile)) then
           compp%configfile = configfile
           compp%config = ESMF_ConfigCreate(status)
           call ESMF_ConfigLoadFile(compp%config, configfile, rc=status)
           ! TODO: rationalize return codes from config with ESMF codes
           if (status .ne. 0) then
-              print *, "ERROR: loading config file, name: ", trim(configfile)
+              ! try again with the dirpath concatinated on front
+              fullpath = trim(dirpath) // '/' // trim(configfile)
+              call ESMF_ConfigLoadFile(compp%config, fullpath, rc=status)
+              if (status .ne. 0) then
+                  print *, "ERROR: loading config file, unable to open either"
+                  print *, " name = ", trim(configfile), " or name = ", trim(fullpath)
+                  return
+              endif
           endif
-        else
-          !compp%config = 0
-        endif
-
-        ! store already opened config object
-        if (present(config)) then
+        else if (present(config)) then
+          ! store already opened config object
           compp%config = config
         else
-          !compp%config = 0
+          ! need a way to set config to 0/invalid
+          ! compp%config = ?
         endif
 
         ! default grid for a gridded component
