@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.25 2003/05/01 15:03:40 flanigan Exp $ 
+# $Id: base_variables,v 1.26 2003/05/01 16:42:12 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -37,8 +37,8 @@ C_CCV			= unknown
 C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= -g  -qfullpath -qcheck
-G_FOPTFLAGS		= -g  -qfullpath -qcheck
+G_COPTFLAGS		= -g  -qfullpath -qcheck 
+G_FOPTFLAGS		= -g  -qfullpath -qcheck 
 # ----------------------------- BOPT - O options -----------------------------
 #O_COPTFLAGS	   = -O3 -qarch=pwr2  -qmaxmem=4000 -w -qspill=3000
 #O_FOPTFLAGS	   = -O3  -qarch=pwr2 -w
@@ -59,17 +59,18 @@ FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 ###  the user support problems i know this is going to cause.   nsc 4/2/2003
 ###
 ###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003
-CXX_CC			= mpCC_r 
+CXX_CC			= mpcc_r 
 CXX_FC			= mpxlf_r
 CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
-CXX_CLINKER		= mpCC_r -qcheck 
-CXX_FLINKER		= mpCC_r -brtl -qcheck 
+CXX_CLINKER		= mpcc_r -qcheck 
+CXX_FLINKER		= mpcc_r -brtl -qcheck 
 CXX_CCV			= unknown
 CXX_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lcomplex -lisode
 CXX_SYS_LIBS		= -lC
 C_CXXF90LD		= ${CXX_CC}
 C_F90CXXLD		= ${CXX_CC}
+
 
 C_CXXF90LIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/threads \
@@ -77,7 +78,7 @@ C_CXXF90LIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -L/usr/lib -L/usr/vac/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc 
+			  -lpthreads -lm_r -lm -lc_r -lc -lC
 
 C_F90CXXLIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/threads \
@@ -85,11 +86,11 @@ C_F90CXXLIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/ip -L/lib/threads \
 			  -L/usr/lib -L/usr/vac/lib \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
-			  -lpthreads -lm_r -lm -lc_r -lc  \
+			  -lpthreads -lm_r -lm -lc_r -lc -lC \
 			  /usr/lpp/ppe.poe/lib/libc.a 
 
-
 C_CXXSO			= cc_r -G
+
 C_CXXSOLIBS		= -L. \
 			  -L/usr/lpp/ppe.poe/lib/threads \
 			  -L/usr/lpp/ppe.poe/lib \
@@ -124,7 +125,6 @@ SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:lo
 # SL_LINKOPTS =
 # SL_F_LINKER = $(F90CXXLD) 
 # SL_C_LINKER = $(CXXF90LD) 
-
 
 include $(ESMF_BUILD_DIR)/common_variables
 
