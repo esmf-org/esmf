@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.66 2003/08/22 21:53:04 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.67 2003/08/26 22:41:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -219,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.66 2003/08/22 21:53:04 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.67 2003/08/26 22:41:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4279,13 +4279,12 @@
 ! !IROUTINE: ESMF_FieldBoxIntersect - Intersect bounding boxes
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldBoxIntersect(src_field, dst_field, parentlayout, &
-                                        recvDomainlist, sendDomainList, rc)
+      subroutine ESMF_FieldBoxIntersect(src_field, dst_field, recvDomainlist, &
+                                        sendDomainList, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: src_field         ! field to cover
       type(ESMF_Field), intent(in) :: dst_field         ! field to find a cover in
-      type(ESMF_DELayout), intent(in) :: parentlayout   ! DE's that cover
       type(ESMF_DomainList), intent(inout) :: recvDomainlist
                                                         ! receive domain list
       type(ESMF_DomainList), intent(inout) :: sendDomainlist
@@ -4307,7 +4306,7 @@
       real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      type(ESMF_DELayout) :: srclayout, dstlayout
+      type(ESMF_DELayout) :: parentlayout, srclayout, dstlayout
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Grid) :: src_grid, dst_grid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
@@ -4324,7 +4323,13 @@
       stypep = src_field%ftypep
       dtypep = dst_field%ftypep
 
-      ! Our DE number in the parent layout
+      ! Our DE number in the parent layout  TODO: for now, just use one of the
+      !                                           grid layouts.  In the future,
+      !                                           there will be proxy grids on all
+      !                                           DEs of the coupler layout and a
+      !                                           different method for determining
+      !                                           if my_DE is part of a layout
+      call ESMF_GridGetDELayout(stypep%grid, parentlayout, status)
       call ESMF_DELayoutGetDEID(parentlayout, my_DE, status)
 
       ! TODO: we need not only to know if this DE has data in the field,
