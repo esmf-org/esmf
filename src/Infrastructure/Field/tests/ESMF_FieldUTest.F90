@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.32 2004/02/02 23:14:03 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.33 2004/02/03 00:06:17 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.32 2004/02/02 23:14:03 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.33 2004/02/03 00:06:17 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -61,7 +61,7 @@
       character (len = 20) :: gname, gname3
       type(ESMF_IOSpec) :: ios
       type(ESMF_Mask) :: mask
-      type(ESMF_Field) :: f1, f2, f3, f4, f5
+      type(ESMF_Field) :: f1, f2, f3, f4, f5, f6
       integer :: intattr, intattr2
       real :: rattr
       character (len=32) :: lattrstr
@@ -121,7 +121,16 @@
       write(failMsg, *) "default name not unique"
       write(name, *) "Getting name of field created with default name"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
+
+      !EX_UTest
+      ! Verifing that a Field with no data can be destroyed
       call ESMF_FieldDestroy(f2, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a Field with no data Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldPrint(f2)
+      !------------------------------------------------------------------------
+
 
 #endif
 
@@ -139,7 +148,7 @@
      !EX_UTest
      ! Verifing that printing an uninitialized Field is handled properly.
      ! This code is commented out until bug 747699 is fixed.
-     call ESMF_FieldPrint(f2, rc=rc)
+     call ESMF_FieldPrint(f6, rc=rc)
      write(failMsg, *) ""
      write(name, *) "Printing an uninitialized Field Test"
      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -351,18 +360,6 @@
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
-#endif
-
-      !NEX_UTest
-      ! Verifing that a Field with no data can be destroyed
-      call ESMF_FieldDestroy(f2, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Destroying a Field with no data Test"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      call ESMF_FieldPrint(f2)
-      !------------------------------------------------------------------------
-
-#ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
       ! Verifing that a destroying a destroyed  Field is handled properly.
