@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.29 2003/02/21 21:13:58 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.30 2003/02/21 21:43:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.29 2003/02/21 21:13:58 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.30 2003/02/21 21:43:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1515,7 +1515,7 @@
       subroutine ESMF_DistGridHalo(distgrid, array, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), intent(in) :: distgrid
+      type(ESMF_DistGridType) :: distgrid
       type(ESMF_Array), intent(inout) :: array
       integer, intent(out), optional :: rc
 !
