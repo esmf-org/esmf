@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.69 2004/08/19 16:52:24 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.70 2004/10/07 20:56:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_LogErrMod
+      use ESMF_VMMod
       use ESMF_ArrayMod
       use ESMF_ArrayGetMod
       use ESMF_FieldMod
@@ -277,6 +278,8 @@
       public ESMF_StateGetAttributeCount  ! number of Attributes
       public ESMF_StateGetAttributeInfo   ! get type, length by name or number
 
+      public ESMF_StateReconcile          ! make consistent for concurrent apps
+
       public ESMF_StateWriteRestart
       public ESMF_StateReadRestart
 
@@ -289,7 +292,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.69 2004/08/19 16:52:24 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.70 2004/10/07 20:56:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2938,6 +2941,63 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_StateReconcile"
+!BOPI
+! !IROUTINE: ESMF_StateReconcile -- Reconcile the internal data from a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateReconcile(state, vm, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_VM), intent(in) :: vm
+      character (len = *), intent(in), optional :: options              
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Called on an {\tt ESMF\_State} which might contain ESMF objects
+!     that have not been created on all the {\tt PET}s which the
+!     coupler runs on.  For example, if a coupler is operating on data
+!     which was created by another component which was running on a subset
+!     of the coupler's {\tt PET}s, the coupler must make this call first
+!     before operating on any data inside that {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!       {\tt ESMF\_State} to reconcile.
+!     \item[vm]
+!       {\tt ESMF\_VM} for this {\tt ESMF\_Component}.
+!     \item[options]
+!       Currently unused.  Here for possible future expansion in the
+!       options for the reconciliation process.
+!     \item[{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+        integer :: pets, mypet, i
+
+        ! if the state container contains a hash, broadcast the hash
+        ! and wait for a hash from each PET.
+       
+        ! get total num pets.
+        call ESMF_VMGet(vm, localPet=mypet, petCount=pets, rc=rc)
+
+        ! for i=0, npets-1, except us, send id to each 
+        do i = 0, pets-1
+           print *, "i am", mypet, "and i need to send to", i
+        enddo
+
+        ! if hash doesn't match, go thru each object and ??
+
+        if (present(rc)) rc = ESMF_SUCCESS
+
+ 
+        end subroutine ESMF_StateReconcile
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateSetInt4Attr"
 !BOP
 ! !IROUTINE: ESMF_StateSetAttribute - Set a 4-byte integer attribute
@@ -4205,7 +4265,7 @@ end function
       integer, allocatable, dimension(:) :: atodo
       integer :: i
       integer :: newcount, aindex
-      logical :: exists, dummy
+      logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
@@ -4229,7 +4289,7 @@ end function
       !  existing entry or placeholder.  Set all entries to 0.  
       ! How can this happen?  is atodo some sort of static?
       if (allocated(atodo)) then
-        dummy=ESMF_LogMsgFoundAllocError(ESMF_RC_INTNRL_INCONS, &
+        call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                                          "atodo already allocated", &
                                          ESMF_CONTEXT, rc)
         deallocate(atodo, stat=localrc)
@@ -4253,7 +4313,7 @@ end function
         call ESMF_ArrayValidate(arrays(i), "", localrc)
         if (localrc .ne. ESMF_SUCCESS) then
             write(errmsg, *) "item", i
-            dummy=ESMF_LogMsgFoundError(localrc, errmsg, &
+            call ESMF_LogMsgSetError(localrc, errmsg, &
                                         ESMF_CONTEXT, rc)
             deallocate(atodo, stat=localrc)
             return
@@ -4603,7 +4663,7 @@ end function
       integer :: bindex, findex 
       integer :: i, j
       integer :: fcount, fruncount, newcount
-      logical :: exists, fneedsdealloc, dummy
+      logical :: exists, fneedsdealloc
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
@@ -4879,7 +4939,7 @@ end function
                                                               findex, localrc)
 
             if (.not. exists) then
-              dummy=ESMF_LogMsgFoundError(ESMF_RC_INTNRL_INCONS, &
+              call ESMF_LogMsgSetError(ESMF_RC_INTNRL_INCONS, &
                                           "field/bundle lists", &
                                           ESMF_CONTEXT, rc)
               goto 10
@@ -4907,14 +4967,14 @@ end function
   
       deallocate(btodo, stat=localrc)
       if ((localrc .ne. 0) .and. (rc .eq. ESMF_SUCCESS)) then         ! F90 rc
-        dummy=ESMF_LogMsgFoundAllocError(localrc, &
+        call ESMF_LogMsgSetError(ESMF_RC_INTNRL_BAD, &
                                          "deallocating internal bundlelist", &
                                          ESMF_CONTEXT, rc)
       endif
       if (fneedsdealloc) then
         deallocate(ftodo, stat=localrc)
         if ((localrc .ne. 0) .and. (rc .eq. ESMF_SUCCESS)) then      ! F90 rc
-          dummy=ESMF_LogMsgFoundAllocError(localrc, &
+          call ESMF_LogMsgSetError(ESMF_RC_INTNRL_BAD, &
                                          "deallocating internal fieldlist", &
                                           ESMF_CONTEXT, rc)
         endif
@@ -5247,7 +5307,7 @@ end function
       integer, allocatable, dimension(:) :: ntodo
       integer :: i
       integer :: newcount, nindex
-      logical :: exists, dummy
+      logical :: exists
 
       ! Initialize return code.  Assume failure until success assured.
       if (present(rc)) rc = ESMF_FAILURE
