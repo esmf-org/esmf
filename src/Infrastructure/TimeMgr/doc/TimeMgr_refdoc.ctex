@@ -283,6 +283,7 @@
 
 #ifdef STANDALONE
 %\section{Bibliography}
+\newpage
 \bibliography{TimeMgr} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}

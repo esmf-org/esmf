@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.10 2003/08/15 17:37:26 cdeluca Exp $
+% $Id: TimeMgr_desc.tex,v 1.11 2003/08/15 20:23:21 cdeluca Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -25,12 +25,11 @@ Support for varying and negative time steps. \\[.03in] \hline
 \subsection{Time Manager Classes}
 There are five ESMF classes that represent time concepts:
 \begin{itemize}
-\item {\bf Calendar}  Standard calendars (such as Gregorian 
-and 360-day) and user-specified calendars are supported.  
-Calendars may be queried for quantities such as seconds per day, 
-days per month, and days per year.  A Calendar can be 
-used to keep track of the date as a Gridded Component advances 
-in time. 
+\item {\bf Calendar}  A Calendar can be used to keep track of the 
+date as an ESMF Gridded Component advances in time. Standard calendars 
+(such as Gregorian and 360-day) and user-specified calendars are 
+supported.  Calendars can be queried for quantities such as seconds 
+per day, days per month, and days per year.  
 \item {\bf Time} A Time represents a time instant in a particular
 calendar, such as November 28, 1964, at 7:31pm EST in the Gregorian 
 calendar.  The Time class can be used 
@@ -68,17 +67,16 @@ calendars includes:
 \item [Gregorian] The standard Gregorian calendar.
 \item [no-leap] The Gregorian calendar with no leap years.
 \item [Julian] The standard Julian calendar.
-\item [360-day] A 30-day-per-month, 12-month-per-year calendar
+\item [360-day] A 30-day-per-month, 12-month-per-year calendar.
 \item [no calendar] Tracks only timesteps.
 \end{description}
-It is also possible to specify a custom Calendar.  See 
-Section~\ref{sec:Calendar} for more details on supported calendars, 
-and how to create a custom ESMF Calendar.
+See Section~\ref{sec:Calendar} for more details on supported standard 
+calendars, and how to create a customized ESMF Calendar.
 
 \subsection{Time Instants and Time Intervals}
 
 TimeIntervals and Time instants (simply called Times) are the computational 
-building blocks of the Time Manager library.  TimeIntervals, which are 
+building blocks of the Time Manager utility.  TimeIntervals, which are 
 time periods independent of a calendar, support operations such as add, 
 subtract, compare size, 
 reset value, copy value, and subdivide by a scalar.  Times, which 
@@ -90,15 +88,15 @@ host of different queries, both for values of individual Time
 components such as year, month, day, and second, and for derived values such 
 as day of year, middle of current month and Julian day.  It is also possible 
 to retrieve the value of the hardware realtime clock in the form of a 
-Time.  See Sections~\ref{sec:Time} and {sec:TimeInterval}, respectively,
+Time.  See Sections~\ref{sec:Time} and ~\ref{sec:TimeInterval}, respectively,
 for use and examples of Times and TimeIntervals.
 
 Since climate modeling, numerical weather prediction and other 
 Earth and space applications have widely varying time scales and require 
 different sorts of calendars, Times and TimeIntervals must support 
 a wide range of time specifiers, spanning nanoseconds to years.  The
-interfaces to these classes are defined so that you can specify a time
-using as a combination of time units selected from the list shown in 
+interfaces to these time classes are defined so that you can specify a time
+using a combination of units selected from the list shown in 
 Table~\ref{table:timeOpts}.  
 
 \input{TimeMgr_specs}
@@ -108,10 +106,10 @@ Although it is possible to repeatedly step a Time forward by a
 TimeInterval using arithmetic on these basic types, it is useful to 
 identify a higher-level concept to represent this function.  We refer to 
 this capability as a Clock, and include in its required features the 
-ability to store reference times such as the start and stop Times of 
+ability to store the start and stop times of 
 a model run, to check when time advancement should cease, 
-and to query the value of quantities such as the current Time and the
-Time at the previous time step.  The Time Manager includes a class 
+and to query the value of quantities such as the current time and the
+time at the previous time step.  The Time Manager includes a class 
 with methods that return a true value when a periodic or unique event 
 has taken place; we refer to these as Alarms.  Applications may contain 
 temporary or multiple Clocks and Alarms.  Sections~\ref{sec:Clock} and

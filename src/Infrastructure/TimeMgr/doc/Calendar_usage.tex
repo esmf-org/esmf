@@ -1,11 +1,12 @@
-% $Id: Calendar_usage.tex,v 1.3 2003/08/14 21:25:46 cdeluca Exp $
+% $Id: Calendar_usage.tex,v 1.4 2003/08/15 20:23:21 cdeluca Exp $
 
-In most Earth system applications, the timekeeping in each Component 
-must refer to the same standard calendar in order for the Components 
-to properly synchronize.  In the interests of reducing the possibilities
-for conflixt, it makes sense to create as few ESMF Calendars as possible.
+In most multi-component Earth system applications, the timekeeping in 
+each component 
+must refer to the same standard calendar in order for the components 
+to properly synchronize.  It therefore makes sense to create as few 
+ESMF Calendars as possible, preferably one per application.
 A typical strategy would be to create a single Calendar at the start
 of an application, and use that Calendar in all subsequent calls that
 accept a Calendar, such as {\tt ESMF\_TimeSet}.
 
-The following example shows how to set up an ESMF Calendar in F90.  
+The following example shows how to set up an ESMF Calendar.  
