@@ -1,4 +1,4 @@
-// $Id: ESMC.h,v 1.4 2004/04/28 23:12:11 cdeluca Exp $
+// $Id: ESMC.h,v 1.5 2004/05/10 15:48:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 // local array, datamap
 #include "ESMC_ArraySpec.h"
 #include "ESMC_LocalArray.h"
-#include "ESMC_DataMap.h"
+#include "ESMC_ArrayDataMap.h"
 
 // vm and layout
 #include "vmachine.h"
@@ -53,7 +53,9 @@
 // array, grid, field, bundle, comms
 #include "ESMC_Array.h"
 #include "ESMC_Grid.h"
+//#include "ESMC_FieldDataMap.h"
 #include "ESMC_Field.h"
+//#include "ESMC_BundleDataMap.h"
 #include "ESMC_Bundle.h"
 #include "ESMC_ArrayComm.h"
 
