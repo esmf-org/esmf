@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.63 2004/05/26 01:43:18 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.64 2004/05/26 21:18:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.63 2004/05/26 01:43:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.64 2004/05/26 21:18:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -489,7 +489,7 @@
         // ensure fit in given int
         if (years < INT_MIN || years > INT_MAX) {
           char logMsg[ESMF_MAXSTR];
-          sprintf(logMsg, "; years value %ld won't fit in given yy integer.",
+          sprintf(logMsg, "; years value %lld won't fit in given yy integer.",
                   years);
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE, logMsg, &rc);
           return(rc);
@@ -583,7 +583,7 @@
         // ensure fit in given int
         if (months < INT_MIN || months > INT_MAX) {
           char logMsg[ESMF_MAXSTR];
-          sprintf(logMsg, "; months value %ld won't fit in given mm integer.",
+          sprintf(logMsg, "; months value %lld won't fit in given mm integer.",
                   months);
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE, logMsg, &rc);
           return(rc);
@@ -615,7 +615,7 @@
           if (tiToConvert.mm != 0) {
             // no startTime or endTime available, can't do
             char logMsg[ESMF_MAXSTR];
-            sprintf(logMsg, "need startTime or endTime to convert %ld months "
+            sprintf(logMsg, "need startTime or endTime to convert %lld months "
                             "to days on ESMC_CAL_GREGORIAN calendar.",
                              tiToConvert.mm);
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET, logMsg,
@@ -638,7 +638,7 @@
             } else {
               // can't do
               char logMsg[ESMF_MAXSTR];
-              sprintf(logMsg, "need startTime or endTime to convert %ld months "
+              sprintf(logMsg, "need startTime or endTime to convert %lld months "
                               "to days on ESMC_CAL_NOLEAP calendar, since "
                               "months are not an integral number of years.",
                                tiToConvert.mm);
@@ -657,7 +657,7 @@
           if (tiToConvert.mm != 0) {
             // can't convert months to days without appropriate calendar!
             char logMsg[ESMF_MAXSTR];
-            sprintf(logMsg, ", can't convert %ld months to days "
+            sprintf(logMsg, ", can't convert %lld months to days "
                             "on ESMC_CAL_JULIANDAY or ESMC_CAL_NOCALENDAR "
                             "calendars.", tiToConvert.mm);
             ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_CANNOT_GET, logMsg,
@@ -693,7 +693,7 @@
         // ensure fit in given int
         if (days < INT_MIN || days > INT_MAX) {
           char logMsg[ESMF_MAXSTR];
-          sprintf(logMsg, "; days value %ld won't fit in given d integer.",
+          sprintf(logMsg, "; days value %lld won't fit in given d integer.",
                   days);
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE, logMsg, &rc);
           return(rc);

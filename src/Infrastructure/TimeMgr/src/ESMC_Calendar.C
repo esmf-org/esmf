@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.67 2004/05/26 20:39:17 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.68 2004/05/26 21:18:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.67 2004/05/26 20:39:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.68 2004/05/26 21:18:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -920,7 +920,7 @@ int ESMC_Calendar::count=0;
             //
             if (yy < -4800 || mm < 1 || mm > 12 || dd < 1) {
               char logMsg[ESMF_MAXSTR];
-              sprintf(logMsg, "; Gregorian %d/%d/%ld (1-12/>=1/>=-4800).",
+              sprintf(logMsg, "; Gregorian %d/%d/%lld (1-12/>=1/>=-4800).",
                       mm, dd, yy); 
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                                     logMsg, &rc);
@@ -929,7 +929,7 @@ int ESMC_Calendar::count=0;
             // invalid before 3/1/-4800
             if (yy == -4800 && mm < 3) {
               char logMsg[ESMF_MAXSTR];
-              sprintf(logMsg, "; Gregorian %d/%d/%ld is before 3/1/-4800.",
+              sprintf(logMsg, "; Gregorian %d/%d/%lld is before 3/1/-4800.",
                       mm, dd, yy); 
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                                     logMsg, &rc);
@@ -955,9 +955,9 @@ int ESMC_Calendar::count=0;
               int leapDay = ESMC_IS_LEAP_YEAR(yy) ? 1 : 0;
               if (dd > (daysPerMonth[1] + leapDay)) {
                 char logMsg[ESMF_MAXSTR];
-                sprintf(logMsg, "; Gregorian: for February %ld, dd=%d > %d "
+                sprintf(logMsg, "; Gregorian: for February %lld, dd=%d > %d "
                         "days in the month.", yy, dd,
-                        (daysPerMonth[mm-1]+leapDay));
+                        (daysPerMonth[1]+leapDay));
                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                                     logMsg, &rc);
                 return(rc);
@@ -1038,7 +1038,7 @@ int ESMC_Calendar::count=0;
             //    equals -32044 Julian days
             if (d < -32044) {
               char logMsg[ESMF_MAXSTR];
-              sprintf(logMsg, "; Julian Day: d=%ld < -32044.", d);
+              sprintf(logMsg, "; Julian Day: d=%lld < -32044.", d);
               ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
                                                     logMsg, &rc);
               return(rc);
@@ -1137,7 +1137,7 @@ int ESMC_Calendar::count=0;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
-                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", jdays);
                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                       logMsg, &rc);
@@ -1177,7 +1177,7 @@ int ESMC_Calendar::count=0;
                 } else {
                   // too large to fit in given int
                   char logMsg[ESMF_MAXSTR];
-                  sprintf(logMsg, "; year value %ld won't fit in given "
+                  sprintf(logMsg, "; year value %lld won't fit in given "
                                   "yy integer.", year);
                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                         logMsg, &rc);
@@ -1206,7 +1206,7 @@ int ESMC_Calendar::count=0;
               } else {
                   // too large to fit in given int
                   char logMsg[ESMF_MAXSTR];
-                  sprintf(logMsg, "; year value %ld won't fit in given "
+                  sprintf(logMsg, "; year value %lld won't fit in given "
                                   "yy integer.", year);
                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                         logMsg, &rc);
@@ -1243,7 +1243,7 @@ int ESMC_Calendar::count=0;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
-                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                       logMsg, &rc);
@@ -1276,7 +1276,7 @@ int ESMC_Calendar::count=0;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
-                sprintf(logMsg, "; year value %ld won't fit in given "
+                sprintf(logMsg, "; year value %lld won't fit in given "
                                 "yy integer.", year);
                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                       logMsg, &rc);
@@ -1309,7 +1309,7 @@ int ESMC_Calendar::count=0;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
-                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                       logMsg, &rc);
@@ -1339,7 +1339,7 @@ int ESMC_Calendar::count=0;
               } else {
                 // too large to fit in given int
                 char logMsg[ESMF_MAXSTR];
-                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                sprintf(logMsg, "; Julian days value %lld won't fit in given "
                                 "d integer.", day);
                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
                                                       logMsg, &rc);
