@@ -1,4 +1,4 @@
-% $Id: State_desc.tex,v 1.4 2004/06/12 17:17:56 cdeluca Exp $
+% $Id: State_desc.tex,v 1.5 2004/12/28 19:13:35 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,8 +24,16 @@ or Coupler Component to execute, and an export State contains the data
 that a Gridded Component or Coupler Component can make available.
 
 States can contain Bundles, Fields, Arrays, and other States.  They
-cannot contain Fortran arrays.
+cannot directly contain Fortran arrays.   Objects in a State must span
+the VM on which they are running.  For sequentially executing components
+which run on the same set of PETs this happens by calling the object
+create methods on each PET creating the object in unison.   For
+concurrently executing components which are running on subsets of PETs,
+an additional method is provided by the ESMF to broadcast information
+about objects which were created in subcomponents.
 
 State methods include creation and deletion, adding and retrieving 
 data items, adding and retrieving attributes, and performing queries.  
+An additional method, reconciliation, makes objects created on a subset
+of the current PETs available to all PETs in the current VM.
 
