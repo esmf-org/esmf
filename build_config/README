@@ -51,28 +51,13 @@ architecture given by ESMF_ARCH.  If a machine's name is used, then
 that particular machine uses makefile settings other then the default
 settings for its architecture.
 
-Current build files for supported platforms:
+The ESMF Users Guide, section 6.2.3, has an exhaustive list of all
+platforms and options for which we provide makefiles, and also a list
+of all platform configurations which are tested regularly and fully
+supported.  The Downloads and Documentation link on the ESMF home page
+also lists the platform configurations which are tested regularly
+and fully supported.
 
-      build_config/AIX.default.default
-                   Darwin.xlf.default
-                   IRIX64.default.default
-                   Linux.absoft.default
-                   Linux.intel.default
-                   Linux.lahey.default
-                   Linux.nag.default
-                   Linux.pgi.default
-                   OSF1.default.default
-                   Unicos.default.default
-
-Current build files for unsupported platforms:
-
-      build_config/Darwin.absoft.default
-                   Darwin.nag.default
-
-Notice that there is no default compiler value for Linux or Darwin
-(Mac) machines.  This is because there are a number of Fortran90 Linux
-compilers.  If ESMF_COMPILER is left unset then the default value
-for Linux machines will be lahey and for Darwin machines absoft.
 
 Customizing the ESMF Build
 --------------------------
@@ -93,56 +78,64 @@ a conditional section for any values which are dependent on the precision.
 Environment Variables
 ---------------------
 
- ESMF_ARCH         Variable describing the current
-                   machine architecture.  Default value
-                   is value returned by uname -s.
+The build system and makefile fragments can use many different environment 
+variables for selecting different options.  An exhaustive list and 
+detailed descriptions can be found in the ESMF User's Guide document.
+This document can be found on the ESMF web site under the 
+Downloads & Documentation link, or can be built from the source 
+in this distribution.
 
- ESMF_COMPILER     Variable specifying which compiler to use.  Value
-                   can be default, absoft, intel, lahey, pgi or nag. 
-                   If the value is default or ESMF_COMPILER is 
-                   left unset, then the default compiler 
-                   will be used.  Exceptions for default values:
-                   On Linux machines the default value is lahey and
-                   on Darwin machines it is absoft.
+A brief list of the environment variables most likely to need to be set are:
 
- ESMF_PREC         Variable specifying the precision.  Value 
-                   can be 32 or 64.  When possible the default 
-                   value will be 64, otherwise it will be 32.
+ ESMF_DIR          Full pathname of the directory in which the ESMF files
+                   have been installed.
 
- ESMF_SITE         If ESMF_SITE is not set or has the value of
-                   default, default build settings for the current machine
-                   architecture and compiler will be used. Otherwise the 
-                   setting will be used to select site-specific build files 
-                   which have been configured for a particular location.   
-                   See the CVS repository: 
-                       http://sourceforge.net/projects/esmfcontrib/
-                   for existing site files or to contribute new ones.
+ ESMF_PREC         Variable specifying the pointer size for those
+                   compilers which support multiple pointer sizes.  
+                   If supported on this platform the default is 64, 
+                   otherwise it is 32.  (Valid values are 32 and 64.)
 
- ESMF_COMM         Defines which MPI communications library to use.  
-                   Many times a machine will come with its own MPI 
-                   library and in those cases the default setting 
-                   will be mpi.  Otherwise the default setting will be 
-                   mpiuni so that the mpiuni library will be used.
-                   Other possible settings are mpich and lam.
+ ESMF_NO_IOCODE    By default the system does not try to link in the netCDF I/O
+                   libraries, but the makefiles are prepared to link with it.
+                   Since the installation location of the libraries and include
+                   files varies widely from system to system, it is generally
+                   necessary to edit the build_rules.mk file to indicate the
+                   installation directory, and to edit build/common.mk and
+                   remove both the setting of the CPPFLAG and this environment
+                   variable to compile with the netCDF I/O code.
+                   
+A brief list of additional environment variables which may to need to be set,
+especially on a Linux-based cluster or workstation are:
 
- ESMF_BOPT         Variable specifying that the build system
-                   use either debugging  or optimization options.
-                   Value of g specifies the debugging options.
-                   Value of O (capital oh) specifies optimization
-                   options.  Default value is O.
- 
- ESMF_DIR or       See note below.
- ESMF_EVA_DIR or
- ESMF_IMPL_DIR
+ ESMF_COMPILER     Defines which compiler to use.  Possible settings vary by
+                   platform, but generally include absoft, intel, lahey, nag, 
+                   pathscale, pgi, or xlf. 
 
-ESMF distributes multiple codes (e.g., ESMF source, Implementation Report
-examples, ESMF Validation Suite) and this build is used to compile all
-of them.
+ ESMF_COMM         Defines which MPI communications library to use.
+                   The default setting is mpiuni, which is a single-process
+                   MPI bypass library.   Possible settings for this are
+                   mpichr, lam, or mpi.
+
+ MPI_HOME          For mpich or lam installations which are not in a directory
+                   searched by default (e.g. /usr/lib or /usr/local/lib) and
+                   if the mpich wrappers do not already take care of this, 
+                   the location of the communication include files and library
+                   can be set by MPI_HOME (which may already be set by default
+                   on the system).  If set, the ESMF makefiles will include 
+                   those directories on the compile and link lines, and run
+                   $MPI_HOME/bin/mpirun to start parallel jobs.
+
+
+ ESMF_EVA_DIR or   In addition to the ESMF source code, the ESMF Implementation 
+ ESMF_IMPL_DIR     Report Example Suite and ESMF Validation Suite also share
+                   the build system.  If compiling one of these Suites, the
+                   full pathname to the top level directory must be set.
+
 
 The top level directory path of the ESMF code being built must be specified
-using an environment variable. The appropriate variable(s) to set are 
+using an environment variable.  Other appropriate variable(s) to set are 
 described in the top-level README file of the ESMF code you are trying to 
-build.  For example, for the ESMF source this variable is ESMF_DIR.
+build.  
 
 Platform notes:
 ________________
@@ -166,7 +159,7 @@ provided only for the supported platforms.
 
 
 ================================================================================
- $Id: README,v 1.18 2005/01/14 20:44:09 nscollins Exp $
+ $Id: README,v 1.19 2005/03/11 20:53:54 nscollins Exp $
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
