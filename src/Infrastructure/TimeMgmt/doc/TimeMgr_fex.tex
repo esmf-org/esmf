@@ -1,0 +1,50 @@
+% $Id: TimeMgr_fex.tex,v 1.1 2002/11/14 23:57:36 jwolfe Exp $
+
+The example below demonstrates usage of the {\tt TimeMgr} class.  For
+a detailed description of the {\tt TimeMgr} class interface, see 
+Appendix A.
+
+We initialize a {\tt TimeMgr} with a start date, an end date, and a timestep.  
+The {\tt TimeMgr} advances the model calendar until it recognizes that it is on the last 
+timestep.  Since no memory is allocated from the heap when a {\tt TimeMgr} is initialized, 
+there is no need to deallocate a {\tt TimeMgr} object.
+
+\begin{verbatim}      
+
+  use ESMF_TimeMgmtMod
+
+  type(ESMF_Time) :: stepSize
+  type(ESMF_Date) :: startDate, endDate
+  type(ESMF_TimeMgr) :: timeMgr
+
+!-------------------------------------------------------------------------------    
+! Initialize the model timestep to 1 day, 1800 seconds; the start date to 
+! December 1, 2001 and 0 seconds; and the end date to March 14, 2003 and 
+! 0 seconds.  Dates are represented in a YYYYMMDD format.  In this example
+! we use a Gregorian calendar. 
+!-------------------------------------------------------------------------------
+
+  stepSize = ESMF_TimeInit(1, 1800)
+  startDate = ESMF_DateInit(ESMF_GREGORIAN, 20011201, 0)
+  endDate = ESMF_DateInit(ESMF_GREGORIAN, 20030314, 0)
+
+!-------------------------------------------------------------------------------    
+! Initialize the time manager.
+!-------------------------------------------------------------------------------
+
+  timeMgr = ESMF_TimeMgrInit(stepSize, startDate, endDate)
+
+!-------------------------------------------------------------------------------    
+! Advance the model until the end date.
+!-------------------------------------------------------------------------------
+
+  do while (.NOT. ESMF_TimeMgrLastStep(timeMgr))
+    ! Execute model code
+    call ESMF_TimeMgrAdvance(timeMgr)
+  end do
+
+\end{verbatim}
+
+
+
+

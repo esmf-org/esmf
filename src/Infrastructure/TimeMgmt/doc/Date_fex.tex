@@ -1,0 +1,40 @@
+% $Id: Date_fex.tex,v 1.1 2002/11/14 23:48:06 jwolfe Exp $
+
+In the example below we demonstrate basic usage of the {\tt Date} class.  For
+a detailed description of the {\tt Date} class interface, see 
+Appendix A.
+
+The example shows how to initialize a Gregorian {\tt Date} and increment 
+it by a specified time interval.  Since no memory is allocated from the heap
+when a {\tt Date} is initialized, there is no need to deallocate a 
+{\tt Date} object.
+
+\begin{verbatim}
+
+  use ESMF_TimeMgmtMod
+
+  type(ESMF_Time) :: interval
+  type(ESMF_Date) :: startDate, endDate
+
+!-------------------------------------------------------------------------------    
+! Initialize a date to July 20, 1998 and 0 seconds. 
+!-------------------------------------------------------------------------------
+
+  startDate = ESMF_DateInit(ESMF_GREGORIAN, 19980720, 0) 
+
+!-------------------------------------------------------------------------------    
+! Initialize a time to 250 days and 7200 seconds. 
+!-------------------------------------------------------------------------------
+
+  interval = ESMF_TimeInit(250, 7200)
+
+!-------------------------------------------------------------------------------    
+! Increment the date with the time. 
+!-------------------------------------------------------------------------------
+       
+  endDate = ESMF_DateIncrement(startDate, interval)
+\end{verbatim}
+
+
+
+

@@ -1,0 +1,24 @@
+% $Id: Date_desc.tex,v 1.1 2002/11/14 23:47:36 jwolfe Exp $
+
+The {\tt Date} class provides a set of functions for manipulating dates.
+These include setting and retrieving dates, incrementing and decrementing 
+dates by a specified time interval, taking the difference of two dates,
+determining whether one date is later than another, and computing the
+day of year of a given date.
+   
+The {\tt Date} class contains attributes representing year, month and day 
+quantities and a time of day.  It also contains a calendar which 
+stores, for a given year, such quantities as the number of days per 
+month and per year.  Gregorian and no-leap year calendars are currently 
+supported.  
+
+The algorithm to convert from Gregorian to Julian days is from 
+Henry F. Fliegel and Thomas C. Van Flandern, in Communications of 
+the ACM (CACM, volume 11, number 10, October 1968, p.657).  Julian 
+day refers to the number of days since a reference day.  For the 
+algorithm used, this reference day is November 24, -4713 in the Gregorian 
+calendar.  The algorithm is valid through all future dates, assuming 
+standard corrections are applied (at 4 years, 100 years,
+and 400 years).
+
+
