@@ -1,30 +1,17 @@
-% $Id: Grid_options.tex,v 1.12 2004/06/23 16:20:38 jwolfe Exp $
-
-
- \subsubsection{ESMF\_CoordIndex}
-
- {\sf DESCRIPTION:\\}
- The Grid class can be set to different default indexing of coordinates.  This
- parameter describes indexing options supported by ESMF.
-
- Valid values are:
- \begin{description}
-    \item [ESMF\_COORD\_INDEX\_GLOBAL]
-          The coordinates are indexed globally.
-
-    \item [ESMF\_COORD\_INDEX\_LOCAL]
-          The coordinates are indexed locally.  
- 
-    \item [ESMF\_COORD\_INDEX\_UNKNOWN]
-          Unknown or undefined coordinate indexing.
- \end{description}
+% $Id: Grid_options.tex,v 1.13 2004/08/16 22:56:16 jwolfe Exp $
 
 
  \subsubsection{ESMF\_CoordOrder}
 
  {\sf DESCRIPTION:\\}
  The Grid class can be set to different default ordering of coordinates, for
- example KIJ.  This parameter describes ordering options supported by ESMF.
+ example KIJ.  This sets the default coordinate ordering for all Fields created
+ from the Grid as well (although there is also a way to override this default
+ with a user-specified mapping between rank numbers in the Field and Grid
+ during Field creation -- please see the Field section for details).  This
+ feature is designed to provide the user with an simple mechanism to change
+ the overall ordering of indices.  This parameter describes ordering options
+ supported by ESMF.
 
  Valid values are:
  \begin{description}
@@ -40,16 +27,20 @@
           mapping to XY.
 
     \item [ESMF\_COORD\_ORDER\_YXZ]
-          IJK maps to YXZ.  For a 2D grid, this defaults to IJ mapping to YX.
+          The coordinates are ordered YXZ.  For a 2D grid, this defaults to IJ
+          mapping to YX.
 
     \item [ESMF\_COORD\_ORDER\_YZX]
-          IJK maps to YZX.
+          The coordinates are ordered YZX.  For a 2D grid, this defaults to IJ
+          mapping to YX.
 
     \item [ESMF\_COORD\_ORDER\_ZXY]
-          IJK maps to ZXY.
+          The coordinates are ordered ZXY.  For a 2D grid, this defaults to IJ
+          mapping to XY.
 
     \item [ESMF\_COORD\_ORDER\_ZYX]
-          IJK maps to ZYX.
+          The coordinates are ordered ZYX.  For a 2D grid, this defaults to IJ
+          mapping to YX.
  
  \end{description}
 
@@ -67,9 +58,8 @@
     \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL] 
           Cylindrical coordinates.
 
-    \item [ESMF\_COORD\_SYSTEM\_DEPTH]
-          Vertical z coordinate depth (0 at top surface).
-
+%   \item [ESMF\_COORD\_SYSTEM\_DEPTH]
+%         Vertical z coordinate depth (0 at top surface).
 %   \item [ESMF\_COORD\_SYSTEM\_ETA]
 %         Vertical eta coordinate.
     \item [ESMF\_COORD\_SYSTEM\_HEIGHT]
