@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.121 2004/03/17 01:42:26 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.122 2004/03/17 02:04:49 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.121 2004/03/17 01:42:26 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.122 2004/03/17 02:04:49 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -348,13 +348,13 @@
       interface ESMF_FieldAddAttribute 
    
 ! !PRIVATE MEMBER FUNCTIONS:
-        module procedure ESMF_FieldSetIntAttr
-        module procedure ESMF_FieldSetIntListAttr
-        module procedure ESMF_FieldSetRealAttr
-        module procedure ESMF_FieldSetRealListAttr
-        module procedure ESMF_FieldSetLogicalAttr
-        module procedure ESMF_FieldSetLogicalListAttr
-        module procedure ESMF_FieldSetCharAttr
+        module procedure ESMF_FieldAddIntAttr
+        module procedure ESMF_FieldAddIntListAttr
+        module procedure ESMF_FieldAddRealAttr
+        module procedure ESMF_FieldAddRealListAttr
+        module procedure ESMF_FieldAddLogicalAttr
+        module procedure ESMF_FieldAddLogicalListAttr
+        module procedure ESMF_FieldAddCharAttr
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that attach
@@ -2835,7 +2835,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetIntAttr(field, name, value, rc)
+      subroutine ESMF_FieldAddIntAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field  
@@ -2883,7 +2883,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetIntAttr
+      end subroutine ESMF_FieldAddIntAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2891,7 +2891,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetIntListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldAddIntListAttr(field, name, count, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -2949,7 +2949,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetIntListAttr
+      end subroutine ESMF_FieldAddIntListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2957,7 +2957,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetRealAttr(field, name, value, rc)
+      subroutine ESMF_FieldAddRealAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -3005,7 +3005,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetRealAttr
+      end subroutine ESMF_FieldAddRealAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3013,7 +3013,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetRealListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldAddRealListAttr(field, name, count, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -3071,7 +3071,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetRealListAttr
+      end subroutine ESMF_FieldAddRealListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3079,7 +3079,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetLogicalAttr(field, name, value, rc)
+      subroutine ESMF_FieldAddLogicalAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -3127,7 +3127,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetLogicalAttr
+      end subroutine ESMF_FieldAddLogicalAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3135,7 +3135,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetLogicalListAttr(field, name, count, value, rc)
+      subroutine ESMF_FieldAddLogicalListAttr(field, name, count, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -3193,7 +3193,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetLogicalListAttr
+      end subroutine ESMF_FieldAddLogicalListAttr
 
 !------------------------------------------------------------------------------
 !BOP
@@ -3201,7 +3201,7 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldSetCharAttr(field, name, value, rc)
+      subroutine ESMF_FieldAddCharAttr(field, name, value, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
@@ -3240,7 +3240,7 @@
           rc = ESMF_FAILURE
       endif
 
-      call c_ESMC_AttributeSetChar(field%ftypep%base, name, value, status)
+      call c_ESMC_AttributeAddChar(field%ftypep%base, name, value, status)
       if(status .ne. ESMF_SUCCESS) then 
         print *, "ERROR in ESMF_FieldAddAttribute"
         return
@@ -3248,7 +3248,7 @@
 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldSetCharAttr
+      end subroutine ESMF_FieldAddCharAttr
 
 !------------------------------------------------------------------------------
 !BOP
