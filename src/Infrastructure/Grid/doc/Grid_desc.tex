@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.5 2003/11/13 23:42:17 jwolfe Exp $
+% $Id: Grid_desc.tex,v 1.6 2003/11/14 21:03:06 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,24 +27,77 @@ grid may also be represented as a subGrid.
 
 More on methods....   ordering?
 
-\subsubsection{Grid Classes}
-The Grid class aggregates two internal classes: the DistGrid (Distributed
-Grid) class and the PhysGrid (Physical Grid) class.  The separation into two
-classes allows the code to differentiate between functions which define the
-local decomposition of data and the local representation of the grid.  The Grid
-class itself maintains general information about the global grid (e.g. the
-grid type, staggering, and coordinate system).  The Grid class is relatively
-thin and otherwise presents a unified interface for DistGrid and PhysGrid
-functions.  Each Grid contains at least one DistGrid and one PhysGrid:
-\begin{itemize}
-\item {\bf DistGrid} The DistGrid class maintains the relationship of how
-a DELayout maps onto a Grid representation and how that Grid is distributed.
-DistGrids can represent the same Grid but have different mappings (staggerings)
-and can be aggregated by the same Grid object. The DistGrid class maintains the
-mapping between the global Grid and the local data distribution;  it has
-methods to aid in the collection and communication of global data.
-\item {\bf PhysGrid} The PhysGrid class maintains a local physical
-representation of a Grid, including all necessary data and masks.  PhysGrids
-can represent subGrids, like vertical Grids, of a single Grid and be
-aggregated by the same Grid object. 
-\end{itemize}
+\subsubsection{Grid Type Options}
+The following types of Grids are supported:
+\begin{description}
+   \item[ESMF\_GridType\_Unknown] - unknown or undefined grid
+   \item[ESMF\_GridType\_LatLon] - equally-spaced lat/lon grid
+   \item[ESMF\_GridType\_Mercator] -  Mercator lat/lon grid
+   \item[ESMF\_GridType\_Dipole] - Displaced-pole dipole grid
+   \item[ESMF\_GridType\_Tripole] - Tripolar grids
+   \item[ESMF\_GridType\_XY] - Cartesian equally-space x-y grid
+   \item[ESMF\_GridType\_DataStream] - Data stream
+   \item[ESMF\_GridType\_PhysFourier] - Mixed Fourier Space/Phys Space grid
+   \item[ESMF\_GridType\_LatLonGauss] - lat/lon grid with Gaussian latitudes
+   \item[ESMF\_GridType\_Reduced] - reduced grid
+   \item[ESMF\_GridType\_SphericalSpectral] - spectral space for spherical harmonics
+   \item[ESMF\_GridType\_Geodesic] - spherical geodesic grid
+   \item[ESMF\_GridType\_CubedSphere] - cubed sphere grid
+\end{description}
+
+\subsubsection{Grid Stagger Options}
+The following Grid staggerings are supported:
+\begin{description}
+   \item[ESMF\_GridStagger\_Unknown] - unknown or undefined staggering
+   \item[ESMF\_GridStagger\_A] - Arakawa A (centered velocity)
+   \item[ESMF\_GridStagger\_B] - Arakawa B (velocities at grid corner)
+   \item[ESMF\_GridStagger\_C] - Arakawa C (velocities at cell faces)
+   \item[ESMF\_GridStagger\_D] - Arakawa D
+   \item[ESMF\_GridStagger\_E] - Arakawa E
+   \item[ESMF\_GridStagger\_Z] - C grid equiv for geodesic grid
+   \item[ESMF\_GridStagger\_VertCenter] - vert velocity at vertical midpoints
+   \item[ESMF\_GridStagger\_VertFace] - vert velocity/Pgrad at top(bottom)face
+\end{description}
+
+
+\subsubsection{Grid Coordinate Ordering Options}
+The following Grid coordinate orderings are supported:
+\begin{description}
+   \item[ESMF\_CoordOrder\_Unknown] - unknown or undefined coord ordering
+   \item[ESMF\_CoordOrder\_XYZ] - IJK maps to XYZ
+   \item[ESMF\_CoordOrder\_XZY] - IJK maps to XZY
+   \item[ESMF\_CoordOrder\_YXZ] - IJK maps to YXZ
+   \item[ESMF\_CoordOrder\_YZX] - IJK maps to YZX
+   \item[ESMF\_CoordOrder\_ZXY] - IJK maps to ZXY
+   \item[ESMF\_CoordOrder\_ZYX] - IJK maps to ZYX
+\end{description}
+
+\subsubsection{Grid Coordinate System Options}
+The following Grid coordinate systems are supported:
+\begin{description}
+   \item[ESMF\_CoordSystem\_Unknown] - unknown or undefined coord system
+   \item[ESMF\_CoordSystem\_User] - user-defined coordinate system
+   \item[ESMF\_CoordSystem\_Spherical] - spherical coordinates (lon,lat)
+   \item[ESMF\_CoordSystem\_Cartesian] - Cartesian coordinates (x,y)
+   \item[ESMF\_CoordSystem\_Cylindrical] - cylindrical coordinates
+   \item[ESMF\_CoordSystem\_LatFourier] - mixed latitude/Fourier spectral space
+   \item[ESMF\_CoordSystem\_Spectral] - wavenumber space
+   \item[ESMF\_CoordSystem\_Depth] - vertical z coord. depth (0 at top surface)
+   \item[ESMF\_CoordSystem\_Height] - vertical z coord. height (0 at bottom)
+   \item[ESMF\_CoordSystem\_Pressure] - vertical pressure coordinate
+   \item[ESMF\_CoordSystem\_Sigma] - vertical sigma coordinate
+   \item[ESMF\_CoordSystem\_Theta] - vertical theta coordinate
+   \item[ESMF\_CoordSystem\_Eta] - vertical eta coordinate
+   \item[ESMF\_CoordSystem\_Isopycnal] - vertical density coordinate
+   \item[ESMF\_CoordSystem\_Hybrid] - hybrid vertical coordinates
+   \item[ESMF\_CoordSystem\_Lagrangian] - Lagrangian coordinates
+\end{description}
+
+\subsubsection{Grid Mask Options}
+The following Grid masks are supported:
+\begin{description}
+   \item[ESMF\_GridMaskKind\_Unknown]
+   \item[ESMF\_GridMaskKind\_Logical]
+   \item[ESMF\_GridMaskKind\_Mult]
+   \item[ESMF\_GridMaskKind\_RegionID]
+\end{description}

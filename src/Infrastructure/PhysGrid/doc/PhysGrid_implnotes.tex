@@ -1,4 +1,4 @@
-% $Id: PhysGrid_implnotes.tex,v 1.1 2003/11/13 23:44:33 jwolfe Exp $
+% $Id: PhysGrid_implnotes.tex,v 1.2 2003/11/14 21:03:46 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,46 +18,20 @@ calculate user-requested metrics.
 
 The PhysGrid class contains the following internal classes:
 \begin{itemize}
+
 \item {\bf ESMF\_GridMask} Data type describing masks for a PhysGrid.  Masks
 are named and can be of different types, including logical masks,
-multiplicative masks, and integer region IDs.  The defined types include:
-\begin{description}
-   \item[ESMF\_GridMaskKind\_Unknown]
-   \item[ESMF\_GridMaskKind\_Logical]
-   \item[ESMF\_GridMaskKind\_Mult]
-   \item[ESMF\_GridMaskKind\_RegionID]
-\end{description}
+multiplicative masks, and integer region IDs.
+
 \item {\bf ESMF\_PhysCoord} A physical coordinate carries information describing
 coordinate attributes like names and flags for special properties of a
 coordinate axis.  This information is used by PhysGrid and Grid to help
-describe the complete physical properties of a grid.  Coordinate system
-types include:
-\begin{description}
-   \item[ESMF\_CoordSystem\_Unknown] - unknown or undefined coord system
-   \item[ESMF\_CoordSystem\_User] - user-defined coordinate system
-   \item[ESMF\_CoordSystem\_Spherical] - spherical coordinates (lon,lat)
-   \item[ESMF\_CoordSystem\_Cartesian] - Cartesian coordinates (x,y)
-   \item[ESMF\_CoordSystem\_Cylindrical] - cylindrical coordinates
-   \item[ESMF\_CoordSystem\_LatFourier] - mixed latitude/Fourier spectral space
-   \item[ESMF\_CoordSystem\_Spectral] - wavenumber space
-   \item[ESMF\_CoordSystem\_Depth] - vertical z coord. depth (0 at top surface)
-   \item[ESMF\_CoordSystem\_Height] - vertical z coord. height (0 at bottom)
-   \item[ESMF\_CoordSystem\_Pressure] - vertical pressure coordinate
-   \item[ESMF\_CoordSystem\_Sigma] - vertical sigma coordinate
-   \item[ESMF\_CoordSystem\_Theta] - vertical theta coordinate
-   \item[ESMF\_CoordSystem\_Eta] - vertical eta coordinate
-   \item[ESMF\_CoordSystem\_Isopycnal] - vertical density coordinate
-   \item[ESMF\_CoordSystem\_Hybrid] - hybrid vertical coordinates
-   \item[ESMF\_CoordSystem\_Lagrangian] - Lagrangian coordinates
-\end{description}
+describe the complete physical properties of a grid.
+
 \item {\bf ESMF\_PhysLocation} Physical locations for a set of points defining the grid.
+
 \item {\bf ESMF\_PhysRegion} Physical locations for a set of points defining regions of
-the grid (e.g. cell vertices or domains of influence).  Region types include:
-\begin{description}
-   \item[ESMF\_RegionKind\_Unknown]
-   \item[ESMF\_RegionKind\_Polygon]
-   \item[ESMF\_RegionKind\_Ellipse]
-\end{description}
+the grid (e.g. cell vertices or domains of influence).
 \end{itemize}
 
 
