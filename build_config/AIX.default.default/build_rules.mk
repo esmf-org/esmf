@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.3 2003/10/28 23:22:11 nscollins Exp $
+#  $Id: build_rules.mk,v 1.4 2003/11/05 00:06:34 jwolfe Exp $
 #
 #  AIX.default.default.mk
 #
@@ -91,8 +91,7 @@ SED			= /bin/sed
 COM_MEMCHECK_FLAG      = -qcheck
 COM_FULLPATH_FLAG      = -qfullpath
 COM_DEBUG_FLAG         = -g 
-COM_ALL_DEBUG_FLAGS    = 
-#COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
+COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
 COM_MAXMEM_FLAG	       = -qmaxmem=4000
 COM_NOWARN_FLAG        = -w
 COM_SPILL_FLAG         = -qspill=3000
