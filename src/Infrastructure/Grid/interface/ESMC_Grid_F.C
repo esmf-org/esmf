@@ -1,4 +1,4 @@
-// $Id: ESMC_Grid_F.C,v 1.3 2004/12/04 00:30:27 jwolfe Exp $
+// $Id: ESMC_Grid_F.C,v 1.4 2004/12/16 21:30:16 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Grid_F.C,v 1.3 2004/12/04 00:30:27 jwolfe Exp $";
+             "$Id: ESMC_Grid_F.C,v 1.4 2004/12/16 21:30:16 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 extern "C" {
@@ -61,6 +61,7 @@ void FTN(c_esmc_gridserialize)(int *dimCount,
                                void *buffer, int *length, int *offset, int *localrc){
 
     int *ip, i;
+    long l;
     double *dp;
 
     // TODO: verify length > needed, and if not, make room.
@@ -79,6 +80,13 @@ void FTN(c_esmc_gridserialize)(int *dimCount,
     *ip++ = *coordIndex;
     for (i=0; i<*dimCount; i++) 
       *ip++ = periodic[i];               // array of logicals
+
+    // make sure pointer is aligned on good double address before the cast
+    l = (long) ip;
+    if (l%8) {
+        l += 8 - (l%8);
+        ip = (int *)l;
+    }
 
     dp = (double *)ip;
     for (i=0; i<*dimCount; i++) {
@@ -111,6 +119,7 @@ void FTN(c_esmc_griddeserialize)(int *dimCount,
                                  void *buffer, int *offset, int *localrc){
 
     int *ip, i;
+    long l;
     double *dp;
 
     ip = (int *)((char *)(buffer) + *offset);
@@ -128,6 +137,13 @@ void FTN(c_esmc_griddeserialize)(int *dimCount,
 
     for (i=0; i<*dimCount; i++)
       periodic[i] = *ip++;    // array of logicals
+
+    // make sure pointer is aligned on good double address before the cast
+    l = (long) ip;
+    if (l%8) {
+        l += 8 - (l%8);
+        ip = (int *)l;
+    }
 
     dp = (double *)ip;
     for (i=0; i<*dimCount; i++) {
