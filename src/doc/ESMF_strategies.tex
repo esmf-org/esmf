@@ -44,7 +44,7 @@ them more flexible, maintainable, and extensible.
 
 The practice of OO design has grown to include the recognition of a family
 of commonly occuring ``design patterns'' and strategies for using them 
-effectively (e.g., \cite{alexandrescu, gamma}.  For example, a widely
+effectively (e.g., \cite{alexandrescu, gof}.  For example, a widely
 recognized design pattern relevant to ESMF is that of a {\bf mediator},
 the generic equivalent of an Earth system coupler.  The role of a 
 mediator object is to enhance reusability by preventing interacting objects 
@@ -53,7 +53,7 @@ context-dependent code from objects simplifies them and enables them to be
 reconfigured more easily.   It also simplifies the application as a whole, turning 
 many-to-many interactions into one-to-many interactions.\footnote{This is a 
 model of control flow and not data flow:  it doesn't imply that a 
-mediator is necessary a serial bottleneck in a parallel code!}  
+mediator is necessarily a serial bottleneck in a parallel code!}  
 
 \subsubsection{ESMF Classes}
 
@@ -66,7 +66,7 @@ The ESMF architecture is class-based, as described in Sections~\ref{sec:supercla
 \ref{sec:fieldclasses}, and \ref{sec:utilclasses}.  Privacy descriptors 
 implement encapsulation.  The modularity provided by classes facilitates reuse
 and extensibility across the framework.  It also makes the system easier to 
-understand by breaking up the functionality into discrete well-defined segments.
+understand by breaking up the functionality into discrete, well-defined segments.
 
 We define a base class for all the objects in ESMF, as well as a base class 
 from which all components will inherit.  See Sections~\ref{sec:Base} and 
@@ -74,8 +74,8 @@ from which all components will inherit.  See Sections~\ref{sec:Base} and
 classes are important to the architecture, because they provide consistency
 of behavior across the entire framework.  This makes the framework easier
 to use, since a user can leverage knowledge gained by working with one
-part of the framework to understand other parts.  For example, if all
-objects use a similar method to save their state, the user can learn it 
+part of the framework to understand other parts.  For example, since all
+objects will use a similar method to save their state, the user can learn it 
 once and be done with it.
 
 Function and operator overloading are employed throughout ESMF.  This too
@@ -98,7 +98,7 @@ of different software packages and different languages in a wide range
 of domains (e.g. \cite{com, corba, javabeans}).  Component architectures have 
 recently extended into the 
 scientific domain through the Common Component Architecture (CCA) project, a 
-DOE effort to standardize science components using the same basic ideas. \cite{cca}
+Department of Energy effort to standardize science components using the same basic ideas. \cite{cca}
 In this section we describe the features of component-based software 
 architecture, then outline how the ESMF borrows from that model.  Unlike
 OO design, the basic concepts of component-based design are not especially
@@ -109,7 +109,7 @@ modeling community.  We therefore go into some detail.
 
 In component-based design, applications are constructed using software entities 
 called components, which are accessed only through {\it interfaces}.  
-An interface is an array of function pointers.  Components usually have multiple 
+An interface is typically implemented as an array of function pointers.  Components usually have multiple 
 interfaces, with each interface representing a collection of functionally 
 related methods.  In addition to components, component 
 architectures must define some sort of control mechanism that can handle tasks 
@@ -119,17 +119,17 @@ CCA, this is called the framework - a different usage
 of the word than we are accustomed to in ESMF.
 
 The component model gets more complicated when, as in most ESMF applications, 
-an application contains multiple address spaces (ASP).  Calling a 
+an application contains multiple address spaces (ASPs).  Calling a 
 method using a function pointer requires that the calling code share the 
 same ASP as the called function.  
 In COM and CORBA, component {\it proxies} are defined across
-all the ASPs in the application.  A component proxy consists of gutted 
+the ASPs in the application.  A component proxy consists of gutted 
 versions of all the functions in the interfaces of the component.  If the 
 called function shares the same ASP as the caller, the proxy just 
 calls the local function.  If the called component is in a different ASP, 
 the proxy initiates some action such as a remote procedure call through which 
 a {\it stub} in the remote process actually makes the function call.\footnote{Different 
-component systems call proxies and 
+component-based systems call proxies and 
 stubs by different names - skeletons, etc., but the concept remains the same.}  
 The CCA architecture gets around this complication by 
 requiring that all inter-component calls exchange only local data.  So, for example,
@@ -139,7 +139,7 @@ the data transfer entirely within component C.
 
 Architectures such as CCA enable components to instantiate and run 
 subcomponents.  This
-capability is very import to support system scalability.  CCA does it 
+capability is very important to support system scalability.  CCA does it 
 through an interface, called {\tt BuilderServices}, that any component
 can implement.  It allows components that have it to instantiate other
 components, run them, and direct them to communicate with each other.
@@ -150,7 +150,7 @@ Language (IDL).  This is a language-independent way to express
 interfaces.  \footnote{In practice IDLs tend to look a lot like C++.}  
 Although 
 an IDL isn't central to the notion of component architectures, it does enable 
-niceties such as allowing the ORB to automatically generate proxies and stubs.
+niceties such as allowing an ORB to automatically generate proxies and stubs.
 
 \subsubsection{ESMF Components}
 
@@ -181,15 +181,16 @@ IDL which supports both the languages we require, F90 and C++.  We see
 no pressing
 reason to develop an IDL or to use ESMF resources to accelerate the development
 of one.  We will continue to track the 
-development of and experiment with CCA's Scientific IDL (SIDL), 
-as described in the {\it ESMF Implementation Report}.
+development of CCA's Scientific IDL (SIDL) and related
+efforts such as Chasm \cite{rasmussen01}, as described in 
+the {\it ESMF Implementation Report}.
 
 We do not anticipate using function pointers exclusively to manipulate
 components in our initial implementation of ESMF.  However, function 
 pointers do play a key role in the current ESMF design.  They are 
 the mechanism that reconciles convenience and performance requirements 
 with the reuse
-strategy of keeping components unaware of how they are coupled to
+strategy of making components unaware of how they are coupled to
 other components.  Basically, function pointers allow data sends and 
 transforms to 
 occur as soon as component data is ready, without requiring either a return
@@ -210,7 +211,7 @@ and identify which of these apply to ESMF.
 \subsubsection{Types of Layering}
 \label{sec:layering}
 
-We introduce the term {\it hardware layering} to refer to a strategy to encapsulate 
+We use the term {\it hardware layering} to refer to a strategy to encapsulate 
 programming constructs and tools that reflect the structure of the underlying 
 computing environment.  In hardware layering, a bottom layer typically includes 
 vendor-specific constructs.  Middle layers may automatically 
@@ -270,7 +271,7 @@ that provides such complex data objects.
 
 The ESMF utility infrastructure and superstructure utilize hardware layering, 
 and multi-component applications running under ESMF can be viewed as 
-being task layered.  The ESMF ``sandwich'' diagram presented in Figure~\ref{fig:sandwich}, is a combination 
+being task layered.  The ESMF ``sandwich'' diagram presented in Figure~\ref{fig:sandwich} is a combination 
 of both strategies.  The bottom layer utilities encapsulate 
 machine-specific constructs and also includes general tools useful throughout
 the framework.  The next layer of data objects representing

@@ -70,11 +70,11 @@ $N_{m}$ = number of {\tt DE}s \\
 $C_{m}$ = connectivity \\
 $P$ = periodic boundary \\
 
-Default values for connectivity may be: \\
+Possible values for connectivity are: \\
 0 = remote processes \\
 1 = adjacent processes, e.g. processes running on the same node\\
 2 = threads with access to the same address space \\
-Connectivities may be customized by the advanced user.
+Connectivities may be customized.
 
 Figure \ref{fig:layouts} shows number of examples of {\tt Layout} objects,
 together with their {\tt Ltuple} description.
@@ -148,9 +148,12 @@ to decompose a task/problem/dataset into subsets.
 The decomposition must allow for mapping certain subsets onto the
 underlying machine model in a preferential way; e.g. keeping
 vertical blocks of a 3D decomposition on processors which share
-a memory pool.
+a memory pool.  The user may specify generally which 
+dimensions of the {\tt Layout} require the most rapid communication.
+A user may also explicitly control the {Layout} by specifying which 
+communication mechanisms are preferred for a particular dimension.
 The {\tt Layout} may interact with both the {\tt PE List}s
-and the {\tt Machine Model} in order to accomplish this preferential
+and the {\tt Machine Model} in order to accomplish a preferential
 decomposition.
 
 \subsubsection{Basic Communications (ESMF\_Comm)}
@@ -165,7 +168,7 @@ to synchronize such as barrier.
 
 \subsubsection{Time Manager (ESMF\_TimeMgr)}
 \label{sec:timemgr} 
-The {\tt Time Manager} provides all general purpose time methods, both
+The {\tt Time Manager} provides general purpose time methods, both
 for computing time instants (dates and times) and time intervals
 (the difference between 2 time instants).   It also supports 
 setting and handling alarm events, either one-shot or repeating.

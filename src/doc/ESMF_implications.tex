@@ -3,7 +3,7 @@
 
 \subsection{ESMF Compliance}
 
-We define ESMF compliance for software components, including
+We define full ESMF compliance for software components, including
 both {\tt Coupler} and {\tt Gridded Component}s.  In order to 
 achieve compliance, 
 components must provide a minimal set of standard ESMF-defined 
@@ -11,8 +11,9 @@ interfaces.  The implementation of these interfaces must enable the
 components to be instantiated in parallel configurations
 and destroyed; to be initialized, finalized, and run; to be queried for 
 distribution, state, run status and other pertinent information;
-and, for {\tt Gridded Component}s, to interoperate with other components such
+and, for {\tt Gridded Component}s, to interact with other components such
 that they do not need to maintain information about the coupling context.
+JMC codes are required to be compliant by April 2004.
 
 \subsection{Implications of Architecture for Framework Adoption}
 

@@ -19,7 +19,7 @@ interacting components, perhaps being regridded, redistributed, or
 otherwise transformed along the way.  The ESMF embodies these concepts 
 in the {\tt Field}, {\tt Grid}, and {\tt Field Bundle} classes.
 These data structures are each decomposed across multiple {\tt Decomposition
-Elements}, or {\tt DE}s (see Section~\ref{sec:progmodel} that are arranged 
+Elements}, or {\tt DE}s (see Section~\ref{sec:progmodel}) that are arranged 
 in some topology such as a 2D grid.
 
 It is a difficult software engineering problem to write both flexible 
@@ -69,24 +69,24 @@ the grid, and once the decomposition is defined all corresponding
 data can be subsequently decomposed in the same manner.
 \item The interface allows the user code to get a pointer to the
 start of the data buffer, so internal computational loops can access
-the data directly without needing to go through the library.
+the data directly without needing to go through the framework.
 \item The memory ordering of multidimensional data can either be
 queried by the user code and the code can iterate the data in that
 order, or the memory can be reordered by the library to conform to what
-the user code specifies (e.g. Fortran array order vs C order).
+the user code specifies.  
 
 \end{itemize}
 
 \subsection{Object Classes}
 
 The major data objects in the infrastructure layer are {\tt Bundles},
-{\tt Fields}, {\tt Grid}s, and {\tt Data}.
+{\tt Fields}, {\tt Grid}s, and {\tt Data Arrays}.
 {\tt Grid}s carry grid type, coordinate information,
-and decomposition information, {\tt Data} carries the actual
+and decomposition information, {\tt Data Arrays} carry the actual
 data values, and {\tt Fields} and {\tt Bundles} tie these objects 
 together with metadata descriptions.
 
-The {\tt Field} class connects {\tt Data}, the underlying
+The {\tt Field} class connects {\tt Data Arrays}, the underlying
 {\tt Grid}s, optional {\tt Mask}s and {\tt IOSpec}s and metadata 
 {\tt Attribute} objects.  It provides methods
 for setting, retrieving, configuring, and querying its internal classes,
@@ -116,22 +116,22 @@ corresponding parameters.  However it is possible that the
 {\tt Physical Grid} must be completely enumerated, perhaps in the
 case of assimilated data or unstructured data.
 The {\tt Distributed Grid} defines an index space that corresponds to
-cells in the Physical Grid and is decomposed among {DE}s in a 
+cells in the {\tt Physical Grid} and is decomposed among {DE}s in a 
 {\tt Layout}.  
 
-A {\tt Data} class is responsible for maintaining
+A {\tt Data Array} class is responsible for maintaining
 information about the individual value type (e.g. float, integer), 
 the physical representation (e.g. Cray format float vs. IEEE), the 
 individual data item length (e.g. scalar, vector, vector length), 
-data count, and memory ordering information such as Fortran vs. C order 
-for multidimensional arrays.  {\tt Data} objects may contains values 
+data count, and memory ordering information for 
+multidimensional arrays.  {\tt Data Array} objects may contains values 
 representing more than one {\tt Field}, for example if supporting
 packed data for a Bundle object.
 {\tt Data} arrays utilize an {\tt Ordering} class to store the
 memory layout information and to manage memory reordering requests.
 If the data are packed, the {\tt Ordering} object maintains the information
-about the order of the {\tt Fields} in the single data array.
-{\tt Data} methods include querying the various information about the
+about the order of the {\tt Fields} in the single {\tt Data Array}.
+{\tt Data Array} methods include querying information about the
 data, returning a pointer to the start of the data
 array, and methods for reordering and subsetting the data.
 
@@ -153,7 +153,7 @@ related data structures form an hierarchy within a {\tt Gridded Component}.}
 A {\tt Bundle} contains one or more {\tt Field}s which are defined on 
 the same {\tt Grid}.  It allows the application to manipulate multiple fields in 
 an identical manner with a single set of calls.  It also allows the option 
-of interleaving data from multiple fields into a single {\tt Data} array for 
+of interleaving data from multiple fields into a single {\tt Data Array} for 
 more efficient memory access patterns.  The {\tt Bundle} class provides methods 
 for querying information about the underlying grid, for requesting the 
 packing of data, the reordering of that packed data, and detaching and 
@@ -162,9 +162,10 @@ attaching the data.
 \subsubsection{Field (ESMF\_Field)}
 \label{sec:field} 
 A Field represents a single scalar field or vector field.  It includes 
-both the data and the grid on which the data are defined.  The Field object provides
-methods for getting, setting, and querying its associated {\tt Data} and {\tt Grid},
-along with its optional {\tt Mask} and {\tt IOspec}.  It provides methods for detaching 
+both the data and the grid on which the data are defined.  The {\tt Field}
+ class provides
+methods for getting, setting, and querying its associated {\tt Data Array} and {\tt Grid},
+along with its optional {\tt Mask} and {\tt IOSpec}.  It provides methods for detaching 
 data from the {\tt Field} and attaching data to the {\tt Field}, and for subsetting, 
 regridding, and reordering the memory layout of associated data.
 
@@ -176,40 +177,41 @@ It may be specified at the {\tt Field} level, but it is stored as part
 of the {\tt Physical Grid} class.  It provides methods for getting 
 and setting masked cells.
 
-\subsubsection{Data (ESMF\_Data)}
+\subsubsection{Data Array (ESMF\_Data)}
 \label{sec:dataarray} 
-The {\tt Data} class contains the data as well as information 
+The {\tt Data Array} class contains the data as well as information 
 about the data, including the data type (e.g. float,
 integer), data count, and data dimensionality.  
 It provides methods for returning a pointer to the memory 
 location of the start of the data, and conversion routines 
 for altering the characteristics of the data.  
-Information about how the data array is laid
+Information about how the {\tt Data Array} is laid
 out in memory is managed by the {\tt Ordering} class.
 
-{\tt Data} can be associated with a {\tt Field} or with a {\tt Bundle}.
-{\tt Data} associated with a {\tt Field} consists of only a single variable,
-while {\tt Bundle Data} can have data from multiple {\tt Field}s packed 
+A {\tt Data Array} can be associated with a {\tt Field} or with a {\tt Bundle}.
+Data associated with a {\tt Field} consists of only a single variable,
+while {\tt Bundle} data can have data from multiple {\tt Field}s packed 
 into a single buffer with the items interleaved in memory.  
 The application may use a packed array to increase
 locality of reference while iterating the array, 
-or for ease in subsetting multiple data values in one operation.
+or for ease in setting multiple data values in one operation.
 
 
 \subsubsection{Ordering (ESMF\_Ordering)}
 \label{sec:ordering} 
-An Ordering is the description of how multidimentional data have been
+An {\tt Ordering} is the description of how multidimentional data have been
 linearized in memory.  This includes multidimensional array index information (e.g. C-order
 vs Fortran-order), vector or tensor data item ordering information (e.g. all Xs then all
-Ys vs [X,Y], [X,Y] tuples), and for Arrays associated with a Bundle object which contain
+Ys vs [X,Y], [X,Y] tuples), and for {\tt Data Array}s associated with a {\tt Bundle} object which contain
 data for multiple fields, interleave information about how multiple field data are 
 packed into a single buffer.
-An Ordering object is associated with a single Data object.  It provides
-methods to query the current memory organization and methods to reorder the Data object.
+An {\tt Ordering} object is associated with a single {\tt Data Array} object.  It provides
+methods to query the current memory organization and methods to reorder the 
+{\tt Data Array} object.
 
 \subsubsection{Grid (ESMF\_Grid)}
 \label{sec:grid} 
-A Grid is the general representation of the coordinate information for
+A {\tt Grid} is the representation of the coordinate information for
 the computation.  It contains both the logical presentation of the grid 
 as well as the
 decomposition of the grid into sets of gridpoints for processing in parallel on a
@@ -257,7 +259,7 @@ and information about how it was generated.  (This may be implicit in
 some formats.)
 The ESMF will probably strive simply to
 support the existing variety of file formats which are in common use in
-the climate community, but looking forward
+the climate and weather communities.  Looking forward,
 the existence of this class lays the foundation for future extension 
 of IO beyond simple files to live connections to database systems, 
 web servers, etc.

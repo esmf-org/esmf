@@ -3,8 +3,8 @@
 
 \subsection{Introduction}
 
-In this section, we describe the classes involved in ESMF applications, 
-their relationships, and typical action sequences for component interactions.  
+In this section, we describe the classes involved in the ESMF superstructure, 
+their relationships, and typical action sequences for component interactions.
 
 \subsection{Design Goals and Considerations}
 
@@ -29,31 +29,31 @@ We aim to keep the coupling specification entirely external
 to {\tt Gridded Component}s involved in an interaction, which makes it easier 
 for the same {\tt Gridded Component} to be reconfigured for a different 
 coupled application.
-This is the recognized ``mediator'' strategy for handling complexity in 
+This is closely related to the ``mediator'' strategy for handling complexity in 
 software that requires many inter-component interactions (see Section~\ref{sec:oop}).  
 We avoid excessive complication in the {\tt Coupler Component} by limiting
-its responsibility; the Coupler component does not instantiate 
+its responsibility; the {\tt Coupler} component does not instantiate 
 interacting components, schedule, or run them.  These tasks are performed
 by an {\tt Application Component} or other parent component (see 
 Section~\ref{sec:controlflow}).
 
 The ability to remap to adapt to different computing platform sizes 
 and characteristics is essential for performance portability.
-Gridded components can be configured as for SPMD or MPMD and 
-sequential or concurrent execution without changes to the gridded 
-component code.  Changes to coupler or application code are likely to 
+{\tt Gridded Component}s can be configured for SPMD or MPMD and 
+sequential or concurrent execution without changes to the {\tt Gridded 
+Component} code.  Changes to {\tt Coupler} or application code are likely to 
 be required (see Section~\ref{sec:scoping}).
 
 The ability to overlap computation with communication is also important for
 performance.  We facilitate this by enabling the user to initiate data 
-sends during gridded component execution, as soon as the data is ready.
+sends during {\tt Gridded Component} execution, as soon as the data is ready.
 
 To further increase efficiency, data may be sent between components without 
-needing to be sent to a coupler as an intermediate step (see
+needing to be sent to a {\tt Coupler} as an intermediate step (see
 Section~\ref{sec:dataflow}).
 
 It is not necessary to create return points from 
-within the time iteration loop of a gridded component.  This reduces the
+within the time iteration loop of a {\tt Gridded Component}.  This reduces the
 amount of work application groups will need to perform to adopt the 
 framework.
 
@@ -93,7 +93,7 @@ it may be computationally efficient for the computation of interpolation
 weights to occur on a set of {\tt DE}s not being used by any {\tt Gridded 
 Components}
 in the application.  The {\tt Coupler} might define a subcomponent on 
-those {\tt DE}s specifically to handle that function.
+those {\tt DE}s specifically to handle the interpolation function.
 
 A {\tt Gridded Component} may exist across all {\tt DE}s in an {\tt Application}.  
 When a set of {\tt Gridded  Component}s and a {\tt Coupler} all execute in sequence on 
@@ -150,17 +150,20 @@ of the data they require in order to run.  These descriptions are
 embodied in the {\tt ESMF\_State} class, and the kind of data that they 
 represent is identified by the {\tt type} attribute of that class, which can
 have an {\tt ESMF\_IMPORT} or {\tt ESMF\_EXPORT} value.  The {\tt State} class
-includes metadata information as well as actual pointers to data 
-locations.  The ESMF will provide methods that enable a user to add or
-remove fields and data from {\tt State}s.  
+includes metadata information, actual pointers to data 
+locations, and default criteria for data validation.  The last of these in its
+simplest form may be a bit that is set when data is ready for use.  The ESMF 
+will provide methods that enable a user to add or remove fields and data from 
+{\tt State}s.  
 
 A {\tt Coupler Component} produces a specification of the sequence of 
-transforms that are necessary to effect communication between components, 
+operations that are necessary to effect communication between components, 
 both scientific and computational, generic and user-defined.  The {\tt Coupler} 
-returns these to the application or parent in the form of a set of {\tt Transforms} 
+returns these to the {\tt Application} or parent in the form of a set of {\tt Transform} objects 
 along with associated sequencing restrictions.  Each {\tt Transform} has a
 function pointer to a transform operation and may be bundled with 
-associated data.
+associated data, information about coupling frequency, and 
+data validation criteria.
 
 The {\tt Application} or parent component initiates the coupling and manages 
 its scheduling.  It is responsible for instantiating the {\tt Gridded Component}s
@@ -190,7 +193,7 @@ a specified subset.
 \label{sec:dataflow}
 The design choices we have made enable the user to configure ESMF
 applications so that data is transferred from one component to another, 
-without requiring that it first be sent via message passing to the
+without requiring that it first be sent via message passing to a
 {\tt Coupler} (or even necessarily
 copied).  This is likely to be the most efficient way of performing 
 inter-component coupling when the components are instantiated on different
@@ -218,16 +221,21 @@ coupler initialization method creates input and output packets, which at this
 stage include empty buffers for packing and unpacking data.  The coupler returns a
 transform (in this case, perhaps a combined unit change, regrid and communication 
 operation) that will occur while the atmosphere 
-component is in the midst of its iteration loop.  The application calls the run methods
+component is in the midst of its iteration loop.  Some parts of the transform
+may be user-defined (i.e., unit changes) and others supplied by the framework
+(i.e., regridding and communication).  The application calls the run methods
 of the atmosphere and ocean components with the transform provided by the coupler,
 which contains different tasks for the two components.  The atmosphere and ocean 
 check that their import states are valid as they begin executing concurrently on
 different {\tt DE} sets.  At an appropriate time the
 ocean component calls a state transform method with its import state and 
-the transform it received from the application.  This call 
+the transform it received from the application.  If the frequency criteria
+contained within the transform specifies that this is a coupling timestep,
+the call 
 posts a message passing receive.  When the atmosphere's data is ready to send, 
 it calls a state transform method with the transform it was passed and 
-its export state.  This call performs
+its export state.  This call checks the frequency criteria and if it is a 
+coupling timestep performs
 the unit conversion and regridding, initiates a send
 to the ocean and returns.  (Although the calculation is performed on the atmosphere 
 {\tt DE}s in this example, the transform could be staged on a separate set of coupler
@@ -249,7 +257,7 @@ The following are brief descriptions of the objects involved in the
 ESMF superstructure:
 
 \subsubsection{Component (ESMF\_Comp)} 
-A Component is a functionally related computational entity that 
+A {\tt Component} is a functionally related computational entity that 
 represents a large system.  The {\tt Component} base class defines a set of operations and
 attributes common to all {\tt Component}s.  These include methods such as:
 initialize, run, finalize, get distribution, get processor list, get status, 
@@ -272,7 +280,7 @@ type (ESMF\_INIT, ESMF\_BRANCH, etc.).
 A {\tt Coupler} is a user-customized type of {\tt Component} that 
 encompasses all the functionality needed to communicate data between two or 
 more {\tt Component}s.  A {\tt Coupler} has a coupling initiation method that 
-defines and returns a {\tt Transform Specification}.
+defines and returns a set of {\tt Transform}s.
 
 \subsubsection{Gridded Component (ESMF\_GComp)}
 \label{sec:griddedcomponent} 
@@ -285,15 +293,19 @@ states when queried.
 
 \subsubsection{State (ESMF\_State)}
 A {\tt State} is a description of a set of data that a 
-{\tt Gridded Component} either needs to run or can make available.  States
-have a {\tt type} attribute that can have values or {\tt ESMF\_IMPORT} or
-{\tt ESMF\_EXPORT}.  A state may be acted on by a {\tt Transform} object.
+{\tt Gridded Component} either needs to run or can make available.  
+{\tt State}s
+have a {\tt type} attribute that can have values of {\tt ESMF\_IMPORT} or
+{\tt ESMF\_EXPORT}.  A {\tt State} may be acted on by a {\tt Transform} object.
 
 \subsubsection{Transform (ESMF\_XForm)} 
 A {\tt Transform} acts on a {\tt State} or other type of 
-ESMF data.  It contains a function pointer to the transformation method 
-and any data necessary to perform the transform.  It may relocate data, 
-redistribute data, regrid data, change units, or any combination of these.  
+ESMF data.  It contains a function pointer to the transformation method
+and may contain data necessary to perform the transform, frequency 
+criteria and data
+validation criteria.  It may relocate data, 
+redistribute data, regrid data, change units, any combination of these,
+or any other type of operation that the user desires.  
 
 
 
