@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridSTest.F90,v 1.4 2003/10/20 23:46:50 jwolfe Exp $
+! $Id: ESMF_FieldRegridSTest.F90,v 1.5 2003/10/21 21:59:39 jwolfe Exp $
 !
 ! System test code FieldRegrid
 !  Description on Sourceforge under System Test #79497
@@ -11,8 +11,16 @@
 ! !DESCRIPTION:
 ! System test FieldRegrid.  
 !   Regrid test.  2 components and 1 coupler, one-way coupling.
-!   
+!                 The first component has a uniform A-grid.  It has
+!                 a Field whose data is set to a given geometric function,
 !
+!                 10.0 + 5.0*sin((X/Xmax)*pi) + 2.0*sin((Y/Ymax)*pi)
+!
+!                 and then regridded to the second component, which has a
+!                 non-uniform D-grid.  The regridded data is then compared
+!                 to the function's solution for a measurement of the
+!                 accuracy of the Regrid.  Those values are output for
+!                 each DE.
 !
 !\begin{verbatim}
 
