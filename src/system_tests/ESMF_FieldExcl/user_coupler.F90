@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.12 2004/12/08 20:41:32 nscollins Exp $
+! $Id: user_coupler.F90,v 1.13 2005/02/16 04:11:16 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -38,7 +38,7 @@
 
       integer :: localrc
 
-      print *, "in user setservices routine"
+      !print *, "in user setservices routine"
 
       ! Register the callback routines.
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETINIT, user_init, &
@@ -48,7 +48,7 @@
       call ESMF_CplCompSetEntryPoint(comp, ESMF_SETFINAL, user_final, &
                                      ESMF_SINGLEPHASE, localrc)
 
-      print *, "Registered Initialize, Run, and Finalize routines"
+      !print *, "Registered Initialize, Run, and Finalize routines"
 
       ! set return code
       rc = localrc
@@ -72,7 +72,7 @@
       type(ESMF_VM) :: vm
       integer :: pet_id
 
-      print *, "User Coupler Init starting"
+      !print *, "User Coupler Init starting"
       status = ESMF_FAILURE
 
       ! Get VM from coupler component
@@ -89,13 +89,13 @@
       ! this coupler.  When the call returns all objects which were not
       ! in existence on all PETs now have an object which represents them.
       call ESMF_StateReconcile(importState, vm, rc=status)
-      call ESMF_StatePrint(importState, rc=status)
+      ! call ESMF_StatePrint(importState, rc=status)
 
       call ESMF_StateReconcile(exportState, vm, rc=status)
-      call ESMF_StatePrint(exportState, rc=status)
+      ! call ESMF_StatePrint(exportState, rc=status)
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
-      print *, "Import State contains ", itemcount, " items."
+      !print *, "Import State contains ", itemcount, " items."
 
       ! Get input data
       call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
@@ -111,9 +111,9 @@
                                  rc=status)
 
       ! for debugging, this prints who is planning to send data and where 
-      call ESMF_RouteHandlePrint(routehandle, "", rc=status)
+      ! call ESMF_RouteHandlePrint(routehandle, "", rc=status)
 
-      print *, "User Coupler Init returning"
+      !print *, "User Coupler Init returning"
    
       rc = ESMF_SUCCESS
       return
@@ -139,7 +139,7 @@
       type(ESMF_Field) :: humidity1, humidity2
       integer :: status
 
-      print *, "User Coupler Run starting"
+      !print *, "User Coupler Run starting"
 
       ! Get input data
       call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
@@ -158,7 +158,7 @@
       ! Data is moved directly to the field in the output state, so no
       ! "put" is needed here.
  
-      print *, "User Coupler Run returning"
+      !print *, "User Coupler Run returning"
 
       rc = status
 
@@ -178,13 +178,13 @@
       ! Local variables
       integer :: status
 
-      print *, "User Coupler Final starting"
+      !print *, "User Coupler Final starting"
       status = ESMF_FAILURE
    
       ! Release resources stored for the Regridding.
       call ESMF_FieldRegridRelease(routehandle, rc=status)
 
-      print *, "User Coupler Final returning"
+      !print *, "User Coupler Final returning"
    
       rc = status
 

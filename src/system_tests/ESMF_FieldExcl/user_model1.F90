@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.10 2004/12/22 04:12:21 nscollins Exp $
+! $Id: user_model1.F90,v 1.11 2005/02/16 04:11:16 nscollins Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -44,7 +44,7 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                        user_final, ESMF_SINGLEPHASE, localrc)
 
-        print *, "Registered Initialize, Run, and Finalize routines"
+        !print *, "Registered Initialize, Run, and Finalize routines"
 
         ! return code
         rc = localrc
@@ -87,13 +87,13 @@
         delayout = ESMF_DELayoutCreate(vm, (/ 2, 2 /), rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        print *, pet_id, "User Comp 1 Init starting"
+        !print *, pet_id, "User Comp 1 Init starting"
 
         ! Add a "humidity1" field to the export state.
-        countsPerDE1 = (/ 30, 30 /)
-        countsPerDE2 = (/ 20, 20 /)
+        countsPerDE1 = (/ 760, 40 /)
+        countsPerDE2 = (/ 30, 10 /)
 
-        counts(1) = 60
+        counts(1) = 800
         counts(2) = 40
         min(1) = 0.0
         max(1) = 60.0
@@ -137,9 +137,9 @@
         call ESMF_StateAddField(exportState, humidity1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
-        call ESMF_StatePrint(exportState, rc=status)
+        !call ESMF_StatePrint(exportState, rc=status)
      
-        print *, pet_id, "User Comp 1 Init returning"
+        !print *, pet_id, "User Comp 1 Init returning"
    
         rc = ESMF_SUCCESS
         return
@@ -171,7 +171,7 @@
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata, coordX, coordY
         integer :: status, i, j, counts(2)
 
-        print *, "User Comp Run starting"
+        !print *, "User Comp Run starting"
 
         pi = 3.14159
 
@@ -213,7 +213,7 @@
      
         deallocate(coordArray)
         
-        print *, "User Comp Run returning"
+        !print *, "User Comp Run returning"
 
         rc = status
 
@@ -233,12 +233,12 @@
         ! Local variables
         integer :: status
 
-        print *, "User Comp Final starting"
+        !print *, "User Comp Final starting"
     
         ! currently nothing to do - replace this if we add code here.
         status = ESMF_SUCCESS
 
-        print *, "User Comp Final returning"
+        !print *, "User Comp Final returning"
    
         rc = status
 

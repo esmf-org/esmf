@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.9 2004/12/21 03:31:02 theurich Exp $
+! $Id: user_model2.F90,v 1.10 2005/02/16 04:11:16 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -35,7 +35,7 @@
 
         integer :: localrc
 
-        print *, "In user register routine"
+        !print *, "In user register routine"
 
         ! Register the callback routines.
 
@@ -46,7 +46,7 @@
         call ESMF_GridCompSetEntryPoint(comp, ESMF_SETFINAL, &
                                        user_final, ESMF_SINGLEPHASE, localrc)
 
-        print *, "Registered Initialize, Run, and Finalize routines"
+        !print *, "Registered Initialize, Run, and Finalize routines"
 
         rc = localrc
 
@@ -88,7 +88,7 @@
       delayout = ESMF_DELayoutCreate(vm, (/ 3, 1 /), rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
-      print *, pet_id, "User Comp 2 Init starting"
+      !print *, pet_id, "User Comp 2 Init starting"
 
       ! Add a "humidity2" field to the import state.
       countsPerDE1 = (/ 10, 6, 24 /)
@@ -140,7 +140,7 @@
       if (status .ne. ESMF_SUCCESS) goto 10
       !   call ESMF_StatePrint(importState, rc=status)
   
-      print *, pet_id, "User Comp 2 Init returning"
+      !print *, pet_id, "User Comp 2 Init returning"
    
       rc = ESMF_SUCCESS
       return
@@ -168,7 +168,7 @@
       integer :: status
 
       status = ESMF_FAILURE
-      print *, "User Comp Run starting"
+      !print *, "User Comp Run starting"
 
       ! Get information from the component.
       call ESMF_StateGetField(importState, "humidity2", humidity2, rc=status)
@@ -176,7 +176,7 @@
       ! This is where the model specific computation goes.
       call ESMF_FieldGetArray(humidity2, array1, rc=status)
 
-      print *, "User Comp Run returning"
+      !print *, "User Comp Run returning"
 
       rc = status
 
@@ -197,7 +197,7 @@
       type(ESMF_Field) :: field
       integer :: localrc, finalrc
 
-      print *, "User Comp Final starting"  
+      !print *, "User Comp Final starting"  
 
       ! set this up to run the validate code on all fields
       ! so we can see and compare the output.  but if any of
@@ -220,7 +220,7 @@
       ! end so we can see the output from all the cases to help track
       ! down errors.
 
-      print *, "User Comp Final returning"
+      !print *, "User Comp Final returning"
       rc = finalrc
    
     end subroutine user_final
@@ -243,7 +243,7 @@
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
       real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
 
-      print *, "User verifyResults starting"  
+      !print *, "User verifyResults starting"  
 
       pi = 3.14159
 
@@ -264,7 +264,7 @@
       call ESMF_FieldGetArray(humidity, array, rc=status)
       ! Get a pointer to the start of the data
       call ESMF_ArrayGetData(array, data, ESMF_DATA_REF, rc=status)
-      print *, "rc from array get data = ", status
+      !print *, "rc from array get data = ", status
 
       ! allocate array for computed results and fill it
       if (counts(1)*counts(2).ne.0) then
@@ -308,7 +308,7 @@
       write(*,*) "   maximum computed value  = ", maxCValue
       write(*,*) "   maximum error           = ", maxError
       write(*,*) "   maximum percent error   = ", maxPerError
-      print *, "User verifyResults returning"
+      !print *, "User verifyResults returning"
    
       rc = ESMF_SUCCESS
 
