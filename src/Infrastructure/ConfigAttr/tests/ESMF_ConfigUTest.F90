@@ -1,3 +1,4 @@
+! $ Id: $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -37,8 +38,8 @@
       type(ESMF_DELayout) :: layout  
       type (ESMF_Config) cf 
       
-      character, parameter :: fname ='ESMF_Resource_File_Sample.rc'
 
+      character(len=255) :: fname = 'ESMF_Resource_File_Sample.rc'
       character(len=255) :: restart_file
       integer :: rc
       logical :: unique
@@ -68,63 +69,47 @@
 
 ! Initialization:
 !----------------
-      call Initialization_Test()
+      call Initialization()
       if (rc /=0) STOP            ! Catastropic Error
 
 
 ! Retrieval of single parameters
 !--------------------------------
-      call Single_Parameter_Test()
+      call SinglePar()
 
 
 ! Retrieval of a group of parameters on a single line
 ! ----------------------------------------------------
 
-      call  Multiple_Parameters_Single_Line_U_Test()
+      call  MultPar_SingleLine_U()
 
-      call  Multiple_Parameters_Single_Line_V_Test()
+      call  MultPar_SingleLine_v()
 
 
 ! Retrieval of a group of parameters on multiple lines
 !   ----------------------------------------------------
-      call Multiple_Parameters_Multiple_Lines_Test()
+      call MultPar_MultLines()
 
 
 ! Retrieval of Tables of unknown length
 ! ---------------------------------------
 
+      call Table()
 
-
-!----------------
-400   continue
-!----------------
 
 ! Finalization
 ! ------------
-
-      rc = 0
-
-!''''''''''''''''''''''''''''
-
-      call ESMF_ConfigDestroy ( cf, rc ) 
-!''''''''''''''''''''''''''''
-
-      counter_total =counter_total + 1
-      if (rc == 0) then
-         counter_success =counter_success + 1
-      else
-         print *,'ESMF_ConfigDestroy failed, rc =', rc 
-      endif     
-
+ 
+      call Finalization()
 
 ! REPORTING
 ! ------------
       if  (counter_total > 0) then
          if( counter_success == counter_total ) then 
-            print *,'ESMF_Config_Test: All tests were successful'
+            print *,'ESMF_Config: All tests were successful'
          else
             success_rate = 100.0 * counter_success / counter_total 
-            print *,'ESMF_Config_Test: Success rate: ', success_rate,'%' 
+            print *,'ESMF_Config: Success rate: ', nint(success_rate),'%' 
          endif
       endif
 
@@ -135,10 +120,13 @@
     CONTAINS
 
 !--------------------------------------------------------------------
-      subroutine Initialization_Test()
+      subroutine Initialization()
 !--------------------------------------------------------------------
+
         rc = 0
+
         
+
         cf = ESMF_ConfigCreate( rc )
       
         if ( rc /= 0 ) then 
@@ -166,10 +154,10 @@
 
         return
         
-      end subroutine Initialization_Test
+      end subroutine Initialization
       
 !--------------------------------------------------------------------
-     subroutine Single_Parameter_Test()
+     subroutine SinglePar()
 !--------------------------------------------------------------------
       integer, parameter   :: nDE_0 = 32      
       real, parameter      :: tau_0 = 14.0
@@ -192,7 +180,7 @@
             counter_success =counter_success + 1
          else
             print *,'ESMF_ConfigGetInt ERROR: got nDE =', nDE, &
-              ' should be', nDE_0
+              ' should be ', nDE_0
          endif
       endif
 
@@ -214,7 +202,7 @@
             counter_success =counter_success + 1
          else
             print *,'ESMF_ConfigGetFloat ERROR: got tau =', tau, &
-              ' should be', tau_0
+              ' should be ', tau_0
          endif
       endif
 
@@ -236,7 +224,7 @@
             counter_success =counter_success + 1
          else
             print *,'ESMF_ConfigGetChar ERROR: got answer =', answer, &
-              ' should be', answer_0
+              ' should be ', answer_0
          endif
       endif
 
@@ -257,26 +245,19 @@
             counter_success =counter_success + 1
          else
             print *,'ESMF_ConfigGetString ERROR: got  =', restart_file, &
-              ' should be', restart_file_0
+              ' should be ', restart_file_0
          endif
       endif
 
-
-      print *,'ESMF_ConfigGetString: restart_file =',  restart_file, &
-           ' rc =', rc
-
-! NOTE: A non-zero rc is returned when an attribute is not found - unless
-!      the function is called with an optional default.
-
-    end subroutine Single_Parameter_Test
+    end subroutine SinglePar
 
 
 
 
 !--------------------------------------------------------------------
-    subroutine Multiple_Parameters_Single_Line_U_Test()
+    subroutine MultPar_SingleLine_U()
 !--------------------------------------------------------------------
-      character, parameter :: u_dataType_0 = 'u-wind_error'
+      character(len=12), parameter :: u_dataType_0 = 'u_UprAir'
       integer, parameter   :: nu_0 = 6
       real, dimension(nu_0), parameter :: sigU_0 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
@@ -286,14 +267,14 @@
  
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigFindLabel ( cf, 'u-wind-error:', rc ) ! identifies label
+      call ESMF_ConfigFindLabel ( cf, 'u-wind_error:', rc ) ! identifies label
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
       if (rc == 0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+         print *,'ESMF_ConfigFindLabel failed, label = u-wind_error:, rc =', rc 
          return
       endif
 
@@ -312,7 +293,7 @@
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetString ERROR: got  =', u_dataType, &
-              ' should be', u_dataType_0
+              ' should be ', u_dataType_0
          return
       endif
 
@@ -332,7 +313,7 @@
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetInt ERROR: got  =', nu, &
-              ' should be', nu_0 
+              ' should be ', nu_0 
          return
       endif
 
@@ -355,13 +336,13 @@
          counter_success =counter_success + 1
       endif
 
-    end subroutine Multiple_Parameters_Single_Line_U_Test
+    end subroutine MultPar_SingleLine_U
 
 
 !--------------------------------------------------------------------
-subroutine Multiple_Parameters_Single_Line_V_Test
+subroutine MultPar_SingleLine_V
 !--------------------------------------------------------------------
-      character, parameter :: v_dataType_0 = 'v-wind_error'
+      character(len=12), parameter :: v_dataType_0 = 'v_UprAir'
       integer, parameter   :: nv_0 = 6
       real, dimension(nv_0), parameter :: sigV_0 = &
            (/ 2.2, 2.2, 2.3, 2.7, 3.2, 3.4 /)
@@ -370,14 +351,14 @@ subroutine Multiple_Parameters_Single_Line_V_Test
 
 !''''''''''''''''''''''''''''
 
-      call ESMF_ConfigFindLabel ( cf, 'v-wind-error:', rc )
+      call ESMF_ConfigFindLabel ( cf, 'v-wind_error:', rc )
 !''''''''''''''''''''''''''''
 
       counter_total =counter_total + 1
       if (rc == 0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+         print *,'ESMF_ConfigFindLabel failed, label = v-wind_error:, rc =', rc
          return        
       endif
 
@@ -396,7 +377,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetString ERROR: got  =', v_dataType, &
-              ' should be', v_dataType_0
+              ' should be ', v_dataType_0
          return
       endif
 
@@ -415,7 +396,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetInt ERROR: got  =', nv, &
-              ' should be', nv_0 
+              ' should be ', nv_0 
          return
       endif
 
@@ -438,19 +419,19 @@ subroutine Multiple_Parameters_Single_Line_V_Test
         counter_success =counter_success + 1
       endif
 
-    end subroutine Multiple_Parameters_Single_Line_V_Test
+    end subroutine MultPar_SingleLine_V
 
 !--------------------------------------------------------------------
-    subroutine Multiple_Parameters_Multiple_Lines_Test()
+    subroutine MultPar_MultLines()
 !--------------------------------------------------------------------
-      character, parameter :: u_dataType_1 = 'u_UprAir.u'
-      character, parameter :: v_dataType_1 = 'v_UprAir.u'
+      character(len=10), parameter :: u_dataType_1 = 'u_UprAir.u'
+      character(len=10), parameter :: v_dataType_1 = 'v_UprAir.u'
       integer, parameter   :: nu_1 = 6
       integer, parameter   :: nv_1 = 6
       real, dimension(nu_1), parameter :: sigU_1 = &
            (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)
       real, dimension(nv_1), parameter :: sigV_1 = &
-           (/ 2.2, 2.2, 2.3, 2.7, 3.2, 3.2 /)  
+           (/ 2.0, 2.0, 2.2, 2.3, 2.7, 3.2 /)  
 
       rc = 0
 
@@ -463,7 +444,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
       if (rc == 0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+         print *,'ESMF_ConfigFindLabel failed, label = ObsErr*QSCAT::, rc =', rc 
          return        
       endif
 
@@ -495,7 +476,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetString ERROR: got  =', u_dataType, &
-              ' should be', u_dataType_1
+              ' should be ', u_dataType_1
          return
       endif
 
@@ -514,7 +495,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetInt ERROR: got  =', nu, &
-              ' should be', nu_1 
+              ' should be ', nu_1 
          return
       endif
 
@@ -568,7 +549,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetString ERROR: got  =', v_dataType, &
-              ' should be', v_dataType_1
+              ' should be ', v_dataType_1
          return
       endif
 
@@ -587,7 +568,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetInt ERROR: got  =', nv, &
-              ' should be', nv_1 
+              ' should be ', nv_1 
          return
       endif
 
@@ -610,11 +591,11 @@ subroutine Multiple_Parameters_Single_Line_V_Test
         counter_success =counter_success + 1
       endif
 
-    end subroutine Multiple_Parameters_Multiple_Lines_Test
+    end subroutine MultPar_MultLines
 
 
 !--------------------------------------------------------------------
-    subroutine Table_Test()
+    subroutine Table()
 !--------------------------------------------------------------------
       integer, parameter   :: nlines_0 = 11
       integer, dimension(nlines_0), parameter :: ncol_0 = &
@@ -658,20 +639,11 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          counter_success =counter_success + 1
       else
          print *,'ESMF_ConfigGetDim ERROR: got  =', nlines, &
-              ' should be', nlines_0 
+              ' should be ', nlines_0 
          return
       endif
 
-      if( any (ncol /= ncol_0) ) then
-         print *,'ESMF_ConfigGetDim ERROR: got  =', ncol, &
-              ' should be', ncol_0 
-         return
-      else
-         counter_success =counter_success + 1
-      endif
 
-!!              if (line >= MAXLEV) exit
-!!              if (rc /= 0) exit
       
 !''''''''''''''''''''''''''''         
          call ESMF_ConfigFindLabel ( cf,'ObsErr*vCor_HH-7::', rc )
@@ -680,7 +652,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
       if (rc == 0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+          print *,'ESMF_ConfigFindLabel failed, label ObsErr*vCor_HH-7::, = rc =', rc 
          return        
       endif
 
@@ -702,7 +674,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
             return        
          endif
 !''''''''''''''''''''''''''''    
-      ncol(line) = ESMF_ConfigGetLen(cf,'ObsErr*vCor_HH-7::', rc)
+      ncol(line) = ESMF_ConfigGetLen(cf, rc = rc) - 1
 !''''''''''''''''''''''''''''  
       if (rc /= 0) then
          print *,'ESMF_ConfigGetLen failed, rc =', rc
@@ -730,7 +702,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
       if (rc == 0) then
          counter_success =counter_success + 1
       else
-         print *,'ESMF_ConfigFindLabel failed, rc =', rc 
+         print *,'ESMF_ConfigFindLabel failed, label = ObsErr*vCor_HH-7::, rc =', rc 
          return        
       endif
 
@@ -755,10 +727,10 @@ subroutine Multiple_Parameters_Single_Line_V_Test
             return
          endif
 
-         if( any(plev(1:nlines) /= plev_0(1:nlines)) ) then
+         if( plev(line) /= plev_0(line) ) then
             print *,'ESMF_ConfigGetFloat ERROR: got plev =', &
-                 plev(1:nlines), ' should be sigV =',        &
-                 plev_0(1:nlines_0) 
+                 plev(line), ' should be plev =',        &
+                 plev_0(line) 
             return
          else
             counter_success =counter_success + 1
@@ -768,7 +740,7 @@ subroutine Multiple_Parameters_Single_Line_V_Test
 !               --------------------
          counter_total =counter_total + 1
 !''''''''''''''''''''''''''''
-         do col =1, ncol(line) - 1
+         do col =1, ncol(line)
             temp = ESMF_ConfigGetFloat ( cf, rc=rc)
             if (rc == 0) then 
                vCorr(line,col) = temp 
@@ -781,9 +753,11 @@ subroutine Multiple_Parameters_Single_Line_V_Test
          endif
 
          
-         do col =1, ncol(line) - 1
-            if (vCorr(line, col) /= vCorr_0(line, col)) then
-               print *,'ESMF_ConfigGetFloat:  Wrong value in vCorr '
+         do col =1, ncol(line)
+            if (vCorr(line, col) /= vCorr_0(col, line)) then
+               print *,'ESMF_ConfigGetFloat:  Wrong value in vCorr line =', &
+                    line,' col =', col,' VCorr = ', vCorr(col, line), &
+               ' should be ', vCorr_0(line, col)
                return
             endif
          end do
@@ -792,8 +766,35 @@ subroutine Multiple_Parameters_Single_Line_V_Test
 !''''''''''''''''''''''''''''    
       end do
 !''''''''''''''''''''''''''''
+!''''''''''''''''''''''''''''     
+      deallocate(ncol, STAT= rc)
+!''''''''''''''''''''''''''''
+      if (rc /= 0) then
+         print *,'array deallocation failed, rc =', rc
+      endif
 
-    end subroutine Table_Test
+
+      return
+    end subroutine Table
 
 
-    end program ESMF_Config_Test
+!--------------------------------------------------------------------
+    subroutine Finalization()
+!--------------------------------------------------------------------
+
+      rc = 0
+!''''''''''''''''''''''''''''
+      call ESMF_ConfigDestroy ( cf, rc ) 
+!''''''''''''''''''''''''''''
+
+      counter_total =counter_total + 1
+      if (rc == 0) then
+         counter_success =counter_success + 1
+      else
+         print *,'ESMF_ConfigDestroy failed, rc =', rc 
+      endif
+      
+    end subroutine Finalization
+
+  end program ESMF_Config_Test
+

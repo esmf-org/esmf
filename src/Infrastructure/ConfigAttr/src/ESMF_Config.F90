@@ -1,3 +1,4 @@
+! $Id: ESMF_Config.F90,v 1.25 2003/05/07 15:22:46 nscollins Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -17,9 +18,6 @@
 ! This file contains the Config class definition and all Config
 ! class methods.
 !
-!------------------------------------------------------------------------------
-! INCLUDES
-!!!#include "ESMF_Macros.inc"
 !------------------------------------------------------------------------------
 !
 !BOPI
@@ -326,6 +324,7 @@
          print *, myname_,'deallocate(...%..)', iret
       endif
 
+
       if (present( rc )) rc = iret
       return
 
@@ -372,6 +371,8 @@
       if(iret /= 0) then
 ! SUBSITUTE call perr(myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret)
          print *, myname_,'ESMF_ConfigLoadFile("'//trim(fname)//'")', iret
+
+         if (present( rc )) rc = iret
          return
       endif
 
@@ -600,7 +601,7 @@
       iret = 0
       local_tend = .false.
 
-      if ( cf%next_line >= cf%nbuf ) then
+      if ( cf%next_line .ge. cf%nbuf ) then
          iret = -1
            if ( present (rc )) rc = iret
          return
@@ -805,7 +806,7 @@
 
 
       
-      if (nsize<=0) then
+      if (nsize.le.0) then
          print *,myname_,' invalid SIZE =', nsize
          iret = -1
          if(present( rc )) rc = iret
@@ -883,11 +884,11 @@
          call ESMF_ConfigGetString( cf, string, rc = iret )
       endif
 
-      if ( iret == 0 ) then
+      if ( iret .eq. 0 ) then
            read(string,*,iostat=iret) x
            if ( iret .ne. 0 ) iret = -2
       end if
-      if ( iret == 0 ) then
+      if ( iret .eq. 0 ) then
          n = nint(x)
       else
          if( present( default )) then
@@ -897,7 +898,7 @@
          endif
       endif
 
-      if ( iret == 0 ) then
+      if ( iret .eq. 0 ) then
          ESMF_ConfigGetInt = n
       endif
 
@@ -936,7 +937,7 @@
       
       iret = 0
 
-      if (nsize<=0) then
+      if (nsize.le.0) then
          print *,myname_,' invalid SIZE =', nsize
          iret = -1
          if(present( rc )) rc = iret
@@ -998,7 +999,6 @@
 !
 !
 !EOP -------------------------------------------------------------------
-      character ch
       character*256 string
       integer       iret
 
@@ -1018,14 +1018,11 @@
          call ESMF_ConfigGetString( cf, string, rc = iret )
       endif
 
-     if ( iret .ne. 0 ) then
-        ch = default
-      else
-         ch = string(1:1)
+      if ( iret .eq. 0 ) then
+         ESMF_ConfigGetChar = string(1:1)
       end if
 
       if (present( rc )) rc = iret
-      ESMF_ConfigGetChar = ch
 
       return
 
@@ -1075,10 +1072,10 @@
 
       do
          call ESMF_ConfigGetString( cf, string, rc = iret )
-         if ( iret == 0 ) then
+         if ( iret .eq. 0 ) then
             count = count + 1
          else
-            if (iret ==-1) iret  = 0  ! end of the line
+            if (iret .eq. -1) iret  = 0  ! end of the line
             exit
          endif
       enddo
@@ -1191,7 +1188,7 @@
       itop = min(nlen,n)      ! top of string to index
       ibot = 1                ! bottom of string
       idx  = index(string(ibot:itop),tok)  ! set for good, if itop=n (<=MAXLEN)
-      do while(idx == 0 .and. itop < n)
+      do while(idx .eq. 0 .and. itop < n)
        i = i+1
        itop = min(i*MAXLEN-lt,n)      ! subtract lt to find tok at bdry
        ibot = max(1,itop+1-nlen)    ! bottom of string to index
@@ -1372,11 +1369,11 @@
 		!     >   0, an error condition, but who cares why.
 
 	    inuse=ios.ne.-1		! the unit is in-use
-	    if(ios >= -1) ios=0		! still a valid test
+	    if(ios .ge. -1) ios=0		! still a valid test
 	  endif
 #endif
 
-	  if(lu >= MX_LU) ios=-1
+	  if(lu .ge. MX_LU) ios=-1
 	end do
 
 	if(ios.ne.0) lu=-1
@@ -1423,7 +1420,7 @@ end function luavail
 
 	do i=1,len(status)
 	  ic=ichar(status(i:i))
-	  if(ic >= iA .and. ic <= iZ) ic=ic+(mA-iA)
+	  if(ic .ge. iA .and. ic .le. iZ) ic=ic+(mA-iA)
 	  Ustat(i:i)=char(ic)
 	end do
 
@@ -1490,7 +1487,7 @@ end function luavail
 
 	close(lu,iostat=ier,status=status_)
 #ifdef _UNICOS
-	if(ier == 0) call asnunit(lu,'-R',ier)	! remove any attributes
+	if(ier .eq. 0) call asnunit(lu,'-R',ier)	! remove any attributes
 #endif
 
 	end subroutine clstext
