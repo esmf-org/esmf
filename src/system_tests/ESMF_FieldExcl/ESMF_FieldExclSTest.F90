@@ -1,6 +1,6 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.1 2004/08/23 16:23:43 nscollins Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.2 2004/09/30 21:20:09 nscollins Exp $
 !
-! System test code FieldRegrid
+! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
 
 !-------------------------------------------------------------------------
@@ -9,8 +9,9 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldRegrid.  
-!   Regrid test.  2 components and 1 coupler, one-way coupling.
+! System test FieldExcl.  
+!   Exclusive, Concurrent Component test.  
+!                 2 components and 1 coupler, one-way coupling.
 !                 The first component has a uniform A-grid.  It has
 !                 a Field whose data is set to a given geometric function,
 !
@@ -24,7 +25,7 @@
 !
 !\begin{verbatim}
 
-    program FieldRegrid
+    program FieldExcl
 
 #include <ESMF_Macros.inc>
 
@@ -39,9 +40,9 @@
     implicit none
     
     ! Local variables
-    integer :: pet_id, npets, rc
+    integer :: i, pet_id, npets, splitnum, rc
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
-    type(ESMF_VM):: vm
+    type(ESMF_VM):: vm, vmsub1, vmsub2
     type(ESMF_State) :: c1exp, c2imp
     type(ESMF_GridComp) :: comp1, comp2
     type(ESMF_CplComp) :: cpl
@@ -67,7 +68,7 @@
 !-------------------------------------------------------------------------
 
     print *, "-------------------------------- "
-    print *, "Start of System Test FieldRegrid:"
+    print *, "Start of System Test FieldExcl:"
     print *, "-------------------------------- "
 
 !-------------------------------------------------------------------------
@@ -90,17 +91,29 @@
       goto 10
     endif
 
+   
+    ! give PETs (0 to splitnum-1) to comp1, (splitnum to npets-1) to comp2
+    splitnum = npets / 2
+
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
+!!!! TODO: when we want to run exclusive, use the following line instead.
+    !!comp1 = ESMF_GridCompCreate(vm, cname1, &
+    !!                            petList=(/ (i, i=0, splitnum-1) /), rc=rc)
     comp1 = ESMF_GridCompCreate(vm, cname1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname1), "rc =", rc
+    call ESMF_GridCompGet(comp1, vm=vmsub1, rc=rc)
     !  call ESMF_GridCompPrint(comp1, "", rc)
 
     cname2 = "user model 2"
+!!!! TODO: when we want to run exclusive, use the following line instead.
+    !!comp2 = ESMF_GridCompCreate(vm, cname2, &
+    !!                            petList=(/ (i, i=splitnum, npets-1) /), rc=rc)
     comp2 = ESMF_GridCompCreate(vm, cname2, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Created component ", trim(cname2), "rc =", rc
+    call ESMF_GridCompGet(comp2, vm=vmsub2, rc=rc)
     !  call ESMF_GridCompPrint(comp2, "", rc)
 
     cplname = "user one-way coupler"
@@ -260,21 +273,21 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegrid complete."
+10    print *, "System Test FieldExcl complete."
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
       ! Normal ESMF Test output
       write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test FieldRegrid: Field Regrid"
+      write(testname, *) "System Test FieldExcl: Field Exclusive Components"
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS: Regrid test finished correctly."
+        write(finalMsg, *) "SUCCESS: Exclusive Component test finished correctly."
       else
         write(finalMsg, *) "System Test did not succeed.  Error code ", rc
       endif
@@ -287,7 +300,7 @@
   
     call ESMF_Finalize(rc) 
 
-    end program FieldRegrid
+    end program FieldExcl
     
 !\end{verbatim}
     
