@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.15 2004/06/15 22:00:44 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.16 2004/06/17 12:58:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,11 +23,12 @@
 !! this should be including ESMF.h, but since it also includes the cover
 !! log macros, it can't be included here.  so just include each file 
 !! individually.  If we add files to ESMF.h they also need to be added here.
-#include "ESMF_Conf.inc"
-#include "ESMF_ErrReturnCodes.inc"
-#include "ESMF_LogConstants.inc"
 #include "ESMF_Macros.inc"
+#include "ESMF_Conf.inc"
 #include "ESMF_Version.inc"
+#include "ESMF_LogConstants.inc"
+#include "ESMF_LogMacros.inc"
+#include "ESMF_ErrReturnCodes.inc"
 
 
 !BOPI
@@ -837,8 +838,8 @@ end subroutine ESMF_LogSet
    endif
 122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a,a,a)
 123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,i0,a,a)
-132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a,a)
-133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a)
+132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a,a,a)
+133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,a,a)
 
 end function ESMF_LogWrite
 
