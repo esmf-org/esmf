@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.34 2004/04/19 19:52:03 theurich Exp $
+! $Id: ESMF_GridComp.F90,v 1.35 2004/04/19 23:16:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,31 +52,7 @@
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_GridComp
-!
-!     ! Grid Component wrapper
-
-      type ESMF_GridComp
-      sequence
-      !private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_CompClass), pointer :: compp => NULL()
-#else
-         type(ESMF_CompClass), pointer :: compp 
-#endif
-         type(ESMF_VM) :: vm
-      end type
-
-
-!------------------------------------------------------------------------------
-! !PUBLIC TYPES:
-
-      public ESMF_GridComp
-
-!------------------------------------------------------------------------------
-
 ! !PUBLIC MEMBER FUNCTIONS:
-
 
       public ESMF_GridCompCreate
       public ESMF_GridCompDestroy
@@ -111,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.34 2004/04/19 19:52:03 theurich Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.35 2004/04/19 23:16:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -128,6 +104,8 @@
         !module procedure ESMF_GridCompCreateNew
         module procedure ESMF_GridCompCreateConf
         module procedure ESMF_GridCompCreateVM
+        module procedure ESMF_GridCompCreateCPar
+        module procedure ESMF_GridCompCreateGPar
         
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
@@ -432,6 +410,214 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreateVM
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with VM enabled
+
+! !INTERFACE:
+      ! Private name; call using ESMF_GridCompCreate()      
+      function ESMF_GridCompCreateGPar(parent, name, delayout, &
+                            gridcomptype, grid, clock, config, configFile, &
+                            vm, petList, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_GridComp) :: ESMF_GridCompCreateGPar
+!
+! !ARGUMENTS:
+      !external :: services
+      type(ESMF_GridComp),  intent(in)  :: parent
+      character(len=*),     intent(in),    optional :: name
+      type(ESMF_newDELayout),  intent(in),    optional :: delayout
+      type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
+      type(ESMF_Grid),      intent(in),    optional :: grid
+      type(ESMF_Clock),     intent(inout), optional :: clock
+      type(ESMF_Config),    intent(in),    optional :: config
+      character(len=*),     intent(in),    optional :: configFile
+      type(ESMF_VM),        intent(in),    optional :: vm
+      integer,              intent(in),    optional :: petList(:)
+      integer,              intent(out),   optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new {\tt ESMF\_GridComp} and set the decomposition characteristics.
+!
+!  The return value is a new {\tt ESMF\_GridComp}.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[parent]
+!    Parent Gridded Component.
+!   \item[{[name]}]
+!    GridComp name.
+!   \item[{[delayout]}]
+!    GridComp delayout.
+!   \item[{[gridcomptype]}]
+!    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
+!   \item[{[grid]}]
+!    Default grid associated with this gridcomp.
+!   \item[{[clock]}]
+!    Private clock associated with this gridcomp.
+!   \item[{[config]}]
+!    Already created {\tt Config} object.   If specified, takes
+!    priority over filename.
+!   \item[{[configFile]}]
+!    GridComp-specific configuration filename. 
+!   \item[{[vm]}]
+!    Virtual Machine for this component.  Default is to inherit VM from parent.
+!   \item[{[petlist]}]
+!    List of {\tt PET}s for this component.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+        ! local vars
+        type (ESMF_CompClass), pointer :: compclass      ! generic comp
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize the pointer to null.
+        nullify(ESMF_GridCompCreateGPar%compp)
+        nullify(compclass)
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Allocate a new comp class
+        allocate(compclass, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
+          return
+        endif
+   
+        ! Call construction method to initialize gridcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+                                gridcomptype=gridcomptype, &
+                                configFile=configFile, config=config, &
+                                grid=grid, clock=clock, parent=parent%compp, &
+                                vm=vm, petList=petList, rc=status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "GridComp construction error"
+          return
+        endif
+
+        ! Set return values
+        ESMF_GridCompCreateGPar%compp => compclass
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_GridCompCreateGPar
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with VM enabled
+
+! !INTERFACE:
+      ! Private name; call using ESMF_GridCompCreate()      
+      function ESMF_GridCompCreateCPar(parent, name, delayout, &
+                            gridcomptype, grid, clock, config, configFile, &
+                            vm, petList, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_GridComp) :: ESMF_GridCompCreateCPar
+!
+! !ARGUMENTS:
+      !external :: services
+      type(ESMF_CplComp),  intent(in)  :: parent
+      character(len=*),     intent(in),    optional :: name
+      type(ESMF_newDELayout),  intent(in),    optional :: delayout
+      type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
+      type(ESMF_Grid),      intent(in),    optional :: grid
+      type(ESMF_Clock),     intent(inout), optional :: clock
+      type(ESMF_Config),    intent(in),    optional :: config
+      character(len=*),     intent(in),    optional :: configFile
+      type(ESMF_VM),        intent(in),    optional :: vm
+      integer,              intent(in),    optional :: petList(:)
+      integer,              intent(out),   optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new {\tt ESMF\_GridComp} and set the decomposition characteristics.
+!
+!  The return value is a new {\tt ESMF\_GridComp}.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[parent]
+!    Parent Gridded Component.
+!   \item[{[name]}]
+!    GridComp name.
+!   \item[{[delayout]}]
+!    GridComp delayout.
+!   \item[{[gridcomptype]}]
+!    GridComp model type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
+!   \item[{[grid]}]
+!    Default grid associated with this gridcomp.
+!   \item[{[clock]}]
+!    Private clock associated with this gridcomp.
+!   \item[{[config]}]
+!    Already created {\tt Config} object.   If specified, takes
+!    priority over filename.
+!   \item[{[configFile]}]
+!    GridComp-specific configuration filename. 
+!   \item[{[vm]}]
+!    Virtual Machine for this component.  Default is to inherit VM from parent.
+!   \item[{[petlist]}]
+!    List of {\tt PET}s for this component.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:
+
+        ! local vars
+        type (ESMF_CompClass), pointer :: compclass      ! generic comp
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize the pointer to null.
+        nullify(ESMF_GridCompCreateCPar%compp)
+        nullify(compclass)
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Allocate a new comp class
+        allocate(compclass, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
+          return
+        endif
+   
+        ! Call construction method to initialize gridcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+                                gridcomptype=gridcomptype, &
+                                configFile=configFile, config=config, &
+                                grid=grid, clock=clock, parent=parent%compp, &
+                                vm=vm, petList=petList, rc=status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "GridComp construction error"
+          return
+        endif
+
+        ! Set return values
+        ESMF_GridCompCreateCPar%compp => compclass
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_GridCompCreateCPar
 
 !------------------------------------------------------------------------------
 !BOP

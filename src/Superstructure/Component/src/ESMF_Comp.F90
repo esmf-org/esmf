@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.86 2004/04/19 20:23:54 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.87 2004/04/19 23:16:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,10 +121,11 @@
          character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
          type(ESMF_Grid) :: grid                  ! default grid, gcomp only
          type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
+         type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
          type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
          integer            :: npetlist           ! number of PETs in petlist
          integer, pointer   :: petlist(:)         ! list of usble parent PETs 
-         type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlam
+         type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlan
          type(ESMF_Pointer) :: vm_info            ! holding pointer to info
          type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
       end type
@@ -135,13 +136,46 @@
       sequence
 !      private
 #ifndef ESMF_NO_INITIALIZERS
-          type(ESMF_CompClass), pointer :: compp => NULL()
+         type(ESMF_CompClass), pointer :: compp => NULL()
 #else
-          type(ESMF_CompClass), pointer :: compp
+         type(ESMF_CompClass), pointer :: compp
 #endif
-      
-          type(ESMF_VM) :: vm
+         type(ESMF_VM) :: vm
       end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_CplComp
+!
+!     ! Cplcomp wrapper
+
+      type ESMF_CplComp
+      sequence
+      !private
+#ifndef ESMF_NO_INITIALIZERS
+         type(ESMF_CompClass), pointer :: compp => NULL()
+#else
+         type(ESMF_CompClass), pointer :: compp
+#endif
+         type(ESMF_VM) :: vm
+      end type
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_GridComp
+!
+!     ! Gridcomp wrapper
+
+      type ESMF_GridComp
+      sequence
+      !private
+#ifndef ESMF_NO_INITIALIZERS
+         type(ESMF_CompClass), pointer :: compp => NULL()
+#else
+         type(ESMF_CompClass), pointer :: compp
+#endif
+         type(ESMF_VM) :: vm
+      end type
+
 
 !------------------------------------------------------------------------------
 !     ! Private global variables
@@ -167,6 +201,7 @@
       public ESMF_CompClass, ESMF_CWrap
       public ESMF_CompType
       public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
+      public ESMF_CplComp, ESMF_GridComp
 
 !------------------------------------------------------------------------------
 
@@ -197,7 +232,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.86 2004/04/19 20:23:54 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.87 2004/04/19 23:16:07 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -267,7 +302,7 @@ end function
 
 ! !INTERFACE:
       subroutine ESMF_CompConstruct(compp, ctype, name, delayout, gridcomptype, &
-                          dirPath, configFile, config, grid, clock, &
+                          dirPath, configFile, config, grid, clock, parent, &
                           vm, petlist, rc)
 !
 ! !ARGUMENTS:
@@ -281,6 +316,7 @@ end function
       type(ESMF_Config), intent(in), optional :: config
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
+      type(ESMF_CompClass), pointer, optional :: parent
       type(ESMF_VM), intent(in), optional :: vm
       integer,       intent(in), optional :: petlist(:)
       integer, intent(out), optional :: rc 
@@ -293,8 +329,7 @@ end function
 !   \item[compp]
 !    Component internal structure to be filled in.
 !   \item[ctype]
-!    Component type, where types include: ESMF\_APPCOMP, ESMF\_GRIDCOMP,
-!    ESMF\_CPLCOMP.
+!    Component type, where type is {\tt ESMF\_GRIDCOMP} or {\tt ESMF\_CPLCOMP}.
 !   \item[{[name]}]
 !    Component name.
 !   \item[{[delayout]}]
@@ -314,6 +349,12 @@ end function
 !    Default {\tt grid} for a Gridded {\tt Component}.
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
+!   \item[{[parent]}]
+!    Parent component - if specified, inherit from here.
+!   \item[{[vm]}]
+!    Parent virtual machine.
+!   \item[{[petlist]}]
+!    List of {\tt PET}s for this component.
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -363,8 +404,12 @@ end function
           compp%vm_parent = vm
 !          print *, 'ESMF_CompConstruct, setting up compp%vm_parent'
         else
-          ! When ESMF is fully VM-enabled this should be an error!
-          call ESMF_VMGetGlobal(compp%vm_parent)
+          ! if parent specified, use their vm, else use global.
+          if (present(parent)) then
+            compp%vm_parent = parent%vm_parent
+          else
+            call ESMF_VMGetGlobal(compp%vm_parent)
+          endif
         endif
       
         ! either store or create a delayout

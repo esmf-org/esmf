@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.24 2004/04/13 17:30:46 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.25 2004/04/19 23:16:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,26 +52,7 @@
 
 
 !------------------------------------------------------------------------------
-!     ! ESMF_CplComp
-!
-!     ! Cplcomp wrapper
-
-      type ESMF_CplComp
-      sequence
-      !private
-#ifndef ESMF_NO_INITIALIZERS
-         type(ESMF_CompClass), pointer :: compp => NULL()
-#else
-         type(ESMF_CompClass), pointer :: compp 
-#endif
-      end type
-
-
-!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_CplComp
-
-!------------------------------------------------------------------------------
       public ESMF_CplCompCreate
       public ESMF_CplCompDestroy
 
@@ -107,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.24 2004/04/13 17:30:46 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.25 2004/04/19 23:16:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -124,12 +105,14 @@
         !module procedure ESMF_CplCompCreateNew
         module procedure ESMF_CplCompCreateConf
         module procedure ESMF_CplCompCreateVM
+        module procedure ESMF_CplCompCreateGPar
+        module procedure ESMF_CplCompCreateCPar
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
-!     Coupler {\tt Cplcomp}.  The difference is whether an already
-!     created configuration object is passed in, or a filename of a new
-!     config file which needs to be opened.
+!     Coupler {\tt Cplcomp}.  The various varieties allow the resources
+!     to default, to be specified explicitly, or inherited from a parent
+!     component.
 !
 
 !EOPI
@@ -406,6 +389,196 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateVM
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp from a Parent Component
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CplCompCreate()      
+      function ESMF_CplCompCreateGPar(parent, name, delayout, config, &
+                                      configFile, clock, vm, petList, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_CplComp) :: ESMF_CplCompCreateGPar
+!
+! !ARGUMENTS:
+      type(ESMF_GridComp), intent(in) :: parent
+      character(len=*), intent(in), optional :: name
+      type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_Config), intent(in), optional :: config
+      character(len=*), intent(in), optional :: configFile
+      type(ESMF_Clock), intent(in), optional :: clock
+      type(ESMF_VM), intent(in), optional :: vm
+      integer, intent(in),  optional :: petList(:)
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!
+!  The return value is a new {\tt ESMF\_CplComp}.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[{[parent]}]
+!    Parent component.
+!   \item[{[name]}]
+!    CplComp name.
+!   \item[{[delayout]}]
+!    CplComp delayout.
+!   \item[{[config]}]
+!    Already created {\tt Config} object.  If specified, takes
+!    priority over config filename.
+!   \item[{[configFile]}]
+!    CplComp-specific configuration filename. 
+!   \item[{[clock]}]
+!    CplComp-specific clock.
+!   \item[{[vm]}]
+!    Virtual machine.  If unspecified, inherit parent VM.
+!   \item[{[petlist]}]
+!    List of {\tt PET}s assigned to this component.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! local vars
+        type (ESMF_CompClass), pointer :: compclass      ! generic comp
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize the pointer to null.
+        nullify(ESMF_CplCompCreateGPar%compp)
+        nullify(compclass)
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Allocate a new comp class
+        allocate(compclass, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
+          return
+        endif
+   
+        ! Call construction method to initialize cplcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+                                configFile=configFile, config=config, &
+                                parent=parent%compp, &
+                                vm=vm, petList=petList, clock=clock, rc=status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CplComp construction error"
+          return
+        endif
+
+        ! Set return values
+        ESMF_CplCompCreateGPar%compp => compclass
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_CplCompCreateGPar
+
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp from a Parent Component
+
+! !INTERFACE:
+      ! Private name; call using ESMF_CplCompCreate()      
+      function ESMF_CplCompCreateCPar(parent, name, delayout, config, &
+                                      configFile, clock, vm, petList, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_CplComp) :: ESMF_CplCompCreateCPar
+!
+! !ARGUMENTS:
+      type(ESMF_CplComp), intent(in) :: parent
+      character(len=*), intent(in), optional :: name
+      type(ESMF_newDELayout), intent(in), optional :: delayout
+      type(ESMF_Config), intent(in), optional :: config
+      character(len=*), intent(in), optional :: configFile
+      type(ESMF_Clock), intent(in), optional :: clock
+      type(ESMF_VM), intent(in), optional :: vm
+      integer, intent(in),  optional :: petList(:)
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new {\tt ESMF\_CplComp} and set the decomposition characteristics.
+!
+!  The return value is a new {\tt ESMF\_CplComp}.
+!    
+!  The arguments are:
+!  \begin{description}
+!   \item[{[parent]}]
+!    Parent component.
+!   \item[{[name]}]
+!    CplComp name.
+!   \item[{[delayout]}]
+!    CplComp delayout.
+!   \item[{[config]}]
+!    Already created {\tt Config} object.  If specified, takes
+!    priority over config filename.
+!   \item[{[configFile]}]
+!    CplComp-specific configuration filename. 
+!   \item[{[clock]}]
+!    CplComp-specific clock.
+!   \item[{[vm]}]
+!    Virtual machine.  If unspecified, inherit parent VM.
+!   \item[{[petlist]}]
+!    List of {\tt PET}s assigned to this component.
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! local vars
+        type (ESMF_CompClass), pointer :: compclass      ! generic comp
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize the pointer to null.
+        nullify(ESMF_CplCompCreateCPar%compp)
+        nullify(compclass)
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Allocate a new comp class
+        allocate(compclass, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_CplCplCompCreate: Allocate"
+          return
+        endif
+   
+        ! Call construction method to initialize cplcomp internals
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, delayout, &
+                                configFile=configFile, config=config, &
+                                parent=parent%compp, &
+                                vm=vm, petList=petList, clock=clock, rc=status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "CplComp construction error"
+          return
+        endif
+
+        ! Set return values
+        ESMF_CplCompCreateCPar%compp => compclass
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_CplCompCreateCPar
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.23 2004/02/13 15:38:25 nscollins Exp $
+# $Id: makefile,v 1.24 2004/04/19 23:16:08 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -43,4 +43,8 @@ DIRS	  =
 CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
+
+ESMF_CplComp.o:  ESMF_Comp.o
+
+ESMF_GridComp.o: ESMF_Comp.o
 
