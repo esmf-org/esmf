@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.13 2003/03/21 22:37:06 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.14 2003/05/01 16:44:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -32,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.13 2003/03/21 22:37:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.14 2003/05/01 16:44:57 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -177,8 +177,14 @@
 //
 //EOP
 // !REQUIREMENTS:  
+    int i;
 
-    return ESMF_FAILURE;
+    for (i=0; i<entrycount; i++) 
+        delete entry[i].xp;
+    
+    delete [] entry;
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RTableDestruct
 
