@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.3 2004/01/07 23:01:12 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.4 2004/01/09 22:31:46 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
         integer :: numPhysGridsAlloc           ! number of physgrids allocated
         type (ESMF_PhysGrid), dimension(:), pointer :: physgrids
                                                ! info for all grid descriptions
-                                               ! necessary to define horizontal, 
+                                               ! necessary to define horizontal,
                                                ! staggered and vertical grids
         integer, dimension(:), pointer :: distGridIndex
                                                ! for each physgrid, the index of
@@ -150,12 +150,13 @@
         type (ESMF_DistGrid), dimension(:), pointer :: distgrids       
                                                ! decomposition and other
                                                ! logical space info for grid
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMinCoord
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: globalMaxCoord
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: minGlobalCoordPerDim
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: maxGlobalCoordPerDim
         type (ESMF_LocalArray) :: boundingBoxes
-                                               ! array of bounding boxes on each
-                                               ! DE - used for search routines
-!       type (???) :: search_structure
+                                            ! array of bounding boxes on each DE
+                                            ! used for search routines
+!       type (???) :: searchStructure
+
 
       end type
 
@@ -206,15 +207,19 @@
 !
 ! !PUBLIC DATA MEMBERS:
 
+  ! TODO: add kinds for vertical coordinates
   ! Supported ESMF grid kinds:
   !   ESMF_GridKind_Unknown           ! unknown or undefined grid
   !   ESMF_GridKind_LatLon            ! aligned with longitude,latitude
+  !   ESMF_GridKind_LatLonGauss       ! LatLon with gaussian-spaced latitudes
+  !   ESMF_GridKind_LatLonMercator    ! LatLon with Mercator-spaced latitudes
+  !   ESMF_GridKind_Reduced           ! LatLon with num lon pts a fcn of lat
   !   ESMF_GridKind_Dipole            ! Displaced-pole dipole grid
   !   ESMF_GridKind_Tripole           ! Tripolar grids
   !   ESMF_GridKind_XY                ! aligned with Cartesian x-y coords
+  !   ESMF_GridKind_XYVar             ! XY grid with unequal spacing
   !   ESMF_GridKind_DataStream        ! Data stream - set of locations
   !   ESMF_GridKind_PhysFourier       ! Mixed Fourier/Phys Space grid
-  !   ESMF_GridKind_Reduced           ! reduced grid
   !   ESMF_GridKind_SphericalSpectral ! spectral space:spherical harmonics
   !   ESMF_GridKind_CartSpectral      ! spectral space:Cartesian coords
   !   ESMF_GridKind_Geodesic          ! spherical geodesic grid
@@ -224,17 +229,20 @@
    type (ESMF_GridKind), parameter, public ::              &
       ESMF_GridKind_Unknown           = ESMF_GridKind( 0), &
       ESMF_GridKind_LatLon            = ESMF_GridKind( 1), &
-      ESMF_GridKind_Dipole            = ESMF_GridKind( 3), &
-      ESMF_GridKind_Tripole           = ESMF_GridKind( 4), &
-      ESMF_GridKind_XY                = ESMF_GridKind( 5), &
-      ESMF_GridKind_DataStream        = ESMF_GridKind( 6), &
-      ESMF_GridKind_PhysFourier       = ESMF_GridKind( 7), &
-      ESMF_GridKind_Reduced           = ESMF_GridKind( 9), &
-      ESMF_GridKind_SphericalSpectral = ESMF_GridKind(10), &
-      ESMF_GridKind_CartSpectral      = ESMF_GridKind(11), &
-      ESMF_GridKind_Geodesic          = ESMF_GridKind(12), &
-      ESMF_GridKind_CubedSphere       = ESMF_GridKind(13), &
-      ESMF_GridKind_Exchange          = ESMF_GridKind(14)
+      ESMF_GridKind_LatLonGauss       = ESMF_GridKind( 2), &
+      ESMF_GridKind_LatLonMercator    = ESMF_GridKind( 3), &
+      ESMF_GridKind_Reduced           = ESMF_GridKind( 4), &
+      ESMF_GridKind_Dipole            = ESMF_GridKind( 5), &
+      ESMF_GridKind_Tripole           = ESMF_GridKind( 6), &
+      ESMF_GridKind_XY                = ESMF_GridKind( 7), &
+      ESMF_GridKind_XYVar             = ESMF_GridKind( 8), &
+      ESMF_GridKind_DataStream        = ESMF_GridKind( 9), &
+      ESMF_GridKind_PhysFourier       = ESMF_GridKind(10), &
+      ESMF_GridKind_SphericalSpectral = ESMF_GridKind(11), &
+      ESMF_GridKind_CartSpectral      = ESMF_GridKind(12), &
+      ESMF_GridKind_Geodesic          = ESMF_GridKind(13), &
+      ESMF_GridKind_CubedSphere       = ESMF_GridKind(14), &
+      ESMF_GridKind_Exchange          = ESMF_GridKind(15)
 
    ! Recognized ESMF staggering types
    !   ESMF_GridStagger_Unknown    ! unknown or undefined staggering
@@ -311,7 +319,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.3 2004/01/07 23:01:12 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.4 2004/01/09 22:31:46 pwjones Exp $'
 
 !==============================================================================
 !
@@ -371,7 +379,7 @@
                               coordOrder,      coordIndex,      &
                               numPhysGrids,    numDistGrids,    &
                               periodic,                         &
-                              globalMinCoord,  globalMaxCoord,  rc)
+                              minGlobalCoordPerDim,  maxGlobalCoordPerDim,  rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridType) :: ESMF_GridConstructNew
@@ -390,8 +398,10 @@
       integer,                 intent(in), optional :: numPhysGrids
       integer,                 intent(in), optional :: numDistGrids
 
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: globalMinCoord
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: globalMaxCoord
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                       minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                       maxGlobalCoordPerDim
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
 
       integer, intent(out), optional :: rc
@@ -437,9 +447,9 @@
 !          Integer specifying the number of {\tt ESMF\_DistGrids} necessary
 !          to support the staggered grids and vertical grids aggregated in
 !          this grid structure.
-!     \item[{[globalMinCoord]}]
+!     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
-!     \item[{[globalMaxCoord]}]
+!     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along each coordinate
@@ -493,22 +503,22 @@
       endif
 
 !     Set global domain limits
-      if (present(globalMinCoord)) then
-         if (size(globalMinCoord) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridConstructNew: Error - globalMinCoord too big'
+      if (present(minGlobalCoordPerDim)) then
+         if (size(minGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
+            print *,'ESMF_GridConstructNew: minGlobalCoordPerDim too big'
             return
          endif
-         do i=1,size(globalMinCoord)
-            ESMF_GridConstructNew%globalMinCoord(i) = globalMinCoord(i)
+         do i=1,size(minGlobalCoordPerDim)
+            ESMF_GridConstructNew%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
          enddo
       endif
-      if (present(globalMaxCoord)) then
-         if (size(globalMaxCoord) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridConstructNew: Error - globalMaxCoord too big'
+      if (present(maxGlobalCoordPerDim)) then
+         if (size(maxGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
+            print *,'ESMF_GridConstructNew: maxGlobalCoordPerDim too big'
             return
          endif
-         do i=1,size(globalMaxCoord)
-            ESMF_GridConstructNew%globalMaxCoord(i) = globalMaxCoord(i)
+         do i=1,size(maxGlobalCoordPerDim)
+            ESMF_GridConstructNew%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
          enddo
       endif
 
@@ -532,7 +542,7 @@
                               coordOrder,      coordIndex,      &
                               numPhysGrids,    numDistGrids,    &
                               periodic,                         &
-                              globalMinCoord,  globalMaxCoord,  rc)
+                              minGlobalCoordPerDim,  maxGlobalCoordPerDim,  rc)
 
 !
 ! !ARGUMENTS:
@@ -551,8 +561,10 @@
       integer,                 intent(in), optional :: numPhysGrids
       integer,                 intent(in), optional :: numDistGrids
 
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: globalMinCoord
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: globalMaxCoord
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                       minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                       maxGlobalCoordPerDim
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
 
       integer, intent(out), optional :: rc
@@ -598,9 +610,9 @@
 !          Integer specifying the number of {\tt ESMF\_DistGrids} necessary
 !          to support the staggered grids and vertical grids aggregated in
 !          this grid structure.
-!     \item[{[globalMinCoord]}]
+!     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
-!     \item[{[globalMaxCoord]}]
+!     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along each coordinate
@@ -666,22 +678,22 @@
       endif
 
 !     Set global domain limits
-      if (present(globalMinCoord)) then
-         if (size(globalMinCoord) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridSetAttributes: Error - globalMinCoord too big'
+      if (present(minGlobalCoordPerDim)) then
+         if (size(minGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
+            print *,'ESMF_GridSetAttributes: minGlobalCoordPerDim too big'
             return
          endif
-         do i=1,size(globalMinCoord)
-            grid%ptr%globalMinCoord(i) = globalMinCoord(i)
+         do i=1,size(minGlobalCoordPerDim)
+            grid%ptr%minGlobalCoordPerDim(i) = minGlobalCoordPerDim(i)
          enddo
       endif
-      if (present(globalMaxCoord)) then
-         if (size(globalMaxCoord) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridSetAttributes: Error - globalMaxCoord too big'
+      if (present(maxGlobalCoordPerDim)) then
+         if (size(maxGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
+            print *,'ESMF_GridSetAttributes: maxGlobalCoordPerDim too big'
             return
          endif
-         do i=1,size(globalMaxCoord)
-            grid%ptr%globalMaxCoord(i) = globalMaxCoord(i)
+         do i=1,size(maxGlobalCoordPerDim)
+            grid%ptr%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDim(i)
          enddo
       endif
 
@@ -701,7 +713,7 @@
                               coordOrder,      coordIndex,      &
                               numPhysGrids,    numDistGrids,    &
                               periodic,                         &
-                              globalMinCoord,  globalMaxCoord,  rc)
+                              minGlobalCoordPerDim,  maxGlobalCoordPerDim,  rc)
 
 !
 ! !ARGUMENTS:
@@ -720,8 +732,10 @@
       integer,                    intent(out), optional :: numPhysGrids
       integer,                    intent(out), optional :: numDistGrids
 
-      real(ESMF_KIND_R8), dimension(:), intent(out), optional :: globalMinCoord
-      real(ESMF_KIND_R8), dimension(:), intent(out), optional :: globalMaxCoord
+      real(ESMF_KIND_R8), dimension(:), intent(out), optional :: &
+                                                           minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(out), optional :: &
+                                                           maxGlobalCoordPerDim
       type(ESMF_Logical), dimension(:), intent(out), optional :: periodic
 
       integer, intent(out), optional :: rc
@@ -768,9 +782,9 @@
 !          Integer specifying the number of {\tt ESMF\_DistGrids} necessary
 !          to support the staggered grids and vertical grids aggregated in
 !          this grid structure.
-!     \item[{[globalMinCoord]}]
+!     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
-!     \item[{[globalMaxCoord]}]
+!     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along each coordinate
@@ -824,22 +838,22 @@
       endif
 
 !     Get global domain limits
-      if (present(globalMinCoord)) then
-         if (size(globalMinCoord) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridGetAttributes: Error - globalMinCoord too big'
+      if (present(minGlobalCoordPerDim)) then
+         if (size(minGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
+            print *,'ESMF_GridGetAttributes: minGlobalCoordPerDim too big'
             return
          endif
-         do i=1,size(globalMinCoord)
-            globalMinCoord(i) = grid%ptr%globalMinCoord(i)
+         do i=1,size(minGlobalCoordPerDim)
+            minGlobalCoordPerDim(i) = grid%ptr%minGlobalCoordPerDim(i)
          enddo
       endif
-      if (present(globalMaxCoord)) then
-         if (size(globalMaxCoord) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridGetAttributes: Error - globalMaxCoord too big'
+      if (present(maxGlobalCoordPerDim)) then
+         if (size(maxGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
+            print *,'ESMF_GridGetAttributes: maxGlobalCoordPerDim too big'
             return
          endif
-         do i=1,size(globalMaxCoord)
-            globalMaxCoord(i) = grid%ptr%globalMaxCoord(i)
+         do i=1,size(maxGlobalCoordPerDim)
+            maxGlobalCoordPerDim(i) = grid%ptr%maxGlobalCoordPerDim(i)
          enddo
       endif
 
@@ -1213,8 +1227,8 @@
       grid%numDistGridsAlloc = 0
       deallocate(grid%distgrids)
     
-      grid%globalMinCoord(:) = 0
-      grid%globalMaxCoord(:) = 0
+      grid%minGlobalCoordPerDim(:) = 0
+      grid%maxGlobalCoordPerDim(:) = 0
 
       call ESMF_LocalArrayDestroy(grid%boundingBoxes, rc=status)
       if (status /= ESMF_SUCCESS) then
