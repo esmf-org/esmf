@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.11 2003/08/15 21:33:20 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.12 2003/08/27 22:46:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -312,7 +312,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.11 2003/08/15 21:33:20 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.12 2003/08/27 22:46:11 nscollins Exp $'
 
 !==============================================================================
 !
@@ -329,10 +329,10 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
         module procedure ESMF_LocalArrayCreateByList ! specify TKR
+        module procedure ESMF_LocalArrayCreateByLst1D ! allow integer counts
         module procedure ESMF_LocalArrayCreateBySpec ! specify ArraySpec
 
-        ! Plus interfaces for each T/K/R
-
+        ! Plus interfaces for each T/K/R expanded by macro.
 !EOP
 
 
@@ -544,6 +544,69 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_LocalArrayCreateByLst1D -- Convenience cover for 1D counts
+
+! !INTERFACE:
+      function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_LocalArray) :: ESMF_LocalArrayCreateByLst1D
+!
+! !ARGUMENTS:
+      integer, intent(in) :: rank
+      type(ESMF_DataType), intent(in) :: type
+      type(ESMF_DataKind), intent(in) :: kind
+      integer, intent(in) :: counts !! this is what differs from ...ByList
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
+! uninitialized. The return value is a new LocalArray.
+!
+! The arguments are:
+! \begin{description}
+!
+! \item[rank]
+! In this version of the call rank must be 1. (This interface is simply
+! to allow counts to be a scalar instead of dimension(1), which fortran
+! finds to be a different argument signature.)
+!
+! \item[type]
+! Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
+! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
+! {\tt ESMF\_DATA\_CHARACTER}.
+!
+! \item[kind]
+! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
+! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
+! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!
+! \item[counts]
+! The number of items in the single dimension of the array. This is a
+! scalar. Note that if you call {\tt ESMF\_LocalArrayCreate} with
+! rank $>$ 1 then you must specify a 1D array of counts and the compiler
+! will match the ByList version of this interface instead of this one.
+!
+! \item[{[rc]}]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+! \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        integer, dimension(1) :: countlist
+
+        countlist(1) = counts
+
+        ESMF_LocalArrayCreateByLst1D = &
+               ESMF_LocalArrayCreateByList(rank, type, kind, countlist, rc)
+
+        end function ESMF_LocalArrayCreateByLst1D
+
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_LocalArrayCreateByList -- Create an LocalArray specifying all options.
 
 ! !INTERFACE:
@@ -560,7 +623,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Create a new {\tt ESMF\_LocalArray and allocate data space, which remains
+! Create a new {\tt ESMF\_LocalArray} and allocate data space, which remains
 ! uninitialized. The return value is a new LocalArray.
 !
 ! The arguments are:
