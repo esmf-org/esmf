@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.108 2003/10/16 17:52:04 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.109 2003/10/16 23:13:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -231,7 +231,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.108 2003/10/16 17:52:04 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.109 2003/10/16 23:13:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2167,9 +2167,9 @@
       counts(1) = countsPerDE1(myDE(1)) + 2*gridBoundWidth
       counts(2) = countsPerDE2(myDE(2)) + 2*gridBoundWidth
       i1 = localStart(1) + 1
-      i2 = localStart(1) + counts(1)
+      i2 = localStart(1) + counts(1) + 1
       j1 = localStart(2) + 1
-      j2 = localStart(2) + counts(2)
+      j2 = localStart(2) + counts(2) + 1
       call ESMF_GridSetCoordSpecd(grid, physgridId, numDims, counts, &
                              gridBoundWidth, relloc, coord1(i1:i2), &
                              coord2(j1:j2), localMin, &
@@ -2182,9 +2182,9 @@
       counts(1) = countsPerDE1(myDE(1))
       counts(2) = countsPerDE2(myDE(2))
       i1 = localStart(1) + 1 + gridBoundWidth
-      i2 = i1 + counts(1) - 1
+      i2 = i1 + counts(1)
       j1 = localStart(2) + 1 + gridBoundWidth
-      j2 = j1 + counts(2) - 1
+      j2 = j1 + counts(2)
       call ESMF_GridSetCoordSpecd(grid, physgridId, numDims, counts, 0, relloc, &
                              coord1(i1:i2), coord2(j1:j2), localMin, &
                              total=.false., rc=status)
@@ -2432,7 +2432,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_GridGetCoord(grid, physgridId, relloc, centerCoord, &
-                                   cornerCoord, faceCoord, rc)
+                                   cornerCoord, faceCoord, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2441,6 +2441,7 @@
       type(ESMF_Array), dimension(:), pointer, optional :: centerCoord
       type(ESMF_Array), dimension(:,:), pointer, optional :: cornerCoord
       type(ESMF_Array), optional :: faceCoord
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2470,6 +2471,10 @@
 !          be defined first, followed by the face index.  Faces should
 !          be numbered consistently with corners.  For example, face 1 should
 !          correspond to the face between corners 1,2.
+!     \item[{[total]}]
+!          Logical. If TRUE, return the total coordinates including internally
+!          generated boundary cells. If FALSE return the
+!          computational cells (which is what the user will be expecting.)
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2529,9 +2534,9 @@
       if (present(centerCoord)) then
         call ESMF_PhysGridGetLocations(grid%ptr%physgrids(physIdUse), &
                                        location_array=centerCoord, &
-                                       rc=status)
+                                       total=total, rc=status)
         if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGetLocations: physgrid get locations"
+          print *, "ERROR in ESMF_GridGetCoord: physgrid get locations"
           return
         endif
       endif
@@ -2539,7 +2544,7 @@
         call ESMF_PhysGridGetRegions(grid%ptr%physgrids(physIdUse), &
                                      vertex_array=cornerCoord, rc=status)
         if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGetRegions: physgrid get regions"
+          print *, "ERROR in ESMF_GridGetCoord: physgrid get regions"
           return
         endif
       endif
@@ -3339,9 +3344,9 @@
         status = ESMF_FAILURE
 
       elseif (relloc .eq. ESMF_CELL_CENTER) then
-        do i = 1,counts(1)-1
+        do i = 1,counts(1)
           coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)-1
+          do j = 1,counts(2)
             coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3349,9 +3354,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_NFACE) then
-        do i = 1,counts(1)-1
+        do i = 1,counts(1)
           coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)-1
+          do j = 1,counts(2)
             coordUse2 = coord2(j+1)
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3359,9 +3364,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_SFACE) then
-        do i = 1,counts(1)-1
+        do i = 1,counts(1)
           coordUse1 = 0.5d0*(coord1(i)+coord1(i+1))
-          do j = 1,counts(2)-1
+          do j = 1,counts(2)
             coordUse2 = coord2(j)
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3369,9 +3374,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_EFACE) then
-        do i = 1,counts(1)-1
+        do i = 1,counts(1)
           coordUse1 = coord1(i+1)
-          do j = 1,counts(2)-1
+          do j = 1,counts(2)
             coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3379,9 +3384,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_WFACE) then
-        do i = 1,counts(1)-1
+        do i = 1,counts(1)
           coordUse1 = coord1(i)
-          do j = 1,counts(2)-1
+          do j = 1,counts(2)
             coordUse2 = 0.5d0*(coord2(j)+coord2(j+1))
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
@@ -3389,9 +3394,9 @@
         enddo
 
       elseif (relloc .eq. ESMF_CELL_NECORNER) then
-        do i = 1,counts(1)-1
+        do i = 1,counts(1)
           coordUse1 = coord1(i+1)
-          do j = 1,counts(2)-1
+          do j = 1,counts(2)
             coordUse2 = coord2(j+1)
             temp1(i,j) = coordUse1 
             temp2(i,j) = coordUse2
