@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.4 2003/03/19 08:53:20 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.5 2003/03/20 08:38:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.4 2003/03/19 08:53:20 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.5 2003/03/20 08:38:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -855,6 +855,156 @@
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_BaseTime(==) - BaseTime equality comparison
+//
+// !INTERFACE:
+      bool ESMC_BaseTime::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt BaseTime} with
+//      given {\tt BaseTime}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(S == baseTime.S);
+    // TODO: compare equal Sn/Sd fractions when Sd differs
+
+}  // end ESMC_BaseTime::operator==
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTime(!=) - BaseTime inequality comparison
+//
+// !INTERFACE:
+      bool ESMC_BaseTime::operator!=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
+//
+// !DESCRIPTION:
+//      Compare for inequality the current object's (this) {\tt BaseTime} with
+//      given {\tt BaseTime}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(S != baseTime.S);
+    // TODO:  compare unequal fractions
+
+}  // end ESMC_BaseTime::operator!=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTime(<) - BaseTime less than comparison
+//
+// !INTERFACE:
+      bool ESMC_BaseTime::operator<(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
+//
+// !DESCRIPTION:
+//      Compare for less than the current object's (this) {\tt BaseTime} with
+//      given {\tt BaseTime}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(S < baseTime.S);
+    // TODO:  compare fractions
+
+}  // end ESMC_BaseTime::operator<
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTime(>) - BaseTime greater than comparison
+//
+// !INTERFACE:
+      bool ESMC_BaseTime::operator>(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
+//
+// !DESCRIPTION:
+//      Compare for greater than the current object's (this) {\tt BaseTime} with
+//      given {\tt BaseTime}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(S > baseTime.S);
+    // TODO:  compare fractions
+
+}  // end ESMC_BaseTime::operator>
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTime(<=) - BaseTime less or equal than comparison
+//
+// !INTERFACE:
+      bool ESMC_BaseTime::operator<=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
+//
+// !DESCRIPTION:
+//      Compare for less than or equal the current object's (this)
+//      {\tt BaseTime} with given {\tt BaseTime}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(S <= baseTime.S);
+    // TODO:  compare fractions
+
+}  // end ESMC_BaseTime::operator<=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTime(>=) - BaseTime greater than or equal comparison
+//
+// !INTERFACE:
+      bool ESMC_BaseTime::operator>=(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
+//
+// !DESCRIPTION:
+//      Compare for greater than or equal the current object's (this)
+//      {\tt BaseTime} with given {\tt BaseTime}, return result
+//
+//EOP
+// !REQUIREMENTS:  
+
+    return(S >= baseTime.S);
+    // TODO:  compare fractions
+
+}  // end ESMC_BaseTime::operator>=
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_BaseTime(+) - increment BaseTime
 //
 // !INTERFACE:
@@ -864,11 +1014,11 @@
 //    ESMC_BaseTime result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &Time) {   // in - ESMC_BaseTime increment
+      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
 //
 // !DESCRIPTION:
-//      Increment current object's (this) {\tt BaseTime} with given {\tt Time},
-//      return result
+//      Increment current object's (this) {\tt BaseTime} with given
+//      {\tt BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -877,7 +1027,7 @@
 
     // assume positive values for now ??
     // fractional part addition -- LCD (assume same denominator for now) ??
-    sum.Sn += Time.Sn;
+    sum.Sn += baseTime.Sn;
 
     // normalize (share logic with ESMC_BaseTimeInit() ?? )
     int w;
@@ -888,7 +1038,7 @@
     }
 
     // whole part addition
-    sum.S += Time.S;
+    sum.S += baseTime.S;
 
     return(sum);
 
@@ -905,11 +1055,11 @@
 //    ESMC_BaseTime result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &Time) {   // in - ESMC_BaseTime decrement
+      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
 //
 // !DESCRIPTION:
-//      Decrement current object's (this) {\tt BaseTime} with given {\tt Time},
-//      return result
+//      Decrement current object's (this) {\tt BaseTime} with given
+//      {\tt BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -921,16 +1071,16 @@
     // fractional part subtraction -- LCD (assume same denominator for now) ??
 
     // fractional part subtraction
-    if (diff.Sn < Time.Sn)
+    if (diff.Sn < baseTime.Sn)
     {
         // borrow
         diff.Sn += diff.Sd;
         diff.S--;
     }
-    diff.Sn -= Time.Sn;
+    diff.Sn -= baseTime.Sn;
 
     // whole part subtraction 
-    diff.S -= Time.S;
+    diff.S -= baseTime.S;
 
     return(diff);
 
@@ -947,17 +1097,17 @@
 //    ESMC_BaseTime& result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &Time) {   // in - ESMC_BaseTime increment
+      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
 //
 // !DESCRIPTION:
-//      Increment current object's (this) {\tt BaseTime} with given {\tt Time}
-//
+//      Increment current object's (this) {\tt BaseTime} with given
+//      {\tt BaseTime}
 //EOP
 // !REQUIREMENTS:  
 
     // assume positive values for now ??
     // fractional part addition -- LCD (assume same denominator for now) ??
-    Sn += Time.Sn;
+    Sn += baseTime.Sn;
 
     // normalize (share logic with ESMC_BaseTimeInit() ?? )
     int w;
@@ -968,7 +1118,7 @@
     }
 
     // whole part addition
-    S += Time.S;
+    S += baseTime.S;
 
     return(*this);
 
@@ -985,29 +1135,30 @@
 //    ESMC_BaseTime& result
 //
 // !ARGUMENTS:
-      ESMC_BaseTime &Time) {   // in - ESMC_BaseTime decrement
+      ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
 //
 // !DESCRIPTION:
-//      Decrement current object's (this) {\tt BaseTime} with given {\tt Time}
+//      Decrement current object's (this) {\tt BaseTime} with given
+//      {\tt BaseTime}
 //
 //EOP
 // !REQUIREMENTS:  
 
     // assume positive values for now ??
-    // assume this > Time and both normalized for now ??
+    // assume this > baseTime and both normalized for now ??
     // fractional part subtraction -- LCD (assume same denominator for now) ??
 
     // fractional part subtraction
-    if (Sn < Time.Sn)
+    if (Sn < baseTime.Sn)
     {
         // borrow
         Sn += Sd;
         S--;
     }
-    Sn -= Time.Sn;
+    Sn -= baseTime.Sn;
 
     // whole part subtraction 
-    S -= Time.S;
+    S -= baseTime.S;
 
     return(*this);
 
