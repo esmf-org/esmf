@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/04/10 23:11:12 flanigan Exp $ 
+# $Id: makefile,v 1.14 2003/04/15 20:24:11 svasquez Exp $ 
 
 ALL:  tests
 
@@ -47,10 +47,10 @@ $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest: ESMF_ArrayF90PtrUTest.o
 	${RM} ESMF_ArrayF90PtrUTest.o
 
 RUN_ESMF_ArrayF90PtrUTest:
-	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
 
 RUN_ESMF_ArrayF90PtrUTestUNI:
-	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest > $(ESMF_TESTDIR)/ESMF_ArrayF90PtrUTest.stdout
 
 ESMF_ArrayF90PtrUTest.rm:
 	-@echo "ESMF_ArrayF90Ptr.rm target called here."
@@ -62,10 +62,10 @@ $(ESMF_TESTDIR)/ESMF_ArrayUTest: ESMF_ArrayUTest.o
 	${RM} ESMF_ArrayUTest.o
 
 RUN_ESMF_ArrayUTest:
-	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
 
 RUN_ESMF_ArrayUTestUNI:
-	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayUTest > $(ESMF_TESTDIR)/ESMF_ArrayUTest.stdout
 
 ESMF_ArrayUTest.rm:
 	-@echo "ESMF_ArrayTest.rm target called here."
@@ -77,10 +77,10 @@ $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest: ESMF_ArrayBasicUTest.o
 	${RM} ESMF_ArrayBasicUTest.o
 
 RUN_ESMF_ArrayBasicUTest:
-	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
 
 RUN_ESMF_ArrayBasicUTestUNI:
-	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest > $(ESMF_TESTDIR)/ESMF_ArrayBasicUTest.stdout
 
 ESMF_ArrayBasic.rm:
 	-@echo "ESMF_ArrayBasic.rm target called here."

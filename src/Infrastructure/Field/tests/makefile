@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2003/04/10 23:13:12 svasquez Exp $ 
+# $Id: makefile,v 1.16 2003/04/15 20:28:22 svasquez Exp $ 
 
 ALL:  tests
 
@@ -51,7 +51,7 @@ RUN_ESMF_BundleUTest:
 
 RUN_ESMF_BundleUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
 
 ESMF_BundleUTest.rm:
 	echo "ESMF_BundleUTest.rm target called here."
@@ -65,11 +65,11 @@ $(ESMC_TESTDIR)/ESMF_FieldUTest: ESMF_FieldUTest.o
 
 RUN_ESMF_FieldUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
 
 RUN_ESMF_FieldUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldUTest > $(ESMC_TESTDIR)/ESMF_FieldUTest.stdout
 
 ESMF_FieldUTest.rm:
 	echo "ESMF_FieldUTest.rm target called here."
@@ -86,11 +86,11 @@ $(ESMC_TESTDIR)/ESMF_FRouteUTest: ESMF_FRouteUTest.o
 
 RUN_ESMF_FRouteUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
 
 RUN_ESMF_FRouteUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FRouteUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FRouteUTest > $(ESMC_TESTDIR)/ESMF_FRouteUTest.stdout
 
 ESMF_FRouteUTest.rm:
 	echo "ESMF_FRouteUTest.rm target called here."

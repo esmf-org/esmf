@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/03/28 17:57:44 jwolfe Exp $
+# $Id: makefile,v 1.7 2003/04/15 20:29:27 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -50,12 +50,12 @@ ESMF_GridCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_GridCreateEx: ESMF_GridCreateEx.o  chkopts
-	${F90CXXLD} -o ESMF_GridCreateEx ESMF_GridCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${F90CXXLD} -o ESMF_GridCreateEx ESMF_GridCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_GridCreateEx.o
 
 RUN_ESMF_GridCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_GridCreateEx.tmps
-	${MPIRUN} -np 4 ESMF_GridCreateEx > ESMF_GridCreateEx.stdout
+	-${MPIRUN} -np 4 ESMF_GridCreateEx > ESMF_GridCreateEx.stdout
 
 RUN_ESMF_GridCreateExUNI:
 	echo "ESMF_GridCreateEx not set up to run on one processor."

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/04/09 23:48:43 flanigan Exp $
+# $Id: makefile,v 1.7 2003/04/15 20:20:13 svasquez Exp $
 
 ALL:  tests
 
@@ -33,11 +33,11 @@ $(ESMC_TESTDIR)/ESMF_DELayoutUTest: chkopts ESMF_DELayoutUTest.o
 
 RUN_ESMF_DELayoutUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
 
 RUN_ESMF_DELayoutUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
 
 ESMF_DELayoutUTest.rm:
 	echo "ESMF_DELayoutTest.rm target called here."

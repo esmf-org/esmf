@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/25 00:17:57 flanigan Exp $ 
+# $Id: makefile,v 1.11 2003/04/15 20:22:02 svasquez Exp $ 
 
 ALL:  examples
 
@@ -37,12 +37,12 @@ ESMF_ArrayCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_ArrayCreateEx: ESMF_ArrayCreateEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_ArrayCreateEx ESMF_ArrayCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	-${F90CXXLD} -g -o ESMF_ArrayCreateEx ESMF_ArrayCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMF_ArrayCreateEx.o
 
 RUN_ESMF_ArrayCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmps
-	${MPIRUN} -np 4 ESMF_ArrayCreateEx > ESMF_ArrayCreateEx.stdout
+	-${MPIRUN} -np 4 ESMF_ArrayCreateEx > ESMF_ArrayCreateEx.stdout
 	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_ArrayCreateEx.tmp
 	#@if (diff ESMF_ArrayCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_ArrayCreateEx.out) then \
 	#echo "PASS ArrayCreateEx test" > ${ESMC_TESTDIR}/ESMF_ArrayCreateEx.log; else \
@@ -51,7 +51,7 @@ RUN_ESMF_ArrayCreateEx:
 
 RUN_ESMF_ArrayCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayCreateEx.tmps
-	${MPIRUN} -np 1 ESMF_ArrayCreateEx > ESMF_ArrayCreateEx.stdout
+	-${MPIRUN} -np 1 ESMF_ArrayCreateEx > ESMF_ArrayCreateEx.stdout
 	#@sort -t, -k2 testlog | cut -d, -f4- > ESMF_ArrayCreateEx.tmp
 	#@if (diff ESMF_ArrayCreateEx.tmp ${ESMF_DIR}/${LOCDIR}/output/ESMF_ArrayCreateEx.outuni) then \
 	#echo "PASS ArrayCreateEx test" > ${ESMC_TESTDIR}/ESMF_ArrayCreateEx.log; else \

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/28 17:30:34 svasquez Exp $ 
+# $Id: makefile,v 1.5 2003/04/15 20:27:00 svasquez Exp $ 
 
 ALL: 
 
@@ -42,16 +42,16 @@ ESMF_FieldCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_FieldCreateEx: ESMF_FieldCreateEx.o  chkopts
-	${F90CXXLD} -o ESMF_FieldCreateEx ESMF_FieldCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${F90CXXLD} -o ESMF_FieldCreateEx ESMF_FieldCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_FieldCreateEx.o
 
 RUN_ESMF_FieldCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmps
-	${MPIRUN} -np 4 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
+	-${MPIRUN} -np 4 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
 
 RUN_ESMF_FieldCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldCreateEx.tmps
-	${MPIRUN} -np 1 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
+	-${MPIRUN} -np 1 ESMF_FieldCreateEx > ESMF_FieldCreateEx.stdout
 
 ESMF_FieldCreateEx.rm:
 	echo "ESMF_FieldCreateEx.rm target called here."
@@ -61,32 +61,32 @@ ESMF_BundleCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_BundleCreateEx: ESMF_BundleCreateEx.o  chkopts
-	${F90CXXLD} -o ESMF_BundleCreateEx ESMF_BundleCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${F90CXXLD} -o ESMF_BundleCreateEx ESMF_BundleCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_BundleCreateEx.o
 
 RUN_ESMF_BundleCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmps
-	${MPIRUN} -np 4 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
+	-${MPIRUN} -np 4 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
 
 RUN_ESMF_BundleCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleCreateEx.tmps
-	${MPIRUN} -np 1 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
+	-${MPIRUN} -np 1 ESMF_BundleCreateEx > ESMF_BundleCreateEx.stdout
 
 ESMF_BundleCreateEx.rm:
 	echo "ESMF_BundleCreateEx.rm target called here."
 
 
 ESMC_FieldCreateEx: ESMC_FieldCreateEx.o  chkopts
-	${CXXF90LD} -o ESMC_FieldCreateEx ESMC_FieldCreateEx.o ${ESMC_TIME_LIB} -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	-${CXXF90LD} -o ESMC_FieldCreateEx ESMC_FieldCreateEx.o ${ESMC_TIME_LIB} -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMC_FieldCreateEx.o
 
 RUN_ESMC_FieldCreateEx:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmps
-	${MPIRUN} -np 4 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
+	-${MPIRUN} -np 4 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
 
 RUN_ESMC_FieldCreateExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldCreateEx.tmps
-	${MPIRUN} -np 1 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
+	-${MPIRUN} -np 1 ESMC_FieldCreateEx > ESMC_FieldCreateEx.stdout
 
 ESMC_FieldCreateEx.rm:
 	echo "ESMC_FieldCreateEx.rm target called here."
