@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2003/10/09 20:56:14 cdeluca Exp $
+! $Id: user_model1.F90,v 1.2 2003/10/10 18:54:30 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -98,10 +98,11 @@
         type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         integer :: nDE_i, nDE_j
-        real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+        real(ESMF_KIND_R8) :: g_min(2), g_max(2)
         integer :: counts(2)
         integer :: ni, nj, de_id
-        integer :: horz_gridtype, horz_stagger, horz_coord_system
+        integer :: horz_gridtype, horz_stagger
+        type(ESMF_CoordSystem) :: horz_coord_system
         integer :: status, myde
 
         print *, "User Comp Init starting"
@@ -112,17 +113,16 @@
         ! Add a "humidity" field to the export state.
         counts(1) = 40
         counts(2) = 20
-        x_min = 0.0
-        x_max = 20.0
-        y_min = 0.0
-        y_max = 5.0
+        g_min(1) = 0.0
+        g_max(1) = 20.0
+        g_min(2) = 0.0
+        g_max(2) = 5.0
         horz_gridtype = ESMF_GridType_XY
         horz_stagger = ESMF_GridStagger_A
         horz_coord_system = ESMF_CoordSystem_Cartesian
 
-        grid1 = ESMF_GridCreate(counts=counts, &
-                                x_min=x_min, x_max=x_max, &
-                                y_min=y_min, y_max=y_max, &
+        grid1 = ESMF_GridCreate(2, counts=counts, &
+                                min=g_min, max=g_max, &
                                 layout=layout, &
                                 horz_gridtype=horz_gridtype, &
                                 horz_stagger=horz_stagger, &
