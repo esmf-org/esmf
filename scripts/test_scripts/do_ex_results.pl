@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.14 2005/02/11 21:32:34 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.15 2005/02/15 20:29:25 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -33,7 +33,7 @@ getopts("d:b:", \%options);
 	find(\&allFiles, '.'); 
 	sub allFiles {
 			# Put all files in a list
-	 		push all_files, "$File::Find::name\n" if -e ; 
+	 		push all_files, "$File::Find::name\n" if -T ; 
 	}	
 	# Get all example files
 	@ex_files=grep (/Ex/, @all_files);
