@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.6 2004/05/12 22:04:00 cpboulder Exp $
+// $Id: ESMC_LogErr_F.C,v 1.7 2004/05/17 19:22:35 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.6 2004/05/12 22:04:00 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.7 2004/05/17 19:22:35 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -141,7 +141,7 @@ extern "C" {
     struct tm ti;
     struct timeval tv;	
     gettimeofday(&tv,NULL);
-    ti=*localtime(&tv.tv_sec);
+    ti=*localtime((const time_t*)&tv.tv_sec);
     *y=ti.tm_year+1900;
     *mn=ti.tm_mon;
     *d=ti.tm_mday;
