@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.12 2004/04/28 23:11:47 cdeluca Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.13 2004/05/26 11:38:07 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -127,8 +127,8 @@
       counts[i] = global_dimlengths[i];
     }
 
-    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, &thisde,
-                                  NULL, NULL, NULL, NULL);
+    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &thisde,
+                                  NULL, NULL, NULL, 0);
 
     // create array with global data buffer
     if (thisde == deid) {
@@ -214,8 +214,8 @@
       counts[i] = ai_comp[i].max;
     }
 
-    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, NULL, &thisde,
-                                  NULL, NULL, NULL, NULL);
+    delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &thisde,
+                                  NULL, NULL, NULL, 0);
 
     // switch based on datatype  TODO: this might be a good place to use templates
     switch (this->type) {
