@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.19 2004/04/14 21:52:18 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.20 2004/04/15 21:31:55 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -32,17 +32,15 @@
     type(ESMF_newDELayout) :: layout1, deflayout
     type(ESMF_VM) :: vm
     !integer, dimension(12) :: delist
-    integer, dimension(4) :: delist
+    !integer, dimension(4) :: delist
+    !integer :: i
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: i, ndes, de_id, rc
+    integer :: ndes, de_id, rc
 
     ! width of halo region
     integer, parameter :: halo_width = 2
 
-    ! route handle
-    type(ESMF_RouteHandle), save :: routehandle
-        
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
 
@@ -74,7 +72,7 @@
 
     deflayout = ESMF_newDELayoutCreate(vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGetNumDEs(deflayout, ndes, rc)
+    call ESMF_newDELayoutGet(deflayout, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     !if (ndes .ne. 12) then
     !    print *, "This system test needs to run 12-way, current np = ", ndes
@@ -85,7 +83,7 @@
         goto 10
     endif
 
-    call ESMF_newDELayoutGetDEId(deflayout, de_id, rc) 
+    call ESMF_newDELayoutGetDE(deflayout, de=de_id, rc=rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
@@ -93,7 +91,7 @@
     !layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
     !delist = (/ (i, i=0, 3) /)
     !layout1 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
-    layout1 = ESMF_DELayoutCreate(delist, (/ 2, 2 /), rc=rc)
+    layout1 = ESMF_newDELayoutCreate(vm, (/ 2, 2 /), rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test FieldHalo"
@@ -244,9 +242,9 @@
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-      type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
+      type(ESMF_GridType) :: horz_gridtype
+      type(ESMF_GridStagger) :: horz_stagger
+      type(ESMF_CoordSystem) :: horz_coord_system
       real(ESMF_KIND_R8) :: min(2), max(2)
       character(len=ESMF_MAXSTR) :: gname, fname
 
@@ -274,7 +272,7 @@
       grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
-                              layout=layout1, &
+                              delayout=layout1, &
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
@@ -284,7 +282,7 @@
       print *, "Grid Create returned"
 
       ! Figure out our local processor id to use as data in the Field.
-      call ESMF_newDELayoutGetDEID(layout1, de_id, rc=rc)
+      call ESMF_newDELayoutGetDE(layout1, de=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
@@ -331,7 +329,6 @@
       enddo
 
       ! and have the framework precompute the halo communication patterns
-      routehandle = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldHaloStore(field1, routehandle, rc=rc)
 
       print *, "Exiting Initialization routine"
@@ -360,7 +357,6 @@
       integer :: rc
 
       ! Local variables
-      type(ESMF_Route) :: route
       type(ESMF_Field) :: field1
 
       print *, "Entering Run routine"
@@ -410,7 +406,7 @@
       integer :: rc
 
       ! Local variables
-      integer :: i, j, ni, nj, xpos, ypos, nx, ny
+      integer :: i, j, ni, nj, xpos, ypos, pos(2), nx, ny, ncount(2)
       integer :: de_id, mismatch, target
       integer :: pattern(3,3)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
@@ -425,13 +421,11 @@
       ! release the saved information about the communications
       call ESMF_FieldHaloRelease(routehandle, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_RouteHandleDestroy(routehandle, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get layout from component
       call ESMF_GridCompGet(comp, delayout=layout, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_newDELayoutGetDEID(layout, de_id, rc=rc)
+      call ESMF_newDELayoutGetDE(layout, de=de_id, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get Field from import state
@@ -460,9 +454,15 @@
 
       ! get info about total number of DEs in each dim and which one
       ! we are.  then use them to compute the values in the halo.
-      call ESMF_newDELayoutGetSize(layout, nx, ny, rc)
+      !call ESMF_newDELayoutGet(layout, nx, ny, rc)
+      call ESMF_newDELayoutGet(layout, deCountPerDim=ncount, rc=rc)
+      nx = ncount(1)
+      ny = ncount(2)
       if (rc .ne. ESMF_SUCCESS) goto 30
-      call ESMF_newDELayoutGetDEPosition(layout, xpos, ypos, rc)
+      !call ESMF_newDELayoutGetDEPosition(layout, xpos, ypos, rc)
+      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
+      xpos = pos(1)
+      ypos = pos(2)
       if (rc .ne. ESMF_SUCCESS) goto 30
 
    
