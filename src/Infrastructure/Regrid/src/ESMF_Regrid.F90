@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.5 2002/11/07 13:51:20 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.6 2002/11/07 18:31:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid.F90,v 1.5 2002/11/07 13:51:20 cdeluca Exp $'
+      '$Id: ESMF_Regrid.F90,v 1.6 2002/11/07 18:31:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -183,7 +183,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[name] 
+!     \item[[name]] 
 !          {\tt Regrid} name.
 !     \item[arg2]
 !          Argument 2.         
@@ -273,7 +273,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_RegridType), intent(in) :: regrid
-      character (len = *), intent(in), optional :: name  ! arg3
+      character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
@@ -353,50 +353,6 @@
 !  code goes here
 !
       end subroutine ESMF_RegridDestruct
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: 
-!     ESMF_RegridInit - Initialize a Regrid 
-
-! !INTERFACE:
-      subroutine ESMF_RegridInit(regrid, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Regrid), intent(in) :: regrid   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt Regrid} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy and 
-!     Construct/Destruct.  Can be overloaded like ESMF_RegridCreate
-!     via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[regrid]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_RegridInit
 
 !------------------------------------------------------------------------------
 !BOP
