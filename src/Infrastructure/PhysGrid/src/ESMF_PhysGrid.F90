@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.83 2004/10/14 18:59:31 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.84 2004/11/17 19:20:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.83 2004/10/14 18:59:31 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.84 2004/11/17 19:20:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1974,6 +1974,106 @@
 !
 !      end subroutine ESMF_PhysGridSearchBboxSphericalPoint
 !
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSearchMyDECartPt"
+!BOPI
+! !IROUTINE: ESMF_PhysGridSrchMyDECartPt - Search grid on this DE for a point
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSearchMyDECartPt(physgrid, dstAdd, point, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_PhysGrid), intent(in) :: physgrid
+      integer, dimension(2) :: dstAdd
+      real(kind=ESMF_KIND_R8), dimension(2), intent(in) :: point
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     This routine searches for the location in the grid of a grid cell 
+!     containing the point given by the input x,y coordinates.  This 
+!     instantiation uses a simple bounding box check to search the
+!     grid and is therefore only applicable to grids where the logical
+!     and physical axes are aligned and logically-rectangular.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          {\tt ESMF\_PhysGrid} to search for location.
+!     \item[dstAdd]
+!          Address of grid cell containing the search point.
+!     \item[point]
+!          Coordinates of search point.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+!REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ! local variables
+      integer :: i, ib, ie, j, jb, je
+      real(ESMF_KIND_R8) ::  cellMinX,  cellMaxX,  cellMinY,  cellMaxY
+      real(ESMF_KIND_R8) :: localMinX, localMaxX, localMinY, localMaxY
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: cornerX, cornerY
+
+      ! Initialize return code - assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! initialize destination address to zero
+      dstAdd = 0
+
+      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
+                             ESMF_DATA_REF, rc)
+      call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(2), cornerY, &
+                             ESMF_DATA_REF, rc)
+
+      ! extract local minima and maxima from the vertex arrays
+      localMinX = minval(cornerX)
+      localMaxX = maxval(cornerX)
+      localMinY = minval(cornerY)
+      localMaxY = maxval(cornerY)
+
+      ! first check the bounding box for myDE
+      if (point(1) < localMinX .OR. &
+          point(1) > localMaxX .OR. &
+          point(2) < localMinY .OR. &
+          point(2) > localMaxY) return ! point not in this DE
+
+      ! point may be somewhere in this DE, loop through the cells on the DE
+
+      ! get jb,je,ib,ie for the grid corners
+      ib = 2
+      ie = size(cornerX,2) - 1
+      jb = 2
+      je = size(cornerY,3) - 1
+
+      do j   = jb,je     !jb,je correspond to exclusive domain on this DE
+        do i = ib,ie     !ib,ie ditto
+
+          ! check bounding box of local grid cell
+          cellMinX = minval(cornerX(:,i,j))
+          cellMaxX = maxval(cornerX(:,i,j))
+          cellMinY = minval(cornerY(:,i,j))
+          cellMinY = maxval(cornerY(:,i,j))
+
+          if (point(1).gt.cellMinX .AND. point(1).le.cellMaxX .AND. &
+              point(2).gt.cellMinY .AND. point(2).le.cellMaxY) then ! point is in this cell
+            dstAdd(1) = i         ! local address of this cell
+            dstAdd(2) = j         ! local address of this cell
+            if (present(rc)) rc = ESMF_SUCCESS
+            return
+          endif
+
+        enddo
+      enddo
+
+      ! set return code
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSearchMyDECartPt
+
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_PhysGridSearchBboxCartesianPoint"
