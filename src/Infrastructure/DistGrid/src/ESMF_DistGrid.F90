@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.79 2003/10/16 18:22:59 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.80 2003/10/16 23:13:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.79 2003/10/16 18:22:59 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.80 2003/10/16 23:13:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1430,19 +1430,19 @@
       if (present(total)) then
         if (total) then
           glob => dgtype%global_total
-          bnd = dgtype%grid_boundary_width * 2
+          bnd  = dgtype%grid_boundary_width * 2
         endif
       endif
 
       ! Calculate number of local counts on each DE, respecting the setting
       ! of the total parameter - if set, this includes boundary cells. 
-      do j = 1,nDE(1)
-        do i = 1,nDE(2)
-          de = (i-1)*nDE(1) + j
-          glob%local_cell_count(de) = (countsPerDE1(j) + bnd) *   &
-                                        (countsPerDE2(i) + bnd)
-          glob%local_axis_length(de,1) = countsPerDE1(j) + bnd
-          glob%local_axis_length(de,2) = countsPerDE2(i) + bnd
+      do i = 1,nDE(1)
+        do j = 1,nDE(2)
+          de = (j-1)*nDE(1) + i
+          glob%local_cell_count(de) = (countsPerDE1(i) + bnd) *   &
+                                      (countsPerDE2(j) + bnd)
+          glob%local_axis_length(de,1) = countsPerDE1(i) + bnd
+          glob%local_axis_length(de,2) = countsPerDE2(j) + bnd
         enddo
       enddo
 
@@ -1450,33 +1450,33 @@
       ! First in the 1 decomposition
 
       global_start = 1
-      global_end = 0
+      global_end   = bnd
       
-      do j = 1,nDE(1)
-        global_end = global_end + countsPerDE1(j) + bnd
-        do i = 1,nDE(2)
-          de = (i-1)*nDE(1) + j
+      do i = 1,nDE(1)
+        global_end = global_end + countsPerDE1(i)
+        do j = 1,nDE(2)
+          de = (j-1)*nDE(1) + i
           glob%global_start(de,1) = global_start - 1
           glob%ai_global(de,1)%min = global_start
           glob%ai_global(de,1)%max = global_end
         enddo
-        global_start = global_end - bnd/2 + 1
+        global_start = global_end - bnd + 1
       enddo
-      do j = 1,nDE(1)
-        do i = 1,nDE(2)
-          de = (i-1)*nDE(1) + j
+      do i = 1,nDE(1)
+        do j = 1,nDE(2)
+          de = (j-1)*nDE(1) + i
           glob%ai_global(de,1)%stride = global_end
           if (present(periodic)) then
             if (periodic(1).eq.ESMF_TRUE) &
             glob%ai_global(de,1)%stride = global_end + countsPerDE1(1) &
-                                            + countsPerDE1(nDE(1))
+                                                     + countsPerDE1(nDE(1))
           endif
         enddo
       enddo
 
       ! Then the 2 decomposition
       global_start = 1
-      global_end = 0
+      global_end   = bnd
       ! TODO: this code was removed from the 1 decomp case above.  should it be
       !  removed from here as well?
       if (present(periodic)) then
@@ -1487,14 +1487,14 @@
       endif
 
       do j = 1,nDE(2)
-        global_end = global_end + countsPerDE2(j) + bnd
+        global_end = global_end + countsPerDE2(j)
         do i = 1,nDE(1)
           de = (j-1)*nDE(1) + i
           glob%global_start(de,2) = global_start - 1
           glob%ai_global(de,2)%min = global_start
           glob%ai_global(de,2)%max = global_end
         enddo
-        global_start = global_end - bnd/2 + 1
+        global_start = global_end - bnd + 1
       enddo
       do j = 1,nDE(2)
         do i = 1,nDE(1)
@@ -1503,7 +1503,7 @@
           if (present(periodic)) then
             if (periodic(2).eq.ESMF_TRUE) &
             glob%ai_global(de,2)%stride = global_end + countsPerDE2(1) &
-                                            + countsPerDE2(nDE(2))
+                                                     + countsPerDE2(nDE(2))
           endif
         enddo
       enddo
