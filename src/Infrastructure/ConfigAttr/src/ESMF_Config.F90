@@ -347,7 +347,7 @@
       iret = 0
 
       deallocate(cf%buffer, cf%this_line, stat = iret)
-      if(rc /= 0) then
+      if(iret /= 0) then
 ! SUBSTITUTE:  call perr(myname_,'deallocate(...%..)', iret)
          print *, myname_,'deallocate(...%..)', iret
       endif
@@ -858,7 +858,7 @@
 
       ESMF_ConfigGetInt = n
       if( present( rc )) rc = iret
-
+      
       return
     end function ESMF_ConfigGetInt
 
@@ -872,11 +872,11 @@
 ! !IROUTINE: ESMF_ConfigGetChar - gets a characer
 !
 ! !INTERFACE:
-
-!    character function ESMF_ConfigGetChar( cf, label, size, default, rc )
-    character function ESMF_ConfigGetChar( cf, label, default, rc )
+!
+!!    character function ESMF_ConfigGetChar( cf, label, size, default, rc )
+    function ESMF_ConfigGetChar( cf, label, default, rc )
       implicit none
-
+      character ESMF_ConfigGetChar
       type(ESMF_Config), intent(inout)       :: cf       ! ESMF Configuration
       character(len=*), intent(in), optional :: label    ! label
 !      integer, intent(in), optional          :: size     ! number of  
@@ -1146,4 +1146,4 @@
 
 
     
-  end module ESMF_ConfigMod
+    end module ESMF_ConfigMod
