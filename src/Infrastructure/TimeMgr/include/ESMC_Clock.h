@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.17 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.18 2003/08/30 00:07:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,8 @@
     int ESMC_ClockGetAlarmList(ESMC_Alarm ***alarmList, int *numAlarms) const;
     int ESMC_ClockGetAlarmList(ESMC_Alarm **alarmList, int *numAlarms) const;
 
-    int ESMC_ClockAdvance(ESMC_TimeInterval *timeStep, int *numRingingAlarms=0);
+    int ESMC_ClockAdvance(ESMC_TimeInterval *timeStep=0,
+                          int *numRingingAlarms=0);
     int ESMC_ClockAdvance(ESMC_Alarm *ringingList=0, int *NumRingingAlarms=0);
     // TMG3.4.1  after increment, for each alarm,
     //           calls ESMC_Alarm::CheckActive()
