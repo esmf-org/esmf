@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.9 2004/12/02 17:45:29 nscollins Exp $
+! $Id: user_coupler.F90,v 1.10 2004/12/07 17:04:05 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -114,7 +114,7 @@
       print *, "done with both reconcile calls"
 
 
-#if 1
+#if 0
       ! TODO: once we have the reconcile calls sending out all the
       ! right data turn the 1 into a 0 to remove all the following code.
       ! reconcile will create the objects itself which we are
@@ -214,11 +214,11 @@
         !   call ESMF_StatePrint(exportState, rc=status)
 
       endif
+#endif
   
-      print *, pet_id, "User Comp 2 Init returning"
+      print *, pet_id, "User Comp 2 Init past commented-out code"
   
       ! end of new code 
-#endif
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
       print *, "Import State contains ", itemcount, " items."
