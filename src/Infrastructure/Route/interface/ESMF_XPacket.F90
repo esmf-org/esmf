@@ -1,4 +1,4 @@
-! $Id: ESMF_XPacket.F90,v 1.5 2003/03/21 20:22:25 nscollins Exp $
+! $Id: ESMF_XPacket.F90,v 1.6 2003/07/09 17:51:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,10 +52,10 @@
       sequence
       private
         integer :: rank
-        integer :: left
-        integer :: right
+        integer :: offset
+        integer :: contig_length
         integer :: stride(ESMF_MAXDIM)
-        integer :: num(ESMF_MAXDIM)
+        integer :: rep_count(ESMF_MAXDIM)
       end type
 
 !------------------------------------------------------------------------------
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_XPacket.F90,v 1.5 2003/03/21 20:22:25 nscollins Exp $'
+      '$Id: ESMF_XPacket.F90,v 1.6 2003/07/09 17:51:10 jwolfe Exp $'
 
 !==============================================================================
 
@@ -91,15 +91,15 @@
 ! !IROUTINE: ESMF_XPacketInit - Initialize a XPacket 
 
 ! !INTERFACE:
-      subroutine ESMF_XPacketInit(xpacket, rank, left, right, stride, num, rc)
+      subroutine ESMF_XPacketInit(xpacket, rank, offset, contig_length, stride, rep_count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_XPacket), intent(inout) :: xpacket   
       integer, intent(in) :: rank
-      integer, intent(in) :: left
-      integer, intent(in) :: right
+      integer, intent(in) :: offset
+      integer, intent(in) :: contig_length
       integer, intent(in) :: stride(:)
-      integer, intent(in) :: num(:)
+      integer, intent(in) :: rep_count(:)
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -112,13 +112,13 @@
 !          Class to be initialized.
 !     \item[rank] 
 !          Argument 1.
-!     \item[left]
+!     \item[offset]
 !          Argument 2.         
-!     \item[right] 
+!     \item[contig\_length] 
 !          Argument 3.
 !     \item[stride] 
 !          Argument 4.
-!     \item[num]
+!     \item[rep\_count]
 !          Argument 5.         
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -142,10 +142,10 @@
         endif
  
         xpacket%rank = rank
-        xpacket%left = left
-        xpacket%right = right
+        xpacket%offset = offset
+        xpacket%contig_length = contig_length
         xpacket%stride = stride
-        xpacket%num = num
+        xpacket%rep_count = rep_count
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -312,9 +312,9 @@
         if (present(rc)) rc = ESMF_FAILURE
 
         print *, "XPacket Print:"
-        print *, "  Rank=", xpacket%rank, " Left=", xpacket%left, &
-                 " Right=", xpacket%right
-        print *, "  Strides=", xpacket%stride, " Nums=", xpacket%num
+        print *, "  Rank=", xpacket%rank, " Left=", xpacket%offset, &
+                 " Right=", xpacket%contig_length
+        print *, "  Strides=", xpacket%stride, " Nums=", xpacket%rep_count
 
         if (present(rc)) rc = ESMF_SUCCESS
 
