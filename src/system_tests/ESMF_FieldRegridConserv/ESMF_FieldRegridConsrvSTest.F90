@@ -1,7 +1,6 @@
-! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.1 2004/06/02 20:40:58 jwolfe Exp $
+! $Id: ESMF_FieldRegridConsrvSTest.F90,v 1.2 2004/06/02 23:10:18 jwolfe Exp $
 !
-! System test code FieldRegrid
-!  Description on Sourceforge under System Test #79497
+! System test code FieldRegridConserv
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -9,22 +8,22 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test FieldRegrid.  
+! System test FieldRegridConserv.  
 !   Regrid test.  2 components and 1 coupler, one-way coupling.
 !                 The first component has a uniform A-grid.  It has
 !                 a Field whose data is set to a given geometric function,
 !
 !                 10.0 + 5.0*sin((X/Xmax)*pi) + 2.0*sin((Y/Ymax)*pi)
 !
-!                 and then regridded to the second component, which has a
-!                 non-uniform D-grid.  The regridded data is then compared
-!                 to the function's solution for a measurement of the
-!                 accuracy of the Regrid.  Those values are output for
-!                 each DE.
+!                 and then regridded using first-order conservative regrid
+!                 to the second component, which has a non-uniform D-grid.
+!                 The regridded data is then compared to the function's
+!                 solution for a measurement of the accuracy of the Regrid.
+!                 Those values are output for each DE.
 !
 !\begin{verbatim}
 
-    program FieldRegrid
+    program FieldRegridConserv
 
 #include <ESMF_Macros.inc>
 
@@ -66,9 +65,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "-------------------------------- "
-    print *, "Start of System Test FieldRegrid:"
-    print *, "-------------------------------- "
+    print *, "--------------------------------------- "
+    print *, "Start of System Test FieldRegridConserv:"
+    print *, "--------------------------------------- "
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -260,21 +259,21 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegrid complete."
+10    print *, "System Test FieldRegridConserv complete."
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
 
       ! Normal ESMF Test output
       write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test FieldRegrid: Field Regrid"
+      write(testname, *) "System Test FieldRegridConserv: Field Regrid"
 
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS: Regrid test finished correctly."
+        write(finalMsg, *) "SUCCESS: RegridConserv test finished correctly."
       else
         write(finalMsg, *) "System Test did not succeed.  Error code ", rc
       endif
@@ -287,7 +286,7 @@
   
     call ESMF_Finalize(rc) 
 
-    end program FieldRegrid
+    end program FieldRegridConserv
     
 !\end{verbatim}
     
