@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.57 2004/05/18 22:36:53 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.58 2004/05/18 22:41:29 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.57 2004/05/18 22:36:53 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.58 2004/05/18 22:41:29 eschwab Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -484,7 +484,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 {
 	int result=false;
 	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	ESMC_LogWrite(ESMC_LogGetErrMsg(rcToReturn),ESMC_LOG_ERROR);
+	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR);
 	result=true;
 	return result;
 
@@ -514,7 +514,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 {
 	int result=false;
 	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-	ESMC_LogWrite(ESMC_LogGetErrMsg(rcToReturn),ESMC_LOG_ERROR,LINE,FILE,method);
+	ESMC_LogWrite(ESMC_LogGetErrMsg(ESMC_RC_MEM),ESMC_LOG_ERROR,LINE,FILE,method);
 	result=ESMF_TRUE;
 	return true;
 }
@@ -541,7 +541,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 {
     int result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    ESMC_LogWrite(strcat(ESMC_LogGetErrMsg(rcToReturn),msg),ESMC_LOG_ERROR);
+    ESMC_LogWrite(strcat(ESMC_LogGetErrMsg(ESMC_RC_MEM),msg),ESMC_LOG_ERROR);
     result=true;
     return result;
 
@@ -572,7 +572,7 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 {
     int result=false;
     if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
-    ESMC_LogWrite(strcat(ESMC_LogGetErrMsg(rcToReturn),msg),ESMC_LOG_ERROR,LINE,FILE,method);
+    ESMC_LogWrite(strcat(ESMC_LogGetErrMsg(ESMC_RC_MEM),msg),ESMC_LOG_ERROR,LINE,FILE,method);
     result=ESMF_TRUE;
     return true;
 }
