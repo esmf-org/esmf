@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.19 2004/03/11 17:03:26 svasquez Exp $
+! $Id: ESMF_DataMap.F90,v 1.20 2004/03/11 19:57:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.19 2004/03/11 17:03:26 svasquez Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.20 2004/03/11 19:57:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -501,7 +501,7 @@ end function
 ! !DESCRIPTION:
 !      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
 !
-!      The arguments are:
+!     The arguments are:
 !     \begin{description}
 !     \item [datamap]
 !           An {\tt ESMF\_DataMap} object.
@@ -593,7 +593,7 @@ end function
 !      ESMF routine to set the contents of a {\tt ESMF\_DataMap} type
 !      to an uninitialized value.
 !
-!      The arguments are:
+!     The arguments are:
 !     \begin{description}
 !     \item [datamap]
 !           An {\tt ESMF\_DataMap} object.
@@ -837,7 +837,7 @@ end function
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
 !
-       The arguments are:
+!     The arguments are:
 !     \begin{description}
 !     \item [datamap]
 !           {\tt ESMF\_DataMap} object to save.
