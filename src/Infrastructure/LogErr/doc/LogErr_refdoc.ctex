@@ -1,4 +1,4 @@
-% $Id: LogErr_refdoc.ctex,v 1.13 2004/03/24 20:00:59 cdeluca Exp $
+% $Id: LogErr_refdoc.ctex,v 1.14 2004/06/08 13:54:08 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,9 +81,9 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_LogErr_fapi}
+\input{../../Base/doc/ESMF_LogErr_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/ESMF_LogErr_fapi}
+\input{../Infrastructure/Base/doc/ESMF_LogErr_fapi}
 #endif
 
 %#ifdef STANDALONE
