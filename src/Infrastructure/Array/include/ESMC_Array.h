@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.32 2004/06/03 12:17:38 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.33 2004/09/21 18:00:35 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,11 +180,12 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                        ESMC_AxisIndex *ai_global, int global_dimlengths[],
                        int decompids[], int size_decomp, ESMC_Logical periodic[]);
     int ESMC_ArrayGather(ESMC_DELayout *delayout, int decompids[], 
-                            int size_decomp, int global_dimlengths[],
-                            int local_maxlength[], int deid, ESMC_Array **Array_out);
+                         int size_decomp, int local_axislengths[],
+                         int global_dimlengths[], int local_maxlength[],
+                         int deid, ESMC_Array **Array_out);
     int ESMC_ArrayScatter(ESMC_DELayout *delayout,
-                            int decompids[], int size_decomp,
-                            int deid, ESMC_Array **Array_out);
+                          int decompids[], int size_decomp,
+                          int deid, ESMC_Array **Array_out);
     
  // < declare the rest of the public interface methods here >
   

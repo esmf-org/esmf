@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm_F.C,v 1.10 2004/06/14 15:47:51 theurich Exp $
+// $Id: ESMC_ArrayComm_F.C,v 1.11 2004/09/21 18:01:30 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,11 +61,12 @@ extern "C" {
 
      void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_DELayout **delayout,
                                   int *decompids,  int *size_decomp,
-                                  int *global_dimlengths, int *local_maxlengths,                                   int *deid,
+                                  int *local_axislengths, int *global_dimlengths, 
+                                  int *local_maxlengths, int *deid,
                                   ESMC_Array **Array_out, int *status) {
           *status = (*ptr)->ESMC_ArrayGather(*delayout, decompids, *size_decomp,
-                                             global_dimlengths, local_maxlengths,
-                                             *deid, Array_out);
+                                             local_axislengths, global_dimlengths,
+                                             local_maxlengths, *deid, Array_out);
      }
 
      void FTN(c_esmc_arrayscatter)(ESMC_Array **ptr, ESMC_DELayout **delayout,
