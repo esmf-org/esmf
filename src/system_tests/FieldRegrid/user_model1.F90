@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2003/09/22 17:36:44 jwolfe Exp $
+! $Id: user_model1.F90,v 1.3 2003/09/23 16:31:09 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -96,7 +96,7 @@
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
         type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-        integer, dimension(:,:), pointer :: idata
+        real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
         integer :: nDE_i, nDE_j
         real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
         integer :: counts(ESMF_MAXGRIDDIM)
@@ -135,8 +135,8 @@
         call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
         ! Set up a 2D integer array
-        call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
-                                kind=ESMF_I4)
+        call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+                                kind=ESMF_R8)
 
         ! Create the field and have it create the array internally
         humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
@@ -147,7 +147,7 @@
         call ESMF_ArrayGetData(array1, idata, rc=rc)
 
         ! Set initial data values over whole array to our de id
-        idata = de_id
+        idata = real(de_id)
 
         call ESMF_StateAddData(exportstate, humidity, rc)
         call ESMF_StatePrint(exportstate, rc=rc)
@@ -172,7 +172,7 @@
 !     ! Local variables
         type(ESMF_Field) :: humidity
         type(ESMF_Array) :: array1
-        integer, dimension(:,:), pointer :: idata
+        real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
         integer :: status
         type(mylocaldata), pointer :: mydatablock
         type(wrapper) :: wrap
@@ -203,7 +203,7 @@
         call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
 
         ! increment data values in place
-        idata = idata + 10
+        idata = idata + 10.0
      
 
         call ESMF_StatePrint(exportstate, rc=status)

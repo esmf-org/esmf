@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2003/09/22 17:37:02 jwolfe Exp $
+! $Id: user_model2.F90,v 1.3 2003/09/23 16:31:23 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -88,7 +88,7 @@
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
-      integer, dimension(:,:), pointer :: idata
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
@@ -144,7 +144,7 @@
       call ESMF_ArrayGetData(array1, idata, rc=rc)
 
       ! Set initial data values over exclusive domain to the de identifier
-      idata = de_id
+      idata = real(de_id)
 
       call ESMF_StateAddData(importstate, humidity, rc)
       call ESMF_StatePrint(importstate, rc=rc)
