@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.16 2003/03/04 15:03:36 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.17 2003/03/04 16:41:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.16 2003/03/04 15:03:36 nscollins Exp $'
+      '$Id: ESMF_class.F90,v 1.17 2003/03/04 16:41:05 nscollins Exp $'
 
 !==============================================================================
 !
@@ -232,7 +232,7 @@
       subroutine ESMF_<Class>Destroy(<class>, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>   
+      type(ESMF_<Class>), intent(inout) :: <class>   
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
@@ -424,7 +424,7 @@
       subroutine ESMF_<Class>Init(<class>, arg1, arg2, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>   
+      type(ESMF_<Class>), intent(inout) :: <class>   
       integer, intent(in), optional :: arg1                       
       integer, intent(in), optional :: arg2                       
       character (len = *), intent(in), optional :: name 
@@ -524,7 +524,7 @@
       subroutine ESMF_<Class>SetConfig(<class>, config, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>
+      type(ESMF_<Class>), intent(inout) :: <class>
       integer, intent(in) :: config   
       integer, intent(out), optional :: rc             
 
@@ -626,7 +626,7 @@
       subroutine ESMF_<Class>Set(<Class>, value1, value2, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>
+      type(ESMF_<Class>), intent(inout) :: <class>
       integer, intent(in), optional :: value1
       integer, intent(in), optional :: value2
       integer, intent(out), optional :: rc            
