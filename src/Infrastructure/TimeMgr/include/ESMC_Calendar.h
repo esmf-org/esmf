@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.19 2003/09/10 23:59:41 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.20 2003/09/12 16:49:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 // converting core time to calendar time and vice versa.
 //
 // Notes:
-//    - Instantiate as few as possilbe; ideally no more than one calendar
+//    - Instantiate as few as possible; ideally no more than one calendar
 //      type per application (for reference only, like a wall calendar)
 //      But may have multiples for convienience such as one per component.
 //    - Generic enough to define for any planetary body
