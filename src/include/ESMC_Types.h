@@ -1,4 +1,4 @@
-// $Id: ESMC_Types.h,v 1.1 2002/10/23 20:19:34 eschwab Exp $
+// $Id: ESMC_Types.h,v 1.2 2002/10/28 23:32:44 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,23 +27,22 @@
 //-------------------------------------------------------------------------
 
 // 32-bit machines/compilers
-#if ESMF_ARCH == linux_lf95 || ESMF_ARCH == linux_pgi ||
-                               ESMF_ARCH == linux_gnupgf90 ||
-                               ESMF_ARCH == IRIX ||
-                               ESMF_ARCH == rs6000_sp ||
-                               ESMF_ARCH == solaris ||
-                               ESMF_ARCH == solaris_hpc
+#if ESMF_IS_32BIT_MACHINE
+
    #define INT64  long long
    #define UINT64 unsigned long long
    #define INT32  long
    #define UINT32 unsigned long
 
 // 64-bit machines/compilers
-#elif ESMF_ARCH == alpha || ESMF_ARCH == IRIX64 || ESMF_ARCH == rs6000_64
+#elif ESMF_IS_64BIT_MACHINE
 
    #define INT64  long
    #define UINT64 unsigned long
    #define INT32  int
    #define UINT32 unsigned int
 
+#endif // machine word length
+
 #endif // ESMF_TYPE_H
+
