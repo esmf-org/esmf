@@ -40,6 +40,7 @@
       use ESMF_IOMod
 
       ! associated derived types
+      use ESMF_CalendarMod
       use ESMF_TimeIntervalMod
       use ESMF_TimeMod
       use ESMF_AlarmTypeMod
@@ -96,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.43 2004/02/04 23:24:01 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.44 2004/02/05 21:28:03 eschwab Exp $'
 
 !==============================================================================
 !
@@ -435,7 +436,7 @@
       subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
                                runDuration, runTimeStepCount, refTime, &
                                currTime, prevTime, currSimTime, prevSimTime, &
-                               advanceCount, alarmCount, rc)
+                               calendar, timeZone, advanceCount, alarmCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
@@ -450,6 +451,8 @@
       type(ESMF_Time),         intent(out), optional :: prevTime
       type(ESMF_TimeInterval), intent(out), optional :: currSimTime
       type(ESMF_TimeInterval), intent(out), optional :: prevSimTime
+      type(ESMF_Calendar),     intent(out), optional :: calendar
+      integer,                 intent(out), optional :: timeZone
       integer(ESMF_KIND_I8),   intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: alarmCount
       integer,                 intent(out), optional :: rc
@@ -487,6 +490,10 @@
 !     \item[{[prevSimTime]}]
 !          The previous simulation time.  Equals currSimTime at
 !          the previous time step.
+!     \item[{[calendar]}]
+!          The {\tt Calendar} on which all the {\tt Clock}'s times are defined.
+!     \item[{[timeZone]}]
+!          The timezone within which all the {\tt Clock}'s times are defined.
 !     \item[{[advanceCount]}]
 !          The number of times the {\tt ESMF\_Clock} has been advanced.
 !     \item[{[alarmCount]}]
@@ -517,7 +524,7 @@
                            timeStep, startTime, stopTime, &
                            runDuration, runTimeStepCount, refTime, &
                            currTime, prevTime, currSimTime, prevSimTime, &
-                           advanceCount, alarmCount, rc)
+                           calendar, timeZone, advanceCount, alarmCount, rc)
 
       ! copy temp name back to given name to restore native F90 storage style
       if (present(name)) then

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.48 2004/02/04 23:24:00 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.49 2004/02/05 21:28:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.48 2004/02/04 23:24:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.49 2004/02/05 21:28:05 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -302,6 +302,8 @@ int ESMC_Clock::count=0;
       ESMC_Time         *prevTime,         // out
       ESMC_TimeInterval *currSimTime,      // out
       ESMC_TimeInterval *prevSimTime,      // out
+      ESMC_Calendar    **calendar,         // out
+      int               *timeZone,         // out
       ESMF_KIND_I8      *advanceCount,     // out
       int               *alarmCount) {     // out
 
@@ -350,6 +352,35 @@ int ESMC_Clock::count=0;
     // Get the clock's previous simulation time
     if (prevSimTime != ESMC_NULL_POINTER) {
       *prevSimTime = (this->prevTime - this->refTime);
+    }
+
+    if (calendar != ESMC_NULL_POINTER) {
+      // get calendar from currTime, but could get from any other clock Time,
+      //   since they all use the same calendar
+      // TODO: use native C++ Get, not F90 entry point, when ready
+      this->currTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      calendar);
+    }
+    if (timeZone != ESMC_NULL_POINTER) {
+      // get timeZone from currTime, but could get from any other clock Time,
+      //   since they all are in the same timezone
+      // TODO: use native C++ Get, not F90 entry point, when ready
+      this->currTime.ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                      ESMC_NULL_POINTER, timeZone);
     }
 
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;

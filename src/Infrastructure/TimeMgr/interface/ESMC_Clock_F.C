@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.26 2004/02/04 23:24:00 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.27 2004/02/05 21:28:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,6 +131,8 @@ extern "C" {
                                  ESMC_Time *prevTime,
                                  ESMC_TimeInterval *currSimTime,
                                  ESMC_TimeInterval *prevSimTime,
+                                 ESMC_Calendar **calendar, 
+                                 int *timeZone,
                                  ESMF_KIND_I8 *advanceCount,
                                  int *alarmCount,
                                  int *status) {
@@ -161,6 +163,10 @@ extern "C" {
                                           ESMC_NULL_POINTER : currSimTime),
                  ((void*) prevSimTime  == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : prevSimTime),
+                 ((void*)calendar      == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : calendar),
+                 ((void*)timeZone      == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : timeZone),
                  ((void*) advanceCount == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : advanceCount),
                  ((void*) alarmCount   == (void*)ESMC_BAD_POINTER ?
