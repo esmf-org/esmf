@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.15 2004/05/10 15:47:30 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.16 2004/05/25 11:17:39 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -62,20 +62,18 @@
 
     mincoords = (/  0.0,  0.0 /)
     mincoords = (/ 20.0, 30.0 /)
-    srcgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
+    srcgrid = ESMF_GridCreateHorz_XYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzGridType=ESMF_GridType_XY, &
-                   horzStagger=ESMF_GridStagger_A, &
-                   horzCoordSystem=ESMF_CoordSystem_Cartesian, &
-                   delayout=layout1, name="srcgrid", rc=rc)
+                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                   name="srcgrid", rc=rc)
+    call ESMF_GridDistribute(srcgrid, delayout=layout1, rc=rc)
 
     ! same grid coordinates, but different layout
-    dstgrid = ESMF_GridCreateLogRectUniform(2, (/ 90, 180 /), &
+    dstgrid = ESMF_GridCreateHorz_XYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
-                   horzGridType=ESMF_GridType_XY, &
-                   horzStagger=ESMF_GridStagger_A, &
-                   horzCoordSystem=ESMF_CoordSystem_Cartesian, &
-                   delayout=layout2, name="srcgrid", rc=rc)
+                   horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
+                   name="srcgrid", rc=rc)
+    call ESMF_GridDistribute(srcgrid, delayout=layout2, rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -162,7 +160,7 @@
 
     call ESMF_FieldRegridStore(field1, field2, layout1, &
                                routehandle=regrid_rh, &
-                               regridtype=ESMF_RegridMethod_Bilinear, rc=rc)
+                               regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
     call ESMF_FieldRegrid(field1, field2, regrid_rh, rc=rc)

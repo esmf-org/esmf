@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.24 2004/05/10 15:43:36 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.25 2004/05/25 11:22:18 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -53,8 +53,9 @@
     call ESMF_VMGetGlobal(vm, rc)
     layout = ESMF_DELayoutCreate(vm, rc=rc)
     origin = (/ 0.0, 0.0 /)
-    grid = ESMF_GridCreateLogRectUniform(2, (/ 10, 20 /), origin, &
-                                         delayout=layout, name="atmgrid", rc=rc)
+    grid = ESMF_GridCreateHorz_XYUni((/ 10, 20 /), origin, name="atmgrid", rc=rc)
+    call ESMF_GridDistribute(grid, delayout=layout, rc=rc)
+
     allocate(f90ptr1(10,20))
     arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
 !EOC
