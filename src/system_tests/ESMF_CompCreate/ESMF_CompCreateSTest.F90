@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.11 2004/05/27 22:47:00 jwolfe Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.12 2004/06/11 02:12:59 cdeluca Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -88,9 +88,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-      imp = ESMF_StateCreate("grid import state", ESMF_STATEIMPORT, rc=rc)
+      imp = ESMF_StateCreate("grid import state", ESMF_STATE_IMPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
-      exp = ESMF_StateCreate("grid export state", ESMF_STATEEXPORT, rc=rc)
+      exp = ESMF_StateCreate("grid export state", ESMF_STATE_EXPORT, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_GridCompInitialize(comp1, imp, exp, phase=1, rc=rc)

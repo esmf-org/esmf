@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.29 2004/05/27 22:47:39 jwolfe Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.30 2004/06/11 02:12:59 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -87,7 +87,7 @@
 !-------------------------------------------------------------------------
 !  Init section
 !
-    import = ESMF_StateCreate("gridded comp import", ESMF_STATEIMPORT, rc=rc)
+    import = ESMF_StateCreate("gridded comp import", ESMF_STATE_IMPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_GridCompInitialize(comp1, importState=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10

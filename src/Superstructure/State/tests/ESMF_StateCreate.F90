@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.6 2004/04/09 19:54:14 eschwab Exp $
+! $Id: ESMF_StateCreate.F90,v 1.7 2004/06/11 02:12:59 cdeluca Exp $
 !
 ! Test code which creates a new State.
 
@@ -49,7 +49,7 @@
 
     sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, rc=rc)  
+    state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StatePrint")
@@ -73,7 +73,7 @@
 
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)  
+    state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     bname="Surface pressure"
@@ -135,7 +135,7 @@
 
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state3 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)
+    state3 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Downward wind"
@@ -226,7 +226,7 @@
 
     sname = "Sea Ice Export"
     P_IN("ESMF_StateCreate")
-    state4 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)
+    state4 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Surface pressure"
@@ -324,12 +324,12 @@
 
     sname = "Coupler Statelist"
     P_IN("ESMF_StateCreate")
-    state5 = ESMF_StateCreate(sname, ESMF_STATELIST, rc=rc)  
+    state5 = ESMF_StateCreate(sname, ESMF_STATE_LIST, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, rc=rc)  
+    state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StateAddData (State)")
@@ -338,7 +338,7 @@
 
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
-    state2 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)  
+    state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StateAddData (State)")
@@ -384,7 +384,7 @@
 
     sname = "Atmosphere Import"
     P_IN("ESMF_StateCreate")
-    state1 = ESMF_StateCreate(sname, ESMF_STATEIMPORT, rc=rc)  
+    state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     P_IN("ESMF_StateAddData (Array)")

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.52 2004/06/10 23:39:50 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.53 2004/06/11 02:12:58 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,10 +61,10 @@
       end type
 
       type(ESMF_StateImpExpType), parameter :: &
-                ESMF_STATEIMPORT   = ESMF_StateImpExpType(1), &
-                ESMF_STATEEXPORT   = ESMF_StateImpExpType(2), &
-                ESMF_STATELIST     = ESMF_StateImpExpType(3), &
-                ESMF_STATEINVALID  = ESMF_StateImpExpType(4)
+                ESMF_STATE_IMPORT   = ESMF_StateImpExpType(1), &
+                ESMF_STATE_EXPORT   = ESMF_StateImpExpType(2), &
+                ESMF_STATE_LIST     = ESMF_StateImpExpType(3), &
+                ESMF_STATE_INVALID  = ESMF_StateImpExpType(4)
 
 !------------------------------------------------------------------------------
 !     ! ESMF_StateObjectType
@@ -232,8 +232,8 @@
       public ESMF_StateObjectType, ESMF_STATEBUNDLE, ESMF_STATEFIELD, &
                                    ESMF_STATEARRAY, ESMF_STATESTATE, &
                                    ESMF_STATEDATANAME
-      public ESMF_StateImpExpType, ESMF_STATEIMPORT, ESMF_STATEEXPORT, &
-                                   ESMF_STATELIST
+      public ESMF_StateImpExpType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
+                                   ESMF_STATE_LIST
       public ESMF_StateDataNeeded, ESMF_STATEDATAISNEEDED, &
                                    ESMF_STATEDATANOTNEEDED
       public ESMF_StateDataReady,  ESMF_STATEDATAREADYTOWRITE, &
@@ -291,7 +291,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.52 2004/06/10 23:39:50 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.53 2004/06/11 02:12:58 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1501,8 +1501,8 @@ end function
 !    if none is specified.
 !   \item[{[statetype]}]
 !    Import or Export {\tt ESMF\_State}.  Valid values are 
-!    {\tt ESMF\_STATEIMPORT}, {\tt ESMF\_STATEEXPORT}, 
-!    or {\tt ESMF\_STATELIST} The default is {\tt ESMF\_STATELIST}.
+!    {\tt ESMF\_STATE\_IMPORT}, {\tt ESMF\_STATE\_EXPORT}, 
+!    or {\tt ESMF\_STATE\_LIST} The default is {\tt ESMF\_STATE\_LIST}.
 !   \item[{[bundles]}]
 !    A list (fortran array) of {\tt ESMF\_Bundle}s.
 !   \item[{[fields]}]
@@ -1626,7 +1626,7 @@ end function
                                  ESMF_CONTEXT, rc)
           return
         endif
-        if (state%statep%st .eq. ESMF_STATEINVALID) then
+        if (state%statep%st .eq. ESMF_STATE_INVALID) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "State uninitialized or already destroyed", &
                                  ESMF_CONTEXT, rc)
@@ -1681,8 +1681,8 @@ end function
 !       Name of this {\tt ESMF\_State}.
 !      \item[{[stateType]}]
 !       Import or Export {\tt ESMF\_State}.  Returns either 
-!       {\tt ESMF\_STATEIMPORT},
-!       {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.
+!       {\tt ESMF\_STATE\_IMPORT},
+!       {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.
 !      \item[{[itemCount]}]
 !        Count of items in {\tt state}, including all objects
 !        as well as placeholder names.
@@ -2719,7 +2719,7 @@ end function
           return
         endif
   
-        if (stypep%st .eq. ESMF_STATEINVALID) then
+        if (stypep%st .eq. ESMF_STATE_INVALID) then
           print errmsg, "invalid State in statelist, number", i
           dummy=EM_LogMsgFoundError(ESMF_RC_OBJ_BAD, errmsg, rc)
           return
@@ -3007,13 +3007,13 @@ end function
        if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-     !jw  if (sp%st .eq. ESMF_STATEIMPORT) write(msgbuf, *) "  Import State"
-     !jw  if (sp%st .eq. ESMF_STATEEXPORT) write(msgbuf, *) "  Export State"
-     !jw  if (sp%st .eq. ESMF_STATELIST) write(msgbuf, *) "  State List"
-       if (sp%st .eq. ESMF_STATEIMPORT) write(*, *) "  Import State"
-       if (sp%st .eq. ESMF_STATEEXPORT) write(*, *) "  Export State"
-       if (sp%st .eq. ESMF_STATELIST) write(*, *) "  State List"
-       if (sp%st .eq. ESMF_STATEINVALID) then
+     !jw  if (sp%st .eq. ESMF_STATE_IMPORT) write(msgbuf, *) "  Import State"
+     !jw  if (sp%st .eq. ESMF_STATE_EXPORT) write(msgbuf, *) "  Export State"
+     !jw  if (sp%st .eq. ESMF_STATE_LIST) write(msgbuf, *) "  State List"
+       if (sp%st .eq. ESMF_STATE_IMPORT) write(*, *) "  Import State"
+       if (sp%st .eq. ESMF_STATE_EXPORT) write(*, *) "  Export State"
+       if (sp%st .eq. ESMF_STATE_LIST) write(*, *) "  State List"
+       if (sp%st .eq. ESMF_STATE_INVALID) then
            if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "Uninitialized or already destroyed State", &
                                   ESMF_CONTEXT, rc)) return
@@ -3226,7 +3226,7 @@ end function
           return
       endif
 
-      if (state%statep%st .eq. ESMF_STATEINVALID) then
+      if (state%statep%st .eq. ESMF_STATE_INVALID) then
           dummy=ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                  "State uninitialized or already destroyed", &
                                   ESMF_CONTEXT, rc)
@@ -3416,9 +3416,9 @@ end function
 !   \item[{[statename]}]
 !    Name of this {\tt ESMF\_State} object. 
 !   \item[{[statetype]}]
-!    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATEIMPORT},
-!    {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.   
-!    {\tt ESMF\_STATELIST} is the default if not specified.
+!    Import or Export {\tt State}.  Should be one of {\tt ESMF\_STATE\_IMPORT},
+!    {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.   
+!    {\tt ESMF\_STATE\_LIST} is the default if not specified.
 !   \item[{[bundles]}]
 !    An array of {\tt Bundles}.
 !   \item[{[fields]}]
@@ -3604,9 +3604,9 @@ end function
 !       \item[{[stypep]}]
 !       Internal StateType pointer.  Required.
 !       \item[{[statetype]}]
-!        Import or Export {\tt State}.  One of {\tt ESMF\_STATEIMPORT},
-!        {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.  Default is 
-!        {\tt ESMF\_STATELIST}.
+!        Import or Export {\tt State}.  One of {\tt ESMF\_STATE\_IMPORT},
+!        {\tt ESMF\_STATE\_EXPORT}, or {\tt ESMF\_STATE\_LIST}.  Default is 
+!        {\tt ESMF\_STATE\_LIST}.
 !       \item[{[statename]}]
 !        Name of this {\tt ESMF\_State} object.  Optional.  If a name is not
 !        specified one will be generated.
@@ -3632,7 +3632,7 @@ end function
         if (present(statetype)) then
           stypep%st = statetype
         else
-          stypep%st = ESMF_STATELIST
+          stypep%st = ESMF_STATE_LIST
         endif
         stypep%statestatus = ESMF_STATUS_READY
         stypep%alloccount = 0
@@ -3682,7 +3682,7 @@ end function
         ! with each entry.  note that we are not freeing the objects
         ! themselves; they could be added to multiple states.  it is
         ! the user's responsibility to delete them when finished.
-        stypep%st = ESMF_STATEINVALID
+        stypep%st = ESMF_STATE_INVALID
         stypep%statestatus = ESMF_STATUS_INVALID
         if (stypep%datacount .gt. 0) then
           do i = 1, stypep%datacount
@@ -4642,7 +4642,7 @@ end function
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_StateTypeAddStateList
+      end subroutine ESMF_StateTypeAddSTATE\_LIST
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

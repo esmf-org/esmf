@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.18 2004/05/27 23:07:28 jwolfe Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.19 2004/06/11 02:13:00 cdeluca Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -168,16 +168,16 @@
 !------------------------------------------------------------------------------
  
       ! Create import/export states for Injection Component
-      INimp = ESMF_StateCreate("Injection Input", ESMF_STATEIMPORT, rc=rc)
-      INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATEEXPORT, rc=rc)
+      INimp = ESMF_StateCreate("Injection Input", ESMF_STATE_IMPORT, rc=rc)
+      INexp = ESMF_StateCreate("Injection Feedback", ESMF_STATE_EXPORT, rc=rc)
 
       call ESMF_GridCompInitialize(INcomp, INimp, INexp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Injection Model Initialize finished, rc =", rc
  
       ! Create import/export states for FlowSolver Component
-      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, rc=rc)
-      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, rc=rc)
+      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATE_IMPORT, rc=rc)
+      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATE_EXPORT, rc=rc)
 
       call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10

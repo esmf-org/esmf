@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.13 2004/06/04 08:24:38 nscollins Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.14 2004/06/11 02:12:59 cdeluca Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -170,12 +170,12 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
-    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATEEXPORT, cname1)
+    c1exp = ESMF_StateCreate("comp1 export", ESMF_STATE_EXPORT, cname1)
     call ESMF_GridCompInitialize(comp1, exportState=c1exp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1 Initialize finished, rc =", rc
  
-    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATEIMPORT, cname2)
+    c2imp = ESMF_StateCreate("comp2 import", ESMF_STATE_IMPORT, cname2)
     call ESMF_GridCompInitialize(comp2, importState=c2imp, clock=clock, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "Comp 1a Initialize finished, rc =", rc

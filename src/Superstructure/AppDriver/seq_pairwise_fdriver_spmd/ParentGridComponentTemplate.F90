@@ -1,4 +1,4 @@
-! $Id: ParentGridComponentTemplate.F90,v 1.9 2004/06/08 17:52:50 nscollins Exp $
+! $Id: ParentGridComponentTemplate.F90,v 1.10 2004/06/11 02:12:57 cdeluca Exp $
 !
 ! Template code for a Gridded Component which creates 3 child Components:
 !  two Gridded Components which perform a computation and a Coupler component
@@ -99,11 +99,11 @@
 
       ! Now create Import and Export State objects in order to pass data
       ! between the Coupler and the Gridded Components
-      G1imp = ESMF_StateCreate("GComp1 Import", ESMF_STATEIMPORT)
-      G1exp = ESMF_StateCreate("GComp1 Export", ESMF_STATEEXPORT)
+      G1imp = ESMF_StateCreate("GComp1 Import", ESMF_STATE_IMPORT)
+      G1exp = ESMF_StateCreate("GComp1 Export", ESMF_STATE_EXPORT)
 
-      G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATEIMPORT)
-      G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATEEXPORT)
+      G2imp = ESMF_StateCreate("GComp2 Import", ESMF_STATE_IMPORT)
+      G2exp = ESMF_StateCreate("GComp2 Export", ESMF_STATE_EXPORT)
 
       ! Now give each of the subcomponents a chance to initialize themselves.
       call ESMF_GridCompInitialize(comp1Grid, G1imp, G1exp, parentclock, rc=rc)

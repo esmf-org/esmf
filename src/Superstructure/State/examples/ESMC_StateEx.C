@@ -1,4 +1,4 @@
-// $Id: ESMC_StateEx.C,v 1.2 2004/04/23 22:14:04 nscollins Exp $
+// $Id: ESMC_StateEx.C,v 1.3 2004/06/11 02:12:58 cdeluca Exp $
 //
 // Example/test code which creates a new State.
 
@@ -40,7 +40,7 @@ main(int argc, char **argv) {
 
 //   // This will probably be called from inside the Component Init code
     compname = "Atmosphere";
-    state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, &rc);
+    state1 = ESMF_StateCreate(compname, ESMF_STATE_IMPORT, &rc);
     printf("State Create returned, name = %s\n", compname);
 
     // Data would be added here and the State reused inside the run
@@ -63,7 +63,7 @@ main(int argc, char **argv) {
     printf("State Example 2: Export State\n");
 
     compname = "Ocean";
-    state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)
+    state2 = ESMF_StateCreate(compname, ESMF_STATE_EXPORT, rc)
     printf("State Create returned, name = %s\n", compname);
 
     bundlename = "Temperature";
@@ -98,7 +98,7 @@ main(int argc, char **argv) {
 
     // The producing Component creates the menu of data items available.
     compname = "Ocean";
-    state3 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc);
+    state3 = ESMF_StateCreate(compname, ESMF_STATE_EXPORT, rc);
     printf("State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind";

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.18 2004/05/26 11:12:01 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.19 2004/06/11 02:12:58 cdeluca Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -180,8 +180,8 @@
     ! Create the necessary import and export states used to pass data
     !  between components.
 
-    exportState = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
-    importState = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
+    exportState = ESMF_StateCreate(cname, ESMF_STATE_EXPORT, rc=rc)
+    importState = ESMF_StateCreate(cname, ESMF_STATE_IMPORT, rc=rc)
 
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.

@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.22 2004/05/26 11:12:01 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.23 2004/06/11 02:12:58 cdeluca Exp $
 !
 ! Example code for a main Application program. 
 
@@ -261,8 +261,8 @@
     ! Create the necessary import and export states used to pass data
     !  between components.
 
-    states(1) = ESMF_StateCreate(cname1, ESMF_STATEEXPORT, rc=rc)
-    states(2) = ESMF_StateCreate(cname2, ESMF_STATEIMPORT, rc=rc)
+    states(1) = ESMF_StateCreate(cname1, ESMF_STATE_EXPORT, rc=rc)
+    states(2) = ESMF_StateCreate(cname2, ESMF_STATE_IMPORT, rc=rc)
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type

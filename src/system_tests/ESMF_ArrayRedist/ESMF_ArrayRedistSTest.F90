@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.12 2004/06/04 08:47:06 nscollins Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.13 2004/06/11 02:12:59 cdeluca Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -84,7 +84,7 @@
 
     ! Create the State
     sname = "Atmosphere Export State"
-    state1 = ESMF_StateCreate(sname, ESMF_STATEEXPORT, rc=rc)
+    state1 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "State Create finished, name = ", trim(sname), " rc =", rc
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.17 2004/05/26 11:12:01 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.18 2004/06/11 02:12:58 cdeluca Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -148,8 +148,8 @@
     print *, "Comp Create returned, name = ", trim(cname)
     ! Create the necessary import and export states used to pass data
     !  between components.
-    importState = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
-    exportState = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
+    importState = ESMF_StateCreate(cname, ESMF_STATE_IMPORT, rc=rc)
+    exportState = ESMF_StateCreate(cname, ESMF_STATE_EXPORT, rc=rc)
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type

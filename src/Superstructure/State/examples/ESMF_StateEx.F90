@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.11 2004/06/01 13:26:44 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.12 2004/06/11 02:12:58 cdeluca Exp $
 
 
 !-------------------------------------------------------------------------
@@ -42,7 +42,7 @@
 
 !   ! This will probably be called from inside the Component Init code
     compname = "Atmosphere"
-    state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
+    state1 = ESMF_StateCreate(compname, statetype=ESMF_STATE_IMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(compname)
 
     ! Data would be added here and the State reused inside the run
@@ -62,7 +62,7 @@
     print *, "State Example 2: Export State"
 
     compname = "Ocean"
-    state2 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
+    state2 = ESMF_StateCreate(compname, statetype=ESMF_STATE_EXPORT, rc=rc)  
 
     print *, "State Create returned, name = ", trim(compname)
 !EOC
@@ -115,7 +115,7 @@
 
     ! The producing Component creates the menu of data items available.
     compname = "Ocean"
-    state3 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
+    state3 = ESMF_StateCreate(compname, statetype=ESMF_STATE_EXPORT, rc=rc)  
     print *, "State Create returned", rc, " name = ", trim(compname)
 !EOC
     if (rc.NE.ESMF_SUCCESS) then

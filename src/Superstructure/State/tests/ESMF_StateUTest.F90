@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.13 2004/06/09 22:24:45 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.14 2004/06/11 02:12:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.13 2004/06/09 22:24:45 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.14 2004/06/11 02:12:59 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -80,7 +80,7 @@
       !NEX_UTest      
       ! Test Creation of an empty import State 
       statename = "Atmosphere In"
-      state1 = ESMF_StateCreate(statename, ESMF_STATEIMPORT, rc=rc)
+      state1 = ESMF_StateCreate(statename, ESMF_STATE_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -100,7 +100,7 @@
       !EX_UTest 
       ! Test Creation of an empty import State 
       statename = "Atmosphere In"
-      state1 = ESMF_StateCreate(statename, ESMF_STATEIMPORT, rc=rc)
+      state1 = ESMF_StateCreate(statename, ESMF_STATE_IMPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty import State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -110,7 +110,7 @@
       !EX_UTest
       ! Test Creation of an empty export State 
       statename = "Atmosphere Out"
-      state1 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, rc=rc)
+      state1 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an empty export State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -545,7 +545,7 @@
       statename = "Export State"
       x = 1
       bundle2(1) = ESMF_BundleCreate(name=bundlename, rc=rc)
-      state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
+      state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 bundles=bundle2, itemcount=x, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Creating an export State with a Bundle Test"
@@ -600,7 +600,7 @@
       !x = 1
       !fieldname = "Precipitation"
       !field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 !fields=field3, itemcount=x, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Creating an export State with a bad Field list"
@@ -619,7 +619,7 @@
       !x = 1
       !fieldname = "Precipitation"
       !field3(1) = ESMF_FieldCreateNoData(fieldname, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 !fields=field3(1:1), itemcount=x, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Creating an export State with a Field Test"
@@ -637,7 +637,7 @@
       !x  = 1
       !allocate(f90ptr1(10,20))
       !array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 !arrays=array2(1:1), itemcount=x, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Creating an export State with a Array Test"
@@ -656,7 +656,7 @@
       !allocate(f90ptr1(10,20))
       !array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       !array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 !arrays=array2, itemcount=x, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Creating an export State with a Array list Test"
@@ -696,7 +696,7 @@
       !allocate(f90ptr1(10,20))
       !array2(1) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
       !array2(2) = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_COPY, rc=rc)
-      !state2 = ESMF_StateCreate(statename, ESMF_STATEEXPORT, &
+      !state2 = ESMF_StateCreate(statename, ESMF_STATE_EXPORT, &
                                 !arrays=array2, itemcount=x, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Creating an export State with a Array list Test"
