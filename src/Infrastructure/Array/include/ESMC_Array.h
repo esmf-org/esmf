@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.1 2003/07/10 18:46:14 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.2 2003/07/15 18:07:06 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,6 +53,14 @@ class ESMC_ArrayConfig {
    private:
 //   < insert resource items here >
 };
+
+// private static data - address of fortran callback funcs
+extern "C" {
+ void FTN(f_esmf_arrayf90allocate)(ESMC_Array**, int *, ESMC_DataType*,
+                                   ESMC_DataKind*, int*, int*);
+ void FTN(f_esmf_arrayf90deallocate)(ESMC_Array**, int*, ESMC_DataType*,
+                                     ESMC_DataKind *, int*);
+}
 
 
 // class declaration type
@@ -159,10 +167,12 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
 
     // most important array methods
     int ESMC_ArrayRedist(ESMC_DELayout *layout,
+                         ESMC_AxisIndex *ai_global,
                          int rank_trans[], int size_rank_trans,
                          int olddecompids[], int decompids[], int size_decomp,
                          ESMC_Array *RedistArray);
     int ESMC_ArrayHalo(ESMC_DELayout *layout,
+                       ESMC_AxisIndex *ai_global,
                        int decompids[], int size_decomp);
     int ESMC_ArrayAllGather(ESMC_DELayout *layout,
                             int decompids[], int size_decomp,
