@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.63 2004/12/28 07:19:18 theurich Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.64 2005/02/28 16:30:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.63 2004/12/28 07:19:18 theurich Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.64 2005/02/28 16:30:28 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -776,7 +776,6 @@
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       integer :: nDEs, my_DE
       integer :: gridrank, datarank
-      logical :: hascachedroute    ! can we reuse an existing route?
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -785,6 +784,7 @@
       !       an interface
 
       ! create the routehandle
+     
       routehandle = ESMF_RouteHandleCreate(status)
     
       ! Extract layout information from the Grid
@@ -855,23 +855,14 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_DE, gl_dst_AI, gl_dst_AI, &
-                               nDEs, delayout, my_DE, gl_src_AI, gl_src_AI, &
-                               nDEs, delayout, periodic, hascachedroute, &
-                               route, status)
+      ! Create the route object.
+      route = ESMF_RouteCreate(vm, rc)
 
-      if (.not. hascachedroute) then
-          ! Create the route object.
-          route = ESMF_RouteCreate(vm, rc)
-
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+      call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
                                         gl_dst_AI, nDEs, &
                                         globalStartPerDEPerDim, &
                                         globalCellCountPerDim, delayout, &
                                         periodic, status)
-      endif
 
       ! and set route into routehandle object
       call ESMF_RouteHandleSet(routehandle, route1=route, &
@@ -1070,7 +1061,7 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayRedistStore(srcArray, srcGrid, srcDataMap, &
                                        dstArray, dstGrid, dstDataMap, &
-                                       parentDElayout, routehandle, rc)
+                                       parentVM, routehandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcArray
@@ -1079,7 +1070,7 @@
       type(ESMF_Array), intent(inout) :: dstArray
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_FieldDataMap), intent(in) :: dstDataMap
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
@@ -1111,8 +1102,8 @@
 !   \item[dstDataMap]
 !    {\tt ESMF\_FieldDataMap} describing how the destination data maps 
 !    onto the grid.
-!   \item[parentDElayout]
-!    {\tt ESMF\_DELayout} object which includes all DEs in both the
+!   \item[parentVM]
+!    {\tt ESMF\_VM} object which includes all PETs in both the
 !    source and destination grids.
 !   \item [routehandle]
 !    Returned {\tt ESMF\_RouteHandle} which identifies this 
@@ -1144,7 +1135,6 @@
       type(ESMF_RelLoc) :: dstHorzRelLoc, srcHorzRelLoc, &
                            dstVertRelLoc, srcVertRelLoc
       type(ESMF_Route) :: route
-      type(ESMF_VM) :: vm
 
       ! initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -1351,11 +1341,8 @@
                                   ESMF_CONTEXT, rc)) return
       endif
 
-      ! Get the associated VM
-      call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
-
       ! Create the route object.
-      route = ESMF_RouteCreate(vm, rc)
+      route = ESMF_RouteCreate(parentVM, rc)
 
       if (dstVector .OR. srcVector) then
         call ESMF_RoutePrecomputeRedistV(route, datarank, &

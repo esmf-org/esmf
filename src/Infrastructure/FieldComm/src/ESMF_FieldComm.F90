@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.67 2005/01/15 00:12:35 cdeluca Exp $
+! $Id: ESMF_FieldComm.F90,v 1.68 2005/02/28 16:30:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.67 2005/01/15 00:12:35 cdeluca Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.68 2005/02/28 16:30:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -561,8 +561,8 @@
 ! !IROUTINE: ESMF_FieldRedist - Data redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, blockingflag, &
-                                  commhandle, parentDelayout, rc)
+      subroutine ESMF_FieldRedist(srcField, dstField, routehandle, &
+                                  blockingflag, commhandle, parentVM, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
@@ -570,7 +570,7 @@
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
       type(ESMF_CommHandle), intent(inout), optional :: commhandle
-      type(ESMF_DELayout), intent(in), optional :: parentDelayout
+      type(ESMF_VM), intent(in), optional :: parentVM
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -610,10 +610,10 @@
 !           argument is required.  Information about the pending operation
 !           will be stored in the {\tt ESMF\_CommHandle} and can be queried
 !           or waited for later.
-!     \item [{[parentDelayout]}]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the layout of the Coupler if the redistribution is
-!           inter-component, but could also be the individual layout for a
+!     \item [{[parentVM]}]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the VM of the Coupler if the redistribution is
+!           inter-component, but could also be the individual VM for a
 !           component if the redistribution is intra-component.  This argument
 !           is only used in the situation where the routehandle has not been
 !           precomputed yet.
@@ -668,13 +668,13 @@
         call ESMF_LogWrite("uninitialized routehandle: calling FieldRedistStore", &
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
-        if (.not. present(parentDelayout)) then
+        if (.not. present(parentVM)) then
           call ESMF_LogMsgSetError(ESMF_RC_ARG_VALUE, &
-          "if parentDELayout not specified, routehandle must be precomputed", &
+          "if parentVM not specified, routehandle must be precomputed", &
                                    ESMF_CONTEXT, rc)
           return
         endif
-        call ESMF_FieldRedistStore(srcField, dstField, parentDelayout, &
+        call ESMF_FieldRedistStore(srcField, dstField, parentVM, &
                                    routehandle, status)
         if (ESMF_LogMsgFoundError(status, &
               "routehandle invalid, and unable to precompute one on the fly", &
@@ -738,14 +738,14 @@
 ! !IROUTINE: ESMF_FieldRedistStore - Data redistribution operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedistStore(srcField, dstField, parentDelayout, &
+      subroutine ESMF_FieldRedistStore(srcField, dstField, parentVM, &
                                        routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       type(ESMF_Field), intent(inout) :: dstField
-      type(ESMF_DELayout), intent(in) :: parentDelayout
+      type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -767,11 +767,11 @@
 !           {\tt ESMF\_Field} containing source data.
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid.
-!     \item [parentDelayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
-!           most commonly the layout
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s, 
+!           most commonly the VM
 !           of the Coupler if the redistribution is inter-component, 
-!           but could also be the individual layout for a component if the 
+!           but could also be the individual VM for a component if the 
 !           redistribution is intra-component.  
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
@@ -805,6 +805,7 @@
       ! redistribution function if both the src and destination fields
       ! have identical halo widths.  Add a check here for that, which 
       ! can be removed if we augment the code to support halo mismatches.
+      ! TODO: fix redist to not impose this restriction
       call ESMF_FieldGet(srcField, haloWidth=srcHalo, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -813,7 +814,6 @@
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
-
 
       if (srcHalo .ne. dstHalo) then
           call ESMF_LogMsgSetError(ESMF_RC_NOT_IMPL, &
@@ -832,7 +832,7 @@
                                  dstFtypep%localfield%localdata, &
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
-                                 parentDelayout, &
+                                 parentVM, &
                                  routehandle, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
@@ -852,14 +852,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRedistStoreNew(srcField, decompIds, dstField, &
-                                          parentDelayout, routehandle, rc)
+                                          parentVM, routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField
       integer, dimension(:), intent(in) :: decompIds
       type(ESMF_Field), intent(out) :: dstField
-      type(ESMF_DELayout), intent(in) :: parentDelayout
+      type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(inout) :: routehandle
       integer, intent(out), optional :: rc               
 !
@@ -880,11 +880,11 @@
 !           Array of decomposition identifiers.
 !     \item [dstField] 
 !           {\tt ESMF\_Field} containing destination grid.
-!     \item [parentDelayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s, 
-!           most commonly the layout
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s, 
+!           most commonly the VM
 !           of the Coupler if the redistribution is inter-component, 
-!           but could also be the individual layout for a component if the 
+!           but could also be the individual VM for a component if the 
 !           redistribution is intra-component.  
 !     \item [routehandle] 
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
@@ -940,7 +940,7 @@
                                  dstFtypep%localfield%localdata, &
                                  dstFtypep%grid, &
                                  dstFtypep%mapping, &
-                                 parentDelayout, &
+                                 parentVM, &
                                  routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -1035,14 +1035,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_FieldRegrid(srcField, dstField, routehandle, &
-                                  parentDelayout, regridmethod, regridnorm, &
+                                  parentVM, regridmethod, regridnorm, &
                                   srcMask, dstMask, blockingflag, commhandle, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_DELayout), intent(in), optional :: parentDelayout
+      type(ESMF_VM), intent(in), optional :: parentVM
       type(ESMF_RegridMethod), intent(in), optional :: regridmethod
       type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcMask                 
@@ -1070,10 +1070,10 @@
 !           associated with the precomputed
 !           information for a regrid operation on this {\tt ESMF\_Field}.
 !           This handle must be supplied at run time to execute the regrid.
-!     \item [{[parentDelayout]}]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the layout of the Coupler if the regridding is
-!           inter-component, but could also be the individual layout for
+!     \item [{[parentVM]}]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the VM of the Coupler if the regridding is
+!           inter-component, but could also be the individual VM for
 !           a component if the regridding is intra-component.  This argument
 !           is used only if the routehandle has not been previously computed
 !           during a RegridStore call.
@@ -1116,13 +1116,10 @@
       logical :: allInOne
       logical :: hasSrcData        ! does this DE contain localdata from src?
       logical :: hasDstData        ! does this DE contain localdata from dst?
-      type(ESMF_DELayout) :: srcDelayout, dstDelayout
-      type(ESMF_Logical) :: hasData        ! does this DE contain localdata?
       type(ESMF_Array) :: srcArray, dstArray
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
-      type(ESMF_VM) :: parentVM
    
       ! Initialize return code   
       if (present(rc)) rc = ESMF_FAILURE
@@ -1155,14 +1152,10 @@
         call ESMF_LogWrite("uninitialized routehandle: calling FieldRegridStore", &
                            ESMF_LOG_WARNING, &
                            ESMF_CONTEXT)
-        call ESMF_DELayoutGetVM(parentDelayout, parentVM, rc=localrc)
         call ESMF_FieldRegridStore(srcField, dstField, parentVM, &
                                    routehandle, regridmethod, regridnorm, &
                                    srcMask, dstMask, localrc)
       endif
-
-      ! Our DE number in the parent layout
-      ! call ESMF_DELayoutGet(parentDelayout, localDe=myDE, localrc)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1324,10 +1317,8 @@
       logical :: hasSrcData           ! does this DE contain localdata from src?
       logical :: hasDstData           ! does this DE contain localdata from dst?
       type(ESMF_Array) :: srcArray, dstArray
-      type(ESMF_DELayout) :: srcDelayout, dstDelayout
       type(ESMF_FieldDataMap) :: srcDatamap, dstDatamap
       type(ESMF_Grid) :: srcGrid, dstGrid
-      type(ESMF_Logical) :: hasdata   ! does this DE contain localdata?
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
    
       ! Initialize return code; assume failure until success is certain
@@ -1574,7 +1565,6 @@
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
       type(ESMF_Route) :: route
       type(ESMF_LocalArray) :: local_array
-      logical :: hascachedroute    ! can we reuse an existing route?
       integer :: nDEs
       integer :: my_DE
       integer, dimension(:), allocatable :: global_count
@@ -1661,26 +1651,13 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
           
-      ! Does this same route already exist?  If so, then we can drop
-      ! down immediately to RouteRun.  Note the confusing ordering of args;
-      ! in this case, the receiving exclusive is the same as the source,
-      ! and the receiving total is the same as dst.  ditto for the sending
-      ! side.  these names should be changed to make this clearer.  TODO!
-      call ESMF_RouteGetCached(datarank, my_DE, gl_src_AI, gl_dst_AI, &
-                               AI_count, delayout, my_DE, gl_src_AI, gl_dst_AI, &
-                               AI_count, delayout, periodic, &
-                               hascachedroute, route, status)
+      ! Create the route object.
+      route = ESMF_RouteCreate(vm, rc) 
 
-      if (.not. hascachedroute) then
-          ! Create the route object.
-          route = ESMF_RouteCreate(vm, rc) 
-
-          call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
-                                        gl_dst_AI, AI_count, &
-                                        globalStartPerDEPerDim, &
-                                        global_count, delayout, periodic, status)
-
-      endif
+      call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, gl_src_AI, &
+                                    gl_dst_AI, AI_count, &
+                                    globalStartPerDEPerDim, &
+                                    global_count, delayout, periodic, status)
 
       ! Once table is full, execute the communications it represents.
 
@@ -1690,8 +1667,8 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      ! TODO: we are caching the route so don't delete it.
-      !call ESMF_RouteDestroy(route, rc)
+      ! delete the route
+      call ESMF_RouteDestroy(route, rc)
 
       ! get rid of temporary arrays
       if (allocated(globalStartPerDEPerDim)) &

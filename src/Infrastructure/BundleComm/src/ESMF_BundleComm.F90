@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.39 2005/01/12 18:16:13 nscollins Exp $
+! $Id: ESMF_BundleComm.F90,v 1.40 2005/02/28 16:31:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.39 2005/01/12 18:16:13 nscollins Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.40 2005/02/28 16:31:08 nscollins Exp $'
 
 !==============================================================================
 !
@@ -609,14 +609,14 @@
 ! !IROUTINE: ESMF_BundleRedistStore - Data redistribution operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentDElayout, &
+      subroutine ESMF_BundleRedistStore(srcBundle, dstBundle, parentVM, &
                                         routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcBundle
       type(ESMF_Bundle), intent(inout) :: dstBundle
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
@@ -638,11 +638,11 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstBundle]
 !           {\tt ESMF\_Bundle} containing destination grid.
-!     \item [parentDElayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
-!           most commonly the layout
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
+!           most commonly the VM
 !           of the Coupler if the redistribution is inter-component, 
-!           but could also be the individual layout for a component if the 
+!           but could also be the individual VM for a component if the 
 !           redistribution is intra-component.  
 !     \item [routehandle]
 !           {\tt ESMF\_RouteHandle} which will be used to execute the
@@ -690,7 +690,7 @@
                                  dtypep%flist(1)%ftypep%localfield%localdata, &
                                  dtypep%grid, &
                                  dtypep%flist(1)%ftypep%mapping, &
-                                 parentDElayout, &
+                                 parentVM, &
                                  routehandle, status)
       if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
@@ -913,14 +913,14 @@
 ! !IROUTINE: ESMF_BundleRegridStore - Precompute regrid operation on a Bundle
 
 ! !INTERFACE:
-      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentDElayout, &
+      subroutine ESMF_BundleRegridStore(srcbundle, dstbundle, parentVM, &
                                         routehandle, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: srcbundle
       type(ESMF_Bundle), intent(inout) :: dstbundle
-      type(ESMF_DELayout), intent(in) :: parentDElayout
+      type(ESMF_VM), intent(in) :: parentVM
       type(ESMF_RouteHandle), intent(out) :: routehandle
       integer, intent(out), optional :: rc
 !
@@ -940,11 +940,11 @@
 !           {\tt ESMF\_Bundle} containing source data.
 !     \item [dstbundle] 
 !           {\tt ESMF\_Bundle} containing destination grid and data map.
-!     \item [parentDElayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Bundle}s, 
-!           most commonly the layout
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Bundle}s, 
+!           most commonly the VM
 !           of the Coupler if the regridding is inter-component, but could 
-!           also be the individual layout for a component if the 
+!           also be the individual VM for a component if the 
 !           regridding is intra-component.  
 !     \item [routehandle]
 !           Output from this call, identifies the precomputed work which
