@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2004/03/24 17:01:32 cpboulder Exp $ 
+# $Id: makefile,v 1.6 2004/03/24 17:49:54 nscollins Exp $ 
 
 ALL: build_here 
 
@@ -21,7 +21,6 @@ LOCDIR	  = src/Infrastructure/LogErr/src
 
 include $(ESMF_DIR)/makefile
 
-ESMF_LogErr.o
 
 DIRS	  = 
 
