@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.11 2004/04/27 21:32:21 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.12 2004/05/18 21:19:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.11 2004/04/27 21:32:21 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.12 2004/05/18 21:19:28 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -69,7 +69,7 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2
-      type(ESMF_Time) :: startTime, stopTime, alarmTime
+      type(ESMF_Time) :: startTime, stopTime, alarmTime, nextTime
       type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, month, minute, second
@@ -471,6 +471,14 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Get Alarm Test"
+      call ESMF_ClockGetAlarm(clock, name="alarm1", alarm=alarm, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
       call ESMF_ClockAdvance(clock, rc=rc)
@@ -482,12 +490,39 @@
       
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      !Test Get Clock Next Time
+      write(failMsg, *) " Did not return ESMF_SUCCESS)"
+      write(name, *) "Get Clock Next Time Test"
+      call ESMF_ClockGetNextTime(clock, nextTime, timeStep, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
       !Test Alarm will ring next
       call ESMF_ClockAdvance(clock, rc=rc)
       write(failMsg, *) " Did not return ESMF_SUCCESS or returned wrong state"
       write(name, *) "Alarm will ring next Test"
       willRingNext = ESMF_AlarmWillRingNext(alarm, timeStep, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(willRingNext), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      !Test Get Time from clock
+      write(failMsg, *) " Did not return ESMF_SUCCESS"
+      write(name, *) "Get Clock Current Time Test"
+      call ESMF_ClockGet(clock, currTime=currentTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      !Test that Clock Get Next Time Passed
+      write(failMsg, *) " Next Time not equal to current Time"
+      write(name, *) "Get Clock Next Time Test"
+      bool = (nextTime == currentTime) 
+      call ESMF_Test((bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
