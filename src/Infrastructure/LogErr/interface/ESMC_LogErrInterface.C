@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.8 2003/04/15 20:21:37 nscollins Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.9 2003/04/25 20:03:18 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,6 @@ void FTN(esmf_loginfo)(ESMC_Log* aLog, char* fmt,...){
     int  numFloat=0;
     int  numStr=0;
     va_list argp;
-    va_start(argp, fmt);
     char* chPtr;
 
     va_start(argp,fmt);
@@ -224,73 +223,20 @@ void FTN(esmf_loginfo)(ESMC_Log* aLog, char* fmt,...){
   }
 
           
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 //BOP
+// !IROUTINE ESMF_LogWarnMsg_Ln - writes warning messages
 //
-// !IROUTINE: ESMF_LogWarnMsg  - writes a warning message to the log file
-//
-// !INTERFACE:
-//
-//  subroutine ESMF_LogWarnMsg(aLog, errCode, line,file,dir,msg)
-//
-// !ARGUMENTS:
-//    typdef(ESMF_Log)::aLog
-//
-//    integer :: errCode         !integer value for error code         
-//
-//    character(len=*) :: msg    !msg written to log file
-//
-//    integer :: line            !line number of warning; argument
-//                               !supplied by macro
-//
-//    character(len=*) :: file   !file where warning occurred in;
-//                               !argument supplied by macro
-//
-//    character(len=*) :: dir    !directory where warning occurred in;
-//                               !argument supplied by macro
-//
-// !DESCRIPTION:
-//    This routine writes a warning message to the log file.  This warning
-//    message consists of the erroCode, a description of the warning, the 
-//    line number, file, and directory of the error, and a message. A 
-//    preprocessor macro adds the predefined preprocessor symbolic
-//    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_.
-//    The macro operates on
-//    the file from which these routines are called.  Note,
-//    the value of \_\_DIR\_\_ 
-//    must be suppliled by the user (usually done in
-//    the makefile.).  By default, execution continues after encountering
-//    a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
-//    can halt on warnings.
-//
-//EOP
-//--------------------------------------------------------------------------
-void FTN(esmf_logwarnmsg)(ESMC_Log *aLog,int *errCode, char msg[], int msglen)
-
-{
-    int line = 0;
-    char *file = NULL;
-    char *dir = NULL;
-    char *msgCopy = NULL;
-
-    if ((msg != NULL) && (msglen > 0)) {
-        msgCopy = new char[msglen+1];
-        strncpy(msgCopy, msg, msglen);
-        msgCopy[msglen] = '\0';
-    }
-
-    aLog->ESMC_LogWarnFortran(*errCode, line, file, dir, msgCopy);
-
-    if (msgCopy != NULL)
-        delete[] msgCopy;
-  
-}
-
-
+// !INTERFACE
 void FTN(esmf_logwarnmsg_ln)(ESMC_Log *aLog,int *errCode, int *line,
                              char file[], char dir[], char msg[],
                              int filelen, int dirlen, int msglen)
-
+// !DESCRIPTION
+//    This routine is called by ESMF_LogWarnMsg (defined in ESMF_LogErr.F90).  
+//    ESMF_LogWarnMsg_Ln calls the C++ method that actually writes the warning.
+//
+//EOP
+//----------------------------------------------------------------------------------------------
 {
     char *fileCopy = NULL;
     char *dirCopy = NULL;
@@ -327,39 +273,20 @@ void FTN(esmf_logwarnmsg_ln)(ESMC_Log *aLog,int *errCode, int *line,
   
 }
 
-
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMF_LogWarn - writes a warning message to log file
+// !IROUTINE ESMF_LogWarn_Ln - writes warning messages
 //
-// !INTERFACE:
-//    ESMF_LogWarn(aLog, errCode)
+// !INTERFACE
 //
-// !ARGUMENTS:
-//   typdef(ESMF_Log) :: aLog
-//   integer :: errCode
-//
-// !DESCRIPTION:
-//   This routine is identical to ESMF\_LogWarnMsg, except a msg is
-//   not written to the log file.
-//
-//EOP
-//-----------------------------------------------------------------------
-void FTN(esmf_logwarn)(ESMC_Log *aLog, int *errCode)
-
-{
-   int line = 0;
-   char *file = NULL;
-   char *dir = NULL;
-   char *msg = NULL; 
-
-   aLog->ESMC_LogWarnFortran(*errCode, line, file, dir, msg);
-
-}
-
 void FTN(esmf_logwarn_ln)(ESMC_Log *aLog, int *errCode, int *line,
                           char file[], char dir[], int filelen, int dirlen)
-
+// !DESCRIPTION
+//    This routine is called by ESMF_LogWarn (defined in ESMF_LogErr.F90).  
+//    ESMF_LogWarn_Ln calls the C++ method that actually writes the warning.
+//
+//EOP
+//-------------------------------------------------------------------------
 {
     char *fileCopy = NULL;
     char *dirCopy = NULL;
@@ -494,71 +421,20 @@ int  FTN(logwrite)(ESMC_Log *aLog)
 }
 
 
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 //BOP
+// !IROUTINE ESMF_LogErrMsg_Ln - writes warning messages
 //
-// !IROUTINE: ESMF_LogErrMsg - writes a err message to the log file
-//
-// !INTERFACE:
-//
-//  subroutine ESMF_LogErrMsg(aLog, errCode, line,file,dir,msg)
-//
-// !ARGUMENTS:
-//    typdef(ESMF_Log)::aLog
-//
-//    integer :: errCode         !integer value for error code
-//
-//    character(len=*) :: msg    !msg written to log file
-//
-//    integer :: line            !line number of warning; argument
-//                               !supplied by macro
-//
-//    character(len=*) :: file   !file where warning occurred in;
-//                               !argument supplied by macro
-//
-//    character(len=*) :: dir    !directory where warning occurred in;
-//                               !argument supplied by macro
-//
-// !DESCRIPTION:
-//    This routine writes a warning message to the log file.  This warning
-//    message consists of the erroCode, a description of the warning, the
-//    line number, file, and directory of the error, and a message. A
-//    preprocessor macro adds the predefined preprocessor symbolic
-//    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_.
-//    The macro operates on
-//    the file from which these routines are called.  Note,
-//    the value of \_\_DIR\_\_
-//    must be suppliled by the user (usually done in
-//    the makefile).  By default, execution continues after encountering
-//    a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
-//    can halt on warnings.
-//
-//EOP
-//--------------------------------------------------------------------------
-
-void FTN(esmf_logerrmsg)(ESMC_Log *aLog, int *errCode, char msg[], int msglen)
-{
-    int line = 0;
-    char *file = NULL;
-    char *dir = NULL;
-    char *msgCopy = NULL;
-
-    if ((msg != NULL) && (msglen > 0)) {
-        msgCopy = new char[msglen+1];
-        strncpy(msgCopy, msg, msglen);
-        msgCopy[msglen] = '\0';
-    }
-
-    aLog->ESMC_LogErrFortran(*errCode, line, file, dir, msgCopy);
-  
-    if (msgCopy != NULL)
-        delete[] msgCopy;
-} 
-
-
+// !INTERFACE
 void FTN(esmf_logerrmsg_ln)(ESMC_Log *aLog, int *errCode, int *line, 
                             char file[], char dir[], char msg[], 
                             int filelen, int dirlen, int msglen)
+// !DESCRIPTION
+//    This routine is called by ESMF_LogErrMsg (defined in ESMF_LogErr.F90).  
+//    ESMF_LogErrMsg_Ln calls the C++ method that actually writes the warning.
+//
+//EOP
+//----------------------------------------------------------------------------------------------
 {
     char *fileCopy = NULL;
     char *dirCopy = NULL;
@@ -595,37 +471,19 @@ void FTN(esmf_logerrmsg_ln)(ESMC_Log *aLog, int *errCode, int *line,
 } 
 
 
-
-//-----------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMF_LogErr - writes a warning message to log file
+// !IROUTINE ESMF_LogErr_Ln - writes warning messages
 //
-// !INTERFACE:
-//    ESMF_LogErr(aLog, errCode)
-//
-// !ARGUMENTS:
-//   typdef(ESMF_Log) :: aLog
-//   integer :: errCode
-//
-// !DESCRIPTION:
-//   This routine is identical to ESMF\_LogErrMsg, except a msg is
-//   not written to the log file.
-//
-//EOP
-//-----------------------------------------------------------------------
-
-void FTN(esmf_logerr)(ESMC_Log* aLog, int* errCode)
-{
-    int line = 0;
-    char *file = NULL;
-    char *dir = NULL;
-    char *msg = NULL;
-   
-    aLog->ESMC_LogErrFortran(*errCode, line, file, dir, msg);
-} 
-
+// !INTERFACE
 void FTN(esmf_logerr_ln)(ESMC_Log *aLog, int *errCode, int *line, 
                          char file[], char dir[], int filelen, int dirlen)
+// !DESCRIPTION
+//    This routine is called by ESMF_LogErr (defined in ESMF_LogErr.F90).  
+//    ESMF_LogErr_Ln calls the C++ method that actually writes the warning.
+//
+//EOP
+//----------------------------------------------------------------------------------------------
 {
     char *fileCopy = NULL;
     char *dirCopy = NULL;
