@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.C,v 1.11 2004/06/15 08:55:47 nscollins Exp $
+// $Id: ESMC_LocalArray.C,v 1.12 2004/12/07 17:20:51 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -40,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.11 2004/06/15 08:55:47 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.12 2004/12/07 17:20:51 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -314,6 +314,7 @@
 //EOP
 // !REQUIREMENTS:  
     int i, status;
+    int totalcount;
     ESMC_LocalArray *aptr;
 
     rank = irank;
@@ -321,12 +322,14 @@
     kind = dk;
 
     base_addr = base;
+    totalcount = 1;
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 1;        
         lbound[i] = lbounds ? lbounds[i] : 1;
         ubound[i] = ubounds ? ubounds[i] : counts[i];
         bytestride[i] = 1;
         offset[i]     = offsets ? offsets[i] : 0;
+        totalcount *= counts[i];
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
         counts[i]     = 1;
@@ -338,6 +341,7 @@
 
     origin = oflag;
     needs_dealloc = dflag;
+    byte_count = ESMC_DataKindSize(kind) * totalcount; 
 
     if (f90ptr != NULL)
         ESMC_LocalArraySetF90Ptr(f90ptr);
@@ -442,6 +446,7 @@
 // !REQUIREMENTS:  
 
     int i, rank = this->rank;
+    int totalcount;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
   
     if (fptr) {
@@ -459,12 +464,14 @@
         base_addr = base;
 
     // valid values
+    totalcount = 1;
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
         bytestride[i] = 0;
         lbound[i] = lbounds ? lbounds[i] : 1;
         ubound[i] = ubounds ? ubounds[i] : counts[i];
+        totalcount *= counts[i];
     }
     // filler for unused ranks
     for (i=rank; i<ESMF_MAXDIM; i++) {
@@ -478,6 +485,8 @@
         iscontig = *contig;
     if (dealloc)
         needs_dealloc = *dealloc;
+
+    byte_count = ESMC_DataKindSize(kind) * totalcount;
 
     return ESMF_SUCCESS; 
 
@@ -691,36 +700,262 @@
 
 
 //-----------------------------------------------------------------------------
-// Standard methods - Validate, Print, Read, Write
+// Standard methods - Validate, Print, Read, Write, Serialize, Deserialize
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMC_LocalArrayValidate"
-//BOP
-// !IROUTINE:  ESMC_LocalArrayValidate - internal consistency check
+#define ESMF_METHOD "ESMC_LocalArraySerialize"
+//BOPI
+// !IROUTINE:  ESMC_LocalArraySerialize - Turn localarray into a byte stream
 //
 // !INTERFACE:
-      int ESMC_LocalArray::ESMC_LocalArrayValidate(
+      int ESMC_LocalArray::ESMC_LocalArraySerialize(
 //
 // !RETURN VALUE:
-//    int error return code
+//    {\tt ESMF\_SUCCESS} or error code on failure.
 //
 // !ARGUMENTS:
-      const char *options) const {    // in - validate options
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) const {   // inout - original offset, updated to point
+                             //  to first free byte after current obj info
 //
 // !DESCRIPTION:
-//      Validates that a {\tt ESMC\_LocalArray} is internally consistent.
-//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
+//    Turn info in LocalArray class into a stream of bytes.
 //
-//EOP
+//EOPI
+    int fixedpart, nbytes, rc;
+    char *cp;
+    int *ip, i;
 
+    fixedpart = sizeof(ESMC_LocalArray);
+    if ((*length - *offset) < fixedpart) {
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        *length += 2 * fixedpart;
+    }
+
+    // Serialize the Base class first.
+    rc = this->ESMC_Base::ESMC_Serialize(buffer, length, offset);
+
+    // now the stuff specific to LocalArray
+    ip = (int *)(buffer + *offset);
+    *ip++ = rank;
+    *ip++ = (int)type;
+    *ip++ = (int)kind;
+    *ip++ = (int)origin;
+    *ip++ = (int)needs_dealloc;
+    *ip++ = (int)iscontig;
+    // skip base addr altogether
+    *ip++ = byte_count;
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        *ip++ = offset[i];
+        *ip++ = lbound[i];
+        *ip++ = ubound[i];
+        *ip++ = counts[i];
+        *ip++ = bytestride[i];
+    }
+
+    // skip the F90 pointer - it will have to be reconstructed on
+    // the remote side.
+
+    cp = (char *)ip;
+
+    // copy the actual data into the buffer.
+    // TODO: verify the buffer size first.
+    memcpy(cp, base_addr, byte_count);
+    cp += byte_count;
+
+    *offset = (cp - buffer);
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_LocalArraySerialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_LocalArrayDeserialize"
+//BOPI
+// !IROUTINE:  ESMC_LocalArrayDeserialize - Turn a byte stream into an object
 //
-//  code goes here
+// !INTERFACE:
+      int ESMC_LocalArray::ESMC_LocalArrayDeserialize(
 //
-    int rc = ESMF_FAILURE;
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+    char *cp;
+    int *ip, i, rc;
+    ESMC_LocalArray *aptr;
 
-    return rc;
+    // Deserialize the Base class first.
+    rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
 
- } // end ESMC_LocalArrayValidate
+    // now the stuff specific to LocalArray
+    ip = (int *)(buffer + *offset);
+    rank = *ip++;
+    type = (ESMC_DataType)*ip++;
+    kind = (ESMC_DataKind)*ip++;
+    origin = (ESMC_ArrayOrigin)*ip++;
+    needs_dealloc = (ESMC_Logical)*ip++;
+    iscontig = (ESMC_Logical)*ip++;
+    // skip base addr altogether for now.
+    byte_count = *ip++;
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        offset[i] = *ip++;
+        lbound[i] = *ip++;
+        ubound[i] = *ip++;
+        counts[i] = *ip++;
+        bytestride[i] = *ip++;
+    }
+
+    // call a routine which results in the allocation being done
+    // from F90, so a dope vector is constructed which we can access
+    // later from fortran.
+    aptr = this;
+    FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &type, &kind,
+                                      counts, lbound, ubound, &rc);
+
+
+    cp = (char *)ip;
+    // TODO: verify the buffer size first.
+    memcpy(base_addr, cp, byte_count);
+    cp += byte_count;
+
+    *offset = (cp - buffer);
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_LocalArrayDeserialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_LocalArraySerializeNoData"
+//BOPI
+// !IROUTINE:  ESMC_LocalArraySerializeNoData - Turn localarray into a byte stream
+//
+// !INTERFACE:
+      int ESMC_LocalArray::ESMC_LocalArraySerializeNoData(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) const {   // inout - original offset, updated to point
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in LocalArray class into a stream of bytes.
+//
+//EOPI
+    int fixedpart, nbytes, rc;
+    char *cp;
+    int *ip, i;
+
+    fixedpart = sizeof(ESMC_LocalArray);
+    if ((*length - *offset) < fixedpart) {
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        *length += 2 * fixedpart;
+    }
+
+    // SerializeNoData the Base class first.
+    rc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+
+    // now the stuff specific to LocalArray
+    ip = (int *)(buffer + *offset);
+    *ip++ = rank;
+    *ip++ = (int)type;
+    *ip++ = (int)kind;
+    *ip++ = (int)origin;
+    *ip++ = (int)needs_dealloc;
+    *ip++ = (int)iscontig;
+
+    // skip base addr altogether, skip byte_count, skip offsets, l/u bounds
+    // counts, offsets - on the deserialize they will be set to 0.
+
+    // do not serialize the F90 pointer nor data either.
+
+    cp = (char *)ip;
+    *offset = (cp - buffer);
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_LocalArraySerializeNoData
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_LocalArrayDeserializeNoData"
+//BOPI
+// !IROUTINE:  ESMC_LocalArrayDeserializeNoData - Turn a byte stream into an object
+//
+// !INTERFACE:
+      int ESMC_LocalArray::ESMC_LocalArrayDeserializeNoData(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+    char *cp;
+    int *ip, i, nbytes, rc;
+
+    // DeserializeNoData the Base class first.
+    rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+
+    // now the stuff specific to LocalArray
+    ip = (int *)(buffer + *offset);
+    rank = *ip++;
+    type = (ESMC_DataType)*ip++;
+    kind = (ESMC_DataKind)*ip++;
+    origin = (ESMC_ArrayOrigin)*ip++;
+    needs_dealloc = (ESMC_Logical)*ip++;
+    iscontig = (ESMC_Logical)*ip++;
+
+    // serialize buffer stops here.  the rest has to be explicitly set
+    // to 0 by hand.
+
+    base_addr = NULL;
+    byte_count = 0;
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        offset[i] = 0;
+        lbound[i] = 0;
+        ubound[i] = 0;
+        counts[i] = 0;
+        bytestride[i] = 0;
+    }
+
+    // zero out the f90 pointer area.
+    cp = (char *) &f90dopev;
+    nbytes = ESMF_F90_PTR_BASE_SIZE;
+    for (i=1; i<rank; i++)
+        nbytes += ESMF_F90_PTR_PLUS_RANK;
+    memset(cp, 0, nbytes);
+
+    // Skip the data, f90 dope vector zero'd out.
+
+    cp = (char *)ip;
+    *offset = (cp - buffer);
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_LocalArrayDeserializeNoData
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -770,7 +1005,7 @@
         beforeskip = '\n';
     }
 
-    sprintf(msgbuf,"ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
+    sprintf(msgbuf,"LocalArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
     printf(msgbuf);
     //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   
@@ -1317,6 +1552,36 @@
     return rc;
 
  } // end ESMC_LocalArrayPrint
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_LocalArrayValidate"
+//BOP
+// !IROUTINE:  ESMC_LocalArrayValidate - internal consistency check
+//
+// !INTERFACE:
+      int ESMC_LocalArray::ESMC_LocalArrayValidate(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - validate options
+//
+// !DESCRIPTION:
+//      Validates that a {\tt ESMC\_LocalArray} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
+//
+//EOP
+
+//
+//  code goes here
+//
+    int rc = ESMF_FAILURE;
+
+    return rc;
+
+ } // end ESMC_LocalArrayValidate
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.13 2004/07/22 15:00:02 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.14 2004/12/07 17:20:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include <iostream.h>
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_LocalArray.h"
 //------------------------------------------------------------------------------
 //BOPI
@@ -339,6 +340,165 @@ char *name = NULL;
      }
 
 
-};
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarrayserialize"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArraySerialize - Serialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarrayserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in - localarray object
+      char *buf,                // in/out - a byte stream buffer
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a localarray object.
+//     Warning!!  Not completely implemented yet.
+//
+//EOP
+
+  int i, status;
+
+  if (!localarray) {
+    //printf("uninitialized LocalArray object\n");
+    ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*localarray)->ESMC_LocalArraySerialize(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_LocalArraySerialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarraydeserialize"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArrayDeserialize - Deserialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarraydeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
+      char *buf,                // in - byte stream buffer
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a localarray object.
+//
+//EOP
+
+  int i, status;
+
+  // create a new localarray object to deserialize into
+  *localarray = new ESMC_LocalArray;
+
+  (*localarray)->ESMC_LocalArrayDeserialize(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_LocalArrayDeserialize
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarrayserializenodata"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArraySerializeNoData - Serialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarrayserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in - localarray object
+      char *buf,                // in/out - a byte stream buffer
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a localarray object, without preserving
+//     the data values.
+//
+//EOP
+
+  int i, status;
+
+  if (!localarray) {
+    //printf("uninitialized LocalArray object\n");
+    ESMC_LogDefault.ESMC_LogWrite("LocalArray object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  *rc = (*localarray)->ESMC_LocalArraySerializeNoData(buf, length, offset);
+
+  return;
+
+}  // end c_ESMC_LocalArraySerializeNoData
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_localarraydeserializenodata"
+//BOP
+// !IROUTINE:  c_ESMC_LocalArrayDeserializeNoData - Deserialize LocalArray object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_localarraydeserializenodata)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list.
+// 
+// !ARGUMENTS:
+      ESMC_LocalArray **localarray,       // in/out - empty localarray object to fill in
+      char *buf,                // in - byte stream buffer
+      int *offset,              // in/out - current offset in the stream
+      int *rc) {                // out - return code
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a localarray object, without preserving
+//     any of the data (counts explicitly set to 0).
+//
+//EOP
+
+  int i, status;
+
+  // create a new localarray object to deserialize into
+  *localarray = new ESMC_LocalArray;
+
+  (*localarray)->ESMC_LocalArrayDeserializeNoData(buf, offset);
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_LocalArrayDeserializeNoData
+
+
+#undef  ESMC_METHOD
+
+}
 
 
