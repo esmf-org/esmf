@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.7 2004/04/26 19:46:28 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.8 2004/04/26 20:05:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.7 2004/04/26 19:46:28 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.8 2004/04/26 20:05:07 theurich Exp $'
 
 !==============================================================================
 
@@ -363,15 +363,16 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMGet - Get VM internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGet(vm, mypet, npets, npes, mpic, ok_openmp, rc)
+  subroutine ESMF_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
+    okOpenMpFlag, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
-    integer,            intent(out), optional :: mypet
-    integer,            intent(out), optional :: npets
-    integer,            intent(out), optional :: npes
-    integer,            intent(out), optional :: mpic
-    type(ESMF_Logical), intent(out), optional :: ok_openmp
+    integer,            intent(out), optional :: localPet
+    integer,            intent(out), optional :: petCount
+    integer,            intent(out), optional :: peCount
+    integer,            intent(out), optional :: mpiCommunicator
+    type(ESMF_Logical), intent(out), optional :: okOpenMpFlag
     integer,            intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -380,17 +381,17 @@ module ESMF_VMMod
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
-!        VM object
-!   \item[{[mypet]}]
+!        VM object.
+!   \item[{[localPet]}]
 !        Id of the PET that instantiates the local user code.
-!   \item[{[npets]}]
+!   \item[{[petCount]}]
 !        Number of PETs in VM.
-!   \item[{[npes]}]
+!   \item[{[peCount]}]
 !        Number of PEs referenced by VM.
-!   \item[{[mpic]}]
+!   \item[{[mpiCommunicator]}]
 !        MPI Intracommunicator for VM.
-!   \item[{[ok\_openmp]}]
-!        Indicate whether user-level OpenMP threading can be supported
+!   \item[{[okOpenMpFlag]}]
+!        Flag indicating whether user-level OpenMP threading is supported in VM.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -399,7 +400,8 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGet(vm, mypet, npets, npes, mpic, ok_openmp, rc)
+    call c_ESMC_VMGet(vm, localPet, petCount, peCount, mpiCommunicator, &
+      okOpenMpFlag, rc)
     
   end subroutine ESMF_VMGet
 !------------------------------------------------------------------------------
@@ -410,15 +412,15 @@ module ESMF_VMMod
 ! !IROUTINE: ESMF_VMGetPET - Get VM PET internals
 
 ! !INTERFACE:
-  subroutine ESMF_VMGetPET(vm, petid, npes, ssiid, nthreads, tid, rc)
+  subroutine ESMF_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)            :: vm
-    integer,       intent(in)            :: petid
-    integer,       intent(out), optional :: npes
-    integer,       intent(out), optional :: ssiid
-    integer,       intent(out), optional :: nthreads
-    integer,       intent(out), optional :: tid
+    integer,       intent(in)            :: pet
+    integer,       intent(out), optional :: peCount
+    integer,       intent(out), optional :: ssiId
+    integer,       intent(out), optional :: threadCount
+    integer,       intent(out), optional :: threadId
     integer,       intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -428,15 +430,15 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        VM object
-!   \item[petid] 
+!   \item[pet] 
 !        Id of the PET for which info is queried
-!   \item[{[npes]}]
-!        Number of PEs in VM.
-!   \item[{[ssiid]}]
+!   \item[{[peCount]}]
+!        Number of PEs associated with PET in VM.
+!   \item[{[ssiId]}]
 !        SSI id this PET is running on.
-!   \item[{[nthreads]}]
+!   \item[{[threadCount]}]
 !        Number of PETs in this PET's thread group.
-!   \item[{[tid]}]
+!   \item[{[threadId]}]
 !        Thread id of this PET.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -446,7 +448,7 @@ module ESMF_VMMod
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGetPET(vm, petid, npes, ssiid, nthreads, tid, rc)
+    call c_ESMC_VMGetPET(vm, pet, peCount, ssiId, threadCount, threadId, rc)
  
   end subroutine ESMF_VMGetPET
 !------------------------------------------------------------------------------
@@ -469,7 +471,7 @@ module ESMF_VMMod
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
-!        VM object
+!        VM object.
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
