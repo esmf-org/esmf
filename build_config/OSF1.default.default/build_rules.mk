@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.18 2005/01/26 23:03:26 theurich Exp $
+#  $Id: build_rules.mk,v 1.16.2.1 2005/02/09 20:00:11 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
