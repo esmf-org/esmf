@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.28 2004/02/06 21:43:23 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.29 2004/02/09 23:43:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.28 2004/02/06 21:43:23 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.29 2004/02/09 23:43:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -328,32 +328,37 @@ static int globalCount = 0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
   int len;
+  int defname, defclass;
  
   // no name, no context:  generate a name "globalXXX" where xxx is a seq num
   // no name, but a context: name is contextXXX with the seq num again
   // name given: use it as is
+  defname = 1;
+  defclass = 1;
 
   // simple error checks first
-  if (name) { 
+  if (name && (name[0]!='\0')) { 
      len = strlen(name);
      if (len >= ESMF_MAXSTR) {
        fprintf(stderr, "Error: object name %d bytes longer than limit of %d\n", 
                           len, ESMF_MAXSTR-1);
        return ESMF_FAILURE;
      }
-  }
+     defname = 0;
+  } 
 
-  if (classname) {
+  if (classname && (classname[0]!='\0')) {
      len = strlen(classname);
      if (len >= ESMF_MAXSTR) {
        fprintf(stderr, "Error: object type %d bytes longer than limit of %d\n",
                           len, ESMF_MAXSTR-1);
        return ESMF_FAILURE;
      }
+     defclass = 0;
   }
 
-  strcpy(className, classname ? classname : "global");
-  if (!name) 
+  strcpy(className, defclass ? classname : "global");
+  if (!defname) 
       sprintf(baseName, "%s%03d", className, ID); 
   else
       strcpy(baseName, name);
@@ -2597,7 +2602,7 @@ extern "C" {
   ID = ++globalCount;
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
-  if (name)
+  if (name && (name[0]!='\0')) 
       // TODO: make sure this name is unique in this namespace.  This means
       // some sort of registry utility.
       strcpy(baseName, name);
