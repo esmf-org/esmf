@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.23 2003/01/15 23:29:20 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.24 2003/01/16 18:16:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -60,11 +60,11 @@
       end type
 
 !------------------------------------------------------------------------------
-!     ! ESMF_DecompAxis
+!     ! ESMF_Axis
 !
-!     ! Description of ESMF_DecompAxis
+!     ! Description of ESMF_Axis
 
-      type ESMF_DecompAxis
+      type ESMF_Axis
       sequence
 !     private
         integer :: start
@@ -80,8 +80,8 @@
       type ESMF_Decomp
       sequence
       private
-        type (ESMF_DecompAxis) :: DEdir1   ! axis decomposition in 1st dir
-        type (ESMF_DecompAxis) :: DEdir2   ! axis decomposition in 2nd dir
+        type (ESMF_Axis) :: DEdir1         ! axis decomposition in 1st dir
+        type (ESMF_Axis) :: DEdir2         ! axis decomposition in 2nd dir
         logical ::  periodic_dir1          ! periodic boundary in 1st dir
         logical ::  periodic_dir2          ! periodic boundary in 2nd dir
         integer :: num_masks               ! number of decomposition masks
@@ -113,10 +113,10 @@
         integer :: gstart   ! global index of starting count
                             ! currently as the constant that should be added
                             ! to local index  TODO: really an array?
-        type (ESMF_DecompAxis) :: n_dir1  ! local cell count in 1st dir, in
-                                          ! global index
-        type (ESMF_DecompAxis) :: n_dir2  ! local cell count in 2nd dir, in
-                                          ! global index
+        type (ESMF_Axis) :: n_dir1  ! local cell count in 1st dir, in
+                                    ! global index
+        type (ESMF_Axis) :: n_dir2  ! local cell count in 2nd dir, in
+                                    ! global index
       end type
 
 !------------------------------------------------------------------------------
@@ -168,7 +168,7 @@
 ! !PUBLIC TYPES:
       public ESMF_DistGridConfig
       public ESMF_MyDE
-      public ESMF_DecompAxis
+      public ESMF_Axis
       public ESMF_Decomp
       public ESMF_DistGrid
       public ESMF_DistGridType
@@ -199,7 +199,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.23 2003/01/15 23:29:20 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.24 2003/01/16 18:16:03 jwolfe Exp $'
 
 !==============================================================================
 !
