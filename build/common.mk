@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.82 2004/11/01 17:14:40 theurich Exp $
+#  $Id: common.mk,v 1.83 2004/11/15 18:00:16 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -88,14 +88,6 @@ CPPFLAGS       += -DESMF_NO_IOCODE
 export ESMF_NO_IOCODE = true
 
 
-#-------------------------------------------------------------------------------
-#  Include site specific makefile fragment.
-#-------------------------------------------------------------------------------
-
-include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
-
-#-------------------------------------------------------------------------------
-
 # if PREC not already set, default to 64.  architectures which
 # have only one word size set this variable in their compiler/platform
 # dependent files, so this only applies to platforms which support
@@ -118,6 +110,14 @@ endif
 ifeq ($(ESMF_BOPT),default)
 export ESMF_BOPT = O
 endif
+
+#-------------------------------------------------------------------------------
+#  Include site specific makefile fragment.
+#-------------------------------------------------------------------------------
+
+include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
+
+#-------------------------------------------------------------------------------
 
 
 
@@ -1242,5 +1242,6 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 # Keep .o files
 #-------------------------------------------------------------------------------
 .PRECIOUS: %.o
+
 
 
