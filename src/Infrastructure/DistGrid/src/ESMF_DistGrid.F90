@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.128 2004/12/08 18:31:40 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.129 2004/12/09 17:47:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.128 2004/12/08 18:31:40 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.129 2004/12/09 17:47:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2909,7 +2909,7 @@
       subroutine ESMF_DistGridSerialize(distgrid, buffer, length, offset, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid
+      type(ESMF_DistGrid), target, intent(in) :: distgrid
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: length
       integer, intent(inout) :: offset
@@ -3011,7 +3011,6 @@
       integer :: localrc, status             ! Error status, allocation status
       integer :: dimCount, i, i1, nDE1, nDE2
       integer, dimension(:,:), allocatable :: cellCountPerDEPerDim
-      type(ESMF_DELayout) :: delayout
 
       ! figure out sizes
       nDE2       = 1
@@ -3023,8 +3022,8 @@
       endif
 
       ! allocate array for distgrid deserialization
-      allocate(cellCountPerDEPerDim(nDE1*nDE2, dimCount), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "cellCountPerDEPerDim", &
+      allocate(cellCountPerDEPerDim(nDE1*nDE2, dimCount), stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "cellCountPerDEPerDim", &
                                      ESMF_CONTEXT, rc)) return
 
       ! deserialize the grid derived type
@@ -3047,8 +3046,8 @@
       endif
 
       ! clean up
-      deallocate(cellCountPerDEPerDim, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+      deallocate(cellCountPerDEPerDim, stat=status)
+      if (ESMF_LogMsgFoundAllocError(status, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
 
       if  (present(rc)) rc = ESMF_SUCCESS
