@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.6 2004/06/17 16:53:26 nscollins Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.7 2004/07/27 16:23:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.6 2004/06/17 16:53:26 nscollins Exp $'
+      '$Id: ESMF_FieldDataMapUTest.F90,v 1.7 2004/07/27 16:23:12 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,10 +52,9 @@
       character(ESMF_MAXSTR*2) :: failMsg
 
       ! local variables needed to pass into function/subroutine calls
-      character(ESMF_MAXSTR) :: validate_options
-      character(ESMF_MAXSTR) :: print_options
+      !character(ESMF_MAXSTR) :: validate_options
+      !character(ESMF_MAXSTR) :: print_options
       type(ESMF_RelLoc) :: horzRelloc
-      integer :: value_set, value_get
 
       ! instantiate a FieldDataMap 
       type(ESMF_FieldDataMap) :: fieldDataMap1
