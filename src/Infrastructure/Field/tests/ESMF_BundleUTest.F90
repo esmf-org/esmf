@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.19 2003/06/19 19:01:02 nscollins Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.20 2003/06/27 21:27:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.19 2003/06/19 19:01:02 nscollins Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.20 2003/06/27 21:27:59 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -70,19 +70,21 @@
       ! instantiate a Bundle 
       type(ESMF_Bundle) :: bundle
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
+!-------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!-------------------------------------------------------------------------------
+
+      call ESMF_FrameworkInitialize(rc)
 
       !------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Verify that getting the name of an uninitialized Bundle is handled properly.
+      ! Verify getting the name of an uninitialized Bundle is handled properly.
       call ESMF_BundleGetName(bundle1, bname1, rc)
       write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
       write(name, *) "Getting name of uninitalized Bundle Test"
@@ -92,14 +94,14 @@
 #ifdef ESMF_EXHAUSTIVE
 
       !EX_UTest
-      !  Verify that the Field count query from an uninitialized Bundle is handled properly
+      !  Verify the Field count query from an uninitialized Bundle is handled
       call ESMF_BundleGetFieldCount(bundle1, fieldcount, rc);
       write(failMsg, *) ""
       write(name, *) "Getting Field count from an uninitialized Bundle Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-
 #endif
+
       !NEX_UTest
       ! Test Requirement FLD2.1.1 Creation using Field list
       ! It shall be possible to create a bundle with a field list, an optional 
@@ -338,5 +340,6 @@
 
 #endif
 
+      call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_BundleUTest

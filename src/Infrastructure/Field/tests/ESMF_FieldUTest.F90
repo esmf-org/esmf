@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.21 2003/06/19 19:51:29 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.22 2003/06/27 21:27:59 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.21 2003/06/19 19:51:29 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.22 2003/06/27 21:27:59 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -63,15 +63,15 @@
       type(ESMF_Mask) :: mask
       type(ESMF_Field) :: f1, f2, f3, f4, f5
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then 
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!-------------------------------------------------------------------------------- 
-
+!-------------------------------------------------------------------------------
+! The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+! always run. When the environment variable, EXHAUSTIVE, is set to ON then 
+! the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+! to OFF, then only the sanity unit tests.
+! Special strings (Non-exhaustive and exhaustive) have been
+! added to allow a script to count the number and types of unit tests.
+!------------------------------------------------------------------------------- 
+      call ESMF_FrameworkInitialize(rc)
 
       !------------------------------------------------------------------------
       
@@ -421,6 +421,8 @@
       ! is fixed.
 
 #endif
+
+      call ESMF_FrameworkFinalize(rc)
 
       print *, "******  End of FieldUTest  ******"
 
