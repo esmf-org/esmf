@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.2 2002/10/14 16:20:03 eschwab Exp $ 
+# $Id: makefile,v 1.3 2002/10/15 23:39:42 eschwab Exp $ 
 ALL: lib 
 
 CFLAGS    =
 FFLAGS    =
-SOURCEC	  = ESMC_TimeInstant.C
+SOURCEC	  = ESMC_Time.C ESMC_TimeInstant.C ESMC_TimeInterval.C ESMC_Clock.C ESMC_Alarm.C ESMC_Calendar.C
 SOURCEF	  = 
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
