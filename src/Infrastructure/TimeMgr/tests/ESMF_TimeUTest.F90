@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.11 2004/10/27 18:54:28 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.12 2004/11/30 22:04:48 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.11 2004/10/27 18:54:28 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.12 2004/11/30 22:04:48 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -396,6 +396,24 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting Stop Time with mm=0
+      write(failMsg, *) " Did return ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, mm=0, dd=1, calendar=noLeapCalendar, rc=rc)
+      write(name, *) "Set End Time with mm=0 Initialization Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Test Setting Stop Time with dd=0
+      write(failMsg, *) " Did return ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, dd=0, s=58, calendar=noLeapCalendar, rc=rc)
+      write(name, *) "Set End Time with dd=0 Initialization Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Converting Gregorian date to Julian Day
