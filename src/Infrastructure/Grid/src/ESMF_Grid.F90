@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.199 2004/12/03 20:47:46 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.200 2004/12/04 00:23:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.199 2004/12/03 20:47:46 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.200 2004/12/04 00:23:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -5535,46 +5535,102 @@
 !EOPI
 
       integer :: localrc                     ! Error status
-      type(ESMF_GridClass), pointer :: gp    ! grid class
+      integer :: i
       type(ESMF_DELayout) :: delayout
+      type(ESMF_GridClass), pointer :: gp    ! grid class
 
       ! shortcut to internals
       gp => grid%ptr
 
       call c_ESMC_BaseSerialize(gp%base, buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_GridSerialize(gp%gridStatus, gp%dimCount, gp%hasLocalData, &
-                                gp%gridStructure, gp%horzGridType, &
-                                gp%vertGridType, gp%horzStagger, &
-                                gp%vertStagger, &
+      ! serialize the grid derived type 
+      call c_ESMC_GridSerialize(gp%dimCount,        gp%gridStructure, &
+                                gp%horzGridType,    gp%vertGridType, &
+                                gp%horzStagger,     gp%vertStagger, &
+                                gp%gridStorage, &
+                                gp%horzCoordSystem, gp%vertCoordSystem, &
+                                gp%coordOrder,      gp%coordIndex, &
+                                gp%periodic(1), &
+                                gp%minGlobalCoordPerDim(1), &
+                                gp%maxGlobalCoordPerDim(1), &
                                 buffer(1), length, offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
+      do i = 1,gp%dimCount
+        call c_ESMC_StringSerialize(gp%dimNames(i), buffer(1), length, offset, localrc)
+        call c_ESMC_StringSerialize(gp%dimUnits(i), buffer(1), length, offset, localrc)
+      enddo
+
+      ! serialize the grid specific information
+      select case(gp%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridSerialize(grid, buffer, length, offset, localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+      end select
+      ! check local error code from the above case statement
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! serialize the delayout
       call ESMF_GridGet(grid, delayout=delayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-
-      call ESMF_DELayoutSerialize(delayout, buffer, length, offset, localrc)
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      call ESMF_DELayoutSerialize(delayout, buffer, length, offset, &
+                                  localrc)
       if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-       
-      !call ESMF_PhysGridSerialize(gp%physgrid, buffer, length, offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
-      !call ESMF_DistGridSerialize(gp%distgrid, buffer, length, offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
-
+      ! serialize the decomposition information
+      call ESMF_DistGridSerialize(gp%distgrids(1), buffer, length, offset, &
+                                  localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -5594,7 +5650,7 @@
       type(ESMF_Grid) :: ESMF_GridDeserialize   
 !
 ! !ARGUMENTS:
-      type(ESMF_VM), intent(in) :: vm
+      type(ESMF_VM) :: vm
       integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
       integer, intent(inout) :: offset
       integer, intent(out), optional :: rc 
@@ -5623,8 +5679,16 @@
 !EOPI
 
       integer :: localrc, status             ! Error status, allocation status
-      type(ESMF_GridClass), pointer :: gp    ! grid class
-      type(ESMF_DELayout) :: remotedelayout
+      integer :: i, i1, j, n
+      integer :: dimCount, oldDimCount, npets, npets2
+      integer :: newDEId, oldDEId, petId
+      integer, dimension(:), allocatable :: decompIDs, newNDEs, oldNDEs
+      integer, dimension(:), allocatable :: newCountPerDE1, newCountPerDE2
+      integer, dimension(:), allocatable :: oldCountPerDE1, oldCountPerDE2
+      integer, dimension(:), allocatable :: petlist, petTrack
+      integer, dimension(:,:), allocatable :: cellCountPerDEPerDim
+      type(ESMF_DELayout) :: newDELayout, oldDELayout
+      type(ESMF_GridClass), pointer :: gp
 
       ! in case of error, make sure this is invalid.
       nullify(ESMF_GridDeserialize%ptr)
@@ -5634,7 +5698,6 @@
       if (ESMF_LogMsgFoundAllocError(status, &
                                      "space for new Grid object", &
                                      ESMF_CONTEXT, rc)) return
-
 
       call ESMF_BaseCreate(gp%base, "Grid", "dummy", 0, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -5647,39 +5710,174 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call c_ESMC_GridDeserialize(gp%gridStatus, gp%dimCount, gp%hasLocalData, &
-                                  gp%gridStructure, gp%horzGridType, &
-                                  gp%vertGridType, gp%horzStagger, &
-                                  gp%vertStagger, &
+      call c_ESMC_GridDeserialize(gp%dimCount,        gp%gridStructure, &
+                                  gp%horzGridType,    gp%vertGridType, &
+                                  gp%horzStagger,     gp%vertStagger, &
+                                  gp%gridStorage, &
+                                  gp%horzCoordSystem, gp%vertCoordSystem, &
+                                  gp%coordOrder,      gp%coordIndex, &
+                                  gp%periodic(1), &
+                                  gp%minGlobalCoordPerDim(1), &
+                                  gp%maxGlobalCoordPerDim(1), &
                                   buffer(1), offset, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                  ESMF_ERR_PASSTHRU, &
                                  ESMF_CONTEXT, rc)) return
 
-      gp%numPhysGrids = 0
-      !call ESMF_PhysGridDeserialize(gp%physgrid, buffer, offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
+      do i = 1,gp%dimCount
+        call c_ESMC_StringDeserialize(gp%dimNames(i), buffer(1), offset, localrc)
+        call c_ESMC_StringDeserialize(gp%dimUnits(i), buffer(1), offset, localrc)
+      enddo
 
-      gp%numDistGrids = 0
-      !call ESMF_DistGridDeserialize(gp%distgrid, buffer, offset, localrc)
-      !if (ESMF_LogMsgFoundError(localrc, &
-      !                           ESMF_ERR_PASSTHRU, &
-      !                           ESMF_CONTEXT, rc)) return
+      select case(gp%gridStructure%gridStructure)
 
-      remotedelayout = ESMF_DELayoutDeserialize(buffer, offset, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                 ESMF_ERR_PASSTHRU, &
-                                 ESMF_CONTEXT, rc)) return
-      
-      call ESMF_DELayoutPrint(remotedelayout, "", localrc)
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                  "Unknown grid structure", &
+                                  ESMF_CONTEXT, rc)) return
 
-      ! get number PETs here - from where?
-     
-      ! get geometry from delayout and pad to include all PETs here.
-   
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridDeserialize(gp, buffer, offset, localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+      end select
+
+      ! TODO: call the appropriate grid create function?  is this necessary?
+      ! set the grid status
+      gp%gridStatus = ESMF_GRID_STATUS_INIT
       ESMF_GridDeserialize%ptr => gp
+
+      ! deserialize the old delayout
+      oldDELayout = ESMF_DELayoutDeserialize(buffer, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! query the old delayout and allocate arrays based on its information
+      call ESMF_DELayoutGet(oldDELayout, dimCount=oldDimCount, rc=localrc)
+      allocate(decompIDs(oldDimCount), &
+                 oldNDEs(oldDimCount), stat=localrc)
+      oldNDEs = 1
+      call ESMF_DELayoutGet(oldDELayout, deCountPerDim=oldNDEs, rc=localrc)
+      allocate(oldCountPerDE1(oldNDEs(1)))
+      if (oldDimCount.gt.1) allocate(oldCountPerDE2(oldNDEs(2)))
+
+      ! deserialize the decomposition information
+      call ESMF_DistGridDeserialize(buffer, offset, decompIDs, oldCountPerDE1, &
+                                    oldCountPerDE2, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! create a new DELayout from the attached VM, using information from the 
+      ! old one
+      ! first, figure out the size of the layout.  the new layout has to be the same
+      ! size in the second direction as the old one in order to correctly spawn the
+      ! deserialized grids
+      call ESMF_VMGet(vm, petCount=npets, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+      newNDEs(2) = oldNDEs(2)
+      newNDEs(1) = npets/newNDEs(2)            ! TODO: this only works for 1-1
+                                               !       should figure out the number
+                                               !       of DEs for the new layout based
+                                               !       in part on the number of DEs per
+                                               !       pet from the old one
+      npets2 = newNDEs(1)*newNDEs(2)           ! in case the division is not even
+
+      ! now allocate a petlist and more for the new delayout
+      allocate(           petlist(npets2), &
+                      petTrack(0:npets-1), &
+               newCountPerDE1(newNDEs(1)), &
+               newCountPerDE2(newNDEs(2)), stat=localrc)
+      petlist        = 0
+      petTrack       = 1
+      newCountPerDE1 = 0
+      newCountPerDE2 = 0
+      do i = 1,oldNDEs(1)
+        newCountPerDE1(i) = oldCountPerDE1(i)
+      enddo
+      do j = 1,oldNDEs(2)
+        newCountPerDE2(j) = oldCountPerDE2(j)
+      enddo
+
+      ! figure out where the DEs from the old delayout need to be in the new one
+      ! loop over the DEs from the old one
+      do j   = 1,oldNDEs(2)
+        do i = 1,oldNDEs(1)
+          oldDEId = (j-1)*oldNDEs(1) + i - 1
+          newDEId = (j-1)*newNDEs(1) + i - 1
+          petId   = oldDEId    ! TODO: if not 1-1, we need a call to get this
+          petlist(newDEId) = petId
+          petTrack(petId)  = 0
+        enddo
+      enddo
+
+      ! fill in the petlist with the remaining petIds
+      do j   = 1,newNDEs(2)
+        do i = oldNDEs(1)+1,newNDEs(1)
+          newDEId = (j-1)*newNDEs(1) + i - 1
+          do n = 0,npets-1
+            if (petTrack(n).ne.0) then
+              petId       = n
+              petTrack(n) = 0
+              exit
+            endif
+          enddo
+          petlist(newDEId) = petId
+        enddo
+      enddo
+
+      ! check for errors -- did all the pets get used?
+  !    if (petTrack.ne.0) then
+  !    endif
+
+      ! create new delayout from the vm and petlist
+      newDELayout = ESMF_DELayoutCreate(vm, deCountList=newNDEs, dePetList=petlist, &
+                                        rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! call distribute function
+      call ESMF_GridDistribute(ESMF_GridDeserialize, newDELayout, &
+                               countsPerDEDim1=newCountPerDE1, &
+                               countsPerDEDim2=newCountPerDE2, &
+                               decompIds=decompIds, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       if  (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_GridDeserialize
