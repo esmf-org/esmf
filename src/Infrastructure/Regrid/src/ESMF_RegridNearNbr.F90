@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.6 2003/08/27 23:38:29 nscollins Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.7 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.6 2003/08/27 23:38:29 nscollins Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.7 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -156,16 +156,16 @@
       integer, dimension(:,:,:), allocatable :: &
          dst_add            ! address in dest grid (i,j,DE)
          
-      real(ESMF_IKIND_R8), dimension(:), allocatable :: &
+      real(ESMF_KIND_R8), dimension(:), allocatable :: &
          weights,          &! normalized distance to each neighbor
          wgtstmp            ! temp for consistency with AddLink call
 
-      real(ESMF_IKIND_R8) :: &
+      real(ESMF_KIND_R8) :: &
          distance,         &! distance to current neighbor
          x1, y1,           &! dst grid x,y coordinates
          x2, y2             ! src grid x,y coordinates
 
-      real (ESMF_IKIND_R8), dimension(:,:,:), allocatable :: &
+      real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
          src_center_x,      &! cell center x-coord for gathered source grid
          src_center_y        ! cell center y-coord for gathered source grid
 

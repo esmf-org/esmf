@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.11 2003/08/30 00:05:41 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.11 2003/08/30 00:05:41 eschwab Exp $'
+      '$Id: ESMF_TimeEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a calendar
@@ -46,7 +46,7 @@
 
       ! temp variables for Get functions
       integer :: YR, MM, DD, D, H, M, S
-      integer(ESMF_IKIND_I8) :: YRl, Dl, Sl
+      integer(ESMF_KIND_I8) :: YRl, Dl, Sl
       type(ESMF_Calendar) :: cal
       integer :: dayOfYear, dayOfWeek, dayOfMonth
 

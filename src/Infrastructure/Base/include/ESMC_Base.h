@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.23 2003/08/29 21:02:50 jwolfe Exp $
+// $Id: ESMC_Base.h,v 1.24 2003/09/04 18:57:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,30 +57,30 @@ enum ESMC_DataType { ESMF_DATA_INTEGER=1,
                      ESMF_DATA_LOGICAL,
                      ESMF_DATA_CHARACTER };
 
-enum ESMC_DataKind { ESMF_KIND_I1=1,
-                     ESMF_KIND_I2,
-                     ESMF_KIND_I4,
-                     ESMF_KIND_I8,
-                     ESMF_KIND_R4,
-                     ESMF_KIND_R8,
+enum ESMC_DataKind { ESMF_I1=1,
+                     ESMF_I2,
+                     ESMF_I4,
+                     ESMF_I8,
+                     ESMF_R4,
+                     ESMF_R8,
                      ESMF_KIND_C8,
                      ESMF_KIND_C16 };
 
 // ESMF platform-dependent data types
 #ifdef ESMF_IS_32BIT_MACHINE
-  typedef long long ESMF_IKIND_I8;
-  typedef int       ESMF_IKIND_I4;
-  typedef short     ESMF_IKIND_I2;
-  typedef char      ESMF_IKIND_I1;
-  typedef double    ESMF_IKIND_R8;
-  typedef float     ESMF_IKIND_R4;
+  typedef long long ESMF_KIND_I8;
+  typedef int       ESMF_KIND_I4;
+  typedef short     ESMF_KIND_I2;
+  typedef char      ESMF_KIND_I1;
+  typedef double    ESMF_KIND_R8;
+  typedef float     ESMF_KIND_R4;
 #else // 64-bit or larger machine
-  typedef long      ESMF_IKIND_I8;
-  typedef int       ESMF_IKIND_I4;
-  typedef short     ESMF_IKIND_I2;
-  typedef char      ESMF_IKIND_I1;
-  typedef double    ESMF_IKIND_R8;
-  typedef float     ESMF_IKIND_R4;
+  typedef long      ESMF_KIND_I8;
+  typedef int       ESMF_KIND_I4;
+  typedef short     ESMF_KIND_I2;
+  typedef char      ESMF_KIND_I1;
+  typedef double    ESMF_KIND_R8;
+  typedef float     ESMF_KIND_R4;
 #endif
 
 // general logical value - MUST MATCH F90

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx2.F90,v 1.5 2003/07/23 02:13:38 eschwab Exp $
+! $Id: ESMF_DELayout_FEx2.F90,v 1.6 2003/09/04 18:57:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,17 +30,17 @@ program ESMF_DELayout_FEx2
   integer, dimension(6) :: delist
   integer, dimension(2) :: layoutDims, layoutCommTypes
   integer :: nx, ny, x, y, id, rc
-  integer(ESMF_IKIND_I4), dimension(20) :: sArray1I4, sArray2I4, sArray3I4, &
+  integer(ESMF_KIND_I4), dimension(20) :: sArray1I4, sArray2I4, sArray3I4, &
                                            sArray4I4, sArray5I4, sArray6I4
-  integer(ESMF_IKIND_I4), dimension(180) :: rArrayI4
+  integer(ESMF_KIND_I4), dimension(180) :: rArrayI4
 
-  real(ESMF_IKIND_R4), dimension(20) :: sArray1R4, sArray2R4, sArray3R4, &
+  real(ESMF_KIND_R4), dimension(20) :: sArray1R4, sArray2R4, sArray3R4, &
                                         sArray4R4, sArray5R4, sArray6R4
-  real(ESMF_IKIND_R4), dimension(180) :: rArrayR4
+  real(ESMF_KIND_R4), dimension(180) :: rArrayR4
 
-  real(ESMF_IKIND_R8), dimension(20) :: sArray1R8, sArray2R8, sArray3R8, &
+  real(ESMF_KIND_R8), dimension(20) :: sArray1R8, sArray2R8, sArray3R8, &
                                         sArray4R8, sArray5R8, sArray6R8
-  real(ESMF_IKIND_R8), dimension(180) :: rArrayR8
+  real(ESMF_KIND_R8), dimension(180) :: rArrayR8
 
   integer, dimension(6) :: rlen, rdispls
   integer :: i, slen

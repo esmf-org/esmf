@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.5 2003/06/07 00:51:03 eschwab Exp $
+! $Id: ESMF_UserMain.F90,v 1.6 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -36,7 +36,7 @@
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime, stopTime
-    integer(ESMF_IKIND_I8) :: advanceCount
+    integer(ESMF_KIND_I8) :: advanceCount
 
     type(ESMF_Config) :: aconfig
     type(ESMF_DELayout) :: alayout

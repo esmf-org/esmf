@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx3.F90,v 1.3 2003/07/23 02:12:49 eschwab Exp $
+! $Id: ESMF_DELayout_FEx3.F90,v 1.4 2003/09/04 18:57:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,12 +32,12 @@ program ESMF_DELayout_FEx3
   integer :: nx, ny, x, y, id, rc
   integer :: i, len, srcDEid
 
-  real(ESMF_IKIND_R8), dimension(:), pointer :: sArrayR8
-  real(ESMF_IKIND_R8), dimension(:), pointer :: rArrayR8
-  real(ESMF_IKIND_R4), dimension(:), pointer :: sArrayR4
-  real(ESMF_IKIND_R4), dimension(:), pointer :: rArrayR4
-  integer(ESMF_IKIND_I4), dimension(:), pointer :: sArrayI4
-  integer(ESMF_IKIND_I4), dimension(:), pointer :: rArrayI4
+  real(ESMF_KIND_R8), dimension(:), pointer :: sArrayR8
+  real(ESMF_KIND_R8), dimension(:), pointer :: rArrayR8
+  real(ESMF_KIND_R4), dimension(:), pointer :: sArrayR4
+  real(ESMF_KIND_R4), dimension(:), pointer :: rArrayR4
+  integer(ESMF_KIND_I4), dimension(:), pointer :: sArrayI4
+  integer(ESMF_KIND_I4), dimension(:), pointer :: rArrayI4
 
   type(ESMF_LocalArray) :: sndArrayR8, rcvArrayR8, &
                            sndArrayR4, rcvArrayR4, &

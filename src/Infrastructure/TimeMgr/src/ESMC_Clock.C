@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.30 2003/08/30 00:37:22 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.30 2003/08/30 00:37:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -98,7 +98,7 @@
       ESMC_Time         *stopTime,       // in
       ESMC_Time         *refTime,        // in
       ESMC_Time         *currTime,       // in
-      ESMF_IKIND_I8     *advanceCount) { // in
+      ESMF_KIND_I8     *advanceCount) { // in
 
 // !DESCRIPTION:
 //      Sets a {\tt ESMC\_Clock}'s properties
@@ -141,7 +141,7 @@
       ESMC_Time         *prevTime,       // out
       ESMC_Time         *currSimTime,    // out
       ESMC_Time         *prevSimTime,    // out
-      ESMF_IKIND_I8     *advanceCount,   // out
+      ESMF_KIND_I8     *advanceCount,   // out
       int               *numAlarms) {    // out
 
 // !DESCRIPTION:
@@ -491,7 +491,7 @@
       ESMC_Time         *refTime,              // in
       ESMC_Time         *currTime,             // in
       ESMC_Time         *prevTime,             // in
-      ESMF_IKIND_I8      advanceCount,         // in
+      ESMF_KIND_I8      advanceCount,         // in
       int                numAlarms,            // in 
       ESMC_Alarm        *alarmList[]) {        // in
 //
@@ -544,7 +544,7 @@
       ESMC_Time         *refTime,              // out
       ESMC_Time         *currTime,             // out
       ESMC_Time         *prevTime,             // out
-      ESMF_IKIND_I8     *advanceCount,         // out
+      ESMF_KIND_I8     *advanceCount,         // out
       int               *numAlarms,            // out 
       ESMC_Alarm        *alarmList[]) const {  // out
 //

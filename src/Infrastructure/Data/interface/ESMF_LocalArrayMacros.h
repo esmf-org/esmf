@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.3 2003/07/21 19:54:22 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.4 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -51,7 +51,7 @@
 #define ArrayTypeMacro(mname, mtypekind, mrank, mdim) \
 ! <Created by macro - do not edit directly > @\
       type ESMF_ArrWrap##mtypekind##mrank##D @\
-        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @\
+        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr @\
       end type ESMF_ArrWrap##mtypekind##mrank##D @\
 
 #define ArrayAllTypeMacro() \
@@ -94,7 +94,7 @@
  @\
 
 #define ArrayPointerMacro(mname, mtypekind, mrank, mdim) \
-        mname (ESMF_IKIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr
+        mname (ESMF_KIND_##mtypekind),dimension(mdim),pointer :: mtypekind##mrank##Dptr
 
 #define ArrayAllPointerMacro() \
 ! <Created by macro - do not edit directly > @\
@@ -235,8 +235,8 @@
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTArr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), target :: f90arr @\
-      !mname (ESMF_IKIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: f90arr @\
+      !mname (ESMF_KIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
       integer, dimension(:), intent(in) :: counts @\
       integer, intent(out), optional :: rc   @\
 ! @\
@@ -269,7 +269,7 @@
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
-        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp  @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -328,8 +328,8 @@
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlArr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), target :: f90arr @\
-      !mname (ESMF_IKIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), target :: f90arr @\
+      !mname (ESMF_KIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc   @\
 ! @\
@@ -367,7 +367,7 @@
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
         integer, dimension(mrank) :: counts ! per dim @\
  @\
-        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -439,7 +439,7 @@
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByMTPtr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       integer, dimension(:), intent(in) :: counts @\
       integer, intent(out), optional :: rc   @\
 ! @\
@@ -528,7 +528,7 @@
       type(ESMF_LocalArray) :: ESMF_LocalArrCreateByFlPtr##mtypekind##mrank##D @\
 ! @\
 ! !ARGUMENTS: @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc   @\
 ! @\
@@ -635,7 +635,7 @@
 ! !ARGUMENTS: @\
       type(ESMF_LocalArray), intent(inout) :: array @\
       integer, dimension(:), intent(in) :: counts @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer, optional :: f90ptr  @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer, optional :: f90ptr  @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc   @\
 ! @\
@@ -685,7 +685,7 @@
         type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
-        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp  @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
         integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds @\
         integer, dimension(ESMF_MAXDIM) :: strides, offsets @\
  @\
@@ -777,7 +777,7 @@
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_LocalArray) :: array @\
-      mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
       integer, intent(out), optional :: rc @\
 ! @\
@@ -794,7 +794,7 @@
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
         integer :: rank, counts(mrank)         ! size info for the array @\
-        mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
+        mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\

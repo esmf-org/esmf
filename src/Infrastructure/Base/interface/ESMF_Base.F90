@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.57 2003/09/03 22:53:51 flanigan Exp $
+! $Id: ESMF_Base.F90,v 1.58 2003/09/04 18:57:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,12 +112,12 @@
       end type
 
       type(ESMF_DataKind), parameter :: &
-                   ESMF_KIND_I1 = ESMF_DataKind(1), &
-                   ESMF_KIND_I2 = ESMF_DataKind(2), &
-                   ESMF_KIND_I4 = ESMF_DataKind(3), &
-                   ESMF_KIND_I8 = ESMF_DataKind(4), &
-                   ESMF_KIND_R4 = ESMF_DataKind(5), &
-                   ESMF_KIND_R8 = ESMF_DataKind(6), &
+                   ESMF_I1 = ESMF_DataKind(1), &
+                   ESMF_I2 = ESMF_DataKind(2), &
+                   ESMF_I4 = ESMF_DataKind(3), &
+                   ESMF_I8 = ESMF_DataKind(4), &
+                   ESMF_R4 = ESMF_DataKind(5), &
+                   ESMF_R8 = ESMF_DataKind(6), &
                    ESMF_KIND_C8 = ESMF_DataKind(7), &
                    ESMF_KIND_C16 = ESMF_DataKind(8)
 
@@ -125,14 +125,14 @@
       !! the data kind to convert the derived type into a real integer, 
       !! then we might be able to get rid of this second set of integer parms.
       integer, parameter :: &
-                   ESMF_IKIND_I1 = selected_int_kind(2), &
-                   ESMF_IKIND_I2 = selected_int_kind(4), &
-                   ESMF_IKIND_I4 = selected_int_kind(9), &
-                   ESMF_IKIND_I8 = selected_int_kind(18), &
-                   ESMF_IKIND_R4 = selected_real_kind(3,25), &
-                   ESMF_IKIND_R8 = selected_real_kind(6,45), &
-                   ESMF_IKIND_C8 = selected_real_kind(3,25), &
-                   ESMF_IKIND_C16 = selected_real_kind(6,45)
+                   ESMF_KIND_I1 = selected_int_kind(2), &
+                   ESMF_KIND_I2 = selected_int_kind(4), &
+                   ESMF_KIND_I4 = selected_int_kind(9), &
+                   ESMF_KIND_I8 = selected_int_kind(18), &
+                   ESMF_KIND_R4 = selected_real_kind(3,25), &
+                   ESMF_KIND_R8 = selected_real_kind(6,45), &
+                   ESMF_KIND_C8 = selected_real_kind(3,25), &
+                   ESMF_KIND_C16 = selected_real_kind(6,45)
 
 !------------------------------------------------------------------------------
 
@@ -236,11 +236,11 @@
       public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
              ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER
 
+      public ESMF_I1, ESMF_I2, ESMF_I4, ESMF_I8, & 
+             ESMF_R4, ESMF_R8, ESMF_KIND_C8, ESMF_KIND_C16
+
       public ESMF_KIND_I1, ESMF_KIND_I2, ESMF_KIND_I4, ESMF_KIND_I8, & 
              ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
-
-      public ESMF_IKIND_I1, ESMF_IKIND_I2, ESMF_IKIND_I4, ESMF_IKIND_I8, & 
-             ESMF_IKIND_R4, ESMF_IKIND_R8, ESMF_IKIND_C8, ESMF_IKIND_C16
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
@@ -354,7 +354,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.57 2003/09/03 22:53:51 flanigan Exp $'
+               '$Id: ESMF_Base.F90,v 1.58 2003/09/04 18:57:55 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 

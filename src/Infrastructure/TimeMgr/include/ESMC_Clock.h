@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.19 2003/08/30 00:37:22 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.20 2003/09/04 18:57:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
     ESMC_Time         currTime;  // current time
     ESMC_Time         prevTime;  // previous time
 
-    ESMF_IKIND_I8     advanceCount;             // number of times
+    ESMF_KIND_I8     advanceCount;             // number of times
                                                 //   ESMC_ClockAdvance has
                                                 //   been called (number of
                                                 //   time steps taken so far)
@@ -116,7 +116,7 @@
                       ESMC_Time         *stopTime=0,
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0,
-                      ESMF_IKIND_I8     *advanceCount=0);
+                      ESMF_KIND_I8     *advanceCount=0);
 
     int ESMC_ClockGet(ESMC_TimeInterval *timeStep=0,
                       ESMC_Time         *startTime=0,
@@ -126,7 +126,7 @@
                       ESMC_Time         *prevTime=0, 
                       ESMC_Time         *currSimTime=0, 
                       ESMC_Time         *prevSimTime=0, 
-                      ESMF_IKIND_I8     *advanceCount=0, 
+                      ESMF_KIND_I8     *advanceCount=0, 
                       int               *numAlarms=0);
 
     int ESMC_ClockAddAlarm(ESMC_Alarm *alarm);  // (TMG 4.1, 4.2)
@@ -155,7 +155,7 @@
                               ESMC_Time         *refTime,
                               ESMC_Time         *currTime,
                               ESMC_Time         *prevTime,
-                              ESMF_IKIND_I8      advanceCount,
+                              ESMF_KIND_I8      advanceCount,
                               int                numAlarms,
                               ESMC_Alarm        *alarmList[]);
 
@@ -165,7 +165,7 @@
                                ESMC_Time         *refTime,
                                ESMC_Time         *currTime,
                                ESMC_Time         *prevTime,
-                               ESMF_IKIND_I8     *advanceCount,
+                               ESMF_KIND_I8     *advanceCount,
                                int               *numAlarms,
                                ESMC_Alarm        *alarmList[] ) const;
 

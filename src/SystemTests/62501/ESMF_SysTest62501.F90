@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.9 2003/08/05 21:20:17 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.10 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #62501
 
@@ -38,7 +38,7 @@
     integer :: status
     integer :: nDE_i, nDE_j
     real :: x_min, x_max, y_min, y_max
-    integer(ESMF_IKIND_I4), dimension(:), pointer :: idata, idata2, rowdata
+    integer(ESMF_KIND_I4), dimension(:), pointer :: idata, idata2, rowdata
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: layout1 
     type(ESMF_Grid) :: grid1

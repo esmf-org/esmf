@@ -1,9 +1,9 @@
-% $Id: BaseTime_def.tex,v 1.1 2003/02/11 18:25:08 eschwab Exp $
+% $Id: BaseTime_def.tex,v 1.2 2003/09/04 18:57:56 cdeluca Exp $
 \begin{verbatim}
       type ESMF_BaseTime
       sequence                        ! for C++ interoperability
       private
-        integer(ESMF_IKIND_I8) :: S   ! whole seconds
+        integer(ESMF_KIND_I8) :: S   ! whole seconds
         integer                :: Sn  ! fractional seconds, numerator
         integer                :: Sd  ! fractional seconds, denominator
       end type

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.41 2003/08/13 22:58:05 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.42 2003/09/04 18:57:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.41 2003/08/13 22:58:05 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.42 2003/09/04 18:57:55 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1013,7 +1013,7 @@ static int verbose = 1;
   }
 
   // share/gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_KIND_I4);
+  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_I4);
   //cout << "DELayoutCreate(): exited ESMC_CommAllGather" << endl;
 
   // create PE List from gathered IDs
@@ -1976,7 +1976,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
           }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMF_KIND_I4);
+                                   displs, ESMF_I4);
         }
         delete [] recvcounts;
         delete [] displs;
@@ -2035,7 +2035,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
             }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMF_KIND_I4);
+                                   displs, ESMF_I4);
           }
         }
         delete [] recvcounts;
@@ -2155,7 +2155,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
           }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMF_KIND_R4);
+                                   displs, ESMF_R4);
         }
         delete [] recvcounts;
         delete [] displs;
@@ -2214,7 +2214,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
             }
           // call layout gather routine
           comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
-                                   displs, ESMF_KIND_R4);
+                                   displs, ESMF_R4);
           }
         }
         delete [] recvcounts;
@@ -2722,7 +2722,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
   // perform reduction operation across all DEs in the layout
   int rc;
-  rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMF_KIND_I4, op);
+  rc = comm.ESMC_CommAllReduce(&localResult, result, 1, ESMF_I4, op);
   if (rc != ESMF_SUCCESS) {
     cout << "ESMC_DELayoutAllReduce(1D) error" << endl;
   }

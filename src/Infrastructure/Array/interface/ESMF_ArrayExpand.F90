@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand.F90,v 1.3 2003/07/22 19:36:49 nscollins Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.4 2003/09/04 18:57:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -125,136 +125,136 @@
 
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI21D 
-  integer  (ESMF_IKIND_I2 ),dimension(  :  ),pointer ::   I21Dptr 
+  integer  (ESMF_KIND_I2 ),dimension(  :  ),pointer ::   I21Dptr 
  end type ESMF_ArrWrapI21D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI41D 
-  integer  (ESMF_IKIND_I4 ),dimension(  :  ),pointer ::   I41Dptr 
+  integer  (ESMF_KIND_I4 ),dimension(  :  ),pointer ::   I41Dptr 
  end type ESMF_ArrWrapI41D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI81D 
-  integer  (ESMF_IKIND_I8 ),dimension(  :  ),pointer ::   I81Dptr 
+  integer  (ESMF_KIND_I8 ),dimension(  :  ),pointer ::   I81Dptr 
  end type ESMF_ArrWrapI81D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI22D 
-  integer  (ESMF_IKIND_I2 ),dimension(  :,:  ),pointer ::   I22Dptr 
+  integer  (ESMF_KIND_I2 ),dimension(  :,:  ),pointer ::   I22Dptr 
  end type ESMF_ArrWrapI22D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI42D 
-  integer  (ESMF_IKIND_I4 ),dimension(  :,:  ),pointer ::   I42Dptr 
+  integer  (ESMF_KIND_I4 ),dimension(  :,:  ),pointer ::   I42Dptr 
  end type ESMF_ArrWrapI42D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI82D 
-  integer  (ESMF_IKIND_I8 ),dimension(  :,:  ),pointer ::   I82Dptr 
+  integer  (ESMF_KIND_I8 ),dimension(  :,:  ),pointer ::   I82Dptr 
  end type ESMF_ArrWrapI82D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI23D 
-  integer  (ESMF_IKIND_I2 ),dimension(  :,:,:  ),pointer ::   I23Dptr 
+  integer  (ESMF_KIND_I2 ),dimension(  :,:,:  ),pointer ::   I23Dptr 
  end type ESMF_ArrWrapI23D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI43D 
-  integer  (ESMF_IKIND_I4 ),dimension(  :,:,:  ),pointer ::   I43Dptr 
+  integer  (ESMF_KIND_I4 ),dimension(  :,:,:  ),pointer ::   I43Dptr 
  end type ESMF_ArrWrapI43D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI83D 
-  integer  (ESMF_IKIND_I8 ),dimension(  :,:,:  ),pointer ::   I83Dptr 
+  integer  (ESMF_KIND_I8 ),dimension(  :,:,:  ),pointer ::   I83Dptr 
  end type ESMF_ArrWrapI83D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI24D 
-  integer  (ESMF_IKIND_I2 ),dimension(  :,:,:,:  ),pointer ::   I24Dptr 
+  integer  (ESMF_KIND_I2 ),dimension(  :,:,:,:  ),pointer ::   I24Dptr 
  end type ESMF_ArrWrapI24D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI44D 
-  integer  (ESMF_IKIND_I4 ),dimension(  :,:,:,:  ),pointer ::   I44Dptr 
+  integer  (ESMF_KIND_I4 ),dimension(  :,:,:,:  ),pointer ::   I44Dptr 
  end type ESMF_ArrWrapI44D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI84D 
-  integer  (ESMF_IKIND_I8 ),dimension(  :,:,:,:  ),pointer ::   I84Dptr 
+  integer  (ESMF_KIND_I8 ),dimension(  :,:,:,:  ),pointer ::   I84Dptr 
  end type ESMF_ArrWrapI84D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI25D 
-  integer  (ESMF_IKIND_I2 ),dimension(  :,:,:,:,:  ),pointer ::   I25Dptr 
+  integer  (ESMF_KIND_I2 ),dimension(  :,:,:,:,:  ),pointer ::   I25Dptr 
  end type ESMF_ArrWrapI25D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI45D 
-  integer  (ESMF_IKIND_I4 ),dimension(  :,:,:,:,:  ),pointer ::   I45Dptr 
+  integer  (ESMF_KIND_I4 ),dimension(  :,:,:,:,:  ),pointer ::   I45Dptr 
  end type ESMF_ArrWrapI45D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapI85D 
-  integer  (ESMF_IKIND_I8 ),dimension(  :,:,:,:,:  ),pointer ::   I85Dptr 
+  integer  (ESMF_KIND_I8 ),dimension(  :,:,:,:,:  ),pointer ::   I85Dptr 
  end type ESMF_ArrWrapI85D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR41D 
-  real  (ESMF_IKIND_R4 ),dimension(  :  ),pointer ::   R41Dptr 
+  real  (ESMF_KIND_R4 ),dimension(  :  ),pointer ::   R41Dptr 
  end type ESMF_ArrWrapR41D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR81D 
-  real  (ESMF_IKIND_R8 ),dimension(  :  ),pointer ::   R81Dptr 
+  real  (ESMF_KIND_R8 ),dimension(  :  ),pointer ::   R81Dptr 
  end type ESMF_ArrWrapR81D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR42D 
-  real  (ESMF_IKIND_R4 ),dimension(  :,:  ),pointer ::   R42Dptr 
+  real  (ESMF_KIND_R4 ),dimension(  :,:  ),pointer ::   R42Dptr 
  end type ESMF_ArrWrapR42D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR82D 
-  real  (ESMF_IKIND_R8 ),dimension(  :,:  ),pointer ::   R82Dptr 
+  real  (ESMF_KIND_R8 ),dimension(  :,:  ),pointer ::   R82Dptr 
  end type ESMF_ArrWrapR82D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR43D 
-  real  (ESMF_IKIND_R4 ),dimension(  :,:,:  ),pointer ::   R43Dptr 
+  real  (ESMF_KIND_R4 ),dimension(  :,:,:  ),pointer ::   R43Dptr 
  end type ESMF_ArrWrapR43D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR83D 
-  real  (ESMF_IKIND_R8 ),dimension(  :,:,:  ),pointer ::   R83Dptr 
+  real  (ESMF_KIND_R8 ),dimension(  :,:,:  ),pointer ::   R83Dptr 
  end type ESMF_ArrWrapR83D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR44D 
-  real  (ESMF_IKIND_R4 ),dimension(  :,:,:,:  ),pointer ::   R44Dptr 
+  real  (ESMF_KIND_R4 ),dimension(  :,:,:,:  ),pointer ::   R44Dptr 
  end type ESMF_ArrWrapR44D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR84D 
-  real  (ESMF_IKIND_R8 ),dimension(  :,:,:,:  ),pointer ::   R84Dptr 
+  real  (ESMF_KIND_R8 ),dimension(  :,:,:,:  ),pointer ::   R84Dptr 
  end type ESMF_ArrWrapR84D 
   
  
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR45D 
-  real  (ESMF_IKIND_R4 ),dimension(  :,:,:,:,:  ),pointer ::   R45Dptr 
+  real  (ESMF_KIND_R4 ),dimension(  :,:,:,:,:  ),pointer ::   R45Dptr 
  end type ESMF_ArrWrapR45D 
   
  ! <Created by macro - do not edit directly > 
  type ESMF_ArrWrapR85D 
-  real  (ESMF_IKIND_R8 ),dimension(  :,:,:,:,:  ),pointer ::   R85Dptr 
+  real  (ESMF_KIND_R8 ),dimension(  :,:,:,:,:  ),pointer ::   R85Dptr 
  end type ESMF_ArrWrapR85D 
   
 ! < end macro - do not edit directly >  
@@ -279,7 +279,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand.F90,v 1.3 2003/07/22 19:36:49 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.4 2003/09/04 18:57:55 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -838,8 +838,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI21D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -879,7 +879,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -905,7 +905,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -939,8 +939,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI41D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -980,7 +980,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1006,7 +1006,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1040,8 +1040,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI81D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1081,7 +1081,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1107,7 +1107,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1141,8 +1141,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI22D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1182,7 +1182,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1208,7 +1208,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1242,8 +1242,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI42D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1283,7 +1283,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1309,7 +1309,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1343,8 +1343,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI82D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1384,7 +1384,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1410,7 +1410,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1444,8 +1444,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI23D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1485,7 +1485,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1511,7 +1511,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1545,8 +1545,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI43D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1586,7 +1586,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1612,7 +1612,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1646,8 +1646,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI83D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1687,7 +1687,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1713,7 +1713,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1747,8 +1747,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI24D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1788,7 +1788,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1814,7 +1814,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1848,8 +1848,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI44D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1889,7 +1889,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -1915,7 +1915,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -1949,8 +1949,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI84D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -1990,7 +1990,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2016,7 +2016,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2050,8 +2050,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI25D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2091,7 +2091,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2117,7 +2117,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2151,8 +2151,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI45D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2192,7 +2192,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2218,7 +2218,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2252,8 +2252,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI85D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2293,7 +2293,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2319,7 +2319,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2353,8 +2353,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR41D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2394,7 +2394,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2420,7 +2420,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2454,8 +2454,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR81D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2495,7 +2495,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2521,7 +2521,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2555,8 +2555,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR42D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2596,7 +2596,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2622,7 +2622,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2656,8 +2656,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR82D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2697,7 +2697,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2723,7 +2723,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2757,8 +2757,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR43D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2798,7 +2798,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2824,7 +2824,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2858,8 +2858,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR83D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -2899,7 +2899,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -2925,7 +2925,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -2959,8 +2959,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR44D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3000,7 +3000,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3026,7 +3026,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3060,8 +3060,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR84D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3101,7 +3101,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3127,7 +3127,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3161,8 +3161,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR45D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3202,7 +3202,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3228,7 +3228,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3262,8 +3262,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR85D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3303,7 +3303,7 @@ end interface
  integer :: hwidth                   ! local copy of halo width 
  logical :: rcpresent                ! did user specify rc? 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3329,7 +3329,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3369,8 +3369,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI21D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3413,7 +3413,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  1 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: newp 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3452,7 +3452,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3486,8 +3486,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI41D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3530,7 +3530,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  1 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: newp 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3569,7 +3569,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3603,8 +3603,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI81D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3647,7 +3647,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  1 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: newp 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3686,7 +3686,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3720,8 +3720,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI22D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3764,7 +3764,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  2 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3803,7 +3803,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3837,8 +3837,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI42D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3881,7 +3881,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  2 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -3920,7 +3920,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -3954,8 +3954,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI82D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -3998,7 +3998,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  2 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4037,7 +4037,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4071,8 +4071,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI23D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4115,7 +4115,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  3 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4154,7 +4154,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4188,8 +4188,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI43D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4232,7 +4232,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  3 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4271,7 +4271,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4305,8 +4305,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI83D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4349,7 +4349,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  3 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4388,7 +4388,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4422,8 +4422,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI24D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4466,7 +4466,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  4 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4505,7 +4505,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4539,8 +4539,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI44D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4583,7 +4583,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  4 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4622,7 +4622,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4656,8 +4656,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI84D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4700,7 +4700,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  4 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4739,7 +4739,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4773,8 +4773,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI25D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4817,7 +4817,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  5 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4856,7 +4856,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -4890,8 +4890,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI45D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -4934,7 +4934,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  5 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -4973,7 +4973,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5007,8 +5007,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI85D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5051,7 +5051,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  5 ) :: counts ! per dim 
  
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: newp 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5090,7 +5090,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5124,8 +5124,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR41D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5168,7 +5168,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  1 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: newp 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5207,7 +5207,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5241,8 +5241,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR81D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5285,7 +5285,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  1 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: newp 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5324,7 +5324,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5358,8 +5358,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR42D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5402,7 +5402,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  2 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: newp 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5441,7 +5441,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5475,8 +5475,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR82D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5519,7 +5519,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  2 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: newp 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5558,7 +5558,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5592,8 +5592,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR43D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5636,7 +5636,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  3 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: newp 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5675,7 +5675,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5709,8 +5709,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR83D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5753,7 +5753,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  3 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: newp 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5792,7 +5792,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5826,8 +5826,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR44D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5870,7 +5870,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  4 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: newp 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -5909,7 +5909,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -5943,8 +5943,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR84D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -5987,7 +5987,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  4 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: newp 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -6026,7 +6026,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6060,8 +6060,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR45D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6104,7 +6104,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  5 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: newp 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -6143,7 +6143,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6177,8 +6177,8 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR85D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
- ! real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), target :: f90arr 
+ ! real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6221,7 +6221,7 @@ end interface
  type (ESMF_CopyFlag) :: copy        ! do we copy or ref? 
  integer, dimension(  5 ) :: counts ! per dim 
  
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: newp 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: newp 
  
  ! Initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -6260,7 +6260,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6299,7 +6299,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI21D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6361,7 +6361,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6394,7 +6394,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI41D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6456,7 +6456,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6489,7 +6489,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI81D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6551,7 +6551,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6584,7 +6584,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI22D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6646,7 +6646,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6679,7 +6679,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI42D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6741,7 +6741,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6774,7 +6774,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI82D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6836,7 +6836,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6869,7 +6869,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI23D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -6931,7 +6931,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -6964,7 +6964,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI43D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7026,7 +7026,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7059,7 +7059,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI83D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7121,7 +7121,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7154,7 +7154,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI24D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7216,7 +7216,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7249,7 +7249,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI44D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7311,7 +7311,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7344,7 +7344,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI84D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7406,7 +7406,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7439,7 +7439,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI25D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7501,7 +7501,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7534,7 +7534,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI45D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7596,7 +7596,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7629,7 +7629,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI85D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7691,7 +7691,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7724,7 +7724,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR41D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7786,7 +7786,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7819,7 +7819,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR81D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7881,7 +7881,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -7914,7 +7914,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR42D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -7976,7 +7976,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8009,7 +8009,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR82D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8071,7 +8071,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8104,7 +8104,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR43D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8166,7 +8166,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8199,7 +8199,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR83D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8261,7 +8261,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8294,7 +8294,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR44D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8356,7 +8356,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8389,7 +8389,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR84D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8451,7 +8451,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8484,7 +8484,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR45D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8546,7 +8546,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8579,7 +8579,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR85D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8641,7 +8641,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8681,7 +8681,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI21D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8761,7 +8761,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8794,7 +8794,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI41D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8874,7 +8874,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -8907,7 +8907,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI81D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -8987,7 +8987,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9020,7 +9020,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI22D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9100,7 +9100,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9133,7 +9133,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI42D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9213,7 +9213,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9246,7 +9246,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI82D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9326,7 +9326,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9359,7 +9359,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI23D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9439,7 +9439,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9472,7 +9472,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI43D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9552,7 +9552,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9585,7 +9585,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI83D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9665,7 +9665,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9698,7 +9698,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI24D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9778,7 +9778,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9811,7 +9811,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI44D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -9891,7 +9891,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -9924,7 +9924,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI84D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10004,7 +10004,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10037,7 +10037,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI25D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10117,7 +10117,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I2 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I2 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10150,7 +10150,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI45D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10230,7 +10230,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10263,7 +10263,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI85D 
 ! 
 ! !ARGUMENTS: 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10343,7 +10343,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_KIND_I8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_integer , ESMF_I8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10376,7 +10376,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR41D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10456,7 +10456,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10489,7 +10489,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR81D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10569,7 +10569,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   1 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10602,7 +10602,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR42D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10682,7 +10682,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10715,7 +10715,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR82D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10795,7 +10795,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   2 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10828,7 +10828,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR43D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -10908,7 +10908,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -10941,7 +10941,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR83D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -11021,7 +11021,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   3 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -11054,7 +11054,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR44D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -11134,7 +11134,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -11167,7 +11167,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR84D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -11247,7 +11247,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   4 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -11280,7 +11280,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR45D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -11360,7 +11360,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R4 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R4 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -11393,7 +11393,7 @@ end interface
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR85D 
 ! 
 ! !ARGUMENTS: 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc   
@@ -11473,7 +11473,7 @@ end interface
  endif 
  
  ! Call create routine 
- call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_KIND_R8 , & 
+ call c_ESMC_ArrayCreateNoData(array,   5 , ESMF_DATA_real , ESMF_R8 , & 
  ESMF_FROM_FORTRAN, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
@@ -11512,7 +11512,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -11565,7 +11565,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI21D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -11655,7 +11655,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -11708,7 +11708,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI41D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -11798,7 +11798,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -11851,7 +11851,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI81D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -11941,7 +11941,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -11994,7 +11994,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI22D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12084,7 +12084,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12137,7 +12137,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI42D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12227,7 +12227,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12280,7 +12280,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI82D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12370,7 +12370,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12423,7 +12423,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI23D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12513,7 +12513,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12566,7 +12566,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI43D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12656,7 +12656,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12709,7 +12709,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI83D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12799,7 +12799,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12852,7 +12852,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI24D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -12942,7 +12942,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -12995,7 +12995,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI44D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13085,7 +13085,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13138,7 +13138,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI84D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13228,7 +13228,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13281,7 +13281,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI25D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13371,7 +13371,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13424,7 +13424,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI45D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13514,7 +13514,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13567,7 +13567,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapI85D) :: wrap ! to pass f90 ptr to C++ 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13657,7 +13657,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13710,7 +13710,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR41D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13800,7 +13800,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13853,7 +13853,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR81D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -13943,7 +13943,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -13996,7 +13996,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR42D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14086,7 +14086,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14139,7 +14139,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR82D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14229,7 +14229,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14282,7 +14282,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR43D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14372,7 +14372,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14425,7 +14425,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR83D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14515,7 +14515,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14568,7 +14568,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR44D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14658,7 +14658,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14711,7 +14711,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR84D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14801,7 +14801,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14854,7 +14854,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR45D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -14944,7 +14944,7 @@ end interface
  type(ESMF_Array), intent(inout) :: array 
  integer, dimension(:), intent(in) :: counts 
  integer, intent(in) :: hwidth 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer, optional :: f90ptr  
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc   
 ! 
@@ -14997,7 +14997,7 @@ end interface
  type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call 
  
  type (ESMF_ArrWrapR85D) :: wrap ! to pass f90 ptr to C++ 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: newp  
  integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds 
  integer, dimension(ESMF_MAXDIM) :: strides, offsets 
  
@@ -15088,7 +15088,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15105,7 +15105,7 @@ end interface
  
  type (ESMF_ArrWrapI21D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  1 )         ! size info for the array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I2 ), dimension(  :  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15164,7 +15164,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15181,7 +15181,7 @@ end interface
  
  type (ESMF_ArrWrapI41D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  1 )         ! size info for the array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I4 ), dimension(  :  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15240,7 +15240,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15257,7 +15257,7 @@ end interface
  
  type (ESMF_ArrWrapI81D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  1 )         ! size info for the array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I8 ), dimension(  :  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15316,7 +15316,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15333,7 +15333,7 @@ end interface
  
  type (ESMF_ArrWrapI22D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  2 )         ! size info for the array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15392,7 +15392,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15409,7 +15409,7 @@ end interface
  
  type (ESMF_ArrWrapI42D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  2 )         ! size info for the array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15468,7 +15468,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15485,7 +15485,7 @@ end interface
  
  type (ESMF_ArrWrapI82D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  2 )         ! size info for the array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15544,7 +15544,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15561,7 +15561,7 @@ end interface
  
  type (ESMF_ArrWrapI23D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  3 )         ! size info for the array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15620,7 +15620,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15637,7 +15637,7 @@ end interface
  
  type (ESMF_ArrWrapI43D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  3 )         ! size info for the array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15696,7 +15696,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15713,7 +15713,7 @@ end interface
  
  type (ESMF_ArrWrapI83D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  3 )         ! size info for the array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15772,7 +15772,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15789,7 +15789,7 @@ end interface
  
  type (ESMF_ArrWrapI24D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  4 )         ! size info for the array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15848,7 +15848,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15865,7 +15865,7 @@ end interface
  
  type (ESMF_ArrWrapI44D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  4 )         ! size info for the array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -15924,7 +15924,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -15941,7 +15941,7 @@ end interface
  
  type (ESMF_ArrWrapI84D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  4 )         ! size info for the array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16000,7 +16000,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16017,7 +16017,7 @@ end interface
  
  type (ESMF_ArrWrapI25D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  5 )         ! size info for the array 
-  integer  (ESMF_IKIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I2 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16076,7 +16076,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16093,7 +16093,7 @@ end interface
  
  type (ESMF_ArrWrapI45D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  5 )         ! size info for the array 
-  integer  (ESMF_IKIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I4 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16152,7 +16152,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16169,7 +16169,7 @@ end interface
  
  type (ESMF_ArrWrapI85D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  5 )         ! size info for the array 
-  integer  (ESMF_IKIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
+  integer  (ESMF_KIND_I8 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16228,7 +16228,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16245,7 +16245,7 @@ end interface
  
  type (ESMF_ArrWrapR41D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  1 )         ! size info for the array 
-  real  (ESMF_IKIND_R4 ), dimension(  :  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R4 ), dimension(  :  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16304,7 +16304,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16321,7 +16321,7 @@ end interface
  
  type (ESMF_ArrWrapR81D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  1 )         ! size info for the array 
-  real  (ESMF_IKIND_R8 ), dimension(  :  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R8 ), dimension(  :  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16380,7 +16380,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16397,7 +16397,7 @@ end interface
  
  type (ESMF_ArrWrapR42D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  2 )         ! size info for the array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R4 ), dimension(  :,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16456,7 +16456,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16473,7 +16473,7 @@ end interface
  
  type (ESMF_ArrWrapR82D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  2 )         ! size info for the array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R8 ), dimension(  :,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16532,7 +16532,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16549,7 +16549,7 @@ end interface
  
  type (ESMF_ArrWrapR43D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  3 )         ! size info for the array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16608,7 +16608,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16625,7 +16625,7 @@ end interface
  
  type (ESMF_ArrWrapR83D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  3 )         ! size info for the array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16684,7 +16684,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16701,7 +16701,7 @@ end interface
  
  type (ESMF_ArrWrapR44D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  4 )         ! size info for the array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16760,7 +16760,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16777,7 +16777,7 @@ end interface
  
  type (ESMF_ArrWrapR84D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  4 )         ! size info for the array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16836,7 +16836,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16853,7 +16853,7 @@ end interface
  
  type (ESMF_ArrWrapR45D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  5 )         ! size info for the array 
-  real  (ESMF_IKIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R4 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -16912,7 +16912,7 @@ end interface
 ! 
 ! !ARGUMENTS: 
  type(ESMF_Array) :: array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
  integer, intent(out), optional :: rc 
 ! 
@@ -16929,7 +16929,7 @@ end interface
  
  type (ESMF_ArrWrapR85D) :: wrap     ! for passing f90 ptr to C++ 
  integer :: rank, counts(  5 )         ! size info for the array 
-  real  (ESMF_IKIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
+  real  (ESMF_KIND_R8 ), dimension(  :,:,:,:,:  ), pointer :: localp ! local copy 
  
  ! initialize return code; assume failure until success is certain 
  status = ESMF_FAILURE 
@@ -18027,7 +18027,7 @@ end interface
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI21D%  I21Dptr(   counts(1)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18057,7 +18057,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI41D%  I41Dptr(   counts(1)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18087,7 +18087,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI81D%  I81Dptr(   counts(1)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18122,7 +18122,7 @@ end interface
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI22D%  I22Dptr(   counts(1), counts(2)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18152,7 +18152,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI42D%  I42Dptr(   counts(1), counts(2)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18182,7 +18182,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI82D%  I82Dptr(   counts(1), counts(2)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18217,7 +18217,7 @@ end interface
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI23D%  I23Dptr(   counts(1), counts(2), counts(3)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18247,7 +18247,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI43D%  I43Dptr(   counts(1), counts(2), counts(3)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18277,7 +18277,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI83D%  I83Dptr(   counts(1), counts(2), counts(3)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18312,7 +18312,7 @@ end interface
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI24D%  I24Dptr(   counts(1), counts(2), counts(3), counts(4)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18342,7 +18342,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI44D%  I44Dptr(   counts(1), counts(2), counts(3), counts(4)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18372,7 +18372,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localI84D%  I84Dptr(   counts(1), counts(2), counts(3), counts(4)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18412,7 +18412,7 @@ end interface
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR41D%  R41Dptr(   counts(1)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18442,7 +18442,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR81D%  R81Dptr(   counts(1)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18477,7 +18477,7 @@ end interface
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR42D%  R42Dptr(   counts(1), counts(2)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18507,7 +18507,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR82D%  R82Dptr(   counts(1), counts(2)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18542,7 +18542,7 @@ end interface
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR43D%  R43Dptr(   counts(1), counts(2), counts(3)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18572,7 +18572,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR83D%  R83Dptr(   counts(1), counts(2), counts(3)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18607,7 +18607,7 @@ end interface
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR44D%  R44Dptr(   counts(1), counts(2), counts(3), counts(4)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18637,7 +18637,7 @@ end interface
  endif 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  allocate(localR84D%  R84Dptr(   counts(1), counts(2), counts(3), counts(4)   ), stat=status) 
  if (status .ne. 0) then 
@@ -18767,21 +18767,21 @@ end interface
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI21D, status) 
  deallocate(localI21D%  I21Dptr, stat=status)  
  nullify(localI21D%  I21Dptr) 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI41D, status) 
  deallocate(localI41D%  I41Dptr, stat=status)  
  nullify(localI41D%  I41Dptr) 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI81D, status) 
  deallocate(localI81D%  I81Dptr, stat=status)  
@@ -18793,21 +18793,21 @@ end interface
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI22D, status) 
  deallocate(localI22D%  I22Dptr, stat=status)  
  nullify(localI22D%  I22Dptr) 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI42D, status) 
  deallocate(localI42D%  I42Dptr, stat=status)  
  nullify(localI42D%  I42Dptr) 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI82D, status) 
  deallocate(localI82D%  I82Dptr, stat=status)  
@@ -18819,21 +18819,21 @@ end interface
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI23D, status) 
  deallocate(localI23D%  I23Dptr, stat=status)  
  nullify(localI23D%  I23Dptr) 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI43D, status) 
  deallocate(localI43D%  I43Dptr, stat=status)  
  nullify(localI43D%  I43Dptr) 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI83D, status) 
  deallocate(localI83D%  I83Dptr, stat=status)  
@@ -18845,21 +18845,21 @@ end interface
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI24D, status) 
  deallocate(localI24D%  I24Dptr, stat=status)  
  nullify(localI24D%  I24Dptr) 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI44D, status) 
  deallocate(localI44D%  I44Dptr, stat=status)  
  nullify(localI44D%  I44Dptr) 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localI84D, status) 
  deallocate(localI84D%  I84Dptr, stat=status)  
@@ -18876,14 +18876,14 @@ end interface
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR41D, status) 
  deallocate(localR41D%  R41Dptr, stat=status)  
  nullify(localR41D%  R41Dptr) 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR81D, status) 
  deallocate(localR81D%  R81Dptr, stat=status)  
@@ -18895,14 +18895,14 @@ end interface
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR42D, status) 
  deallocate(localR42D%  R42Dptr, stat=status)  
  nullify(localR42D%  R42Dptr) 
 ! < End macro - do not edit directly >  
  
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR82D, status) 
  deallocate(localR82D%  R82Dptr, stat=status)  
@@ -18914,14 +18914,14 @@ end interface
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR43D, status) 
  deallocate(localR43D%  R43Dptr, stat=status)  
  nullify(localR43D%  R43Dptr) 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR83D, status) 
  deallocate(localR83D%  R83Dptr, stat=status)  
@@ -18933,14 +18933,14 @@ end interface
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR44D, status) 
  deallocate(localR44D%  R44Dptr, stat=status)  
  nullify(localR44D%  R44Dptr) 
 ! < End macro - do not edit directly >  
         
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 ! <Created by macro - do not edit directly >  
  call c_ESMC_ArrayGetF90Ptr(array, localR84D, status) 
  deallocate(localR84D%  R84Dptr, stat=status)  

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.15 2003/09/02 15:59:45 jwolfe Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.16 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.15 2003/09/02 15:59:45 jwolfe Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.16 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1517,44 +1517,44 @@ ArrayAllLocalVarMacro()
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocAllocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocAllocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocAllocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocAllocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocAllocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocAllocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocAllocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocAllocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocAllocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocAllocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocAllocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
               case default
             end select
@@ -1566,36 +1566,36 @@ AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocAllocateMacro(real, R4, 1, COL1, LEN1, LOC1)
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocAllocateMacro(real, R8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocAllocateMacro(real, R4, 2, COL2, LEN2, LOC2)
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocAllocateMacro(real, R8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocAllocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocAllocateMacro(real, R8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocAllocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
               case default
             end select
@@ -1661,44 +1661,44 @@ ArrayAllLocalVarMacro()
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_I2%dkind)
+              case (ESMF_I2%dkind)
 AllocDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
-              case (ESMF_KIND_I4%dkind)
+              case (ESMF_I4%dkind)
 AllocDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_KIND_I8%dkind)
+              case (ESMF_I8%dkind)
 AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
               case default
             end select
@@ -1710,36 +1710,36 @@ AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
         select case (rank)
           case (1)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
-              case (ESMF_KIND_R4%dkind)
+              case (ESMF_R4%dkind)
 AllocDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
-              case (ESMF_KIND_R8%dkind)
+              case (ESMF_R8%dkind)
 AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
               case default
             end select

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.29 2003/09/03 21:08:54 cdeluca Exp $
+! $Id: ESMF_Calendar.F90,v 1.30 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,9 +88,9 @@
       type ESMF_DaysPerYear
       sequence
       private
-        integer(ESMF_IKIND_I4) :: days  ! whole days per year
-        integer(ESMF_IKIND_I4) :: daysN ! fractional days per year numerator
-        integer(ESMF_IKIND_I4) :: daysD ! fractional days per year denominator
+        integer(ESMF_KIND_I4) :: days  ! whole days per year
+        integer(ESMF_KIND_I4) :: daysN ! fractional days per year numerator
+        integer(ESMF_KIND_I4) :: daysD ! fractional days per year denominator
       end type                          ! e.g. for Venus,
                                         !   days=0, daysN=926, daysD=1000
 !
@@ -104,8 +104,8 @@
       private
         type(ESMF_CalendarType)             :: type
         integer, dimension(MONTHS_PER_YEAR) :: daysPerMonth
-        integer(ESMF_IKIND_I4)              :: secondsPerDay
-        integer(ESMF_IKIND_I4)              :: secondsPerYear
+        integer(ESMF_KIND_I4)              :: secondsPerDay
+        integer(ESMF_KIND_I4)              :: secondsPerYear
         type(ESMF_DaysPerYear)              :: daysPerYear
       end type
 !
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.29 2003/09/03 21:08:54 cdeluca Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.30 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 
@@ -192,10 +192,10 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),                 intent(inout) :: calendar
       integer, dimension(MONTHS_PER_YEAR), intent(in)    :: daysPerMonth
-      integer(ESMF_IKIND_I4),              intent(in)    :: secondsPerDay
-      integer(ESMF_IKIND_I4),              intent(in)    :: daysPerYear
-      integer(ESMF_IKIND_I4),              intent(in)    :: daysPerYearDn
-      integer(ESMF_IKIND_I4),              intent(in)    :: daysPerYearDd
+      integer(ESMF_KIND_I4),              intent(in)    :: secondsPerDay
+      integer(ESMF_KIND_I4),              intent(in)    :: daysPerYear
+      integer(ESMF_KIND_I4),              intent(in)    :: daysPerYearDn
+      integer(ESMF_KIND_I4),              intent(in)    :: daysPerYearDd
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -242,11 +242,11 @@
       type(ESMF_Calendar),     intent(in)            :: calendar
       type(ESMF_CalendarType), intent(out), optional :: type
       integer, dimension(MONTHS_PER_YEAR), intent(out), optional :: daysPerMonth
-      integer(ESMF_IKIND_I4),  intent(out), optional :: secondsPerDay
-      integer(ESMF_IKIND_I4),  intent(out), optional :: secondsPerYear
-      integer(ESMF_IKIND_I4),  intent(out), optional :: daysPerYear
-      integer(ESMF_IKIND_I4),  intent(out), optional :: daysPerYearDn
-      integer(ESMF_IKIND_I4),  intent(out), optional :: daysPerYearDd
+      integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerDay
+      integer(ESMF_KIND_I4),  intent(out), optional :: secondsPerYear
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYear
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDn
+      integer(ESMF_KIND_I4),  intent(out), optional :: daysPerYearDd
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -305,11 +305,11 @@
       type(ESMF_Calendar),                 intent(out) :: calendar
       type(ESMF_CalendarType),             intent(in)  :: type
       integer, dimension(MONTHS_PER_YEAR), intent(in)  :: daysPerMonth
-      integer(ESMF_IKIND_I4),              intent(in)  :: secondsPerDay
-      integer(ESMF_IKIND_I4),              intent(in)  :: secondsPerYear
-      integer(ESMF_IKIND_I4),              intent(in)  :: daysPerYear
-      integer(ESMF_IKIND_I4),              intent(in)  :: daysPerYearDn
-      integer(ESMF_IKIND_I4),              intent(in)  :: daysPerYearDd
+      integer(ESMF_KIND_I4),              intent(in)  :: secondsPerDay
+      integer(ESMF_KIND_I4),              intent(in)  :: secondsPerYear
+      integer(ESMF_KIND_I4),              intent(in)  :: daysPerYear
+      integer(ESMF_KIND_I4),              intent(in)  :: daysPerYearDn
+      integer(ESMF_KIND_I4),              intent(in)  :: daysPerYearDd
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -364,11 +364,11 @@
       type(ESMF_Calendar),                 intent(in)  :: calendar
       type(ESMF_CalendarType),             intent(out) :: type
       integer, dimension(MONTHS_PER_YEAR), intent(out) :: daysPerMonth
-      integer(ESMF_IKIND_I4),              intent(out) :: secondsPerDay
-      integer(ESMF_IKIND_I4),              intent(out) :: secondsPerYear
-      integer(ESMF_IKIND_I4),              intent(out) :: daysPerYear
-      integer(ESMF_IKIND_I4),              intent(out) :: daysPerYearDn
-      integer(ESMF_IKIND_I4),              intent(out) :: daysPerYearDd
+      integer(ESMF_KIND_I4),              intent(out) :: secondsPerDay
+      integer(ESMF_KIND_I4),              intent(out) :: secondsPerYear
+      integer(ESMF_KIND_I4),              intent(out) :: daysPerYear
+      integer(ESMF_KIND_I4),              intent(out) :: daysPerYearDn
+      integer(ESMF_KIND_I4),              intent(out) :: daysPerYearDd
       integer,                             intent(out), optional :: rc
 
 ! !DESCRIPTION:

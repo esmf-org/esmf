@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.12 2003/09/03 23:20:26 eschwab Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.13 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.12 2003/09/03 23:20:26 eschwab Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.13 2003/09/04 18:57:57 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -47,10 +47,10 @@
       integer, dimension(MONTHS_PER_YEAR) :: DaysPerMonth
 
       ! temp variables
-      integer(ESMF_IKIND_I8) :: YRl, rYRl, Dl, rDl, endYRl, endDl
+      integer(ESMF_KIND_I8) :: YRl, rYRl, Dl, rDl, endYRl, endDl
       integer :: MM, rMM, DD, rDD
-      integer(ESMF_IKIND_I8), parameter :: ly1 = 400, ly2 = 4, ly3 = 100
-      integer(ESMF_IKIND_I8), parameter :: tenthousand = 10000
+      integer(ESMF_KIND_I8), parameter :: ly1 = 400, ly2 = 4, ly3 = 100
+      integer(ESMF_KIND_I8), parameter :: tenthousand = 10000
       integer, parameter :: HIGH_LO = 1, HIGH_HI = 2
       integer :: test, first_test, last_test
       logical :: broken, done
@@ -337,10 +337,10 @@
 
 ! !ARGUMENTS:
       type(ESMF_Time), intent(inout) :: time
-      integer(ESMF_IKIND_I8), intent(in) :: YRl
+      integer(ESMF_KIND_I8), intent(in) :: YRl
       integer, intent(in) :: MM
       integer, intent(in) :: DD
-      integer(ESMF_IKIND_I8), intent(in) :: Dl
+      integer(ESMF_KIND_I8), intent(in) :: Dl
       type(ESMF_Calendar), intent(in) :: gregCal
       type(ESMF_Calendar), intent(in) :: julCal
       integer, intent(out), optional :: rc
@@ -351,7 +351,7 @@
 !EOP
 
       ! ESMF returned variables
-      integer(ESMF_IKIND_I8) :: rYRl, rDl
+      integer(ESMF_KIND_I8) :: rYRl, rDl
       integer :: rMM, rDD
 
       !

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.70 2003/09/03 23:07:40 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.71 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,7 +144,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.70 2003/09/03 23:07:40 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.71 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1624,10 +1624,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), intent(in) :: distgrid
-      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: global1D
-      integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: local1D
-      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: global2D
-      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: local2D
+      integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: global1D
+      integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
+      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
+      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: local2D
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1744,10 +1744,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), intent(in) :: distgrid
-      integer(ESMF_IKIND_I4), dimension(:), optional, intent(in) :: local1D
-      integer(ESMF_IKIND_I4), dimension(:), optional, intent(out) :: global1D
-      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(in) :: local2D
-      integer(ESMF_IKIND_I4), dimension(:,:), optional, intent(out) :: global2D
+      integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: local1D
+      integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
+      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: local2D
+      integer(ESMF_KIND_I4), dimension(:,:), optional, intent(out) :: global2D
       type(ESMF_AxisIndex), dimension(:), optional, intent(in) ::  localAI1D
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D

@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.41 2003/08/29 21:08:12 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.42 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.41 2003/08/29 21:08:12 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.42 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2375,7 +2375,7 @@
 !      integer, dimension(?) ::
 !         dst_add      ! location in grid of grid cell containing search point
 !
-!      real(kind=ESMF_IKIND_R8), intent(in) :: &
+!      real(kind=ESMF_KIND_R8), intent(in) :: &
 !         x,y          ! x,y coordinates of search point 
 !
 !      integer, intent(in) :: &
@@ -2538,7 +2538,7 @@
 !      integer, dimension(?) ::
 !         dst_add      ! location in grid of grid cell containing search point
 !
-!      real(kind=ESMF_IKIND_R8), intent(in) :: &
+!      real(kind=ESMF_KIND_R8), intent(in) :: &
 !         x,y          ! x,y coordinates of search point 
 !
 !      integer, intent(in) :: &
@@ -2684,7 +2684,7 @@
 !      integer, dimension(?) ::
 !         dst_add      ! location in grid of grid cell containing search point
 !
-!      real(kind=ESMF_IKIND_R8), intent(in) :: &
+!      real(kind=ESMF_KIND_R8), intent(in) :: &
 !         x,y          ! x,y coordinates of search point 
 !
 !      integer, intent(in) :: &
@@ -2859,10 +2859,10 @@
       logical :: ESMF_PhysGridPointInCell ! true if point located in cell
 !
 ! !ARGUMENTS:
-      real(kind=ESMF_IKIND_R8), intent(in) :: &
+      real(kind=ESMF_KIND_R8), intent(in) :: &
          xpoint, ypoint  ! x,y coordinates of search point 
 
-      real(kind=ESMF_IKIND_R8), dimension(:), intent(in) :: &
+      real(kind=ESMF_KIND_R8), dimension(:), intent(in) :: &
          corner_x,     & ! x coordinates of cell corners
          corner_y        ! y coordinates of cell corners 
 
@@ -2901,7 +2901,7 @@
    integer      :: ncorn, next_n,   &! corner index
                    num_corners       ! number of corners in each grid cell
 
-   real(kind=ESMF_IKIND_R8) :: &
+   real(kind=ESMF_KIND_R8) :: &
       vec1_x, vec1_y,  &! components of the cell side vector
       vec2_x, vec2_y,  &! components of the vector from vertex to point
       cross_product,   &! cross product of two vectors
@@ -3008,10 +3008,10 @@
 
 !
 ! !RETURN VALUE:
-      real(kind=ESMF_IKIND_R8) :: ESMF_PhysGridCompDistSpherical
+      real(kind=ESMF_KIND_R8) :: ESMF_PhysGridCompDistSpherical
 !
 ! !ARGUMENTS:
-      real(kind=ESMF_IKIND_R8), intent(in) :: &
+      real(kind=ESMF_KIND_R8), intent(in) :: &
          x1, y1,        & ! x,y coordinates of points between which to 
          x2, y2           !   compute distance: x=longitude(deg), y=lat (deg)
 
@@ -3037,9 +3037,9 @@
 !     local variables
 !
 
-      real(kind=ESMF_IKIND_R8) :: &
+      real(kind=ESMF_KIND_R8) :: &
          lon1, lat1, lon2, lat2  ! lon/lat in radians
-      real(kind=ESMF_IKIND_R8) :: pi
+      real(kind=ESMF_KIND_R8) :: pi
 
 !
 !     initialize return code
@@ -3085,10 +3085,10 @@
 
 !
 ! !RETURN VALUE:
-      real(kind=ESMF_IKIND_R8) :: ESMF_PhysGridCompDistCartesian
+      real(kind=ESMF_KIND_R8) :: ESMF_PhysGridCompDistCartesian
 !
 ! !ARGUMENTS:
-      real(kind=ESMF_IKIND_R8), intent(in) :: &
+      real(kind=ESMF_KIND_R8), intent(in) :: &
          x1, y1,        & ! x,y coordinates of points between which to 
          x2, y2           !   compute distance
 

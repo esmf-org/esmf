@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.9 2003/09/02 20:25:57 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.10 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -34,10 +34,10 @@
     type(ESMF_DataKind) :: akind
     integer :: counts(ESMF_MAXDIM)
     type(ESMF_LocalArray) :: array1, array2, array3, array4
-    real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
-    real(ESMF_IKIND_R8), dimension(:,:), pointer :: realptr, realptr2
-    integer(ESMF_IKIND_I4), dimension(:), pointer :: intptr, intptr2
-    integer(ESMF_IKIND_I4), dimension(:,:), pointer :: int2Dptr
+    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: real3dptr, real3d2ptr
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: realptr, realptr2
+    integer(ESMF_KIND_I4), dimension(:), pointer :: intptr, intptr2
+    integer(ESMF_KIND_I4), dimension(:,:), pointer :: int2Dptr
     character(ESMF_MAXSTR) :: filename
 
 
@@ -603,7 +603,7 @@
     arank = 2
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Initializing an Array Spec of rank 2 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! set all counts to 1 first, then alter the ones you want to change
@@ -635,7 +635,7 @@
     write(failMsg, *) "kind not correct" 
     write(name, *) "Get Spec kind and verify Test"
     call ESMF_LocalArraySpecGet(arrayspec, kind=akind, rc=rc)
-    call ESMF_Test((akind.eq.ESMF_KIND_R4), name, failMsg, result, ESMF_SRCLINE)
+    call ESMF_Test((akind.eq.ESMF_R4), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
@@ -643,7 +643,7 @@
     arank = 10
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Initializing an Array Spec of rank 10 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -658,7 +658,7 @@
     arank = 5
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 5 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -674,7 +674,7 @@
     arank = 4
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 4 Test"
-    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_KIND_R4, rc)
+    call ESMF_LocalArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 

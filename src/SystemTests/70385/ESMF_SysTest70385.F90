@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.30 2003/08/29 22:31:16 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.31 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #70385
 
@@ -213,7 +213,7 @@
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array1
-      integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
       integer :: horz_gridtype, vert_gridtype
@@ -259,7 +259,7 @@
 
       ! Create an arrayspec for a 2-D array 
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
-                              kind=ESMF_KIND_I4)
+                              kind=ESMF_I4)
 
       ! Create a Field using the Grid and ArraySpec created above
       fname = "DE id"
@@ -378,7 +378,7 @@
       integer :: i, j, ni, nj, xpos, ypos, nx, ny
       integer :: de_id, mismatch, target
       integer :: pattern(3,3), halo_width
-      integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_DELayout) :: layout
       type(ESMF_Field) :: field1

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.13 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.14 2003/09/04 18:57:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,10 +41,10 @@ extern "C" {
 
        void FTN(c_esmc_calendarsetgeneric)(ESMC_Calendar *ptr,
                                     int           *daysPerMonth,
-                                    ESMF_IKIND_I4 *secondsPerDay,
-                                    ESMF_IKIND_I4 *daysPerYear,
-                                    ESMF_IKIND_I4 *daysPerYearDn,
-                                    ESMF_IKIND_I4 *daysPerYearDd, int *status) {
+                                    ESMF_KIND_I4 *secondsPerDay,
+                                    ESMF_KIND_I4 *daysPerYear,
+                                    ESMF_KIND_I4 *daysPerYearDn,
+                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
            int rc = (ptr)->ESMC_CalendarSetGeneric(daysPerMonth,
                                                    *secondsPerDay,
                                                    *daysPerYear,
@@ -56,11 +56,11 @@ extern "C" {
        void FTN(c_esmc_calendarget)(ESMC_Calendar *ptr,
                                     ESMC_CalendarType *type,
                                     int           *daysPerMonth,
-                                    ESMF_IKIND_I4 *secondsPerDay,
-                                    ESMF_IKIND_I4 *secondsPerYear,
-                                    ESMF_IKIND_I4 *daysPerYear,
-                                    ESMF_IKIND_I4 *daysPerYearDn,
-                                    ESMF_IKIND_I4 *daysPerYearDd, int *status) {
+                                    ESMF_KIND_I4 *secondsPerDay,
+                                    ESMF_KIND_I4 *secondsPerYear,
+                                    ESMF_KIND_I4 *daysPerYear,
+                                    ESMF_KIND_I4 *daysPerYearDn,
+                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
            int rc = (ptr)->ESMC_CalendarGet(type,
                                             daysPerMonth,
                                             secondsPerDay,
@@ -73,11 +73,11 @@ extern "C" {
        void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar *ptr,
                                             ESMC_CalendarType *type,
                                             int           *daysPerMonth,
-                                            ESMF_IKIND_I4 *secondsPerDay,
-                                            ESMF_IKIND_I4 *secondsPerYear,
-                                            ESMF_IKIND_I4 *daysPerYear,
-                                            ESMF_IKIND_I4 *daysPerYearDn,
-                                            ESMF_IKIND_I4 *daysPerYearDd,
+                                            ESMF_KIND_I4 *secondsPerDay,
+                                            ESMF_KIND_I4 *secondsPerYear,
+                                            ESMF_KIND_I4 *daysPerYear,
+                                            ESMF_KIND_I4 *daysPerYearDn,
+                                            ESMF_KIND_I4 *daysPerYearDd,
                                             int *status) {
            int rc = (ptr)->ESMC_CalendarReadRestart(*type, daysPerMonth,
                                                     *secondsPerDay,
@@ -91,11 +91,11 @@ extern "C" {
        void FTN(c_esmc_calendarwriterestart)(ESMC_Calendar *ptr,
                                              ESMC_CalendarType *type,
                                              int           *daysPerMonth,
-                                             ESMF_IKIND_I4 *secondsPerDay,
-                                             ESMF_IKIND_I4 *secondsPerYear,
-                                             ESMF_IKIND_I4 *daysPerYear,
-                                             ESMF_IKIND_I4 *daysPerYearDn, 
-                                             ESMF_IKIND_I4 *daysPerYearDd,
+                                             ESMF_KIND_I4 *secondsPerDay,
+                                             ESMF_KIND_I4 *secondsPerYear,
+                                             ESMF_KIND_I4 *daysPerYear,
+                                             ESMF_KIND_I4 *daysPerYearDn, 
+                                             ESMF_KIND_I4 *daysPerYearDd,
                                              int *status) {
            int rc = (ptr)->ESMC_CalendarWriteRestart(type, daysPerMonth,
                                                      secondsPerDay,

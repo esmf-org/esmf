@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.28 2003/09/03 21:08:54 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.29 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,7 +65,7 @@
         type(ESMF_Time)         :: refTime
         type(ESMF_Time)         :: currTime
         type(ESMF_Time)         :: prevTime
-        integer(ESMF_IKIND_I8)  :: advanceCount
+        integer(ESMF_KIND_I8)  :: advanceCount
         integer                 :: numAlarms
         integer                 :: pad  ! to satisfy alpha compiler
         type(ESMF_Pointer), dimension(MAX_ALARMS) :: alarmList
@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.28 2003/09/03 21:08:54 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.29 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 
@@ -171,7 +171,7 @@
       type(ESMF_Time),         intent(in),  optional :: stopTime
       type(ESMF_Time),         intent(in),  optional :: refTime
       type(ESMF_Time),         intent(in),  optional :: currTime
-      integer(ESMF_IKIND_I8),  intent(in),  optional :: advanceCount
+      integer(ESMF_KIND_I8),  intent(in),  optional :: advanceCount
       integer,                 intent(out), optional :: rc
     
 ! !DESCRIPTION:
@@ -226,7 +226,7 @@
       type(ESMF_Time),         intent(out), optional :: prevTime
       type(ESMF_TimeInterval), intent(out), optional :: currSimTime
       type(ESMF_TimeInterval), intent(out), optional :: prevSimTime
-      integer(ESMF_IKIND_I8),  intent(out), optional :: advanceCount
+      integer(ESMF_KIND_I8),  intent(out), optional :: advanceCount
       integer,                 intent(out), optional :: numAlarms
       integer,                 intent(out), optional :: rc
     
@@ -510,7 +510,7 @@
       type(ESMF_Time),         intent(in)                 :: refTime
       type(ESMF_Time),         intent(in)                 :: currTime
       type(ESMF_Time),         intent(in)                 :: prevTime
-      integer(ESMF_IKIND_I8),  intent(in)                 :: advanceCount
+      integer(ESMF_KIND_I8),  intent(in)                 :: advanceCount
       integer,                 intent(in)                 :: numAlarms
       type(ESMF_Alarm), dimension(MAX_ALARMS), intent(in) :: alarmList
       integer,                 intent(out), optional      :: rc
@@ -572,7 +572,7 @@
       type(ESMF_Time),         intent(out)                 :: refTime
       type(ESMF_Time),         intent(out)                 :: currTime
       type(ESMF_Time),         intent(out)                 :: prevTime
-      integer(ESMF_IKIND_I8),  intent(out)                 :: advanceCount
+      integer(ESMF_KIND_I8),  intent(out)                 :: advanceCount
       integer,                 intent(out)                 :: numAlarms
       type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out) :: alarmList
       integer,                 intent(out), optional       :: rc

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.25 2003/07/18 20:36:28 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.26 2003/09/04 18:57:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.25 2003/07/18 20:36:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.26 2003/09/04 18:57:55 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,7 +69,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
  // initialize local inter-thread buffer TODO: beginnings of memory mgmt ?
  void *ESMC_Comm::lbuf = 0;
  int  ESMC_Comm::lbufSize = 4096;              // TODO:  from config file ?
- ESMC_DataKind ESMC_Comm::lbufType = ESMF_KIND_I4;   // TODO: from config file ?
+ ESMC_DataKind ESMC_Comm::lbufType = ESMF_I4;   // TODO: from config file ?
 
  // initialize inter-thread comm variables
  pthread_mutex_t ESMC_Comm::bufMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -92,10 +92,10 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 
 // type conversion maps from ESMF to MPI
  MPI_Datatype ESMC_Comm::ESMC_DataKindToMPI[] =
-   // ESMF_KIND_I1 ESMF_KIND_I2 ESMF_KIND_I4 ESMF_KIND_I8 ESMF_KIND_R4
+   // ESMF_I1 ESMF_I2 ESMF_I4 ESMF_I8 ESMF_R4
   {0, MPI_CHAR,    MPI_SHORT,   MPI_INT,     MPI_LONG,    MPI_FLOAT,
 
-   // ESMF_KIND_R8 ESMF_KIND_C8 ESMF_KIND_C16
+   // ESMF_R8 ESMF_KIND_C8 ESMF_KIND_C16
       MPI_DOUBLE,  MPI_DOUBLE, MPI_LONG_DOUBLE };
    // MPI_DOUBLE,  MPI_COMPLEX, MPI_DOUBLE_COMPLEX }; // for MPI implementations
                                                       // that support COMPLEX
@@ -191,7 +191,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
     if (lbuf == 0) {
       switch (lbufType)
       {
-        case ESMF_KIND_I4:
+        case ESMF_I4:
           try {
             lbuf = new int[lbufSize];
           }
@@ -203,7 +203,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
             return(ESMF_FAILURE);
           }
           break;
-        case ESMF_KIND_I8:
+        case ESMF_I8:
           try {
             lbuf = new long[lbufSize];
           }
@@ -215,7 +215,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
             return(ESMF_FAILURE);
           }
           break;
-        case ESMF_KIND_R4:
+        case ESMF_R4:
           try {
             lbuf = new float[lbufSize];
           }
@@ -227,7 +227,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
             return(ESMF_FAILURE);
           }
           break;
-        case ESMF_KIND_R8:
+        case ESMF_R8:
           try {
             lbuf = new double[lbufSize];
           }
@@ -822,7 +822,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   // copy our data into common buffer
   switch (type)
   {
-    case ESMF_KIND_I4:
+    case ESMF_I4:
       // copy sbuf to our lbuf slot (don't need to mutex protect since
       //   we're writing to our own unique thread-specific slot)
       //  TODO:  use memcpy for speed ??
@@ -907,7 +907,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   // copy our data into common buffer
   switch (type)
   {
-    case ESMF_KIND_I4:
+    case ESMF_I4:
       // copy sbuf to our lbuf slot (don't need to mutex protect since
       //   we're writing to our own unique thread-specific slot)
       //  TODO:  use memcpy for speed ??
@@ -1029,7 +1029,7 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
     // add our data into common buffer
     switch (type)
     {
-      case ESMF_KIND_I4:
+      case ESMF_I4:
         pthread_mutex_lock(&bufMutex);
           if(!lbufCleared) {
             memset(lbuf, 0, num*sizeof(int)); // 1st DE in clears lbuf

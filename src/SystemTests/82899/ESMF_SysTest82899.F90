@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.15 2003/08/29 22:12:57 nscollins Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.16 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -264,7 +264,7 @@
       type(ESMF_Grid) :: grid(4), thisgrid
       type(ESMF_ArraySpec) :: arrayspec
       type(ESMF_Array) :: array1
-      integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       integer :: de_id
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
       integer :: horz_gridtype, vert_gridtype
@@ -367,7 +367,7 @@
 
       ! Create an arrayspec for a 2-D array 
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
-                              kind=ESMF_KIND_I4)
+                              kind=ESMF_I4)
 
       ! Create 4 Fields using the Grids and ArraySpec created above
       fname = "Periodic in X"
@@ -613,7 +613,7 @@
       integer :: mismatch
       integer :: pattern(3,3)
       type(ESMF_Logical) :: pflags(2)
-      integer(ESMF_IKIND_I4), dimension(:,:), pointer :: ldata
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid1

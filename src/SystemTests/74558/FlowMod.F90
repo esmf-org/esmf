@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.15 2003/08/29 22:17:58 nscollins Exp $
+! $Id: FlowMod.F90,v 1.16 2003/09/04 18:57:57 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -901,7 +901,7 @@
 ! Local variables
 !
       integer :: ni, nj, i, j, de_id
-      integer(kind=ESMF_IKIND_I8) :: frame
+      integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: array2
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout

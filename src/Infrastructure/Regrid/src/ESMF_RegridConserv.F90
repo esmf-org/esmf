@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.8 2003/08/26 14:46:35 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.9 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.8 2003/08/26 14:46:35 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.9 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -172,7 +172,7 @@
          src_add,          &! address in gathered source grid (i,j,DE)
          dst_add            ! address in dest grid (i,j,DE)
          
-      real (ESMF_IKIND_R8) :: &
+      real (ESMF_KIND_R8) :: &
          lon_thresh,    &! threshold for checking longitude crossing
          lon_cycle,     &! 360 for degrees, 2pi for radians
          dx1, dx2, dx3, &! differences for iterative scheme
@@ -184,7 +184,7 @@
          determinant     ! determinant of above matrix
          
 
-      real (ESMF_IKIND_R8), dimension(4) ::     &
+      real (ESMF_KIND_R8), dimension(4) ::     &
          src_DE_bbox,  &! bounding box for domain on the source DE
          dst_DE_bbox,  &! bounding box for domain on the destination DE
          corner_x,     &! x coordinate of bilinear box corners
@@ -195,14 +195,14 @@
          src_DE_overlap,    &! array to use for determining overlapping DEs
          src_DE_gather       ! array to keep track of source DEs to gather up
 
-      real (ESMF_IKIND_R8), dimension(:,:,:), allocatable :: &
+      real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
          src_center_x,      &! cell center x-coord for gathered source grid
          src_center_y        ! cell center y-coord for gathered source grid
 
       integer, parameter :: &
          max_iter = 100   ! max iteration count for i,j iteration
 
-      real (ESMF_IKIND_R8), parameter :: &
+      real (ESMF_KIND_R8), parameter :: &
          converge = 1.e-10  ! convergence criterion
 
 !

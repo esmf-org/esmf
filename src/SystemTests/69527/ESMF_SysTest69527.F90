@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.20 2003/08/05 21:20:18 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.21 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #69527
 
@@ -35,7 +35,7 @@
     integer :: horz_coord_system, vert_coord_system
     integer :: status
     real :: x_min, x_max, y_min, y_max
-    integer(ESMF_IKIND_I4), dimension(:), pointer :: idata, ldata, rowdata
+    integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
     character(len=ESMF_MAXSTR) :: cname, gname, fname
     type(ESMF_DELayout) :: layout1 

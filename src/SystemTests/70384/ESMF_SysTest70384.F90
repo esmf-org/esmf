@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.25 2003/08/29 22:14:45 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.26 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #70384
 
@@ -32,8 +32,8 @@
     integer :: status
     integer :: nde(2), ndes
     logical :: match
-    integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
-    integer(ESMF_IKIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
+    integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
+    integer(ESMF_KIND_I4), dimension(:,:,:), pointer :: srcptr, dstptr, resptr
     integer, dimension(3) :: global_counts, decompids1, decompids2, rank_trans
     character(len=ESMF_MAXSTR) :: cname, sname, gname, fname
     type(ESMF_DELayout) :: layout0, layout1, layout2

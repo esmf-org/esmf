@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.15 2003/09/02 18:56:34 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.16 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #79497
 
@@ -44,7 +44,7 @@
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-    integer(ESMF_IKIND_I8) :: advanceCount
+    integer(ESMF_KIND_I8) :: advanceCount
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.15 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.16 2003/09/04 18:57:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,7 +49,7 @@ extern "C" {
                                  ESMC_Time *stopTime,
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
-                                 ESMF_IKIND_I8 *advanceCount,
+                                 ESMF_KIND_I8 *advanceCount,
                                  int *status) {
           int rc = (ptr)->ESMC_ClockSet(timeStep, startTime, stopTime,
                                         refTime, currTime, advanceCount);
@@ -65,7 +65,7 @@ extern "C" {
                                  ESMC_Time *prevTime,
                                  ESMC_Time *currSimTime,
                                  ESMC_Time *prevSimTime,
-                                 ESMF_IKIND_I8 *advanceCount,
+                                 ESMF_KIND_I8 *advanceCount,
                                  int *numAlarms,
                                  int *status) {
           int rc = (ptr)->ESMC_ClockGet(timeStep, startTime, stopTime,
@@ -122,7 +122,7 @@ extern "C" {
                                          ESMC_Time *refTime,
                                          ESMC_Time *currTime,
                                          ESMC_Time *prevTime,
-                                         ESMF_IKIND_I8 *advanceCount,
+                                         ESMF_KIND_I8 *advanceCount,
                                          int *numAlarms,
                                          ESMC_Alarm *alarmList[],
                                          int *status) {
@@ -141,7 +141,7 @@ extern "C" {
                                           ESMC_Time *refTime,
                                           ESMC_Time *currTime,
                                           ESMC_Time *prevTime,
-                                          ESMF_IKIND_I8 *advanceCount,
+                                          ESMF_KIND_I8 *advanceCount,
                                           int *numAlarms,
                                           ESMC_Alarm *alarmList[],
                                           int *status) {

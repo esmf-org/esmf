@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.23 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.24 2003/09/04 18:57:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,9 +78,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
                                              // TODO: (& ESMC_Base class when
                                              // fully aligned with F90 equiv)
   private:
-    ESMF_IKIND_I8 yy;      // for Calendar intervals:  number of years
-    ESMF_IKIND_I8 mo;      // for Calendar intervals:  number of months
-    ESMF_IKIND_I8 d;       // for Calendar intervals:  number of days
+    ESMF_KIND_I8 yy;      // for Calendar intervals:  number of years
+    ESMF_KIND_I8 mo;      // for Calendar intervals:  number of months
+    ESMF_KIND_I8 d;       // for Calendar intervals:  number of days
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -93,31 +93,31 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     //   ESMC_BaseTime base class
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeIntervalSet(ESMF_IKIND_I4 *yy=0, ESMF_IKIND_I8 *yy_i8=0,
-                             ESMF_IKIND_I4 *mo=0, ESMF_IKIND_I8 *mo_i8=0,
-                             ESMF_IKIND_I4 *d=0,  ESMF_IKIND_I8 *d_i8=0,
-                             ESMF_IKIND_I4 *h=0,  ESMF_IKIND_I4 *m=0,
-                             ESMF_IKIND_I4 *s=0,  ESMF_IKIND_I8 *s_i8=0,
-                             ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
-                             ESMF_IKIND_I4 *ns=0,
-                             ESMF_IKIND_R8 *d_r8=0,  ESMF_IKIND_R8 *h_r8=0,
-                             ESMF_IKIND_R8 *m_r8=0,  ESMF_IKIND_R8 *s_r8=0,
-                             ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
-                             ESMF_IKIND_R8 *ns_r8=0,
-                             ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0);
+    int ESMC_TimeIntervalSet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
+                             ESMF_KIND_I4 *mo=0, ESMF_KIND_I8 *mo_i8=0,
+                             ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
+                             ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
+                             ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
+                             ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
+                             ESMF_KIND_I4 *ns=0,
+                             ESMF_KIND_R8 *d_r8=0,  ESMF_KIND_R8 *h_r8=0,
+                             ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
+                             ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
+                             ESMF_KIND_R8 *ns_r8=0,
+                             ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0);
 
-    int ESMC_TimeIntervalGet(ESMF_IKIND_I4 *yy=0, ESMF_IKIND_I8 *yy_i8=0,
-                             ESMF_IKIND_I4 *mo=0, ESMF_IKIND_I8 *mo_i8=0,
-                             ESMF_IKIND_I4 *d=0,  ESMF_IKIND_I8 *d_i8=0,
-                             ESMF_IKIND_I4 *h=0,  ESMF_IKIND_I4 *m=0,
-                             ESMF_IKIND_I4 *s=0,  ESMF_IKIND_I8 *s_i8=0,
-                             ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
-                             ESMF_IKIND_I4 *ns=0,
-                             ESMF_IKIND_R8 *d_r8=0,  ESMF_IKIND_R8 *h_r8=0,
-                             ESMF_IKIND_R8 *m_r8=0,  ESMF_IKIND_R8 *s_r8=0,
-                             ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
-                             ESMF_IKIND_R8 *ns_r8=0,
-                             ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0,
+    int ESMC_TimeIntervalGet(ESMF_KIND_I4 *yy=0, ESMF_KIND_I8 *yy_i8=0,
+                             ESMF_KIND_I4 *mo=0, ESMF_KIND_I8 *mo_i8=0,
+                             ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
+                             ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
+                             ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
+                             ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
+                             ESMF_KIND_I4 *ns=0,
+                             ESMF_KIND_R8 *d_r8=0,  ESMF_KIND_R8 *h_r8=0,
+                             ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
+                             ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
+                             ESMF_KIND_R8 *ns_r8=0,
+                             ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                              char *timeString=0) const;
 
     // native C++ interface -- via variable argument lists
@@ -138,25 +138,25 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // division (TMG 1.5.5)
     ESMC_Fraction ESMC_TimeIntervalDiv(const ESMC_TimeInterval &) const;
-    ESMF_IKIND_R8 operator/(const ESMC_TimeInterval &) const;
+    ESMF_KIND_R8 operator/(const ESMC_TimeInterval &) const;
 
     // modulus
     ESMC_TimeInterval  operator% (const ESMC_TimeInterval &) const;
     ESMC_TimeInterval& operator%=(const ESMC_TimeInterval &);
 
     // subdivision (TMG 1.5.6, 5.3, 7.2)
-    ESMC_TimeInterval  operator/ (const ESMF_IKIND_I4 &) const;
-    ESMC_TimeInterval& operator/=(const ESMF_IKIND_I4 &);
-    ESMC_TimeInterval  operator/ (const ESMF_IKIND_R8 &) const;
-    ESMC_TimeInterval& operator/=(const ESMF_IKIND_R8 &);
+    ESMC_TimeInterval  operator/ (const ESMF_KIND_I4 &) const;
+    ESMC_TimeInterval& operator/=(const ESMF_KIND_I4 &);
+    ESMC_TimeInterval  operator/ (const ESMF_KIND_R8 &) const;
+    ESMC_TimeInterval& operator/=(const ESMF_KIND_R8 &);
 
     // multiplication (TMG 1.5.7, 7.2)
-    ESMC_TimeInterval  operator* (const ESMF_IKIND_I4 &) const;
-    ESMC_TimeInterval& operator*=(const ESMF_IKIND_I4 &);
+    ESMC_TimeInterval  operator* (const ESMF_KIND_I4 &) const;
+    ESMC_TimeInterval& operator*=(const ESMF_KIND_I4 &);
     ESMC_TimeInterval  operator* (const ESMC_Fraction &) const;
     ESMC_TimeInterval& operator*=(const ESMC_Fraction &);
-    ESMC_TimeInterval  operator* (const ESMF_IKIND_R8 &) const;
-    ESMC_TimeInterval& operator*=(const ESMF_IKIND_R8 &);
+    ESMC_TimeInterval  operator* (const ESMF_KIND_R8 &) const;
+    ESMC_TimeInterval& operator*=(const ESMF_KIND_R8 &);
 
     // copy or assign from ESMC_BaseTime expressions
     // TODO:  should be implicit ?
@@ -165,14 +165,14 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_TimeIntervalReadRestart(ESMF_IKIND_I8 s,
-                                     ESMF_IKIND_I4 sN, ESMF_IKIND_I4 sD,
-                                     ESMF_IKIND_I8 yy, ESMF_IKIND_I8 mo,
-                                     ESMF_IKIND_I8 d);
-    int ESMC_TimeIntervalWriteRestart(ESMF_IKIND_I8 *s,
-                                      ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
-                                      ESMF_IKIND_I8 *yy, ESMF_IKIND_I8 *mo,
-                                      ESMF_IKIND_I8 *d) const;
+    int ESMC_TimeIntervalReadRestart(ESMF_KIND_I8 s,
+                                     ESMF_KIND_I4 sN, ESMF_KIND_I4 sD,
+                                     ESMF_KIND_I8 yy, ESMF_KIND_I8 mo,
+                                     ESMF_KIND_I8 d);
+    int ESMC_TimeIntervalWriteRestart(ESMF_KIND_I8 *s,
+                                      ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                      ESMF_KIND_I8 *yy, ESMF_KIND_I8 *mo,
+                                      ESMF_KIND_I8 *d) const;
 
     // internal validation (TMG 7.1.1)
     int ESMC_TimeIntervalValidate(const char *options=0) const;
@@ -182,8 +182,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
-    ESMC_TimeInterval(ESMF_IKIND_I8 s, int sN, int sD,
-                      ESMF_IKIND_I8 yy, ESMF_IKIND_I8 mo, ESMF_IKIND_I8 d);
+    ESMC_TimeInterval(ESMF_KIND_I8 s, int sN, int sD,
+                      ESMF_KIND_I8 yy, ESMF_KIND_I8 mo, ESMF_KIND_I8 d);
 
     ~ESMC_TimeInterval(void);
 

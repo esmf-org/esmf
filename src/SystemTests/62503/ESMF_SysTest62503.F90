@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.16 2003/08/29 05:36:23 eschwab Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.17 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! System test code #62503
 
@@ -43,7 +43,7 @@
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime
     type(ESMF_Time) :: stopTime
-    integer(ESMF_IKIND_I8) :: advanceCount
+    integer(ESMF_KIND_I8) :: advanceCount
 
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.30 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.30 2003/08/29 05:31:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.31 2003/09/04 18:57:57 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -155,10 +155,10 @@
 //
 // !ARGUMENTS:
       int          *daysPerMonth,     // in
-      ESMF_IKIND_I4 secondsPerDay,    // in
-      ESMF_IKIND_I4 daysPerYear,      // in
-      ESMF_IKIND_I4 daysPerYeardN,    // in
-      ESMF_IKIND_I4 daysPerYeardD) {  // in
+      ESMF_KIND_I4 secondsPerDay,    // in
+      ESMF_KIND_I4 daysPerYear,      // in
+      ESMF_KIND_I4 daysPerYeardN,    // in
+      ESMF_KIND_I4 daysPerYeardD) {  // in
 // 
 // !DESCRIPTION:
 //      Initialzes a {\tt EMSC\_Calendar} to be a custom, user-defined type
@@ -211,11 +211,11 @@
 // !ARGUMENTS:
       ESMC_CalendarType *type,           // out - Calendar type
       int *daysPerMonth,                 // out
-      ESMF_IKIND_I4 *secondsPerDay,      // out
-      ESMF_IKIND_I4 *secondsPerYear,     // out
-      ESMF_IKIND_I4 *daysPerYear,        // out
-      ESMF_IKIND_I4 *daysPerYeardN,      // out
-      ESMF_IKIND_I4 *daysPerYeardD) {    // out
+      ESMF_KIND_I4 *secondsPerDay,      // out
+      ESMF_KIND_I4 *secondsPerYear,     // out
+      ESMF_KIND_I4 *daysPerYear,        // out
+      ESMF_KIND_I4 *daysPerYeardN,      // out
+      ESMF_KIND_I4 *daysPerYeardD) {    // out
 // 
 // !DESCRIPTION:
 //      Gets a {\tt EMSC\_Calendar}'s properties
@@ -275,7 +275,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 yr, int mm, int dd, ESMF_IKIND_I8 d,    // in
+      ESMF_KIND_I8 yr, int mm, int dd, ESMF_KIND_I8 d,    // in
       ESMC_BaseTime *t) const {                             // out
 //
 // !DESCRIPTION:
@@ -332,7 +332,7 @@
             // convert Gregorian date to Julian days
             // Gregorian date (yr, mm, dd) => Julian days (jdays)
             int temp            = (mm - 14) / 12;
-            ESMF_IKIND_I8 jdays = (1461 * (yr + 4800 + temp)) / 4 +
+            ESMF_KIND_I8 jdays = (1461 * (yr + 4800 + temp)) / 4 +
                              (367 * (mm - 2 - 12 * temp )) / 12 -
                              (3 * ((yr + 4900 + temp) / 100)) / 4 + dd - 32075;
 
@@ -391,8 +391,8 @@
 //
 // !ARGUMENTS:
       const ESMC_BaseTime *t,                                      // in
-      ESMF_IKIND_I4 *yr, ESMF_IKIND_I8 *yr_i8, int *mm, int *dd,   // out
-      ESMF_IKIND_I4 *d, ESMF_IKIND_I8 *d_i8, ESMF_IKIND_R8 *d_r8) const { // out
+      ESMF_KIND_I4 *yr, ESMF_KIND_I8 *yr_i8, int *mm, int *dd,   // out
+      ESMF_KIND_I4 *d, ESMF_KIND_I8 *d_i8, ESMF_KIND_R8 *d_r8) const { // out
 //
 // !DESCRIPTION:
 //     Converts a core {\tt ESMC\_BaseTime} representation to a
@@ -425,11 +425,11 @@
             //    (4*templ = 2^63)
 
             // convert basetime seconds to Julian days
-            ESMF_IKIND_I8 jdays = t->s / secondsPerDay;
+            ESMF_KIND_I8 jdays = t->s / secondsPerDay;
 
             if (d != ESMC_NULL_POINTER) {
               if (jdays > INT_MIN && jdays <= INT_MAX) {
-                *d = (ESMF_IKIND_I4) jdays;
+                *d = (ESMF_KIND_I4) jdays;
                 // adjust for negative time (reverse integer division)
                 if (t->s % secondsPerDay < 0) (*d)--;
               } else {
@@ -443,19 +443,19 @@
               if (t->s % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_IKIND_R8) t->s / (ESMF_IKIND_R8) secondsPerDay;
+              *d_r8 = (ESMF_KIND_R8) t->s / (ESMF_KIND_R8) secondsPerDay;
             }
 
             // convert Julian days to Gregorian date
             // Julian days (jdays) => Gregorian date (yr, mm, dd)
             if (dd != ESMC_NULL_POINTER || mm != ESMC_NULL_POINTER ||
                 yr != ESMC_NULL_POINTER || yr_i8 != ESMC_NULL_POINTER) {
-              ESMF_IKIND_I8 templ = jdays + 68569;
-              ESMF_IKIND_I8 tempn = (4 * templ) / 146097;
+              ESMF_KIND_I8 templ = jdays + 68569;
+              ESMF_KIND_I8 tempn = (4 * templ) / 146097;
                             templ = templ - (146097 * tempn + 3) / 4;
-              ESMF_IKIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
+              ESMF_KIND_I8 tempi = (4000 * (templ + 1)) / 1461001;
                             templ = templ - (1461 * tempi) / 4 + 31;
-              ESMF_IKIND_I8 tempj = (80 * templ) / 2447;
+              ESMF_KIND_I8 tempj = (80 * templ) / 2447;
               if (dd != ESMC_NULL_POINTER) {
                 *dd = templ - (2447 * tempj) / 80;
               }
@@ -464,10 +464,10 @@
                 *mm = tempj + 2 - (12 * templ);
               }
 
-              ESMF_IKIND_I8 year = 100 * (tempn - 49) + tempi + templ;
+              ESMF_KIND_I8 year = 100 * (tempn - 49) + tempi + templ;
               if (yr != ESMC_NULL_POINTER) {
                 if (year >= INT_MIN && year <= INT_MAX) {
-                  *yr = (ESMF_IKIND_I4) year;  // >= 32-bit
+                  *yr = (ESMF_KIND_I4) year;  // >= 32-bit
                 } else {
                   // too large to fit in given int
                   rc = ESMF_FAILURE;
@@ -483,14 +483,14 @@
         // convert Time => No Leap Date
         case ESMC_CAL_NOLEAP:
         {
-            ESMF_IKIND_I8 tmpS = t->s - 148600915200LL;
+            ESMF_KIND_I8 tmpS = t->s - 148600915200LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
             if (yr != ESMC_NULL_POINTER) {
-              ESMF_IKIND_I8 year = tmpS / secondsPerYear;
+              ESMF_KIND_I8 year = tmpS / secondsPerYear;
               if (year > INT_MIN && year <= INT_MAX) {
-                  *yr = (ESMF_IKIND_I4) year;  // >= 32-bit
+                  *yr = (ESMF_KIND_I4) year;  // >= 32-bit
                   // adjust for negative time (reverse integer division)
                   if (tmpS % secondsPerYear < 0) (*yr)--;
               } else {
@@ -521,9 +521,9 @@
 
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_IKIND_I8 day = tmpS / secondsPerDay;
+              ESMF_KIND_I8 day = tmpS / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
-                *d = (ESMF_IKIND_I4) day;   // >= 32-bit
+                *d = (ESMF_KIND_I4) day;   // >= 32-bit
                 // adjust for negative time (reverse integer division)
                 if (tmpS % secondsPerDay < 0) (*d)--;
               } else {
@@ -537,7 +537,7 @@
               if (tmpS % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_IKIND_R8) tmpS / (ESMF_IKIND_R8) secondsPerDay;
+              *d_r8 = (ESMF_KIND_R8) tmpS / (ESMF_KIND_R8) secondsPerDay;
             }
 
             break;
@@ -545,14 +545,14 @@
         // convert Time => 360 Day Date
         case ESMC_CAL_360DAY:
         {
-            ESMF_IKIND_I8 tmpS = t->s - 146565244800LL;
+            ESMF_KIND_I8 tmpS = t->s - 146565244800LL;
                                      // ^ adjust to match Julian time zero
                                      // = (1/1/0000) - (11/24/-4713)
 
             if (yr != ESMC_NULL_POINTER) {
-              ESMF_IKIND_I8 year = tmpS / secondsPerYear;
+              ESMF_KIND_I8 year = tmpS / secondsPerYear;
               if (year > INT_MIN && year <= INT_MAX) {
-                *yr = (ESMF_IKIND_I4) year;
+                *yr = (ESMF_KIND_I4) year;
                 // adjust for negative time (reverse integer division)
                 if (tmpS % secondsPerYear < 0) (*yr)--;
               } else {
@@ -579,9 +579,9 @@
 
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_IKIND_I8 day = tmpS / secondsPerDay;
+              ESMF_KIND_I8 day = tmpS / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
-                *d = (ESMF_IKIND_I4) day;   // >= 32-bit
+                *d = (ESMF_KIND_I4) day;   // >= 32-bit
                 // adjust for negative time (reverse integer division)
                 if (tmpS % secondsPerDay < 0) (*d)--;
               } else {
@@ -595,7 +595,7 @@
               if (tmpS % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_IKIND_R8) tmpS / (ESMF_IKIND_R8) secondsPerDay;
+              *d_r8 = (ESMF_KIND_R8) tmpS / (ESMF_KIND_R8) secondsPerDay;
             }
 
             break;
@@ -605,9 +605,9 @@
         {
             // convert basetime seconds to Julian days
             if (d != ESMC_NULL_POINTER) {
-              ESMF_IKIND_I8 day = t->s / secondsPerDay;
+              ESMF_KIND_I8 day = t->s / secondsPerDay;
               if (day > INT_MIN && day <= INT_MAX) {
-                *d = (ESMF_IKIND_I4) day;    // >= 32-bit
+                *d = (ESMF_KIND_I4) day;    // >= 32-bit
                 // adjust for negative time (reverse integer division)
                 if (t->s % secondsPerDay < 0) (*d)--;
               } else {
@@ -621,7 +621,7 @@
                 if (t->s % secondsPerDay < 0) (*d_i8)--;
             }
             if (d_r8 != ESMC_NULL_POINTER) {
-              *d_r8 = (ESMF_IKIND_R8) t->s / (ESMF_IKIND_R8) secondsPerDay;
+              *d_r8 = (ESMF_KIND_R8) t->s / (ESMF_KIND_R8) secondsPerDay;
             }
             break;
         }
@@ -646,11 +646,11 @@
 // !ARGUMENTS:
       ESMC_CalendarType type,        // in
       int          *daysPerMonth,    // in
-      ESMF_IKIND_I4 secondsPerDay,   // in
-      ESMF_IKIND_I4 secondsPerYear,  // in
-      ESMF_IKIND_I4 daysPerYear,     // in
-      ESMF_IKIND_I4 daysPerYeardN,   // in
-      ESMF_IKIND_I4 daysPerYeardD) { // in
+      ESMF_KIND_I4 secondsPerDay,   // in
+      ESMF_KIND_I4 secondsPerYear,  // in
+      ESMF_KIND_I4 daysPerYear,     // in
+      ESMF_KIND_I4 daysPerYeardN,   // in
+      ESMF_KIND_I4 daysPerYeardD) { // in
 // 
 // !DESCRIPTION:
 //      Restores {\tt EMSC\_Calendar} state for persistence/checkpointing
@@ -691,11 +691,11 @@
 // !ARGUMENTS:
       ESMC_CalendarType *type,              // out
       int           *daysPerMonth,          // out
-      ESMF_IKIND_I4 *secondsPerDay,         // out
-      ESMF_IKIND_I4 *secondsPerYear,        // out
-      ESMF_IKIND_I4 *daysPerYear,           // out
-      ESMF_IKIND_I4 *daysPerYeardN,         // out
-      ESMF_IKIND_I4 *daysPerYeardD) const { // out
+      ESMF_KIND_I4 *secondsPerDay,         // out
+      ESMF_KIND_I4 *secondsPerYear,        // out
+      ESMF_KIND_I4 *daysPerYear,           // out
+      ESMF_KIND_I4 *daysPerYeardN,         // out
+      ESMF_KIND_I4 *daysPerYeardD) const { // out
 // 
 // !DESCRIPTION:
 //      Returns {\tt EMSC\_Calendar} state for persistence/checkpointing
@@ -856,10 +856,10 @@
 //
 // !ARGUMENTS:
       int          *daysPerMonth,      // in
-      ESMF_IKIND_I4 secondsPerDay,     // in
-      ESMF_IKIND_I4 daysPerYear,       // in
-      ESMF_IKIND_I4 daysPerYeardN,     // in
-      ESMF_IKIND_I4 daysPerYeardD) {   // in
+      ESMF_KIND_I4 secondsPerDay,     // in
+      ESMF_KIND_I4 daysPerYear,       // in
+      ESMF_KIND_I4 daysPerYeardN,     // in
+      ESMF_KIND_I4 daysPerYeardD) {   // in
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Time} to be of a custom user-defined type

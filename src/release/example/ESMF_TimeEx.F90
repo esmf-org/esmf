@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.2 2003/07/09 17:51:10 nscollins Exp $
+! $Id: ESMF_TimeEx.F90,v 1.3 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 
       ! Temp variables for Get functions
       integer :: MM, DD, H, M
-      integer(ESMF_IKIND_I8) :: S
+      integer(ESMF_KIND_I8) :: S
       type(ESMF_Calendar) :: cal
       character, dimension(ESMF_MAXSTR) :: Ts
       integer :: dayOfYear, dayOfWeek, dayOfMonth
@@ -50,8 +50,8 @@
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! Initialize time to 5/12/2003 2:24:45
-      call ESMF_TimeInit(Time, YR=int(2003,kind=ESMF_IKIND_I8), &
-                       MM=5, DD=12, H=2, M=24, S=int(45,kind=ESMF_IKIND_I8), &
+      call ESMF_TimeInit(Time, YR=int(2003,kind=ESMF_KIND_I8), &
+                       MM=5, DD=12, H=2, M=24, S=int(45,kind=ESMF_KIND_I8), &
                        cal=gregorianCalendar, rc=rc)
 
       call ESMF_TimePrint(Time, "string", rc)

@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.25 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.26 2003/09/04 18:57:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,37 +88,37 @@
     // all get/set routines perform signed conversions, where applicable
 
     // Get/Set methods to support the F90 optional arguments interface
-    int ESMC_TimeSet(ESMF_IKIND_I4 *yr=0, ESMF_IKIND_I8 *yr_i8=0,
+    int ESMC_TimeSet(ESMF_KIND_I4 *yr=0, ESMF_KIND_I8 *yr_i8=0,
                      int *mm=0, int *dd=0,
-                     ESMF_IKIND_I4 *d=0,  ESMF_IKIND_I8 *d_i8=0,
-                     ESMF_IKIND_I4 *h=0,  ESMF_IKIND_I4 *m=0,
-                     ESMF_IKIND_I4 *s=0,  ESMF_IKIND_I8 *s_i8=0,
-                     ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
-                     ESMF_IKIND_I4 *ns=0,
-                     ESMF_IKIND_R8 *d_r8=0,  ESMF_IKIND_R8 *h_r8=0,
-                     ESMF_IKIND_R8 *m_r8=0,  ESMF_IKIND_R8 *s_r8=0,
-                     ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
-                     ESMF_IKIND_R8 *ns_r8=0,
-                     ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0,
+                     ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
+                     ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
+                     ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
+                     ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
+                     ESMF_KIND_I4 *ns=0,
+                     ESMF_KIND_R8 *d_r8=0,  ESMF_KIND_R8 *h_r8=0,
+                     ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
+                     ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
+                     ESMF_KIND_R8 *ns_r8=0,
+                     ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                      ESMC_Calendar *calendar=0, int *timeZone=0);
 
-    int ESMC_TimeGet(ESMF_IKIND_I4 *yr=0, ESMF_IKIND_I8 *yr_i8=0,
+    int ESMC_TimeGet(ESMF_KIND_I4 *yr=0, ESMF_KIND_I8 *yr_i8=0,
                      int *mm=0, int *dd=0,
-                     ESMF_IKIND_I4 *d=0,  ESMF_IKIND_I8 *d_i8=0,
-                     ESMF_IKIND_I4 *h=0,  ESMF_IKIND_I4 *m=0,
-                     ESMF_IKIND_I4 *s=0,  ESMF_IKIND_I8 *s_i8=0,
-                     ESMF_IKIND_I4 *ms=0, ESMF_IKIND_I4 *us=0,
-                     ESMF_IKIND_I4 *ns=0,
-                     ESMF_IKIND_R8 *d_r8=0,  ESMF_IKIND_R8 *h_r8=0,
-                     ESMF_IKIND_R8 *m_r8=0,  ESMF_IKIND_R8 *s_r8=0,
-                     ESMF_IKIND_R8 *ms_r8=0, ESMF_IKIND_R8 *us_r8=0,
-                     ESMF_IKIND_R8 *ns_r8=0,
-                     ESMF_IKIND_I4 *sN=0, ESMF_IKIND_I4 *sD=0,
+                     ESMF_KIND_I4 *d=0,  ESMF_KIND_I8 *d_i8=0,
+                     ESMF_KIND_I4 *h=0,  ESMF_KIND_I4 *m=0,
+                     ESMF_KIND_I4 *s=0,  ESMF_KIND_I8 *s_i8=0,
+                     ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
+                     ESMF_KIND_I4 *ns=0,
+                     ESMF_KIND_R8 *d_r8=0,  ESMF_KIND_R8 *h_r8=0,
+                     ESMF_KIND_R8 *m_r8=0,  ESMF_KIND_R8 *s_r8=0,
+                     ESMF_KIND_R8 *ms_r8=0, ESMF_KIND_R8 *us_r8=0,
+                     ESMF_KIND_R8 *ns_r8=0,
+                     ESMF_KIND_I4 *sN=0, ESMF_KIND_I4 *sD=0,
                      ESMC_Calendar *calendar=0, int *timeZone=0,
                      char *timeString=0, int *dayOfWeek=0,
                      int *dayOfMonth=0, ESMC_Time *midMonth=0,
-                     ESMF_IKIND_I4 *dayOfYear=0,
-                     ESMF_IKIND_R8 *dayOfYear_r8=0,
+                     ESMF_KIND_I4 *dayOfYear=0,
+                     ESMF_KIND_R8 *dayOfYear_r8=0,
                      ESMC_TimeInterval *dayOfYear_intvl=0) const;
 
     // native C++ interface -- via variable argument lists
@@ -145,11 +145,11 @@
     // required methods inherited and overridden from the ESMC_Base class
 
     // for persistence/checkpointing
-    int ESMC_TimeReadRestart(ESMF_IKIND_I8 s,
-                             ESMF_IKIND_I4 sN, ESMF_IKIND_I4 sD,
+    int ESMC_TimeReadRestart(ESMF_KIND_I8 s,
+                             ESMF_KIND_I4 sN, ESMF_KIND_I4 sD,
                              ESMC_Calendar *calendar, int timeZone);
-    int ESMC_TimeWriteRestart(ESMF_IKIND_I8 *s,
-                              ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+    int ESMC_TimeWriteRestart(ESMF_KIND_I8 *s,
+                              ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                               ESMC_Calendar *calendar, int *timeZone) const;
 
     // internal validation
@@ -160,7 +160,7 @@
 
     // native C++ constructors/destructors
     ESMC_Time(void);
-    ESMC_Time(ESMF_IKIND_I8 s, int sN, int sD, ESMC_Calendar *calendar,
+    ESMC_Time(ESMF_KIND_I8 s, int sN, int sD, ESMC_Calendar *calendar,
               int timeZone=0);
     ~ESMC_Time(void);
 
@@ -178,8 +178,8 @@
     int ESMC_TimeGetDayOfMonth(int *dayOfMonth) const;  // (TMG 2.5.4)
     int ESMC_TimeGetMidMonth(ESMC_Time *midMonth) const;
 
-    int ESMC_TimeGetDayOfYear(ESMF_IKIND_I4 *dayOfYear) const;
-    int ESMC_TimeGetDayOfYear(ESMF_IKIND_R8 *dayOfYear) const; // (TMG 2.5.2)
+    int ESMC_TimeGetDayOfYear(ESMF_KIND_I4 *dayOfYear) const;
+    int ESMC_TimeGetDayOfYear(ESMF_KIND_R8 *dayOfYear) const; // (TMG 2.5.2)
     int ESMC_TimeGetDayOfYear(ESMC_TimeInterval *dayOfYear) const;
 
                                                         // (TMG 2.5.5)

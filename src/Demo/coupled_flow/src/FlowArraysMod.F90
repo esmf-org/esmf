@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.4 2003/08/06 21:19:19 jwolfe Exp $
+! $Id: FlowArraysMod.F90,v 1.5 2003/09/04 18:57:54 cdeluca Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -26,9 +26,9 @@
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: p, q, flag, de
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: sie, u, v
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: p, q, flag, de
       integer, dimension(4) :: nbc
       integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
 !
@@ -60,12 +60,12 @@
       integer :: nobsdesc
       integer :: iflo_min, iflo_max
       type(ESMF_TimeInterval) :: time_step
-      real(kind=ESMF_IKIND_R4) :: dt, dx, dy
-      real(kind=ESMF_IKIND_R4) :: uin, rhoin, siein
-      real(kind=ESMF_IKIND_R4) :: vin2, rhoin2, siein2
-      real(kind=ESMF_IKIND_R4) :: gamma, akb
-      real(kind=ESMF_IKIND_R4) :: q0, u0, v0, sie0, rho0
-      real(kind=ESMF_IKIND_R4) :: sieobs
+      real(kind=ESMF_KIND_R4) :: dt, dx, dy
+      real(kind=ESMF_KIND_R4) :: uin, rhoin, siein
+      real(kind=ESMF_KIND_R4) :: vin2, rhoin2, siein2
+      real(kind=ESMF_KIND_R4) :: gamma, akb
+      real(kind=ESMF_KIND_R4) :: q0, u0, v0, sie0, rho0
+      real(kind=ESMF_KIND_R4) :: sieobs
 
       contains
 
@@ -113,7 +113,7 @@
 !     and kind ESMF\_KIND\_R4:
 !\begin{verbatim}
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                              kind=ESMF_KIND_R4)
+                              kind=ESMF_R4)
 !\end{verbatim}
 !     Next, create a Field named "SIE" using the ArraySpec with a relative
 !     location (relloc) at the cell centers:

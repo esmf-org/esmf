@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.8 2003/08/01 21:49:07 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.9 2003/09/04 18:57:57 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -108,7 +108,7 @@
         type(ESMF_State) :: mysource, mydest
         type(ESMF_Field) :: srcfield, dstfield
         type(ESMF_Array) :: srcarray, dstarray
-        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: srcptr, dstptr
+        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: srcptr, dstptr
         type(ESMF_DELayout) :: cpllayout
       
         character(len=ESMF_MAXSTR) :: statename

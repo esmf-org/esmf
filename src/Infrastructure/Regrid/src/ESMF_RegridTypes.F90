@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.13 2003/08/29 21:09:25 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.14 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.13 2003/08/29 21:09:25 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.14 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -182,7 +182,7 @@
       type(ESMF_TransformValues), intent(inout) :: tv
       integer, dimension(2), intent(in) :: src_add
       integer, dimension(2), intent(in) :: dst_add
-      real(kind=ESMF_IKIND_R8), intent(in) :: weight
+      real(kind=ESMF_KIND_R8), intent(in) :: weight
       integer, intent(out) :: rc
 
 !
@@ -210,7 +210,7 @@
 
       ! do these need to be 2 separate x and y arrays?
       integer, dimension(:), pointer :: src_ptr, dst_ptr
-      real(kind=ESMF_IKIND_R8), dimension(:,:), pointer :: wgt_ptr
+      real(kind=ESMF_KIND_R8), dimension(:,:), pointer :: wgt_ptr
       type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
          src_add_tmp, dst_add_tmp, weights_tmp
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.8 2003/05/27 23:00:44 jwolfe Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.9 2003/09/04 18:57:55 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -93,7 +93,7 @@
 !   !  Create based on an array specification.
 
     arank = 2
-!   !   arrayspec = ESMF_ArraySpecCreate(arank, ESMF_DATA_REAL, ESMF_KIND_R4, &
+!   !   arrayspec = ESMF_ArraySpecCreate(arank, ESMF_DATA_REAL, ESMF_R4, &
     !                                         nx, ny, rc)
 
 !   !   array2 = ESMF_ArrayCreate(arrayspec, ESMF_NO_DATA, rc)

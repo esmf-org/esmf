@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.24 2003/07/29 22:52:58 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.25 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.24 2003/07/29 22:52:58 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.25 2003/09/04 18:57:56 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -293,7 +293,7 @@
       ! and descriptors, optional masks (e.g. for active cells), and an optional I/O 
       ! specification. In this case a field will allocate its own data. The grid passed 
       ! into the argument list is referenced and not copied.
-      call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_KIND_R4)
+      call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4)
       f2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       write(failMsg, *) "ArraySpec has not been created"

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.11 2003/08/29 22:25:30 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.12 2003/09/04 18:57:55 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -861,10 +861,10 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real(kind=ESMF_IKIND_R4) :: u_ij, u_ipj, rhouu_m, rhouu_p
-      real(kind=ESMF_IKIND_R4) :: v_ipjm, v_ipjp, rhouv_p, rhouv_m
-      real(kind=ESMF_IKIND_R4) :: v_ij, v_ijp, rhovv_m, rhovv_p
-      real(kind=ESMF_IKIND_R4) :: u_imjp, u_ipjp, rhovu_p, rhovu_m
+      real(kind=ESMF_KIND_R4) :: u_ij, u_ipj, rhouu_m, rhouu_p
+      real(kind=ESMF_KIND_R4) :: v_ipjm, v_ipjp, rhouv_p, rhouv_m
+      real(kind=ESMF_KIND_R4) :: v_ij, v_ijp, rhovv_m, rhovv_p
+      real(kind=ESMF_KIND_R4) :: u_imjp, u_ipjp, rhovu_p, rhovu_m
 !
 ! Set initial values
 !
@@ -1003,8 +1003,8 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real(kind=ESMF_IKIND_R4) :: rhoiu_m, rhoiu_p, rhoiv_m, rhoiv_p
-      real(kind=ESMF_IKIND_R4) :: dsiedx2, dsiedy2
+      real(kind=ESMF_KIND_R4) :: rhoiu_m, rhoiu_p, rhoiv_m, rhoiv_p
+      real(kind=ESMF_KIND_R4) :: dsiedx2, dsiedy2
 !
 ! Set initial values
 !
@@ -1123,9 +1123,9 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real(kind=ESMF_IKIND_R4), dimension(imax,jmax) :: rho_new
-      real(kind=ESMF_IKIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p
-      real(kind=ESMF_IKIND_R4) :: dsiedx2, dsiedy2
+      real(kind=ESMF_KIND_R4), dimension(imax,jmax) :: rho_new
+      real(kind=ESMF_KIND_R4) :: rhou_m, rhou_p, rhov_m, rhov_p
+      real(kind=ESMF_KIND_R4) :: dsiedx2, dsiedy2
 !
 ! Set initial values
 !
@@ -1245,7 +1245,7 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j
-      real(kind=ESMF_IKIND_R4) :: rhoav
+      real(kind=ESMF_KIND_R4) :: rhoav
 !
 ! Set initial values
 !
@@ -1586,7 +1586,7 @@
       integer :: status
       logical :: rcpresent
       integer :: ni, nj, i, j, de_id
-      integer(kind=ESMF_IKIND_I8) :: frame
+      integer(kind=ESMF_KIND_I8) :: frame
       type(ESMF_Array) :: outarray
       type(ESMF_Grid) :: grid
       type(ESMF_DELayout) :: layout

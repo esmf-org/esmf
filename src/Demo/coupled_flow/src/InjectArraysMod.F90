@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.3 2003/08/06 21:19:48 jwolfe Exp $
+! $Id: InjectArraysMod.F90,v 1.4 2003/09/04 18:57:55 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -25,9 +25,9 @@
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: p, q, flag
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: sie, u, v
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
+      real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: p, q, flag
       integer, dimension(4) :: nbc
       integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
 !
@@ -59,12 +59,12 @@
       integer :: nobsdesc
       integer :: iflo_min, iflo_max
       type(ESMF_TimeInterval) :: time_step
-      real(kind=ESMF_IKIND_R4) :: dt, dx, dy
-      real(kind=ESMF_IKIND_R4) :: uin, rhoin, siein
-      real(kind=ESMF_IKIND_R4) :: vin2, rhoin2, siein2
-      real(kind=ESMF_IKIND_R4) :: gamma, akb
-      real(kind=ESMF_IKIND_R4) :: q0, u0, v0, sie0, rho0
-      real(kind=ESMF_IKIND_R4) :: sieobs
+      real(kind=ESMF_KIND_R4) :: dt, dx, dy
+      real(kind=ESMF_KIND_R4) :: uin, rhoin, siein
+      real(kind=ESMF_KIND_R4) :: vin2, rhoin2, siein2
+      real(kind=ESMF_KIND_R4) :: gamma, akb
+      real(kind=ESMF_KIND_R4) :: q0, u0, v0, sie0, rho0
+      real(kind=ESMF_KIND_R4) :: sieobs
 
       contains
 
@@ -101,7 +101,7 @@
 !
       haloWidth = 1
       call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
-                              kind=ESMF_KIND_R4)
+                              kind=ESMF_R4)
 
       field_sie  = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                    haloWidth=haloWidth, name="SIE", rc=status)

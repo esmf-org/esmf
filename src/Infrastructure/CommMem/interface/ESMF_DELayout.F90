@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.32 2003/08/29 21:06:13 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.33 2003/09/04 18:57:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -131,7 +131,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.32 2003/08/29 21:06:13 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.33 2003/09/04 18:57:55 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1175,12 +1175,12 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R4), dimension(:), intent(in) :: DistArray
+      real(ESMF_KIND_R4), dimension(:), intent(in) :: DistArray
       integer, dimension(:), intent(in) :: global_dimlengths
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:) :: AIPtr
       type(ESMF_AxisIndex), dimension(:) :: AIPtr2
-      real(ESMF_IKIND_R4), dimension(:), intent(out) :: GlobalArray
+      real(ESMF_KIND_R4), dimension(:), intent(out) :: GlobalArray
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
@@ -1474,8 +1474,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R8), intent(in) :: sndArray(:)
-      real(ESMF_IKIND_R8), intent(out) :: rcvArray(:)
+      real(ESMF_KIND_R8), intent(in) :: sndArray(:)
+      real(ESMF_KIND_R8), intent(out) :: rcvArray(:)
       integer, intent(in) :: len
       integer, intent(in) :: srcDEid
       integer, intent(out), optional :: rc
@@ -1499,7 +1499,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutScatterNA(layout, sndArray, rcvArray, len, &
-                                    ESMF_KIND_R8, srcDEid, status)
+                                    ESMF_R8, srcDEid, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutScatterR8 error"
           return
@@ -1520,8 +1520,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R4), intent(in) :: sndArray(:)
-      real(ESMF_IKIND_R4), intent(out) :: rcvArray(:)
+      real(ESMF_KIND_R4), intent(in) :: sndArray(:)
+      real(ESMF_KIND_R4), intent(out) :: rcvArray(:)
       integer, intent(in) :: len
       integer, intent(in) :: srcDEid
       integer, intent(out), optional :: rc
@@ -1545,7 +1545,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutScatterNA(layout, sndArray, rcvArray, len, &
-                                    ESMF_KIND_R4, srcDEid, status)
+                                    ESMF_R4, srcDEid, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutScatterR4 error"
           return
@@ -1566,8 +1566,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      integer(ESMF_IKIND_I4), intent(in) :: sndArray(:)
-      integer(ESMF_IKIND_I4), intent(out) :: rcvArray(:)
+      integer(ESMF_KIND_I4), intent(in) :: sndArray(:)
+      integer(ESMF_KIND_I4), intent(out) :: rcvArray(:)
       integer, intent(in) :: len
       integer, intent(in) :: srcDEid
       integer, intent(out), optional :: rc
@@ -1591,7 +1591,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutScatterNA(layout, sndArray, rcvArray, len, &
-                                    ESMF_KIND_I4, srcDEid, status)
+                                    ESMF_I4, srcDEid, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutScatterI4 error"
           return
@@ -1704,7 +1704,7 @@
 !  TODO: rename SendRecvR for real
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R4), intent(in) :: sarray(:), rarray(:)
+      real(ESMF_KIND_R4), intent(in) :: sarray(:), rarray(:)
       integer, intent(in) :: snum
       integer, intent(in) :: rnum
       integer, intent(in) :: sde_index, rde_index
@@ -1729,7 +1729,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutSendRecv(layout, sarray, rarray, snum, & 
-        rnum, sde_index, rde_index, ESMF_KIND_R4, rc)
+        rnum, sde_index, rde_index, ESMF_R4, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutSendRecv error"
         return
@@ -1750,7 +1750,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R4), intent(in) :: array
+      real(ESMF_KIND_R4), intent(in) :: array
       integer, intent(in) :: num
       integer, intent(in) :: rootde_index
       integer, intent(out), optional :: rc 
@@ -1775,7 +1775,7 @@
 
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutBcast(layout, array, num, rootde_index, &
-			        ESMF_KIND_R4, rc)
+			        ESMF_R4, rc)
       if (status .ne. ESMF_SUCCESS) then
         print *, "ESMF_DELayoutBcast error"
         return
@@ -1796,9 +1796,9 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R8), intent(in) :: sndArray(:)
+      real(ESMF_KIND_R8), intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
-      real(ESMF_IKIND_R8), intent(out) :: rcvArray(:)
+      real(ESMF_KIND_R8), intent(out) :: rcvArray(:)
       integer, intent(in) :: rcvLen(:)
       integer, intent(in) :: rcvDispls(:)
       integer, intent(out), optional :: rc
@@ -1823,7 +1823,7 @@
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutAllGatherVNA(layout, sndArray, sndLen, &
                                        rcvArray, rcvLen, rcvDispls, &
-                                       ESMF_KIND_R8, status)
+                                       ESMF_R8, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutAllGatherVR8 error"
           return
@@ -1844,9 +1844,9 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real(ESMF_IKIND_R4), intent(in) :: sndArray(:)
+      real(ESMF_KIND_R4), intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
-      real(ESMF_IKIND_R4), intent(out) :: rcvArray(:)
+      real(ESMF_KIND_R4), intent(out) :: rcvArray(:)
       integer, intent(in) :: rcvLen(:)
       integer, intent(in) :: rcvDispls(:)
       integer, intent(out), optional :: rc
@@ -1871,7 +1871,7 @@
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutAllGatherVNA(layout, sndArray, sndLen, &
                                        rcvArray, rcvLen, rcvDispls, &
-                                       ESMF_KIND_R4, status)
+                                       ESMF_R4, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutAllGatherVR4 error"
           return
@@ -1892,9 +1892,9 @@
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      integer(ESMF_IKIND_I4), intent(in) :: sndArray(:)
+      integer(ESMF_KIND_I4), intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
-      integer(ESMF_IKIND_I4), intent(out) :: rcvArray(:)
+      integer(ESMF_KIND_I4), intent(out) :: rcvArray(:)
       integer, intent(in) :: rcvLen(:)
       integer, intent(in) :: rcvDispls(:)
       integer, intent(out), optional :: rc
@@ -1919,7 +1919,7 @@
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutAllGatherVNA(layout, sndArray, sndLen, &
                                        rcvArray, rcvLen, rcvDispls, &
-                                       ESMF_KIND_I4, status)
+                                       ESMF_I4, status)
       if (status .ne. ESMF_SUCCESS) then
           print *, "ESMF_DELayoutAllGatherVI4 error"
           return

@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.42 2003/08/29 23:09:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.43 2003/09/04 18:57:57 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -55,28 +55,28 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I4 *yr,        // in - integer year (>= 32-bit)
-      ESMF_IKIND_I8 *yr_i8,     // in - integer year (large, >= 64-bit)
+      ESMF_KIND_I4 *yr,        // in - integer year (>= 32-bit)
+      ESMF_KIND_I8 *yr_i8,     // in - integer year (large, >= 64-bit)
       int *mm,                  // in - integer month
       int *dd,                  // in - integer day of the month
-      ESMF_IKIND_I4 *d,         // in - integer days (>= 32-bit)
-      ESMF_IKIND_I8 *d_i8,      // in - integer days (large, >= 64-bit)
-      ESMF_IKIND_I4 *h,         // in - integer hours
-      ESMF_IKIND_I4 *m,         // in - integer minutes
-      ESMF_IKIND_I4 *s,         // in - integer seconds (>= 32-bit)
-      ESMF_IKIND_I8 *s_i8,      // in - integer seconds (large, >= 64-bit)
-      ESMF_IKIND_I4 *ms,        // in - integer milliseconds
-      ESMF_IKIND_I4 *us,        // in - integer microseconds
-      ESMF_IKIND_I4 *ns,        // in - integer nanoseconds
-      ESMF_IKIND_R8 *d_r8,      // in - floating point days
-      ESMF_IKIND_R8 *h_r8,      // in - floating point hours
-      ESMF_IKIND_R8 *m_r8,      // in - floating point minutes
-      ESMF_IKIND_R8 *s_r8,      // in - floating point seconds
-      ESMF_IKIND_R8 *ms_r8,     // in - floating point milliseconds
-      ESMF_IKIND_R8 *us_r8,     // in - floating point microseconds
-      ESMF_IKIND_R8 *ns_r8,     // in - floating point nanoseconds
-      ESMF_IKIND_I4 *sN,        // in - fractional seconds numerator
-      ESMF_IKIND_I4 *sD,        // in - fractional seconds denominator
+      ESMF_KIND_I4 *d,         // in - integer days (>= 32-bit)
+      ESMF_KIND_I8 *d_i8,      // in - integer days (large, >= 64-bit)
+      ESMF_KIND_I4 *h,         // in - integer hours
+      ESMF_KIND_I4 *m,         // in - integer minutes
+      ESMF_KIND_I4 *s,         // in - integer seconds (>= 32-bit)
+      ESMF_KIND_I8 *s_i8,      // in - integer seconds (large, >= 64-bit)
+      ESMF_KIND_I4 *ms,        // in - integer milliseconds
+      ESMF_KIND_I4 *us,        // in - integer microseconds
+      ESMF_KIND_I4 *ns,        // in - integer nanoseconds
+      ESMF_KIND_R8 *d_r8,      // in - floating point days
+      ESMF_KIND_R8 *h_r8,      // in - floating point hours
+      ESMF_KIND_R8 *m_r8,      // in - floating point minutes
+      ESMF_KIND_R8 *s_r8,      // in - floating point seconds
+      ESMF_KIND_R8 *ms_r8,     // in - floating point milliseconds
+      ESMF_KIND_R8 *us_r8,     // in - floating point microseconds
+      ESMF_KIND_R8 *ns_r8,     // in - floating point nanoseconds
+      ESMF_KIND_I4 *sN,        // in - fractional seconds numerator
+      ESMF_KIND_I4 *sD,        // in - fractional seconds denominator
       ESMC_Calendar *calendar,  // in - associated calendar
       int *timeZone) {          // in - timezone (hours offset from UTC,
                                 //      e.g. EST = -5)
@@ -137,14 +137,14 @@
     if ((yr != ESMC_NULL_POINTER || yr_i8 != ESMC_NULL_POINTER) &&
          mm != ESMC_NULL_POINTER && dd != ESMC_NULL_POINTER) {
       if (this->calendar != ESMC_NULL_POINTER) {
-        ESMF_IKIND_I8 argYR = (yr != ESMC_NULL_POINTER) ? *yr : *yr_i8;
+        ESMF_KIND_I8 argYR = (yr != ESMC_NULL_POINTER) ? *yr : *yr_i8;
         if (this->calendar->ESMC_CalendarConvertToTime(argYR, *mm, *dd, 0, this)
             == ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
     }
     if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
       if (this->calendar != ESMC_NULL_POINTER) {
-        ESMF_IKIND_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
+        ESMF_KIND_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
         if (this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, argD, this) ==
             ESMF_FAILURE) return (ESMF_FAILURE);
       } else return (ESMF_FAILURE);
@@ -164,7 +164,7 @@
 
       // fractional part
       this->s +=
-              (ESMF_IKIND_I8) (modf(*d_r8, ESMC_NULL_POINTER) * secPerDay);
+              (ESMF_KIND_I8) (modf(*d_r8, ESMC_NULL_POINTER) * secPerDay);
     }
     
     // use base class for sub-day values
@@ -186,36 +186,36 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I4 *yr,           // out - integer year (>= 32-bit)
-      ESMF_IKIND_I8 *yr_i8,        // out - integer year (large, >= 64-bit)
+      ESMF_KIND_I4 *yr,           // out - integer year (>= 32-bit)
+      ESMF_KIND_I8 *yr_i8,        // out - integer year (large, >= 64-bit)
       int *mm,                     // out - integer month
       int *dd,                     // out - integer day of the month
-      ESMF_IKIND_I4 *d,            // out - integer days (>= 32-bit)
-      ESMF_IKIND_I8 *d_i8,         // out - integer days (large, >= 64-bit)
-      ESMF_IKIND_I4 *h,            // out - integer hours
-      ESMF_IKIND_I4 *m,            // out - integer minutes
-      ESMF_IKIND_I4 *s,            // out - integer seconds (>= 32-bit)
-      ESMF_IKIND_I8 *s_i8,         // out - integer seconds (large, >= 64-bit)
-      ESMF_IKIND_I4 *ms,           // out - integer milliseconds
-      ESMF_IKIND_I4 *us,           // out - integer microseconds
-      ESMF_IKIND_I4 *ns,           // out - integer nanoseconds
-      ESMF_IKIND_R8 *d_r8,         // out - floating point days
-      ESMF_IKIND_R8 *h_r8,         // out - floating point hours
-      ESMF_IKIND_R8 *m_r8,         // out - floating point minutes
-      ESMF_IKIND_R8 *s_r8,         // out - floating point seconds
-      ESMF_IKIND_R8 *ms_r8,        // out - floating point milliseconds
-      ESMF_IKIND_R8 *us_r8,        // out - floating point microseconds
-      ESMF_IKIND_R8 *ns_r8,        // out - floating point nanoseconds
-      ESMF_IKIND_I4 *sN,           // out - fractional seconds numerator
-      ESMF_IKIND_I4 *sD,           // out - fractional seconds denominator
+      ESMF_KIND_I4 *d,            // out - integer days (>= 32-bit)
+      ESMF_KIND_I8 *d_i8,         // out - integer days (large, >= 64-bit)
+      ESMF_KIND_I4 *h,            // out - integer hours
+      ESMF_KIND_I4 *m,            // out - integer minutes
+      ESMF_KIND_I4 *s,            // out - integer seconds (>= 32-bit)
+      ESMF_KIND_I8 *s_i8,         // out - integer seconds (large, >= 64-bit)
+      ESMF_KIND_I4 *ms,           // out - integer milliseconds
+      ESMF_KIND_I4 *us,           // out - integer microseconds
+      ESMF_KIND_I4 *ns,           // out - integer nanoseconds
+      ESMF_KIND_R8 *d_r8,         // out - floating point days
+      ESMF_KIND_R8 *h_r8,         // out - floating point hours
+      ESMF_KIND_R8 *m_r8,         // out - floating point minutes
+      ESMF_KIND_R8 *s_r8,         // out - floating point seconds
+      ESMF_KIND_R8 *ms_r8,        // out - floating point milliseconds
+      ESMF_KIND_R8 *us_r8,        // out - floating point microseconds
+      ESMF_KIND_R8 *ns_r8,        // out - floating point nanoseconds
+      ESMF_KIND_I4 *sN,           // out - fractional seconds numerator
+      ESMF_KIND_I4 *sD,           // out - fractional seconds denominator
       ESMC_Calendar *calendar,     // out - associated calendar
       int           *timeZone,     // out - timezone (hours offset from UTC)
       char          *timeString,   // out - ISO 8601 format YYYY-MM-DDThh:mm:ss
       int           *dayOfWeek,    // out - day of the week (Mon = 1, Sun = 7)
       int           *dayOfMonth,   // out - day of the month
       ESMC_Time     *midMonth,     // out - middle of the month time instant
-      ESMF_IKIND_I4 *dayOfYear,    // out - day of the year as an integer
-      ESMF_IKIND_R8 *dayOfYear_r8, // out - day of the year as a floating point
+      ESMF_KIND_I4 *dayOfYear,    // out - day of the year as an integer
+      ESMF_KIND_R8 *dayOfYear_r8, // out - day of the year as a floating point
       ESMC_TimeInterval *dayOfYear_intvl) const {  // out - day of the year
                                                    //       as a time interval
 //
@@ -394,7 +394,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 s,         // in - integer seconds
+      ESMF_KIND_I8 s,         // in - integer seconds
       int sN,                  // in - fractional seconds, numerator
       int sD,                  // in - fractional seconds, denominator
       ESMC_Calendar *calendar, // in - associated calendar
@@ -484,12 +484,12 @@
     // TODO:  use POSIX real-time function to get nanosecond resolution
     if (time(&tm) < 0) return (ESMF_FAILURE);
     wallClock = *localtime(&tm);          
-    ESMF_IKIND_I8 yr_i8 = wallClock.tm_year + 1900;
+    ESMF_KIND_I8 yr_i8 = wallClock.tm_year + 1900;
     int           mm    = wallClock.tm_mon + 1;
     int           dd    = wallClock.tm_mday;
     int           h     = wallClock.tm_hour;
     int           m     = wallClock.tm_min;
-    ESMF_IKIND_I8 s_i8  = wallClock.tm_sec;
+    ESMF_KIND_I8 s_i8  = wallClock.tm_sec;
 
     // set this time to wall clock time
     // TODO: use native C++ version when ready
@@ -539,9 +539,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 s,         // in - integer seconds
-      ESMF_IKIND_I4 sN,        // in - fractional seconds, numerator
-      ESMF_IKIND_I4 sD,        // in - fractional seconds, denominator
+      ESMF_KIND_I8 s,         // in - integer seconds
+      ESMF_KIND_I4 sN,        // in - fractional seconds, numerator
+      ESMF_KIND_I4 sD,        // in - fractional seconds, denominator
       ESMC_Calendar *calendar, // in - associated calendar
       int timeZone) {          // in - associated timezone
 //
@@ -582,9 +582,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 *s,          // out - integer seconds
-      ESMF_IKIND_I4 *sN,         // out - fractional seconds, numerator
-      ESMF_IKIND_I4 *sD,         // out - fractional seconds, denominator
+      ESMF_KIND_I8 *s,          // out - integer seconds
+      ESMF_KIND_I4 *sN,         // out - fractional seconds, numerator
+      ESMF_KIND_I4 *sD,         // out - fractional seconds, denominator
       ESMC_Calendar *calendar,   // out - associated calendar
       int *timeZone) const {     // out - associated timezone
 //
@@ -737,9 +737,9 @@
 //    none
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 s,          // in - integer seconds
-      ESMF_IKIND_I4 sN,         // in - fractional seconds, numerator
-      ESMF_IKIND_I4 sD,         // in - fractional seconds, denominator
+      ESMF_KIND_I8 s,          // in - integer seconds
+      ESMF_KIND_I4 sN,         // in - fractional seconds, numerator
+      ESMF_KIND_I4 sD,         // in - fractional seconds, denominator
       ESMC_Calendar *calendar,  // in - associated calendar
       int timeZone) :           // in - timezone
 //
@@ -806,9 +806,9 @@
     if (this->calendar->type == ESMC_CAL_JULIANDAY ||
         this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
-    ESMF_IKIND_I8 yr_i8, s_i8;
+    ESMF_KIND_I8 yr_i8, s_i8;
     int mm, dd;
-    ESMF_IKIND_I4 h, m; 
+    ESMF_KIND_I4 h, m; 
     // TODO: use native C++ Get, not F90 entry point, when ready
     ESMC_TimeGet(ESMC_NULL_POINTER, &yr_i8, &mm, &dd, ESMC_NULL_POINTER,
                  ESMC_NULL_POINTER, &h, &m, ESMC_NULL_POINTER, &s_i8);
@@ -846,7 +846,7 @@
     if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
 
     // date variables
-    ESMF_IKIND_I8 yr_i8;
+    ESMF_KIND_I8 yr_i8;
     int mm, dd;
 
     //  The day of the week is simply modulo 7 from a reference date,
@@ -885,7 +885,7 @@
     //  the reference date
     ESMC_TimeInterval delta;
     delta = *this - referenceMonday;
-    ESMF_IKIND_I8 diffDays;
+    ESMF_KIND_I8 diffDays;
     // TODO: use native C++ Get() when ready
     delta.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                ESMC_NULL_POINTER, ESMC_NULL_POINTER, 
@@ -964,7 +964,7 @@
     // TODO: use native C++ Get()/Set() when ready
 
     // get this date
-    ESMF_IKIND_I8 yr_i8;
+    ESMF_KIND_I8 yr_i8;
     int mm, dd;
     ESMC_TimeGet(ESMC_NULL_POINTER, &yr_i8, &mm, &dd);
 
@@ -1010,7 +1010,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I4 *dayOfYear) const {    // out - time's day of year value
+      ESMF_KIND_I4 *dayOfYear) const {    // out - time's day of year value
 //
 // !DESCRIPTION:
 //      Gets a {\tt Time}'s day of the year value as a integer value.
@@ -1029,7 +1029,7 @@
     if (ESMC_TimeGetDayOfYear(&yearDay) == ESMF_FAILURE) return(ESMF_FAILURE);
 
     // get difference in integer days
-    ESMF_IKIND_I8 diffDays;
+    ESMF_KIND_I8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
     yearDay.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1053,7 +1053,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_R8 *dayOfYear) const {    // out - time's day of year value
+      ESMF_KIND_R8 *dayOfYear) const {    // out - time's day of year value
 //
 // !DESCRIPTION:
 //      Gets a {\tt Time}'s day of the year value as a floating point value.
@@ -1075,7 +1075,7 @@
     if (ESMC_TimeGetDayOfYear(&yearDay) == ESMF_FAILURE) return(ESMF_FAILURE);
 
     // get difference in floating point days
-    ESMF_IKIND_R8 diffDays;
+    ESMF_KIND_R8 diffDays;
     // TODO: use native C++ Get, not F90 entry point
     yearDay.ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
@@ -1118,7 +1118,7 @@
         this->calendar->type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
     // get year of our (this) time
-    ESMF_IKIND_I8 yr_i8;
+    ESMF_KIND_I8 yr_i8;
     int mm, dd;
     // TODO: use native C++ Get, not F90 entry point
     ESMC_TimeGet(ESMC_NULL_POINTER, &yr_i8, &mm, &dd);

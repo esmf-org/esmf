@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.20 2003/08/29 22:04:03 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.21 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.20 2003/08/29 22:04:03 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.21 2003/09/04 18:57:56 cdeluca Exp $'
 
 !==============================================================================
 
@@ -131,9 +131,9 @@
       integer :: size_xy(2), size_x0(2)
       integer :: i, num_domains, counts(3)
       logical, dimension(:), pointer :: src_mask, dst_mask
-      real(ESMF_IKIND_R8), dimension(:), pointer :: src_center_x, src_center_y
-      real(ESMF_IKIND_R8), dimension(:,:), pointer :: centerCoordX, centerCoordY
-      real(ESMF_IKIND_R8), dimension(:,:,:), pointer :: center_coord
+      real(ESMF_KIND_R8), dimension(:), pointer :: src_center_x, src_center_y
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: centerCoordX, centerCoordY
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: center_coord
       real, dimension(ESMF_MAXGRIDDIM) :: dst_min, dst_max, src_min, src_max
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
@@ -207,7 +207,7 @@
       endif
 
       type = ESMF_DATA_REAL
-      kind = ESMF_KIND_R8
+      kind = ESMF_R8
       centerCoordArray = ESMF_LocalArrayCreate(3, type, kind, counts, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConsByFieldBilinear: LocalArrayCreate ", &
@@ -322,11 +322,11 @@
       size = src_size_x * src_size_y * 4
       size_x0(1) = size_xy(1)
       size_x0(2) = 1
-      tv%srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
+      tv%srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size, status)
-      tv%dstindex = ESMF_LocalArrayCreate(2, ESMF_DATA_INTEGER, ESMF_KIND_I4, &
+      tv%dstindex = ESMF_LocalArrayCreate(2, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size_xy, status) 
-      tv%weights  = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_KIND_R8, &
+      tv%weights  = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_R8, &
                                           size_x0, status)
  
       call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
@@ -378,11 +378,11 @@
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
-      real(ESMF_IKIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
-      real(ESMF_IKIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterY
+      real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
+      real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterY
       logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcMask
-      real(ESMF_IKIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterX
-      real(ESMF_IKIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterY
+      real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterX
+      real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterY
       logical, dimension(dstSizeX,dstSizeY), intent(in) :: dstMask
       integer, intent(out), optional :: rc
 !
@@ -435,7 +435,7 @@
          src_add,          &! address in gathered source grid (i,j,DE)
          dst_add            ! address in dest grid (i,j,DE)
          
-      real (ESMF_IKIND_R8) ::  &
+      real (ESMF_KIND_R8) ::  &
          lon_thresh,    &! threshold for checking longitude crossing
          lon_cycle,     &! 360 for degrees, 2pi for radians
          dx1, dx2, dx3, &! differences for iterative scheme
@@ -450,19 +450,19 @@
          sum_wts,       &
          zero, half, one, pi
 
-      real (ESMF_IKIND_R8), dimension(4) ::     &
+      real (ESMF_KIND_R8), dimension(4) ::     &
          src_x,        &! x coordinate of bilinear box corners
          src_y,        &! y coordinate of bilinear box corners
          weights        ! bilinear weights for single box
 
-      real (ESMF_IKIND_R8), dimension(:,:,:), allocatable :: &
+      real (ESMF_KIND_R8), dimension(:,:,:), allocatable :: &
          src_center_x,      &! cell center x-coord for gathered source grid
          src_center_y        ! cell center y-coord for gathered source grid
 
       integer, parameter :: &
          max_iter = 100   ! max iteration count for i,j iteration
 
-      real (ESMF_IKIND_R8), parameter :: &
+      real (ESMF_KIND_R8), parameter :: &
          converge = 1.e-10  ! convergence criterion
 
       ! Initialize return code

@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.14 2003/08/29 05:37:36 eschwab Exp $
+! $Id: InjectorMod.F90,v 1.15 2003/09/04 18:57:57 cdeluca Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -244,8 +244,8 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         type(ESMF_Field) :: thisfield
         type(ESMF_Field) :: local_sie, local_v, local_rho, local_flag
         type(ESMF_Array) :: array_sie, array_v, array_rho, array_flag
-        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_sie, data_v
-        real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: data_rho, data_flag
+        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_sie, data_v
+        real(kind=ESMF_KIND_R4), dimension(:,:), pointer :: data_rho, data_flag
         type(ESMF_Time) :: currtime
         type(injectdata), pointer :: datablock
         type(wrapper) :: wrap

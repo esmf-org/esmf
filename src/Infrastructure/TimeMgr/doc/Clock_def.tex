@@ -1,4 +1,4 @@
-% $Id: Clock_def.tex,v 1.2 2003/02/11 18:58:55 eschwab Exp $
+% $Id: Clock_def.tex,v 1.3 2003/09/04 18:57:56 cdeluca Exp $
 \begin{verbatim}
       type ESMF_Clock
       sequence
@@ -9,7 +9,7 @@
         type(ESMF_Time)  :: RefTime
         type(ESMF_Time)  :: CurrTime
         type(ESMF_Time)  :: PrevTime
-        integer(ESMF_IKIND_I8) :: AdvanceCount
+        integer(ESMF_KIND_I8) :: AdvanceCount
         type(ESMF_Alarm), dimension(MAX_ALARMS) :: AlarmList
         integer :: NumAlarms
         integer :: ClockMutex

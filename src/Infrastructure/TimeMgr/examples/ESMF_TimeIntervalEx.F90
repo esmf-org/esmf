@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.9 2003/08/30 00:05:41 eschwab Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.10 2003/09/04 18:57:56 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.9 2003/08/30 00:05:41 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.10 2003/09/04 18:57:56 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals
@@ -38,7 +38,7 @@
 
       ! temp variables
       integer :: D, H, M, S
-      integer(ESMF_IKIND_I8) :: Dl, Sl
+      integer(ESMF_KIND_I8) :: Dl, Sl
       double precision :: quotient, divisor, multiplier 
       type(ESMF_TimeInterval) :: remainder
 

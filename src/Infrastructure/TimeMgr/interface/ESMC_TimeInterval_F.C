@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval_F.C,v 1.19 2003/08/29 05:31:58 eschwab Exp $
+// $Id: ESMC_TimeInterval_F.C,v 1.20 2003/09/04 18:57:56 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,18 +34,18 @@
 extern "C" {
 
        void FTN(c_esmc_timeintervalset)(ESMC_TimeInterval *ptr,
-                                 ESMF_IKIND_I4 *yy, ESMF_IKIND_I8 *yy_i8,
-                                 ESMF_IKIND_I4 *mo, ESMF_IKIND_I8 *mo_i8,
-                                 ESMF_IKIND_I4 *d,  ESMF_IKIND_I8 *d_i8,
-                                 ESMF_IKIND_I4 *h,  ESMF_IKIND_I4 *m,
-                                 ESMF_IKIND_I4 *s,  ESMF_IKIND_I8 *s_i8,
-                                 ESMF_IKIND_I4 *ms, ESMF_IKIND_I4 *us,
-                                 ESMF_IKIND_I4 *ns,
-                                 ESMF_IKIND_R8 *d_r8,  ESMF_IKIND_R8 *h_r8,
-                                 ESMF_IKIND_R8 *m_r8,  ESMF_IKIND_R8 *s_r8,
-                                 ESMF_IKIND_R8 *ms_r8, ESMF_IKIND_R8 *us_r8,
-                                 ESMF_IKIND_R8 *ns_r8,
-                                 ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mo, ESMF_KIND_I8 *mo_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                                  int *status) {
           int rc = (ptr)->ESMC_TimeIntervalSet(yy, yy_i8, mo, mo_i8, d, d_i8,
                                                h, m, s, s_i8, ms, us, ns,
@@ -55,18 +55,18 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalget)(ESMC_TimeInterval *ptr,
-                                 ESMF_IKIND_I4 *yy, ESMF_IKIND_I8 *yy_i8,
-                                 ESMF_IKIND_I4 *mo, ESMF_IKIND_I8 *mo_i8,
-                                 ESMF_IKIND_I4 *d,  ESMF_IKIND_I8 *d_i8,
-                                 ESMF_IKIND_I4 *h,  ESMF_IKIND_I4 *m,
-                                 ESMF_IKIND_I4 *s,  ESMF_IKIND_I8 *s_i8,
-                                 ESMF_IKIND_I4 *ms, ESMF_IKIND_I4 *us,
-                                 ESMF_IKIND_I4 *ns,
-                                 ESMF_IKIND_R8 *d_r8,  ESMF_IKIND_R8 *h_r8,
-                                 ESMF_IKIND_R8 *m_r8,  ESMF_IKIND_R8 *s_r8,
-                                 ESMF_IKIND_R8 *ms_r8, ESMF_IKIND_R8 *us_r8,
-                                 ESMF_IKIND_R8 *ns_r8,
-                                 ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
+                                 ESMF_KIND_I4 *yy, ESMF_KIND_I8 *yy_i8,
+                                 ESMF_KIND_I4 *mo, ESMF_KIND_I8 *mo_i8,
+                                 ESMF_KIND_I4 *d,  ESMF_KIND_I8 *d_i8,
+                                 ESMF_KIND_I4 *h,  ESMF_KIND_I4 *m,
+                                 ESMF_KIND_I4 *s,  ESMF_KIND_I8 *s_i8,
+                                 ESMF_KIND_I4 *ms, ESMF_KIND_I4 *us,
+                                 ESMF_KIND_I4 *ns,
+                                 ESMF_KIND_R8 *d_r8,  ESMF_KIND_R8 *h_r8,
+                                 ESMF_KIND_R8 *m_r8,  ESMF_KIND_R8 *s_r8,
+                                 ESMF_KIND_R8 *ms_r8, ESMF_KIND_R8 *us_r8,
+                                 ESMF_KIND_R8 *ns_r8,
+                                 ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
                                  char *timeString, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalGet(yy, yy_i8, mo, mo_i8, d, d_i8, 
                                                h, m, s, s_i8, ms, us, ns,
@@ -95,7 +95,7 @@ extern "C" {
 
        void FTN(c_esmc_timeintervalrquot)(ESMC_TimeInterval *timeInterval1,
                                           ESMC_TimeInterval *timeInterval2,
-                                          ESMF_IKIND_R8 *timeIntervalRQuot) {
+                                          ESMF_KIND_R8 *timeIntervalRQuot) {
            *timeIntervalRQuot = (*timeInterval1 / *timeInterval2);
        }
 
@@ -106,19 +106,19 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalquoti)(ESMC_TimeInterval *timeInterval,
-                                        ESMF_IKIND_I4 *divisor,
+                                        ESMF_KIND_I4 *divisor,
                                         ESMC_TimeInterval *timeIntervalQuotI) {
            *timeIntervalQuotI = (*timeInterval / *divisor);
        }
 
        void FTN(c_esmc_timeintervalquotr)(ESMC_TimeInterval *timeInterval,
-                                        ESMF_IKIND_R8 *divisor,
+                                        ESMF_KIND_R8 *divisor,
                                         ESMC_TimeInterval *timeIntervalQuotR) {
            *timeIntervalQuotR = (*timeInterval / *divisor);
        }
 
        void FTN(c_esmc_timeintervalprodi)(ESMC_TimeInterval *timeInterval,
-                                        ESMF_IKIND_I4 *multiplier,
+                                        ESMF_KIND_I4 *multiplier,
                                         ESMC_TimeInterval *timeIntervalProdI) {
            *timeIntervalProdI = (*timeInterval * *multiplier);
        }
@@ -130,26 +130,26 @@ extern "C" {
        }
 
        void FTN(c_esmc_timeintervalprodr)(ESMC_TimeInterval *timeInterval,
-                                        ESMF_IKIND_R8 *multiplier,
+                                        ESMF_KIND_R8 *multiplier,
                                         ESMC_TimeInterval *timeIntervalProdR) {
            *timeIntervalProdR = (*timeInterval * *multiplier);
        }
 
        void FTN(c_esmc_timeintervalreadrestart)(ESMC_TimeInterval *ptr,
-                                           ESMF_IKIND_I8 *s,
-                                           ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
-                                           ESMF_IKIND_I8 *yy, ESMF_IKIND_I8 *mo,
-                                           ESMF_IKIND_I8 *d, int *status) {
+                                           ESMF_KIND_I8 *s,
+                                           ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                           ESMF_KIND_I8 *yy, ESMF_KIND_I8 *mo,
+                                           ESMF_KIND_I8 *d, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalReadRestart(*s, *sN, *sD,
                                                        *yy, *mo, *d);
           if (status != ESMC_NULL_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_timeintervalwriterestart)(ESMC_TimeInterval *ptr,
-                                           ESMF_IKIND_I8 *s, 
-                                           ESMF_IKIND_I4 *sN, ESMF_IKIND_I4 *sD,
-                                           ESMF_IKIND_I8 *yy, ESMF_IKIND_I8 *mo,
-                                           ESMF_IKIND_I8 *d, int *status) {
+                                           ESMF_KIND_I8 *s, 
+                                           ESMF_KIND_I4 *sN, ESMF_KIND_I4 *sD,
+                                           ESMF_KIND_I8 *yy, ESMF_KIND_I8 *mo,
+                                           ESMF_KIND_I8 *d, int *status) {
           int rc = (ptr)->ESMC_TimeIntervalWriteRestart(s, sN, sD, yy, mo, d);
           if (status != ESMC_NULL_POINTER) *status = rc;
        }

@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.34 2003/09/03 20:47:23 cdeluca Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.35 2003/09/04 18:57:57 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,9 +63,9 @@
       sequence                             ! match C++ storage order
       private                              !   (members opaque on F90 side)
         type(ESMF_BaseTime)    :: baseTime ! inherit base class
-        integer(ESMF_IKIND_I8) :: yy       ! calendar interval number of years
-        integer(ESMF_IKIND_I8) :: mo       ! calendar interval number of months
-        integer(ESMF_IKIND_I8) :: d        ! calendar interval number of days
+        integer(ESMF_KIND_I8) :: yy       ! calendar interval number of years
+        integer(ESMF_KIND_I8) :: mo       ! calendar interval number of months
+        integer(ESMF_KIND_I8) :: d        ! calendar interval number of days
       end type
 
 !------------------------------------------------------------------------------
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.34 2003/09/03 20:47:23 cdeluca Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.35 2003/09/04 18:57:57 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -355,28 +355,28 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout)         :: timeInterval
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: yy
-      integer(ESMF_IKIND_I8),  intent(in),  optional :: yy_i8
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: mo
-      integer(ESMF_IKIND_I8),  intent(in),  optional :: mo_i8
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: d
-      integer(ESMF_IKIND_I8),  intent(in),  optional :: d_i8
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: h
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: m
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: s
-      integer(ESMF_IKIND_I8),  intent(in),  optional :: s_i8
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: ms
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: us
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: ns
-      real(ESMF_IKIND_R8),     intent(in),  optional :: d_r8
-      real(ESMF_IKIND_R8),     intent(in),  optional :: h_r8
-      real(ESMF_IKIND_R8),     intent(in),  optional :: m_r8
-      real(ESMF_IKIND_R8),     intent(in),  optional :: s_r8
-      real(ESMF_IKIND_R8),     intent(in),  optional :: ms_r8
-      real(ESMF_IKIND_R8),     intent(in),  optional :: us_r8
-      real(ESMF_IKIND_R8),     intent(in),  optional :: ns_r8
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: sN
-      integer(ESMF_IKIND_I4),  intent(in),  optional :: sD
+      integer(ESMF_KIND_I4),  intent(in),  optional :: yy
+      integer(ESMF_KIND_I8),  intent(in),  optional :: yy_i8
+      integer(ESMF_KIND_I4),  intent(in),  optional :: mo
+      integer(ESMF_KIND_I8),  intent(in),  optional :: mo_i8
+      integer(ESMF_KIND_I4),  intent(in),  optional :: d
+      integer(ESMF_KIND_I8),  intent(in),  optional :: d_i8
+      integer(ESMF_KIND_I4),  intent(in),  optional :: h
+      integer(ESMF_KIND_I4),  intent(in),  optional :: m
+      integer(ESMF_KIND_I4),  intent(in),  optional :: s
+      integer(ESMF_KIND_I8),  intent(in),  optional :: s_i8
+      integer(ESMF_KIND_I4),  intent(in),  optional :: ms
+      integer(ESMF_KIND_I4),  intent(in),  optional :: us
+      integer(ESMF_KIND_I4),  intent(in),  optional :: ns
+      real(ESMF_KIND_R8),     intent(in),  optional :: d_r8
+      real(ESMF_KIND_R8),     intent(in),  optional :: h_r8
+      real(ESMF_KIND_R8),     intent(in),  optional :: m_r8
+      real(ESMF_KIND_R8),     intent(in),  optional :: s_r8
+      real(ESMF_KIND_R8),     intent(in),  optional :: ms_r8
+      real(ESMF_KIND_R8),     intent(in),  optional :: us_r8
+      real(ESMF_KIND_R8),     intent(in),  optional :: ns_r8
+      integer(ESMF_KIND_I4),  intent(in),  optional :: sN
+      integer(ESMF_KIND_I4),  intent(in),  optional :: sD
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -470,28 +470,28 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)            :: timeInterval
-      integer(ESMF_IKIND_I4),  intent(out), optional :: yy
-      integer(ESMF_IKIND_I8),  intent(out), optional :: yy_i8
-      integer(ESMF_IKIND_I4),  intent(out), optional :: mo
-      integer(ESMF_IKIND_I8),  intent(out), optional :: mo_i8
-      integer(ESMF_IKIND_I4),  intent(out), optional :: d
-      integer(ESMF_IKIND_I8),  intent(out), optional :: d_i8
-      integer(ESMF_IKIND_I4),  intent(out), optional :: h
-      integer(ESMF_IKIND_I4),  intent(out), optional :: m
-      integer(ESMF_IKIND_I4),  intent(out), optional :: s
-      integer(ESMF_IKIND_I8),  intent(out), optional :: s_i8
-      integer(ESMF_IKIND_I4),  intent(out), optional :: ms
-      integer(ESMF_IKIND_I4),  intent(out), optional :: us
-      integer(ESMF_IKIND_I4),  intent(out), optional :: ns
-      real(ESMF_IKIND_R8),     intent(out), optional :: d_r8
-      real(ESMF_IKIND_R8),     intent(out), optional :: h_r8
-      real(ESMF_IKIND_R8),     intent(out), optional :: m_r8
-      real(ESMF_IKIND_R8),     intent(out), optional :: s_r8
-      real(ESMF_IKIND_R8),     intent(out), optional :: ms_r8
-      real(ESMF_IKIND_R8),     intent(out), optional :: us_r8
-      real(ESMF_IKIND_R8),     intent(out), optional :: ns_r8
-      integer(ESMF_IKIND_I4),  intent(out), optional :: sN
-      integer(ESMF_IKIND_I4),  intent(out), optional :: sD
+      integer(ESMF_KIND_I4),  intent(out), optional :: yy
+      integer(ESMF_KIND_I8),  intent(out), optional :: yy_i8
+      integer(ESMF_KIND_I4),  intent(out), optional :: mo
+      integer(ESMF_KIND_I8),  intent(out), optional :: mo_i8
+      integer(ESMF_KIND_I4),  intent(out), optional :: d
+      integer(ESMF_KIND_I8),  intent(out), optional :: d_i8
+      integer(ESMF_KIND_I4),  intent(out), optional :: h
+      integer(ESMF_KIND_I4),  intent(out), optional :: m
+      integer(ESMF_KIND_I4),  intent(out), optional :: s
+      integer(ESMF_KIND_I8),  intent(out), optional :: s_i8
+      integer(ESMF_KIND_I4),  intent(out), optional :: ms
+      integer(ESMF_KIND_I4),  intent(out), optional :: us
+      integer(ESMF_KIND_I4),  intent(out), optional :: ns
+      real(ESMF_KIND_R8),     intent(out), optional :: d_r8
+      real(ESMF_KIND_R8),     intent(out), optional :: h_r8
+      real(ESMF_KIND_R8),     intent(out), optional :: m_r8
+      real(ESMF_KIND_R8),     intent(out), optional :: s_r8
+      real(ESMF_KIND_R8),     intent(out), optional :: ms_r8
+      real(ESMF_KIND_R8),     intent(out), optional :: us_r8
+      real(ESMF_KIND_R8),     intent(out), optional :: ns_r8
+      integer(ESMF_KIND_I4),  intent(out), optional :: sN
+      integer(ESMF_KIND_I4),  intent(out), optional :: sD
       character (len=*),       intent(out), optional :: timeString
       integer,                 intent(out), optional :: rc
 
@@ -695,7 +695,7 @@
       function ESMF_TimeIntervalRQuot(timeInterval1, timeInterval2)
 
 ! !RETURN VALUE:
-      real(ESMF_IKIND_R8) :: ESMF_TimeIntervalRQuot
+      real(ESMF_KIND_R8) :: ESMF_TimeIntervalRQuot
 
 ! !ARGUMENTS: 
       type(ESMF_TimeInterval), intent(in) :: timeInterval1
@@ -769,7 +769,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
-      integer(ESMF_IKIND_I4),  intent(in) :: divisor
+      integer(ESMF_KIND_I4),  intent(in) :: divisor
 
 ! !DESCRIPTION:
 !     Divides {\tt timeInterval} by an integer {\tt divisor}, and returns
@@ -804,7 +804,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
-      real(ESMF_IKIND_R8),     intent(in) :: divisor
+      real(ESMF_KIND_R8),     intent(in) :: divisor
 
 ! !DESCRIPTION:
 !     Divides {\tt timeInterval} by a double precision {\tt divisor}, 
@@ -839,7 +839,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
-      integer(ESMF_IKIND_I4),  intent(in) :: multiplier
+      integer(ESMF_KIND_I4),  intent(in) :: multiplier
 
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
@@ -908,7 +908,7 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in) :: timeInterval
-      real(ESMF_IKIND_R8),     intent(in) :: multiplier
+      real(ESMF_KIND_R8),     intent(in) :: multiplier
 
 ! !DESCRIPTION:
 !     Multiplies {\tt timeInterval} by a double precision 
@@ -1238,12 +1238,12 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(out) :: timeInterval
-      integer(ESMF_IKIND_I8),  intent(in)  :: s
-      integer(ESMF_IKIND_I4),  intent(in)  :: sN
-      integer(ESMF_IKIND_I4),  intent(in)  :: sD
-      integer(ESMF_IKIND_I8),  intent(in)  :: yy
-      integer(ESMF_IKIND_I8),  intent(in)  :: mo
-      integer(ESMF_IKIND_I8),  intent(in)  :: d 
+      integer(ESMF_KIND_I8),  intent(in)  :: s
+      integer(ESMF_KIND_I4),  intent(in)  :: sN
+      integer(ESMF_KIND_I4),  intent(in)  :: sD
+      integer(ESMF_KIND_I8),  intent(in)  :: yy
+      integer(ESMF_KIND_I8),  intent(in)  :: mo
+      integer(ESMF_KIND_I8),  intent(in)  :: d 
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1288,12 +1288,12 @@
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(in)  :: timeInterval
-      integer(ESMF_IKIND_I8),  intent(out) :: s
-      integer(ESMF_IKIND_I4),  intent(out) :: sN
-      integer(ESMF_IKIND_I4),  intent(out) :: sD
-      integer(ESMF_IKIND_I8),  intent(out) :: yy
-      integer(ESMF_IKIND_I8),  intent(out) :: mo
-      integer(ESMF_IKIND_I8),  intent(out) :: d 
+      integer(ESMF_KIND_I8),  intent(out) :: s
+      integer(ESMF_KIND_I4),  intent(out) :: sN
+      integer(ESMF_KIND_I4),  intent(out) :: sD
+      integer(ESMF_KIND_I8),  intent(out) :: yy
+      integer(ESMF_KIND_I8),  intent(out) :: mo
+      integer(ESMF_KIND_I8),  intent(out) :: d 
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
