@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.55 2004/07/22 14:46:11 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.56 2004/11/01 23:38:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,6 +109,13 @@ enum ESMC_DataKind { ESMF_I1=1,
 #ifndef MIN
 #define MIN(a,b)  (((a)<(b))?(a):(b))
 #endif
+
+// unique id/name string for all esmf objects.
+typedef struct ESMC_ObjectID { 
+   int objectID; 
+   char objectName[32]; 
+} ESMC_ObjectID;
+
 
 // Single Attribute, (name, value) pair which can contain:
 //  int / Integer*4, single value or list

@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.42 2004/07/22 14:46:11 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.43 2004/11/01 23:38:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,11 +35,49 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.42 2004/07/22 14:46:11 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.43 2004/11/01 23:38:45 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
 static int globalCount = 0;
+
+// define constants once to avoid duplicate instantiations
+ESMC_ObjectID ESMC_ID_BASE = {1, "ESMF_Base"};
+ESMC_ObjectID ESMC_ID_IOSPEC = {2, "ESMF_IOSpec"};
+ESMC_ObjectID ESMC_ID_LOGERR = {3, "ESMF_LogErr"};
+ESMC_ObjectID ESMC_ID_TIME = {4, "ESMF_Time"};
+ESMC_ObjectID ESMC_ID_CALENDAR = {5, "ESMF_Calendar"};
+ESMC_ObjectID ESMC_ID_TIMEINTERVAL = {6, "ESMF_TimeInterval"};
+ESMC_ObjectID ESMC_ID_ALARM = {7, "ESMF_Alarm"};
+ESMC_ObjectID ESMC_ID_CLOCK = {8, "ESMF_Clock"};
+ESMC_ObjectID ESMC_ID_ARRAYSPEC = {9, "ESMF_ArraySpec"};
+ESMC_ObjectID ESMC_ID_LOCALARRAY = {10, "ESMF_LocalArray"};
+ESMC_ObjectID ESMC_ID_ARRAYDATAMAP = {11, "ESMF_ArrayDataMap"};
+ESMC_ObjectID ESMC_ID_VM = {12, "ESMF_VM"};
+ESMC_ObjectID ESMC_ID_DELAYOUT = {13, "ESMF_DELayout"};
+ESMC_ObjectID ESMC_ID_CONFIG = {14, "ESMF_Config"};
+ESMC_ObjectID ESMC_ID_PERFPROF = {15, "ESMF_PerfProf"};
+ESMC_ObjectID ESMC_ID_ARRAY = {16, "ESMF_Array"};
+ESMC_ObjectID ESMC_ID_DISTGRID = {17, "ESMF_DistGrid"};
+ESMC_ObjectID ESMC_ID_PHYSGRID = {18, "ESMF_PhysGrid"};
+ESMC_ObjectID ESMC_ID_GRID = {19, "ESMF_Grid"};
+ESMC_ObjectID ESMC_ID_EXCHANGEPACKET = {20, "ESMF_ExchangePacket"};
+ESMC_ObjectID ESMC_ID_COMMTABLE = {21, "ESMF_CommTable"};
+ESMC_ObjectID ESMC_ID_ROUTETABLE = {22, "ESMF_RouteTable"};
+ESMC_ObjectID ESMC_ID_ROUTE = {23, "ESMF_Route"};
+ESMC_ObjectID ESMC_ID_ROUTEHANDLE = {24, "ESMF_RouteHandle"};
+ESMC_ObjectID ESMC_ID_FIELDDATAMAP = {25, "ESMF_FieldDataMap"};
+ESMC_ObjectID ESMC_ID_FIELD = {26, "ESMF_Field"};
+ESMC_ObjectID ESMC_ID_BUNDLEDATAMAP = {27, "ESMF_BundleDataMap"};
+ESMC_ObjectID ESMC_ID_BUNDLE = {28, "ESMF_Bundle"};
+ESMC_ObjectID ESMC_ID_TRANSFORMVALUES = {29, "ESMF_TransformValues"};
+ESMC_ObjectID ESMC_ID_REGRID = {30, "ESMF_Regrid"};
+ESMC_ObjectID ESMC_ID_TRANSFORM = {31, "ESMF_Transform"};
+ESMC_ObjectID ESMC_ID_STATE = {32, "ESMF_State"};
+ESMC_ObjectID ESMC_ID_GRIDCOMPONENT = {33, "ESMF_GridComponent"};
+ESMC_ObjectID ESMC_ID_CPLCOMPONENT = {34, "ESMF_CplComponent"};
+ESMC_ObjectID ESMC_ID_COMPONENT = {35, "ESMF_Component"};
+ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 
 //
 //-----------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTypes.F90,v 1.7 2004/10/19 17:34:59 nscollins Exp $
+! $Id: ESMF_BaseTypes.F90,v 1.8 2004/11/01 23:38:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -190,6 +190,58 @@
 
 !------------------------------------------------------------------------------
 !
+!    ! Integer object type id, one for each ESMF Object type 
+!    ! plus a string "official" object name.   Keep this in sync
+!    ! with the C++ version!!
+
+      type ESMF_ObjectID
+      sequence
+      !private
+          integer :: objectID
+          character (len=32) :: objectName
+      end type
+
+      ! these work well for internal ESMF use, arguments, etc
+      type(ESMF_ObjectID), parameter :: &
+         ESMF_ID_BASE = ESMF_ObjectID(1, "ESMF_Base"), &
+         ESMF_ID_IOSPEC = ESMF_ObjectID(2, "ESMF_IOSpec"), &
+         ESMF_ID_LOGERR = ESMF_ObjectID(3, "ESMF_LogErr"), &
+         ESMF_ID_TIME = ESMF_ObjectID(4, "ESMF_Time"), &
+         ESMF_ID_CALENDAR = ESMF_ObjectID(5, "ESMF_Calendar"), &
+         ESMF_ID_TIMEINTERVAL = ESMF_ObjectID(6, "ESMF_TimeInterval"), &
+         ESMF_ID_ALARM = ESMF_ObjectID(7, "ESMF_Alarm"), &
+         ESMF_ID_CLOCK = ESMF_ObjectID(8, "ESMF_Clock"), &
+         ESMF_ID_ARRAYSPEC = ESMF_ObjectID(9, "ESMF_ArraySpec"), &
+         ESMF_ID_LOCALARRAY = ESMF_ObjectID(10, "ESMF_LocalArray"), &
+         ESMF_ID_ARRAYDATAMAP = ESMF_ObjectID(11, "ESMF_ArrayDataMap"), &
+         ESMF_ID_VM = ESMF_ObjectID(12, "ESMF_VM"), &
+         ESMF_ID_DELAYOUT = ESMF_ObjectID(13, "ESMF_DELayout"), &
+         ESMF_ID_CONFIG = ESMF_ObjectID(14, "ESMF_Config"), &
+         ESMF_ID_PERFPROF = ESMF_ObjectID(15, "ESMF_PerfProf"), &
+         ESMF_ID_ARRAY = ESMF_ObjectID(16, "ESMF_Array"), &
+         ESMF_ID_DISTGRID = ESMF_ObjectID(17, "ESMF_DistGrid"), &
+         ESMF_ID_PHYSGRID = ESMF_ObjectID(18, "ESMF_PhysGrid"), &
+         ESMF_ID_GRID = ESMF_ObjectID(19, "ESMF_Grid"), &
+         ESMF_ID_EXCHANGEPACKET = ESMF_ObjectID(20, "ESMF_ExchangePacket"), &
+         ESMF_ID_COMMTABLE = ESMF_ObjectID(21, "ESMF_CommTable"), &
+         ESMF_ID_ROUTETABLE = ESMF_ObjectID(22, "ESMF_RouteTable"), &
+         ESMF_ID_ROUTE = ESMF_ObjectID(23, "ESMF_Route"), &
+         ESMF_ID_ROUTEHANDLE = ESMF_ObjectID(24, "ESMF_RouteHandle"), &
+         ESMF_ID_FIELDDATAMAP = ESMF_ObjectID(25, "ESMF_FieldDataMap"), &
+         ESMF_ID_FIELD = ESMF_ObjectID(26, "ESMF_Field"), &
+         ESMF_ID_BUNDLEDATAMAP = ESMF_ObjectID(27, "ESMF_BundleDataMap"), &
+         ESMF_ID_BUNDLE = ESMF_ObjectID(28, "ESMF_Bundle"), &
+         ESMF_ID_TRANSFORMVALUES = ESMF_ObjectID(29, "ESMF_TransformValues"), &
+         ESMF_ID_REGRID = ESMF_ObjectID(30, "ESMF_Regrid"), &
+         ESMF_ID_TRANSFORM = ESMF_ObjectID(31, "ESMF_Transform"), &
+         ESMF_ID_STATE = ESMF_ObjectID(32, "ESMF_State"), &
+         ESMF_ID_GRIDCOMPONENT = ESMF_ObjectID(33, "ESMF_GridComponent"), &
+         ESMF_ID_CPLCOMPONENT = ESMF_ObjectID(34, "ESMF_CplComponent"), &
+         ESMF_ID_COMPONENT = ESMF_ObjectID(35, "ESMF_Component"), &
+         ESMF_ID_NONE = ESMF_ObjectID(99, "ESMF_None")
+
+!------------------------------------------------------------------------------
+!
 !    ! Dummy structure which must just be big enough to hold the values.
 !    ! actual data values will always be accessed on the C++ side.
 
@@ -330,6 +382,19 @@
       public ESMF_MAJOR_VERSION, ESMF_MINOR_VERSION
       public ESMF_REVISION, ESMF_PATCHLEVEL
       public ESMF_VERSION_STRING 
+
+      public ESMF_ObjectID, ESMF_ID_NONE
+      public ESMF_ID_BASE, ESMF_ID_IOSPEC, ESMF_ID_LOGERR, ESMF_ID_TIME
+      public ESMF_ID_CALENDAR, ESMF_ID_TIMEINTERVAL, ESMF_ID_ALARM
+      public ESMF_ID_CLOCK, ESMF_ID_ARRAYSPEC, ESMF_ID_LOCALARRAY
+      public ESMF_ID_ARRAYDATAMAP, ESMF_ID_VM, ESMF_ID_DELAYOUT
+      public ESMF_ID_CONFIG, ESMF_ID_PERFPROF, ESMF_ID_ARRAY, ESMF_ID_DISTGRID
+      public ESMF_ID_PHYSGRID, ESMF_ID_GRID, ESMF_ID_EXCHANGEPACKET
+      public ESMF_ID_COMMTABLE, ESMF_ID_ROUTETABLE, ESMF_ID_ROUTE
+      public ESMF_ID_ROUTEHANDLE, ESMF_ID_FIELDDATAMAP, ESMF_ID_FIELD
+      public ESMF_ID_BUNDLEDATAMAP, ESMF_ID_BUNDLE, ESMF_ID_TRANSFORMVALUES
+      public ESMF_ID_REGRID, ESMF_ID_TRANSFORM, ESMF_ID_STATE
+      public ESMF_ID_GRIDCOMPONENT, ESMF_ID_CPLCOMPONENT, ESMF_ID_COMPONENT
 
       public ESMF_Base
       public ESMF_Status, ESMF_Pointer, ESMF_DataType, ESMF_DataKind
