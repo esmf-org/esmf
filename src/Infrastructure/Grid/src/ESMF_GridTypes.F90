@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.15 2004/03/17 01:42:26 cdeluca Exp $
+! $Id: ESMF_GridTypes.F90,v 1.16 2004/03/17 03:04:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -249,7 +249,7 @@
     
     public ESMF_GridConstructNew
     public ESMF_GridGetDELayout
-    public ESMF_GridAddAttributes
+    public ESMF_GridAddAttribute
     public ESMF_GridGetAttributes
     public ESMF_GridAddDistGrid
     public ESMF_GridMakeDistGridSpace
@@ -410,7 +410,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.15 2004/03/17 01:42:26 cdeluca Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.16 2004/03/17 03:04:11 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -597,10 +597,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridAddAttributes - sets some attributes of Grid
+! !IROUTINE: ESMF_GridAddAttribute - sets some attributes of Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddAttributes(grid,  name,            &
+      subroutine ESMF_GridAddAttribute(grid,  name,            &
                               horzGridKind,    vertGridKind,    &
                               horzStagger,     vertStagger,     &
                               horzCoordSystem, vertCoordSystem, &
@@ -715,7 +715,7 @@
       if (present(name)) then
          call ESMF_SetName(grid%ptr%base, name, "Grid", status)
          if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridAddAttributes: Setname"
+            print *, "ERROR in ESMF_GridAddAttribute: Setname"
             return
          endif
       endif
@@ -745,7 +745,7 @@
 !     Set global domain limits
       if (present(minGlobalCoordPerDim)) then
          if (size(minGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridAddAttributes: minGlobalCoordPerDim too big'
+            print *,'ESMF_GridAddAttribute: minGlobalCoordPerDim too big'
             return
          endif
          do i=1,size(minGlobalCoordPerDim)
@@ -754,7 +754,7 @@
       endif
       if (present(maxGlobalCoordPerDim)) then
          if (size(maxGlobalCoordPerDim) > ESMF_MAXGRIDDIM) then
-            print *,'ESMF_GridAddAttributes: maxGlobalCoordPerDim too big'
+            print *,'ESMF_GridAddAttribute: maxGlobalCoordPerDim too big'
             return
          endif
          do i=1,size(maxGlobalCoordPerDim)
@@ -764,7 +764,7 @@
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridAddAttributes
+      end subroutine ESMF_GridAddAttribute
 
 !------------------------------------------------------------------------------
 !BOP
