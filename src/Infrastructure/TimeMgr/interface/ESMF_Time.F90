@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.41 2003/09/03 17:50:50 cdeluca Exp $
+! $Id: ESMF_Time.F90,v 1.42 2003/09/03 18:41:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.41 2003/09/03 17:50:50 cdeluca Exp $'
+      '$Id: ESMF_Time.F90,v 1.42 2003/09/03 18:41:03 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -264,7 +264,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeSet - Initialize via user-specified unit set
+! !IROUTINE: ESMF_TimeSet - Initialize or set a Time
 
 ! !INTERFACE:
       subroutine ESMF_TimeSet(time, yr, yr_i8, &
@@ -383,7 +383,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGet - Get Time value in user-specified units
+! !IROUTINE: ESMF_TimeGet - Get a Time value 
 
 ! !INTERFACE:
       subroutine ESMF_TimeGet(time, yr, yr_i8, &
@@ -436,7 +436,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Gets the value of the Time in units specified by the user
+!     Gets the value of {\tt time} in units specified by the user
 !     via F90 optional arguments.
 !
 !     The ESMF Time Manager represents and manipulates time internally with 
@@ -723,9 +723,10 @@
 
 ! !DESCRIPTION:
 !     Returns the difference between {\tt time1} and {\tt time2} as
-!     an {\tt ESMF\_TimeInterval}.  It is assumed that {\tt time2} is
-!     later than {\tt time1}; if not, the resulting {\tt ESMF_TimeInterval} 
-!     will have a negative value.
+!     an {\tt ESMF\_TimeInterval}.  It is assumed that {\tt time1} is
+!     later than {\tt time2}; if not, the resulting {\tt ESMF_TimeInterval} 
+!     will have a negative value.  This method is overloaded with the
+!     (-) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -760,7 +761,7 @@
 !
 ! !DESCRIPTION:
 !     Returns true if {\tt time1} and {\tt time2} are equal, false
-!     otherwise.  This method is overloaded with the = operator.
+!     otherwise.  This method is overloaded with the (==) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -795,7 +796,7 @@
 
 ! !DESCRIPTION:
 !     Returns true if {\tt time1} and {\tt time2} are not equal, false
-!     otherwise.  This method is overloaded with the != operator.
+!     otherwise.  This method is overloaded with the (!=) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -830,7 +831,7 @@
 !
 ! !DESCRIPTION:
 !     Returns true if {\tt time1} is less than {\tt time2}, false 
-!     otherwise.  This method is overloaded with the < operator.  
+!     otherwise.  This method is overloaded with the (<) operator.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -865,7 +866,7 @@
 !
 ! !DESCRIPTION:
 !     Returns true if {\tt time1} is greater than {\tt time2}, false
-!     otherwise.  This method is overloaded with the > operator.   
+!     otherwise.  This method is overloaded with the (>) operator.   
 !
 !     The arguments are:
 !     \begin{description}
@@ -901,7 +902,7 @@
 ! !DESCRIPTION:
 !     Returns true if {\tt time1} is less than or equal to
 !     {\tt time2}, false otherwise.  This method is overloaded with
-!     the <= operator.
+!     the (<=) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -937,7 +938,7 @@
 ! !DESCRIPTION:
 !     Returns true if {\tt time1} is greater than or equal to
 !     {\tt time2}, false otherwise.  This method is overloaded with
-!     the >= operator.
+!     the (>=) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -963,7 +964,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeReadRestart - Restore the attributes of a Time
+! !IROUTINE:  ESMF_TimeReadRestart - Restore the contents of a Time
 
 ! !INTERFACE:
       subroutine ESMF_TimeReadRestart(time, s, sN, sD, calendar, timeZone, rc)
@@ -978,7 +979,7 @@
       integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Restores an {\tt ESMF\_Time} exactly.
+!     Restores the contents of an {\tt ESMF\_Time} exactly.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1023,7 +1024,7 @@
       integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Saves the atttributes of an {\tt ESMF\_Time}.
+!     Saves the contents of an {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1086,7 +1087,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimePrint - Print the attributes of a Time 
+! !IROUTINE:  ESMF_TimePrint - Print the contents of a Time 
 
 ! !INTERFACE:
       subroutine ESMF_TimePrint(time, options, rc)
@@ -1098,7 +1099,7 @@
 
 ! !DESCRIPTION:
 !     To support testing and debugging, this method prints out 
-!     the attributes of {\tt time}.
+!     the contents of an {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description}

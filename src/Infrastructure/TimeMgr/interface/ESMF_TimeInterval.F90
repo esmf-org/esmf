@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.31 2003/08/29 05:31:58 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.32 2003/09/03 18:41:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.31 2003/08/29 05:31:58 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.32 2003/09/03 18:41:03 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -339,7 +339,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize via user-specified unit set
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalSet(timeInterval, &
@@ -380,15 +380,12 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Set the value of the {\tt ESMF\_TimeInterval} in units specified by
+!     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
 !     the user via F90 optional arguments.
 !
-!     Time manager represents and manipulates time internally with integers 
+!     The ESMF Time Manager represents and manipulates time internally with integers 
 !     to maintain precision.  Hence, user-specified floating point values are
 !     converted internally to integers.
-!
-!     See {\tt ../include/ESMC\_BaseTime.h} and
-!     {\tt ../include/ESMC\_TimeInterval.h} for complete description.
 !
 !     The arguments are:
 !     \begin{description}
@@ -456,7 +453,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalGet - Get value in user-specified units
+! !IROUTINE: ESMF_TimeIntervalGet - Get a TimeInterval value 
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalGet(timeInterval, &
@@ -499,10 +496,10 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the value of the {\tt ESMF\_TimeInterval} in units specified by the
+!     Gets the value of {\tt timeInterval} in units specified by the
 !     user via F90 optional arguments.
 !
-!     Time manager represents and manipulates time internally with integers 
+!     The ESMF Time Manager represents and manipulates time internally with integers 
 !     to maintain precision.  Hence, user-specified floating point values are
 !     converted internally from integers.
 !
@@ -587,7 +584,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalAbsValue - Get the absolute value of a time interval
+! !IROUTINE:  ESMF_TimeIntervalAbsValue - Get the absolute value of a TimInterval
 
 ! !INTERFACE:
       function ESMF_TimeIntervalAbsValue(timeInterval)
@@ -599,7 +596,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 
 ! !DESCRIPTION:
-!     Return a {\tt ESMF\_TimeInterval}'s absolute value.
+!     Returns the absolute value of {\tt timeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -618,7 +615,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Get the negative absolute value of a time interval
+! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Get the negative absolute value of a TimeInterval
 
 ! !INTERFACE:
       function ESMF_TimeIntervalNegAbsValue(timeInterval)
@@ -630,7 +627,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 
 ! !DESCRIPTION:
-!     Return a {\tt ESMF\_TimeInterval}'s negative absolute value.
+!     Returns the negative absolute value of {\tt timeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -657,7 +654,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two time intervals, return fraction result
+! !IROUTINE:  ESMF_TimeIntervalFQuot - Divide two TimeIntervals, return fraction result
 
 ! !INTERFACE:
       function ESMF_TimeIntervalFQuot(timeInterval1, timeInterval2)
@@ -670,7 +667,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns timeInterval1 divided by timeInterval2 as a fraction quotient.
+!     Returns {\tt timeInterval1} divided by {\tt timeInterval2} as a 
+!     fraction quotient.
 !
 !     The arguments are:
 !     \begin{description}
@@ -691,7 +689,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two time intervals, return double precision result
+! !IROUTINE:  ESMF_TimeIntervalRQuot - Divide two TimeIntervals, return double precision result
 
 ! !INTERFACE:
       function ESMF_TimeIntervalRQuot(timeInterval1, timeInterval2)
@@ -704,7 +702,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns timeInterval1 divided by timeInterval2 as a double precision
+!     Returns {\tt timeInterval1} divided by {\tt timeInterval2} as a double precision
 !     quotient.
 !
 !     The arguments are:
@@ -726,7 +724,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalRemainder - Divide two time intervals, return time interval remainder
+! !IROUTINE:  ESMF_TimeIntervalRemainder - Divide two TimeIntervals, return time interval remainder
 
 ! !INTERFACE:
       function ESMF_TimeIntervalRemainder(timeInterval1, timeInterval2)
@@ -739,8 +737,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Returns the remainder of timeInterval1 divided by timeInterval2 as a
-!     {\tt ESMF\_TimeInterval}.
+!     Returns the remainder of {\tt timeInterval1} divided by {\tt timeInterval2} 
+!     as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -761,7 +759,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalQuotI - Divide time interval by an integer, return time interval result 
+! !IROUTINE:  ESMF_TimeIntervalQuotI - Divide TimeInterval by an integer, return TimeInterval result 
 
 ! !INTERFACE:
       function ESMF_TimeIntervalQuotI(timeInterval, divisor)
@@ -774,8 +772,8 @@
       integer(ESMF_IKIND_I4),  intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides a {\tt ESMF\_TimeInterval} by an integer divisor, returns
-!     quotient as a {\tt ESMF\_TimeInterval}.
+!     Divides {\tt timeInterval} by an integer {\tt divisor}, and returns
+!     the quotient as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -796,7 +794,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalQuotR - Divide time interval by a double precision, return time interval result 
+! !IROUTINE:  ESMF_TimeIntervalQuotR - Divide TimeInterval by a double precision, return TimeInterval result 
 
 ! !INTERFACE:
       function ESMF_TimeIntervalQuotR(timeInterval, divisor)
@@ -809,8 +807,8 @@
       real(ESMF_IKIND_R8),     intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides an {\tt ESMF\_TimeInterval} by a double precision divisor, returns
-!     quotient as a {\tt ESMF\_TimeInterval}.
+!     Divides {\tt timeInterval} by a double precision {\tt divisor}, 
+!     and returns the quotient as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -844,8 +842,8 @@
       integer(ESMF_IKIND_I4),  intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiply a {\tt ESMF\_TimeInterval} by an integer, return product as a
-!     {\tt ESMF\_TimeInterval}.
+!     Multiplies {\tt timeInterval} by an integer {\tt multiplier}, 
+!     and returns the product as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -879,8 +877,8 @@
       type(ESMF_Fraction),     intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiply a {\tt ESMF\_TimeInterval} by a fraction, return product as a
-!     {\tt ESMF\_TimeInterval}.
+!     Multiplies {\tt timeInterval} by a fraction {\tt multiplier},
+!     and returns the product as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -913,8 +911,8 @@
       real(ESMF_IKIND_R8),     intent(in) :: multiplier
 
 ! !DESCRIPTION:
-!     Multiply a {\tt ESMF\_TimeInterval} by a double precision number,
-!     return product as a {\tt ESMF\_TimeInterval}.
+!     Multiplies {\tt timeInterval} by a double precision 
+!     {\tt multiplier}, and returns the product as an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -952,9 +950,9 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Add two {\tt ESMF\_TimeIntervals}, return sum as a
-!     {\tt ESMF\_TimeInterval}.  Maps overloaded (+) operator interface
-!     function to {\tt ESMF\_BaseTime} base class.
+!     Adds {\tt timeInterval1} to {\tt timeInterval2} and returns the
+!     sum as an {\tt ESMF\_TimeInterval}.  This method is overloaded 
+!     with the (+) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -990,10 +988,9 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Subtract timeInterval2 from timeInterval1, return remainder as a 
-!     {\tt ESMF\_TimeInterval}.
-!     Map overloaded (-) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     Subtract {\tt timeInterval2} from {\tt timeInterval1} and return 
+!     the remainder as an {\tt ESMF\_TimeInterval}.  This method is 
+!     overloaded with the (-) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1015,7 +1012,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalEQ - Compare two time intervals for equality
+! !IROUTINE: ESMF_TimeIntervalEQ - TimeInterval 1 equal to TimeInterval 2?
 
 ! !INTERFACE:
       function ESMF_TimeIntervalEQ(timeInterval1, timeInterval2)
@@ -1028,9 +1025,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 !DESCRIPTION:
-!     Return true if both given time intervals are equal, false otherwise.
-!     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     Returns true if {\tt timeInterval1} and {\tt timeInterval2} are equal, 
+!     false otherwise.  This method is overloaded with the (==) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1051,7 +1047,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalNE - Compare two time intervals for inequality
+! !IROUTINE:  ESMF_TimeIntervalNE - TimeInterval 1 not equal to TimeInterval 2?
 
 ! !INTERFACE:
       function ESMF_TimeIntervalNE(timeInterval1, timeInterval2)
@@ -1064,9 +1060,9 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Return true if both given time intervals are not equal, false otherwise.
-!     Maps overloaded (/=) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     Returns true if {\tt timeInterval1} and {\tt timeInterval2} are
+!     not equal, false otherwise.  This method is overloaded with the
+!     (!=) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1087,7 +1083,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalLT - Time interval 1 less than time interval 2 ?
+! !IROUTINE:  ESMF_TimeIntervalLT - TimeInterval 1 less than TimeInterval 2 ?
 
 ! !INTERFACE:
       function ESMF_TimeIntervalLT(timeInterval1, timeInterval2)
@@ -1100,9 +1096,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Return true if first time interval is less than second time interval,
-!     false otherwise. Maps overloaded (<) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt timeInterval1} is less than {\tt timeInterval2},
+!     false otherwise. This method is overloaded with the (<) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1123,7 +1118,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalGT - Time interval 1 greater than time interval 2?
+! !IROUTINE:  ESMF_TimeIntervalGT - TimeInterval 1 greater than TimeInterval 2?
 
 ! !INTERFACE:
       function ESMF_TimeIntervalGT(timeInterval1, timeInterval2)
@@ -1136,9 +1131,8 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Return true if first time interval is greater than second time interval,
-!     false otherwise.  Maps overloaded (>) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt timeInterval1} is greater than {\tt timeInterval2},
+!     false otherwise.  This method is overloaded with the (>) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1159,7 +1153,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalLE - Time interval 1 less than or equal to time interval 2 ?
+! !IROUTINE:  ESMF_TimeIntervalLE - TimeInterval 1 less than or equal to TimeInterval 2?
 
 ! !INTERFACE:
       function ESMF_TimeIntervalLE(timeInterval1, timeInterval2)
@@ -1172,10 +1166,9 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Return true if first time interval is less than or equal to second time
-!     interval, false otherwise.
-!     Maps overloaded (<=) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     Returns true if {\tt timeInterval1} is less than or equal to 
+!     {\tt timeInterval2}, false otherwise.  This method is overloaded
+!     with the (>) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1196,7 +1189,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalGE - Time interval 1 greater than or equal to time interval 2 ?
+! !IROUTINE:  ESMF_TimeIntervalGE - TimeInterval1 greater than or equal to TimeInterval2?
 
 ! !INTERFACE:
       function ESMF_TimeIntervalGE(timeInterval1, timeInterval2)
@@ -1209,9 +1202,9 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval2
 
 ! !DESCRIPTION:
-!     Return true if first time interval is greater than or equal to second
-!     time interval, false otherwise. Maps overloaded (>=) operator interface
-!     function to {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt timeInterval1} is greater than or equal to 
+!     {\tt timeInterval2}, false otherwise.  This method is overloaded
+!     with the (>=) operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1237,7 +1230,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore a time interval's properties
+! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalReadRestart(timeInterval, &
@@ -1254,7 +1247,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a restore on a {\tt ESMF\_TimeInterval}'s properties.
+!      Restores the contents of an {\tt ESMF\_TimeInterval} exactly.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1287,7 +1280,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save a time interval's properties
+! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalWriteRestart(timeInterval, &
@@ -1304,7 +1297,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on an {\tt ESMF\_TimeInterval}'s properties.
+!     Saves the contents of an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1337,7 +1330,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a time interval's properties
+! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalValidate(timeInterval, options, rc)
@@ -1348,7 +1341,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt ESMF\_TimeInterval}'s properties.
+!     Check whether a {\tt timeInterval} is valid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1370,7 +1363,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalPrint - Print out a time interval's properties
+! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
 
 ! !INTERFACE:
       subroutine ESMF_TimeIntervalPrint(timeInterval, options, rc)
@@ -1381,8 +1374,8 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out an {\tt ESMF\_TimeInterval}'s
-!     properties.
+!     To support testing and debugging, this method prints out the contents
+!     of an {\tt ESMF\_TimeInterval}.
 !
 !     The arguments are:
 !     \begin{description}
