@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.8 2003/04/05 01:48:16 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.9 2003/04/11 23:47:14 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,7 +70,7 @@
  #include <ESMC_BaseTime.h>
  #include <ESMC_Time.h>
 
-#define MONTHSPERYEAR 12
+#define MONTHS_PER_YEAR 12
 
 // TODO: make function for Gregorian only?
 #define ESMC_IS_LEAP_YEAR(year)  ( (year%400 == 0) || ((year%4 == 0) && \
@@ -102,8 +102,9 @@ class ESMC_Calendar {
 
     ESMC_CalendarType Type;    // Calendar type
 
-    int DaysPerMonth[MONTHSPERYEAR];
+    int DaysPerMonth[MONTHS_PER_YEAR];
     int SecondsPerDay;
+    int SecondsPerYear;
     struct DaysPerYear_s
     {
         int D;        // integer number of days per year
