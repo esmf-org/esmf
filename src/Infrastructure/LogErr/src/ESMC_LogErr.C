@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.36 2004/04/29 22:01:29 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.37 2004/04/29 22:29:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.36 2004/04/29 22:01:29 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.37 2004/04/29 22:29:26 nscollins Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -281,7 +281,7 @@ int ESMC_Log::ESMC_LogWrite(
     int y,mn,d,h,m,s,ms;
     int ok=0;
     int i=0;
-    ESMC_TimeStamp(y,mn,d,h,m,s,ms);
+    ESMC_TimeStamp(&y,&mn,&d,&h,&m,&s,&ms);
     //return ESMF_FAILURE;
 	do
 	{
@@ -332,7 +332,7 @@ int ESMC_Log::ESMC_LogWrite(
     int y,mn,d,h,m,s,ms;
     int ok=0;
     int i=0;
-    ESMC_TimeStamp(y,mn,d,h,m,s,ms);
+    ESMC_TimeStamp(&y,&mn,&d,&h,&m,&s,&ms);
     //return ESMF_FAILURE;
     //puts("Write Log");
 	do
@@ -386,7 +386,7 @@ int ESMC_Log::ESMC_LogWrite(
     int y,mn,d,h,m,s,ms;
     int ok=0;
     int i=0;
-    ESMC_TimeStamp(y,mn,d,h,m,s,ms);
+    ESMC_TimeStamp(&y,&mn,&d,&h,&m,&s,&ms);
     //return ESMF_FAILURE;
     //puts("Write Log");
 	do
