@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.59 2004/07/02 20:31:25 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.60 2004/07/21 19:07:42 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.59 2004/07/02 20:31:25 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.60 2004/07/21 19:07:42 eschwab Exp $'
 
 !==============================================================================
 !
@@ -246,12 +246,8 @@
 !     TMG3.4.1
 
       ! initialize list size to zero for not-present list
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-      integer :: sizeofRingingAlarmList = 0
-#else
       integer :: sizeofRingingAlarmList
       sizeofRingingAlarmList = 0
-#endif
 
       ! get size of given ringing alarm list for C++ validation
       if (present(ringingAlarmList)) then
@@ -342,12 +338,8 @@
 !     TMG3.1, TMG3.4.4
 
       ! initialize name length to zero for non-existent name
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-      integer :: nameLen = 0
-#else
       integer :: nameLen
       nameLen = 0
-#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -516,15 +508,10 @@
       character (len=ESMF_MAXSTR) :: tempName
 
       ! initialize name lengths to zero for non-existent name
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-      integer :: nameLen = 0
-      integer :: tempNameLen = 0
-#else
       integer :: nameLen
       integer :: tempNameLen
       nameLen = 0
       tempNameLen = 0
-#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
@@ -903,12 +890,8 @@
 !     TMG3.1, TMG3.4.4
 
       ! initialize name length to zero for non-existent name
-#if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
-      integer :: nameLen = 0
-#else
       integer :: nameLen
       nameLen = 0
-#endif
 
       ! get length of given name for C++ validation
       if (present(name)) then
