@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.41 2004/02/02 19:11:58 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.42 2004/02/04 02:14:16 eschwab Exp $'
 
 !==============================================================================
 !
@@ -314,9 +314,7 @@
 !     \item[clock]
 !          The object instance to set.
 !     \item[{[name]}]
-!          The name for this clock.  If not specified, a default unique
-!          name will be generated: "ClockNNN" where NNN is a unique sequence
-!          number from 001 to 999.
+!          The new name for this clock.
 !     \item[{[timeStep]}]
 !          The {\tt ESMF\_Clock}'s time step interval.  This is used to
 !          change a clock's timestep property for those applications that need

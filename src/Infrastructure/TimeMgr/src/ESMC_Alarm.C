@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.29 2004/02/02 19:11:57 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.30 2004/02/04 02:12:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.29 2004/02/02 19:11:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.30 2004/02/04 02:12:25 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -94,7 +94,7 @@ int ESMC_Alarm::count=0;
     // associate this alarm with given clock
     alarm->clock = clock;
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Clock
+    // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
       if (nameLen < ESMF_MAXSTR) {
         strncpy(alarm->name, name, nameLen);
@@ -285,7 +285,7 @@ int ESMC_Alarm::count=0;
     // save current values to restore in case of failure
     ESMC_Alarm saveAlarm = *this;
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Clock
+    // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
       if (nameLen < ESMF_MAXSTR) {
         strncpy(this->name, name, nameLen);
@@ -381,7 +381,7 @@ int ESMC_Alarm::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    // TODO: use inherited methods from ESMC_Base
     if (nameLen > 0) {
       if (strlen(this->name) < nameLen) {
         // copy all of it
@@ -1151,6 +1151,8 @@ int ESMC_Alarm::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     *this = alarm;
+    // id = ++count;  // TODO: unique copy ? review operator==
+                      //       also, inherit from ESMC_Base class
 
  } // end ESMC_Alarm
 

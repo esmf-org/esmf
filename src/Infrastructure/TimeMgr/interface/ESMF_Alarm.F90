@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.40 2004/02/02 19:11:59 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.41 2004/02/04 02:14:15 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.40 2004/02/02 19:11:59 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.41 2004/02/04 02:14:15 eschwab Exp $'
 
 !==============================================================================
 !
@@ -355,7 +355,7 @@
 !     \item[alarm]
 !          The object instance to set.
 !     \item[{[name]}]
-!          A new name for this alarm.  
+!          The new name for this alarm.  
 !     \item[{[clock]}]
 !          Re-associates this alarm with a different clock.
 !     \item[{[ringTime]}]

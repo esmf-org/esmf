@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.46 2004/02/02 19:11:57 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.47 2004/02/04 02:12:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.46 2004/02/02 19:11:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.47 2004/02/04 02:12:25 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -88,7 +88,7 @@ int ESMC_Clock::count=0;
       return(ESMC_NULL_POINTER);
     }
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
       if (nameLen < ESMF_MAXSTR) {
         strncpy(clock->name, name, nameLen);
@@ -116,7 +116,7 @@ int ESMC_Clock::count=0;
       clock->stopTime = clock->startTime + (*runTimeStepCount * *timeStep);
     }
 
-    if (refTime   != ESMC_NULL_POINTER) clock->refTime   = *refTime;
+    if (refTime != ESMC_NULL_POINTER) clock->refTime = *refTime;
     else clock->refTime = clock->startTime;
 
     clock->currTime = clock->startTime;
@@ -237,7 +237,7 @@ int ESMC_Clock::count=0;
     // save current values to restore in case of failure;
     ESMC_Clock saveClock = *this;
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
       if (nameLen < ESMF_MAXSTR) {
         strncpy(this->name, name, nameLen); 
@@ -313,7 +313,7 @@ int ESMC_Clock::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    // TODO: use inherited methods from ESMC_Base
     if (nameLen > 0) {
       if (strlen(this->name) < nameLen) {
         // copy all of it
@@ -1115,6 +1115,8 @@ int ESMC_Clock::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     *this = clock;
+    // id = ++count;  // TODO: unique copy ? review operator==
+                      //       also, inherit from ESMC_Base class
 
  } // end ESMC_Clock
 
