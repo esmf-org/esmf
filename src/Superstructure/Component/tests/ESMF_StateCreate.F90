@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.7 2003/02/12 21:34:21 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.8 2003/02/13 16:39:09 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -17,6 +17,14 @@
     
 !   ! Some common definitions.  This requires the C preprocessor.
 #include "ESMF.h"
+
+!   ! Local macros to make this simpler until we've got a template.
+#define P_START(string) print *, "------> Start: ", string
+#define P_END(string)   print *, "------>   End: ", string
+#define P_BLANK()       print *, " "
+#define P_IN(string)    print *, "Calling ", string 
+#define P_OUT(string)   print *, "Return  ", string, " (rc=", rc, ")"
+#define P_OUT2(string, val)   print *, "Return  ", string, " (rc=", rc, "), value = ", val
 
 !   ! Other ESMF modules which are needed by States
     use ESMF_IOMod
@@ -42,20 +50,23 @@
 !   !
 !   !  Quick Test - Create/Destroy an Empty State.
  
-    print *, "State Test 1: Empty State"
+    P_START("State Test 1: Empty State")
 
     cname = "Atmosphere"
+    P_IN("ESMF_StateCreate")
     state1 = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)  
-    print *, "State Create returned, name = ", trim(cname)
+    P_OUT2("ESMF_StateCreate", trim(cname))
 
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state1, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
 
+    P_IN("ESMF_StateDestroy")
     call ESMF_StateDestroy(state1, rc=rc)
-    print *, "State Destroy returned", rc
+    P_OUT("ESMF_StateDestroy")
 
-    print *, "State Test 1 finished"
-    print *, " "
+    P_END("State Test 1: Empty State")
+    P_BLANK()
 
 
 !-------------------------------------------------------------------------
@@ -63,47 +74,61 @@
 !   !
 !   !  Quick Test - Create, Add Data, Print, Query, then Destroy a State.
  
-    print *, "State Test 2: Export State"
+    P_START("State Test 2: Export State")
 
     cname = "Ocean"
+    P_IN("ESMF_StateCreate")
     state2 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)  
-    print *, "State Create returned, name = ", trim(cname)
+    P_OUT2("ESMF_StateCreate", trim(cname))
 
-    bundle1 = ESMF_BundleCreate(name="Surface pressure", rc=rc)
-    print *, "Bundle Create returned", rc
+    bname="Surface pressure"
+    P_IN("ESMF_BundleCreate")
+    bundle1 = ESMF_BundleCreate(name=bname, rc=rc)
+    P_OUT2("ESMF_BundleCreate", trim(bname))
 
+    P_IN("ESMF_StateAddData (Bundle)")
     call ESMF_StateAddData(state2, bundle1, rc=rc)
-    print *, "StateAddData returned", rc
+    P_OUT("ESMF_StateAddData (Bundle)")
     
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state2, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
 
-    bundle2 = ESMF_BundleCreate(name="Temperature", rc=rc)
-    print *, "Bundle Create returned", rc
+    bname="Temperature"
+    P_IN("ESMF_BundleCreate")
+    bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
+    P_OUT2("ESMF_BundleCreate", trim(bname))
 
+    P_IN("ESMF_StateAddData (Bundle)")
     call ESMF_StateAddData(state2, bundle2, rc=rc)
-    print *, "StateAddData returned", rc
+    P_OUT("ESMF_StateAddData (Bundle)")
     
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state2, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
 
+    P_IN("ESMF_StateGetData")
     call ESMF_StateGetData(state2, "Surface pressure", qbundle, rc=rc)
-    print *, "State GetData returned", rc
+    P_IN("ESMF_StateGetData")
 
+    P_IN("ESMF_BundlePrint")
     call ESMF_BundlePrint(qbundle, "", rc=rc)
-    print *, "Bundle Print returned", rc
+    P_OUT("ESMF_BundlePrint")
 
+    P_IN("ESMF_StateDestroy")
     call ESMF_StateDestroy(state2, rc=rc)
-    print *, "State Destroy returned", rc
+    P_OUT("ESMF_StateDestroy")
 
+    P_IN("ESMF_BundleDestroy")
     call ESMF_BundleDestroy(bundle1, rc=rc)
-    print *, "Bundle Destroy returned", rc
+    P_OUT("ESMF_BundleDestroy")
 
+    P_IN("ESMF_BundleDestroy")
     call ESMF_BundleDestroy(bundle2, rc=rc)
-    print *, "Bundle Destroy returned", rc
+    P_OUT("ESMF_BundleDestroy")
 
-    print *, "State Test 2 finished"
-    print *, " "
+    P_END("State Test 2: Export State")
+    P_BLANK()
 
 
 !-------------------------------------------------------------------------
@@ -111,23 +136,26 @@
 !   !
 !   !  Quick Test - Create, Add Placeholder, Query, then Destroy a State.
  
-    print *, "State Test 3: Export State with Placeholder"
+    P_START("State Test 3: Export State with Placeholder")
 
     cname = "Ocean"
+    P_IN("ESMF_StateCreate")
     state3 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
-    print *, "State Create returned, name = ", trim(cname)
+    P_OUT2("ESMF_StateCreate", trim(cname))
 
     sname = "Downward wind"
+    P_IN("ESMF_StateAddData (Name only)")
     call ESMF_StateAddData(state3, sname, rc=rc)
-    print *, "StateAddData (name only) returned", rc
+    P_OUT2("ESMF_StateAddData (Name only)", trim(sname))
     
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state3, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
 
     ! save for next test, do not destroy yet
 
-    print *, "State Test 3 finished"
-    print *, " "
+    P_END("State Test 3 finished")
+    P_BLANK()
 
 
 !-------------------------------------------------------------------------
@@ -135,51 +163,61 @@
 !   !
 !   !  Quick Test - Mark and query Needed flags
  
-    print *, "State Test 4: Get/Set Needed flags in Export State"
+    P_START("State Test 4: Get/Set Needed flags in Export State")
 
     ! inherit state3 from test above
 
     sname = "Downward wind"
+    P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state3, sname, ESMF_STATEDATAISNEEDED, rc=rc)
-    print *, "StateSetNeeded returned", rc
+    P_OUT2("ESMF_StateSetNeeded", trim(sname))
     
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state3, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
 
     if (ESMF_StateIsNeeded(state3, sname, rc=rc)) then
-      print *, "Data marked as needed", trim(sname)
+      P_OUT2("Data marked as needed", trim(sname))
 
       bname = sname
+      P_IN("ESMF_BundleCreate")
       bundle2 = ESMF_BundleCreate(bname, rc=rc)
-      print *, "Bundle Create returned", rc, "name =", trim(bname)
+      P_OUT2("ESMF_BundleCreate", trim(bname))
       
       fname = "Downward wind field"
+      P_IN("ESMF_FieldCreate")
       field1 = ESMF_FieldCreateNoData(fname, rc=rc)
-      print *, "Field Create returned", rc, "name =", trim(fname)
+      P_OUT2("ESMF_FieldCreate", trim(fname))
 
+      P_IN("ESMF_BundleAddFields")
       call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
-      print *, "Bundle AddField returned", rc
+      P_OUT("ESMF_BundleAddFields")
 
+      P_IN("ESMF_StateAddData (Bundle)")
       call ESMF_StateAddData(state3, bundle2, rc=rc)
-      print *, "StateAddData returned", rc
+      P_OUT("ESMF_StateAddData (Bundle)")
     else
-      print *, "Data marked as not needed", trim(sname)
+      P_OUT2("Data marked as *NOT* needed", trim(sname))
     endif
 
+    P_IN("ESMF_BundlePrint")
     call ESMF_StatePrint(state3, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_BundlePrint")
     
+    P_IN("ESMF_StateDestroy")
     call ESMF_StateDestroy(state3, rc=rc)
-    print *, "State Destroy returned", rc
+    P_OUT("ESMF_StateDestroy")
 
+    P_IN("ESMF_BundleDestroy")
     call ESMF_BundleDestroy(bundle2, rc=rc)
-    print *, "Bundle Destroy returned", rc
+    P_OUT("ESMF_BundleDestroy")
 
+    P_IN("ESMF_FieldDestroy")
     call ESMF_FieldDestroy(field1, rc=rc)
-    print *, "Field Destroy returned", rc
+    P_OUT("ESMF_FieldDestroy")
 
-    print *, "State Test 4 finished"
-    print *, " "
+    P_END("State Test 4 finished")
+    P_BLANK()
 
 
 
@@ -189,76 +227,94 @@
 !   !  Longer Test - Overwriting existing placeholders, especially
 !   !    handling fields inside bundles.
  
-    print *, "State Test 5: State with Multiple Placeholders"
+    P_START("State Test 5: State with Multiple Placeholders")
 
     cname = "Sea Ice"
+    P_IN("ESMF_StateCreate")
     state4 = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
-    print *, "State Create returned, name = ", trim(cname)
+    P_OUT2("ESMF_StateCreate", trim(cname))
 
     sname = "Surface pressure"
+    P_IN("StateAddData (Name only)")
     call ESMF_StateAddData(state4, sname, rc=rc)
-    print *, "StateAddData (name only) returned", rc, "for", trim(sname)
+    P_OUT2("StateAddData (Name only)", trim(sname))
     
+    P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATAISNEEDED, rc=rc)
-    print *, "StateSetNeeded returned", rc
+    P_OUT("ESMF_StateSetNeeded")
     
     sname = "Energy Flux"
+    P_IN("StateAddData (Name only)")
     call ESMF_StateAddData(state4, sname, rc=rc)
-    print *, "StateAddData (name only) returned", rc, "for", trim(sname)
+    P_OUT2("StateAddData (Name only)", trim(sname))
     
+    P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATAISNEEDED, rc=rc)
-    print *, "StateSetNeeded returned", rc
+    P_OUT("ESMF_StateSetNeeded")
     
     sname = "Humidity"
+    P_IN("StateAddData (Name only)")
     call ESMF_StateAddData(state4, sname, rc=rc)
-    print *, "StateAddData (name only) returned", rc, "for", trim(sname)
+    P_OUT2("StateAddData (Name only)", trim(sname))
     
+    P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state4, sname, ESMF_STATEDATAISNEEDED, rc=rc)
-    print *, "StateSetNeeded returned", rc
+    P_OUT("ESMF_StateSetNeeded")
     
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state4, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
 
     bname = "Collected quantities"
+    P_IN("ESMF_BundleCreate")
     bundle2 = ESMF_BundleCreate(bname, rc=rc)
-    print *, "Bundle Create returned", rc, "name =", trim(bname)
+    P_OUT2("ESMF_BundleCreate", trim(bname))
       
     fname = "Surface pressure"
+    P_IN("ESMF_FieldCreate")
     field1 = ESMF_FieldCreateNoData(fname, rc=rc)
-    print *, "Field Create returned", rc, "name =", trim(fname)
+    P_OUT2("ESMF_FieldCreate", trim(fname))
 
+    P_IN("ESMF_BundleAddFields")
     call ESMF_BundleAddFields(bundle2, field1, rc=rc) 
-    print *, "Bundle AddField returned", rc
+    P_OUT("ESMF_BundleAddFields")
 
     fname = "Energy Flux"
+    P_IN("ESMF_FieldCreate")
     field2 = ESMF_FieldCreateNoData(fname, rc=rc)
-    print *, "Field Create returned", rc, "name =", trim(fname)
+    P_OUT2("ESMF_FieldCreate", trim(fname))
 
+    P_IN("ESMF_BundleAddFields")
     call ESMF_BundleAddFields(bundle2, field2, rc=rc) 
-    print *, "Bundle AddField returned", rc
+    P_OUT("ESMF_BundleAddFields")
 
 
+    P_IN("ESMF_StateAddData (Bundle)")
     call ESMF_StateAddData(state4, bundle2, rc=rc)
-    print *, "StateAddData returned", rc
+    P_OUT("ESMF_StateAddData (Bundle)")
 
+    P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state4, rc=rc)
-    print *, "State Print returned", rc
+    P_OUT("ESMF_StatePrint")
     
+    P_IN("ESMF_StateDestroy")
     call ESMF_StateDestroy(state4, rc=rc)
-    print *, "State Destroy returned", rc
+    P_OUT("ESMF_StateDestroy")
 
+    P_IN("ESMF_BundleDestroy")
     call ESMF_BundleDestroy(bundle2, rc=rc)
-    print *, "Bundle Destroy returned", rc
+    P_OUT("ESMF_BundleDestroy")
 
+    P_IN("ESMF_FieldDestroy")
     call ESMF_FieldDestroy(field1, rc=rc)
-    print *, "Field Destroy returned", rc
+    P_OUT("ESMF_FieldDestroy")
 
+    P_IN("ESMF_FieldDestroy")
     call ESMF_FieldDestroy(field2, rc=rc)
-    print *, "Field Destroy returned", rc
+    P_OUT("ESMF_FieldDestroy")
 
-    print *, "State Test 5 finished"
-    print *, " "
-
+    P_END("State Test 5 finished")
+    P_BLANK()
 
 
     end program ESMF_StateCreateTest
