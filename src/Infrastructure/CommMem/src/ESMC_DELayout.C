@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.31 2003/04/25 16:05:47 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.32 2003/06/17 17:59:28 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.31 2003/04/25 16:05:47 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.32 2003/06/17 17:59:28 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -109,7 +109,7 @@ static int verbose = 1;
       int *rc) {                      // out - return code
 //
 // !DESCRIPTION:
-//  Create a new {\tt DELayout} using a parent {\tt DELayout}'s {\tt DE}s. 
+//  Create a new {\tt ESMC\_DELayout} using a parent {\tt ESMC\_DELayout}'s {\tt ESMC\_DE}s. 
 //
 //EOP
 
@@ -151,7 +151,7 @@ static int verbose = 1;
       int *rc) {                 // out - return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new {\tt DELayout}
+//      Allocates memory for a new {\tt ESMC\_DELayout}
 //      object and uses the internal routine {\tt ESMC\_DELayoutConstruct} to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
@@ -213,7 +213,7 @@ static int verbose = 1;
       int *rc) {                 // out - return code
 //
 // !DESCRIPTION:
-//      Allocates memory for a new {\tt DELayout}
+//      Allocates memory for a new {\tt ESMC\_DELayout}
 //      object and uses the internal routine {\tt ESMC\_DELayoutConstruct} to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
@@ -277,7 +277,7 @@ static int verbose = 1;
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a DELayout object previously allocated
-//      via an ESMC\_DELayoutCreate routine.  Define for deep classes only.
+//      via an {\tt ESMC\_DELayoutCreate} routine.  Define for deep classes only.
 //
 //EOP
 
@@ -310,10 +310,10 @@ static int verbose = 1;
 // !DESCRIPTION:
 //      ESMC routine which fills in the contents of an already
 //      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
+//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
-//      ESMC\_DELayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
+//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -420,10 +420,10 @@ static int verbose = 1;
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
+//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
-//      ESMC\_DELayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
+//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
 //
 //EOP
 
@@ -603,10 +603,10 @@ static int verbose = 1;
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
+//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
-//      ESMC\_DELayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
+//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -777,10 +777,10 @@ static int verbose = 1;
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated DELayout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_DELayoutDestruct
+//      as needed.  Must call the corresponding {\tt ESMC\_DELayoutDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_DELayoutCreate, which calls
-//      ESMC\_DELayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_DELayoutCreate}, which calls
+//      {\tt ESMC\_DELayoutConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -926,10 +926,10 @@ static int verbose = 1;
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF\_DELayoutConstruct, does any additional cleanup before the
+//      {\tt ESMF\_DELayoutConstruct}, does any additional cleanup before the
 //      original DELayout object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_DELayoutDestroy, which calls
-//      ESMC\_DELayoutDestruct.  Define for deep classes only.
+//      use only; end-users use {\tt ESMC\_DELayoutDestroy}, which calls
+//      {\tt ESMC\_DELayoutDestruct}.  Define for deep classes only.
 //
 //EOP
 
@@ -977,7 +977,7 @@ static int verbose = 1;
 //    none
 //
 // !DESCRIPTION:
-//      Do an MPI communication to create a PE list for all PEs
+//      Do an MPI communication to create a {\tt ESMC\_PE} list for all {\tt ESMC\_PE}s
 //      involved in this layout.
 //
 //EOPI
@@ -1053,10 +1053,10 @@ static int verbose = 1;
       void) {
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes DELayout values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_DELayout} values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC\_DELayoutCreate.
+//      Construct/Destruct.  Can be overloaded like {\tt ESMC\_DELayoutCreate}.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1118,7 +1118,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       ESMC_DELayoutConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the DELayout object was configured with.
+//    Returns the set of resources the {\tt DELayout} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1143,7 +1143,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       const ESMC_DELayoutConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the DELayout object with set of resources given.
+//    Configures the {\tt ESMC\_DELayout} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1164,7 +1164,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of DELayout member <Value>.
+//     Returns the value of {\tt ESMC\_DELayout} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -1190,7 +1190,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       <value type> value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the DELayout member <Value> with the given value.
+//     Sets the {\tt ESMC\_DELayout} member <Value> with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -1217,7 +1217,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *ndes) const {     // out - total number of DEs in layout
 //
 // !DESCRIPTION:
-//    Returns the total number of DEs in the layout
+//    Returns the total number of {\tt ESMC\_DE}s in the layout
 //EOP
 // !REQUIREMENTS:  
 
@@ -1241,7 +1241,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *ny) const {     // out - number of DE's in y direction
 //
 // !DESCRIPTION:
-//    returns overall x,y dimensions of 2D DELayout
+//    returns overall x,y dimensions of 2D {\tt ESMC\_DELayout}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1269,7 +1269,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *nz) const {     // out - number of DE's in z direction
 //
 // !DESCRIPTION:
-//    returns overall x,y,z dimensions of DELayout
+//    returns overall x,y,z dimensions of {\tt ESMC\_DELayout}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1297,7 +1297,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *y) const {     // out - y position of DE in layout
 //
 // !DESCRIPTION:
-//    returns (x,y) position of my DE in 2D layout
+//    returns (x,y) position of my {\tt ESMC\_DE} in 2D layout
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1336,7 +1336,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *z) const {     // out - z position of DE in layout
 //
 // !DESCRIPTION:
-//    returns (x,y,z) position of given DE in layout
+//    returns (x,y,z) position of given {\tt ESMC\_DE} in layout
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1378,7 +1378,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       ESMC_DE *de) const { // out - DE at (x,y,z)
 //
 // !DESCRIPTION:
-//    returns DE at position (x,y,z) in layout
+//    returns {\tt ESMC\_DE} at position (x,y,z) in layout
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1414,7 +1414,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *deid) const   { // out - DE ID at (x,y,z)
 //
 // !DESCRIPTION:
-//    returns DE at position (x,y,z) in layout
+//    returns {\tt ESMC\_DE} at position (x,y,z) in layout
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1451,7 +1451,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *deid) const   { // out - DE ID at (x,y)
 //
 // !DESCRIPTION:
-//    returns DE at position (x,y) in layout
+//    returns {\tt ESMC\_DE} at position (x,y) in layout
 //
 //EOP
 // !REQUIREMENTS:  
@@ -1485,7 +1485,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *deid) const {     // out - our DE id
 //
 // !DESCRIPTION:
-//    Returns our DE id
+//    Returns our {\tt ESMC\_DE} id
 //EOP
 // !REQUIREMENTS:  
 
@@ -1533,8 +1533,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !DESCRIPTION:
 //    Method applied to a Child layout.
-//    Input is a DE ID from the Child layout, plus the Parent layout from
-//    which this child was created.  Returns the corresponding DE ID number
+//    Input is a {\tt ESMC\_DE} ID from the Child layout, plus the Parent layout from
+//    which this child was created.  Returns the corresponding {\tt ESMC\_DE} ID number
 //    in the Parent's layout for the given Child ID.
 //EOP
 // !REQUIREMENTS:  
@@ -1560,8 +1560,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !DESCRIPTION:
 //    Method applied to a Parent layout.
-//    Input is a DE ID from the Parent layout, plus a Child layout created
-//    from this parent.  Returns the corresponding DE ID number
+//    Input is a {\tt ESMC\_DE} ID from the Parent layout, plus a Child layout created
+//    from this parent.  Returns the corresponding {\tt ESMC\_DE} ID number
 //    in the Child's layout for the given Parent ID.
 //EOP
 // !REQUIREMENTS:  
@@ -1589,8 +1589,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !DESCRIPTION:
 //    Method applied to a layout which has a child or parent relationship
-//    with the "other" layout.   deid is relative to the "this" layout,
-//    boolean return is whether the same deid is valid in the other layout.
+//    with the "other" layout.   {\tt ESMC\_DE} ID is relative to the "this" layout,
+//    boolean return is whether the same {\tt ESMC\_DE} ID is valid in the other layout.
 //EOP
 // !REQUIREMENTS:  
   
@@ -1622,7 +1622,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *otherid) const {    // out - DE ID in other layout
 //
 // !DESCRIPTION:
-//    Common code for either GetParent or GetChild DEID.  This is a
+//    Common code for either GetParent or GetChild {\tt ESMC\_DE} ID.  This is a
 //    private method - go through the other interfaces for external access.
 //EOP
 // !REQUIREMENTS:  
@@ -1698,8 +1698,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 
 // !DESCRIPTION:
-//   If current PE is part of this given layout, returns ESMF\_SUCCESS.
-//   If not, returns ESMF\_FAILURE for no without printing an error message.
+//   If current PE is part of this given layout, returns {\tt ESMF\_SUCCESS}.
+//   If not, returns {\tt ESMF\_FAILURE} for no without printing an error message.
 
 //EOP
 // !REQUIREMENTS:  
@@ -2171,8 +2171,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //
 // !DESCRIPTION:
-//    Performs a send and receive data transfer between {\tt DEs}
-//    on a single {\tt DELayout}.
+//    Performs a send and receive data transfer between {\tt ESMC\_DE}s
+//    on a single {\tt ESMC\_DELayout}.
 //
 //EOP
 
@@ -2233,8 +2233,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //
 // !DESCRIPTION:
-//    Broadcasts data from a root {\tt DE} to all other {\tt DE}s in
-//    the {\tt DELayout}.  
+//    Broadcasts data from a root {\tt ESMC\_DE} to all other {\tt ESMC\_DE}s in
+//    the {\tt ESMC\_DELayout}.  
 //
 //EOP
 
@@ -2270,8 +2270,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       void) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a DELayout is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Validates that a {\tt ESMC\_DELayout} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 
@@ -2294,8 +2294,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       void) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a DELayout.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      Print information about a {\tt ESMC\_DELayout}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 
@@ -2420,7 +2420,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !DESCRIPTION:
 //    Perform MPI-like Allgatherv of integer data arrays
-//    across all DEs in a layout
+//    across all {\tt ESMC\_DE}s in a layout
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -2459,7 +2459,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !DESCRIPTION:
 //    Perform MPI-like Allgatherv of integer data arrays
-//    across all DEs in a layout
+//    across all {\tt ESMC\_DE}s in a layout
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -2497,7 +2497,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 // !DESCRIPTION:
 //      performs requested reduction operation on given data array across
-//      all DEs in layout
+//      all {\tt ESMC\_DE}s in layout
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
