@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.2 2002/10/09 21:37:58 eschwab Exp $
+// $Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 eschwab Exp $
 //
 // ESMC <Class> method code (body) file
 //
@@ -16,9 +16,6 @@
 //
 // < insert a paragraph or two explaining what you'll find in this file >
 //
-// (all lines below between the !BOP and !EOP markers will be included in 
-//  the automated document processing.)
-//
 //-------------------------------------------------------------------------
 
 // associated class definition file
@@ -27,7 +24,7 @@
 //-------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_class.C,v 1.2 2002/10/09 21:37:58 eschwab Exp $";
+static const char *const version = "$Id: ESMC_class.C,v 1.3 2002/10/10 18:51:16 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //

@@ -1,6 +1,6 @@
-// $Id: ESMC_class.h,v 1.2 2002/10/09 21:37:38 eschwab Exp $
+// $Id: ESMC_class.h,v 1.3 2002/10/10 18:50:59 eschwab Exp $
 //
-// ESMF <Class> definition include file
+// ESMF <Class> C++ definition include file
 //
 // < Something here from legal about the status of the code, like:
 //  This code developed by NASA/NCAR/ESMF whatever, and is covered by
@@ -9,8 +9,8 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMC_<Class>_h
-#define ESMC_<Class>_h
+#ifndef ESMC_<Class>_H
+#define ESMC_<Class>_H
 
 //-------------------------------------------------------------------------
 //
@@ -50,6 +50,8 @@ struct ESMC_<Class>Config
 // class definition type
 class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
 {
+// < insert any C++ class declaratives here, e.g. friends >
+
   private:
 //  < insert class members here >  corresponds to type ESMF_<Class> members
 //                                 in F90 modules
@@ -88,6 +90,7 @@ class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
 // < list the rest of the public interface methods here >
   
 //EOP
+//-------------------------------------------------------------------------
 
   private: 
 //
@@ -96,4 +99,4 @@ class ESMC_<Class> : public ESMC_Base    // inherits from ESMC_Base class
 
 };   // end class ESMC_<Class>
 
-#endif  // ESMC_<Class>_h
+#endif  // ESMC_<Class>_H

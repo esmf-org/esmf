@@ -1,39 +1,117 @@
-#include <ESMC_Types.h>
-#include <ESMC_Time.h>
-#include <ESMC_Calendar.h>
-#include <ESMC_Util.h>
+// $Id: ESMC_TimeInstant.C,v 1.2 2002/10/10 18:49:13 eschwab Exp $
+//
+// ESMC TimeInstant method code (body) file
+//
+// < Something here from legal about the status of the code, like:
+//  This code developed by NASA/NCAR/ESMC whatever, and is covered by
+//  the terms of the GNU public license.  See license file for more details. >
+//
+
+//-------------------------------------------------------------------------
+//
+// !PURPOSE:
+//
+// The code in this file implements the C++ TimeInstant methods defined
+// in the companion file ESMC_TimeInstant.h
+//
+//-------------------------------------------------------------------------
+
+// associated class definition file
 #include <ESMC_TimeInstant.h>
-#include <stdio.h>
-
-/*
-#include <iostream>
-//#include <stdlib.h>
-using std::cout;
-using std::endl;
-*/
 
 //-------------------------------------------------------------------------
-// Class ESMC_TimeInstant Methods
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMC_TimeInstant.C,v 1.2 2002/10/10 18:49:13 eschwab Exp $
 //-------------------------------------------------------------------------
 
-ESMC_TimeInstant::ESMC_TimeInstant(void)
-{
-	Init(0, 0, 1, NULL, 0); 	// what is default calendar ??
-}
+//
+//-------------------------------------------------------------------------
+//-------------------------------------------------------------------------
+//
+// This section includes all the ESMC_TimeInstant routines
+//
+//
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInstant - native default C++ constructor
+//
+// !INTERFACE:
+      ESMC_TimeInstant::ESMC_TimeInstant(void) {
+//
+// !ARGUMENTS: none
+//
+// !DESCRIPTION:
+//      Initializes a ESMC_TimeInstant with defaults via ESMC_TimeInstInit
+//
+//EOP
+// !REQUIREMENTS:  
 
-ESMC_TimeInstant::ESMC_TimeInstant(int64 S, int32 Sn, int32 Sd,
-								   ESMC_Calendar *Cal, int Tz)
-{
+   Init(0, 0, 1, NULL, 0);
+
+}  // end ESMC_TimeInstant
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInstant - native C++ constructor
+//
+// !INTERFACE:
+      ESMC_TimeInstant::ESMC_TimeInstant(
+//
+// !ARGUMENTS:
+      int64 S,              // in - integer seconds
+      int32 Sn,             // in - fractional seconds, numerator
+      int32 Sd,             // in - fractional seconds, denominator
+	  ESMC_Calendar *Cal,   // in - associated calendar
+      int Tz) {             // in - timezone
+//
+// !DESCRIPTION:
+//      Initializes a ESMC_TimeInstant via ESMC_TimeInstInit
+//
+//EOP
+// !REQUIREMENTS:  
+
 	Init(S, Sn, Sd, Cal, Tz);
-}
 
-ESMC_TimeInstant::~ESMC_TimeInstant(void)
-{
-}
+}  // end ESMC_TimeInstant
 
-int ESMC_TimeInstant::Init(int64 S, int32 Sn, int32 Sd, ESMC_Calendar *Cal,
-						   int Tz)
-{
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ~ESMC_TimeInstant - native default C++ destructor
+//
+// !INTERFACE:
+      ESMC_TimeInstant::~ESMC_TimeInstant(void) {
+//
+// !ARGUMENTS:  none
+//
+// !DESCRIPTION:
+//      Default ESMC_TimeInstant destructor
+//
+//EOP
+// !REQUIREMENTS:  
+
+}  // end ~ESMC_TimeInstant
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInstantInit - shallow class initializer
+//
+// !INTERFACE:
+      ESMC_TimeInstant::ESMC_TimeInstInit(
+//
+// !ARGUMENTS:
+      int64 S,              // in - integer seconds
+      int32 Sn,             // in - fractional seconds, numerator
+      int32 Sd,             // in - fractional seconds, denominator
+	  ESMC_Calendar *Cal,   // in - associated calendar
+      int Tz) {             // in - timezone
+//
+// !DESCRIPTION:
+//      Initialzes a TimeInstant with given values
+//
+//EOP
+// !REQUIREMENTS:  
+
 	// use base class Init()
 	if (ESMC_Time::Init(S, Sn, Sd) == ESMC_SUCCESS)
 	{
@@ -43,20 +121,50 @@ int ESMC_TimeInstant::Init(int64 S, int32 Sn, int32 Sd, ESMC_Calendar *Cal,
 		return(ESMC_SUCCESS);
 	}
 	else return(ESMC_FAILURE);
-}
 
-// for persistence/checkpointing
-int ESMC_TimeInstant::Dump(int64 *S, int32 *Sn, int32 *Sd)
-{
-	// use base class Dump() first
-	return(ESMC_Time::Dump(S, Sn, Sd));
-}
+}  // end ESMC_ESMC_TimeInstInit
 
-// for testing/debugging
-int ESMC_TimeInstant::Dump(void)
-{
-	// use base class Dump
-	ESMC_Time::Dump();
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInstPrint - return TimeInstant state
+//
+// !INTERFACE:
+      ESMC_TimeInstant::ESMC_ESMC_TimeInstPrint(
+//
+// !ARGUMENTS:
+      int64 *S,              // out - integer seconds
+      int32 *Sn,             // out - fractional seconds, numerator
+      int32 *Sd) {           // out - fractional seconds, denominator
+//
+// !DESCRIPTION:
+//      return TimeInstant state for persistence/checkpointing
+//
+//EOP
+// !REQUIREMENTS:  
+
+	// use base class Print() first
+	return(ESMC_Time::ESMC_TimePrint(S, Sn, Sd));
+
+}  // end ESMC_TimeInstPrint
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeInstPrint - print TimeInstant state
+//
+// !INTERFACE:
+      ESMC_TimeInstant::ESMC_ESMC_TimeInstPrint(void) {
+//
+// !ARGUMENTS:  none
+//
+// !DESCRIPTION:
+//      print TimeInstant state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+	// use base class Print
+	ESMC_Time::ESMC_TimePrint();
 
 	return(ESMC_SUCCESS);
-}
+
+}  // end ESMC_TimeInstPrint
