@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.30 2004/07/02 20:37:57 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.31 2004/08/21 00:02:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.30 2004/07/02 20:37:57 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.31 2004/08/21 00:02:47 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -59,7 +59,7 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep, timeStep2, timeStep3
-      type(ESMF_Time) :: startTime, endTime
+      type(ESMF_Time) :: startTime
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, &
                              noLeapCalendar, day360Calendar
       type(ESMF_TimeInterval) :: absoluteTime
@@ -417,10 +417,10 @@
       !EX_UTest
       write(name, *) "Gregorian Calendar Interval conversion (days to months) Test"
       write(failMsg, *) " Did not return 2 and ESMF_SUCCESS"
-      call ESMF_TimeSet(endTime, yy=2004, mm=3, dd=31, &
+      call ESMF_TimeSet(startTime, yy=2004, mm=1, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=60, rc=rc)
-      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, &
+      call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
                                 timeString=timeString, rc=rc)
       call ESMF_Test((months==2 .and. timeString=="P0Y0M60DT0H0M0S" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -446,11 +446,11 @@
       !EX_UTest
       write(name, *) "Gregorian Calendar Interval conversion (731 days to years and days) Test"
       write(failMsg, *) " Did not return years=2, days=0 and ESMF_SUCCESS"
-      call ESMF_TimeSet(endTime, yy=2004, mm=3, dd=31, &
+      call ESMF_TimeSet(startTime, yy=2002, mm=3, dd=31, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=731, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, &
-                                endTimeIn=endTime, rc=rc)
+                                startTimeIn=startTime, rc=rc)
       call ESMF_Test((years==2 .and. days==0 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -661,10 +661,11 @@
       !EX_UTest
       write(name, *) "Gregorian Calendar Interval conversion (days to months) Test"
       write(failMsg, *) " Did not return 2 and ESMF_SUCCESS"
-      call ESMF_TimeSet(endTime, yy=2003, mm=3, dd=31, &
+      call ESMF_TimeSet(startTime, yy=2003, mm=2, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=59, rc=rc)
-      call ESMF_TimeIntervalGet(timeStep, mm=months, endTimeIn=endTime, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, mm=months, startTimeIn=startTime, &
+                                rc=rc)
       call ESMF_Test((months==2.and.rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -688,11 +689,11 @@
       !EX_UTest
       write(name, *) "Gregorian Calendar Interval conversion (731 days to years and days) Test"
       write(failMsg, *) " Did not return years=2, days=1 and ESMF_SUCCESS"
-      call ESMF_TimeSet(endTime, yy=2003, mm=3, dd=31, &
+      call ESMF_TimeSet(startTime, yy=2001, mm=1, dd=31, &
                         calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=731, rc=rc)
       call ESMF_TimeIntervalGet(timeStep, yy=years, d=days, &
-                                endTimeIn=endTime, rc=rc)
+                                startTimeIn=startTime, rc=rc)
       call ESMF_Test((years==2 .and. days==1 .and. rc==ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
