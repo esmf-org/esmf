@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.9 2002/12/10 18:23:50 nscollins Exp $ 
+# $Id: makefile,v 1.10 2002/12/10 23:33:06 nscollins Exp $ 
 
-DIRS     = Base BasicUtil ConfigAttr Error Log Machine TimeMgr TimeMgmt \
+DIRS     = Base BasicUtil ConfigAttr Log Machine TimeMgr \
 	   CommMem PerfProf IO Data PhysGrid DistGrid Regrid Grid Fields App \
 	   mpiuni
 
