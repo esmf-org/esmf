@@ -1,23 +1,23 @@
-% $Id: LogErr_usage.tex,v 1.1 2004/03/16 20:04:12 cdeluca Exp $
+% $Id: LogErr_usage.tex,v 1.2 2004/03/17 22:42:30 cdeluca Exp $
 
 %\subsection{Use and Examples}
 
-The sequence of 
+A typical sequence of tasks associated with using the Log utility would begin
+with the user calling {\tt ESMF\_LogOpen()} to open a Log file and retrieve
+an active Log object.  The user can then set or get options on how the Log
+should be used with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.
+Depending on how the options are set, {\tt ESMF\_LogWrite()} either writes
+user messages direstly to a Log file or writes to a buffer that can be flushed
+when full or by using the {\tt ESMF\_LogFlush()} method.  When done writing
+messages, the Log is closed by calling {\tt ESMF\_LogClose}.  
 
-1. The user opens a Log file and retrieves an  ESMF_Log handle via ESMF_LogOpen.
-2. The user sets the parameters of the Log file via ESMF_LogSet.
-3. The user gets the parameters of the Log file via ESMF_LogGet.
-4. The user writes to a buffer or writes directly to the Log file via ESMF_LogWrite depending on the settings.
-5. The user can flush the array via ESMF_LogFlush.
-6. The user can have up to ESMF_LOG_MAXARRAYS "files" open.
-7. There can be up to max_elements write messages in a single Log.
-8. The user closes the Log file via ESMF_LogClose.
-9. The user can re-open a previously closed Log using ESMF_LogReopen
+Some of the assumptions implicit in using the Log utility are:
 
-ASSUMPTIONS
+\begin{enumerate}
 
-1. Prior to closing, ESMF_LogFlush is always executed.
-2. Prior to halting, ESMF_LogFlush is always executed.
-3. If the number of elements in an ESMF_Log exceeds max_elements, a message 
+\item Prior to closing, ESMF_LogFlush is always executed.
+\item Prior to halting, ESMF_LogFlush is always executed.
+\item If the number of elements in an ESMF_Log exceeds max_elements, a message 
    is written to file and the buffer flushes automatically.
 
+\end{enumerate}
