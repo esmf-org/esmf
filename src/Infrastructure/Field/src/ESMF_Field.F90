@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.111 2004/02/26 22:48:54 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.112 2004/02/27 22:25:08 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.111 2004/02/26 22:48:54 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.112 2004/02/27 22:25:08 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -413,7 +413,7 @@
 !
 !==============================================================================
 !BOP
-! !IROUTINE:  (Overloaded)ESMF_FieldAttachData - Associate an Array object with a Field
+! !IROUTINE:  ESMF_FieldAttachData - Associate an Array object with a Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttachData()
@@ -454,7 +454,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  (Overloaded)ESMF_FieldAttachData - Associate a data buffer with a field
+! !IROUTINE:  ESMF_FieldAttachData - Associate a data buffer with a field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAttachData()
@@ -496,7 +496,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  (Overloaded)ESMF_FieldAttachData - Associate a Grid and an Array with a Field
+! !IROUTINE:  ESMF_FieldAttachData - Associate a Grid and an Array with a Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_AttachData()
@@ -540,7 +540,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   (Overloaded)ESMF_FieldCreate - Create a new Field
+! !IROUTINE:   ESMF_FieldCreate - Create a new Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
@@ -650,7 +650,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldCreate - Create a Field from an existing ESMF Array
+! !IROUTINE: ESMF_FieldCreate - Create a Field from an existing ESMF Array
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
@@ -760,7 +760,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldCreate - Create a Field by remapping another Field
+! !IROUTINE: ESMF_FieldCreate - Create a Field by remapping another Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
@@ -859,7 +859,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldCreateNoData - Create a Field with no associated data buffer
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
@@ -961,7 +961,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldCreateNoData - Create a Field with no associated Array object
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
@@ -1057,7 +1057,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldCreateNoData - Create a Field with no Grid or Array
+! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no Grid or Array
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreateNoData()
@@ -1198,7 +1198,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  (Overloaded)ESMF_FieldDetachData - Disassociate a buffer from a Field
+! !IROUTINE:  ESMF_FieldDetachData - Disassociate a buffer from a Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldDetachData()
@@ -1241,7 +1241,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  (Overloaded)ESMF_FieldDetachData - Disassociate an Array from a Field
+! !IROUTINE:  ESMF_FieldDetachData - Disassociate an Array from a Field
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldDetachData()
@@ -1491,7 +1491,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve an integer Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1551,7 +1551,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve an integer list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1622,7 +1622,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve a real Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1681,7 +1681,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve a real list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1751,7 +1751,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve a logical Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1810,7 +1810,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve a logical list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1880,7 +1880,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttribute - Retrieve a character Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1993,7 +1993,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttributeInfo - Query Field Attributes by name
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
@@ -2062,7 +2062,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldGetAttributeInfo - Query Field Attributes by number
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
@@ -2922,7 +2922,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set an integer Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
@@ -2981,7 +2981,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set an integer list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
@@ -3051,7 +3051,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set a real Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set a real Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
@@ -3110,7 +3110,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set a real list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
@@ -3180,7 +3180,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set a logical Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set a logical Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
@@ -3240,7 +3240,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set a logical list Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
@@ -3311,7 +3311,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: (Overloaded)ESMF_FieldSetAttribute - Set a character Attribute
+! !IROUTINE: ESMF_FieldSetAttribute - Set a character Attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldSetAttribute()
