@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.50 2004/02/10 18:55:46 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.51 2004/02/11 21:56:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.50 2004/02/10 18:55:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.51 2004/02/11 21:56:51 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -408,7 +408,7 @@ int ESMC_Clock::count=0;
                                                  //        element to calculate
                                                  //        F90 array element
                                                  //        size
-      int               *sizeofRingingAlarmList, // in  - size of given array
+      int                sizeofRingingAlarmList, // in  - size of given array
                                                  //       of ringing alarms
       int               *ringingAlarmCount) {    // out - number of ringing
                                                  //       alarms
@@ -466,7 +466,7 @@ int ESMC_Clock::count=0;
 
         // report ringing alarm list
         if (ringingAlarmList1stElementPtr != ESMC_NULL_POINTER) {
-          if (j < *sizeofRingingAlarmList) {
+          if (j < sizeofRingingAlarmList) {
             // F90 equivalent: ringingAlarmList(j) = alarmList(i)
             //                 j = j + 1
             // calculate F90 array address for the j'th element ...
@@ -624,7 +624,7 @@ int ESMC_Clock::count=0;
                                                  //        element to calculate
                                                  //        F90 array element
                                                  //        size
-      int               *sizeofAlarmList,        // in  - size of given array
+      int                sizeofAlarmList,        // in  - size of given array
                                                  //       of alarms
       int               *alarmCount,             // out - number of alarms
       ESMC_TimeInterval *timeStep) {             // in  - optional time step to
@@ -701,7 +701,7 @@ int ESMC_Clock::count=0;
         (*alarmCount)++;
 
         // copy if there's space in the given F90 array
-        if (j < *sizeofAlarmList) {
+        if (j < sizeofAlarmList) {
           // F90/C++ equivalent: AlarmList(j) = this->alarmList[i]
           //                 j = j + 1
           // calculate F90 array address for the j'th element ...

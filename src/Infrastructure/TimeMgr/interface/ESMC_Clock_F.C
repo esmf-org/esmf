@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.27 2004/02/05 21:28:04 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.28 2004/02/11 21:56:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -188,7 +188,7 @@ extern "C" {
                             ESMC_NULL_POINTER : ringingAlarmList1stElementPtr),
              ((void*) ringingAlarmList2ndElementPtr == (void*)ESMC_BAD_POINTER ?
                             ESMC_NULL_POINTER : ringingAlarmList2ndElementPtr),
-             sizeofRingingAlarmList,  // always present internal argument.
+             *sizeofRingingAlarmList,  // always present internal argument.
 
              ((void*) ringingAlarmCount == (void*)ESMC_BAD_POINTER ?
                             ESMC_NULL_POINTER : ringingAlarmCount) );
@@ -237,7 +237,7 @@ extern "C" {
           int rc = (*ptr)->ESMC_ClockGetAlarmList(*type,
                                                   AlarmList1stElementPtr,
                                                   AlarmList2ndElementPtr,
-                                                  sizeofAlarmList,
+                                                  *sizeofAlarmList,
                                                   alarmCount,
                           ((void*) timeStep == (void*)ESMC_BAD_POINTER ?
                               ESMC_NULL_POINTER : timeStep));
