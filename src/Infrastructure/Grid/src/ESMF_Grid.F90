@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.77 2003/08/07 18:21:32 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.78 2003/08/13 21:49:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -79,9 +79,10 @@
                                             ! logical identifier to indicate
                                             ! periodic boundary conditions in
                                             ! each direction
-        type (ESMF_PhysGrid), dimension(:), pointer :: &
-           physgrids         ! grid info for all grid descriptions necessary
-                             ! to define horizontal, staggered and vertical grids
+        type (ESMF_PhysGrid), dimension(:), pointer :: physgrids
+                                            ! grid info for all grid descriptions
+                                            ! necessary to define horizontal, 
+                                            ! staggered and vertical grids
         type (ESMF_DistGrid) :: distgrid    ! decomposition and other
                                             ! logical space info for grid
 !       type (???) :: search_structure
@@ -207,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.77 2003/08/07 18:21:32 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.78 2003/08/13 21:49:00 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -575,7 +576,7 @@
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
-                                            name, rc)
+                                            periodic, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateInternalSpecd
@@ -595,6 +596,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -671,7 +673,7 @@
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              name, status)
+                              periodic, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
@@ -1218,7 +1220,7 @@
 
 !     Create the DistGrid
       grid%distgrid = ESMF_DistGridCreate(counts=counts, layout=layout, &
-                                          rc=status)
+                                          periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Distgrid create"
         return
@@ -1267,7 +1269,7 @@
                                                  horz_stagger, vert_stagger, &
                                                  horz_coord_system, &
                                                  vert_coord_system, &
-                                                 name, rc)
+                                                 periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1285,6 +1287,7 @@
       integer, intent(in), optional :: vert_stagger
       integer, intent(in), optional :: horz_coord_system
       integer, intent(in), optional :: vert_coord_system
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1367,7 +1370,8 @@
 !     Create the DistGrid
       grid%distgrid = ESMF_DistGridCreate(countsPerDE1=countsPerDE1, &
                                           countsPerDE2=countsPerDE2, &
-                                          layout=layout, rc=status)
+                                          periodic=periodic, layout=layout, &
+                                          rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternalSpecd: Distgrid create"
         return
