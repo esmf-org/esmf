@@ -3,11 +3,11 @@
 \subsection{Introduction}
 
 One of the primary goals of the ESMF project is to increase interoperability
-across a range of Earth system modeling components.  Initially these 
+across a range of Earth system modeling components.  As described in 
+Section~\ref{sec:scope}, initially these 
 components will be large scale, such as land models, ocean models, 
-and other systems representing physical domains; data assimilation systems
-and diagnostics packages; and computational tools such as couplers and 
-I/O subsystems.  ESMF coupling services will facilitate component 
+data assimilation systems and diagnostics packages.  ESMF coupling 
+services will facilitate component 
 interoperability and efficient inter-component communication.  As the 
 framework evolves, we plan to utilize coupling services for smaller-scale 
 tasks within model components, such as the transformation of data between the 
@@ -30,23 +30,30 @@ inter-component data exchange, and one or more coupling
 components ({\tt ESMF\_Coupler}).
 
 There are restrictions on how objects within an application may be scoped
-on a parallel platform.  The application component is required to exist on 
+on a parallel platform.  The application component must be instantiated on 
 any decomposition elements or DEs ({\tt ESMF\_DE}s) on which other components
 within the application are defined.  This is true whether the 
 application contains a single executable or multiple 
 executables.  There is only one application component defined for any
 application; it initially allocates resources and tracks application-wide 
-information.
+information.  
 
-A coupler or gridded component may exist across all DEs in 
-the application.  When 
+A coupler component must be instantiated on any DEs on which components
+it will couple are defined.  This is consistent with an architectural
+model in which inter-process communication is handled internal to 
+a component (see Section~\ref{sec:strategies}).  It is possible for
+some portions of the functionality of a component to be restricted to
+a subset of the DEs over which the component is defined.  For example, 
+it might be computationally efficient for the computation of interpolation
+weight to occur on a set of DEs which is 
+
+A gridded component may exist across all DEs in the application.  When 
 a set of gridded  components and a coupler all reside on the same set of 
 DEs and are contained within an application running as a single 
 executable we have an SPMD, sequential execution model.  
 
-Within an application, a coupler or gridded component may also reside on 
-a subset of DEs.  Either of these may wholly coincide with, be
-wholly 
+Within an application, a gridded component may also reside on 
+a subset of DEs.  These may wholly coincide with, be wholly 
 contained within or wholly contain another component.  Multiple gridded 
 components or couplers may be defined as separate executables.  A typical 
 MPMD, concurrent execution configuration is one in which gridded components 
