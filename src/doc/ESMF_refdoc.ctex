@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.29 2003/10/22 20:09:42 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.30 2003/10/23 12:34:21 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -71,6 +71,8 @@
 
 \label{part:Superstructure}
 
+\newpage
+
 #include "../Superstructure/Component/doc/Component_refdoc.ctex"
 
 #include "../Superstructure/State/doc/State_refdoc.ctex"
@@ -83,6 +85,7 @@
 \end{htmlonly}
 \part{Infrastructure:  Fields and Grids}
 
+\newpage
 \section{Overview}
 \input{ESMF_fieldgridoverview.tex}
 
@@ -111,6 +114,7 @@
 \end{htmlonly}
 \part{Infrastructure:  Utilities}
 
+\newpage
 \section{Overview}
 \input{ESMF_utiloverview}
 
