@@ -1,4 +1,4 @@
-% $Id: ESMF.cbib,v 1.1 2003/07/25 10:39:08 cdeluca Exp $
+% $Id: ESMF.cbib,v 1.2 2004/08/02 17:58:43 nscollins Exp $
 
 % abbreviations
 @String{BAMS = {Bull. Amer. Met. Soc.}}
@@ -11,25 +11,25 @@
 @misc{ESMFWEBSITE,
         title = "Earth System Modeling Framework",
         howpublished= "http://www.esmf.ucar.edu",
-        year = "2002")
+        year = "2002"}
 
 @misc{bib:ESMFreqdoc,
         title = "{Earth System Modeling Framework Requirements Document}",
         author = "{ESMF Joint Specification Team}",
         howpublished= "http://www.esmf.ucar.edu/esmf\_docs/ESMF\_reqdoc",
-        year = "2002")
+        year = "2002"}
 
-@misc(bib:ESMFimplrep,
+@misc{bib:ESMFimplrep,
         title = "{Earth System Modeling Framework Implementation Report}",
         author = "{Neckels, D.} and {C. DeLuca}",
         howpublished= "http://www.esmf.ucar.edu/esmf\_docs/impl\_rep/",
-        year = "2002")
+        year = "2002"}
 
 @book{WOM2002,
         author = "{Womack, B., Higgins, G.}",
         title = "Software Engineering Support of the Third Round of Scientific Grand Challenge Investigations. General Requirements Analysis ",
         publisher = "NASA/CT Internal Document",
-        year = "2002")
+        year = "2002"}
 
 %================================================================================
 % Topic-specific references
