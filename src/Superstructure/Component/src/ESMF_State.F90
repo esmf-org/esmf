@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.48 2003/10/22 16:18:00 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.49 2003/10/22 17:46:52 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.48 2003/10/22 16:18:00 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.49 2003/10/22 17:46:52 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2129,8 +2129,8 @@ end function
 !      The {\tt name} must be unique within the {\tt state}
 !      It is available to be marked {\tt needed} by the
 !      consumer of the export {\tt state}. Then the data 
-!      provider can replace the name with the actual {\tt ESMF_Bundle},
-!      {\tt ESMF_Field}, or {\tt ESMF_Array} which carries the needed data.
+!      provider can replace the name with the actual {\tt ESMF\_Bundle},
+!      {\tt ESMF\_Field}, or {\tt ESMF\_Array} which carries the needed data.
 !
 !EOP
 ! !REQUIREMENTS: 
