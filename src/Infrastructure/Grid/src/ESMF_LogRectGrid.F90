@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.116 2004/12/04 20:05:16 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.117 2004/12/06 17:00:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -121,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.116 2004/12/04 20:05:16 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.117 2004/12/06 17:00:44 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8943,14 +8943,17 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      ! loop over the arrays of coords
-      do i = 1,grid%dimCount
-        call c_ESMC_ArraySerialize(lrgrid%coords(i), buffer(1), length, &
-                                   offset, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      enddo
+      ! loop over the arrays of coords (only for non-uniform grids)
+      if (grid%horzGridType.ne.ESMF_GRID_TYPE_XY_UNI .AND. &
+          grid%horzGridType.ne.ESMF_GRID_TYPE_LATLON_UNI) then
+        do i = 1,grid%dimCount
+          call c_ESMC_ArraySerialize(lrgrid%coords(i), buffer(1), length, &
+                                     offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        enddo
+      endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
 
@@ -9008,13 +9011,16 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! loop over the arrays of coords
-      do i = 1,grid%dimCount
-        call c_ESMC_ArrayDeserialize(lrgrid%coords(i), buffer(1), &
-                                     offset, localrc)
-        if (ESMF_LogMsgFoundError(localrc, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
-      enddo
+      if (grid%horzGridType.ne.ESMF_GRID_TYPE_XY_UNI .AND. &
+          grid%horzGridType.ne.ESMF_GRID_TYPE_LATLON_UNI) then
+        do i = 1,grid%dimCount
+          call c_ESMC_ArrayDeserialize(lrgrid%coords(i), buffer(1), &
+                                       offset, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        enddo
+      endif
 
       ! call the appropriate create function -- is this necessary or is it all there?
 
