@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.6 2004/02/13 15:36:40 nscollins Exp $ 
+# $Id: makefile,v 1.7 2004/05/04 22:29:09 slswift Exp $ 
 
 ALL: build_here 
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = ESMF_IO.F90
+SOURCEF	  = 
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
