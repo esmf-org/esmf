@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.16 2004/12/09 18:09:22 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.17 2004/12/15 23:11:59 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,6 +47,7 @@
 !EOE
 !BOC
     ! Initialize ESMF to initialize the default log
+    !call ESMF_Initialize(rc=rc1,defaultlogtype=ESMF_LOG_MULTI)
     call ESMF_Initialize(rc=rc1)
 !EOC
     if (rc1.NE.ESMF_SUCCESS) then
@@ -62,7 +63,6 @@
 !BOC
     ! LogMsgSetError
     call ESMF_LogMsgSetError(ESMF_FAILURE,"Convergence failure",rcToReturn=rc2)
-
     ! LogMsgFoundError
     call ESMF_TimeSyncToRealTime(time, rcToTest)
     if (ESMF_LogMsgFoundError(rcToTest, "getting wall clock time", &
@@ -109,7 +109,6 @@
     ! LogMsgSetError
     call ESMF_LogMsgSetError(ESMF_FAILURE,"Interpolation Failure", ESMF_CONTEXT, &
         rcToReturn=rc2,log=alog)
-
     ! Close the log.
     call ESMF_LogClose(alog,rc2)
 !EOC
@@ -117,9 +116,8 @@
         finalrc = ESMF_FAILURE
     end if
 !BOC
-
     ! Finalize ESMF to close the default log
-    !call ESMF_Finalize(rc=rc1)
+    call ESMF_Finalize(rc=rc1)
 !EOC
     !if (rc1.NE.ESMF_SUCCESS) then
      !   finalrc = ESMF_FAILURE

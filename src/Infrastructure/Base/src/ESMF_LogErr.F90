@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.56 2004/12/14 15:38:17 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.57 2004/12/15 23:11:48 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -102,50 +102,42 @@ type(ESMF_LogType), parameter		:: &
 !     ! Log Entry                            
 type ESMF_LOGENTRY
     private
-    sequence  	
+    sequence  					
+    integer					h,m,s,ms				        
+    integer					line   	
+    logical                                     methodflag,lineflag,fileflag	
     character(len=64)				msg	
     character(len=32) 				file,method	
     character(len=8) 				d		                                     
-    character(len=8)				lt  		
-    integer                                     petNumber	   				
-    integer					        h,m,s,ms				        
-    integer					        line   
-    logical					        methodflag,lineflag,fileflag,stopprogram					
+    character(len=8)				lt  			
 end type ESMF_LOGENTRY
 
-!     ! ESMF_LOGARRAY
-type ESMF_LOGARRAY
-    private
-    sequence
-    character(len=26)                                   nameLogErrFile   
-    integer                              	    ::  findex
-    integer                                         ::  unitNumber
-    type(ESMF_Logical)			            ::  flushed 
-    type(ESMF_Logical)			            ::  dirty
-    type(ESMF_Logical)                              ::  FileIsOpen
-end type ESMF_LOGARRAY
-
-!     ! Log  
 type ESMF_Log
     private
     sequence        
-#ifndef ESMF_NO_INITIALIZERS
-    type(ESMF_LOGENTRY), dimension(:,:),pointer       ::  LOG_ENTRY=>Null()
-    type(ESMF_LOGARRAY), dimension(:),pointer       ::  LOG_ARRAY =>Null()
-#else
-    type(ESMF_LOGENTRY), dimension(:,:),pointer       ::  LOG_ENTRY
-    type(ESMF_LOGARRAY), dimension(:),pointer       ::  LOG_ARRAY
-#endif                                        
-!    type(ESMF_VM)                                   ::  vm  
-    type(ESMF_HaltType)                             ::  halt
-    type(ESMF_LogType)			            ::  logtype       
+     
     integer                                             maxElements
     integer                                             stream 
-    integer                                             petCount 
+    integer                                             petnum 
+    integer                              	        findex
+    integer                                             unitNumber
+    integer                                             petNumber	
+    logical					        stopprogram		   
     type(ESMF_Logical)                              ::  flushImmediately    
     type(ESMF_Logical)                              ::  rootOnly    
     type(ESMF_Logical)                              ::  verbose  
-    type(ESMF_Logical)                              ::  logNone
+    type(ESMF_Logical)                              ::  logNone   
+    type(ESMF_Logical)			            ::  flushed 
+    type(ESMF_Logical)			            ::  dirty
+    type(ESMF_Logical)                              ::  FileIsOpen
+    type(ESMF_HaltType)                             ::  halt
+    type(ESMF_LogType)			            ::  logtype      
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY=>Null()
+#else
+    type(ESMF_LOGENTRY), dimension(:),pointer       ::  LOG_ENTRY
+#endif                                          
+    character(len=32)                                   nameLogErrFile
     
 end type ESMF_Log
 
@@ -257,24 +249,18 @@ end function
 !      \end{description}
 ! 
 !EOP
-
-	!character(len=10) 					:: t
-	!character(len=8) 					:: d
-	integer  :: i
+	
+	integer::rc2,status
 	
 	if (present(rc)) rc=ESMF_FAILURE
+	if (log%FileIsOpen .eq. ESMF_TRUE) then
+
+		call ESMF_LogFlush(log,rc=rc2)	
 	
-	do i=1, log%petCount
-	    if (log%LOG_ARRAY(i)%FileIsOpen .eq. ESMF_TRUE) then
-		!call DATE_AND_TIME(d,t)
-		!WRITE(log%unitnumber,100) d,t,"INFO     Log Close"
-		!100 FORMAT(a8,2x,a10,2x,a)
-		!if (log%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  INFO       Log Close"
-		!CLOSE(UNIT=log%stdOutUnitNumber)
-		log%LOG_ARRAY(i)%FileIsOpen=ESMF_FALSE
-		if (present(rc)) rc=ESMF_SUCCESS
-	    endif	
-	enddo
+	    ESMF_LogDefault%FileIsOpen=ESMF_FALSE
+	endif
+	if (present(rc)) rc=ESMF_SUCCESS
+	deallocate(log%LOG_ENTRY,stat=status)	
 	
 end subroutine ESMF_LogClose
 
@@ -300,22 +286,17 @@ end subroutine ESMF_LogClose
 !      \end{description}
 ! 
 !EOPI
-	integer::rc2,status,i
+	integer::rc2,status
 	
 	if (present(rc)) rc=ESMF_FAILURE
-	do i=1, ESMF_LogDefault%petCount
-	    if (ESMF_LogDefault%LOG_ARRAY(i)%FileIsOpen .eq. ESMF_TRUE) then
-	        if (ESMF_LogDefault%LOG_ARRAY(i)%flushed .eq. ESMF_FALSE) then
-		    call ESMF_LogFlush(ESMF_LogDefault,petnum=i,rc=rc2)	
-		endif  
-		ESMF_LogDefault%LOG_ARRAY(i)%FileIsOpen=ESMF_FALSE
-	    endif
-	enddo	
+	if (ESMF_LogDefault%FileIsOpen .eq. ESMF_TRUE) then
+	
+	    call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)	
+ 
+	    ESMF_LogDefault%FileIsOpen=ESMF_FALSE
+	endif
 	if (present(rc)) rc=ESMF_SUCCESS
-	deallocate(ESMF_LogDefault%LOG_ENTRY,stat=status)
-	deallocate(ESMF_LogDefault%LOG_ARRAY,stat=status)
-	
-	
+	deallocate(ESMF_LogDefault%LOG_ENTRY,stat=status)	
 end subroutine ESMF_LogFinalize
 
 !--------------------------------------------------------------------------
@@ -323,12 +304,11 @@ end subroutine ESMF_LogFinalize
 ! !IROUTINE: ESMF_LogFlush - Flushes the Log file(s)
 
 ! !INTERFACE: 
-	subroutine ESMF_LogFlush(log,petnum,rc)
+	subroutine ESMF_LogFlush(log,rc)
 !
 !
 ! !ARGUMENTS:
 	type(ESMF_LOG)				:: log
-	integer, intent(in),optional		:: petnum
 	integer, intent(out),optional		:: rc
 
 ! !DESCRIPTION:
@@ -345,75 +325,69 @@ end subroutine ESMF_LogFinalize
 !      \end{description}
 ! 
 !EOP
-    integer 			    :: i,j,ok,status,pet
-
-    if (present(rc)) rc=ESMF_FAILURE
-    if (present(petnum)) then 
-        pet=petnum+1
-    else
-        pet=1
-    endif	
+    integer 			    :: i,j,ok,status
     
-    if ((log%LOG_ARRAY(pet)%FileIsOpen .eq. ESMF_TRUE) .AND. &
-        (log%LOG_ARRAY(pet)%flushed .eq. ESMF_FALSE) .AND. &
-	(log%LOG_ARRAY(pet)%dirty .eq. ESMF_TRUE))  then	
+    if (present(rc)) rc=ESMF_FAILURE    
+    if ((log%FileIsOpen .eq. ESMF_TRUE) .AND. &
+        (log%flushed .eq. ESMF_FALSE) .AND. &
+	(log%dirty .eq. ESMF_TRUE))  then	
     	ok=0
     	do i=1, ESMF_LOG_MAXTRYOPEN
-    	    OPEN(UNIT=log%LOG_ARRAY(pet)%unitnumber,File=log%LOG_ARRAY(pet)%nameLogErrFile,& 
+    	    OPEN(UNIT=log%unitnumber,File=log%nameLogErrFile,& 
 	    POSITION="APPEND", ACTION="WRITE", STATUS="UNKNOWN", IOSTAT=status)
             if (status.eq.0) then
-	        do j=1, log%LOG_ARRAY(pet)%findex
-    		    if (log%LOG_ENTRY(pet,j)%lineflag) then								
-    		        if (log%LOG_ENTRY(pet,j)%methodflag) then
-    			    WRITE(log%LOG_ARRAY(pet)%unitnumber,122) &
-                                  log%LOG_ENTRY(pet,j)%d     , " ", log%LOG_ENTRY(pet,j)%h   , &
-                                  log%LOG_ENTRY(pet,j)%m     ,      log%LOG_ENTRY(pet,j)%s   , ".", &
-                                  log%LOG_ENTRY(pet,j)%ms    , " ", log%LOG_ENTRY(pet,j)%lt  , "  pet", &
-				  pet-1, " ", &
-                                  log%LOG_ENTRY(pet,j)%file  , " ", log%LOG_ENTRY(pet,j)%line, " ", &
-                                  log%LOG_ENTRY(pet,j)%method, " ", log%LOG_ENTRY(pet,j)%msg
+	        do j=1, log%findex
+    		    if (log%LOG_ENTRY(j)%lineflag) then								
+    		        if (log%LOG_ENTRY(j)%methodflag) then
+    			    WRITE(log%unitnumber,122) &
+                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h   , &
+                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s   , ".", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt  , "  pet", &
+				  log%petnum, " ", &
+                                  log%LOG_ENTRY(j)%file  , " ", log%LOG_ENTRY(j)%line, " ", &
+                                  log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
     		        else
-    			    WRITE(log%LOG_ARRAY(pet)%unitnumber,123) &
-                                  log%LOG_ENTRY(pet,j)%d   , " ", log%LOG_ENTRY(pet,j)%h   , &
-                                  log%LOG_ENTRY(pet,j)%m   ,      log%LOG_ENTRY(pet,j)%s   , ".", &
-                                  log%LOG_ENTRY(pet,j)%ms  , " ", log%LOG_ENTRY(pet,j)%lt  , "  pet", &
-				  pet-1, " ", &
-                                  log%LOG_ENTRY(pet,j)%file, " ", log%LOG_ENTRY(pet,j)%line, " ", &
-                                  log%LOG_ENTRY(pet,j)%msg
+    			    WRITE(log%unitnumber,123) &
+                                  log%LOG_ENTRY(j)%d   , " ", log%LOG_ENTRY(j)%h   , &
+                                  log%LOG_ENTRY(j)%m   ,      log%LOG_ENTRY(j)%s   , ".", &
+                                  log%LOG_ENTRY(j)%ms  , " ", log%LOG_ENTRY(j)%lt  , "  pet", &
+				  log%petnum, " ", &
+                                  log%LOG_ENTRY(j)%file, " ", log%LOG_ENTRY(j)%line, " ", &
+                                  log%LOG_ENTRY(j)%msg
     		        endif	
                     else
-    		        if (log%LOG_ENTRY(pet,j)%methodflag) then
-    		            WRITE(log%LOG_ARRAY(pet)%unitnumber,132) &
-                                  log%LOG_ENTRY(pet,j)%d     , " ", log%LOG_ENTRY(pet,j)%h  , &
-                                  log%LOG_ENTRY(pet,j)%m     ,      log%LOG_ENTRY(pet,j)%s  , ".", &
-                                  log%LOG_ENTRY(pet,j)%ms    , " ", log%LOG_ENTRY(pet,j)%lt , "  pet", &
-				  pet-1, " ", &
-    			          log%LOG_ENTRY(pet,j)%method, " ", log%LOG_ENTRY(pet,j)%msg
+    		        if (log%LOG_ENTRY(j)%methodflag) then
+    		            WRITE(log%unitnumber,132) &
+                                  log%LOG_ENTRY(j)%d     , " ", log%LOG_ENTRY(j)%h  , &
+                                  log%LOG_ENTRY(j)%m     ,      log%LOG_ENTRY(j)%s  , ".", &
+                                  log%LOG_ENTRY(j)%ms    , " ", log%LOG_ENTRY(j)%lt , "  pet", &
+				  log%petnum, " ", &
+    			          log%LOG_ENTRY(j)%method, " ", log%LOG_ENTRY(j)%msg
     		        else
-    		            WRITE(log%LOG_ARRAY(pet)%unitnumber,133) &
-                                  log%LOG_ENTRY(pet,j)%d  , " ", log%LOG_ENTRY(pet,j)%h , &
-                                  log%LOG_ENTRY(pet,j)%m  ,      log%LOG_ENTRY(pet,j)%s , ".", &
-                                  log%LOG_ENTRY(pet,j)%ms , " ", log%LOG_ENTRY(pet,j)%lt, "  pet", &
-				  pet-1, " ", &
-                                  log%LOG_ENTRY(pet,j)%msg
+    		            WRITE(log%unitnumber,133) &
+                                  log%LOG_ENTRY(j)%d  , " ", log%LOG_ENTRY(j)%h , &
+                                  log%LOG_ENTRY(j)%m  ,      log%LOG_ENTRY(j)%s , ".", &
+                                  log%LOG_ENTRY(j)%ms , " ", log%LOG_ENTRY(j)%lt, "  pet", &
+				  log%petnum, " ", &
+                                  log%LOG_ENTRY(j)%msg
     		        endif	
     	            endif
 		enddo    
-    	        CLOSE(UNIT=log%LOG_ARRAY(pet)%unitnumber)
+    	        CLOSE(UNIT=log%unitnumber)
     	        ok=1
     	    endif	
     	    if (ok.eq.1) exit    
        enddo
    endif
    
-   log%LOG_ARRAY(pet)%findex = 1 
+   log%findex = 1 
    122  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a,a,a)
    123  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,i0,a,a)
    132  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a,a,a)
    133  FORMAT(a8,a,i2.2,i2.2,i2.2,a,i6.6,a,a,a,i0,a,a)
    
-   log%LOG_ARRAY(pet)%flushed = ESMF_TRUE
-   log%LOG_ARRAY(pet)%dirty = ESMF_FALSE
+   log%flushed = ESMF_TRUE
+   log%dirty = ESMF_FALSE
    rc=ESMF_SUCCESS	
       
 end subroutine ESMF_LogFlush
@@ -638,96 +612,74 @@ end subroutine ESMF_LogGet
 ! 
 !EOPI
 	
-    integer 				       :: status, i, j, rc2,rc3,un	
-    type(ESMF_LOGENTRY), dimension(:,:), pointer :: localbuf
-    type(ESMF_LOGARRAY), dimension(:), pointer  :: localbuf2
-    character(len=32)                                 :: fname
-    character(len=4)                                  ::fnum
-	
+    integer 				       :: status, i,j, rc2	
+    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
+    character(len=32)                          :: fname
+    character(len=4)                           :: fnum	
     if (present(rc)) rc=ESMF_FAILURE
     ESMF_LogDefault%logNone = ESMF_FALSE !default is to log
     ESMF_LogDefault%maxElements = 10
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
-    ESMF_LogDefault%flushImmediately = ESMF_TRUE
-!    call ESMF_VMGetGlobal(ESMF_LogDefault%vm,rc3)
-!    call ESMF_VMGet(ESMF_LogDefault%vm,petCount=ESMF_LogDefault%petCount)
-    call f_ESMF_VMGlobalGet(petCount=ESMF_LogDefault%petCount)
+    call f_ESMF_VMGlobalGet(localPet=ESMF_LogDefault%petnum)    
     if (present(lognone)) then
       if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
-      ESMF_LogDefault%petCount = 1
     endif
     if (present(logtype)) then
-        ESMF_LogDefault%logtype=logtype
-        if (ESMF_LogDefault%logtype .eq. ESMF_LOG_SINGLE) then
-	    ESMF_LogDefault%petCount=1
-	endif
+      	ESMF_LogDefault%logtype=logtype
     else
         ESMF_LogDefault%logtype=ESMF_LOG_SINGLE
-	ESMF_LogDefault%petCount=1
-    endif 
-    allocate(localbuf2(ESMF_LogDefault%petCount),stat=status)
-    if (status .ne. 0) then
-      print *, "allocation of buffer failed"
-      if (present(rc)) rc = ESMF_FAILURE
-      return
     endif
-    ESMF_LogDefault%LOG_ARRAY => localbuf2
-    un = ESMF_LOG_FORT_STDOUT
-    do i=1, ESMF_LogDefault%petCount
-        ESMF_LogDefault%LOG_ARRAY(i)%FileIsOpen=ESMF_FALSE
-        ESMF_LogDefault%LOG_ARRAY(i)%flushed = ESMF_FALSE
-	ESMF_LogDefault%LOG_ARRAY(i)%dirty = ESMF_FALSE
-	ESMF_LogDefault%LOG_ARRAY(i)%fIndex = 1
-	if (ESMF_LogDefault%petCount .eq. 1) then
-	    ESMF_LogDefault%LOG_ARRAY(1)%nameLogErrFile=trim(filename)
-        else
-	    if (ESMF_LogDefault%petCount .le. 9) then
-	        write(fnum,10) i
-            else if (ESMF_LogDefault%petCount .le. 99) then
-	        write(fnum,20) i
-            else if (ESMF_LogDefault%petCount .le. 9999) then
-	        write(fnum,30) i
-            else if (ESMF_LogDefault%petCount .le. 99999) then
-	        write(fnum,40) i
-            else if (ESMF_LogDefault%petCount .le. 999999) then
-	        write(fnum,50) i
-            else 
-	        write(fnum,*) i
-	    endif
-	    fname = "pet" // trim(fnum) // "." // trim(filename)
-	    ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile=fname
-	endif
+    ESMF_LogDefault%FileIsOpen=ESMF_FALSE
+    ESMF_LogDefault%flushed = ESMF_FALSE
+    ESMF_LogDefault%dirty = ESMF_FALSE
+    ESMF_LogDefault%fIndex = 1
+    i = ESMF_LogDefault%petnum
+    if (ESMF_LogDefault%logtype .eq. ESMF_LOG_SINGLE) then
+        ESMF_LogDefault%nameLogErrFile=trim(filename)
+    else
+        if (i .le. 9) then
+	    write(fnum,10) i
+        else if (i .le. 99) then
+            write(fnum,20) i
+        else if (i .le. 9999) then
+            write(fnum,30) i
+        else if (i .le. 99999) then
+            write(fnum,40) i
+        else if (i .le. 999999) then
+            write(fnum,50) i
+        else 
+            write(fnum,*) i
+        endif
+        fname = "pet" // trim(fnum) // "." // trim(filename)
+	print *,fname
+        ESMF_LogDefault%nameLogErrFile=fname
+    endif
  10     format(I1.1)
  20     format(I2.2)
  30     format(I3.3)
  40     format(I4.4)
  50     format(I5.5)
-    if (len(ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile) .gt. 32) then
+    if (len(ESMF_LogDefault%nameLogErrFile) .gt. 32) then
         print *, "filename exceeded 32 characters"
         if (present(rc)) rc = ESMF_FAILURE
         return
     endif
-	ESMF_LogDefault%LOG_ARRAY(i)%unitnumber=un   
-        do j=un, ESMF_LOG_UPPER
-            inquire(unit=j,iostat=status)
-            if (status .eq. 0) then
-              ESMF_LogDefault%LOG_ARRAY(i)%FileIsOpen = ESMF_TRUE
-	      ESMF_LogDefault%LOG_ARRAY(i)%unitNumber= j
-	      un = j+1
-              exit
-	    else
-	      if (present(rc)) rc=ESMF_FAILURE
-	      return
-     	    endif
-        enddo          
-    enddo
-    
+    do j=ESMF_LOG_FORT_STDOUT , ESMF_LOG_UPPER
+        inquire(unit=j,iostat=status)
+        if (status .eq. 0) then
+            ESMF_LogDefault%FileIsOpen = ESMF_TRUE
+	    ESMF_LogDefault%unitNumber= j
+            exit
+	else
+	    if (present(rc)) rc=ESMF_FAILURE
+	    return
+     	endif
+    enddo          
     ! BEWARE:  absoft 8.0 compiler bug - if you try to allocate directly
     ! you get an error.  if you allocate a local buffer and then point the
     ! derived type buffer at it, it works.  go figure.
     
-    allocate(localbuf(ESMF_LogDefault%petCount, ESMF_LogDefault%maxElements), &
-    stat=status)
+    allocate(localbuf(ESMF_LogDefault%maxElements), stat=status)
     if (status .ne. 0) then
       print *, "allocation of buffer failed"
       if (present(rc)) rc = ESMF_FAILURE
@@ -970,76 +922,74 @@ end subroutine ESMF_LogMsgSetError
 !      \end{description}
 ! 
 !EOP
-    integer 				         :: status, i, j, rc2,rc3,un	
-    type(ESMF_LOGENTRY), dimension(:,:), pointer :: localbuf
-    type(ESMF_LOGARRAY), dimension(:), pointer   :: localbuf2
+    integer 				       :: status, i, j, rc2	
+    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
+    character(len=32)                          :: fname
+    character(len=4)                           :: fnum
 
     if (present(rc)) rc=ESMF_FAILURE
     log%logNone = ESMF_FALSE !default is to log
     log%maxElements = 10
     log%halt=ESMF_LOG_HALTNEVER
     log%flushImmediately = ESMF_TRUE
-!    call ESMF_VMGetGlobal(log%vm,rc3)
-!    call ESMF_VMGet(log%vm,petCount=log%petCount)
-    call f_ESMF_VMGlobalGet(petCount=log%petCount)
+    call f_ESMF_VMGlobalGet(log%petnum)    
     if (present(lognone)) then
       if (lognone .eq. ESMF_LOG_NONE) log%logNone = ESMF_TRUE 
-      log%petCount = 1
     endif
     if (present(logtype)) then
-        log%logtype=logtype
-        if (log%logtype .eq. ESMF_LOG_SINGLE) then
-	    log%petCount=1
-	endif
+      	log%logtype=logtype
     else
         log%logtype=ESMF_LOG_SINGLE
-	log%petCount=1
-    endif 
-    allocate(localbuf2(log%petCount),stat=status)
-    if (status .ne. 0) then
-      print *, "allocation of buffer failed"
-      if (present(rc)) rc = ESMF_FAILURE
-      return
-    endif
-    log%LOG_ARRAY => localbuf2
-    un = ESMF_LOG_FORT_STDOUT
-    do i=1, log%petCount
-        log%LOG_ARRAY(i)%FileIsOpen=ESMF_FALSE
-        log%LOG_ARRAY(i)%flushed = ESMF_FALSE
-	log%LOG_ARRAY(i)%dirty = ESMF_FALSE
-	log%LOG_ARRAY(i)%fIndex = 1
-	if (log%petCount .eq. 1) then
-	    log%LOG_ARRAY(1)%nameLogErrFile=filename
-        else
-	    filename = "pet" // char(i) // "." // filename
-	    log%LOG_ARRAY(i)%nameLogErrFile=filename
-	endif
-	if (len(log%LOG_ARRAY(i)%nameLogErrFile) .gt. 32) then
-            print *, "filename exceeded 32 characters"
-            if (present(rc)) rc = ESMF_FAILURE
-                return
+    endif	
+    log%FileIsOpen=ESMF_FALSE
+    log%flushed = ESMF_FALSE
+    log%dirty = ESMF_FALSE
+    log%fIndex = 1
+    if (log%logtype .eq. ESMF_LOG_SINGLE) then
+        log%nameLogErrFile=trim(filename)
+    else
+        if (log%petnum .le. 9) then
+	    write(fnum,11) log%petnum 
+        else if (log%petnum .le. 99) then
+            write(fnum,21) log%petnum
+        else if (log%petnum .le. 9999) then
+            write(fnum,31) log%petnum
+        else if (log%petnum .le. 99999) then
+            write(fnum,41) log%petnum
+        else if (log%petnum .le. 999999) then
+            write(fnum,51) log%petnum
+        else 
+            write(fnum,*) log%petnum
         endif
-	log%LOG_ARRAY(i)%unitnumber=un   
-        do j=un, ESMF_LOG_UPPER
-            inquire(unit=j,iostat=status)
-            if (status .eq. 0) then
-              log%LOG_ARRAY(i)%FileIsOpen = ESMF_TRUE
-	      log%LOG_ARRAY(i)%unitNumber= j
-	      un = j+1
-              exit
-	    else
-	      if (present(rc)) rc=ESMF_FAILURE
-	      return
-     	    endif
-        enddo          
-    enddo
-    
+        fname = "pet" // trim(fnum) // "." // trim(filename)
+        log%nameLogErrFile=fname
+    endif
+ 11     format(I1.1)
+ 21     format(I2.2)
+ 31     format(I3.3)
+ 41     format(I4.4)
+ 51     format(I5.5)
+    if (len(log%nameLogErrFile) .gt. 32) then
+        print *, "filename exceeded 32 characters"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+    endif
+    do j=ESMF_LOG_FORT_STDOUT , ESMF_LOG_UPPER
+        inquire(unit=j,iostat=status)
+        if (status .eq. 0) then
+            log%FileIsOpen = ESMF_TRUE
+	    log%unitNumber= j
+            exit
+	else
+	    if (present(rc)) rc=ESMF_FAILURE
+	    return
+     	endif
+    enddo         
     ! BEWARE:  absoft 8.0 compiler bug - if you try to allocate directly
     ! you get an error.  if you allocate a local buffer and then point the
     ! derived type buffer at it, it works.  go figure.
     
-    allocate(localbuf(log%petCount, log%maxElements), &
-    stat=status)
+    allocate(localbuf(log%maxElements), stat=status)
     if (status .ne. 0) then
       print *, "allocation of buffer failed"
       if (present(rc)) rc = ESMF_FAILURE
@@ -1095,7 +1045,7 @@ end subroutine ESMF_LogOpen
 ! 
 !EOPI 
     integer :: status
-    type(ESMF_LOGENTRY), dimension(:,:), pointer :: localbuf
+    type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(verbose)) log%verbose=verbose
 	if (present(flush)) log%flushImmediately=flush
@@ -1104,7 +1054,7 @@ end subroutine ESMF_LogOpen
 	if (present(stream)) log%stream=stream
 	if (present(maxElements) .and. maxElements .gt. 0) then
 	    if (log%maxElements .ne. maxElements) then
-	        allocate(localbuf(ESMF_LogDefault%petCount, maxElements), &
+	        allocate(localbuf(maxElements), &
                      stat=status)
                 ! TODO: copy old contents over, or flush first!!
 	        deallocate(log%LOG_ENTRY,stat=status)
@@ -1166,73 +1116,65 @@ end subroutine ESMF_LogSet
     
     character(len=10)               :: t
     character(len=8)                :: d
-    !character(len=7)                :: lt
+    !character(len=7)               :: lt
     character(len=32)               ::tmethod,tfile
     integer			    ::tline
     integer                         ::h,m,s,ms,y,mn,dy
-    integer			    ::rc2
-    integer                         ::petid,petnum
+    integer			    ::rc2,index
     
-    !call ESMF_VMGet(ESMF_LogDefault%vm,localpet=petnum)
-    call f_ESMF_VMGlobalGet(localPet=petnum)    
-    if (ESMF_LogDefault%LogType .eq. ESMF_LOG_SINGLE) then
-        petid=1
-    else        
-	petid=petnum+1
-    endif	
-    
+    index = ESMF_LogDefault%findex
     if (ESMF_LogDefault%logNone .ne. ESMF_TRUE) then
-    ESMF_LogDefault%LOG_ARRAY(petid)%dirty = ESMF_TRUE
+    ESMF_LogDefault%dirty = ESMF_TRUE
     call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
     call DATE_AND_TIME(d,t)	
     if (present(rc)) rc=ESMF_FAILURE
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%methodflag = .FALSE.
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%lineflag = .FALSE.
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%fileflag = .FALSE.
+    ESMF_LogDefault%LOG_ENTRY(index)%methodflag = .FALSE.
+    ESMF_LogDefault%LOG_ENTRY(index)%lineflag = .FALSE.
+    ESMF_LogDefault%LOG_ENTRY(index)%fileflag = .FALSE.
     if (present(method)) then
         tmethod=adjustl(method)
-	ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%methodflag=.TRUE.
-	ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%method = tmethod
+	ESMF_LogDefault%LOG_ENTRY(index)%methodflag=.TRUE.
+	ESMF_LogDefault%LOG_ENTRY(index)%method = tmethod
     endif	
     if (present(line)) then
         tline=line 
-	ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%lineflag = .TRUE.
-	ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%line = tline
+	ESMF_LogDefault%LOG_ENTRY(index)%lineflag = .TRUE.
+	ESMF_LogDefault%LOG_ENTRY(index)%line = tline
     endif	
     if (present(file)) then
         tfile=adjustl(file)
-	ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%fileflag = .TRUE.
-	ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%file = tfile
+	ESMF_LogDefault%LOG_ENTRY(index)%fileflag = .TRUE.
+	ESMF_LogDefault%LOG_ENTRY(index)%file = tfile
     endif
     select case (msgtype%mtype)
         case (1)
-    	    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%lt="INFO"
+    	    ESMF_LogDefault%LOG_ENTRY(index)%lt="INFO"
         case (2)
-    	    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%lt="WARNING"
+    	    ESMF_LogDefault%LOG_ENTRY(index)%lt="WARNING"
    	case default
-    	    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%lt="ERROR"
+    	    ESMF_LogDefault%LOG_ENTRY(index)%lt="ERROR"
     end select	
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%d = d
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%h = h
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%m = m
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%s = s
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%ms = ms	
-    ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%msg = msg
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%d = d
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%h = h
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%m = m
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%s = s
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%ms = ms	
+    ESMF_LogDefault%LOG_ENTRY(ESMF_LogDefault%findex)%msg = msg
     if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTERROR).and. (msgtype .eq. ESMF_LOG_ERROR)) then
-        ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%stopprogram=.TRUE.
-        call ESMF_LogFlush(ESMF_LogDefault,petnum=petnum,rc=rc2)
+        ESMF_LogDefault%stopprogram=.TRUE.
+        call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
     endif    	 
     if ((ESMF_LogDefault%halt .eq. ESMF_LOG_HALTWARNING).and. (msgtype .gt. ESMF_LOG_WARNING)) then
-        ESMF_LogDefault%LOG_ENTRY(petid,ESMF_LogDefault%LOG_ARRAY(petid)%findex)%stopprogram=.TRUE.
-	call ESMF_LogFlush(ESMF_LogDefault, petnum=petnum,rc=rc2)
+        ESMF_LogDefault%stopprogram=.TRUE.
+	call ESMF_LogFlush(ESMF_LogDefault,rc=rc2)
     endif
-    if (ESMF_LogDefault%LOG_ARRAY(petid)%findex .eq. ESMF_LogDefault%maxElements) then
-        call ESMF_LogFlush(ESMF_LogDefault, petnum=petnum,rc=rc2) 
-	ESMF_LogDefault%LOG_ARRAY(petid)%findex = 1
+    if (ESMF_LogDefault%findex .eq. ESMF_LogDefault%maxElements) then
+        call ESMF_LogFlush(ESMF_LogDefault,rc=rc2) 
+	ESMF_LogDefault%findex = 1
     else
-        ESMF_LogDefault%LOG_ARRAY(petid)%findex = ESMF_LogDefault%LOG_ARRAY(petid)%findex + 1	
+        ESMF_LogDefault%findex = ESMF_LogDefault%findex + 1	
     endif	
-    ESMF_LogDefault%LOG_ARRAY(petid)%flushed = ESMF_FALSE
+    ESMF_LogDefault%flushed = ESMF_FALSE
     endif
     if (present(rc)) rc=ESMF_SUCCESS
 end subroutine ESMF_LogWrite
