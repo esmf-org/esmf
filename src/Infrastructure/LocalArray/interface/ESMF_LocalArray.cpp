@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.6 2004/04/20 22:51:53 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.7 2004/05/17 17:30:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -172,7 +172,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.6 2004/04/20 22:51:53 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.7 2004/05/17 17:30:18 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -306,6 +306,8 @@ end function
 ! This section includes the LocalArray Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayCreateByLst1D"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create an array with explicit arguments
 
@@ -375,6 +377,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayCreateByList"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create an LocalArray specifying all options.
 
@@ -470,6 +474,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayCreateBySpec"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayCreate -- Create a new LocalArray from an ArraySpec
 
@@ -538,6 +544,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrConstrF90Ptr"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
 
@@ -975,6 +983,8 @@ DeclarationMacro(LocalArrayDeallocate)
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArraySetInfo"
 !BOPI
 ! !IROUTINE: ESMF_LocalArraySetInfo
 !
@@ -1008,6 +1018,8 @@ DeclarationMacro(LocalArrayDeallocate)
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayGetInfo"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayGetInfo
 !
@@ -1041,6 +1053,8 @@ DeclarationMacro(LocalArrayDeallocate)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArraySetData"
 !BOPI
 ! !IROUTINE: ESMF_LocalArraySetData
 !
@@ -1164,6 +1178,8 @@ DeclarationMacro(LocalArrayDeallocate)
       end subroutine ESMF_LocalArrayGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayGetName"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayGetName - Retrieve the name of a LocalArray
 !
@@ -1219,6 +1235,8 @@ DeclarationMacro(LocalArrayDeallocate)
 !!! ESMF_LocalArrayF90Deallocate to get rid of it as well, so the interfaces
 !!! are more symmetric?
 !------------------------------------------------------------------------------ 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayF90Allocate"
 !BOPI
 ! !IROUTINE:  ESMF_LocalArrayF90Allocate - Allocate an F90 pointer and set LocalArray info
 !
@@ -1469,6 +1487,8 @@ AllocAllocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
  
 
 !------------------------------------------------------------------------------ 
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayF90Deallocate"
 !BOPI
 ! !IROUTINE:  ESMF_LocalArrayF90Deallocate - Deallocate an F90 pointer 
 !
@@ -1967,6 +1987,8 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayValidate"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayValidate - Check validity of LocalArray object
 !
@@ -2022,6 +2044,8 @@ AllocDeallocateMacro(real, R8, 7, COL7, LEN7, RNG7, LOC7)
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LocalArrayPrint"
 !BOPI
 ! !IROUTINE: ESMF_LocalArrayPrint - Print contents of an LocalArray object
 !
