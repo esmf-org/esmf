@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.3 2003/04/14 14:51:38 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.4 2003/04/24 17:12:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,18 +118,6 @@ extern "C" {
          delete[] name;
      }
 
-     void FTN(c_esmc_ftablegetinternalstate)(ESMC_FTable **ptr, char *type,
-                       void **data, enum dtype *dtype, int *status, int slen) {
-         char *name;
-
-         newtrim(type, slen, NULL, &name);
-         //printf("after newtrim, name = '%s'\n", name);
-
-         *status = (*ptr)->ESMC_FTableGetDataPtr(name, data, dtype);
-
-         delete[] name;
-     }
-
      void FTN(c_esmc_ftablesetentrypoint)(ESMC_FTable **ptr, char *type,
                                            void *func, int *status, int slen) {
          char *name;
@@ -179,8 +167,7 @@ extern "C" {
 
      void FTN(c_esmc_ftablesetcplargs)(ESMC_FTable **ptr, char *type,
                                       int *phase, void *comp, 
-                                      //void **statelist, void *clock, 
-                                      void *statelist, void *clock, 
+                                      void **statelist, void *clock, 
                                       int *status, int slen) {
 
          char *fname;
@@ -191,7 +178,6 @@ extern "C" {
          //printf("after newtrim, name = '%s'\n", fname);
 
          alist[0] = (void *)comp;
-         //alist[1] = (void *)(*statelist);
          alist[1] = (void *)statelist;
          alist[2] = (void *)clock;
          alist[3] = (void *)status;
@@ -202,14 +188,26 @@ extern "C" {
      }
 
 
-     void FTN(c_esmc_ftablesetinternalstate)(ESMC_FTable **ptr, char *type,
+     void FTN(c_esmc_ftablesetinternalstate)(ESMC_FTable ***ptr, char *type,
                         void *data, enum dtype *dtype, int *status, int slen) {
          char *name;
 
          newtrim(type, slen, NULL, &name);
          //printf("after newtrim, name = '%s'\n", name);
 
-         *status = (*ptr)->ESMC_FTableSetDataPtr(name, data, *dtype);
+         *status = (**ptr)->ESMC_FTableSetDataPtr(name, data, *dtype);
+
+         delete[] name;
+     }
+
+     void FTN(c_esmc_ftablegetinternalstate)(ESMC_FTable ***ptr, char *type,
+                       void **data, enum dtype *dtype, int *status, int slen) {
+         char *name;
+
+         newtrim(type, slen, NULL, &name);
+         //printf("after newtrim, name = '%s'\n", name);
+
+         *status = (**ptr)->ESMC_FTableGetDataPtr(name, data, dtype);
 
          delete[] name;
      }
