@@ -1,4 +1,4 @@
-! $Id: ESMF_UserGComp.F90,v 1.2 2003/04/03 22:43:58 nscollins Exp $
+! $Id: ESMF_UserGComp.F90,v 1.3 2003/04/04 15:38:36 nscollins Exp $
 !
 ! Test code which supplies a user-written component.
 
@@ -15,10 +15,7 @@
 
     module UserGridCompMod
     
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
-
-!   ! Other ESMF modules which are needed by Comps
+!   ! ESMF Framework module
     use ESMF_Mod
     
     implicit none
@@ -57,48 +54,33 @@
     end subroutine User_SetServices
 
 
-    subroutine my_init(gcomp, importstate, exportstate, externalclock, &
-                                         compname, layout, grid, config, rc)
+    subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importstate
       type(ESMF_State) :: exportstate
       type(ESMF_Clock) :: externalclock
-      character(len=*) :: compname
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid
-      type(ESMF_Config) :: config
       integer :: rc
      
 
     end subroutine my_init
 
 
-    subroutine my_run(gcomp, importstate, exportstate, externalclock, &
-                                         compname, layout, grid, config, rc)
+    subroutine my_run(gcomp, importstate, exportstate, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importstate
       type(ESMF_State) :: exportstate
       type(ESMF_Clock) :: externalclock
-      character(len=*) :: compname
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid
-      type(ESMF_Config) :: config
       integer :: rc
      
 
     end subroutine my_run
 
 
-    subroutine my_final(gcomp, importstate, exportstate, externalclock, &
-                                         compname, layout, grid, config, rc)
+    subroutine my_final(gcomp, importstate, exportstate, externalclock, rc)
       type(ESMF_GridComp) :: gcomp
       type(ESMF_State) :: importstate
       type(ESMF_State) :: exportstate
       type(ESMF_Clock) :: externalclock
-      character(len=*) :: compname
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Grid) :: grid
-      type(ESMF_Config) :: config
       integer :: rc
      
 

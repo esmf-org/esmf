@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.10 2003/04/03 22:43:57 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.11 2003/04/04 15:38:33 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -15,9 +15,6 @@
 
     program ESMF_StateCreateTest
     
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
-
 !   ! Local macros to make this simpler until we've got a template.
 #define P_START(string) print *, "------> Start: ", string
 #define P_END(string)   print *, "------>   End: ", string

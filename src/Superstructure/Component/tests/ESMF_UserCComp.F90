@@ -1,4 +1,4 @@
-! $Id: ESMF_UserCComp.F90,v 1.2 2003/04/03 22:43:58 nscollins Exp $
+! $Id: ESMF_UserCComp.F90,v 1.3 2003/04/04 15:38:35 nscollins Exp $
 !
 ! Test code which supplies a user-written coupler component.
 
@@ -15,9 +15,6 @@
 
     module UserCplCompMod
     
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
-
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_Mod
     
@@ -57,42 +54,30 @@
     end subroutine User_SetServices
 
 
-    subroutine my_init(ccomp, statelist, externalclock, &
-                                         compname, layout, config, rc)
+    subroutine my_init(ccomp, statelist, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist(:)
+      type(ESMF_State) :: statelist(*)
       type(ESMF_Clock) :: externalclock
-      character(len=*) :: compname
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Config) :: config
       integer :: rc
      
 
     end subroutine my_init
 
 
-    subroutine my_run(ccomp, statelist, externalclock, &
-                                         compname, layout, config, rc)
+    subroutine my_run(ccomp, statelist, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist(:)
+      type(ESMF_State) :: statelist(*)
       type(ESMF_Clock) :: externalclock
-      character(len=*) :: compname
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Config) :: config
       integer :: rc
      
 
     end subroutine my_run
 
 
-    subroutine my_final(ccomp, statelist, externalclock, &
-                                         compname, layout, config, rc)
+    subroutine my_final(ccomp, statelist, externalclock, rc)
       type(ESMF_CplComp) :: ccomp
-      type(ESMF_State) :: statelist(:)
+      type(ESMF_State) :: statelist(*)
       type(ESMF_Clock) :: externalclock
-      character(len=*) :: compname
-      type(ESMF_DELayout) :: layout
-      type(ESMF_Config) :: config
       integer :: rc
      
 

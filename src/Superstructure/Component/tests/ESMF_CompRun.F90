@@ -1,4 +1,4 @@
-! $Id: ESMF_CompRun.F90,v 1.2 2003/04/03 22:43:57 nscollins Exp $
+! $Id: ESMF_CompRun.F90,v 1.3 2003/04/04 15:38:33 nscollins Exp $
 !
 ! Test code which creates a new Component.
 
@@ -13,11 +13,8 @@
 !
 !\begin{verbatim}
 
-    program ESMF_CompCreateTest
+    program ESMF_GridCompCreateTest
     
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
-
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_Mod
 
@@ -68,7 +65,7 @@
     print *, "Component Test 1 finished"
 
 
-    end program ESMF_CompCreateTest
+    end program ESMF_GridCompCreateTest
     
 !\end{verbatim}
     
