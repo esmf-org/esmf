@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.1 2003/09/17 21:26:29 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.2 2003/09/18 16:38:28 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -47,26 +47,6 @@
 %\input{../Infrastructure/Field/doc/Field_prog}
 %#endif
 
-%
-% Field_obj.tex wants to include the graphics  file
-% fieldclassNH.eps.  In processing in CONSTITUENT
-% mode, this file can not be found.
-%
-%
-%% \section{Object Model}
-%% #ifdef STANDALONE
-%% \input{Field_obj}
-%% #elif defined(CONSTITUENT)
-%% \input{../Infrastructure/Field/doc/Field_obj}
-%% #endif
-
-% %\section{Global Parameters and Definitions}
-% #ifdef STANDALONE
-% %\input{Field_param}
-% #elif defined(CONSTITUENT)
-% %\input{../Infrastructure/Field/doc/Field_param}
-% #endif
-
 \section{Bundle Class}
 
 \subsection{Description}
@@ -111,61 +91,15 @@
 \input{../Infrastructure/Field/doc/ESMF_Bundle_fapi}
 #endif
 
-\section{DataMap Class}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{DataMap_desc}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/DataMap_desc}
-#endif
-
-\subsection{Usage}
-#ifdef STANDALONE
-\input{DataMap_usage}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/DataMap_usage}
-#endif
-
-%\subsubsection{Class Definition}
 %#ifdef STANDALONE
-%\input{DataMap_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/DataMap_def}
+%\section{Review Status}
+%\input{Field_desrev}
 %#endif
 
-%\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{DataMap_rest}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Field/doc/DataMap_rest}
-#endif
-
-%\section{DataMap F90 Interface}
-
-%\subsection{Use and Examples}
 %#ifdef STANDALONE
-%\input{../../Data/doc/DataMap_fex}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/Data/doc/DataMap_fex}
-%#endif
-
-\subsection{Class API}
-#ifdef STANDALONE
-\input{../../Data/doc/ESMF_DataMap_fapi}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Data/doc/ESMF_DataMap_fapi}
-#endif
-
-#ifdef STANDALONE
-\section{Review Status}
-\input{Field_desrev}
-#endif
-
-#ifdef STANDALONE
 %\section{Glossary}
-\input{Field_glos}
-#endif
+%\input{Field_glos}
+%#endif
 
 #ifdef STANDALONE
 %\section{Bibliography}

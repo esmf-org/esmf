@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/17 21:26:29 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/18 16:38:28 cdeluca Exp $ 
 ALL: alldoc 
 
 
@@ -13,16 +13,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Bundle/doc
 
-DVIFILES  = 	Bundle_reqdoc.dvi \
-		Bundle_desdoc.dvi \
+DVIFILES  = 	Bundle_desdoc.dvi \
 		Bundle_refdoc.dvi
 
-PDFFILES  =     ${ESMC_DOCDIR}/Bundle_reqdoc.pdf \
-		${ESMC_DOCDIR}/Bundle_desdoc.pdf \
+PDFFILES  =	${ESMC_DOCDIR}/Bundle_desdoc.pdf \
 		${ESMC_DOCDIR}/Bundle_refdoc.pdf
 
-HTMLFILES = 	${ESMC_DOCDIR}/Bundle_reqdoc \
-		${ESMC_DOCDIR}/Bundle_desdoc \
+HTMLFILES = 	${ESMC_DOCDIR}/Bundle_desdoc \
 		${ESMC_DOCDIR}/Bundle_refdoc
 
 #
@@ -52,15 +49,7 @@ REQDOC_DEP_FILES = Bundle_auth.tex Bundle_background.tex Bundle_terms.tex \
       Bundle_abbr.tex Bundle_req.tex Bundle_desdoc.ctex
 
 
-DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) Bundle_ccex.tex Bundle_ccparam.tex \
-      Bundle_def.tex Bundle_desc.tex Bundle_design.tex \
-      Bundle_fex.tex Bundle_fparam.tex Bundle_rest.tex \
-      Bundle_abbr.tex Bundle_alg.tex Bundle_background.tex \
-      Bundle_ccex.tex Bundle_ccparam.tex Bundle_def.tex \
-      Bundle_desc.tex Bundle_design.tex \
-      Bundle_fex.tex Bundle_fparam.tex Bundle_glos.tex Bundle_prog.tex \
-      Bundle_obj.tex Bundle_req.tex Bundle_reqdoc.ctex Bundle_rest.tex \
-      Bundle_syn.tex Bundle_terms.tex fieldclass.eps bundleclass.eps 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
 REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
 
