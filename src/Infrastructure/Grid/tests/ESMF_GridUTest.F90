@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.12 2003/06/05 17:48:34 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.13 2003/06/06 14:31:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.12 2003/06/05 17:48:34 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.13 2003/06/06 14:31:39 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -115,7 +115,9 @@
       name = "test grid 1"
       halo_width = 1
 
-      !NEX
+      !NEX_UTest
+
+
       ! Creating a layout test
       layout = ESMF_DELayoutCreate(rc=rc)
       write(name, *) "Creating a DELayout Test"
@@ -135,7 +137,9 @@
 			     halo_width=halo_width, &
                              name=name, rc=status)
 
-      !NEX
+      !NEX_UTest
+
+
       write(failMsg, *) ""
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
@@ -165,7 +169,9 @@
 
 #endif
 
-      !NEX
+      !NEX_UTest
+
+
       ! Printing a Grid
       call ESMF_GridPrint(grid, "", rc=rc)
       write(failMsg, *) ""
@@ -174,7 +180,9 @@
       !------------------------------------------------------------------------
 
 
-      !NEX
+      !NEX_UTest
+
+
       ! Test destroy subroutine
       call  ESMF_GridDestroy(grid, rc=rc)
       write(failMsg, *) ""
@@ -185,7 +193,9 @@
 
       !----------------------------------------------------------------------
 
-      !NEX
+      !NEX_UTest
+
+
       ! Test creation ofempty 
       grid1 =  ESMF_GridCreate( rc=rc)
       write(failMsg, *) ""
