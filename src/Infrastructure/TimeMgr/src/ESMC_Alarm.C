@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.20 2003/10/22 03:33:00 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.21 2003/10/27 20:36:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.20 2003/10/22 03:33:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.21 2003/10/27 20:36:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -506,7 +506,7 @@ int ESMC_Alarm::count=0;
 // !DESCRIPTION:
 //    Checks if {\tt ESMC\_Alarm}'s ringing state is set.
 //
-//    See also method ESMC_ClockGetAlarmList(areRinging, ...) to get
+//    See also method ESMC\_ClockGetAlarmList(areRinging, ...) to get
 //    a list of all ringing alarms belonging to a {\tt ESMC_Clock}.
 //
 //EOP
@@ -538,7 +538,7 @@ int ESMC_Alarm::count=0;
 //    clock timestep, using either the clock's current timestep,
 //    or a passed-in one.
 //
-//    See also method ESMC_ClockGetAlarmList(willRingNext, ...) to get
+//    See also method ESMC\_ClockGetAlarmList(willRingNext, ...) to get
 //    a list of all alarms belonging to a {\tt ESMC_Clock} that will ring on
 //    the next time step.
 
@@ -593,7 +593,7 @@ int ESMC_Alarm::count=0;
 //    Checks if {\tt ESMC\_Alarm}'s ringing state was set on the previous
 //    clock timestep.
 //
-//    See also method ESMC_ClockGetAlarmList(werePrevRinging, ...) to
+//    See also method ESMC\_ClockGetAlarmList(werePrevRinging, ...) to
 //    get a list of all alarms belonging to a {\tt ESMC_Clock} that were
 //    ringing on the previous time step.
 
