@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.17 2003/04/25 09:02:51 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.18 2003/04/28 23:17:47 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.17 2003/04/25 09:02:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.18 2003/04/28 23:17:47 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -607,8 +607,7 @@
 // !REQUIREMENTS: TMG 3.5.5
 
     if (currSimTime != ESMC_NULL_POINTER) {
-      // TODO: (make ESMC_TimeInterval::operator=)
-      // *currSimTime = (CurrTime - RefTime);
+      *currSimTime = (CurrTime - RefTime);
       return(ESMF_SUCCESS);
     }
     else {
@@ -639,8 +638,7 @@
 // !REQUIREMENTS: TMG 3.5.5
 
     if (prevSimTime != ESMC_NULL_POINTER) {
-      // TODO: (make ESMC_TimeInterval::operator=)
-      // *prevSimTime = (PrevTime - RefTime);
+      *prevSimTime = (PrevTime - RefTime);
       return(ESMF_SUCCESS);
     }
     else {
