@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/04/09 23:48:43 flanigan Exp $ 
+# $Id: makefile,v 1.6 2003/04/15 20:13:42 svasquez Exp $ 
 
 ALL:  tests
 
@@ -43,11 +43,11 @@ $(ESMC_TESTDIR)/ESMF_BaseUTest: ESMF_BaseUTest.o
 
 RUN_ESMF_BaseUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
 
 RUN_ESMF_BaseUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BaseUTest > $(ESMC_TESTDIR)/ESMF_BaseUTest.stdout
 
 ESMF_BaseUTest.rm:
 	echo "ESMF_BaseUTest.rm target called here."
@@ -63,11 +63,11 @@ $(ESMC_TESTDIR)/ESMF_StringTest: ESMC_StringSubr.o ESMF_StringTest.o
 
 RUN_ESMF_StringTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StringTest > $(ESMC_TESTDIR)/ESMF_StringTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StringTest > $(ESMC_TESTDIR)/ESMF_StringTest.stdout
 
 RUN_ESMF_StringTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_StringTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StringTest > $(ESMC_TESTDIR)/ESMF_StringTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StringTest > $(ESMC_TESTDIR)/ESMF_StringTest.stdout
 
 ESMF_StringTest.rm:
 	echo "ESMF_StringTest.rm target called here."
