@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.11 2003/09/05 21:46:34 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.12 2003/09/12 17:48:16 nscollins Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -86,12 +86,12 @@
     !NEX_UTest
     ni = 15 
     do i=1,ni
-    	if (intptr(i).eq.intptr2(i)) then
-		result = 0
-    	else
-		result = 1
-        	exit
-    	end if
+        if (intptr(i).eq.intptr2(i)) then
+            result = 0
+        else
+            result = 1
+            exit
+        end if
     enddo
     write(failMsg, *) "Array data did not compare."
     write(name, *) "Compare Local Array Integer 1D Data Test"
