@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.187 2004/10/13 23:06:18 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.188 2004/10/14 20:14:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -283,7 +283,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.187 2004/10/13 23:06:18 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.188 2004/10/14 20:14:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -3187,7 +3187,6 @@
           hasarray = .TRUE.
       endif
 
-#if 0
       ! and now see if it is at all consistent.
       if (hasarray .and. hasmap) then
           if (arrayrank .ne. maprank) then
@@ -3201,22 +3200,32 @@
       if (hasarray .and. hasmap .and. hasgrid) then
           j = 1
           do i = 1, arrayrank
-              if (maplist(i) .ne. 0) then
+              if (maplist(i) .eq. 0) then
                   ! maplist is 0 if the axes does not correspond to the grid.
                   ! in that case, it must correspond to the counts in the map.
-                  if (arraycounts(i) .ne. otheraxes(j)) then
-                      call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+                  ! TODO: for now the halo is added to all axes in the array,
+                  ! not just those which correspond to the grid.  when we fix
+                  ! this, then change this test to ignore halo widths.
+                  if (arraycounts(i) .ne. (otheraxes(j) + (2*halo))) then
+                      if (arraycounts(i) .eq. otheraxes(j)) then
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
+       "counts of non-grid axes in array must match counts in field datamap, including halo width", &
+                                                   ESMF_CONTEXT, rc)
+                          return
+                      else 
+                          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
        "counts of non-grid axes in array must match counts in field datamap", &
-                                                ESMF_CONTEXT, rc)
+                                                   ESMF_CONTEXT, rc)
                   
-                      return
+                          return
+                      endif
                   endif
                   j = j + 1
               else
                   ! maplist is not 0, so this axes does correspond to the grid.
                   ! the sizes must match, taking into account the halo widths
                   ! and the index reordering.
-                  if (arraycounts(maplist(i)) .ne. (gridcounts(i) + (2*halo))) then
+                  if (arraycounts(i) .ne. (gridcounts(maplist(i)) + (2*halo))) then
                       call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, &
                                "axes in array does not match counts in grid", &
                                                 ESMF_CONTEXT, rc)
@@ -3226,7 +3235,6 @@
               endif
           enddo
       endif
-#endif
 
       
       if (present(rc)) rc = ESMF_SUCCESS
