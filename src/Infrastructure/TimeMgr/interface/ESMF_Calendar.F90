@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.31 2003/09/11 00:02:19 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.32 2003/10/22 01:17:18 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.31 2003/09/11 00:02:19 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.32 2003/10/22 01:17:18 eschwab Exp $'
 
 !==============================================================================
 
@@ -186,17 +186,19 @@
 ! !IROUTINE: ESMF_CalendarSetGeneric - Initialize or set a custom Calendar
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarSetGeneric(calendar, daysPerMonth, &
-                                         secondsPerDay, daysPerYear, &
-                                         daysPerYearDn, daysPerYearDd, rc)
+      subroutine ESMF_CalendarSetGeneric(calendar, monthsPerYear, &
+                                         daysPerMonth, secondsPerDay, &
+                                         daysPerYear, daysPerYearDn, &
+                                         daysPerYearDd, rc)
 ! !ARGUMENTS:
-      type(ESMF_Calendar),                 intent(inout) :: calendar
-      integer, dimension(MONTHS_PER_YEAR), intent(in)    :: daysPerMonth
-      integer(ESMF_KIND_I4),               intent(in)    :: secondsPerDay
-      integer(ESMF_KIND_I4),               intent(in)    :: daysPerYear
-      integer(ESMF_KIND_I4),               intent(in)    :: daysPerYearDn
-      integer(ESMF_KIND_I4),               intent(in)    :: daysPerYearDd
-      integer,                             intent(out), optional :: rc
+      type(ESMF_Calendar),   intent(inout)         :: calendar
+      integer,               intent(in),  optional :: monthsPerYear
+      integer, dimension(:), intent(in),  optional :: daysPerMonth
+      integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd
+      integer,               intent(out), optional :: rc
 
 ! !DESCRIPTION:
 !     Sets values in a custom {\tt ESMF\_Calendar}.
@@ -205,16 +207,24 @@
 !     \begin{description}
 !     \item[calendar]
 !          The object instance to initialize.
-!     \item[daysPerMonth]
-!          Integer array of days per month, for each of the 12 months.
-!     \item[secondsPerDay]
+!     \item[{[monthsPerYear]}]
+!          Integer number of months per year.
+!     \item[{[daysPerMonth]}]
+!          Integer array of days per month, for each month of the year.
+!     \item[{[secondsPerDay]}]
 !          Integer number of seconds per day.
-!     \item[daysPerYear]
-!          Integer number of days per year.
-!     \item[daysPerYearDn]
+!     \item[{[daysPerYear]}]
+!          Integer number of days per year.  Use with daysPerYearDn and
+!          daysPerYearDd (see below) to specify a days-per-year calendar
+!          for any planetary body.
+!     \item[{[daysPerYearDn]}]
 !          Integer fractional number of days per year (numerator).
-!     \item[daysPerYearDd]
+!          Use with daysPerYear (see above) and daysPerYearDd (see below) to
+!          specify a days-per-year calendar for any planetary body.
+!     \item[{[daysPerYearDd]}]
 !          Integer fractional number of days per year (denominator).
+!          Use with daysPerYear and daysPerYearDn (see above) to
+!          specify a days-per-year calendar for any planetary body.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -224,7 +234,7 @@
 !     TMGn.n.n
 
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarSetGeneric(calendar, daysPerMonth, &
+      call c_ESMC_CalendarSetGeneric(calendar, monthsPerYear, daysPerMonth, &
                                      secondsPerDay, daysPerYear, &
                                      daysPerYearDn, daysPerYearDd, rc)
     
@@ -235,13 +245,14 @@
 ! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarGet(calendar, type, &
+      subroutine ESMF_CalendarGet(calendar, type, monthsPerYear, &
                                   daysPerMonth, secondsPerDay, secondsPerYear, &
                                   daysPerYear, daysPerYearDn, daysPerYearDd, rc)
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(in)            :: calendar
       type(ESMF_CalendarType), intent(out), optional :: type
-      integer, dimension(MONTHS_PER_YEAR), intent(out), optional :: daysPerMonth
+      integer,                 intent(out), optional :: monthsPerYear
+      integer, dimension(:),   intent(out), optional :: daysPerMonth
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerDay
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerYear
       integer(ESMF_KIND_I4),   intent(out), optional :: daysPerYear
@@ -259,6 +270,8 @@
 !     \item[{[type]}]
 !          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIANDAY,
 !          etc.
+!     \item[{[monthsPerYear]}]
+!          Integer number of months per year.
 !     \item[{[daysPerMonth]}]
 !          Integer array of days per month, for each month of the year.
 !     \item[{[secondsPerDay]}]
@@ -280,7 +293,7 @@
 !     TMGn.n.n
 
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarGet(calendar, type, &
+      call c_ESMC_CalendarGet(calendar, type, monthsPerYear, &
                               daysPerMonth, secondsPerDay, secondsPerYear, &
                               daysPerYear, daysPerYearDn, daysPerYearDd, rc)
     

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.20 2003/09/12 16:49:07 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.21 2003/10/22 01:17:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,6 +70,7 @@
  #include <ESMC_BaseTime.h>
  #include <ESMC_Time.h>
 
+// TODO: replace with monthsPerYear property
 #define MONTHS_PER_YEAR 12
 
 // TODO: make function for Gregorian only?
@@ -105,6 +106,8 @@ class ESMC_Calendar {
 
     ESMC_CalendarType type;    // Calendar type
 
+    int monthsPerYear;
+// TODO: make dynamically allocatable with monthsPerYear
     int daysPerMonth[MONTHS_PER_YEAR];
     ESMF_KIND_I4 secondsPerDay;
     ESMF_KIND_I4 secondsPerYear;
@@ -119,13 +122,18 @@ class ESMC_Calendar {
 
   public:
 
+// TODO: make dynamically allocatable ESMC_CalendarCreate() to ensure
+// persistence in times/clocks.
+
     int ESMC_CalendarSet(ESMC_CalendarType type);
-    int ESMC_CalendarSetGeneric(int         *daysPerMonth,
-                                ESMF_KIND_I4 secondsPerDay,
-                                ESMF_KIND_I4 daysPerYear,
-                                ESMF_KIND_I4 daysPerYearDn,
-                                ESMF_KIND_I4 daysPerYearDd);
+    int ESMC_CalendarSetGeneric(int          *monthsPerYear,
+                                int          *daysPerMonth,
+                                ESMF_KIND_I4 *secondsPerDay,
+                                ESMF_KIND_I4 *daysPerYear,
+                                ESMF_KIND_I4 *daysPerYearDn,
+                                ESMF_KIND_I4 *daysPerYearDd);
     int ESMC_CalendarGet(ESMC_CalendarType *type,
+                         int              *monthsPerYear,
                          int              *daysPerMonth,
                          ESMF_KIND_I4     *secondsPerDay,
                          ESMF_KIND_I4     *secondsPerYear,
@@ -175,18 +183,19 @@ class ESMC_Calendar {
     // native C++ constructors/destructors
     ESMC_Calendar(void);
     ESMC_Calendar(ESMC_CalendarType type);
-    ESMC_Calendar(int *daysPerMonth, ESMF_KIND_I4 secondsPerDay,
-                  ESMF_KIND_I4 daysPerYear, ESMF_KIND_I4 daysPerYeardN,
-                  ESMF_KIND_I4 daysPerYearDd);
+    ESMC_Calendar(int *monthsPerYear, int *daysPerMonth,
+                  ESMF_KIND_I4 *secondsPerDay, ESMF_KIND_I4 *daysPerYear,
+                  ESMF_KIND_I4 *daysPerYeardN, ESMF_KIND_I4 *daysPerYearDd);
     ~ESMC_Calendar(void);
 
  // < declare the rest of the public interface methods here >
     
-    friend class ESMC_Time;
-
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private:
+
+    friend class ESMC_Time;
+
 //
  // < declare private interface methods here >
 //
