@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.124.2.1 2005/03/02 22:08:05 jwolfe Exp $
+//$Id: ESMC_Route.C,v 1.124.2.2 2005/03/04 00:06:22 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.124.2.1 2005/03/02 22:08:05 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.124.2.2 2005/03/04 00:06:22 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -562,12 +562,22 @@
               // test contiguity of xpacket data   TODO: should come from XP
               // if sending data is contiguous, set the pointer into the data;
               // otherwise create a buffer and pack it if necessary
+              sendContig = true;
               if (sendContigLength == sendStride[0]) {
-                  sendContig = true;
-                  sendBuffer = (char *)sendAddr+(sendOffset*nbytes); 
-                  sendBufferSize = sendContigLength*sendRepCount[0] * nbytes;
+                for (k=1; k<sendRank-1; k++) {
+                 if (sendStride[k] != sendRepCount[k-1]*sendStride[k-1]) sendContig = false;
+                }
               } else {
-                  sendContig = false;
+                sendContig = false;
+              }
+              
+              if (sendContig) {
+                  sendBuffer = (char *)sendAddr+(sendOffset*nbytes); 
+                  sendBufferSize = sendContigLength*nbytes;
+                  for (k=0; k<sendRank-1; k++) {
+                    sendBufferSize *= sendRepCount[k];
+                  }
+              } else {
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, VMType, nbytes,
                                               &sendBuffer, &sendBufferSize);
                   rc = ESMC_XPacketPackBuffer(1, &sendXP, VMType, nbytes,
@@ -590,12 +600,22 @@
               // the receive buffer is a bit more complicated - it depends both
               // on whether the receive buffer is contig and also if the sender
               // and receiver are the same PET.
+              recvContig = true;
               if (recvContigLength == recvStride[0]) {
-                  recvContig = true;
-                  recvBuffer = (char *)recvAddr+(recvOffset*nbytes); 
-                  recvBufferSize = recvContigLength*recvRepCount[0] * nbytes;
+                for (k=1; k<recvRank-1; k++) {
+                 if (recvStride[k] != recvRepCount[k-1]*recvStride[k-1]) recvContig = false;
+                }
               } else {
-                  recvContig = false;
+                recvContig = false;
+              }
+
+              if (recvContig) {
+                  recvBuffer = (char *)recvAddr+(recvOffset*nbytes); 
+                  recvBufferSize = recvContigLength*nbytes;
+                  for (k=0; k<recvRank-1; k++) {
+                    recvBufferSize *= recvRepCount[k];
+                  }
+              } else {
                   // make a separate receive buffer if necessary (if the data
                   // isn't contig and can't be moved directly to where it will
                   // finally need to be.
@@ -1087,12 +1107,22 @@
               // test contiguity of xpacket data   TODO: should come from XP
               // if sending data is contiguous, set the pointer into the data;
               // otherwise create a buffer and pack it if necessary
+              sendContig = true;
               if (sendContigLength == sendStride[0]) {
-                  sendContig = true;
-                  sendBufferList[req] = (char *)sendAddr+(sendOffset*nbytes); 
-                  sendBufferSize = sendContigLength*sendRepCount[0] * nbytes;
+                for (k=1; k<sendRank-1; k++) {
+                 if (sendStride[k] != sendRepCount[k-1]*sendStride[k-1]) sendContig = false;
+                }
               } else {
-                  sendContig = false;
+                sendContig = false;
+              }
+
+              if (sendContig) {
+                  sendBufferList[req] = (char *)sendAddr+(sendOffset*nbytes); 
+                  sendBufferSize = sendContigLength*nbytes;
+                  for (k=0; k<sendRank-1; k++) {
+                    sendBufferSize *= sendRepCount[k];
+                  }
+              } else {
                   rc = ESMC_XPacketMakeBuffer(1, &sendXP, VMType, nbytes,
                                               &sendBufferList[req], &sendBufferSize);
                   rc = ESMC_XPacketPackBuffer(1, &sendXP, VMType, nbytes,
@@ -1115,12 +1145,22 @@
               // the receive buffer is a bit more complicated - it depends both
               // on whether the receive buffer is contig and also if the sender
               // and receiver are the same PET.
+              recvContig = true;
               if (recvContigLength == recvStride[0]) {
-                  recvContig = true;
-                  recvBufferList[req] = (char *)recvAddr+(recvOffset*nbytes); 
-                  recvBufferSize = recvContigLength*recvRepCount[0] * nbytes;
+                for (k=1; k<recvRank-1; k++) {
+                 if (recvStride[k] != recvRepCount[k-1]*recvStride[k-1]) recvContig = false;
+                }
               } else {
-                  recvContig = false;
+                recvContig = false;
+              }
+
+              if (recvContig) {
+                  recvBufferList[req] = (char *)recvAddr+(recvOffset*nbytes); 
+                  recvBufferSize = recvContigLength*nbytes;
+                  for (k=0; k<recvRank-1; k++) {
+                    recvBufferSize *= recvRepCount[k];
+                  }
+              } else {
                   // make a separate receive buffer if necessary (if the data
                   // isn't contig and can't be moved directly to where it will
                   // finally need to be.
@@ -1393,8 +1433,14 @@
             }
 
             // test contiguity of xpacket data   TODO: should come from XP
-            recvContig = false;
-            if (recvContigLength == recvStride[0]) recvContig = true;
+            recvContig = true;
+            if (recvContigLength == recvStride[0]) {
+              for (k=1; k<recvRank-1; k++) {
+               if (recvStride[k] != recvRepCount[k-1]*recvStride[k-1]) recvContig = false;
+              }
+            } else {
+              recvContig = false;
+            }
 
             // time to retrieve data == only necessary if myPET != theirPET
             if (myPET != theirPET) {
