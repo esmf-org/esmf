@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.20 2004/06/15 11:18:36 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.21 2004/06/17 16:38:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.20 2004/06/15 11:18:36 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.21 2004/06/17 16:38:08 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -632,6 +632,7 @@ end function
         ! local vars
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
+        integer :: i, dimlength
 
         ! init return code
         status = ESMF_FAILURE
@@ -643,13 +644,26 @@ end function
         endif
 
         ! initialize the contents of the datamap
+        datamap%dataRank = dataRank
 
         ! set the defaults
         datamap%dataDimOrder(:) = 0
+        datamap%dataDimOrder(1:dataRank) = (/ (i,i=1,dataRank) /)
 
         ! now overwrite with what the user passed in
-        datamap%dataRank = dataRank
-        datamap%dataDimOrder(1:size(dataIndexList)) = dataIndexList
+        if (present(dataIndexList)) then
+           dimlength = size(dataIndexList,1)
+           if (dimlength .lt. datamap%dataRank) then
+              if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
+                                "dataIndexList array too short for dataRank", &
+                                 ESMF_CONTEXT, rc)) return
+           endif
+
+           do i=1, dimlength
+             datamap%dataDimOrder(i) = dataIndexList(i)
+           enddo
+        endif
+
 
         ! counts for dimensions not aligned with the grid
         datamap%dataNonGridCounts(:) = 1
