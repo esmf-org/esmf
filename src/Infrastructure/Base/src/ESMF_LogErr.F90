@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.64 2005/01/10 22:08:04 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.65 2005/01/10 22:15:36 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -995,7 +995,7 @@ end subroutine ESMF_LogMsgSetError
 end subroutine ESMF_LogOpen	
 
 !--------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_LogSet - Set Log parameters
 
 ! !INTERFACE: 
@@ -1035,7 +1035,7 @@ end subroutine ESMF_LogOpen
 !            Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
 ! 
-!EOPI 
+!EOP
     integer :: status
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	if (present(rc)) rc=ESMF_FAILURE
