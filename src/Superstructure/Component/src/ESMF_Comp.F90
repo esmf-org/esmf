@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.22 2003/02/20 17:31:25 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.23 2003/02/25 18:42:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,7 +149,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.22 2003/02/20 17:31:25 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.23 2003/02/25 18:42:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -501,7 +501,7 @@ end interface
         ! release any storage that was allocated
         if (associated(compp%statelist)) then
            deallocate(compp%statelist, stat=status)
-           if (status .ne. ESMF_SUCCESS) then
+           if (status .ne. 0) then
              print *, "Component contents destruction error"
              return
            endif
