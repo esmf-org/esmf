@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.3 2004/04/23 14:30:16 theurich Exp $
+! $Id: ESMF_Init.F90,v 1.4 2004/04/23 15:02:16 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,6 @@
       integer :: status
       logical, save :: already_init = .false.    ! Static, maintains state.
       type(ESMF_VM) :: testVM
-      type(ESMF_newDELayout) :: testDELayout
 
       ! Initialize return code
       rcpresent = .FALSE.
@@ -196,24 +195,10 @@
       !    return
       !endif
 
-      ! Create the global default layout
-      call ESMF_newDELayoutCreateGlobal(status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error creating default layout"
-          return
-      endif
-
       ! Test getting the global VM
       call ESMF_VMGetGlobal(testVM, rc)
       if (status .ne. ESMF_SUCCESS) then
           print *, "Error getting global vm"
-          return
-      endif
-
-      ! Test getting the global newDELayout
-      call ESMF_newDELayoutGetGlobal(testDELayout, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error getting global delayout"
           return
       endif
 
