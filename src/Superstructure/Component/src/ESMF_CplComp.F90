@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.33 2004/05/19 17:12:41 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.34 2004/05/20 11:51:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.33 2004/05/19 17:12:41 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.34 2004/05/20 11:51:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -194,12 +194,12 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
 
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                     config=config, clock=clock, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateNew%compp => compclass
@@ -275,13 +275,13 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateConf%compp => compclass
@@ -349,7 +349,7 @@
 !    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
 !    component is giving to the created child 
 !    component. If {\tt petList} is not specified all of the 
-!    parent's {\tt PET}s will be given to the child component.
+!    parents {\tt PET}s will be given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -369,13 +369,13 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, vm=vm, petList=petList, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateVM%compp => compclass
@@ -441,12 +441,12 @@
 !    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[vm]}]
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
-!    inherit parent's {\tt VM}.
+!    inherit parents {\tt VM}.
 !   \item[{[petlist]}]
 !    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
 !    component is giving to the created child 
 !    component. If {\tt petList} is not specified all of the 
-!    parent's {\tt PET}s will be given to the child component.
+!    parents {\tt PET}s will be given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -466,14 +466,14 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateGPar%compp => compclass
@@ -539,12 +539,12 @@
 !    down to the Initialize/Run/Finalize routines separately.
 !   \item[{[vm]}]
 !    {\tt ESMF\_VM} virtual machine object.  If unspecified, 
-!    inherit parent's {\tt VM}.
+!    inherit parents {\tt VM}.
 !   \item[{[petlist]}]
 !    List of {\tt PET}s in the given {\tt ESMF\_VM} that the parent 
 !    component is giving to the created child 
 !    component. If {\tt petList} is not specified all of the 
-!    parent's {\tt PET}s will be given to the child component.
+!    parents {\tt PET}s will be given to the child component.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -564,14 +564,14 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateCPar%compp => compclass
@@ -622,12 +622,11 @@
 
         ! call Destruct to release resources
         call ESMF_CompDestruct(cplcomp%compp, localrc)
-        if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Deallocate the cplcomp struct itself
         deallocate(cplcomp%compp, stat=localrc)
-	if (ESMF_LogMsgFoundAllocError(localrc, "deallocating Component class",&
-                                                                    rc)) return
+	if (EM_LogMsgFoundAllocError(localrc, "deallocating Component class", rc)) return
         nullify(cplcomp%compp)
  
         ! Set return code if user specified it
@@ -639,7 +638,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompFinalize"
 !BOP
-! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
+! !IROUTINE: ESMF_CplCompFinalize - Call the CplComps finalize routine
 !
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
@@ -669,7 +668,7 @@
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent component's clock, and will be treated
+!    This is generally the parent components clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
@@ -751,7 +750,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompInitialize"
 !BOP
-! !IROUTINE: ESMF_CplCompInitialize - Call the CplComp's initialize routine
+! !IROUTINE: ESMF_CplCompInitialize - Call the CplComps initialize routine
 !
 ! !INTERFACE:
       recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
@@ -779,7 +778,7 @@
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent component's clock, and will be treated
+!    This is generally the parent components clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}] 
@@ -846,7 +845,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompReadRestart"
 !BOP
-! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
+! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComps restore routine
 !
 ! !INTERFACE:
      recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, &
@@ -870,7 +869,7 @@
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent component's clock, and will be treated
+!    This is generally the parent components clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !    {\tt ESMF\_State} containing export data for coupling.
@@ -930,7 +929,7 @@
 !    {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent component's clock, and will be treated
+!    This is generally the parent components clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
@@ -1046,7 +1045,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompWriteRestart"
 !BOP
-! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
+! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComps checkpoint routine
 
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
@@ -1072,7 +1071,7 @@
 !    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
 !    External {\tt ESMF\_Clock} for passing in time information.  
-!    This is generally the parent component's clock, and will be treated
+!    This is generally the parent components clock, and will be treated
 !    as read-only by the child component.  The child component can maintain
 !    a private clock for its own internal time computations.
 !   \item[{[phase]}]  
@@ -1146,7 +1145,7 @@
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
                    pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1200,7 +1199,7 @@
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1255,7 +1254,7 @@
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
                    pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1298,7 +1297,7 @@
 
     ! call CompClass method
     call ESMF_CompWait(cplcomp%compp, localrc)
-    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS

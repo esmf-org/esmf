@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.43 2004/05/17 22:32:03 jwolfe Exp $
+! $Id: ESMF_GridComp.F90,v 1.44 2004/05/20 11:51:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,6 +36,7 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_VMMod
+      use ESMF_LogErrMod
       use ESMF_ConfigMod
       use ESMF_ClockMod
       use ESMF_GridTypesMod
@@ -84,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.43 2004/05/17 22:32:03 jwolfe Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.44 2004/05/20 11:51:26 nscollins Exp $'
 
 !==============================================================================
 !
@@ -190,20 +191,12 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=status)
-        ! if (ESMF_LogFoundAllocError(status, "compclass", rc)) return
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
-          return
-        endif
+        if (EM_LogMsgFoundAllocError(status, "compclass", rc)) return
 
         ! Call construction method to initialize gridcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
                 gridcomptype, config=config, grid=grid, clock=clock, rc=status)
-        ! if (ESMF_LogPassFoundError(status, rc)) return
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "GridComp construction error"
-          return
-        endif
+        if (EM_LogMsgFoundError(status, ESMF_ERR_PASSTHRU, rc)) return
 
         ! Set return values
         ESMF_GridCompCreateNew%compp => compclass
@@ -386,11 +379,7 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=status)
-        ! if (ESMF_LogFoundAllocError(status, "compclass", rc)) return
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
-          return
-        endif
+        if (EM_LogMsgFoundAllocError(status, "compclass", rc)) return
    
         ! Call construction method to initialize gridcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
@@ -490,11 +479,7 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=status)
-        ! if (ESMF_LogFoundAllocError(status, "compclass", rc)) return
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
-          return
-        endif
+        if (EM_LogMsgFoundAllocError(status, "compclass", rc)) return
    
         ! Call construction method to initialize gridcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
@@ -594,11 +579,7 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=status)
-        ! if (ESMF_LogFoundAllocError(status, "compclass", rc)) return
-        if(status .NE. 0) then
-          print *, "ERROR in ESMF_GridGridCompCreate: Allocate"
-          return
-        endif
+        if (EM_LogMsgFoundAllocError(status, "compclass", rc)) return
    
         ! Call construction method to initialize gridcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, &
@@ -673,11 +654,8 @@
 
         ! Deallocate the gridcomp struct itself
         deallocate(gridcomp%compp, stat=status)
-        ! if (ESMF_LogFoundAllocError(status, "compclass dealloc", rc)) return
-        if (status .ne. 0) then
-          print *, "GridComp contents destruction error"
-          return
-        endif
+        if (EM_LogMsgFoundAllocError(status, "compclass dealloc", rc)) return
+
         nullify(gridcomp%compp)
  
         ! Set return code if user specified it
