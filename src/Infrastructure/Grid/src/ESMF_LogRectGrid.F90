@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.44 2004/03/20 19:44:24 cdeluca Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.45 2004/03/22 20:29:58 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3241,18 +3241,38 @@
 
       ! call DistGrid method to retrieve information otherwise not available
       ! to the application level
-      if (present(localCellCount) .OR. aSize.ge.1) then
+      if (present(localCellCount)) then
+        horzCellCount = 1
+        vertCellCount = 1
+        if (horzPhysIdUse.ne.-1) then
+          call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
+                                  horzCellCount, &
+                                  total=total, rc=status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
+            return
+          endif
+        endif
+        if (vertPhysIdUse.ne.-1) then
+          call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
+                                  vertCellCount, &
+                                  total=total, rc=status)
+          if (status .NE. ESMF_SUCCESS) then
+            print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
+            return
+          endif
+        endif
+        localCellCount = horzCellCount*vertCellCount
+      endif
+      if (aSize.ge.1) then
         index = 1
         if (aSize.ge.2 .AND. horzPhysIdUse.ne.-1) then
           index         = 3
-          horzCellCount = 1
-          vertCellCount = 1
           call ESMF_DistGridGetDE(grid%ptr%distgrids(horzDistIdUse)%ptr, &
-                                  horzCellCount, &
-                                  localCellCountPerDimUse(1:2), &
-                                  globalStartPerDimUse(1:2), &
-                                  globalAIPerDimUse(1:2), &
-                                  total=total, rc=status)
+                    localCellCountPerDim=localCellCountPerDimUse(1:2), &
+                    globalStartPerDim=globalStartPerDimUse(1:2), &
+                    globalAIPerDim=globalAIPerDimUse(1:2), &
+                    total=total, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
             return
@@ -3260,19 +3280,16 @@
         endif
         if (aSize.ge.index .AND. vertPhysIdUse.ne.-1) then
           call ESMF_DistGridGetDE(grid%ptr%distgrids(vertDistIdUse)%ptr, &
-                                  vertCellCount, &
-                                  localCellCountPerDimUse(index:index), &
-                                  globalStartPerDimUse(index:index), &
-                                  globalAIPerDimUse(index:index), &
-                                  total=total, rc=status)
+                    localCellCountPerDim=localCellCountPerDimUse(index:index), &
+                    globalStartPerDim=globalStartPerDimUse(index:index), &
+                    globalAIPerDim=globalAIPerDimUse(index:index), &
+                    total=total, rc=status)
           if (status .NE. ESMF_SUCCESS) then
             print *, "ERROR in ESMF_LRGridGetDE: distgrid get de"
             return
           endif
         endif
-
         ! load local values into return arguments
-        if (present(localCellCount)) localCellCount = horzCellCount*vertCellCount
         do i = 1,gridRank
           if (present(localCellCountPerDim)) &
                       localCellCountPerDim(order(i)) = localCellCountPerDimUse(i)
@@ -4404,6 +4421,7 @@
       if (present(horzCoordSystem)) horzCoordSystem = gridp%horzCoordSystem
       if (present(vertCoordSystem)) vertCoordSystem = gridp%vertCoordSystem
       if (present(coordOrder     )) coordOrder      = gridp%coordOrder
+      if (present(dimCount       )) dimCount        = gridp%dimCount
 
       ! get name from base obj
       if (present(name)) then
