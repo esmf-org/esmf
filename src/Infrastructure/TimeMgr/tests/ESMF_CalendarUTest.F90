@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.12 2004/01/30 23:15:11 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.13 2004/02/02 19:16:55 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.12 2004/01/30 23:15:11 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.13 2004/02/02 19:16:55 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -249,7 +249,7 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
                                         daysPerMonth=days_per_month, &
 					secondsPerDay=86400, &
 					daysPerYear=360, &
@@ -289,7 +289,7 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with overflow Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
                                         daysPerMonth=dayspermonth, &
 					secondsPerDay=86400, &
 					daysPerYear=100000000, &
@@ -326,7 +326,7 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with negative number seconds Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
                                         daysPerMonth=dayspermonth, &
 					secondsPerDay=-400, &
 					daysPerYear=1, &
@@ -364,7 +364,7 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with nonsense numbers Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+      customCalendar = ESMF_CalendarCreate("CustomCalendar", &
                                         daysPerMonth=dayspermonth, &
 					secondsPerDay=86400, &
 					daysPerYear=1, &
