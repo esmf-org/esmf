@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.25 2003/04/28 23:19:30 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.26 2003/04/29 05:50:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.25 2003/04/28 23:19:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.26 2003/04/29 05:50:09 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -569,7 +569,13 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // validate inputs
+    if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+
+    // TODO: validate for month calendars ?
+
     // TODO
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetString
@@ -595,6 +601,12 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // validate inputs
+    if (dayOfYear == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
     // get year of our (this) time
     ESMF_IKIND_I8 YR;
@@ -625,6 +637,8 @@
     // calculate difference between 1/1/YR and our (this) time
     ESMC_TimeInterval dayofYear;
     dayofYear = *this - dayOne;
+    // TODO: add C++ infrastructure to enable the following expression:
+    // ESMC_TimeInterval dayofYear = *this - dayOne;
     
     // get difference in floating point days
     double diffDays;
@@ -667,6 +681,12 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // validate inputs
+    if (dayOfWeek == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+
     // TODO
     return(ESMF_SUCCESS);
 
@@ -690,6 +710,12 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // validate inputs
+    if (dayOfMonth == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
 
     // TODO: use native C++ Get() when ready
     ESMC_TimeGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER, dayOfMonth, 
@@ -723,7 +749,62 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
+    // validate inputs
+    if (midMonth == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+    if (Calendar->Type == ESMC_CAL_JULIAN ||
+        Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+
+    // TODO: use native C++ Get()/Set() when ready
+
+    // get this date
+    ESMF_IKIND_I8 YR;
+    int MM, DD;
+    ESMC_TimeGet(&YR, &MM, &DD, 
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER);
+
+    // set start of this month
+    DD = 1;
+    ESMC_Time startOfMonth = *this;  // copy calendar and timezone
+    startOfMonth.ESMC_TimeSet(&YR, &MM, &DD, 
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER);
+
+    // set end of this month (start of next month)
+    DD = 1;
+    MM++;
+    if (MM > MONTHS_PER_YEAR) {
+      MM = 1;
+      YR++;
+    }
+    ESMC_Time endOfMonth = *this;  // copy calendar and timezone
+    endOfMonth.ESMC_TimeSet(&YR, &MM, &DD, 
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                 ESMC_NULL_POINTER);
+
+    // size of this month
+    ESMC_TimeInterval month;
+    month = endOfMonth - startOfMonth;
+
+    // calculate and return the middle of this month
+    *midMonth = startOfMonth + month/2;
+
+    // TODO: add C++ infrastructure to enable the following expression:
+    // *midMonth = startOfMonth + (endOfMonth - startOfMonth)/2;
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeGetMidMonth
