@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.35 2003/09/05 21:13:55 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.36 2003/09/05 22:40:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.35 2003/09/05 21:13:55 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.36 2003/09/05 22:40:52 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -57,7 +57,7 @@
       type(ESMF_Clock) :: clock, clock1
 
       ! instantiate a calendar
-      type(ESMF_Calendar) :: gregorianCalendar
+      type(ESMF_Calendar) :: gregorianCalendar, julianCalendar
       type(ESMF_CalendarType) :: cal_type
 
       ! instantiate timestep, start and stop times
@@ -73,8 +73,11 @@
       ! initialize ESMF framework
       call ESMF_FrameworkInitialize(rc)
 
-      ! initialize calendar to be Gregorian type
+      ! initialize one calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+
+      ! initialize secand calendar to be Julian type
+      call ESMF_CalendarSet(julianCalendar, ESMF_CAL_JULIANDAY, rc)
 
 !--------------------------------------------------------------------------------
 !     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
@@ -383,6 +386,18 @@
       call ESMF_TimeSet(stopTime, yr=2002, mm=3, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       write(failMsg, *) "Should return ESMF_FAILURE because timestep is positive."
+      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+ 
+
+     !EX_UTest
+      write(name, *) "Clock Initialization with stop time & start time with different calendars Test" 
+      call ESMF_TimeSet(startTime, yr=2000, mm=3, dd=13, &
+                                   calendar=julianCalendar, rc=rc)
+      write(failMsg, *) "Should return ESMF_FAILURE."
       call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
