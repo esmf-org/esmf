@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.21 2005/02/25 05:31:26 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.22 2005/03/04 22:12:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,16 +88,17 @@
 
       ! obj types from base class, same with IDs
 
-!TODO: figure out why this does not work on the altix system.  for now,
-! explicitly add !! in front of DEBUG lines.  the preprocessor does not
-! seem to be doing the substitution before the parsing happens.
-
-! to enable the debugging messages sprinkled amongst the proxy create
-! code, set the #if number below to 1.  to turn them off, set it to 0.
+!TODO: This does not work as expected on systems which parse out comments
+! before doing substitution.  (it replaces DEBUG with nothing.)
+! The alternative is:  #define DEBUG  if (.false.) then
+! but i am not sure if that is recognized at compile time and avoided
+! or if it introduces a bunch of run-time tests.  (hopefully the former.)
+! For now, just comment out the whole mess.
 !#if 0
 !#define DEBUG  print *, mypet, 
 !#else
-!#define DEBUG !
+!#define DEBUG !!
+!#define DEBUG if (.false.) then
 !#endif
 
 
@@ -113,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.21 2005/02/25 05:31:26 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.22 2005/03/04 22:12:35 nscollins Exp $'
 
 !==============================================================================
 ! 
