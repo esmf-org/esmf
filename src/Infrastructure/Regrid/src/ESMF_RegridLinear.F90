@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.28 2004/12/07 23:28:57 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.29 2004/12/18 15:26:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.28 2004/12/07 23:28:57 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.29 2004/12/18 15:26:02 nscollins Exp $'
 
 !==============================================================================
 
@@ -146,7 +146,8 @@
       type(ESMF_Array) :: srcMaskArray
       type(ESMF_Array), pointer :: dstLocalCoordArray
       type(ESMF_Array), pointer :: srcLocalCoordArray
-      type(ESMF_DomainList) :: recvDomainList, recvDomainListTot
+      type(ESMF_DomainList) :: recvDomainList 
+      !type(ESMF_DomainList) :: recvDomainListTot
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
@@ -302,17 +303,17 @@
      
       ! Loop through domains for the search routine
       call ESMF_GridGet(srcGrid, vertCoordSystem=coordSystem, rc=localrc)
-      num_domains = recvDomainListTot%num_domains
+      num_domains = recvDomainList%num_domains
       start = 1
       startComp = 1
       do i = 1,num_domains
         srcSizeZComp = recvDomainList%domains(i)%ai(3)%max &
                      - recvDomainList%domains(i)%ai(3)%min + 1
         stopComp  = startComp + srcSizeZComp - 1
-        srcSizeZ = recvDomainListTot%domains(i)%ai(3)%max &
-                 - recvDomainListTot%domains(i)%ai(3)%min + 1
+        srcSizeZ = recvDomainList%domains(i)%ai(3)%max &
+                 - recvDomainList%domains(i)%ai(3)%min + 1
         stop  = start + srcSizeZ - 1
-        call ESMF_RegridLinearSearch(tv, recvDomainListTot%domains(i), &
+        call ESMF_RegridLinearSearch(tv, recvDomainList%domains(i), &
                                      coordSystem, srcSizeZ, startComp-1, &
                                      dstCounts(3), found, foundCount, &
                                      srcGatheredCoordZ(start:stop), &
