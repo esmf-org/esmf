@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.h,v 1.1 2004/10/27 18:40:08 eschwab Exp $
+// $Id: ESMC_Fraction.h,v 1.2 2004/11/05 04:07:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,6 +88,11 @@ class ESMC_Fraction
     ESMC_Fraction  operator- (const ESMC_Fraction &) const;
     ESMC_Fraction& operator+=(const ESMC_Fraction &);
     ESMC_Fraction& operator-=(const ESMC_Fraction &);
+
+    // explicit assignment operator to support ESMC_BaseTime::operator=
+    // and ESMC_TimeInterval::operator=
+    // TODO:  should be implicit ?
+    ESMC_Fraction& operator=(const ESMC_Fraction &);
 
     // internal validation
     int ESMC_FractionValidate(const char *options=0) const;

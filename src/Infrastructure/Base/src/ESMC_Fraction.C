@@ -1,4 +1,4 @@
-// $Id: ESMC_Fraction.C,v 1.1 2004/10/27 18:40:24 eschwab Exp $
+// $Id: ESMC_Fraction.C,v 1.2 2004/11/05 04:07:25 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Fraction.C,v 1.1 2004/10/27 18:40:24 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Fraction.C,v 1.2 2004/11/05 04:07:25 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -878,6 +878,36 @@
     return(*this);
 
 }  // end ESMC_Fraction::operator-=
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Fraction(=) - assignment operator
+//
+// !INTERFACE:
+      ESMC_Fraction& ESMC_Fraction::operator=(
+//
+// !RETURN VALUE:
+//    ESMC_Fraction& result
+//
+// !ARGUMENTS:
+      const ESMC_Fraction &fraction) {   // in - ESMC_Fraction
+//
+// !DESCRIPTION:
+//      Assign current object's (this) {\tt ESMC\_Fraction} with given
+//      {\tt ESMC\_Fraction}.  
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO: should be implicit, but then won't support
+    //   ESMC_BaseTime::operator= and ESMC_TimeInterval::operator=
+
+    this->w = fraction.w;
+    this->n = fraction.n;
+    this->d = fraction.d;
+
+    return(*this);
+
+}  // end ESMC_Fraction::operator=
 
 //-------------------------------------------------------------------------
 //BOP
