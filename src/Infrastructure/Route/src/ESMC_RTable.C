@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.7 2003/03/12 21:42:48 jwolfe Exp $
+// $Id: ESMC_RTable.C,v 1.8 2003/03/13 15:38:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,15 +22,17 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
- #include <ESMC.h>
+ #include "ESMC.h"
+ #include <stdio.h>
+ #include <stdlib.h>
 
  // associated class definition file
- #include <ESMC_RTable.h>
+ #include "ESMC_RTable.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.7 2003/03/12 21:42:48 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.8 2003/03/13 15:38:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -217,7 +219,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-       int dst_de,         // in  -
+       int deid,           // in  -
        void *base_addr,    // in  -
        ESMC_XPacket *xp) { // in -
 //
@@ -228,9 +230,18 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    if (entry[deid].xpcount > 0) {
+        printf("already an entry for deid %d\n", deid);
+        printf("need to implement multiple xp's per src/dst pair\n"); 
+        return ESMF_FAILURE;
+    }
+
+    entry[deid].dest_deid = deid;
+    entry[deid].xpcount++;
+    entry[deid].base_addr = base_addr;
+    entry[deid].xp = xp;
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RTableSetEntry
 
