@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeUTest.F90,v 1.6 2004/07/02 20:35:59 eschwab Exp $
+! $Id: ESMF_TimeUTest.F90,v 1.7 2004/08/06 22:34:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,14 +37,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeUTest.F90,v 1.6 2004/07/02 20:35:59 eschwab Exp $'
+      '$Id: ESMF_TimeUTest.F90,v 1.7 2004/08/06 22:34:10 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc, H, M, S, MM, DD, YY
+      integer :: rc, H, M, S, MM, DD, YY, D
       logical :: bool
 
       ! individual test name
@@ -355,6 +355,31 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(bool), &
                       name, failMsg, result, ESMF_SRCLINE)
       
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Gregorian date to Julian Day
+      !   from http://www.friesian.com/numbers.htm
+      write(failMsg, *) " Did not return D = 2450713 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1997, mm=9, dd=21, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=D, calendar=julianDayCalendar, rc=rc)
+      write(name, *) "Convert Gregorian to Julian Day Test 1"
+      call ESMF_Test((D.eq.2450713).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Test Converting Gregorian date to Julian Day
+      !   from Henry F. Fliegel and Thomas C. Van Flandern, in
+      !   Communications of the ACM, CACM, volume 11, number 10,
+      !   October 1968, p. 657.
+      write(failMsg, *) " Did not return D = 2440588 and ESMF_SUCCESS"
+      call ESMF_TimeSet(stopTime, yy=1970, mm=1, dd=1, &
+                                   calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeGet(stopTime, d=D, rc=rc)
+      write(name, *) "Convert Gregorian to Julian Day Test 2"
+      call ESMF_Test((D.eq.2440588).and.(rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
 
