@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desdoc.ctex,v 1.2 2002/09/20 16:28:56 eschwab Exp $
+% $Id: TimeMgr_desdoc.ctex,v 1.3 2002/09/20 18:21:04 eschwab Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -201,9 +201,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{time_interval_ccex}
+\input{time_interval_ccex}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/time_interval_ccex}
+\input{../Infrastructure/TimeMgr/doc/time_interval_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
@@ -281,9 +281,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{time_instant_ccex}
+\input{time_instant_ccex}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/time_instant_ccex}
+\input{../Infrastructure/TimeMgr/doc/time_instant_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
@@ -361,9 +361,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{calendar_ccex}
+\input{calendar_ccex}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/calendar_ccex}
+\input{../Infrastructure/TimeMgr/doc/calendar_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
@@ -441,9 +441,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{clock_ccex}
+\input{clock_ccex}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/clock_ccex}
+\input{../Infrastructure/TimeMgr/doc/clock_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
@@ -521,9 +521,9 @@
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{alarm_ccex}
+\input{alarm_ccex}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/alarm_ccex}
+\input{../Infrastructure/TimeMgr/doc/alarm_ccex}
 #endif
 
 \subsection{Parameters and Definitions}
