@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.3 2003/03/18 04:33:09 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.4 2003/03/19 08:53:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.3 2003/03/18 04:33:09 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.4 2003/03/19 08:53:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -101,6 +101,10 @@
 
 //
 // individual get/set methods which perform signed conversion
+//
+
+//
+// Integer get/sets
 //
 
 //-------------------------------------------------------------------------
@@ -191,7 +195,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int H) {  // int - hours to convert into BaseTime
+      int H) {  // in - hours to convert into BaseTime
 //
 // !DESCRIPTION:
 //      converts hours into {\tt BaseTime} value
@@ -242,7 +246,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int M) {  // int - minutes to convert into BaseTime
+      int M) {  // in - minutes to convert into BaseTime
 //
 // !DESCRIPTION:
 //      converts minutes into {\tt BaseTime} value
@@ -294,7 +298,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int S) {  // int - seconds to convert into BaseTime
+      int S) {  // in - seconds to convert into BaseTime
 //
 // !DESCRIPTION:
 //      converts seconds into {\tt BaseTime} value
@@ -347,7 +351,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int MS) {  // int - milliseconds to convert into BaseTime
+      int MS) {  // in - milliseconds to convert into BaseTime
 //
 // !DESCRIPTION:
 //      converts milliseconds into {\tt BaseTime} value
@@ -402,7 +406,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int US) {  // int - microseconds to convert into BaseTime
+      int US) {  // in - microseconds to convert into BaseTime
 //
 // !DESCRIPTION:
 //      converts microseconds into {\tt BaseTime} value
@@ -448,7 +452,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_BaseTimeSet_NS - set BaseTime converted from nanooseconds
+// !IROUTINE:  ESMC_BaseTimeSet_NS - set BaseTime converted from nanoseconds
 //
 // !INTERFACE:
       int ESMC_BaseTime::ESMC_BaseTimeSet_NS(
@@ -457,7 +461,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int NS) {  // int - nanoseconds to convert into BaseTime
+      int NS) {  // in - nanoseconds to convert into BaseTime
 //
 // !DESCRIPTION:
 //      converts nanoseconds into {\tt BaseTime} value
@@ -472,6 +476,382 @@
     return(ESMF_SUCCESS);
 
 }  // end ESMC_BaseTimeSet_NS
+
+//
+// Floating point get/sets
+//
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_d - get BaseTime converted to floating point days
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_d(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *d) const {  // out - BaseTime converted to floating point days
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into floating point days
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (d != 0) {
+      *d = (double) S / 86400.0;
+      return(ESMF_SUCCESS);
+    } else return(ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_d
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_d - set BaseTime converted from floating point days
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_d(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double d) {  // out - BaseTime converted from floating point days
+//
+// !DESCRIPTION:
+//      converts floating point days into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    S = (ESMF_IKIND_I8) (d * 86400);
+    // TODO convert remainder to Sn/Sd
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_d
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_h - get BaseTime converted to floating point hours
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_h(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *h) const {  // out - BaseTime converted to hours
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into hours
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (h != 0) {
+      *h = (double) S / 3600.0;
+      return(ESMF_SUCCESS);
+    } else return(ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_h
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_h - set BaseTime converted from floating point hours
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_h(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double h) {  // in - floating point hours to convert into BaseTime
+//
+// !DESCRIPTION:
+//      converts floating point hours into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+     S = (ESMF_IKIND_I8) (h * 3600);
+    // TODO convert remainder to Sn/Sd
+
+     return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_h
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_m - get BaseTime converted to floating point minutes
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_m(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *m) const {  // out - BaseTime converted to floating point minutes
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into floating point minutes
+//
+//EOP
+// !REQUIREMENTS:  
+
+     if (m != 0) {
+       *m = (double) S / 60.0;
+       return(ESMF_SUCCESS);
+     } else return(ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_m
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_m - set BaseTime converted from floating point minutes
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_m(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double m) {  // in - floating point minutes to convert into BaseTime
+//
+// !DESCRIPTION:
+//      converts floating point minutes into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+     S = (ESMF_IKIND_I8) (m * 60);
+    // TODO convert remainder to Sn/Sd
+
+     return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_m
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_s - get BaseTime converted to floating point seconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_s(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *s) const {  // out - BaseTime converted to floating point seconds
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into floating point seconds
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (s != 0) {
+      *s = (double) S;
+      return(ESMF_SUCCESS);
+    }
+    else return (ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_s
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_s - set BaseTime converted from floating point seconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_s(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double s) {  // in - floating point seconds to convert into BaseTime
+//
+// !DESCRIPTION:
+//      converts floating point seconds into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    S = (ESMF_IKIND_I8) s;
+    // TODO convert remainder to Sn/Sd
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_s
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_ms - get BaseTime converted to floating point milliseconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_ms(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *ms) const {  // out - BaseTime converted to floating point milliseconds
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into floating point milliseconds
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (ms != 0) {
+      *ms = (double) S * 1000.0 + (double) Sn;  // TODO: assume Sd = 1000
+      // TODO: convert Sn/Sd fraction
+      return(ESMF_SUCCESS);
+    }
+    else return (ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_ms
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_ms - set BaseTime converted from floating point milliseconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_ms(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double ms) {  // in - floating point milliseconds to convert into BaseTime
+//
+// !DESCRIPTION:
+//      converts floating point milliseconds into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    S = (ESMF_IKIND_I8) (ms / 1000);
+    // TODO convert remainder to Sn/Sd
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_ms
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_us - get BaseTime converted to floating point microseconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_us(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *us) const {  // out - BaseTime converted to floating point microseconds
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into floating point microseconds
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (us != 0) {
+      *us = (double) S * 1000000.0 + (double) Sn;  // TODO: assume Sd = 1000000
+      // TODO: convert Sn/Sd fraction
+      return(ESMF_SUCCESS);
+    }
+    else return (ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_us
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_us - set BaseTime converted from floating point microseconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_us(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double us) {  // in - floating point microseconds to convert into BaseTime
+//
+// !DESCRIPTION:
+//      converts floating point microseconds into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    S = (ESMF_IKIND_I8) (us / 1000000);
+    // TODO convert remainder to Sn/Sd
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_us
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet_ns - get BaseTime converted to floating point nanoseconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet_ns(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *ns) const {  // out - BaseTime converted to floating point nanoseconds
+//
+// !DESCRIPTION:
+//      converts {\tt BaseTime} value into floating point nanoseconds
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (ns != 0) {
+      *ns = (double) S * 1000000000.0 + (double) Sn;
+                                           // TODO:  assume Sd = 1000000000
+      // TODO: convert Sn/Sd fraction
+      return(ESMF_SUCCESS);
+    }
+    else return (ESMF_FAILURE);
+
+}  // end ESMC_BaseTimeGet_ns
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet_ns - set BaseTime converted from floating point nanoseconds
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet_ns(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double ns) {  // in - floating point nanoseconds to convert into BaseTime
+//
+// !DESCRIPTION:
+//      converts floating point nanoseconds into {\tt BaseTime} value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    S = (ESMF_IKIND_I8) (ns / 1000000000);
+    // TODO convert remainder to Sn/Sd
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeSet_ns
 
 //-------------------------------------------------------------------------
 //BOP
