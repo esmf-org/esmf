@@ -1,3 +1,4 @@
+// $Id: ESMC_Array.C,v 1.32 2004/06/07 09:24:50 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -8,6 +9,7 @@
 
 // ESMC Array method implementation (body) file
 
+#define ESMF_FILENAME "ESMC_Array.C"
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -29,6 +31,7 @@
 #include <assert.h>
 // associated class definition file
 #include "ESMC_Base.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
 
@@ -36,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.31 2004/06/03 12:17:38 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.32 2004/06/07 09:24:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -48,6 +51,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayCreate"
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
@@ -113,6 +118,8 @@
  } // end ESMC_ArrayCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayCreate"
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
@@ -156,6 +163,8 @@
  } // end ESMC_ArrayCreate
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayDestroy"
 //BOP
 // !IROUTINE:  ESMC_ArrayDestroy - free a Array created with Create
 //
@@ -184,6 +193,8 @@
  } // end ESMC_ArrayDestroy
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayCreateNoData"
 //BOPI
 // !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
 //
@@ -226,6 +237,8 @@
  } // end ESMC_ArrayCreateNoData
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayCreate_F"
 //BOP
 // !IROUTINE:  ESMC_ArrayCreate_F - internal routine for fortran use
 //
@@ -309,6 +322,8 @@
  } // end ESMC_ArrayCreate_F
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayConstruct"
 //BOP
 // !IROUTINE:  ESMC_ArrayConstruct - fill in an already allocated Array
 //
@@ -419,6 +434,8 @@
  } // end ESMC_ArrayConstruct
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayDestruct"
 //BOP
 // !IROUTINE:  ESMC_ArrayDestruct - release resources associated w/a Array
 //
@@ -461,6 +478,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayGet"
 //BOP
 // !IROUTINE:  ESMC_ArrayGet<Value> - get <Value> for a Array
 //
@@ -487,6 +506,8 @@
  //} // end ESMC_ArrayGet<Value>
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArraySet"
 //BOP
 // !IROUTINE:  ESMC_ArraySet<Value> - set <Value> for a Array
 //
@@ -516,6 +537,8 @@
  //} // end ESMC_ArraySet<Value>
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArraySetInfo"
 //BOP
 // !IROUTINE:  ESMC_ArraySetInfo - Set the most common F90 needs
 //
@@ -601,6 +624,8 @@
  } // end ESMC_ArraySetInfo
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayGetF90Ptr"
 //BOP
 // !IROUTINE:  ESMC_ArrayGetF90Ptr - get F90Ptr for a Array
 //
@@ -636,6 +661,8 @@
  } // end ESMC_ArrayGetF90Ptr
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArraySetF90Ptr"
 //BOP
 // !IROUTINE:  ESMC_ArraySetF90Ptr - set F90Ptr for a Array
 //
@@ -670,6 +697,8 @@
  } // end ESMC_ArraySetF90Ptr
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayComputeAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_ArrayComputeAxisIndex - compute AIs for Arrays for local/global
 //
@@ -751,6 +780,8 @@
  } // end ESMC_ArrayComputeAxisIndex
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArraySetAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_ArraySetAxisIndex - set annotation on Arrays for local/global
 //
@@ -770,7 +801,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     int i;
+     int i, rc;
 
      switch(dt) {
        case ESMC_DOMAIN_TOTAL:
@@ -789,15 +820,18 @@
          break;
 
        default:
-         fprintf(stderr, "bad value for domain type in ESMF_ArraySetAxisIndex\n");
-         return ESMF_FAILURE;
-    }
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                               "domain type", &rc);
+         return(rc);
+      }
 
-    return ESMF_SUCCESS;
+      return ESMF_SUCCESS;
 
  } // end ESMC_ArraySetAxisIndex
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayGetAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_ArrayGetAxisIndex - get annotation on Arrays for local/global
 //
@@ -817,7 +851,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-     int i;
+     int i, rc;
 
      switch(dt) {
        case ESMC_DOMAIN_TOTAL:
@@ -836,8 +870,9 @@
          break;
 
        default:
-         fprintf(stderr, "bad value for domain type in ESMF_ArrayGetAxisIndex\n");
-         return ESMF_FAILURE;
+         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                                               "domain type", &rc);
+         return(rc);
     }
 
      return ESMF_SUCCESS;
@@ -845,6 +880,8 @@
  } // end ESMC_ArrayGetAxisIndex
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayGetAllAxisIndex"
 //BOP
 // !IROUTINE:  ESMC_ArrayGetAllAxisIndices - get all AIs for local/global
 //
@@ -914,6 +951,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayValidate"
 //BOP
 // !IROUTINE:  ESMC_ArrayValidate - internal consistency check for a Array
 //
@@ -944,6 +983,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayPrint"
 //BOP
 // !IROUTINE:  ESMC_ArrayPrint - print contents of a Array
 //
@@ -1351,6 +1392,8 @@
  } // end ESMC_ArrayPrint
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayWrite"
 //BOP
 // !IROUTINE:  ESMC_ArrayWrite - write contents of a Array
 //
@@ -1677,6 +1720,8 @@
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Array()"
 //BOP
 // !IROUTINE:  ESMC_Array - native C++ constructor
 //
@@ -1703,6 +1748,8 @@
  } // end ESMC_Array
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "~ESMC_Array()"
 //BOP
 // !IROUTINE:  ~ESMC_Array - native C++ destructor
 //
