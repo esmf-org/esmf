@@ -1,9 +1,8 @@
 
-#include "ESMF.h"
 #include "ESMF_LogErr.inc"
 
 program test_log
-    use ESMF_LogErr
+    use ESMF_Mod
     
     integer rc,int_num,nnn
     type(ESMF_Log) :: anErr,anErr2

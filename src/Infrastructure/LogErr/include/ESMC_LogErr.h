@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.7 2003/04/14 16:42:45 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.8 2003/04/15 20:21:36 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,6 +39,22 @@
 #include "ESMF_ErrConstants.inc"
 #include "ESMC_UtilityFunctions.h"
 
+
+extern "C" {
+   void FTN(f_esmf_logopenfortran)(int *isOpen, int *unitNumber, 
+                                       char *nameLogFile);
+   void FTN(f_esmf_logclosefortran)(int *unitNumber);
+   void FTN(f_esmf_logprintchar)(int *unitNumber, char *charData, 
+                                       int *flushSet, char *msg, int *length);
+   void FTN(f_esmf_logprintint)(int *unitNumber, int *intData, 
+                                       int *flushSet, char *msg, int *length);
+   void FTN(f_esmf_logprintreal)(int *unitNumber, double *realData, 
+                                       int *flushSet, char *msg, int *length);
+   void FTN(f_esmf_logprintstring)(int *unitNumber, char *stringData, int *slen,
+                                       int *flushSet, char *msg, int *length);
+   void FTN(f_esmf_logprintnewline)(int *unitNumber, int *flushSet);
+
+}
 
 class ESMC_Log {
   private:

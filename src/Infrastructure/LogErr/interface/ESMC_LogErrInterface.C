@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.7 2003/04/14 16:40:44 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.8 2003/04/15 20:21:37 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,8 +19,6 @@
 #include <string.h>
 
 #include <ESMC.h>
-//#include "/home/sjs/ESMF/esmf/esmf/src/include/ESMC.h"
-//#include "../include/ESMC_LogErr.h"
 #include "ESMC_LogErr.h"
 
 //Global Variables
@@ -72,33 +70,32 @@ void FTN(esmf_loginit_c)(ESMC_Log* aLog,int* verbose, int* flush,
 //  integer :: numFile           !! set to either ESMF_SINGLE_FILE
 //                               !! or ESMF_MULTIPLE_FILE 
 //
-//  characlter(len=*) :: name    !! name of file
+//  character(len=*) :: name     !! name of file
 //
 // !DESCRIPTION:
 // This routine finds the first space in the array name and inserts a
-// a null character. It then calls ESMC\_LogOpenFileForWrote an ESMC\_Log method
-// for opening files.
+// a null character. It then calls ESMC\_LogOpenFileForWrite 
+// an ESMC\_Log method for opening files.
 //
 //EOP
 //----------------------------------------------------------------------------
 
-void FTN(esmf_logopenfile)(ESMC_Log* aLog,int* numFiles,char name[])
+void FTN(esmf_logopenfile)(ESMC_Log *aLog, int *numFiles, char name[], 
+                                                                 int namelen)
 {
-  char c_name[32];
-  bool foundSpace=false;
-  int i=0;
+    char *nameCopy = NULL;
 
-  while (i<32 && !foundSpace) {
-    if (isspace(name[i])) { 
-       c_name[i]='\0';
-       foundSpace=true;
-    } else {
-       c_name[i]=name[i];
+    if ((name != NULL) && (namelen > 0)) {
+        nameCopy = new char[namelen+1];
+        strncpy(nameCopy, name, namelen);
+        nameCopy[namelen] = '\0';
     }
-    i++;
-  }
-  if (!foundSpace) c_name[32]='\0';
-    aLog->ESMC_LogOpenFortFile(*numFiles, c_name);
+
+    aLog->ESMC_LogOpenFortFile(*numFiles, nameCopy);
+
+    if (nameCopy != NULL)
+        delete[] nameCopy;
+  
 }
 
 //-----------------------------------------------------------------------
@@ -268,22 +265,72 @@ void FTN(esmf_loginfo)(ESMC_Log* aLog, char* fmt,...){
 //
 //EOP
 //--------------------------------------------------------------------------
-void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
-  char file[],char dir[],char msg[])
+void FTN(esmf_logwarnmsg)(ESMC_Log *aLog,int *errCode, char msg[], int msglen)
 
 {
-   char* strPtr;        
-		   
-   strPtr=strstr(file,"F90")+3;
-   *strPtr=NULL; 
-   aLog->ESMC_LogWarnFortran(*errCode, *line,file,dir,msg);
+    int line = 0;
+    char *file = NULL;
+    char *dir = NULL;
+    char *msgCopy = NULL;
 
+    if ((msg != NULL) && (msglen > 0)) {
+        msgCopy = new char[msglen+1];
+        strncpy(msgCopy, msg, msglen);
+        msgCopy[msglen] = '\0';
+    }
+
+    aLog->ESMC_LogWarnFortran(*errCode, line, file, dir, msgCopy);
+
+    if (msgCopy != NULL)
+        delete[] msgCopy;
+  
+}
+
+
+void FTN(esmf_logwarnmsg_ln)(ESMC_Log *aLog,int *errCode, int *line,
+                             char file[], char dir[], char msg[],
+                             int filelen, int dirlen, int msglen)
+
+{
+    char *fileCopy = NULL;
+    char *dirCopy = NULL;
+    char *msgCopy = NULL;
+
+    if ((file != NULL) && (filelen > 0)) {
+        fileCopy = new char[filelen+1];
+        strncpy(fileCopy, file, filelen);
+        fileCopy[filelen] = '\0';
+    }
+
+    if ((dir != NULL) && (dirlen > 0)) {
+        dirCopy = new char[dirlen+1];
+        strncpy(dirCopy, dir, dirlen);
+        dirCopy[dirlen] = '\0';
+    }
+
+    if ((msg != NULL) && (msglen > 0)) {
+        msgCopy = new char[msglen+1];
+        strncpy(msgCopy, msg, msglen);
+        msgCopy[msglen] = '\0';
+    }
+
+    aLog->ESMC_LogWarnFortran(*errCode, *line, fileCopy, dirCopy, msgCopy);
+
+    if (fileCopy != NULL)
+        delete[] fileCopy;
+  
+    if (dirCopy != NULL)
+        delete[] dirCopy;
+  
+    if (msgCopy != NULL)
+        delete[] msgCopy;
+  
 }
 
 
 //-----------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMF_LogWarn - writes a warnng message to log file
+// !IROUTINE: ESMF_LogWarn - writes a warning message to log file
 //
 // !INTERFACE:
 //    ESMF_LogWarn(aLog, errCode)
@@ -298,19 +345,46 @@ void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
 //
 //EOP
 //-----------------------------------------------------------------------
-void FTN(esmf_logwarn_)(ESMC_Log* aLog,int* errCode, int* line,
-  char file[],char dir[])
+void FTN(esmf_logwarn)(ESMC_Log *aLog, int *errCode)
 
 {
-   char msg[32];      
-   char* strPtr;        
-   msg[0]=NULL;
+   int line = 0;
+   char *file = NULL;
+   char *dir = NULL;
+   char *msg = NULL; 
 
-		   
-   strPtr=strstr(file,"F90")+3;
-   *strPtr=NULL; 
-   aLog->ESMC_LogWarnFortran(*errCode, *line,file,dir,msg);
+   aLog->ESMC_LogWarnFortran(*errCode, line, file, dir, msg);
 
+}
+
+void FTN(esmf_logwarn_ln)(ESMC_Log *aLog, int *errCode, int *line,
+                          char file[], char dir[], int filelen, int dirlen)
+
+{
+    char *fileCopy = NULL;
+    char *dirCopy = NULL;
+    char *msg = NULL;
+ 
+    if ((file != NULL) && (filelen > 0)) {
+        fileCopy = new char[filelen+1];
+        strncpy(fileCopy, file, filelen);
+        fileCopy[filelen] = '\0';
+    }
+
+    if ((dir != NULL) && (dirlen > 0)) {
+        dirCopy = new char[dirlen+1];
+        strncpy(dirCopy, dir, dirlen);
+        dirCopy[dirlen] = '\0';
+    }
+
+    aLog->ESMC_LogWarnFortran(*errCode, *line, fileCopy, dirCopy, msg);
+
+    if (fileCopy != NULL)
+        delete[] fileCopy;
+  
+    if (dirCopy != NULL)
+        delete[] dirCopy;
+  
 }
 
 //------------------------------------------------------------------------
@@ -413,7 +487,7 @@ void FTN(esmf_lognotverbose)(ESMC_Log* aLog)
 //    header information (time,date etc.) to what ever is printed out
 //    from the write, e.g. Hi.
 //EOP
-//-------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 int  FTN(logwrite)(ESMC_Log *aLog)
 {
     return aLog->ESMC_LogWrite();
@@ -462,21 +536,69 @@ int  FTN(logwrite)(ESMC_Log *aLog)
 //EOP
 //--------------------------------------------------------------------------
 
-void FTN(esmf_logerrmsg_)(ESMC_Log* aLog, int* errCode,int* line, char file[],
-                     char dir[],char msg[])
+void FTN(esmf_logerrmsg)(ESMC_Log *aLog, int *errCode, char msg[], int msglen)
 {
-    char* strPtr;
+    int line = 0;
+    char *file = NULL;
+    char *dir = NULL;
+    char *msgCopy = NULL;
 
-    strPtr=strstr(file,"F90")+3;
-    *strPtr=NULL;
-    aLog->ESMC_LogErrFortran(*errCode,*line,file,dir,msg);
+    if ((msg != NULL) && (msglen > 0)) {
+        msgCopy = new char[msglen+1];
+        strncpy(msgCopy, msg, msglen);
+        msgCopy[msglen] = '\0';
+    }
+
+    aLog->ESMC_LogErrFortran(*errCode, line, file, dir, msgCopy);
+  
+    if (msgCopy != NULL)
+        delete[] msgCopy;
+} 
+
+
+void FTN(esmf_logerrmsg_ln)(ESMC_Log *aLog, int *errCode, int *line, 
+                            char file[], char dir[], char msg[], 
+                            int filelen, int dirlen, int msglen)
+{
+    char *fileCopy = NULL;
+    char *dirCopy = NULL;
+    char *msgCopy = NULL;
+
+    if ((file != NULL) && (filelen > 0)) {
+        fileCopy = new char[filelen+1];
+        strncpy(fileCopy, file, filelen);
+        fileCopy[filelen] = '\0';
+    }
+
+    if ((dir != NULL) && (dirlen > 0)) {
+        dirCopy = new char[dirlen+1];
+        strncpy(dirCopy, dir, dirlen);
+        dirCopy[dirlen] = '\0';
+    }
+
+    if ((msg != NULL) && (msglen > 0)) {
+        msgCopy = new char[msglen+1];
+        strncpy(msgCopy, msg, msglen);
+        msgCopy[msglen] = '\0';
+    }
+
+    aLog->ESMC_LogErrFortran(*errCode, *line, fileCopy, dirCopy, msgCopy);
+  
+    if (fileCopy != NULL)
+        delete[] fileCopy;
+  
+    if (dirCopy != NULL)
+        delete[] dirCopy;
+  
+    if (msgCopy != NULL)
+        delete[] msgCopy;
 } 
 
 
 
 //-----------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMF_LogErr - writes a warnng message to log file
+// !IROUTINE: ESMF_LogErr - writes a warning message to log file
 //
 // !INTERFACE:
 //    ESMF_LogErr(aLog, errCode)
@@ -492,16 +614,44 @@ void FTN(esmf_logerrmsg_)(ESMC_Log* aLog, int* errCode,int* line, char file[],
 //EOP
 //-----------------------------------------------------------------------
 
-void FTN(esmf_logerr_)(ESMC_Log* aLog, int* errCode, int* line, char file[],
-                     char dir[])
+void FTN(esmf_logerr)(ESMC_Log* aLog, int* errCode)
 {
-    char msg[32];
-    char* strPtr;        
-    msg[0]=NULL;
+    int line = 0;
+    char *file = NULL;
+    char *dir = NULL;
+    char *msg = NULL;
    
-    strPtr=strstr(file,"F90")+3;
-    *strPtr=NULL; 
-    aLog->ESMC_LogErrFortran(*errCode,*line,file,dir,msg);
+    aLog->ESMC_LogErrFortran(*errCode, line, file, dir, msg);
+} 
+
+void FTN(esmf_logerr_ln)(ESMC_Log *aLog, int *errCode, int *line, 
+                         char file[], char dir[], int filelen, int dirlen)
+{
+    char *fileCopy = NULL;
+    char *dirCopy = NULL;
+    char *msg = NULL;
+
+    if ((file != NULL) && (filelen > 0)) {
+        fileCopy = new char[filelen+1];
+        strncpy(fileCopy, file, filelen);
+        fileCopy[filelen] = '\0';
+    }
+   
+    if ((dir != NULL) && (dirlen > 0)) {
+        dirCopy = new char[dirlen+1];
+        strncpy(dirCopy, dir, dirlen);
+        dirCopy[dirlen] = '\0';
+    }
+
+    aLog->ESMC_LogErrFortran(*errCode, *line, file, dir, msg);
+
+
+    if (fileCopy != NULL)
+        delete[] fileCopy;
+  
+    if (dirCopy != NULL)
+        delete[] dirCopy;
+  
 } 
 
 //---------------------------------------------------------------------------

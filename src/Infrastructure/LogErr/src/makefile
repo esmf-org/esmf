@@ -1,11 +1,11 @@
-# $Id: makefile,v 1.2 2003/04/03 20:05:16 nscollins Exp $ 
+# $Id: makefile,v 1.3 2003/04/15 20:21:40 nscollins Exp $ 
 ALL: lib 
 
 CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
 SOURCEC	  = ESMC_LogErr.C
-SOURCEF	  = 
+SOURCEF	  = ESMF_LogErr_C.F90
 SOURCEH	  = 
 STOREH    = ESMC_LogErr.h ESMC_UtilityFunctions.h ESMF_ErrConstants.inc \
             ESMF_LogConstants.inc ESMF_LogErr.inc ESMF_LogMacros.inc
@@ -19,6 +19,8 @@ LOCDIR	  = src/Infrastructure/LogErr/src
 
 
 include $(ESMF_DIR)/makefile
+
+ESMC_LogErr.o: ESMF_LogErr_C.o
 
 DIRS	  = 
 
