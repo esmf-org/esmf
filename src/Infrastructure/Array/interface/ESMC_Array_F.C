@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.1 2003/07/15 18:08:35 jwolfe Exp $
+// $Id: ESMC_Array_F.C,v 1.2 2003/07/17 20:02:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,6 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Array.h"
-#include "ESMC_Alloc.h"
 #include "ESMC_DELayout.h"
 //------------------------------------------------------------------------------
 //BOP
@@ -43,16 +42,18 @@ extern "C" {
                                      int *strides, int *status)  {
          (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, counts, 
                                     NULL, NULL, ESMC_DATA_NONE, 
-                                    lbounds, ubounds, strides, NULL, status);
+                                    lbounds, ubounds, strides, NULL, 
+                                    0, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
      void FTN(c_esmc_arraycreatenodata)(ESMC_Array **ptr, int *rank, 
                                         ESMC_DataType *dt, ESMC_DataKind *dk, 
-                                        ESMC_ArrayOrigin *oflag, int *status) {
+                                        ESMC_ArrayOrigin *oflag, int *hwidth,
+                                        int *status) {
              
-             (*ptr) = ESMC_ArrayCreateNoData(*rank, *dt, *dk, *oflag, status);
+             (*ptr) = ESMC_ArrayCreateNoData(*rank, *dt, *dk, *oflag, *hwidth, status);
 
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.15 2003/06/27 18:21:28 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.16 2003/07/17 20:02:47 nscollins Exp $
 !
 ! System test code #69527
 
@@ -186,7 +186,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE
-    rowlen = index(1)%r - index(1)%l + 1
+    rowlen = index(1)%max - index(1)%min + 1
     rstart = ((row_to_reduce-1) * rowlen) + 1
     rend = (row_to_reduce) * rowlen
     

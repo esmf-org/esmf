@@ -3,7 +3,9 @@
     
     use ESMF_BaseMod
     use ESMF_IOMod
-    use ESMF_ArrayMod
+    use ESMF_LocalArrayMod
+    use ESMF_ArrayBaseMod
+    use ESMF_ArrayExpandMod
     implicit none
 
     integer :: i, j, nx, ny, items, rc

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Alloc_C.F90,v 1.1 2003/07/15 18:10:17 jwolfe Exp $
+!  $Id: ESMF_Alloc_C.F90,v 1.2 2003/07/17 20:02:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,11 +23,12 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Alloc_C.F90,v 1.1 2003/07/15 18:10:17 jwolfe Exp $'
+!      '$Id: ESMF_Alloc_C.F90,v 1.2 2003/07/17 20:02:46 nscollins Exp $'
 !==============================================================================
    subroutine f_esmf_arrayf90allocate(array, rank, type, kind, counts, rc)
        use ESMF_BaseMod    ! ESMF base class
-       use ESMF_ArrayMod
+       use ESMF_ArrayBaseMod
+       use ESMF_ArrayExpandMod
      type(ESMF_Array) :: array
      integer :: rank
      type(ESMF_DataType) :: type
@@ -42,7 +43,8 @@
 
    subroutine f_esmf_arrayf90deallocate(array, rank, type, kind, rc)
        use ESMF_BaseMod    ! ESMF base class
-       use ESMF_ArrayMod
+       use ESMF_ArrayBaseMod
+       use ESMF_ArrayExpandMod
      type(ESMF_Array) :: array
      integer :: rank
      type(ESMF_DataType) :: type

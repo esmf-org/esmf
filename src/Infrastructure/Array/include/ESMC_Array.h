@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.3 2003/07/16 21:28:26 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.4 2003/07/17 20:02:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,8 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
             ESMC_ArrayOrigin oflag, struct c_F90ptr *f90ptr, 
             ESMC_ArrayDoAllocate aflag, 
             ESMC_DataCopy docopy, ESMC_Logical dflag, 
-            int *lbounds, int *ubounds, int *strides, int *offsets);
+            int *lbounds, int *ubounds, int *strides, int *offsets,
+            int halo_widths);
     int ESMC_ArrayDestruct(void);
 
  // optional configuration methods
@@ -202,16 +203,24 @@ ESMC_Array *ESMC_ArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk,
                     int *counts = NULL, void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *rc = NULL);
+ESMC_Array *ESMC_ArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+                    int *counts, void *base, 
+                    ESMC_DataCopy docopy,
+                    int halo_widths, int *rc);
 int ESMC_ArrayDestroy(ESMC_Array *array);
 ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
                     int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, 
                     void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *lbounds = NULL, int *ubounds = NULL, 
-                    int *strides = NULL, int *offsets = NULL, int *rc = NULL);
+                    int *strides = NULL, int *offsets = NULL, 
+                    int halo_widths = 0, int *rc = NULL);
 ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
+ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
+                                   ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
+                                   int halo_widths = 0, int *rc = NULL);
 
 
  #endif  // ESMC_Array_H

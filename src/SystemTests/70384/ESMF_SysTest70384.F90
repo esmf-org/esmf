@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.17 2003/06/20 17:45:54 nscollins Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.18 2003/07/17 20:02:47 nscollins Exp $
 !
 ! System test code #70384
 
@@ -156,11 +156,11 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     !! TODO: set & get the axis info here.  These need to be
     !!  different on each DE.
-    call ESMF_ArraySetAxisIndex(array1, indexlist1, rc)
+    call ESMF_ArraySetAxisIndex(array1, ESMF_DOMAIN_LOCAL, indexlist1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array2, indexlist2, rc)
+    call ESMF_ArraySetAxisIndex(array2, ESMF_DOMAIN_LOCAL, indexlist2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_ArraySetAxisIndex(array3, indexlist3, rc)
+    call ESMF_ArraySetAxisIndex(array3, ESMF_DOMAIN_LOCAL, indexlist3, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! Generate global cell numbers, where cell numbering scheme goes

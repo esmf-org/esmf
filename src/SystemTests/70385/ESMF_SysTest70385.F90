@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.18 2003/06/20 17:45:54 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.19 2003/07/17 20:02:47 nscollins Exp $
 !
 ! System test code #70385
 
@@ -30,7 +30,8 @@
     type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1, deflayout
-    integer, dimension(12) :: delist
+    !integer, dimension(12) :: delist
+    integer, dimension(4) :: delist
     integer :: de_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
@@ -65,17 +66,19 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_DELayoutGetNumDEs(deflayout, ndes, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    if (ndes .ne. 12) then
-        print *, "This system test needs to run 12-way, current np = ", ndes
-        goto 10
-    endif
+    !if (ndes .ne. 12) then
+    !    print *, "This system test needs to run 12-way, current np = ", ndes
+    !    goto 10
+    !endif
 
     call ESMF_DELayoutGetDEId(deflayout, de_id, rc) 
     if (rc .ne. ESMF_SUCCESS) goto 10
     
 !   Create a DELayout for the Component
-    delist = (/ (i, i=0, 11) /)
-    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
+    !delist = (/ (i, i=0, 11) /)
+    !layout1 = ESMF_DELayoutCreate(delist, 2, (/ 3, 4 /), (/ 0, 0 /), rc)
+    delist = (/ (i, i=0, 3) /)
+    layout1 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test #70385"
@@ -244,7 +247,6 @@
                              horz_gridtype=horz_gridtype, &
                              horz_stagger=horz_stagger, &
                              horz_coord_system=horz_coord_system, &
-                             halo_width=halo_width, &
                              name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
 

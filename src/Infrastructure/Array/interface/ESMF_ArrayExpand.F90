@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.2 2003/07/15 18:10:51 jwolfe Exp $
+! $Id: ESMF_ArrayExpand.F90,v 1.1 2003/07/17 20:02:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,11 +11,13 @@
 !==============================================================================
 !
 ! ESMF Array module
-      module ESMF_ArrayMod
+      module ESMF_ArrayExpandMod
 !
 !==============================================================================
 !
-! This file contains the Array class definition and all Array
+! This file contains the Array class methods which are automatically
+! generated from macros to handle the type/kind/rank overloading.
+! See ESMF_ArrayBase.F90 for non-macroized entry points.
 ! class methods.
 !
 !------------------------------------------------------------------------------
@@ -23,27 +25,10 @@
 ! < ignore blank lines below. they are created by the files which
 ! define various macros. >
 !------------------------------------------------------------------------------
-!BOP
-! !MODULE: ESMF_ArrayMod - Manage data arrays uniformly between F90 and C++
-!
-! !DESCRIPTION:
-!
-! The code in this file implements the {\tt Array} class and
-! associated functions and subroutines.
-!
-! C and C++ arrays are simple pointers to memory.
-! Fortran arrays contain shape and stride definitions and are strongly
-! typed. To enable interoperability between the languages the C++ code
-! must be able to obtain this information from the Fortran description
-! (which is called the "dope vector" in Fortran), either through a priori
-! knowledge or through query.
-!
-!------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
-      use ESMF_IOMod
-      use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
+      use ESMF_ArrayBaseMod
       implicit none
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
@@ -62,16 +47,6 @@
       type(ESMF_ArrayOrigin), parameter :: &
                             ESMF_FROM_FORTRAN = ESMF_ArrayOrigin(1), &
                             ESMF_FROM_CPLUSPLUS = ESMF_ArrayOrigin(2)
-!------------------------------------------------------------------------------
-! ! ESMF_Array
-!
-! ! Array data type. All information is kept on the C++ side inside
-! ! the class structure.
-      type ESMF_Array
-      sequence
-      private
-        type(ESMF_Pointer) :: this ! opaque pointer to the C++ class data
-      end type
 !------------------------------------------------------------------------------
 ! ! Internal wrapper structures for passing f90 pointers to C++ and
 ! ! guaranteeing they are passed by reference on all compilers and all
@@ -217,36 +192,19 @@
  
 
 !------------------------------------------------------------------------------
-! !PUBLIC TYPES:
-      public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF
-      public ESMF_ArraySpec, ESMF_Array
-!------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_ArrayCreate
-      public ESMF_ArrayDestroy
-      public ESMF_ArraySpecInit
-      public ESMF_ArraySpecGet
-      public ESMF_ArraySetData, ESMF_ArrayGetData
-      !public ESMF_ArraySetInfo, ESMF_ArrayGetInfo
-      public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
-      public ESMF_ArrayRedist, ESMF_ArrayHalo
-      public ESMF_ArrayAllGather, ESMF_ArrayGather, ESMF_ArrayScatter
-      public ESMF_ArrayGet, ESMF_ArrayGetName
+      public ESMF_ArraySetData
+      public ESMF_ArrayGetData
       public ESMF_ArrayF90Allocate
       public ESMF_ArrayF90Deallocate
       public ESMF_ArrayConstructF90Ptr ! needed for C++ callback only
-      public ESMF_ArrayCheckpoint
-      public ESMF_ArrayRestore
-      public ESMF_ArrayWrite
-      public ESMF_ArrayRead
-      public ESMF_ArrayValidate
-      public ESMF_ArrayPrint
 !EOP
       public operator(.eq.), operator(.ne.)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.2 2003/07/15 18:10:51 jwolfe Exp $'
+      '$Id: ESMF_ArrayExpand.F90,v 1.1 2003/07/17 20:02:46 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -428,13 +386,13 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the Array Create and Destroy methods.
+! This section includes the Array Create methods.
 !
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayCreateByList -- Create an Array specifying all options.
 ! !INTERFACE:
-      function ESMF_ArrayCreateByList(rank, type, kind, counts, rc)
+      function ESMF_ArrayCreateByList(rank, type, kind, counts, halo_width, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateByList
@@ -444,6 +402,7 @@ end interface
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts
+      integer, intent(in), optional :: halo_width
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -470,6 +429,9 @@ end interface
 ! The number of items in each dimension of the array. This is a 1D
 ! integer array the same length as the rank.
 !
+! \item[{[halo_width]}]
+! Set the maximum width of the halo region on all edges. Defaults to 0.
+!
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -479,6 +441,7 @@ end interface
 ! !REQUIREMENTS:
         ! Local vars
         type (ESMF_Array) :: array ! new C++ Array
+        integer :: hwidth ! local copy of halo width
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
         status = ESMF_FAILURE
@@ -489,10 +452,16 @@ end interface
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+        ! Always supply a halo value, setting it to 0 if not specified.
+        if (present(halo_width)) then
+          hwidth = halo_width
+        else
+          hwidth = 0
+        endif
         ! TODO: should this take the counts, or not? for now i am going to
         ! set the counts after i have created the f90 array and not here.
         call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
-                                                   ESMF_FROM_FORTRAN, status)
+                                            ESMF_FROM_FORTRAN, hwidth, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
@@ -506,7 +475,7 @@ end interface
 !BOP
 ! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpec(spec, counts, rc)
+      function ESMF_ArrayCreateBySpec(spec, counts, halo_width, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateBySpec
@@ -514,6 +483,7 @@ end interface
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), intent(in) :: spec
       integer, intent(in), dimension(:) :: counts
+      integer, intent(in), optional :: halo_width
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -529,6 +499,9 @@ end interface
 ! \item[counts]
 ! The number of items in each dimension of the array. This is a 1D
 ! integer array the same length as the rank.
+!
+! \item[{[halo_width]}]
+! Set the maximum width of the halo region on all edges. Defaults to 0.
 !
 ! \item[{[rc]}]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -556,7 +529,7 @@ end interface
         if (status .ne. ESMF_SUCCESS) return
         ! Call the list function to make the array
         ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
-                                                            counts, status)
+                                                   counts, halo_width, status)
         if (rcpresent) rc = status
         end function ESMF_ArrayCreateBySpec
 !------------------------------------------------------------------------------
@@ -686,6 +659,33 @@ end interface
         if (rcpresent) rc = status
         end subroutine ESMF_ArrayConstructF90Ptr
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArraySetData
+!
+! !INTERFACE:
+      subroutine ESMF_ArraySetData(array, dataspec, databuf, docopy, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      type(ESMF_ArraySpec), intent(in) :: dataspec
+      real, dimension (:), pointer :: databuf
+      type(ESMF_CopyFlag), intent(in) :: docopy
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used only with the version of ArrayCreate which creates an empty
+! Array and allows the Data to be specified later. Otherwise it is an
+! error to replace the data contents associated with a Array.
+!
+! TODO: this needs to be macroized for T/K/R, just like create
+!
+!EOP
+! !REQUIREMENTS:
+!
+! TODO: code goes here
+!
+        end subroutine ESMF_ArraySetData
+!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !! < start of macros which become actual function bodies after expansion >
 !------------------------------------------------------------------------------ 
@@ -694,7 +694,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI21D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI21D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI21D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI21D 
@@ -703,6 +703,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -710,7 +711,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -719,6 +721,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -732,6 +738,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I2), dimension(:), pointer :: newp 
@@ -752,9 +759,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -780,7 +794,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI41D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI41D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI41D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI41D 
@@ -789,6 +803,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -796,7 +811,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -805,6 +821,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -818,6 +838,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I4), dimension(:), pointer :: newp 
@@ -838,9 +859,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -866,7 +894,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI81D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI81D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI81D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI81D 
@@ -875,6 +903,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -882,7 +911,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -891,6 +921,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -904,6 +938,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I8), dimension(:), pointer :: newp 
@@ -924,9 +959,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -952,7 +994,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI22D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI22D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI22D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI22D 
@@ -961,6 +1003,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -968,7 +1011,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -977,6 +1021,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -990,6 +1038,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I2), dimension(:,:), pointer :: newp 
@@ -1010,9 +1059,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1038,7 +1094,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI42D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI42D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI42D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI42D 
@@ -1047,6 +1103,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1054,7 +1111,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1063,6 +1121,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1076,6 +1138,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: newp 
@@ -1096,9 +1159,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1124,7 +1194,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI82D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI82D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI82D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI82D 
@@ -1133,6 +1203,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1140,7 +1211,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1149,6 +1221,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1162,6 +1238,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: newp 
@@ -1182,9 +1259,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1210,7 +1294,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI23D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI23D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI23D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI23D 
@@ -1219,6 +1303,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1226,7 +1311,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1235,6 +1321,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1248,6 +1338,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I2), dimension(:,:,:), pointer :: newp 
@@ -1268,9 +1359,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1296,7 +1394,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI43D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI43D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI43D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI43D 
@@ -1305,6 +1403,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1312,7 +1411,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1321,6 +1421,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1334,6 +1438,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I4), dimension(:,:,:), pointer :: newp 
@@ -1354,9 +1459,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1382,7 +1494,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI83D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI83D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI83D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI83D 
@@ -1391,6 +1503,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1398,7 +1511,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1407,6 +1521,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1420,6 +1538,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I8), dimension(:,:,:), pointer :: newp 
@@ -1440,9 +1559,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1468,7 +1594,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI24D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI24D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI24D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI24D 
@@ -1477,6 +1603,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1484,7 +1611,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1493,6 +1621,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1506,6 +1638,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), pointer :: newp 
@@ -1526,9 +1659,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1554,7 +1694,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI44D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI44D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI44D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI44D 
@@ -1563,6 +1703,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1570,7 +1711,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1579,6 +1721,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1592,6 +1738,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), pointer :: newp 
@@ -1612,9 +1759,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1640,7 +1794,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI84D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI84D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI84D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI84D 
@@ -1649,6 +1803,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1656,7 +1811,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1665,6 +1821,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1678,6 +1838,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), pointer :: newp 
@@ -1698,9 +1859,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1726,7 +1894,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI25D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI25D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI25D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI25D 
@@ -1735,6 +1903,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1742,7 +1911,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1751,6 +1921,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1764,6 +1938,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), pointer :: newp 
@@ -1784,9 +1959,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1812,7 +1994,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI45D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI45D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI45D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI45D 
@@ -1821,6 +2003,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1828,7 +2011,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1837,6 +2021,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1850,6 +2038,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), pointer :: newp 
@@ -1870,9 +2059,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1898,7 +2094,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrI85D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrI85D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrI85D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrI85D 
@@ -1907,6 +2103,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -1914,7 +2111,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -1923,6 +2121,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -1936,6 +2138,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), pointer :: newp 
@@ -1956,9 +2159,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -1984,7 +2194,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR41D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR41D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR41D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR41D 
@@ -1993,6 +2203,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2000,7 +2211,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2009,6 +2221,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2022,6 +2238,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R4), dimension(:), pointer :: newp 
@@ -2042,9 +2259,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2070,7 +2294,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR81D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR81D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR81D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR81D 
@@ -2079,6 +2303,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2086,7 +2311,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2095,6 +2321,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2108,6 +2338,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R8), dimension(:), pointer :: newp 
@@ -2128,9 +2359,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2156,7 +2394,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR42D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR42D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR42D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR42D 
@@ -2165,6 +2403,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2172,7 +2411,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2181,6 +2421,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2194,6 +2438,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: newp 
@@ -2214,9 +2459,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2242,7 +2494,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR82D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR82D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR82D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR82D 
@@ -2251,6 +2503,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2258,7 +2511,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2267,6 +2521,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2280,6 +2538,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: newp 
@@ -2300,9 +2559,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2328,7 +2594,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR43D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR43D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR43D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR43D 
@@ -2337,6 +2603,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2344,7 +2611,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2353,6 +2621,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2366,6 +2638,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R4), dimension(:,:,:), pointer :: newp 
@@ -2386,9 +2659,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2414,7 +2694,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR83D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR83D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR83D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR83D 
@@ -2423,6 +2703,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2430,7 +2711,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2439,6 +2721,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2452,6 +2738,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R8), dimension(:,:,:), pointer :: newp 
@@ -2472,9 +2759,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2500,7 +2794,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR44D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR44D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR44D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR44D 
@@ -2509,6 +2803,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2516,7 +2811,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2525,6 +2821,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2538,6 +2838,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R4), dimension(:,:,:,:), pointer :: newp 
@@ -2558,9 +2859,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2586,7 +2894,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR84D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR84D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR84D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR84D 
@@ -2595,6 +2903,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2602,7 +2911,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2611,6 +2921,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2624,6 +2938,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R8), dimension(:,:,:,:), pointer :: newp 
@@ -2644,9 +2959,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2672,7 +2994,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR45D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR45D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR45D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR45D 
@@ -2681,6 +3003,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2688,7 +3011,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2697,6 +3021,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2710,6 +3038,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), pointer :: newp 
@@ -2730,9 +3059,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2758,7 +3094,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTArrR85D - make an ESMF array from an unallocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTArrR85D(f90arr, counts, rc) 
+ function ESMF_ArrayCreateByMTArrR85D(f90arr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTArrR85D 
@@ -2767,6 +3103,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2774,7 +3111,8 @@ end interface
 ! 90 array. This routine allocates memory to the array and fills in 
 ! the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type with space allocated for data. 
+! The function return is an {\tt ESMF\_Array} type with space 
+! allocated for data. 
 ! 
 ! The arguments are: 
 ! \begin{description} 
@@ -2783,6 +3121,10 @@ end interface
 ! 
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
+! 
+! \item[{[halo_width]}] 
+! An integer count of the width of the halo region on all sides of 
+! the array. The default is 0, no halo region. 
 ! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
@@ -2796,6 +3138,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), pointer :: newp 
@@ -2816,9 +3159,16 @@ end interface
  ! return 
  !endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2847,7 +3197,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI21D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI21D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI21D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI21D 
@@ -2856,6 +3206,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2876,6 +3227,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2889,6 +3243,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
  
@@ -2923,9 +3278,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -2951,7 +3313,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI41D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI41D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI41D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI41D 
@@ -2960,6 +3322,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -2980,6 +3343,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -2993,6 +3359,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
  
@@ -3027,9 +3394,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3055,7 +3429,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI81D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI81D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI81D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI81D 
@@ -3064,6 +3438,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3084,6 +3459,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3097,6 +3475,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
  
@@ -3131,9 +3510,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3159,7 +3545,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI22D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI22D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI22D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI22D 
@@ -3168,6 +3554,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3188,6 +3575,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3201,6 +3591,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
  
@@ -3235,9 +3626,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3263,7 +3661,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI42D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI42D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI42D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI42D 
@@ -3272,6 +3670,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3292,6 +3691,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3305,6 +3707,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
  
@@ -3339,9 +3742,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3367,7 +3777,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI82D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI82D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI82D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI82D 
@@ -3376,6 +3786,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3396,6 +3807,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3409,6 +3823,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
  
@@ -3443,9 +3858,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3471,7 +3893,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI23D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI23D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI23D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI23D 
@@ -3480,6 +3902,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3500,6 +3923,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3513,6 +3939,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
  
@@ -3547,9 +3974,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3575,7 +4009,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI43D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI43D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI43D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI43D 
@@ -3584,6 +4018,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3604,6 +4039,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3617,6 +4055,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
  
@@ -3651,9 +4090,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3679,7 +4125,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI83D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI83D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI83D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI83D 
@@ -3688,6 +4134,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3708,6 +4155,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3721,6 +4171,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
  
@@ -3755,9 +4206,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3783,7 +4241,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI24D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI24D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI24D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI24D 
@@ -3792,6 +4250,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3812,6 +4271,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3825,6 +4287,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
  
@@ -3859,9 +4322,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3887,7 +4357,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI44D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI44D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI44D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI44D 
@@ -3896,6 +4366,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -3916,6 +4387,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -3929,6 +4403,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
  
@@ -3963,9 +4438,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -3991,7 +4473,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI84D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI84D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI84D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI84D 
@@ -4000,6 +4482,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4020,6 +4503,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4033,6 +4519,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
  
@@ -4067,9 +4554,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4095,7 +4589,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI25D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI25D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI25D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI25D 
@@ -4104,6 +4598,7 @@ end interface
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4124,6 +4619,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4137,6 +4635,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
  
@@ -4171,9 +4670,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4199,7 +4705,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI45D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI45D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI45D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI45D 
@@ -4208,6 +4714,7 @@ end interface
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4228,6 +4735,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4241,6 +4751,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
  
@@ -4275,9 +4786,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4303,7 +4821,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrI85D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrI85D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrI85D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrI85D 
@@ -4312,6 +4830,7 @@ end interface
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), target :: f90arr 
  !integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4332,6 +4851,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4345,6 +4867,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
  
@@ -4379,9 +4902,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4407,7 +4937,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR41D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR41D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR41D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR41D 
@@ -4416,6 +4946,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4436,6 +4967,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4449,6 +4983,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
  
@@ -4483,9 +5018,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4511,7 +5053,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR81D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR81D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR81D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR81D 
@@ -4520,6 +5062,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4540,6 +5083,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4553,6 +5099,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
  
@@ -4587,9 +5134,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4615,7 +5169,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR42D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR42D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR42D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR42D 
@@ -4624,6 +5178,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4644,6 +5199,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4657,6 +5215,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
  
@@ -4691,9 +5250,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4719,7 +5285,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR82D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR82D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR82D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR82D 
@@ -4728,6 +5294,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4748,6 +5315,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4761,6 +5331,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
  
@@ -4795,9 +5366,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4823,7 +5401,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR43D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR43D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR43D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR43D 
@@ -4832,6 +5410,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4852,6 +5431,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4865,6 +5447,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
  
@@ -4899,9 +5482,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -4927,7 +5517,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR83D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR83D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR83D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR83D 
@@ -4936,6 +5526,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -4956,6 +5547,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -4969,6 +5563,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
  
@@ -5003,9 +5598,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5031,7 +5633,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR44D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR44D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR44D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR44D 
@@ -5040,6 +5642,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5060,6 +5663,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5073,6 +5679,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
  
@@ -5107,9 +5714,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5135,7 +5749,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR84D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR84D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR84D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR84D 
@@ -5144,6 +5758,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5164,6 +5779,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5177,6 +5795,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
  
@@ -5211,9 +5830,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5239,7 +5865,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR45D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR45D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR45D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR45D 
@@ -5248,6 +5874,7 @@ end interface
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R4), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5268,6 +5895,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5281,6 +5911,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
  
@@ -5315,9 +5946,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5343,7 +5981,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullArrR85D - make an ESMF array from an Allocated F90 array 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullArrR85D(f90arr, docopy, rc) 
+ function ESMF_ArrayCreateByFullArrR85D(f90arr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullArrR85D 
@@ -5352,6 +5990,7 @@ end interface
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), target :: f90arr 
  !real (ESMF_IKIND_R8), dimension(:,:,:,:,:), allocatable, target :: f90arr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5372,6 +6011,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5385,6 +6027,7 @@ end interface
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
  logical :: rcpresent ! did user specify rc? 
+ integer :: hwidth ! local copy of halo width 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
  
@@ -5419,9 +6062,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90arr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5450,7 +6100,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI21D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI21D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI21D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI21D 
@@ -5458,6 +6108,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5475,6 +6126,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5487,6 +6141,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5505,9 +6160,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5532,7 +6194,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI41D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI41D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI41D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI41D 
@@ -5540,6 +6202,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5557,6 +6220,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5569,6 +6235,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5587,9 +6254,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5614,7 +6288,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI81D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI81D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI81D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI81D 
@@ -5622,6 +6296,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5639,6 +6314,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5651,6 +6329,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5669,9 +6348,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5696,7 +6382,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI22D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI22D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI22D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI22D 
@@ -5704,6 +6390,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5721,6 +6408,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5733,6 +6423,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5751,9 +6442,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5778,7 +6476,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI42D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI42D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI42D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI42D 
@@ -5786,6 +6484,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5803,6 +6502,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5815,6 +6517,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5833,9 +6536,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5860,7 +6570,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI82D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI82D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI82D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI82D 
@@ -5868,6 +6578,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5885,6 +6596,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5897,6 +6611,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5915,9 +6630,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -5942,7 +6664,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI23D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI23D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI23D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI23D 
@@ -5950,6 +6672,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -5967,6 +6690,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -5979,6 +6705,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -5997,9 +6724,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6024,7 +6758,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI43D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI43D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI43D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI43D 
@@ -6032,6 +6766,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6049,6 +6784,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6061,6 +6799,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6079,9 +6818,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6106,7 +6852,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI83D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI83D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI83D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI83D 
@@ -6114,6 +6860,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6131,6 +6878,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6143,6 +6893,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6161,9 +6912,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6188,7 +6946,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI24D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI24D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI24D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI24D 
@@ -6196,6 +6954,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6213,6 +6972,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6225,6 +6987,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6243,9 +7006,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6270,7 +7040,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI44D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI44D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI44D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI44D 
@@ -6278,6 +7048,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6295,6 +7066,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6307,6 +7081,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6325,9 +7100,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6352,7 +7134,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI84D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI84D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI84D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI84D 
@@ -6360,6 +7142,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6377,6 +7160,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6389,6 +7175,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6407,9 +7194,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6434,7 +7228,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI25D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI25D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI25D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI25D 
@@ -6442,6 +7236,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6459,6 +7254,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6471,6 +7269,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6489,9 +7288,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6516,7 +7322,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI45D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI45D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI45D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI45D 
@@ -6524,6 +7330,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6541,6 +7348,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6553,6 +7363,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6571,9 +7382,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6598,7 +7416,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrI85D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrI85D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrI85D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrI85D 
@@ -6606,6 +7424,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6623,6 +7442,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6635,6 +7457,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6653,9 +7476,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6680,7 +7510,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR41D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR41D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR41D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR41D 
@@ -6688,6 +7518,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6705,6 +7536,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6717,6 +7551,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6735,9 +7570,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6762,7 +7604,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR81D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR81D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR81D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR81D 
@@ -6770,6 +7612,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6787,6 +7630,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6799,6 +7645,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6817,9 +7664,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6844,7 +7698,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR42D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR42D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR42D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR42D 
@@ -6852,6 +7706,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6869,6 +7724,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6881,6 +7739,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6899,9 +7758,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -6926,7 +7792,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR82D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR82D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR82D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR82D 
@@ -6934,6 +7800,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -6951,6 +7818,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -6963,6 +7833,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -6981,9 +7852,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7008,7 +7886,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR43D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR43D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR43D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR43D 
@@ -7016,6 +7894,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7033,6 +7912,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7045,6 +7927,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -7063,9 +7946,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7090,7 +7980,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR83D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR83D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR83D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR83D 
@@ -7098,6 +7988,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7115,6 +8006,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7127,6 +8021,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -7145,9 +8040,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7172,7 +8074,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR44D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR44D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR44D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR44D 
@@ -7180,6 +8082,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7197,6 +8100,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7209,6 +8115,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -7227,9 +8134,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7254,7 +8168,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR84D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR84D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR84D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR84D 
@@ -7262,6 +8176,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7279,6 +8194,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7291,6 +8209,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -7309,9 +8228,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7336,7 +8262,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR45D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR45D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR45D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR45D 
@@ -7344,6 +8270,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7361,6 +8288,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7373,6 +8303,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -7391,9 +8322,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7418,7 +8356,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByMTPtrR85D - make an ESMF array from an unallocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByMTPtrR85D(f90ptr, counts, rc) 
+ function ESMF_ArrayCreateByMTPtrR85D(f90ptr, counts, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByMTPtrR85D 
@@ -7426,6 +8364,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), pointer :: f90ptr 
  integer, dimension(:), intent(in) :: counts 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7443,6 +8382,9 @@ end interface
 ! \item[counts] 
 ! An integer array of counts. Must be the same length as the rank. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7455,6 +8397,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  
  ! Initialize return code; assume failure until success is certain 
@@ -7473,9 +8416,16 @@ end interface
  return 
  endif 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7503,7 +8453,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI21D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI21D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI21D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI21D 
@@ -7511,6 +8461,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7531,6 +8482,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7543,6 +8497,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
@@ -7576,9 +8531,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7603,7 +8565,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI41D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI41D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI41D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI41D 
@@ -7611,6 +8573,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7631,6 +8594,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7643,6 +8609,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
@@ -7676,9 +8643,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7703,7 +8677,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI81D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI81D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI81D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI81D 
@@ -7711,6 +8685,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7731,6 +8706,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7743,6 +8721,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
@@ -7776,9 +8755,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7803,7 +8789,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI22D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI22D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI22D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI22D 
@@ -7811,6 +8797,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7831,6 +8818,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7843,6 +8833,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
@@ -7876,9 +8867,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -7903,7 +8901,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI42D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI42D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI42D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI42D 
@@ -7911,6 +8909,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -7931,6 +8930,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -7943,6 +8945,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
@@ -7976,9 +8979,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8003,7 +9013,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI82D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI82D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI82D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI82D 
@@ -8011,6 +9021,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8031,6 +9042,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8043,6 +9057,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
@@ -8076,9 +9091,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8103,7 +9125,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI23D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI23D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI23D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI23D 
@@ -8111,6 +9133,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8131,6 +9154,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8143,6 +9169,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
@@ -8176,9 +9203,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8203,7 +9237,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI43D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI43D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI43D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI43D 
@@ -8211,6 +9245,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8231,6 +9266,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8243,6 +9281,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
@@ -8276,9 +9315,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8303,7 +9349,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI83D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI83D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI83D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI83D 
@@ -8311,6 +9357,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8331,6 +9378,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8343,6 +9393,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
@@ -8376,9 +9427,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8403,7 +9461,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI24D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI24D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI24D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI24D 
@@ -8411,6 +9469,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8431,6 +9490,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8443,6 +9505,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
@@ -8476,9 +9539,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8503,7 +9573,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI44D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI44D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI44D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI44D 
@@ -8511,6 +9581,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8531,6 +9602,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8543,6 +9617,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
@@ -8576,9 +9651,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8603,7 +9685,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI84D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI84D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI84D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI84D 
@@ -8611,6 +9693,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8631,6 +9714,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8643,6 +9729,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
@@ -8676,9 +9763,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8703,7 +9797,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI25D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI25D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI25D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI25D 
@@ -8711,6 +9805,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I2), dimension(:,:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8731,6 +9826,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8743,6 +9841,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
@@ -8776,9 +9875,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I2, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8803,7 +9909,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI45D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI45D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI45D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI45D 
@@ -8811,6 +9917,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I4), dimension(:,:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8831,6 +9938,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8843,6 +9953,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
@@ -8876,9 +9987,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -8903,7 +10021,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrI85D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrI85D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrI85D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrI85D 
@@ -8911,6 +10029,7 @@ end interface
 ! !ARGUMENTS: 
  integer (ESMF_IKIND_I8), dimension(:,:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -8931,6 +10050,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -8943,6 +10065,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
@@ -8976,9 +10099,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_integer, ESMF_KIND_I8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9003,7 +10133,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR41D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR41D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR41D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR41D 
@@ -9011,6 +10141,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9031,6 +10162,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9043,6 +10177,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
@@ -9076,9 +10211,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9103,7 +10245,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR81D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR81D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR81D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR81D 
@@ -9111,6 +10253,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9131,6 +10274,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9143,6 +10289,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(1) :: counts ! per dim 
@@ -9176,9 +10323,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 1, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9203,7 +10357,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR42D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR42D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR42D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR42D 
@@ -9211,6 +10365,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9231,6 +10386,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9243,6 +10401,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
@@ -9276,9 +10435,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9303,7 +10469,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR82D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR82D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR82D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR82D 
@@ -9311,6 +10477,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9331,6 +10498,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9343,6 +10513,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(2) :: counts ! per dim 
@@ -9376,9 +10547,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 2, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9403,7 +10581,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR43D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR43D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR43D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR43D 
@@ -9411,6 +10589,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9431,6 +10610,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9443,6 +10625,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
@@ -9476,9 +10659,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9503,7 +10693,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR83D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR83D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR83D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR83D 
@@ -9511,6 +10701,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9531,6 +10722,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9543,6 +10737,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(3) :: counts ! per dim 
@@ -9576,9 +10771,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 3, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9603,7 +10805,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR44D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR44D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR44D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR44D 
@@ -9611,6 +10813,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9631,6 +10834,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9643,6 +10849,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
@@ -9676,9 +10883,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9703,7 +10917,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR84D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR84D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR84D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR84D 
@@ -9711,6 +10925,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9731,6 +10946,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9743,6 +10961,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(4) :: counts ! per dim 
@@ -9776,9 +10995,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 4, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9803,7 +11029,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR45D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR45D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR45D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR45D 
@@ -9811,6 +11037,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R4), dimension(:,:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9831,6 +11058,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9843,6 +11073,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
@@ -9876,9 +11107,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R4, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -9903,7 +11141,7 @@ end interface
 ! !IROUTINE: ESMF_ArrayCreateByFullPtrR85D - make an ESMF array from an Allocated F90 pointer 
  
 ! !INTERFACE: 
- function ESMF_ArrayCreateByFullPtrR85D(f90ptr, docopy, rc) 
+ function ESMF_ArrayCreateByFullPtrR85D(f90ptr, docopy, halo_width, rc) 
 ! 
 ! !RETURN VALUE: 
  type(ESMF_Array) :: ESMF_ArrayCreateByFullPtrR85D 
@@ -9911,6 +11149,7 @@ end interface
 ! !ARGUMENTS: 
  real (ESMF_IKIND_R8), dimension(:,:,:,:,:), pointer :: f90ptr 
  type(ESMF_CopyFlag), intent(in), optional :: docopy 
+ integer, intent(in), optional :: halo_width 
  integer, intent(out), optional :: rc 
 ! 
 ! !DESCRIPTION: 
@@ -9931,6 +11170,9 @@ end interface
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
+! \item[{[halo_width]}] 
+! Set the maximum width of the halo region on all edges. Defaults to 0. 
+! 
 ! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
@@ -9943,6 +11185,7 @@ end interface
  ! Local variables 
  type (ESMF_Array) :: array ! new array object 
  integer :: status ! local error status 
+ integer :: hwidth ! local copy of halo width 
  logical :: rcpresent ! did user specify rc? 
  type (ESMF_CopyFlag) :: copy ! do we copy or ref? 
  integer, dimension(5) :: counts ! per dim 
@@ -9976,9 +11219,16 @@ end interface
  ! does not need it for an already allocated array. 
  counts = shape(f90ptr) 
  
+ ! Always supply a halo value, setting it to 0 if not specified. 
+ if (present(halo_width)) then 
+ hwidth = halo_width 
+ else 
+ hwidth = 0 
+ endif 
+ 
  ! Call create routine 
  call c_ESMC_ArrayCreateNoData(array, 5, ESMF_DATA_real, ESMF_KIND_R8, & 
- ESMF_FROM_FORTRAN, status) 
+ ESMF_FROM_FORTRAN, hwidth, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
@@ -16160,633 +17410,11 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayDestroy(array, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Releases all resources associated with this {\tt Array}.
-!
-! The arguments are:
-! \begin{description}
-!
-! \item[array]
-! Destroy contents of this {\tt Array}.
-!
-! \item[[rc]]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
-!
-! To reduce the depth of crossings of the F90/C++ boundary we first
-! query to see if we are responsible for deleting the data space. If so,
-! first deallocate the space and then call the C++ code to release
-! the object space. When it returns we are done and can return to the user.
-! Otherwise we would need to make a nested call back into F90 from C++ to do
-! the deallocate() during the object delete.
-!
-!EOP
-! !REQUIREMENTS:
-        ! Local vars
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        logical :: needsdealloc ! do we need to free space?
-        integer :: rank
-        type(ESMF_DataType) :: type
-        type(ESMF_DataKind) :: kind
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-        needsdealloc = .FALSE.
-        ! TODO: document the current rule - if we do the allocate in
-        ! the case of ESMF_DATA_COPY at create time then we delete the
-        ! space. otherwise, the user needs to destroy the array
-        ! (we will ignore the data) and call deallocate themselves.
-        ! Call Destruct first, then free this memory
-        call c_ESMC_ArrayNeedsDealloc(array, needsdealloc, status)
-        if (needsdealloc) then
-          call c_ESMC_ArrayGetRank(array, rank, status)
-          call c_ESMC_ArrayGetType(array, type, status)
-          call c_ESMC_ArrayGetKind(array, kind, status)
-          call ESMF_ArrayF90Deallocate(array, rank, type, kind, status)
-          if (status .ne. ESMF_SUCCESS) then
-            print *, "Array contents destruction error"
-            return
-          endif
-          call c_ESMC_ArraySetNoDealloc(array, status)
-        endif
-        ! Calling deallocate first means this will not return back to F90
-        ! before returning for good.
-        call c_ESMC_ArrayDestroy(array, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array destruction error"
-          return
-        endif
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayDestroy
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArraySetData
-!
-! !INTERFACE:
-      subroutine ESMF_ArraySetData(array, dataspec, databuf, docopy, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_ArraySpec), intent(in) :: dataspec
-      real, dimension (:), pointer :: databuf
-      type(ESMF_CopyFlag), intent(in) :: docopy
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used only with the version of ArrayCreate which creates an empty
-! Array and allows the Data to be specified later. Otherwise it is an
-! error to replace the data contents associated with a Array.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_ArraySetData
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArraySetAxisIndex
-!
-! !INTERFACE:
-      subroutine ESMF_ArraySetAxisIndex(array, indexlist, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
-      type(ESMF_AxisIndex), intent(in) :: indexlist(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to annotate an Array with information used to map local to global
-! indicies.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        ! call c routine to add index
-        call c_ESMC_ArraySetAxisIndex(array, indexlist, rc)
-        end subroutine ESMF_ArraySetAxisIndex
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayGetAxisIndex
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayGetAxisIndex(array, indexlist, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(inout) :: array
-      type(ESMF_AxisIndex), intent(out) :: indexlist(:)
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to retrieve the index annotation from an Array.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        ! call c routine to query index
-        call c_ESMC_ArrayGetAxisIndex(array, indexlist, rc)
-        end subroutine ESMF_ArrayGetAxisIndex
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayRedist(array, layout, rank_trans, olddecompids, &
-                                  decompids, redistarray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: layout
-      integer, dimension(:), intent(in) :: rank_trans
-      integer, dimension(:), intent(in) :: olddecompids
-      integer, dimension(:), intent(in) :: decompids
-      type(ESMF_Array), intent(in) :: redistarray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to redistribute an Array.
-!
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        integer :: size_rank_trans
-        integer :: size_decomp
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-! call c routine to query index
-        size_rank_trans = size(rank_trans)
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayRedist(array, layout, rank_trans, size_rank_trans, &
-                                olddecompids, decompids, size_decomp, &
-                                redistarray, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayRedist returned error"
-          return
-        endif
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayRedist
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayHalo(array, layout, decompids, AI_exc, AI_tot, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_DELayout) :: layout
-      integer, dimension(:), intent(in) :: decompids
-      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
-      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to halo an Array.
-!
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        integer :: size_decomp, size_AI
-        integer :: i
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-! subtract one from location parts of indices to translate to C++
-        size_AI = size(AI_tot)
-        do i = 1,size_AI
-          AI_exc(i)%min = AI_exc(i)%min - 1
-          AI_exc(i)%max = AI_exc(i)%max - 1
-          AI_tot(i)%min = AI_tot(i)%min - 1
-          AI_tot(i)%max = AI_tot(i)%max - 1
-        enddo
-! call c routine to halo
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayHalo(array, layout, decompids, size_decomp, &
-                              AI_exc, AI_tot, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayHalo returned error"
-          return
-        endif
-! add one back to location parts of indices to translate from C++
-        size_AI = size(AI_tot)
-        do i = 1,size_AI
-          AI_exc(i)%min = AI_exc(i)%min + 1
-          AI_exc(i)%max = AI_exc(i)%max + 1
-          AI_tot(i)%min = AI_tot(i)%min + 1
-          AI_tot(i)%max = AI_tot(i)%max + 1
-        enddo
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayHalo
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayAllGather(array, layout, decompids, array_out, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: layout
-      integer, dimension(:), intent(in) :: decompids
-      type(ESMF_Array), intent(out) :: array_out
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
-!
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        integer :: size_decomp
-        integer :: i
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-! call c routine to allgather
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
-                                   array_out, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayAllGather returned error"
-          return
-        endif
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayAllGather
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayGather(array, layout, decompids, deid, array_out, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: layout
-      integer, dimension(:), intent(in) :: decompids
-      integer, intent(in) :: deid
-      type(ESMF_Array), intent(out) :: array_out
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
-!
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        integer :: size_decomp, size_AI
-        integer :: i
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-! call c routine to allgather
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayGather(array, layout, decompids, size_decomp, &
-                                deid, array_out, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayGather returned error"
-          return
-        endif
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayGather
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayScatter(array, layout, decompids, deid, array_out, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      type(ESMF_DELayout), intent(in) :: layout
-      integer, dimension(:), intent(in) :: decompids
-      integer, intent(in) :: deid
-      type(ESMF_Array), intent(out) :: array_out
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to scatter a single Array into a distributed Array across all DEs.
-!
-!
-!EOP
-! !REQUIREMENTS:
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        integer :: size_decomp
-        integer :: i
-! initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-! call c routine to allgather
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayScatter(array, layout, decompids, size_decomp, &
-                                 deid, array_out, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "c_ESMC_ArrayScatter returned error"
-          return
-        endif
-! set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayScatter
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayReorder(array, newarrayspec, newarray, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_ArraySpec), intent(in) :: newarrayspec
-      type(ESMF_Array):: newarray
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to alter the local memory ordering (layout) of this Array.
-!
-! !TODO: remove this note before generating user documentation
-!
-! (i am not sure this makes sense now, or that the routine should be
-! in this class. but i am leaving this here as a reminder that we
-! might need some low level reorder functions. maybe the argument
-! should be another array or an arrayspec which describes what you
-! want, and the input array is what exists, and this routine can then
-! make one into the other. is this a type of create? or is this
-! a copy?)
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_ArrayReorder
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-     subroutine ESMF_ArraySpecInit(as, rank, type, kind, rc)
-!
-!
-! !ARGUMENTS:
-     type(ESMF_ArraySpec), intent(inout) :: as
-     integer, intent(in) :: rank
-     type(ESMF_DataType), intent(in) :: type
-     type(ESMF_DataKind), intent(in) :: kind
-     integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Creates a description of the data -- the type, the dimensionality, etc.
-! This specification can be
-! used in an ArrayCreate call with data to create a full Array.
-!
-! The arguments are:
-! \begin{description}
-!
-! \item[arrayspec]
-! Uninitialized array spec.
-!
-! \item[rank]
-! Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 5D.
-!
-! \item[type]
-! Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
-! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
-! {\tt ESMF\_DATA\_CHARACTER}.
-!
-! \item[kind]
-! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
-!
-! \item[[rc]]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-        ! Local vars
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        ! Initialize pointer
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-        ! Set arrayspec contents
-        as%rank = rank
-        as%type = type
-        as%kind = kind
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArraySpecInit
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! Query for information from the array.
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayGet(array, rank, type, kind, counts, &
-                               lbounds, ubounds, strides, base, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, dimension(:), intent(out), optional :: counts
-      integer, dimension(:), intent(out), optional :: lbounds
-      integer, dimension(:), intent(out), optional :: ubounds
-      integer, dimension(:), intent(out), optional :: strides
-      type(ESMF_Pointer), intent(out), optional :: base
-      character(len=ESMF_MAXSTR), intent(out), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Returns information about the array. For queries where the caller
-! only wants a single value, specify the argument by name.
-! All the arguments after the array input are optional to facilitate this.
-!
-!EOP
-! !REQUIREMENTS:
-      integer :: status ! Error status
-      logical :: rcpresent ! Return code present
-      integer :: lrank ! Local use to get rank
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-      if (present(rank)) then
-         call c_ESMC_ArrayGetRank(array, rank, status)
-         ! TODO: test status
-      endif
-      if (present(type)) then
-         call c_ESMC_ArrayGetType(array, type, status)
-      endif
-      if (present(kind)) then
-         call c_ESMC_ArrayGetKind(array, kind, status)
-      endif
-      if (present(counts)) then
-         call c_ESMC_ArrayGetRank(array, lrank, status)
-         call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
-      endif
-      ! TODO: add these methods
-      !integer, dimension(:), intent(out), optional :: lbounds
-      !integer, dimension(:), intent(out), optional :: ubounds
-      !integer, dimension(:), intent(out), optional :: strides
-      !type(ESMF_Pointer), intent(out), optional :: base
-      if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_ArrayGet
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayGetName - Retrieve the name of a Array
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayGetName(array, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
-      character (len = *), intent(out) :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Returns the name of the array. If the array was created without
-! specifying a name, the framework will have assigned it a unique one.
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-      integer :: status ! Error status
-      logical :: rcpresent ! Return code present
-! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-      ! TODO: add an interface to the C code here
-      !call c_ESMC_ArrayGetName(array, name, status)
-      !if(status .NE. ESMF_FAILURE) then
-      ! print *, "ERROR in ESMF_ArrayGetName"
-      ! return
-      !endif
-      name = "default array name"
-      if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_ArrayGetName
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_ArraySpec), intent(in) :: as
-      integer, intent(out), optional :: rank
-      type(ESMF_DataType), intent(out), optional :: type
-      type(ESMF_DataKind), intent(out), optional :: kind
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Return information about the contents of a ArraySpec type.
-!
-! The arguments are:
-! \begin{description}
-!
-! \item[as]
-! An {\tt ArraySpec} object.
-!
-! \item[rank]
-! Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 5D.
-!
-! \item[type]
-! Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
-! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
-! {\tt ESMF\_DATA\_CHARACTER}.
-!
-! \item[kind]
-! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
-! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
-! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
-!
-! \item[[rc]]
-! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-! \end{description}
-!
-!EOP
-        ! Local vars
-        integer :: i
-        integer :: status ! local error status
-        logical :: rcpresent ! did user specify rc?
-        ! Initialize return code; assume failure until success is certain
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-        ! Get arrayspec contents
-        if(present(rank)) rank = as%rank
-        if(present(type)) type = as%type
-        if(present(kind)) kind = as%kind
-        if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArraySpecGet
-!------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section is Allocate/Deallocate for Arrays
 !
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!!! TODO: the interface now calls ESMF_ArrayConstructF90Ptr instead of
-!!! this routine. It maybe can go away? and can we do something with
-!!! ESMF_ArrayF90Deallocate to get rid of it as well, so the interfaces
-!!! are more symmetric?
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
@@ -17780,229 +18408,4 @@ end interface
      if (present(rc)) rc = ESMF_SUCCESS
      end subroutine ESMF_ArrayF90Deallocate
 !------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!
-! This section is I/O for Arrays
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayCheckpoint(array, iospec, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array):: array
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to save all data to disk as quickly as possible.
-! (see Read/Write for other options). Internally this routine uses the
-! same I/O interface as Read/Write, but the default options are to
-! select the fastest way to save data to disk.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        end subroutine ESMF_ArrayCheckpoint
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      function ESMF_ArrayRestore(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayRestore
-!
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name ! array name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec ! file specs
-      integer, intent(out), optional :: rc ! return code
-!
-! !DESCRIPTION:
-! Used to reinitialize
-! all data associated with a Array from the last call to Checkpoint.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        type (ESMF_Array) :: a
-! this is just to shut the compiler up
-        a%this = ESMF_NULL_POINTER
-!
-! TODO: add code here
-!
-        ESMF_ArrayRestore = a
-        end function ESMF_ArrayRestore
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      subroutine ESMF_ArrayWrite(array, iospec, filename, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      type(ESMF_IOSpec), intent(in), optional :: iospec
-      character(len=*), intent(in), optional :: filename
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Used to write data to persistent storage in a variety of formats.
-! (see Checkpoint/Restore for quick data dumps.) Details of I/O
-! options specified in the IOSpec derived type.
-!
-!
-!EOP
-! !REQUIREMENTS:
-       character (len=16) :: defaultopts ! default write options
-       character (len=16) :: defaultfile ! default filename
-       integer :: status ! local error status
-       logical :: rcpresent
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
-       defaultopts = "singlefile"
-       defaultfile = "datafile"
-       if(present(filename)) then
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status)
-       else
-           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status)
-       endif
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Array write error"
-         return
-       endif
-! set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-        end subroutine ESMF_ArrayWrite
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      function ESMF_ArrayRead(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayRead
-!
-! !ARGUMENTS:
-      character (len = *), intent(in) :: name ! array name to read
-      type(ESMF_IOSpec), intent(in), optional :: iospec ! file specs
-      integer, intent(out), optional :: rc ! return code
-!
-! !DESCRIPTION:
-! Used to read data from persistent storage in a variety of formats.
-!
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-        type (ESMF_Array) :: a
-! this is just to shut the compiler up
-        a%this = ESMF_NULL_POINTER
-!
-! TODO: add code here
-!
-        ESMF_ArrayRead = a
-        end function ESMF_ArrayRead
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayValidate - Check validity of Array object
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayValidate(array, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Routine to print information about a array.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-       character (len=6) :: defaultopts ! default print options
-       integer :: status ! local error status
-       logical :: rcpresent
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
-       defaultopts = "brief"
-       ! Simple validity checks
-       if (array%this .eq. ESMF_NULL_POINTER) then
-           print *, "Array not initialized or Destroyed"
-           return
-       endif
-       if(present(options)) then
-           !call c_ESMC_ArrayValidate(array, options, status)
-       else
-           !call c_ESMC_ArrayValidate(array, defaultopts, status)
-       endif
-       !if (status .ne. ESMF_SUCCESS) then
-       ! print *, "Array validate error"
-       ! return
-       !endif
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-       end subroutine ESMF_ArrayValidate
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ArrayPrint - Print contents of an Array object
-!
-! !INTERFACE:
-      subroutine ESMF_ArrayPrint(array, options, rc)
-!
-!
-! !ARGUMENTS:
-      type(ESMF_Array) :: array
-      character (len = *), intent(in), optional :: options
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-! Routine to print information about a array.
-!
-!EOP
-! !REQUIREMENTS:
-!
-! TODO: code goes here
-!
-       character (len=6) :: defaultopts ! default print options
-       integer :: status ! local error status
-       logical :: rcpresent
-       ! Initialize return code; assume failure until success is certain
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.
-         rc = ESMF_FAILURE
-       endif
-       defaultopts = "brief"
-       if(present(options)) then
-           call c_ESMC_ArrayPrint(array, options, status)
-       else
-           call c_ESMC_ArrayPrint(array, defaultopts, status)
-       endif
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "Array print error"
-         return
-       endif
-! set return values
-       if (rcpresent) rc = ESMF_SUCCESS
-       end subroutine ESMF_ArrayPrint
-        end module ESMF_ArrayMod
+        end module ESMF_ArrayExpandMod

@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.3 2003/07/15 22:33:19 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.4 2003/07/17 20:02:46 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -102,7 +102,50 @@
                                      ESMC_FROM_CPLUSPLUS,
                                      NULL, ESMC_ARRAY_DO_ALLOCATE, 
                                      docopy, ESMF_TF_TRUE, 
-                                     NULL, NULL, NULL, NULL); 
+                                     NULL, NULL, NULL, NULL, 0); 
+     
+     if (rc != NULL)
+         *rc = status;
+
+     return a;
+
+ } // end ESMC_ArrayCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayCreate - Create a new Array
+//
+// !INTERFACE:
+      ESMC_Array *ESMC_ArrayCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Array
+//
+// !ARGUMENTS:
+    int rank,                  // dimensionality
+    ESMC_DataType dt,          // int, float, etc
+    ESMC_DataKind dk,          // short/long, etc
+    int *icounts,              // number of items in each dim
+    void *base,                // if non-null, this is already allocated memory
+    ESMC_DataCopy docopy,      // if base != NULL, copy data?
+    int halo_width,            // applies to all edges, more dirs to be added
+    int *rc) {                 // return code
+//
+// !DESCRIPTION:
+//      Same as above but with halo widths specified.
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+     ESMC_Array *a = new ESMC_Array;
+     int status;
+
+
+     status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
+                                     ESMC_FROM_CPLUSPLUS,
+                                     NULL, ESMC_ARRAY_DO_ALLOCATE, 
+                                     docopy, ESMF_TF_TRUE, 
+                                     NULL, NULL, NULL, NULL, halo_width); 
      
      if (rc != NULL)
          *rc = status;
@@ -172,7 +215,45 @@
      status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
                             ESMC_DATA_NONE, ESMF_TF_FALSE, 
-                            NULL, NULL, NULL, NULL);
+                            NULL, NULL, NULL, NULL, 0);
+
+     if (rc != NULL)
+         *rc = status;
+
+     return a;
+
+ } // end ESMC_ArrayCreateNoData
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
+//
+// !INTERFACE:
+      ESMC_Array *ESMC_ArrayCreateNoData(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Array
+//
+// !ARGUMENTS:
+    int rank,                  // dimensionality
+    ESMC_DataType dt,          // int, float, etc
+    ESMC_DataKind dk,          // short/long, etc
+    ESMC_ArrayOrigin oflag,    // caller is fortran or C++?
+    int halo_width,            // max halo depth in all dirs
+    int *rc) {                 // return code
+//
+// !DESCRIPTION:
+//      Same as above but with halo width spec.
+//
+//EOPI
+
+     ESMC_Array *a = new ESMC_Array;
+     int status;
+
+     status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
+                            NULL, ESMC_ARRAY_NO_ALLOCATE, 
+                            ESMC_DATA_NONE, ESMF_TF_FALSE, 
+                            NULL, NULL, NULL, NULL, halo_width);
 
      if (rc != NULL)
          *rc = status;
@@ -247,13 +328,13 @@
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_DO_ALLOCATE,
                                      ESMC_DATA_NONE, ESMF_TF_TRUE, 
-                                     lbounds, ubounds, strides, offsets); 
+                                     lbounds, ubounds, strides, offsets, 0); 
      else
          status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
                                      ESMC_FROM_FORTRAN, f90ptr, 
                                      ESMC_ARRAY_NO_ALLOCATE, 
                                      docopy, ESMF_TF_FALSE, 
-                                     lbounds, ubounds, strides, offsets); 
+                                     lbounds, ubounds, strides, offsets, 0); 
 
      if (rc != NULL)
          *rc = status;
@@ -286,32 +367,51 @@
     int *lbounds,              // lower index number per dim
     int *ubounds,              // upper index number per dim
     int *strides,              // number of bytes between successive items/dim
-    int *offsets) {            // offset in bytes to start of each dim
+    int *offsets,              // offset in bytes to start of each dim
+    int halo_width) {          // halo width on all edges
 //
 // !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated {\tt ESMF\_Array} object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_ArrayDestruct}
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_ArrayCreate}, which calls
-//      {\tt ESMC\_ArrayConstruct}.  Define for deep classes only.
+//   ESMF routine which fills in the contents of an already
+//   allocated {\tt ESMF\_Array} object.  May need to do additional allocations
+//   as needed.  Must call the corresponding {\tt ESMC\_ArrayDestruct}
+//   routine to free the additional memory.  Intended for internal
+//   ESMF use only; end-users use {\tt ESMC\_ArrayCreate}, which calls
+//   {\tt ESMC\_ArrayConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
     int i, status;
     ESMC_Array *aptr;
+    int total_stride, comp_stride, excl_stride;
 
     rank = irank;
     type = dt;
     kind = dk;
 
     base_addr = base;
+    total_stride = 1;
+    comp_stride = 1;
+    excl_stride = 1;
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 1;        
-//        lbound[i] = lbounds ? lbounds[i] : 1;
-//        ubound[i] = ubounds ? ubounds[i] : counts[i];
+//        lbound[i]   = lbounds ? lbounds[i] : 1;
+//        ubound[i]   = ubounds ? ubounds[i] : counts[i];
         bytestride[i] = strides ? strides[i] : 1;
         offset[i]     = offsets ? offsets[i] : 0;
+
+        total_stride *= counts[i];
+        ESMC_AxisIndexSet(ai_total+i, 0, counts[i]-1, total_stride);
+        if (halo_width == 0) {
+            ESMC_AxisIndexSet(ai_comp+i, 0, counts[i]-1, total_stride);
+            ESMC_AxisIndexSet(ai_excl+i, 0, counts[i]-1, total_stride);
+        } else {
+            comp_stride *= counts[i] - 2*halo_width;
+            excl_stride *= counts[i] - 4*halo_width;
+            ESMC_AxisIndexSet(ai_comp+i, halo_width, 
+                                         counts[i]-1-halo_width, comp_stride);
+            ESMC_AxisIndexSet(ai_excl+i, halo_width*2, 
+                                      counts[i]-1-(halo_width*2), excl_stride);
+        }
     }
     for (i=rank; i<ESMF_MAXDIM; i++) {
         counts[i]     = 1;
@@ -319,6 +419,9 @@
 //        ubound[i] = 1;
         bytestride[i] = 1;
         offset[i]     = 0;
+        ESMC_AxisIndexSet(ai_total+i, 0, 0, 1);
+        ESMC_AxisIndexSet(ai_comp+i, 0, 0, 1);
+        ESMC_AxisIndexSet(ai_excl+i, 0, 0, 1);
     }
 
     origin = oflag;
@@ -608,7 +711,6 @@
 //
 // !DESCRIPTION:
 //     Sets the {\tt ESMC\_Array} member F90ptr with the given value.
-//     Can be multiple routines, one per value
 //
 //EOP
 // !REQUIREMENTS:  
@@ -639,7 +741,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DomainType dt,              // in - domain type, C or F90
+      ESMC_DomainType dt,              // in - domain type, total/comp/excl
       struct ESMC_AxisIndex *ai) {     // in - values to set
 //
 // !DESCRIPTION:
@@ -648,16 +750,30 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
      int i;
 
-     for (i=0; i<this->rank; i++) {
-         this->ai_comp[i] = ai[i];  // TODO: set all?
-     }
+     switch(dt) {
+       case ESMC_DOMAIN_LOCAL:
+         for (i=0; i<this->rank; i++) 
+             ai_total[i] = ai[i];
+         break;
+     
+       case ESMC_DOMAIN_COMPUTATIONAL:
+         for (i=0; i<this->rank; i++) 
+             ai_comp[i] = ai[i];
+         break;
 
-     return ESMF_SUCCESS;
+       case ESMC_DOMAIN_EXCLUSIVE:
+         for (i=0; i<this->rank; i++) 
+             ai_excl[i] = ai[i];
+         break;
+
+       default:
+         fprintf(stderr, "bad value for domain type in ESMF_ArraySetAxisIndex\n");
+         return ESMF_FAILURE;
+    }
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_ArraySetAxisIndex
 
@@ -672,7 +788,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DomainType dt,                 // out - domain type, C or F90
+      ESMC_DomainType dt,                 // out - domain type, total/comp/excl
       struct ESMC_AxisIndex *ai) const {  // out - values to get
 //
 // !DESCRIPTION:
@@ -681,14 +797,28 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
      int i;
 
-     for (i=0; i<this->rank; i++) {
-         ai[i] = this->ai_comp[i];   // TODO: interface to get any ai
-     }
+     switch(dt) {
+       case ESMC_DOMAIN_LOCAL:
+         for (i=0; i<this->rank; i++) 
+             ai[i] = ai_total[i];
+         break;
+     
+       case ESMC_DOMAIN_COMPUTATIONAL:
+         for (i=0; i<this->rank; i++) 
+             ai[i] = ai_comp[i];
+         break;
+
+       case ESMC_DOMAIN_EXCLUSIVE:
+         for (i=0; i<this->rank; i++) 
+             ai[i] = ai_excl[i];
+         break;
+
+       default:
+         fprintf(stderr, "bad value for domain type in ESMF_ArrayGetAxisIndex\n");
+         return ESMF_FAILURE;
+    }
 
      return ESMF_SUCCESS;
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/07/10 18:46:14 nscollins Exp $
+# $Id: makefile,v 1.2 2003/07/17 20:02:46 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -12,7 +12,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Array_F.C ESMC_DataMap.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Array.F90 ESMF_Alloc_C.F90
+SOURCEF	  =  ESMF_ArrayBase.F90 ESMF_ArrayExpand.F90 ESMF_Alloc_C.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = ESMC_DataMap.h
 
@@ -54,7 +54,7 @@ CLOBBERDIRS =
 # actual compile. (These lines are: ^include "fred" in the
 # original source to shield them from the first preprocess pass.)
 #
-#ESMF_Array.F90: ESMF_Array_F90.cpp
-#	gcc -E -P ESMF_Array_F90.cpp | tr "@^" "\n#" > ESMF_Array.F90
+#ESMF_ArrayExpand.F90: ESMF_ArrayExpand_F90.cpp
+#	gcc -E -P ESMF_ArrayExpand_F90.cpp|tr "@^" "\n#" >ESMF_ArrayExpand.F90
 #
 

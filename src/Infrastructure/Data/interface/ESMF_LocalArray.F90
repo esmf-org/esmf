@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.5 2003/07/15 21:14:32 jwolfe Exp $
+! $Id: ESMF_LocalArray.F90,v 1.6 2003/07/17 20:02:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -98,7 +98,7 @@
       type ESMF_ArraySpec
       sequence
       !!private
-        integer :: rank ! number of dimensions
+        integer :: rank             ! number of dimensions
         type(ESMF_DataType) :: type ! real/float, integer, etc enum
         type(ESMF_DataKind) :: kind ! fortran "kind" enum/integer
       end type
@@ -262,6 +262,8 @@
 ! !PUBLIC TYPES:
       public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
       public ESMF_ArraySpec, ESMF_LocalArray
+      public ESMF_DomainType
+      public ESMF_DOMAIN_LOCAL, ESMF_DOMAIN_COMPUTATIONAL, ESMF_DOMAIN_EXCLUSIVE
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_LocalArrayCreate
@@ -285,7 +287,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.5 2003/07/15 21:14:32 jwolfe Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.6 2003/07/17 20:02:47 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
