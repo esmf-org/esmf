@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.10 2004/01/21 18:15:03 jwolfe Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.10 2004/01/21 18:15:03 jwolfe Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -58,40 +58,15 @@
 
    end subroutine f_esmf_frameworkfinalize
 
-#if 0
-   function f_esmf_appcompcreate(name, rc)
-       !use ESMF_BaseMod    ! ESMF base class
-       !use ESMF_CompMod
-       use ESMF_AppCompMod
-
-       type(ESMF_AppComp) :: f_esmf_appcompcreate
-       character(*) :: name
-       integer :: rc              
-
-       f_esmf_appcompcreate = ESMF_AppCompCreate(name, rc=rc)
-    
-   end function f_esmf_appcompcreate
-
-   subroutine f_esmf_appcompdestroy(comp, rc)
-       !use ESMF_BaseMod    ! ESMF base class
-       !use ESMF_CompMod
-       use ESMF_AppCompMod
-
-       type(ESMF_AppComp) :: comp
-       integer :: rc              
-
-       call ESMF_AppCompDestroy(comp, rc)
-    
-   end subroutine f_esmf_appcompdestroy
-#endif
 
 !------------------------------------------------------------------------------
 
-   subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, &
+   subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, clock, &
                                      config, configfile, rc)
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ConfigMod
        use ESMF_DELayoutMod
+       use ESMF_ClockMod
        use ESMF_GridTypesMod
        use ESMF_GridCompMod
        use ESMF_CompMod
@@ -101,11 +76,12 @@
        type(ESMF_DELayout) :: layout
        type(ESMF_ModelType) :: mtype
        type(ESMF_Grid) :: grid
+       type(ESMF_Clock) :: clock
        type(ESMF_Config) :: config
        character(len=*) :: configfile
        integer :: rc
 
-       gcomp = ESMF_GridCompCreate(name, layout, mtype, grid, &
+       gcomp = ESMF_GridCompCreate(name, layout, mtype, grid, clock, &
                                        config, configfile, rc)
     
    end subroutine f_esmf_gridcompcreate
@@ -226,9 +202,10 @@
 
 !------------------------------------------------------------------------------
 
-   subroutine f_esmf_cplcompcreate(ccomp, name, layout, config, configfile, rc)
+   subroutine f_esmf_cplcompcreate(ccomp, name, layout, config, configfile, clock, rc)
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_DELayoutMod
+       use ESMF_ClockMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
@@ -237,9 +214,10 @@
        type(ESMF_DELayout) :: layout
        type(ESMF_Config) :: config
        character(len=*) :: configfile
+       type(ESMF_Clock) :: clock
        integer :: rc
 
-       ccomp = ESMF_CplCompCreate(name, layout, config, configfile, rc)
+       ccomp = ESMF_CplCompCreate(name, layout, config, configfile, clock, rc)
     
    end subroutine f_esmf_cplcompcreate
 

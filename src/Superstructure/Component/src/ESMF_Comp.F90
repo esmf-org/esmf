@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.59 2004/01/26 17:44:42 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.60 2004/01/27 18:05:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,11 +99,12 @@
       type ESMF_CompClass
       sequence
       private
-         type(ESMF_Pointer) :: this           ! C++ ftable pointer - MUST BE FIRST
+         type(ESMF_Pointer) :: this       ! C++ ftable pointer - MUST BE FIRST
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
          type(ESMF_DELayout) :: layout            ! component layout
+         type(ESMF_Clock) :: clock                ! private component clock
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
          logical :: multiphaserun                 ! multiple init, run, final
@@ -176,7 +177,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.59 2004/01/26 17:44:42 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.60 2004/01/27 18:05:46 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -246,7 +247,7 @@ end function
 
 ! !INTERFACE:
       subroutine ESMF_CompConstruct(compp, ctype, name, layout, mtype, &
-                                    dirpath, configfile, config, grid, rc)
+                                 dirpath, configfile, config, grid, clock, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CompClass), pointer :: compp
@@ -258,6 +259,7 @@ end function
       character(len=*), intent(in), optional :: configfile
       type(ESMF_Config), intent(in), optional :: config
       type(ESMF_Grid), intent(in), optional :: grid
+      type(ESMF_Clock), intent(in), optional :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -295,6 +297,9 @@ end function
 !
 !   \item[{[grid]}]
 !    Default {\tt grid} for a Gridded {\tt Component}.
+!
+!   \item[{[clock]}]
+!    Private {\tt clock} for this {\tt Component}.
 !
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -397,6 +402,14 @@ end function
           compp%grid = grid
         else
           ! TODO: do we need an "empty grid" object?
+        endif
+
+        ! default clock
+        if (present(clock)) then
+          compp%clock = clock
+        else
+          !! TODO: Fix this to work
+          !!compp%clock = ESMF_NULL_POINTER
         endif
 
         ! Create an empty subroutine/internal state table.
@@ -962,7 +975,7 @@ end function
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompGet(compp, name, layout, mtype, grid, &
+      subroutine ESMF_CompGet(compp, name, layout, mtype, grid, clock, &
                                              dirpath, configfile, config, rc)
 !
 ! !ARGUMENTS:
@@ -971,6 +984,7 @@ end function
       type(ESMF_DELayout), intent(out), optional :: layout
       type(ESMF_ModelType), intent(out), optional :: mtype 
       type(ESMF_Grid), intent(out), optional :: grid
+      type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: dirpath
       character(len=*), intent(out), optional :: configfile
       type(ESMF_Config), intent(out), optional :: config
@@ -1014,6 +1028,10 @@ end function
           grid = compp%grid
         endif
 
+        if (present(clock)) then
+          clock = compp%clock
+        endif
+
         if (present(dirpath)) then
           dirpath = compp%dirpath
         endif
@@ -1038,7 +1056,7 @@ end function
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CompSet(compp, name, layout, mtype, grid, &
+      subroutine ESMF_CompSet(compp, name, layout, mtype, grid, clock, &
                                              dirpath, configfile, config, rc)
 !
 ! !ARGUMENTS:
@@ -1047,6 +1065,7 @@ end function
       type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Grid), intent(in), optional :: grid
+      type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: dirpath
       character(len=*), intent(in), optional :: configfile
       type(ESMF_Config), intent(in), optional :: config
@@ -1088,6 +1107,10 @@ end function
 
         if (present(grid)) then
           compp%grid = grid
+        endif
+
+        if (present(clock)) then
+          compp%clock = clock
         endif
 
         if (present(dirpath)) then

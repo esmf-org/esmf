@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.10 2004/01/26 17:44:42 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.10 2004/01/26 17:44:42 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -155,7 +155,7 @@
 ! !IROUTINE: ESMF_CplCompCreateNew -- Create a new Component.
 
 ! !INTERFACE:
-      function ESMF_CplCompCreateNew(name, layout, config, rc)
+      function ESMF_CplCompCreateNew(name, layout, config, clock, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateNew
@@ -164,6 +164,7 @@
       character(len=*), intent(in) :: name
       type(ESMF_DELayout), intent(in) :: layout
       type(ESMF_Config), intent(in) :: config
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -182,6 +183,9 @@
 !
 !   \item[config]
 !    Component-specific configuration object.  
+!  
+!   \item[clock]
+!    Component-specific clock object.  
 !  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -217,7 +221,7 @@
 
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, ESMF_CPLCOMPTYPE, name, layout, &
-                                                    config=config, rc=status)
+                                    config=config, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -235,7 +239,8 @@
 ! !IROUTINE: ESMF_CplCompCreateConf -- Create a new Component.
 
 ! !INTERFACE:
-      function ESMF_CplCompCreateConf(name, layout, config, configfile, rc)
+      function ESMF_CplCompCreateConf(name, layout, config, configfile, &
+                                      clock, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateConf
@@ -245,6 +250,7 @@
       type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configfile
+      type(ESMF_Clock), intent(in), optional :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -267,6 +273,9 @@
 !  
 !   \item[{[configfile]}]
 !    Component-specific configuration filename. 
+!  
+!   \item[{[clock]}]
+!    Component-specific clock.
 !  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -302,7 +311,8 @@
    
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, ESMF_CPLCOMPTYPE, name, layout, &
-                                configfile=configfile, config=config, rc=status)
+                                configfile=configfile, config=config, &
+                                clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -425,13 +435,14 @@
 ! !IROUTINE: ESMF_CplCompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompGet(component, name, layout, &
+      subroutine ESMF_CplCompGet(component, name, layout, clock, &
                                                        configfile, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: component
       character(len=*), intent(out), optional :: name
       type(ESMF_DELayout), intent(out), optional :: layout
+      type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configfile
       type(ESMF_Config), intent(out), optional :: config
       integer, intent(out), optional :: rc             
@@ -446,7 +457,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompGet(component%compp, name, layout, &
+        call ESMF_CompGet(component%compp, name, layout, clock=clock, &
                           configfile=configfile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompGet
@@ -456,13 +467,14 @@
 ! !IROUTINE: ESMF_CplCompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompSet(component, name, layout, &
+      subroutine ESMF_CplCompSet(component, name, layout, clock, &
                                                        configfile, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: component
       character(len=*), intent(in), optional :: name
       type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: configfile
       type(ESMF_Config), intent(in), optional :: config
       integer, intent(out), optional :: rc             
@@ -477,7 +489,7 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompSet(component%compp, name, layout, &
+        call ESMF_CompSet(component%compp, name, layout, clock=clock, &
                           configfile=configfile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompSet

@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.12 2004/01/26 17:44:42 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.13 2004/01/27 18:05:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.12 2004/01/26 17:44:42 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.13 2004/01/27 18:05:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -152,7 +152,7 @@
 ! !IROUTINE: ESMF_GridCompCreateNew -- Create a new Component.
 
 ! !INTERFACE:
-      function ESMF_GridCompCreateNew(name, layout, mtype, grid, config, rc)
+      function ESMF_GridCompCreateNew(name, layout, mtype, grid, config, clock, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateNew
@@ -163,6 +163,7 @@
       type(ESMF_ModelType), intent(in) :: mtype 
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Config), intent(in) :: config
+      type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -188,6 +189,9 @@
 !
 !   \item[config]
 !    Component-specific configuration object.  
+!  
+!   \item[clock]
+!    Component-specific clock object.  
 !  
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -223,7 +227,7 @@
 
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
-                                 mtype, config=config, grid=grid, rc=status)
+                      mtype, config=config, grid=grid, clock=clock, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -243,7 +247,7 @@
 ! !INTERFACE:
       !function ESMF_GridCompCreateConf(services, name, layout, mtype, grid, &
       !                                                  config, configfile, rc)
-      function ESMF_GridCompCreateConf(name, layout, mtype, grid, &
+      function ESMF_GridCompCreateConf(name, layout, mtype, grid, clock, &
                                                         config, configfile, rc)
 !
 ! !RETURN VALUE:
@@ -255,6 +259,7 @@
       type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Grid), intent(in), optional :: grid
+      type(ESMF_Clock), intent(inout), optional :: clock
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configfile
       integer, intent(out), optional :: rc 
@@ -279,6 +284,9 @@
 !
 !   \item[{[grid]}]
 !    Default grid associated with this component.
+!
+!   \item[{[clock]}]
+!    Private clock associated with this component.
 !
 !   \item[{[config]}]
 !    Already created {\tt Config} object.   If specified, takes
@@ -322,7 +330,8 @@
         ! Call construction method to initialize component internals
         call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
                                 mtype=mtype, configfile=configfile, &
-                                config=config, grid=grid, rc=status)
+                                config=config, grid=grid, clock=clock, &
+                                rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component construction error"
           return
@@ -440,7 +449,7 @@
 ! !IROUTINE: ESMF_GridCompGet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompGet(component, name, layout, mtype, grid, &
+      subroutine ESMF_GridCompGet(component, name, layout, mtype, grid, clock, &
                                                        configfile, config, rc)
 !
 ! !ARGUMENTS:
@@ -449,6 +458,7 @@
       type(ESMF_DELayout), intent(out), optional :: layout
       type(ESMF_ModelType), intent(out), optional :: mtype 
       type(ESMF_Grid), intent(out), optional :: grid
+      type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configfile
       type(ESMF_Config), intent(out), optional :: config
       integer, intent(out), optional :: rc             
@@ -464,8 +474,8 @@
 ! !REQUIREMENTS:
 
         call ESMF_CompGet(component%compp, name, layout, &
-                          mtype=mtype, grid=grid, configfile=configfile, &
-                          config=config, rc=rc)
+                          mtype=mtype, grid=grid, clock=clock, &
+                          configfile=configfile, config=config, rc=rc)
 
         end subroutine ESMF_GridCompGet
 
@@ -474,7 +484,7 @@
 ! !IROUTINE: ESMF_GridCompSet -- Query a component for various information
 !
 ! !INTERFACE:
-      subroutine ESMF_GridCompSet(component, name, layout, mtype, grid, &
+      subroutine ESMF_GridCompSet(component, name, layout, mtype, grid, clock, &
                                                        configfile, config, rc)
 !
 ! !ARGUMENTS:
@@ -483,6 +493,7 @@
       type(ESMF_DELayout), intent(in), optional :: layout
       type(ESMF_ModelType), intent(in), optional :: mtype 
       type(ESMF_Grid), intent(in), optional :: grid
+      type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: configfile
       type(ESMF_Config), intent(in), optional :: config
       integer, intent(out), optional :: rc             
@@ -498,8 +509,8 @@
 ! !REQUIREMENTS:
 
         call ESMF_CompSet(component%compp, name, layout, &
-                          mtype=mtype, grid=grid, configfile=configfile, &
-                          config=config, rc=rc)
+                          mtype=mtype, grid=grid, clock=clock, &
+                          configfile=configfile, config=config, rc=rc)
 
         end subroutine ESMF_GridCompSet
 
