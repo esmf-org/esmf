@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.6 2004/11/04 22:22:33 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.7 2004/11/09 00:44:59 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2028,6 +2028,10 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
 
 void ESMC_VMK::vmk_barrier(void){
   // collective barrier over all PETs
+  if (mpionly){
+    MPI_Barrier(mpi_c);
+    return;
+  }
   int myp = pid[mypet];
   int myt = tid[mypet];
   if (myt==0){
