@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.8 2003/04/17 22:55:57 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.9 2003/04/18 22:27:43 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,14 +36,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.8 2003/04/17 22:55:57 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.9 2003/04/18 22:27:43 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc
+      integer :: rc, H, YR, MM, DD
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -152,16 +152,61 @@
 
       ! initialize clock time intervals and instants
       !call ESMF_TimeIntervalInit(timeStep, S=1, rc=rc)
-      write(failMsg, *) ""
-      write(name, *) "Time Interval Initiation Test"
+
+      ! Test Setting Time Step
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Set Time Interval Initiation Test"
       call ESMF_TimeIntervalInit(timeStep, H=1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
-      write(name, *) "Start Time Initiation Test"
+
+      ! ----------------------------------------------------------------------------
+
+      ! Test getting the timestep
+      write(name, *) "Get Time Interval Test"
+      call ESMF_TimeIntervalGet(timeStep, H=H, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or timeStep not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(H.eq.1), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, " H = ", H
+
+      ! ----------------------------------------------------------------------------
+
+      ! Test Setting the Start Time
+      write(name, *) "Set Start Time Initiation Test"
       call ESMF_TimeInit(startTime, YR=2003, MM=3, DD=13, &
                                    cal=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      ! Verify the year is set correctly
+      write(name, *) "Get StartTime Year Test"
+      call ESMF_TimeGet(startTime, YR=YR, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Year not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(YR.eq.2003), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      ! Verify the month is set correctly
+      write(name, *) "Get StartTime Month Test"
+      call ESMF_TimeGet(startTime, MM=MM, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Month not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(MM.eq.3), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      ! Verify the day is set correctly
+      write(name, *) "Get StartTime Day Test"
+      call ESMF_TimeGet(startTime, DD=DD, rc=rc)
+      write(failMsg, *) " Returned ESMF_FAILURE and/or Day not correct value"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(DD.eq.13), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       write(name, *) "Stop Time Initiation Test"
       call ESMF_TimeInit(stopTime, YR=2003, MM=3, DD=14, &
                                    cal=gregorianCalendar, rc=rc)
