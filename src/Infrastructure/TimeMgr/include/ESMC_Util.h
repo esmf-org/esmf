@@ -1,4 +1,4 @@
-// $Id: ESMC_Types.h,v 1.2 2002/10/15 03:30:13 eschwab Exp $
+// $Id: ESMC_Util.h,v 1.1 2002/10/15 03:30:13 eschwab Exp $
 //
 // < Something here from legal about the status of the code, like:
 //  This code developed by NASA/NCAR/ESMC whatever, and is covered by
@@ -7,23 +7,22 @@
 // these lines prevent this file from being read more than once if it
 // ends up being included multiple times
 
-#ifndef ESMF_TYPE_H
-#define ESMF_TYPE_H
+#ifndef ESMC_UTIL_H
+#define ESMC_UTIL_H
 
 //-------------------------------------------------------------------------
 //
 // !DESCRIPTION:
-//  
-// ESMF platform-independent data types.  Needs higher level, ESMF-wide home ??
+//
+// Utility macros and constants.  Needs higher level, ESMF-wide home ??
 //
 // (all lines below between the !BOP and !EOP markers will be included in
 //  the automated document processing.)
 //
 //-------------------------------------------------------------------------
+//
 
-#define int64  long long
-#define uint64 unsigned long long
-#define int32  long
-#define uint32 unsigned long
+#define ESMC_SUCCESS 0
+#define ESMC_FAILURE 1
 
-#endif // ESMF_TYPE_H
+#endif // ESMC_UTIL_H
