@@ -1,4 +1,4 @@
-% $Id: Grid_implnotes.tex,v 1.5 2004/08/16 22:53:57 jwolfe Exp $
+
 
 %\subsection{Design and Implementation Notes}
 
@@ -12,7 +12,8 @@ local decomposition of data and the local representation of the grid.  The Grid
 class itself maintains general information about the global grid (e.g. the
 grid type, staggering, and coordinate system).  The Grid class is relatively
 thin and otherwise presents a unified interface for DistGrid and PhysGrid
-functions.  Each Grid contains at least one DistGrid and one PhysGrid:
+functions.  Each Grid contains at least one subGrid, represented by a unique
+DistGrid and PhysGrid pair:
 \begin{itemize}
 \item {\bf DistGrid} The DistGrid class maintains the relationship of how
 a DELayout maps onto a Grid representation and how that Grid is distributed.
@@ -20,15 +21,17 @@ DistGrids can represent the same Grid but have different mappings (staggerings)
 and can be contained by the same Grid object. The DistGrid class represents the
 mapping between the global Grid and the local data distribution;  it has
 methods to aid in the collection and communication of global data.
-\item {\bf PhysGrid} The PhysGrid class maintains a local physical
-representation of a Grid, including all necessary data and masks.  PhysGrids
-can represent subGrids, like vertical Grids, of a single Grid and be
-contained by the same Grid object.
+\item {\bf PhysGrid} The PhysGrid class maintains the local decomposed physical
+representation of a Grid, including all necessary coordinate data and masks.
+Separate PhysGrids are created for each relative location associated with the
+Grid's staggering (e.g. a Grid with Arakawa D staggering will have PhysGrids
+representing the cell centers and specified cell faces), as well as for any
+vertical grids.
 \end{itemize}
 
 Some methods which have a Grid interface are actually implemented
 at the underlying DistGrid or PhysGrid level; they will be inherited
 by the Grid class.  This allows the API to present functions at the 
 level which is most consistent to the application without restricting
-where inside the ESMF the actual implementation is done.
+the actual implementation.
 

@@ -1,4 +1,4 @@
-% $Id: Grid_usage.tex,v 1.9 2004/08/16 22:57:00 jwolfe Exp $
+% $Id: Grid_usage.tex,v 1.10 2005/01/03 23:38:36 jwolfe Exp $
 
 %\subsection{Design and Implementation Notes}
 
@@ -6,31 +6,35 @@
 In typical applications, Grids are created either internally or read in from
 a file.  The {\tt ESMF\_Grid} class will provide methods for both, though 
 currently it only has routines for simple internal Grid generation.  It also
-has a variety of methods to set and get Grid parameters like the number of cells
-associated with a particular DE.  
+has a variety of methods to set and get Grid parameters such as the number of
+cells associated with a particular DE.  
 
 The creation of a distributed Grid requires multiple steps, as
 illustrated in the example code below.  The {\tt ESMF\_GridCreateHorz<GridType>()}
 call, which has an explicit interface for each GridType, allocates space for the
-Grid class and sets parameters defining the horizontal grid.  A vertical subGrid
+Grid class and sets parameters defining the horizontal grid.  A vertical grid
 can then be attached to the Grid via an {\tt ESMF\_GridAddVert<VertGridType>()}
-call.  Currently a Grid can have only a single vertical subGrid.  The last call,
+call.  Currently a Grid can have only a single vertical grid.  The last call,
 {\tt ESMF\_GridDistribute()}, allocates some of the Grid subclasses and
 distributes the Grid in either a default or user-specified decomposition.
 
 The default decomposition distributes the Grid cells as evenly as possible across
 the DEs in the attached delayout.  The user can define a specified distribution
-in the {\tt ESMF\_GridDistribute()} call through optional arguments.  Any two
+in the {\tt ESMF\_GridDistribute()} call through optional arguments.  ESMF
+currently supports two different basic distribution patterns.  In the first,
+logically-rectangular blocks of data are distributed, one per PE.  Here, any two
 dimensions of a 3D grid may be distributed.  By default, the first grid
 dimension is distributed by the first delayout dimension and the second grid
 dimension is distributed by the second delayout dimension.  Users can specify
 other distributions via another optional argument to the {\tt ESMF\_GridDistribute()}
-call.  Please see the {\tt ESMF\_GridDistribute()} interface description for
-further details.
+call.  The second distribution pattern assigns arbitrary points to different PEs
+and is intended for vertical column calculations where horizontal communication
+is not necessary.  Please see the {\tt ESMF\_GridDistribute()} interface
+description for further details.
 
 Please note that {\tt ESMF\_GridDistribute()} must be called, even if mpiuni is
 used for communication.  Currently, these calls must be made in this order
-(i.e. it is not possible to add a vertical subGrid to an already distributed
+(i.e. it is not possible to add a vertical grid to an already distributed
 Grid), and while an {\tt ESMF\_GridAddVert<VertGridType>()} call is optional,
 both an {\tt ESMF\_GridCreate<GridType>()} and {\tt ESMF\_GridDistribute()}
 call are required.

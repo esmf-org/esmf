@@ -1,4 +1,4 @@
-% $Id: Grid_obj.tex,v 1.5 2004/02/27 22:09:26 cdeluca Exp $
+% $Id: Grid_obj.tex,v 1.6 2005/01/03 23:36:08 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,13 +19,13 @@ meaning.
 \includegraphics{Grid_obj.eps}   
 \end{center}
 
-Each Grid contains a Distributed Grid and a Physical Grid. The Physical Grid
-maintains information about the global coordinates. In general this data is
-described implicitly by specifying the grid type and the corresponding
-parameters. However it is possible that the Physical Grid must be completely
-enumerated, perhaps in the case of assimilated data or unstructured data. The
-Distributed Grid defines an index space that corresponds to cells in 
-the Physical
-Grid and is decomposed among DEs in a DELayout.
+Each Grid contains at least one Distributed Grid and a related Physical Grid.
+The Physical Grid maintains information about the global coordinates.  In
+general the coordinates are described implicitly by specifying the grid type
+and the corresponding parameters.  However it is possible that the Physical
+Grid must be completely enumerated, perhaps in the case of assimilated data
+or unstructured data.  The Distributed Grid defines an index space that
+corresponds to cells in the Physical Grid and is decomposed among DEs in a
+DELayout.
 
 

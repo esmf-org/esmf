@@ -1,4 +1,4 @@
-% $Id: Grid_desc.tex,v 1.10 2004/06/22 23:13:44 cdeluca Exp $
+% $Id: Grid_desc.tex,v 1.11 2005/01/03 23:34:28 jwolfe Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,12 +17,37 @@ is included in the Field class and the Gridded Component class
 and provides information needed in data communication methods like halo and
 redistribution.  It has methods to internally generate a variety of
 simple grids or read in more complicated grids provided by a user 
-(reading in grids is not yet implemented).  The
-ESMF Grid class supports multi-component coupling by providing a common
-structure necessary for regridding.
+(reading in grids is not yet implemented).  The ESMF Grid class supports
+multi-component coupling by providing a common structure necessary for regridding.
 
-A single Grid can have more than one related subGrid.  Each subGrid corresponds
-to a different representation of the Grid.  For example, a staggered Grid could
-have separate subGrids representing locations at the cell centers and cell 
-faces.  A vertical grid may also be represented as a subGrid.
+ESMF Grids are currently assumed to be two-dimensional, logically-rectangular
+horizontal grids, with an optional vertical grid whose coordinates are
+independent of those of the horizontal grid.  Each Grid is assigned a
+staggering in its create method call, which helps define the Grid according
+to typical Arakawa nomenclature.  The Grid will spawn subGrids at the relative
+cell locations that are associated with its staggering.  For example, an
+Arakawa C grid has some computational fields defined at the cell centers
+and other fields defined at cell face centers.  An {\tt ESMF\_Grid} assigned
+Arakawa C staggering will therefore make subGrids at the cell centers and
+specified cell faces (please see the Grid Options section for more information
+and a complete list of staggerings).  A vertical grid may also be represented
+as one or more subGrids.  When an {\tt ESMF\_Field} is created, it must be
+assigned to one of the appropriate subGrids, represented by the identifier
+{\tt ESMF\_RelLoc} (or relative location), present in the {\tt ESMF\_Grid} it 
+is being created from.  Continuing the example above, an {\tt ESMF\_Field}
+created from the Arakawa C Grid would have to be defined at either the cell
+center or one of the prescribed cell faces. 
+
+ESMF differentiates between global data, which describes a complete set of data,
+and local data, which describes a distributed or decomposed chuck of data located
+on a single PE.  The Grid class plays an integral role in this concept.  A Grid
+is first instantiated, via a create call, on all PEs in its domain, but only in
+a global sense.  By that we mean it stores only information about the global grid,
+such as the number of grid cells and the grid extents, but has not generated all
+the information that will end up distributed, such as the cell coordinates.  The
+Grid is then decomposed onto a given DELayout via a Distribute call.  At that
+point, the local data types are created and computed, so that on each PE there
+resides necessary global Grid information as well as its own local Grid data.
+The local data represented by an {\tt ESMF\_Field} is defined by the decomposition
+of the underlying {\tt ESMF\_Grid}.
 
