@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.6 2004/03/23 17:33:16 cdeluca Exp $
+! $Id: ESMF_Config.F90,v 1.7 2004/04/14 20:05:09 jwolfe Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -85,7 +85,7 @@
 !
 ! \begin{verbatim}
 !       cf = ESMF_ConfigCreate ( rc)
-!       call ESMF_ConfigLoadFile (cf, fname, layout, rc = rc)
+!       call ESMF_ConfigLoadFile (cf, fname, delayout, rc = rc)
 ! \end{verbatim}
 !
 !    Parameter {\tt layout} is optional. If it is passed, multiprocessor
@@ -182,7 +182,7 @@
 !       1may2003 Leonid Zaslavsky Corrected version 
 ! !USES:
 
-      use ESMF_DELayoutMod
+      use ESMF_newDELayoutMod
       !use ESMF_LogErrMod    ! seems unneeded, at least for now.
 
       implicit none
@@ -1038,12 +1038,12 @@
 ! !IROUTINE: ESMF_ConfigLoadFile - Load resource file into memory
 !
 ! !INTERFACE:
-    subroutine ESMF_ConfigLoadFile( cf, fname, layout, unique, rc )
+    subroutine ESMF_ConfigLoadFile( cf, fname, delayout, unique, rc )
 
 ! !ARGUMENTS:
       type(ESMF_Config), intent(inout) :: cf     
       character(len=*), intent(in)     :: fname 
-      type(ESMF_DELayout), intent(in), optional  :: layout 
+      type(ESMF_newDELayout), intent(in), optional  :: delayout 
       logical, intent(in), optional    :: unique 
       integer, intent(out), optional :: rc         
 !
@@ -1053,7 +1053,7 @@
 !     Already created {\tt ESMF\_Config} object.
 !   \item [fname]
 !     Configuration file name.
-!   \item [{[layout]}]
+!   \item [{[delayout]}]
 !     {\tt ESMF\_DELayout} associated with this configuration.
 !   \item [{[unique]}]
 !     If specified as true, uniqueness of labels are checked and 
@@ -1082,7 +1082,7 @@
          return
       endif
 
-      if ( present (layout) ) then
+      if ( present (delayout) ) then
          print *, myname_, ' DE layout is not used yet '
       endif
 

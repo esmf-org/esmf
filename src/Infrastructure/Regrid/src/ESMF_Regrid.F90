@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.65 2004/04/14 15:29:12 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.66 2004/04/14 20:05:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,7 +43,6 @@
 ! !USES:
       use ESMF_BaseMod         ! ESMF base   class
       use ESMF_DataMapMod      ! ESMF datamap class
-      use ESMF_DELayoutMod   ! TODO: get rid of this once CommHandle is moved
       use ESMF_newDELayoutMod  ! ESMF DE layout class
       use ESMF_ArrayMod        ! ESMF array  class
       use ESMF_ArrayGetMod     ! ESMF array  class
@@ -105,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.65 2004/04/14 15:29:12 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.66 2004/04/14 20:05:45 jwolfe Exp $'
 
 !==============================================================================
 
@@ -976,7 +975,7 @@
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_CommHandle), intent(inout), optional :: commhandle
+      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
