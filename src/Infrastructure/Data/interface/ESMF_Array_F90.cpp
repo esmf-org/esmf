@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.21 2003/04/15 21:35:38 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.22 2003/04/17 20:37:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -171,7 +171,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.21 2003/04/15 21:35:38 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.22 2003/04/17 20:37:14 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1707,9 +1707,9 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
        defaultfile = "datafile"
 
        if(present(filename)) then
-           call c_ESMC_ArrayWrite(array, defaultopts, filename, status) 
+           call c_ESMC_ArrayWrite(array, defaultopts, trim(filename), status) 
        else
-           call c_ESMC_ArrayWrite(array, defaultopts, defaultfile, status) 
+           call c_ESMC_ArrayWrite(array, defaultopts, trim(defaultfile), status) 
        endif
 
        if (status .ne. ESMF_SUCCESS) then
