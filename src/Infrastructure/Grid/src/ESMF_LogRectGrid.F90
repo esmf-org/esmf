@@ -62,8 +62,11 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 
-    public ESMF_GridCreateLogRectUniform
-    public ESMF_GridCreateLogRect
+    public ESMF_GridCreateHorz_LatLon
+    public ESMF_GridCreateHorz_LatLonUni
+    public ESMF_GridCreateHorz_XY
+    public ESMF_GridCreateHorz_XYUni
+    public ESMF_LRGridAddVert
     public ESMF_LRGridDistribute
     public ESMF_LRGridCreateRead
     public ESMF_LRGridCreateCopy
@@ -101,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.66 2004/05/10 15:46:11 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.67 2004/05/24 22:59:16 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -223,272 +226,65 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCreateLogRectUniform - Create a new uniform Grid
+! !IROUTINE: ESMF_GridCreateHorz_LatLon - Create a new horizontal LatLon Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateLogRectUniform(dimCount, counts, &
-                                             minGlobalCoordPerDim, &
-                                             maxGlobalCoordPerDim, deltaPerDim, &
-                                             horzGridType, vertGridType, &
-                                             horzStagger, vertStagger, &
-                                             horzCoordSystem, vertCoordSystem, &
-                                             dimNames, dimUnits, &
-                                             coordOrder, coordIndex, periodic, &
-                                             delayout, decompIds, &
-                                             countsPerDEDecomp1, countsPerDEDecomp2, &
-                                             name, rc)
-                                             
+      function ESMF_GridCreateHorz_LatLon(minGlobalCoordPerDim, &
+                                          delta1, delta2, coord1, coord2, &
+                                          horzStagger, dimNames, dimUnits, &
+                                          coordOrder, coordIndex, periodic, &
+                                          name, rc)
+
 !
 ! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateLogRectUniform
+      type(ESMF_Grid) :: ESMF_GridCreateHorz_LatLon
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: dimCount
-      integer, dimension(dimCount), intent(in) :: counts
-      real(ESMF_KIND_R8), dimension(dimCount), intent(in) :: minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: &
-                                                            maxGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: deltaPerDim
-      type(ESMF_GridType), intent(in), optional :: horzGridType
-      type(ESMF_GridType), intent(in), optional :: vertGridType
-      type(ESMF_GridStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridStagger), intent(in), optional :: vertStagger
-      type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
-      type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      type(ESMF_DELayout), intent(in), optional :: delayout
-      integer, dimension(:), intent(in), optional :: decompIds
-      integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
-      integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer
-!     to the new {\tt ESMF\_Grid}.  This routine is specific for uniformly spaced
-!     Grids, and can create Grids from two different sets of arguments:
-!        (1). given min, max, and count (variables minGlobalCoordPerDim, 
-!             maxGlobalCoordPerDim, and counts);
-!        (2). given min, delta, and count (variables minGlobalCoordPerDim, 
-!             deltaPerDim, and counts).
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
+!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     {\tt ESMF\_Grid} with the following parameters:
+!             logically rectangular;
+!             user-specified spacing;
+!             horizontal spherical coordinate system.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:
+!        (1). given min and arrays of deltas (variables minGlobalCoordPerDim,
+!             delta1 and delta2);
+!        (2). given arrays of coordinates (variables coords1 and coords2).
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and the program is terminated.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[dimCount]
-!          Number of grid dimensions.
-!     \item[counts]
-!          Array of number of grid increments in each dimension.
-!     \item[minGlobalCoordPerDim]
-!          Array of minimum physical coordinates in each dimension.
-!     \item[{[maxGlobalCoordPerDim]}]
-!          Array of maximum physical coordinates in each direction.
-!     \item[{[deltaPerDim]}]
-!          Array of constant physical increments in each direction.
-!     \item[{[horzGridType]}]
-!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
-!     \item[{[vertGridType]}]
-!          {\tt ESMF\_GridType} specifier to denote vertical grid type.
-!     \item[{[horzStagger]}]
-!          {\tt ESMF\_GridStagger} specifier to denote horizontal grid stagger.
-!     \item[{[vertStagger]}]
-!          {\tt ESMF\_GridStagger} specifier to denote vertical grid stagger.
-!     \item[{[horzCoordSystem]}]
-!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
-!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal grid.
-!     \item[{[vertCoordSystem]}]
-!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
-!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical grid.
-!     \item[{[dimNames]}]
-!          Array of dimension names.
-!     \item[{[dimUnits]}]
-!          Array of dimension units.
-!     \item[{[coordOrder]}]
-!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
-!     \item[{[coordIndex]}]
-!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
-!     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate
-!          axes.
-!     \item[{[delayout]}]
-!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[{[decompIds]}]
-!          Identifier for which Grid axes are decomposed.
-!     \item[{[countsPerDEDecomp1]}]
-!          Array of number of grid increments per DE in the first decomposition
-!          direction
-!     \item[{[countsPerDEDecomp2]}]
-!          Array of number of grid increments per DE in the second decomposition
-!          direction
-!     \item[{[name]}]
-!          {\tt ESMF\_Grid} name.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:  TODO
-
-      type(ESMF_GridClass), pointer :: grid        ! Pointer to new grid
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize pointers
-    !  nullify(grid)
-    !  nullify(ESMF_GridCreateLogRectUniform%ptr)
-
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      allocate(grid, stat=status)
-      ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if (status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateLogRectUniform: Allocate"
-        return
-      endif
-
-      ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructUniform(grid, dimCount, counts, &
-                                       minGlobalCoordPerDim, &
-                                       maxGlobalCoordPerDim, deltaPerDim, &
-                                       horzGridType, vertGridType, &
-                                       horzStagger, vertStagger, &
-                                       horzCoordSystem, vertCoordSystem, &
-                                       dimNames, dimUnits, &
-                                       coordOrder, coordIndex, periodic, &
-                                       name, status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateLogRectUniform: Grid construct"
-        return
-      endif
-
-      ! if layout information available, call grid distribute method
-      if (present(delayout)) then
-        call ESMF_LRGridDistribute(grid, delayout, &
-                                   countsPerDEDecomp1=countsPerDEDecomp1, &
-                                   countsPerDEDecomp2=countsPerDEDecomp2, &
-                                   decompIds=decompIds, name=name, &
-                                   rc=status)
-        if (status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridCreateLogRectUniform: Grid distribute"
-          return
-        endif
-      endif
-
-      ! Set return values.
-      ESMF_GridCreateLogRectUniform%ptr => grid
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end function ESMF_GridCreateLogRectUniform
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_GridCreateLogRect - Create a new specified LogRect Grid internally
-
-! !INTERFACE:
-      function ESMF_GridCreateLogRect(dimCount, counts, minGlobalCoordPerDim, &
-                                      delta1, delta2, delta3, &
-                                      coord1, coord2, coord3, &
-                                      horzGridType, vertGridType, &
-                                      horzStagger, vertStagger, &
-                                      horzCoordSystem, vertCoordSystem, &
-                                      dimNames, dimUnits, &
-                                      coordOrder, coordIndex, periodic, &
-                                      delayout, decompIds, &
-                                      countsPerDEDecomp1, countsPerDEDecomp2, &
-                                      name, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Grid) :: ESMF_GridCreateLogRect
-!
-! !ARGUMENTS:
-      integer, intent(in) :: dimCount
-      integer, dimension(dimCount), intent(in) :: counts
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
-                                                 minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta3
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
-      type(ESMF_GridType), intent(in), optional :: horzGridType
-      type(ESMF_GridType), intent(in), optional :: vertGridType
-      type(ESMF_GridStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridStagger), intent(in), optional :: vertStagger
-      type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
-      type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
-      character (len=*), dimension(:), intent(in), optional :: dimNames
-      character (len=*), dimension(:), intent(in), optional :: dimUnits
-      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
-      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
-      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
-      type(ESMF_DELayout), intent(in), optional :: delayout
-      integer, dimension(dimCount), intent(in), optional :: decompIds
-      integer, dimension(:), intent(in), optional :: countsPerDEDecomp1
-      integer, dimension(:), intent(in), optional :: countsPerDEDecomp2
-      character (len=*), intent(in), optional :: name
-      integer, intent(out), optional :: rc
-
-!
-! !DESCRIPTION:
-!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and internally generates the {\tt ESMF\_Grid}.  Return a pointer
-!     to the new {\tt ESMF\_Grid}.  This routine is for Grids with user-specified
-!     spacing, and can create Grids from two different sets of arguments:
-!        (1). given min and arrays of deltas (variables minGlobalCoordPerDim and
-!             delta1, delta2, and delta3, if applicable);
-!        (2). given arrays of coordinates (variables coords1, coords2, and
-!             coords3, if applicable).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[dimCount]
-!          Number of grid dimensions.
-!     \item[counts]
-!          Array of number of grid increments in each dimension.
 !     \item[{[minGlobalCoordsPerDim]}]
 !          Array of minimum physical coordinate in each direction.
 !     \item[{[delta1]}]
 !          Array of physical increments between nodes in the first direction.
 !     \item[{[delta2]}]
 !          Array of physical increments between nodes in the second direction.
-!     \item[{[delta3]}]
-!          Array of physical increments between nodes in the third direction.
 !     \item[{[coord1]}]
 !          Array of physical coordinates in the first direction.
 !     \item[{[coord2]}]
 !          Array of physical coordinates in the second direction.
-!     \item[{[coord3]}]
-!          Array of physical coordinates in the third direction.
-!     \item[{[horzGridType]}]
-!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
-!     \item[{[vertGridType]}]
-!          {\tt ESMF\_GridType} specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
-!          {\tt ESMF\_GridStagger} specifier to denote horizontal grid stagger.
-!     \item[{[vertStagger]}]
-!          {\tt ESMF\_GridStagger} specifier to denote vertical grid stagger.
-!     \item[{[horzCoordSystem]}]
-!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
-!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the horizontal grid.
-!     \item[{[vertCoordSystem]}]
-!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
-!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical grid.
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          stagger.
 !     \item[{[dimNames]}]
 !          Array of dimension names.
 !     \item[{[dimUnits]}]
@@ -500,16 +296,6 @@
 !     \item[{[periodic]}]
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
-!     \item[{[delayout]}]
-!          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[{[decompIds]}]
-!          Identifier for which Grid axes are decomposed.
-!     \item[{[countsPerDEDecomp1]}]
-!          Array of number of grid increments per DE in the first decomposition
-!          direction.
-!     \item[{[countsPerDEDecomp2]}]
-!          Array of number of grid increments per DE in the second decomposition
-!          direction.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -519,13 +305,15 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      type(ESMF_GridClass), pointer :: grid    ! Pointer to new grid
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+      type(ESMF_GridType)           :: horzGridType
+      type(ESMF_CoordSystem)        :: horzCoordSystem
 
       ! Initialize pointers
       nullify(grid)
-      nullify(ESMF_GridCreateLogRect%ptr)
+      nullify(ESMF_GridCreateHorz_LatLon%ptr)
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -535,50 +323,588 @@
         rc = ESMF_FAILURE
       endif
 
+      ! set applicable default values
+      horzGridType    = ESMF_GRID_TYPE_XY
+      horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+
       allocate(grid, stat=status)
       ! If error write message and return.
       ! Formal error handling will be added asap.
       if (status .NE. 0) then
-        print *, "ERROR in ESMF_GridCreateLogRect: Allocate"
+        print *, "ERROR in ESMF_GridCreateHorz_LatLon: Allocate"
         return
       endif
 
       ! Call construction method to allocate and initialize grid internals.
-      call ESMF_LRGridConstructSpecd(grid, dimCount, coord1, coord2, coord3, &
+      call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
                                      minGlobalCoordPerDim=minGlobalCoordPerDim, &
-                                     delta1=delta1, delta2=delta2, delta3=delta3, &
+                                     delta1=delta1, delta2=delta2, &
                                      horzGridType=horzGridType, &
-                                     vertGridType=vertGridType, &
                                      horzStagger=horzStagger, &
-                                     vertStagger=vertStagger, &
                                      horzCoordSystem=horzCoordSystem, &
-                                     vertCoordSystem=vertCoordSystem, &
                                      dimNames=dimNames, dimunits=dimUnits, &
-                                     coordOrder=coordOrder, coordIndex=coordIndex, &
+                                     coordOrder=coordOrder, &
+                                     coordIndex=coordIndex, &
                                      periodic=periodic, name=name, rc=status)
       if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateLogRect: Grid construct"
+        print *, "ERROR in ESMF_GridCreateHorz_LatLon: Grid construct"
         return
       endif
 
-      ! if layout information available, call grid distribute method
-      if (present(delayout)) then
-        call ESMF_LRGridDistribute(grid, delayout, &
-                                   countsPerDEDecomp1=countsPerDEDecomp1, &
-                                   countsPerDEDecomp2=countsPerDEDecomp2, &
-                                   decompIds=decompIds, name=name, &
-                                   rc=status)
-        if (status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridCreateLogRect: Grid distribute"
-          return
-        endif
+      ! Set return values.
+      ESMF_GridCreateHorz_LatLon%ptr => grid
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateHorz_LatLon
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCreateHorz_LatLonUni - Create a new uniform horizontal LatLon Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateHorz_LatLonUni(counts, minGlobalCoordPerDim, &
+                                             maxGlobalCoordPerDim, &
+                                             deltaPerDim, horzStagger, &
+                                             dimNames, dimUnits, &
+                                             coordOrder, coordIndex, periodic, &
+                                             name, rc)
+                                             
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateHorz_LatLonUni
+!
+! !ARGUMENTS:
+      integer, dimension(:), intent(in) :: counts
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                             maxGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                             deltaPerDim
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      character(len=*), dimension(:), intent(in), optional :: dimNames
+      character(len=*), dimension(:), intent(in), optional :: dimUnits
+      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
+      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+      character(len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
+!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     {\tt ESMF\_Grid} with the following parameters:
+!             logically rectangular;
+!             uniformly spaced;
+!             horizontal spherical coordinate system.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:
+!        (1). given min, max, and count (variables minGlobalCoordPerDim, 
+!             maxGlobalCoordPerDim, and counts);
+!        (2). given min, delta, and count (variables minGlobalCoordPerDim, 
+!             deltaPerDim, and counts).
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and the program is terminated.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[counts]
+!          Array of number of grid increments in each dimension.  This array
+!          must have at least a length of two and have valid values in the
+!          first two array locations or a fatal error occurs.
+!     \item[minGlobalCoordPerDim]
+!          Array of minimum physical coordinates in each dimension.
+!     \item[{[maxGlobalCoordPerDim]}]
+!          Array of maximum physical coordinates in each direction.
+!     \item[{[deltaPerDim]}]
+!          Array of constant physical increments in each direction.
+!     \item[{[horzStagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          stagger.
+!     \item[{[dimNames]}]
+!          Array of dimension names.
+!     \item[{[dimUnits]}]
+!          Array of dimension units.
+!     \item[{[coordOrder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!     \item[{[coordIndex]}]
+!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+      type(ESMF_GridType)           :: horzGridType
+      type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateHorz_LatLonUni%ptr)
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! set applicable default values
+      horzGridType    = ESMF_GRID_TYPE_LATLON_UNI
+      horzCoordSystem = ESMF_COORD_SYSTEM_SPHERICAL
+
+      allocate(grid, stat=status)
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
+      if (status .NE. 0) then
+        print *, "ERROR in ESMF_GridCreateHorz_LatLonUni: Allocate"
+        return
+      endif
+
+      ! Call construction method to allocate and initialize grid internals.
+      call ESMF_LRGridConstructUniform(grid, 2, counts, &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       dimNames, dimUnits, &
+                                       coordOrder, coordIndex, periodic, &
+                                       name, status)
+      if (status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateHorz_LatLonUni: Grid construct"
+        return
       endif
 
       ! Set return values.
-      ESMF_GridCreateLogRect%ptr => grid
+      ESMF_GridCreateHorz_LatLonUni%ptr => grid
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_GridCreateLogRect
+      end function ESMF_GridCreateHorz_LatLonUni
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCreateHorz_XY - Create a new horizontal XY Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateHorz_XY(minGlobalCoordPerDim, &
+                                      delta1, delta2, coord1, coord2, &
+                                      horzStagger, dimNames, dimUnits, &
+                                      coordOrder, coordIndex, periodic, &
+                                      name, rc)
+
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateHorz_XY
+!
+! !ARGUMENTS:
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      character(len=*), dimension(:), intent(in), optional :: dimNames
+      character(len=*), dimension(:), intent(in), optional :: dimUnits
+      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
+      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+      character(len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
+!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     {\tt ESMF\_Grid} with the following parameters:
+!             logically rectangular;
+!             user-specified spacing;
+!             horizontal cartesian coordinate system.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:
+!        (1). given min and arrays of deltas (variables minGlobalCoordPerDim,
+!             delta1 and delta2);
+!        (2). given arrays of coordinates (variables coords1 and coords2).
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and the program is terminated.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[{[minGlobalCoordsPerDim]}]
+!          Array of minimum physical coordinate in each direction.
+!     \item[{[delta1]}]
+!          Array of physical increments between nodes in the first direction.
+!     \item[{[delta2]}]
+!          Array of physical increments between nodes in the second direction.
+!     \item[{[coord1]}]
+!          Array of physical coordinates in the first direction.
+!     \item[{[coord2]}]
+!          Array of physical coordinates in the second direction.
+!     \item[{[horzStagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          stagger.
+!     \item[{[dimNames]}]
+!          Array of dimension names.
+!     \item[{[dimUnits]}]
+!          Array of dimension units.
+!     \item[{[coordOrder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!     \item[{[coordIndex]}]
+!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+      type(ESMF_GridType)           :: horzGridType
+      type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateHorz_XY%ptr)
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! set applicable default values
+      horzGridType    = ESMF_GRID_TYPE_XY
+      horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
+
+      allocate(grid, stat=status)
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
+      if (status .NE. 0) then
+        print *, "ERROR in ESMF_GridCreateHorz_XY: Allocate"
+        return
+      endif
+
+      ! Call construction method to allocate and initialize grid internals.
+      call ESMF_LRGridConstructSpecd(grid, 2, coord1, coord2, &
+                                     minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                                     delta1=delta1, delta2=delta2, &
+                                     horzGridType=horzGridType, &
+                                     horzStagger=horzStagger, &
+                                     horzCoordSystem=horzCoordSystem, &
+                                     dimNames=dimNames, dimunits=dimUnits, &
+                                     coordOrder=coordOrder, &
+                                     coordIndex=coordIndex, &
+                                     periodic=periodic, name=name, rc=status)
+      if (status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateHorz_XY: Grid construct"
+        return
+      endif
+
+      ! Set return values.
+      ESMF_GridCreateHorz_XY%ptr => grid
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateHorz_XY
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCreateHorz_XYUni - Create a new uniform horizontal XY Grid
+
+! !INTERFACE:
+      function ESMF_GridCreateHorz_XYUni(counts, minGlobalCoordPerDim, &
+                                         maxGlobalCoordPerDim, &
+                                         deltaPerDim, horzStagger, &
+                                         dimNames, dimUnits, &
+                                         coordOrder, coordIndex, periodic, &
+                                         name, rc)
+                                             
+!
+! !RETURN VALUE:
+      type(ESMF_Grid) :: ESMF_GridCreateHorz_XYUni
+!
+! !ARGUMENTS:
+      integer, dimension(:), intent(in) :: counts
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                             maxGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                             deltaPerDim
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      character(len=*), dimension(:), intent(in), optional :: dimNames
+      character(len=*), dimension(:), intent(in), optional :: dimUnits
+      type(ESMF_CoordOrder), intent(in), optional :: coordOrder
+      type(ESMF_CoordIndex), intent(in), optional :: coordIndex
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+      character(len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
+!     internals, and internally generates the {\tt ESMF\_Grid}.  Returns a
+!     pointer to the new {\tt ESMF\_Grid}.  This routine creates an
+!     {\tt ESMF\_Grid} with the following parameters:
+!             logically rectangular;
+!             uniformly spaced;
+!             horizontal cartesian coordinate system.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:
+!        (1). given min, max, and count (variables minGlobalCoordPerDim, 
+!             maxGlobalCoordPerDim, and counts);
+!        (2). given min, delta, and count (variables minGlobalCoordPerDim, 
+!             deltaPerDim, and counts).
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and the program is terminated.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[counts]
+!          Array of number of grid increments in each dimension.  This array
+!          must have at least a length of two and have valid values in the
+!          first two array locations or a fatal error occurs.
+!     \item[minGlobalCoordPerDim]
+!          Array of minimum physical coordinates in each dimension.
+!     \item[{[maxGlobalCoordPerDim]}]
+!          Array of maximum physical coordinates in each direction.
+!     \item[{[deltaPerDim]}]
+!          Array of constant physical increments in each direction.
+!     \item[{[horzStagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid
+!          stagger.
+!     \item[{[dimNames]}]
+!          Array of dimension names.
+!     \item[{[dimUnits]}]
+!          Array of dimension units.
+!     \item[{[coordOrder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!     \item[{[coordIndex]}]
+!          {\tt ESMF\_CoordIndex} specifier to denote global or local indexing.
+!     \item[{[periodic]}]
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  TODO
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridClass), pointer :: grid       ! Pointer to new grid
+      type(ESMF_GridType)           :: horzGridType
+      type(ESMF_CoordSystem)        :: horzCoordSystem
+
+      ! Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateHorz_XYUni%ptr)
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! set applicable default values
+      horzGridType    = ESMF_GRID_TYPE_XY_UNI
+      horzCoordSystem = ESMF_COORD_SYSTEM_CARTESIAN
+
+      allocate(grid, stat=status)
+      ! If error write message and return.
+      ! Formal error handling will be added asap.
+      if (status .NE. 0) then
+        print *, "ERROR in ESMF_GridCreateHorz_XYUni: Allocate"
+        return
+      endif
+
+      ! Call construction method to allocate and initialize grid internals.
+      call ESMF_LRGridConstructUniform(grid, 2, counts, &
+                                       minGlobalCoordPerDim, &
+                                       maxGlobalCoordPerDim, deltaPerDim, &
+                                       horzGridType, horzStagger, &
+                                       horzCoordSystem, &
+                                       dimNames, dimUnits, &
+                                       coordOrder, coordIndex, periodic, &
+                                       name, status)
+      if (status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateHorz_XYUni: Grid construct"
+        return
+      endif
+
+      ! Set return values.
+      ESMF_GridCreateHorz_XYUni%ptr => grid
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end function ESMF_GridCreateHorz_XYUni
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_LRGridAddVert - Add a vertical Grid to an existing Grid
+
+! !INTERFACE:
+      subroutine ESMF_LRGridAddVert(grid, minGlobalCoord, delta, coord, &
+                                    vertGridType, vertStagger, &
+                                    vertCoordSystem, dimName, dimUnit, &
+                                    name, rc)
+                                             
+!
+! !ARGUMENTS:
+      type(ESMF_GridClass), pointer :: grid
+      real(ESMF_KIND_R8), intent(in), optional :: minGlobalCoord
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
+      type(ESMF_GridVertType), intent(in), optional :: vertGridType
+      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
+      type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
+      character(len=*), intent(in), optional :: dimName
+      character(len=*), intent(in), optional :: dimUnit
+      character(len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This routine adds a vertical subGrid to an already allocated {\tt ESMF_Grid}.
+!     Only one vertical subGrid is allowed for any Grid, so if a vertical subGrid
+!     already exists for the Grid that is passed in, an error is returned.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:                 
+!        (1). given min and array of deltas (variables minGlobalCoord and delta);
+!        (2). given array of coordinates (variable coords).
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and the program is terminated.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          {\tt ESMF\_Grid} to add vertical grid to.
+!     \item[{[minGlobalCoord]}]
+!          Minimum physical coordinate in the vertical direction.
+!     \item[{[delta]}]
+!          Array of physical increments in the vertical direction.
+!     \item[{[coord]}]
+!          Array of physical coordinates in the vertical direction.
+!     \item[{[vertGridType]}]
+!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!     \item[{[vertStagger]}]
+!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!     \item[{[vertCoordSystem]}]
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
+!     \item[{[dimName]}]
+!          Dimension name.
+!     \item[{[dimUnit]}]
+!          Dimension unit.
+!     \item[{[name]}]
+!          Name for the vertical grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  TODO
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: count, i
+      real(ESMF_KIND_R8) :: minGlobalCoordUse, maxGlobalCoordUse
+      real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse
+      type(ESMF_LogRectGrid), pointer :: lrgrid
+      type(ESMF_LocalArray), dimension(:), pointer :: coords
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! sanity check for bad values  TODO: more checks
+      if (present(delta)) count = size(delta)
+      if (present(coord)) count = size(coord)-1
+      if (count .le. 1) then
+        print *, "bad value for count, ", count
+        return
+      endif
+
+      allocate(coords(3))
+        coords(1) = grid%gridSpecific%logRectGrid%coords(1)
+        coords(2) = grid%gridSpecific%logRectGrid%coords(2)
+
+     ! coords => grid%gridSpecific%logRectGrid%coords
+
+      ! Two ways to make a subgrid here: by coordinates or by minimum and delta
+      ! by coordinates:
+      allocate(coordsUse(count+1))
+      if (present(coord)) then
+        do i = 1,count+1
+          coordsUse(i) = coord(i)
+        enddo
+        count  = size(coord) - 1   !TODO: coords indicate corner points
+                                   !      or center points?
+
+      ! by deltas (and minCoord):     TODO: make it a starting value instead of min
+      elseif (present(delta)) then
+        coordsUse(1) = minGlobalCoord    ! TODO: make sure it's here
+        do i = 1,count
+          coordsUse(i+1) = coordsUse(i) + delta(i)
+        enddo
+      endif
+
+      coords(3) = ESMF_LocalArrayCreate(coordsUse, ESMF_DATA_COPY, status)
+      minGlobalCoordUse = minval(coordsUse)
+      maxGlobalCoordUse = maxval(coordsUse)
+
+      ! Fill in logRectGrid derived type with subroutine arguments
+      lrgrid => grid%gridSpecific%logRectGrid
+      lrgrid%countPerDim(3) = count
+
+      ! Fill in grid derived type with subroutine arguments
+      grid%dimCount      = 3
+      if (present(vertGridType   )) grid%vertGridType    = vertGridType
+      if (present(vertStagger    )) grid%vertStagger     = vertStagger
+      if (present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
+
+      ! Set dimension name and unit
+      if (present(dimName)) then
+        grid%dimNames(3) = dimName
+      endif
+      if (present(dimUnit)) then
+        grid%dimUnits(3) = dimUnit
+      endif
+
+      ! Set global domain limit
+      grid%minGlobalCoordPerDim(3) = minGlobalCoordUse
+      grid%maxGlobalCoordPerDim(3) = maxGlobalCoordUse
+
+      ! Clean up
+      deallocate(coordsUse)
+
+      ! Set return values.
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridAddVert
 
 !------------------------------------------------------------------------------
 !BOPI
@@ -1004,9 +1330,8 @@
                                              minGlobalCoordPerDim, &
                                              maxGlobalCoordPerDim, &
                                              deltaPerDim, &
-                                             horzGridType, vertGridType, &
-                                             horzStagger, vertStagger, &
-                                             horzCoordSystem, vertCoordSystem, &
+                                             horzGridType, horzStagger, &
+                                             horzCoordSystem, &
                                              dimNames, dimUnits, &
                                              coordOrder, coordIndex, &
                                              periodic, name, rc)
@@ -1021,11 +1346,8 @@
       real(ESMF_KIND_R8), dimension(dimCount), intent(in), optional :: &
                                                             deltaPerDim
       type(ESMF_GridType), intent(in), optional :: horzGridType
-      type(ESMF_GridType), intent(in), optional :: vertGridType
-      type(ESMF_GridStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridStagger), intent(in), optional :: vertStagger
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
-      type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
       character(len=*), dimension(:), intent(in), optional :: dimNames
       character(len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
@@ -1056,24 +1378,17 @@
 !          Array of maximum physical coordinates in each direction.
 !     \item[{[horzGridType]}]
 !          Integer specifier to denote horizontal grid type.
-!     \item[{[vertGridType]}]
-!          Integer specifier to denote vertical grid type.
 !     \item[{[horzStagger]}]
 !          Integer specifier to denote horizontal grid stagger.
-!     \item[{[vertStagger]}]
-!          Integer specifier to denote vertical grid stagger.
 !     \item[{[horzCoordSystem]}]
 !          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
 !          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
 !          the horizontal grid.
-!     \item[{[vertCoordSystem]}]
-!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
-!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
-!          the vertical grid.
 !     \item[{[coordOrder]}]
 !     \item[{[coordIndex]}]
 !     \item[{[periodic]}]
-!          Logical specifier (array) to denote periodicity along the coordinate axes.
+!          Logical specifier (array) to denote periodicity along the coordinate
+!          axes.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1086,9 +1401,9 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       integer :: i
-      type (ESMF_LogRectGrid), pointer :: lrgrid
-      real :: recheck
-      real, dimension(dimCount) :: useMaxes, useDeltas
+      type(ESMF_LogRectGrid), pointer :: lrgrid
+      real(ESMF_KIND_R8) :: recheck
+      real(ESMF_KIND_R8), dimension(dimCount) :: useMaxes, useDeltas
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -1162,13 +1477,10 @@
 
       ! Fill in grid derived type with subroutine arguments
       grid%dimCount      = dimCount
-      grid%gridStructure = ESMF_GridStructure_LogRect
+      grid%gridStructure = ESMF_GRID_STRUCTURE_LOGRECT
       if (present(horzGridType   )) grid%horzGridType    = horzGridType
-      if (present(vertGridType   )) grid%vertGridType    = vertGridType
       if (present(horzStagger    )) grid%horzStagger     = horzStagger
-      if (present(vertStagger    )) grid%vertStagger     = vertStagger
       if (present(horzCoordSystem)) grid%horzCoordSystem = horzCoordSystem
-      if (present(vertCoordSystem)) grid%vertCoordSystem = vertCoordSystem
       if (present(coordOrder     )) grid%coordOrder      = coordOrder
       if (present(coordIndex     )) grid%coordIndex      = coordIndex
 
@@ -1218,7 +1530,7 @@
         enddo
       endif
 
-      grid%gridStatus = ESMF_GridStatus_Init
+      grid%gridStatus = ESMF_GRID_STATUS_INIT
 
       if (rcpresent) rc = ESMF_SUCCESS
 
@@ -1252,9 +1564,9 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta3
       type(ESMF_GridType), intent(in), optional :: horzGridType
-      type(ESMF_GridType), intent(in), optional :: vertGridType
-      type(ESMF_GridStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridStagger), intent(in), optional :: vertStagger
+      type(ESMF_GridVertType), intent(in), optional :: vertGridType
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
       character (len=*), dimension(:), intent(in), optional :: dimNames
@@ -1465,7 +1777,7 @@
 
       ! Fill in grid derived type with subroutine arguments
       grid%dimCount      = dimCount
-      grid%gridStructure = ESMF_GridStructure_LogRect
+      grid%gridStructure = ESMF_GRID_STRUCTURE_LOGRECT
       if (present(horzGridType   )) grid%horzGridType    = horzGridType
       if (present(vertGridType   )) grid%vertGridType    = vertGridType
       if (present(horzStagger    )) grid%horzStagger     = horzStagger
@@ -1505,7 +1817,7 @@
         grid%maxGlobalCoordPerDim(i) = maxGlobalCoordPerDimUse(i)
       enddo
 
-      grid%gridStatus = ESMF_GridStatus_Init
+      grid%gridStatus = ESMF_GRID_STATUS_INIT
 
       ! Clean up
       deallocate(coordsUse1)
@@ -1662,7 +1974,7 @@
       endif
 
       call ESMF_DELayoutGet(delayout, dimCount=ndim, oneToOneFlag=otoFlag, &
-                               logRectFlag=lrFlag, rc=status)
+                            logRectFlag=lrFlag, rc=status)
 
       ! Check layout attributes
       if (otoFlag .ne. ESMF_TRUE) then    ! ensure this is 1-to-1 layout
@@ -2107,11 +2419,11 @@
 
         select case (grid%vertStagger%stagger)
 
-          ! ESMF_GridStagger_VertCenter - vertical velocity at vertical midpoints
-          case (16)
+          ! ESMF_GRID_VERT_STAGGER_CENTER - vertical velocity at vertical midpoints
+          case (1)
 
-          ! ESMF_GridStagger_VertFace - vertical velocity at top vertical face
-          case (17)
+          ! ESMF_GRID_VERT_STAGGER_TOP - vertical velocity at top vertical face
+          case (2)
             distGridName = 'vertical top face'
             physGridName = 'vertical top face'
             relloc = ESMF_CELL_TOPFACE
@@ -2163,7 +2475,7 @@
       deallocate(countsPerDE2)
       if (dimCount.ge.3) deallocate(countsPerDE3)
 
-      grid%gridStatus = ESMF_GridStatus_Ready
+      grid%gridStatus = ESMF_GRID_STATUS_READY
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDistribute
@@ -2212,14 +2524,14 @@
       !TODO: destruct these
       !  type (ESMF_Base) :: base
       !  type (ESMF_Status) :: gridStatus
-      grid%horzGridType    = ESMF_GridType_Unknown
-      grid%vertGridType    = ESMF_GridType_Unknown
-      grid%horzStagger     = ESMF_GridStagger_Unknown
-      grid%vertStagger     = ESMF_GridStagger_Unknown
-      grid%horzCoordSystem = ESMF_CoordSystem_Unknown
-      grid%vertCoordSystem = ESMF_CoordSystem_Unknown
-      grid%coordOrder      = ESMF_CoordOrder_Unknown
-      grid%coordIndex      = ESMF_CoordIndex_Unknown
+      grid%horzGridType    = ESMF_GRID_TYPE_UNKNOWN
+      grid%vertGridType    = ESMF_GRID_VERT_TYPE_UNKNOWN
+      grid%horzStagger     = ESMF_GRID_HORZ_STAGGER_UNKNOWN
+      grid%vertStagger     = ESMF_GRID_VERT_STAGGER_UNKNOWN
+      grid%horzCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
+      grid%vertCoordSystem = ESMF_COORD_SYSTEM_UNKNOWN
+      grid%coordOrder      = ESMF_COORD_ORDER_UNKNOWN
+      grid%coordIndex      = ESMF_COORD_INDEX_UNKNOWN
       grid%periodic        = ESMF_FALSE
       grid%numPhysGrids    = 0
       grid%numDistGrids    = 0
@@ -2549,26 +2861,26 @@
       ! set parameters based on grid type
       select case (grid%horzGridType%gridType)
 
-        ! ESMF_GridType_LatLon
+        ! ESMF_GRID_TYPE_LATLON
         case (1)
-          coordSystem         = ESMF_CoordSystem_Spherical
+          coordSystem         = ESMF_COORD_SYSTEM_SPHERICAL
           coordNames(1)       = 'latitude'
           coordNames(2)       = 'longitude'
-          coordType(1)        = ESMF_CoordType_Lat
-          coordType(2)        = ESMF_CoordType_Lon
+          coordType(1)        = ESMF_COORD_TYPE_LAT
+          coordType(2)        = ESMF_COORD_TYPE_LON
           coordUnits(:)       = 'degrees'
           coordAligned(:)     = .true.
           coordEqualSpaced(:) = .false.
           coordCyclic(1)      = .true.
           coordCyclic(2)      = .false.
 
-        ! ESMF_GridType_XY
+        ! ESMF_GRID_TYPE_XY
         case (7)
-          coordSystem         = ESMF_CoordSystem_Cartesian
+          coordSystem         = ESMF_COORD_SYSTEM_CARTESIAN
           coordNames(1)       = 'x'
           coordNames(2)       = 'y'
-          coordType(1)        = ESMF_CoordType_X
-          coordType(2)        = ESMF_CoordType_Y
+          coordType(1)        = ESMF_COORD_TYPE_X
+          coordType(2)        = ESMF_COORD_TYPE_Y
           coordUnits(:)       = ''
           coordAligned(:)     = .true.
           coordEqualSpaced(:) = .false.
@@ -2789,21 +3101,21 @@
       enddo
 
       ! set parameters based on vertical coordinate system  TODO: better as a case
-      if (grid%vertCoordSystem.eq.ESMF_CoordSystem_Depth) then
+      if (grid%vertCoordSystem .eq. ESMF_COORD_SYSTEM_DEPTH) then
         ! ESMF_CoordSystem_Depth
-        coordSystem      = ESMF_CoordSystem_Depth
+        coordSystem      = ESMF_COORD_SYSTEM_DEPTH
         coordName        = 'depth'
-        coordType        = ESMF_CoordType_Depth
+        coordType        = ESMF_COORD_TYPE_DEPTH
         coordUnit        = ''
         coordAligned     = .true.
         coordEqualSpaced = .true.
         coordCyclic      = .false.
 
-      elseif (grid%vertCoordSystem.eq.ESMF_CoordSystem_Height) then
+      elseif (grid%vertCoordSystem .eq. ESMF_COORD_SYSTEM_HEIGHT) then
         ! ESMF_CoordSystem_Height
-        coordSystem      = ESMF_CoordSystem_Height
+        coordSystem      = ESMF_COORD_SYSTEM_HEIGHT
         coordName        = 'height'
-        coordType        = ESMF_CoordType_Height
+        coordType        = ESMF_COORD_TYPE_HEIGHT
         coordUnit        = ''
         coordAligned     = .true.
         coordEqualSpaced = .true.
@@ -4690,7 +5002,7 @@
       ! set the region array in PhysGrid
       if (.not.total) then
       call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
-                                   regionType=ESMF_RegionType_Polygon, &
+                                   regionType=ESMF_REGION_TYPE_POLYGON, &
                                    vertexArray=cornerArray, &
                                    numVertices=4, rc=status)
             ! TODO: add name to set call
@@ -4769,9 +5081,9 @@
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_GridType), intent(out), optional :: horzGridType
-      type(ESMF_GridType), intent(out), optional :: vertGridType
-      type(ESMF_GridStagger), intent(out), optional :: horzStagger
-      type(ESMF_GridStagger), intent(out), optional :: vertStagger
+      type(ESMF_GridVertType), intent(out), optional :: vertGridType
+      type(ESMF_GridHorzStagger), intent(out), optional :: horzStagger
+      type(ESMF_GridVertStagger), intent(out), optional :: vertStagger
       type(ESMF_CoordSystem), intent(out), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(out), optional :: vertCoordSystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordOrder
@@ -5089,15 +5401,17 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
-      type(ESMF_GridType), intent(in), optional :: horzGridType
-      type(ESMF_GridType), intent(in), optional :: vertGridType
-      type(ESMF_GridStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridStagger), intent(in), optional :: vertStagger
+      type(ESMF_GridType),     intent(in), optional :: horzGridType
+      type(ESMF_GridVertType), intent(in), optional :: vertGridType
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
       type(ESMF_CoordOrder),  intent(in), optional :: coordOrder
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: maxGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                      minGlobalCoordPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
+                                                      maxGlobalCoordPerDim
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       integer, intent(out), optional :: rc
 !
@@ -5375,7 +5689,7 @@
       name = 'cell type total'
       call ESMF_PhysGridSetMask(grid%physGrids(physGridId), &
                                 maskArray=arrayTemp, &
-                                maskType=ESMF_GridMaskType_RegionId, &
+                                maskType=ESMF_GRID_MASKTYPE_REGION_ID, &
                                 name=name, rc=status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridSetCellMask: PhysGrid set mask"
@@ -5855,7 +6169,7 @@
       endif
 
       gp => grid%ptr
-      if (gp%gridStatus /= ESMF_GridStatus_Ready) then
+      if (gp%gridStatus /= ESMF_GRID_STATUS_READY) then
         return
       endif
 
@@ -6371,19 +6685,19 @@
 !!
 ! 
 !      select case (srchGridType)
-!      case(ESMF_GridType_LatLon,      ESMF_GridType_LatLonMercator, &
-!           ESMF_GridType_LatLonGauss, ESMF_GridType_Reduced)
+!      case(ESMF_GRID_TYPE_LATLON,       ESMF_GRID_TYPE_LATLON_MERCATOR, &
+!           ESMF_GRID_TYPE_LATLON_GAUSS, ESMF_GRID_TYPE_REDUCED)
 !         !*** simple search adequate for these cases
 !         call ESMF_PhysGridSearchBboxSpherical(dstAdd, x, y, DEId, physGrid, &
 !                                               distGrid, status)
 !
-!      case(ESMF_GridType_Dipole,   ESMF_GridType_Tripole, &
-!           ESMF_GridType_Geodesic, ESMF_GridType_CubedSphere)
+!      case(ESMF_GRID_TYPE_DIPOLE,   ESMF_GRID_TYPE_TRIPOLE, &
+!           ESMF_GRID_TYPE_GEODESIC, ESMF_GRID_TYPE_CUBEDSPHERE)
 !         !*** must use more general algorithm for these cases
 !         call ESMF_PhysGridSearchGeneralSpherical(dstAdd, x, y, DEId, physGrid, &
 !                                                  distGrid, status)
 !
-!      case(ESMF_GridType_XY, ESMF_GridType_XYVar)
+!      case(ESMF_GRIDTYPE_XY, ESMF_GRIDTYPE_XY_UNI)
 !         call ESMF_PhysGridSearchBboxCartesian(dstAdd, x, y, DEId, physGrid, &
 !                                               distGrid, status)
 !

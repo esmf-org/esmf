@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.165 2004/05/10 15:46:11 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.166 2004/05/24 22:58:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,6 +62,7 @@
 
     public ESMF_GridCreate
     public ESMF_GridDestroy
+    public ESMF_GridAddVert_Height
     public ESMF_GridDistribute
     public ESMF_GridGetCoord
     public ESMF_GridSetCoord
@@ -92,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.165 2004/05/10 15:46:11 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.166 2004/05/24 22:58:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -325,33 +326,33 @@
       select case(gridStructure)
 
       !-------------
-      !  ESMF_GridStructure_Unknown
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridCreateRead: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateRead = ESMF_LRGridCreateRead(iospec, name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridCreateRead: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridCreateRead: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridCreateRead: ", &
                  "GridStructureUser not supported"
@@ -428,33 +429,33 @@
       select case(gridIn%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridCreateCopy: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateCopy = ESMF_LRGridCreateCopy(gridIn, name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridCreateCopy: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridCreateCopy: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridCreateCopy: ", &
                  "GridStructureUser not supported"
@@ -537,34 +538,34 @@
       select case(gridIn%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridCreateCutout: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateCutout = ESMF_LRGridCreateCutout(gridIn, min, max, &
                                                         name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridCreateCutout: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridCreateCutout: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridCreateCutout: ", &
                  "GridStructureUser not supported"
@@ -651,34 +652,34 @@
       select case(gridIn%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateDiffRes = &
           ESMF_LRGridCreateDiffRes(gridIn, resolution, name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridCreateDiffRes: ", &
                  "GridStructureUser not supported"
@@ -758,34 +759,34 @@
       select case(gridIn1%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridCreateExchange: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         ESMF_GridCreateExchange = ESMF_LRGridCreateExchange(gridIn1, gridIn2, &
                                                             name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridCreateExchange: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridCreateExchange: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridCreateExchange: ", &
                  "GridStructureUser not supported"
@@ -856,7 +857,7 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         ! TODO: decide if it's ok to create an empty grid and then delete 
         !   it without being created further. (allow it for now)
@@ -866,26 +867,26 @@
         status = ESMF_SUCCESS
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDestruct(grid%ptr, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridDestroy: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridDestroy: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridDestroy: ", &
                  "GridStructureUser not supported"
@@ -922,6 +923,138 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridDestroy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridAddVert_Height - add a vertical subGrid to an existing Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridAddVert_Height(grid, delta, coord, vertStagger, &
+                                         dimName, dimUnit, name, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord
+      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
+      character(len=*), intent(in), optional :: dimName
+      character(len=*), intent(in), optional :: dimUnit
+      character(len=*), intent(in), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This routine adds a vertical subGrid to an already allocated {\tt ESMF_Grid}.
+!     This explicit interface only creates vertical subGrids with coordinate
+!     systems where the zero point is defined at the bottom.
+!     Only one vertical subGrid is allowed for any Grid, so if a vertical subGrid
+!     already exists for the Grid that is passed in, an error is returned.
+!     This routine generates {\tt ESMF\_Grid} coordinates from either of two
+!     optional sets of arguments:
+!        (1). given array of deltas (variable delta) and assumes 0 is the minimum
+!             or starting coordinate;
+!        (2). given array of coordinates (variable coords).
+!     If neither of these sets of arguments is present and valid, an error
+!     message is issued and the program is terminated.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          {\tt ESMF\_Grid} to add vertical grid to.
+!     \item[{[delta]}]
+!          Array of physical increments in the vertical direction.
+!     \item[{[coord]}]
+!          Array of physical coordinates in the vertical direction.
+!     \item[{[vertStagger]}]
+!          {\tt ESMF\_GridVertStagger} specifier to denote vertical grid stagger.
+!     \item[{[dimName]}]
+!          Dimension name.
+!     \item[{[dimUnit]}]
+!          Dimension unit.
+!     \item[{[name]}]
+!          Name for the vertical grid.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  TODO
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_GridVertType) :: vertGridType
+      type(ESMF_CoordSystem) :: vertCoordSystem
+      real(ESMF_KIND_R8) :: minGlobalCoord
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Set default values
+      vertGridType    = ESMF_GRID_VERT_TYPE_HEIGHT
+      vertCoordSystem = ESMF_COORD_SYSTEM_HEIGHT
+      minGlobalCoord  = 0.0d0
+
+!     Call GridAddVert routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        print *, "ERROR in ESMF_GridAddVert_Height: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridAddVert(grid%ptr, minGlobalCoord, delta, coord, &
+                                vertGridType, vertStagger, &
+                                vertCoordSystem, dimName, dimUnit, &
+                                name, status)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        print *, "ERROR in ESMF_GridAddVert_Height: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        print *, "ERROR in ESMF_GridAddVert_Height: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        print *, "ERROR in ESMF_GridAddVert_Height: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridAddVert_Height: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridAddVert_Height: error in specific call'
+        return
+      endif
+
+!     Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridAddVert_Height
 
 !------------------------------------------------------------------------------
 !BOP
@@ -980,34 +1113,34 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridDistribute: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridDistribute(grid%ptr, delayout, countsPerDEDim1, &
                                    countsPerDEDim2, decompIds, name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridDistribute: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridDistribute: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridDistribute: ", &
                  "GridStructureUser not supported"
@@ -1021,7 +1154,7 @@
 
       if (status /= ESMF_SUCCESS) then
         rc = status
-        print *, 'ERROR in ESMF_GridDistribute: error in get'
+        print *, 'ERROR in ESMF_GridDistribute: error in specific call'
         return
       endif
 
@@ -1048,10 +1181,10 @@
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
-      type(ESMF_GridType), intent(out), optional :: horzGridType
-      type(ESMF_GridType), intent(out), optional :: vertGridType
-      type(ESMF_GridStagger), intent(out), optional :: horzStagger
-      type(ESMF_GridStagger), intent(out), optional :: vertStagger
+      type(ESMF_GridType),     intent(out), optional :: horzGridType
+      type(ESMF_GridVertType), intent(out), optional :: vertGridType
+      type(ESMF_GridHorzStagger), intent(out), optional :: horzStagger
+      type(ESMF_GridVertStagger), intent(out), optional :: vertStagger
       type(ESMF_CoordSystem), intent(out), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(out), optional :: vertCoordSystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordOrder
@@ -1142,14 +1275,14 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      !  ESMF_GridStructure_Unknown
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridGet: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGet(grid, horzRelLoc, vertRelLoc, &
                             horzGridType, vertGridType, &
@@ -1162,21 +1295,21 @@
                             name, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridGet: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridGet: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridGet: ", &
                  "GridStructureUser not supported"
@@ -1250,34 +1383,34 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetAllAxisIndex(grid, globalAI, horzRelLoc, vertRelLoc, &
                                         total, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridGetAllAxisIndex: ", &
                  "GridStructureUser not supported"
@@ -1353,33 +1486,33 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      !  ESMF_GridStructure_Unknown
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridGetCellMask: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetCellMask(grid, maskArray, relloc, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridGetCellMask: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridGetCellMask: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridGetCellMask: ", &
                  "GridStructureUser not supported"
@@ -1478,34 +1611,34 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridGetCoord: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
                                  cornerCoord, faceCoord, reorder, total, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridGetCoord: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridGetCoord: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridGetCoord: ", &
                  "GridStructureUser not supported"
@@ -1619,14 +1752,14 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridGetDE: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGetDE(grid, horzRelLoc, vertRelLoc, &
                               myDE, localCellCount, localCellCountPerDim, &
@@ -1635,21 +1768,21 @@
                               total, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridGetDE: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridGetDE: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridGetDE: ", &
                  "GridStructureUser not supported"
@@ -1749,14 +1882,14 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
                                            global1D, local1D, &
@@ -1766,21 +1899,21 @@
                                            dimOrder, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: ", &
                  "GridStructureUser not supported"
@@ -1878,14 +2011,14 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
                                            local1D, global1D, &
@@ -1894,21 +2027,21 @@
                                            localAI2D, globalAI2D, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: ", &
                  "GridStructureUser not supported"
@@ -1978,7 +2111,7 @@
   !    call ESMF_StatusString(gp%gridStatus, str, rc)
   !    print *, "Grid status = ", trim(str)
 
-      if (gp%gridStatus /= ESMF_GridStatus_Ready) then
+      if (gp%gridStatus /= ESMF_GRID_STATUS_READY) then
         if (present(rc)) rc = ESMF_FAILURE
         return
       endif
@@ -2022,10 +2155,10 @@
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
-      type(ESMF_GridType), intent(in), optional :: horzGridType
-      type(ESMF_GridType), intent(in), optional :: vertGridType
-      type(ESMF_GridStagger), intent(in), optional :: horzStagger
-      type(ESMF_GridStagger), intent(in), optional :: vertStagger
+      type(ESMF_GridType),     intent(in), optional :: horzGridType
+      type(ESMF_GridVertType), intent(in), optional :: vertGridType
+      type(ESMF_GridHorzStagger), intent(in), optional :: horzStagger
+      type(ESMF_GridVertStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
@@ -2609,7 +2742,7 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         ! FIXME:  field needs to know the grid is ok -
         !print *, "ERROR in ESMF_GridValidate: ", &
@@ -2619,26 +2752,26 @@
         status = ESMF_SUCCESS
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridValidate(grid, opt, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridValidate: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridValidate: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridValidate: ", &
                  "GridStructureUser not supported"
@@ -2705,10 +2838,10 @@
 !
       status = ESMF_SUCCESS
 
-      if(coordSystem .eq. ESMF_CoordSystem_Spherical) then
+      if(coordSystem .eq. ESMF_COORD_SYSTEM_SPHERICAL) then
         ESMF_GridComputeDistance = &
           ESMF_PhysGridCompDistSpherical(x1, y1, x2, y2, rc=status)
-      elseif(coordSystem .eq. ESMF_CoordSystem_Cartesian) then
+      elseif(coordSystem .eq. ESMF_COORD_SYSTEM_CARTESIAN) then
         ESMF_GridComputeDistance = &
           ESMF_PhysGridCompDistCartesian(x1, y1, x2, y2, rc=status)
       else
@@ -2788,34 +2921,34 @@
 !      select case(grid%ptr%gridStructure%gridStructure)
 !
 !      !-------------
-!      ! ESMF_GridStructure_Unknown
+!      ! ESMF_GRID_STRUCTURE_UNKNOWN
 !      case(0)
 !        print *, "ERROR in ESMF_GridSearch: ", &
 !                 "GridStructureUnknown not supported"
 !        status = ESMF_FAILURE
 !
 !      !-------------
-!      ! ESMF_GridStructure_LogRect
+!      ! ESMF_GRID_STRUCTURE_LOGRECT
 !      case(1)
 !        call ESMF_LRGridSearchPoint(dstAdd, x, y, DEID, searchGrid, &
 !                                    physGridID, status)
 !
 !      !-------------
-!      ! ESMF_GridStructure_LogRectBlock
+!      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
 !      case(2)
 !        print *, "ERROR in ESMF_GridSearch: ", &
 !                 "GridStructureLogRectBlock not supported"
 !        status = ESMF_FAILURE
 !
 !      !-------------
-!      ! ESMF_GridStructure_Unstruct
+!      ! ESMF_GRID_STRUCTURE_UNSTRUCT
 !      case(3)
 !        print *, "ERROR in ESMF_GridSearch: ", &
 !                 "GridStructureUnstruct not supported"
 !        status = ESMF_FAILURE
 !
 !      !-------------
-!      ! ESMF_GridStructure_User
+!      ! ESMF_GRID_STRUCTURE_USER
 !      case(4)
 !        print *, "ERROR in ESMF_GridSearch: ", &
 !                 "GridStructureUser not supported"
@@ -2910,34 +3043,34 @@
       select case(grid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridBoxIntersectRecv(grid, localMinPerDim, localMaxPerDim, &
                                          domainList, total, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridBoxIntersectRecv: ", &
                  "GridStructureUser not supported"
@@ -3034,35 +3167,35 @@
       select case(srcGrid%ptr%gridStructure%gridStructure)
 
       !-------------
-      ! ESMF_GridStructure_Unknown
+      ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
         print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
                  "GridStructureUnknown not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_LogRect
+      ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
         call ESMF_LRGridBoxIntersectSend(dstGrid, srcGrid, &
                                          localMinPerDim, localMaxPerDim, &
                                          myAI, domainList, status)
 
       !-------------
-      ! ESMF_GridStructure_LogRectBlock
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
       case(2)
         print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
                  "GridStructureLogRectBlock not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_Unstruct
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
       case(3)
         print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
                  "GridStructureUnstruct not supported"
         status = ESMF_FAILURE
 
       !-------------
-      ! ESMF_GridStructure_User
+      ! ESMF_GRID_STRUCTURE_USER
       case(4)
         print *, "ERROR in ESMF_GridBoxIntersectSend: ", &
                  "GridStructureUser not supported"
