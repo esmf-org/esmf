@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.4 2004/03/04 22:34:15 nscollins Exp $
+# $Id: build_rules.mk,v 1.5 2004/03/16 15:44:26 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -88,8 +88,8 @@ C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
-C_CCV		   = ${C_CC} --version
-C_FCV              = ${C_FC}
+C_CCV		   = ${C_CC} -V
+C_FCV              = ${C_FC} -V
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc -lf2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
@@ -105,7 +105,7 @@ CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = ${CXX_CC}
 CXX_FLINKER	   = ${CXX_CC}
-CXX_CCV		   = ${CXX_CC} --version
+CXX_CCV		   = ${CXX_CC} -V
 #CXX_SYS_LIB	   = -ldl -lc -lf2c -lm
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
