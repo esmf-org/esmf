@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.152 2004/03/20 03:54:49 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.153 2004/03/22 23:51:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.152 2004/03/20 03:54:49 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.153 2004/03/22 23:51:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1360,7 +1360,7 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, rc)
+        call ESMF_LRGridGetCellMask(grid, maskArray, relloc, status)
 
       !-------------
       ! ESMF_GridStructure_LogRectBlock
