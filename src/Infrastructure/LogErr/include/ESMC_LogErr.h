@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.12 2003/07/25 17:51:38 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.13 2003/07/25 19:28:11 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,7 +132,17 @@ class ESMC_Log {
     void ESMC_LogExit();
     ESMC_Log();
 };
- 
+
+// private static data - address of fortran callback funcs
+
+extern "C" {
+ void FTN(f_esmf_logopenfortran)(ESMC_Logical*, int *, char*, int );
+ void FTN(f_esmf_logclosefortran)(int *);
+ void FTN(f_esmf_logprintstring)(int *, char*, ESMC_Logical*, int );
+ void FTN(f_esmf_logprintnewline)(int *, ESMC_Logical*);
+}
+
+
 //---------------------------------------------------------------------------
 //BOP
 //
