@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2004/11/01 17:14:42 theurich Exp $ 
+# $Id: makefile,v 1.18 2004/11/01 23:41:21 nscollins Exp $ 
 
 ALL: build_system_tests
 
@@ -16,6 +16,7 @@ DIRS     = ESMF_RowReduce \
            ESMF_FieldRegridConserv \
            ESMF_FieldRegridMulti \
            ESMF_FieldRegridOrder \
+           ESMF_FieldExcl \
            ESMF_SimpleCoupling \
            ESMF_FlowComp \
            ESMF_FlowWithCoupling
@@ -23,8 +24,6 @@ DIRS     = ESMF_RowReduce \
 # tests not yet ready
 #           ESMF_MergeCoupling \
 #           ESMF_CplOnExclDEs \
-# the next one exercises the pthread mechanism in VM
-#           ESMF_FieldExcl \
 
 
 CLEANDIRS   =
