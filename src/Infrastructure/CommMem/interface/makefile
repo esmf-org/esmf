@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/04/08 23:05:28 nscollins Exp $
+# $Id: makefile,v 1.13 2003/04/24 14:11:36 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -10,9 +10,9 @@ CFLAGS    = ${MPI_INCLUDE}
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_DELayout_F.C  ESMC_Mach_F.C
+SOURCEC	  = ESMC_DELayout_F.C 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_DELayout.F90 ESMF_Mach.F90
+SOURCEF	  = ESMF_DELayout.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 
