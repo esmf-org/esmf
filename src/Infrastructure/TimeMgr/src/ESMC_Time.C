@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.5 2003/02/11 18:33:57 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.6 2003/03/22 05:43:52 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.5 2003/02/11 18:33:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.6 2003/03/22 05:43:52 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -77,7 +77,7 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_TimeInit - shallow class initializer 2
+// !IROUTINE:  ESMC_TimeInit - shallow class initializer
 //
 // !INTERFACE:
       int ESMC_Time::ESMC_TimeInit(
@@ -86,8 +86,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Calendar *Cal,      // in - associated calendar
-      const char *TimeList,    // in - initializer specifier string
+      ESMC_Calendar *cal,      // in - associated calendar
+      int tz,                  // in - timezone
+      const char *timeList,    // in - initializer specifier string
       ...) {                   // in - specifier values (variable args)
 //
 // !DESCRIPTION:
@@ -96,9 +97,113 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // TODO
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeInit
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGet - Get a Time value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *TimeList,    // in  - time value specifier string
+      ...) const {             // out - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s values in user-specified format
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeSet - Set a Time value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeSet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *TimeList,    // in - time value specifier string
+      ...) {                   // in - specifier values (variable args)
+//
+// !DESCRIPTION:
+//      Sets a {\tt Time}'s values in user-specified values
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeSet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetCalendar - Get a Time's associated calendar
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetCalendar(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Calendar *calendar) const {    // out - Time's calendar
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s associated calendar
+//
+//EOP
+// !REQUIREMENTS:  
+
+    calendar = Calendar;
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetCalendar
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeSetCalendar - Set a Time's associated calendar
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeSetCalendar(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Calendar *calendar) {    // in - Time's calendar
+//
+// !DESCRIPTION:
+//      Sets a {\tt Time}'s associated calendar
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (calendar != 0) {
+      Calendar = calendar;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      return(ESMF_FAILURE);
+    }
+
+ }  // end ESMC_TimeSetCalendar
 
 //-------------------------------------------------------------------------
 //BOP
@@ -111,7 +216,8 @@
 //    bool true same calendars, false different calendars
 //
 // !ARGUMENTS:
-      ESMC_Time *Time) { // in - Time to compare Calendar types against
+      ESMC_Time *Time,    // in - Time to compare Calendar types against
+      int *rc) const {    // out - return code
 //
 // !DESCRIPTION:
 //      Compares given {\tt Time}'s {\tt Calendar} type with this {\tt Time}'s
@@ -122,11 +228,262 @@
 
     if (Calendar != 0)
     {
-        return(this->Calendar->Type == Time->Calendar->Type);
+      *rc = ESMF_SUCCESS;
+      return(this->Calendar->Type == Time->Calendar->Type);
     }
-    else return(false);
+    else {
+      *rc = ESMF_FAILURE;
+      return(false);
+    }
 
  }  // end ESMC_TimeIsSameCal
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetTimeZone - Get a Time's associated timezone
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetTimeZone(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *timezone) const {    // out - Time's timezone
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s associated timezone
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (timezone != 0) {
+      *timezone = Timezone;
+      return(ESMF_SUCCESS);
+    }
+    else {
+      return(ESMF_FAILURE);
+    }
+
+ }  // end ESMC_TimeGetTimeZone
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeSetTimeZone - Set a Time's associated timezone
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeSetTimeZone(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int timezone) {    // in - Time's timezone
+//
+// !DESCRIPTION:
+//      Sets a {\tt Time}'s associated timezone
+//
+//EOP
+// !REQUIREMENTS:  
+
+    Timezone = timezone;
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeSetTimeZone
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetString - Get a Time value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetString(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      char *timeString) const {    // out - time value in string format
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s value in character format
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetDayOfYear - Get a Time's day of the year value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetDayOfYear(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      double *dayOfYear) const {    // out - time's day of year value
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s day of the year value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetDayOfYear
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetDayOfWeek - Get a Time's day of the week value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetDayOfWeek(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *dayOfWeek) const {    // out - time's day of week value
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s day of the week value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetDayOfWeek
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetDayOfMonth - Get a Time's day of the month value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetDayOfMonth(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *dayOfMonth) const {    // out - time's day of month value
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s day of the month value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetDayOfMonth
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetMidMonth - Get a Time's middle of the month value
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetMidMonth(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time *midMonth) const {    // out - time's middle of month value
+//
+// !DESCRIPTION:
+//      Gets a {\tt Time}'s middle of the month value
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetMidMonth
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_TimeGetRealTime - Sync this Time to wall clock time
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_TimeGetRealTime(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Sets a {\tt Time}'s value to wall clock time
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeGetRealTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseValidate - validate Time state
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_BaseValidate(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - validate options
+//
+// !DESCRIPTION:
+//      validate {\tt Time} state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // TODO
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimeValidate
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BasePrint - print Time state
+//
+// !INTERFACE:
+      int ESMC_Time::ESMC_BasePrint(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      const char *options) const {    // in - print options
+//
+// !DESCRIPTION:
+//      print {\tt Time} state for testing/debugging
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_BaseTime::ESMC_BasePrint(options);
+    // TODO: print calendar and timezone
+
+    return(ESMF_SUCCESS);
+
+ }  // end ESMC_TimePrint
 
 //-------------------------------------------------------------------------
 //BOP
@@ -139,9 +496,11 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_IKIND_I8 *S,              // out - integer seconds
-      int *Sn,             // out - fractional seconds, numerator
-      int *Sd) const {     // out - fractional seconds, denominator
+      ESMF_IKIND_I8 *S,          // out - integer seconds
+      int *Sn,                   // out - fractional seconds, numerator
+      int *Sd,                   // out - fractional seconds, denominator
+      ESMC_Calendar *cal,        // out - associated calendar
+      int *timezone) const {     // out - associated timezone
 //
 // !DESCRIPTION:
 //      return {\tt Time} state for persistence/checkpointing
@@ -149,34 +508,21 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc;
+
     // use base class Print() first
-    return(ESMC_BaseTime::ESMC_BasePrint(S, Sn, Sd));
+    rc = ESMC_BaseTime::ESMC_BasePrint(S, Sn, Sd);
 
- }  // end ESMC_TimePrint
+    cal = Calendar;
 
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_BasePrint - print Time state
-//
-// !INTERFACE:
-      int ESMC_Time::ESMC_BasePrint(void) const {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      print {\tt Time} state for testing/debugging
-//
-//EOP
-// !REQUIREMENTS:  
-
-    // use base class Print
-    ESMC_BaseTime::ESMC_BasePrint();
-
-    return(ESMF_SUCCESS);
+    if (timezone != 0) {
+      *timezone = Timezone;
+    }
+    else {
+      rc = ESMF_FAILURE;
+    }
+  
+    return(rc);
 
  }  // end ESMC_TimePrint
 
