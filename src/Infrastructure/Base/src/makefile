@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/25 00:17:45 flanigan Exp $ 
+# $Id: makefile,v 1.8 2003/04/08 22:47:54 nscollins Exp $ 
 ALL: lib  install
 
 CFLAGS    =
@@ -7,6 +7,7 @@ STOREH    = ESMC_Base.h ESMC_Test.h
 SOURCEC	  = ESMC_Base.C ESMC_Test.C
 SOURCEF	  = ESMF_Test.F90
 SOURCEH	  = 
+STOREH    = ESMC.h ESMF_Macros.inc ESMF_Version.inc ESMF.h ESMC_Macros.h
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 MANSEC	  = Baseobj
