@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.15 2004/03/02 16:41:38 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.16 2004/03/13 00:04:56 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -75,19 +75,12 @@
 %\input{../Infrastructure/Field/doc/Field_rest}
 #endif
 
-%\subsection{Use and Examples}
-% #ifdef STANDALONE
-% \input{fieldex_fapi}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/fieldex_fapi}
-% #endif
-
-% \subsection{Parameters and Definitions}
-% #ifdef STANDALONE
-% \input{Field_fparam}
-% #elif defined(CONSTITUENT)
-% \input{../Infrastructure/Field/doc/Field_fparam}
-% #endif
+%\subsubsection{Design and Implementation Notes}
+#ifdef STANDALONE
+%\input{Field_implnotes}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/Field/doc/Field_implnotes}
+#endif
 
 \subsection{Class API: Basic Field Methods}
 #ifdef STANDALONE
