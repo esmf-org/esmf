@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_newclass,v 1.2 2002/10/08 22:16:33 eschwab Exp $
+# $Id: do_newclass,v 1.3 2002/10/11 19:57:40 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -39,6 +39,8 @@ endif
 
   set DOCT_DIR=$DOC_DIR/templates
 
+# note: sleep used below prevents random 0-byte file output
+
 # get a copy of the source template file, rename and edit as requested class
   switch ($lang) 
   case f:
@@ -48,7 +50,7 @@ endif
       breaksw
   case c:
       if(!(-r ESMC_$class.C)) cat $DOCT_DIR/ESMC_class.C | \
-        sed 's/<Class>/'$class'/g' > ESMC_$class.C
+        sed 's/<Class>/'$class'/g' > ESMC_$class.C; sleep 1
       if(!(-r ../include/ESMC_$class.h)) cat $DOCT_DIR/ESMC_class.h | \
         sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
            > ../include/ESMC_$class.h
