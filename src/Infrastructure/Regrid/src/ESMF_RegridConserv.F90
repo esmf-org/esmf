@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.18 2004/04/09 16:59:44 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.19 2004/04/09 22:33:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.18 2004/04/09 16:59:44 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.19 2004/04/09 22:33:41 jwolfe Exp $'
 
 !==============================================================================
 
@@ -152,14 +152,13 @@
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, startComp, stopComp, indexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, aSize, nC
-      integer :: i, j
+      integer :: i
       integer :: numDomains, numDstCorners, numSrcCorners
       integer, dimension(3) :: srcOrder, dstOrder, srcCounts, dstCounts
       integer :: datarank
       integer :: normOptUse, orderUse
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
-      logical, dimension(:,:), pointer :: found
-      integer(ESMF_KIND_I4), dimension(:,:), pointer :: foundCount, srcLocalMask
+      integer(ESMF_KIND_I4), dimension(:,:), pointer :: srcLocalMask
       integer(ESMF_KIND_I4), dimension(:), pointer :: srcGatheredMask
       real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, &
                                                    srcGatheredCoordY
@@ -378,12 +377,7 @@
       ! Create a Transform Values object
       tv = ESMF_TransformValuesCreate(aSize, rc)
 
-      ! set up user masks and logical found arrays for search
-      allocate(found(dstCounts(1),dstCounts(2)))
-      allocate(foundCount(dstCounts(1),dstCounts(2)))
-      found = .FALSE.
-      foundCount = 0
-
+      ! set up user masks for search
       if(present(dstMask)) then
   !      dstUserMask = dstMask
       else
@@ -424,7 +418,6 @@
                         startComp-1, srcSizeXComp, &
                         dstCounts(1), dstCounts(2), numDstCorners, &
                         indexMod, srcOrder, dstOrder, &
-                        found, foundCount, &
                         srcGatheredCoordX(start:stop), &
                         srcGatheredCoordY(start:stop), &
                         dstLocalCoordX, dstLocalCoordY, &
@@ -446,8 +439,6 @@
       deallocate(srcLocalCoordArray)
       deallocate(dstLocalCornerArray)
       deallocate(srcLocalCornerArray)
-      deallocate(found)
-      deallocate(foundCount)
       deallocate(dstUserMask)
       deallocate(srcUserMask)
       
@@ -467,7 +458,6 @@
                                           srcStart, srcICount, &
                                           dstSizeX, dstSizeY, numDstCorners, &
                                           indexMod, srcOrder, dstOrder, &
-                                          found, foundCount, &
                                           srcCenterX, srcCenterY, &
                                           dstCenterX, dstCenterY, &
                                           srcCornerX, srcCornerY, &
@@ -491,8 +481,6 @@
       integer, dimension(:), intent(in) :: indexMod
       integer, dimension(:), intent(in) :: srcOrder
       integer, dimension(:), intent(in) :: dstOrder
-      logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
-      integer, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(inout) :: srcCenterX
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(inout) :: srcCenterY
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(inout) :: dstCenterX
@@ -554,14 +542,14 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer ::           &
-         i, j, n,          &! loop counters
+         n,                &! loop counter
          iDst, jDst,       &! more loop counters
          iSrc, jSrc,       &! more loop counters
          ibDst, ieDst,     &! beg, end of exclusive domain in i-dir of dest grid
          jbDst, jeDst,     &! beg, end of exclusive domain in j-dir of dest grid
          ibSrc, ieSrc,     &! beg, end of exclusive domain in i-dir of source grid
          jbSrc, jeSrc,     &! beg, end of exclusive domain in j-dir of source grid
-         srcCount, srcValidCount, numLinks
+         numLinks
 
       integer :: srcAdd,    &! address in gathered source grid
                  dstAdd(2), &! address in dest grid
@@ -1286,8 +1274,7 @@
        lonThresh,        &! longitude threshold to check proper range
        sinlat1, sinlat2, &! sines of latitude endpoints
        coslat1, coslat2, &! cosines of latitude endpoint
-       lon1, lon2,       &! longitude differences
-       fac, fint          ! for use in longitude integrals
+       lon1, lon2         ! longitude differences
 
      integer :: iorder     ! order of interpolation
      integer :: status     ! for internal error flags
@@ -1494,12 +1481,12 @@
 !EOPI
 
      ! local variables
-     integer ::      &
-       i, j, k,       &! dummies for addresses
-       n, nNext,   &! loop index, next index
-       status,      &! error signal
+     integer ::         &
+       i, j,            &! dummies for addresses
+       n, nNext,        &! loop index, next index
+       status,          &! error signal
        iCells, jCells,  &! search grid size
-       numCorners    ! number of corners in each search grid cell
+       numCorners        ! number of corners in each search grid cell
 
      logical ::      & 
        lreverse,    &! segment in opposite direction of full segment
@@ -1510,7 +1497,7 @@
      real (ESMF_KIND_R8), parameter :: offset = 1.d-10
 
      real (ESMF_KIND_R8) ::     &
-       xtmp, refx,             &! temporaries for manipulating longitudes
+       refx,                   &! temporary for manipulating longitudes
        xb, yb, xe, ye,         &! local coordinates for segment endpoints
        x1, y1, x2, y2,         &! coordinates for grid side endpoints
        dx, dy,                 &! difference in x,y for stepping along seg
@@ -1950,7 +1937,7 @@
 
      ! local variables
      integer :: &
-       i, j, k,             &! dummies for addresses
+       i, j,                &! dummies for addresses
        iCells, jCells,         &! number of cells in search grid
        numCorners,        &! number of corners in each cell of search grid
        n, nNext            ! loop index, next index
@@ -1964,7 +1951,6 @@
        offset = 1.d-8
 
      real (ESMF_KIND_R8) ::         &
-       xtmp, refx,             &! temporaries for manipulating longitudes
        xb, yb, xe, ye,         &! local coordinates for segment endpoints
        x1, y1, x2, y2,         &! coordinates for grid side endpoints
        dx, dy,                 &! difference in x,y for stepping along seg
@@ -1976,7 +1962,6 @@
        crossProduct             ! cross product to use in various tests 
 
      real (ESMF_KIND_R8), dimension(4) :: &
-       bbox, bboxX, bboxY,    &! bound box in transformed coords
        fullLineXY              ! xy coords of full line
 
      real (ESMF_KIND_R8), dimension(:), allocatable :: &

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.59 2004/04/09 16:59:01 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.60 2004/04/09 22:33:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.59 2004/04/09 16:59:01 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.60 2004/04/09 22:33:00 jwolfe Exp $'
 
 !==============================================================================
 
@@ -125,7 +125,7 @@
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, startComp, stopComp, indexMod(2)
       integer :: srcSizeX, srcSizeY, srcSizeXComp, srcSizeYComp, size
-      integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
+      integer :: i, numDomains, dstCounts(3), srcCounts(3)
       integer :: datarank
       integer, dimension(3) :: srcOrder, dstOrder
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
@@ -327,11 +327,11 @@
      
       ! Loop through domains for the search routine
       call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=status)
-      num_domains = recvDomainListTot%num_domains
+      numDomains = recvDomainListTot%num_domains
       indexMod = -1
       start = 1
       startComp = 1
-      do i = 1,num_domains
+      do i = 1,numDomains
         srcSizeXComp = recvDomainList%domains(i)%ai(1)%max &
                      - recvDomainList%domains(i)%ai(1)%min + 1
         srcSizeYComp = recvDomainList%domains(i)%ai(2)%max &
@@ -445,9 +445,9 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i,j,n,iter                       ! loop counters
-      integer :: iii,jjj                          ! more loop counters
-      integer :: ip1,jp1                          ! neighbor indices
+      integer :: i, j, iter                       ! loop counters
+      integer :: iii, jjj                         ! more loop counters
+      integer :: ip1, jp1                         ! neighbor indices
       integer :: ibDst, ieDst                     ! beg, end of excl domain in
                                                   ! i-dir of dest grid
       integer :: jbDst, jeDst                     ! beg, end of excl domain in

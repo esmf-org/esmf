@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.56 2004/04/08 17:33:55 theurich Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.57 2004/04/09 22:34:08 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2546,7 +2546,6 @@
       integer, dimension(:), allocatable :: cellType1, cellType2
       character(len=ESMF_MAXSTR), dimension(dimCount) :: coordNames, coordUnits
       logical, dimension(dimCount) :: coordAligned, coordEqualSpaced, coordCyclic
-      real(ESMF_KIND_R8) :: last
       real(ESMF_KIND_R8), dimension(dimCount) :: localMin, localMax
       real(ESMF_KIND_R8), dimension(:), allocatable :: coordUse1, coordUse2
       type(ESMF_CoordSystem) :: coordSystem
@@ -3083,7 +3082,6 @@
       logical :: reorderUse
       type(ESMF_Array) :: tempArray
       type(ESMF_Array), dimension(:), pointer :: coord, coord2
-      type(ESMF_Array), dimension(:,:), pointer :: tempArray2
 
       ! Initialize return code
       status = ESMF_FAILURE
@@ -3638,7 +3636,6 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i
       integer :: aSize, gridRank, index, sizeAI
       integer :: horzDistIdUse, vertDistIdUse
       integer :: horzPhysIdUse, vertPhysIdUse
@@ -4428,7 +4425,7 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, j, i1, j1
+      integer :: i, j
       real(ESMF_KIND_R8) :: coordUse1, coordUse2
       real(ESMF_KIND_R8), dimension(:), pointer :: temp
       real(ESMF_KIND_R8), dimension(:,:), pointer :: temp1, temp2
@@ -5841,7 +5838,6 @@
       integer :: counts(ESMF_MAXDIM)
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:,:), pointer :: grid_ai, localAI
-      type(ESMF_Domain) :: domain
       type(ESMF_LocalArray) :: array
 
       ! Initialize return code
@@ -6035,7 +6031,6 @@
       integer :: counts(ESMF_MAXDIM)
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: boxes
       type(ESMF_AxisIndex), dimension(:), pointer :: myLocalAI
-      type(ESMF_Domain) :: domain
       type(ESMF_LocalArray) :: array
 
       ! Initialize return code
