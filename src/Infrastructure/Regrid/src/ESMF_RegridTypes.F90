@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.50 2004/05/25 21:13:38 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.51 2004/06/04 21:56:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -159,7 +159,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.50 2004/05/25 21:13:38 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.51 2004/06/04 21:56:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -237,17 +237,21 @@
       type (ESMF_Array) :: &! temps for use when re-sizing arrays
          srcAddTmp, dstAddTmp, weightsTmp
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, localrc)
       call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, localrc)
       call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! increment number of links for this regrid
       numList = numList + 1
@@ -261,7 +265,9 @@
       wgtPtr(numList) = weight
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -321,7 +327,7 @@
       type (ESMF_Array) :: &! temps for use when re-sizing arrays
          srcAddTmp, dstAddTmp, weightsTmp
 
-!     Initialize return code; assume failure until success is certain
+      ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
       newLink = .true.
@@ -330,12 +336,16 @@
 
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, localrc)
       call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, localrc)
       call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! if the aggregation flag is set, search through the already existing
       ! links for the current address pair
@@ -369,7 +379,9 @@
 
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
                                    dstIndex=dstIndex, weights=weights, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -442,27 +454,42 @@
       if (present(total)) totalUse = total
 
       call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call ESMF_DELayoutGet(srcDELayout, localDE=myDE, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Extract some layout information for use in this regrid.
       call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-      allocate (myAI(gridrank))
+      allocate (myAI(gridrank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "myAI", &
+                                     ESMF_CONTEXT, rc)) return
+
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           globalAIPerDim=myAI, reorder=reorder, &
                           total=totalUse, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! From each grid get the bounding box information on this DE
       call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-      allocate (srcMin(gridrank))
-      allocate (srcMax(gridrank))
+      allocate(srcMin(gridrank), &
+               srcMax(gridrank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "src arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
-      allocate (dstMin(gridrank))
-      allocate (dstMax(gridrank))
+      allocate(dstMin(gridrank), &
+               dstMax(gridrank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=srcMin, &
@@ -477,19 +504,26 @@
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
                                      myAI, sendDomainList, localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
                                      recvDomainList, total=totalUse, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Modify DomainLists for Array dimensions larger than Grid dimensions
       ! TODO: move this to its own subroutine?
       if ((dimCount.gt.gridrank) .and. (present(srcArray))) then ! TODO: fill in
       ! sendDomainList first
-        allocate(myArrayAI(dimCount))
-        allocate(myArrayLocalAI(dimCount))
-        allocate(dimOrder(dimCount))
+        allocate(     myArrayAI(dimCount), &
+                 myArrayLocalAI(dimCount), &
+                       dimOrder(dimCount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
+                                       ESMF_CONTEXT, rc)) return
+
         if (totalUse) then
           call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=localrc)
         else
@@ -522,8 +556,11 @@
 
       ! recvDomainList next
         call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
-        allocate(allAI(nDEs,dimCount))
-        allocate(allLocalAI(nDEs,dimCount))
+        allocate(     allAI(nDEs,dimCount), &
+                 allLocalAI(nDEs,dimCount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "allAI arrays", &
+                                       ESMF_CONTEXT, rc)) return
+
         if (totalUse) then
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
                                            totalindex=allAI, rc=localrc)
@@ -556,29 +593,37 @@
           endif
         enddo
 
-        deallocate(dimOrder)
-        deallocate(myArrayAI)
-        deallocate(myArrayLocalAI)
-        deallocate(allAI)
-        deallocate(allLocalAI)
+        deallocate(      dimOrder, &
+                        myArrayAI, &
+                   myArrayLocalAI, &
+                            allAI, &
+                       allLocalAI, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       ! Create Route
       route = ESMF_RouteCreate(parentDELayout, localrc)
       call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, sendDomainList, &
                                        recvDomainList, localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set size of recv items in Route
       call ESMF_RouteSetRecvItems(route, recvDomainList%total_points, localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Clean up
-      deallocate(myAI)
-      deallocate(srcMin)
-      deallocate(srcMax)
-      deallocate(dstMin)
-      deallocate(dstMax)
+      deallocate(  myAI, &
+                 srcMin, &
+                 srcMax, &
+                 dstMin, &
+                 dstMax, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Set return values
       ESMF_RegridRouteConstruct = route
@@ -654,7 +699,9 @@
       ! Get name if requested
       if (present(name)) then
         call ESMF_GetName(rtype%base, name, localrc)
-        ! TODO: add error check
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! Get arrays if requested
@@ -754,7 +801,9 @@
       ! Set name if requested
       if (present(name)) then
         call ESMF_SetName(rtype%base, name, "Regrid", localrc)
-        ! TODO: add error check
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! Set arrays if requested
@@ -817,19 +866,15 @@
       nullify(rgtype)
       nullify(ESMF_RegridCreateEmpty%ptr)
 
-      allocate(rgtype, stat=localrc)        ! TODO
-!     If error write message and return.
-      if(localrc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_RegridCreateEmpty: Allocate"
-        return
-      endif
+      allocate(rgtype, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "Regrid type", &
+                                     ESMF_CONTEXT, rc)) return
 
 !     Call construction method to allocate and initialize regrid internals.
       call ESMF_RegridConstructEmpty(rgtype, localrc)
-      if(localrc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_RegridCreateEmpty: Regrid construct"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 !     Set return values.
       ESMF_RegridCreateEmpty%ptr => rgtype
@@ -875,7 +920,9 @@
 
       ! initialize the base object
       call ESMF_BaseCreate(regrid%base, "Regrid", rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       ! TODO: add error handling
 
       ! initialize scalars

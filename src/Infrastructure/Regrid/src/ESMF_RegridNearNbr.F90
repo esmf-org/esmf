@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.14 2004/05/24 23:03:53 jwolfe Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.15 2004/06/04 21:56:29 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.14 2004/05/24 23:03:53 jwolfe Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.15 2004/06/04 21:56:29 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -113,7 +113,7 @@
       integer, intent(in), optional :: &
          num_nbrs       ! number of near neighbors to use in interpolation
 
-      integer, intent(out) :: rc
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -152,7 +152,7 @@
          noverlap_src_DEs, &! num overlapping source DEs
          ib_dst, ie_dst,   &! beg, end of exclusive domain in i-dir of dest grid
          jb_dst, je_dst,   &! beg, end of exclusive domain in j-dir of dest grid
-         status             ! error flag
+         localrc            ! error flag
 
       integer, dimension(:,:), allocatable :: &
          srcAdd             ! src neighbor addresses (nnbr,3)
@@ -176,12 +176,13 @@
 !
 !     Construct an empty regrid structure
 !
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-      rc = ESMF_SUCCESS
-      status = ESMF_SUCCESS
-
-      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldNearNbr, status)
-      if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
+      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldNearNbr, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       !
       ! Set name and field pointers
@@ -191,8 +192,10 @@
       !                        name=name, src_field = src_field,       &
       !                                   dst_field = dst_field,       &
       !                                   method = ESMF_REGRID_METHOD_NEAR_NBR, &
-      !                                   rc = status)
-      if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
+      !                                   rc = localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
       !
       ! Extract some grid information for use in this regrid.
@@ -202,7 +205,7 @@
       !Get grid associated with this field
       !dst_grid = ?
       !src_grid = ?
-      !call ESMF_GridGet(dst_grid, coord_system=coord_system, status)
+      !call ESMF_GridGet(dst_grid, coord_system=coord_system, localrc)
       !Check that src grid in same coord system
 
 
@@ -301,7 +304,7 @@
       !               y2 = src_center_y(iii,jjj,n)
       !
       !               distance = ESMF_GridComputeDistance(x1,y1,x2,y2,&
-      !                                               coord_system,status)
+      !                                               coord_system, localrc)
 
 !
 !                     check to see if this is closer than the other

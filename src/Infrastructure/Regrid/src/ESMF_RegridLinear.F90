@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.21 2004/05/25 21:15:34 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.22 2004/06/04 21:56:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,7 +62,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.21 2004/05/25 21:15:34 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.22 2004/06/04 21:56:17 jwolfe Exp $'
 
 !==============================================================================
 
@@ -157,48 +157,67 @@
 
       ! Construct an empty regrid structure
       rh = ESMF_RouteHandleCreate(rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       tempRegrid = ESMF_RegridCreateEmpty(rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set name and field pointers
       call ESMF_RegridSet(tempRegrid, name=name, &
                           srcArray = srcArray, dstArray = dstArray, &
                           method = ESMF_REGRID_METHOD_LINEAR, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
       
       ! get destination grid info
       !TODO: Get grid masks?
       call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
                           localCellCountPerDim=dstCounts, &
                           reorder=.false., rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 !      call ESMF_GridGetCoord(dstGrid, relloc=dstRelLoc, &
 !                             vertCoord=dstLocalCoordArray, &
 !                             reorder=.false., rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+!      if (ESMF_LogMsgFoundError(localrc, &
+!                                ESMF_ERR_PASSTHRU, &
+!                                ESMF_CONTEXT, rc)) return
 
       call ESMF_ArrayGetData(dstLocalCoordArray, dstLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
 
       ! get source grid info
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
                           localCellCountPerDim=srcCounts, &
                           reorder=.false., rc=localrc)
- !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
 
 !      call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
 !                             vertCoord=srcLocalCoordArray, &
 !                             reorder=.false., total=.true., rc=localrc)
-!      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+!      if (ESMF_LogMsgFoundError(localrc, &
+!                                ESMF_ERR_PASSTHRU, &
+!                                ESMF_CONTEXT, rc)) return
 
       call ESMF_ArrayGetData(srcLocalCoordArray, srcLocalCoordZ, &
                              ESMF_DATA_REF, localrc)
@@ -234,8 +253,10 @@
       ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
       call ESMF_RouteGetRecvItems(tempRoute, size, localrc)
-      allocate(srcGatheredCoordZ(size))
-      allocate(srcGatheredMask(size))
+      allocate(srcGatheredCoordZ(size), &
+               srcGatheredMask  (size), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! Execute Route now to gather grid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
@@ -254,22 +275,29 @@
       tv = ESMF_TransformValuesCreate(size, rc)
 
       ! set up user masks and logical found arrays for search
-      allocate(found(dstCounts(3)))
-      allocate(foundCount(dstCounts(3)))
+      allocate(     found(dstCounts(3)), &
+               foundCount(dstCounts(3)), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "found arrays", &
+                                     ESMF_CONTEXT, rc)) return
+
       found = .FALSE.
       foundCount = 0
 
       if (present(dstMask)) then
   !      dstUserMask = dstMask
       else
-        allocate(dstUserMask(dstCounts(3)))
+        allocate(dstUserMask(dstCounts(3)), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dstUserMask", &
+                                       ESMF_CONTEXT, rc)) return
         dstUserMask = .TRUE.
       endif
       if (present(srcMask)) then
   !      srcUserMask = srcMask
       else
         call ESMF_RouteGetRecvItems(tempRoute, size, localrc)
-        allocate(srcUserMask(size))
+        allocate(srcUserMask(size), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "srcUserMask", &
+                                       ESMF_CONTEXT, rc)) return
         srcUserMask = .TRUE.
       endif
      
@@ -300,12 +328,14 @@
 
       ! clean up
       call ESMF_RouteDestroy(tempRoute, localrc)
-      deallocate(srcGatheredCoordZ)
-      deallocate(srcGatheredMask)
-      deallocate(found)
-      deallocate(foundCount)
-      deallocate(dstUserMask)
-      deallocate(srcUserMask)
+      deallocate(srcGatheredCoordZ, &
+                   srcGatheredMask, &
+                             found, &
+                        foundCount, &
+                       dstUserMask, &
+                       srcUserMask, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
       
       ESMF_RegridConstructLinear = rh
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.75 2004/05/24 23:02:05 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.76 2004/06/04 21:55:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_PhysGrid.F90"
 !
 !     ESMF PhysGrid Module
       module ESMF_PhysGridMod
@@ -35,6 +37,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod
+      use ESMF_LogErrMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayDataMapMod
       use ESMF_ArrayMod
@@ -317,7 +320,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.75 2004/05/24 23:02:05 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.76 2004/06/04 21:55:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -439,6 +442,8 @@
 ! This section includes the PhysGrid Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridCreateNew"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridCreateNew - Create a new PhysGrid
 
@@ -491,35 +496,25 @@
 
       ! local variables
       type(ESMF_PhysGridType), pointer :: physgrid   ! Pointer to new physgrid
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
 
       ! Initialize pointers
       nullify(physgrid)
       nullify(ESMF_PhysGridCreateNew%ptr)
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-      allocate(physgrid, stat=status)
+      allocate(physgrid, stat=localrc)
       ! If error write message and return.
-      ! Formal error handling will be added asap.
-      if (status /= ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridCreateNew: Allocate"
-        return
-      endif
+      if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid type", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! initialize base object in each of the types which use it
-      call ESMF_BaseCreate(physgrid%base, "PhysGrid", name, 0, status)
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridCreate: BaseCreate"
-         return
-      endif
+      call ESMF_BaseCreate(physgrid%base, "PhysGrid", name, 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Fill new physgrid with supplied variables.
       physgrid%numDims  = numDims
@@ -542,31 +537,32 @@
       
       ! initialize other objects which contains a base
       call ESMF_BaseCreate(physgrid%locations%base, "PhysGridLocations", name, &
-                           0, status)
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridCreate: Locations BaseCreate"
-         return
-      endif
+                           0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
       nullify(physgrid%locations%totalLocations)
       nullify(physgrid%locations%compLocations)
 
       call ESMF_BaseCreate(physgrid%regions%base, "PhysGridRegions", name, &
-                           0, status)
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridCreate: Regions BaseCreate"
-         return
-      endif
+                           0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       nullify(physgrid%metrics)
       physgrid%numMetrics = 0
 
       ! Set return values.
       ESMF_PhysGridCreateNew%ptr => physgrid
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_PhysGridCreateNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridDestroy"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridDestroy - Free resources associated with a PhysGrid 
 
@@ -592,27 +588,22 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Destroy all components of physgrid
       nullify(physgrid%ptr)
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSet"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridSet - Sets value of selected PhysGrid quantities.
 
@@ -650,41 +641,35 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (present(coordSystem)) then
-         physgrid%ptr%coordSystem = coordSystem
+        physgrid%ptr%coordSystem = coordSystem
       endif
       
       if (present(orientation)) then
-         physgrid%ptr%orientation = orientation
+        physgrid%ptr%orientation = orientation
       endif
       
       if (present(name)) then
-         call ESMF_SetName(physgrid%ptr%base, name, "PhysGrid", status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridSet: set name"
-            return
-         endif
+        call ESMF_SetName(physgrid%ptr%base, name, "PhysGrid", localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! Set return values.
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGet"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridGet - Retrieves selected internal PhysGrid quantities.
 
@@ -730,25 +715,17 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       if (present(name)) then
-         call ESMF_GetName(physgrid%ptr%base, name, status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridGet: get name"
-            return
-         endif
+        call ESMF_GetName(physgrid%ptr%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       if (present(relloc     )) relloc      = physgrid%ptr%relloc
@@ -757,11 +734,13 @@
       if (present(orientation)) orientation = physgrid%ptr%orientation
 
       ! Set return values.
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSetCoord"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridSetCoord - Adds a physical coordinate to a PhysGrid
 
@@ -796,51 +775,48 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
       integer :: idim
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if coordinate array not allocated yet, do so now
       if (.not. associated(physgrid%ptr%coords)) then
-        allocate(physgrid%ptr%coords(physgrid%ptr%numDims), stat=status)
-        if (status /= ESMF_SUCCESS) then
-          print *,'ERROR in PhysGridSetCoord: error allocating coord'
-          return
-        endif
+        allocate(physgrid%ptr%coords(physgrid%ptr%numDims), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid Coords", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       ! add coordinate
       if (present(dimOrder)) then
-         physgrid%ptr%coords(dimOrder) = physCoord
+        physgrid%ptr%coords(dimOrder) = physCoord
       else
-         order_loop: do idim = 1,physgrid%ptr%numDims
-            if (.not.associated(physgrid%ptr%coords(idim)%ptr)) then
-               physgrid%ptr%coords(idim) = physCoord
-               exit order_loop
-            endif
-         enddo order_loop
-         if (idim > physgrid%ptr%numDims) then
-            print *,'ERROR in PhysGridSetCoord: too many coords defined'
-            return
-         endif
+        order_loop: do idim = 1,physgrid%ptr%numDims
+          if (.not.associated(physgrid%ptr%coords(idim)%ptr)) then
+            physgrid%ptr%coords(idim) = physCoord
+            exit order_loop
+          endif
+        enddo order_loop
+        if (idim > physgrid%ptr%numDims) then
+          print logMsg, "too many coords defined"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
       endif
 
       ! set return code
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSetCoord
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGetCoord"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridGetCoord - Gets a physical coordinate from a PhysGrid
 
@@ -878,58 +854,63 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
+      integer :: localrc                             ! Error status
       integer :: idim, n
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      logical :: found                            ! flag for name search
       character(len=ESMF_MAXSTR) :: nameTmp
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
+      logical :: found                               ! flag for name search
 
-      ! Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE. 
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if dimension supplied, just grab the coordinate
       if (present(dimOrder)) then
-         physCoord = physgrid%ptr%coords(dimOrder)
+        physCoord = physgrid%ptr%coords(dimOrder)
 
       ! if a name supplied, search for a coord with given name
       elseif (present(name)) then
-         found = .false.
-         name_srch: do n=1,physgrid%ptr%numDims
-            call ESMF_PhysCoordGet(physgrid%ptr%coords(n), name=nameTmp, &
-                                   rc=status)
-            if (name == trim(nameTmp)) then
-               found = .true.
-               idim = n
-               exit name_srch
-            endif
-         end do name_srch
+        found = .false.
+        name_srch: do n=1,physgrid%ptr%numDims
+          call ESMF_PhysCoordGet(physgrid%ptr%coords(n), name=nameTmp, &
+                                 rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+
+          if (name == trim(nameTmp)) then
+            found = .true.
+            idim = n
+            exit name_srch
+          endif
+        end do name_srch
          
-         if (found) then
-            physCoord = physgrid%ptr%coords(idim)
-         else
-            print *,'ERROR in PhysGridGetCoord: no coordinate with that name'
-            return
-         endif
+        if (found) then
+          physCoord = physgrid%ptr%coords(idim)
+        else
+          print logMsg, "no coordinate with that name"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
 
       ! if neither supplied, return an error
       else
-         print *,'ERROR in PhysGridGetCoord: name or dim must be supplied'
-         return
+        print logMsg, "name or dim must be supplied"
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                    ESMF_CONTEXT, rc)
+        return
       endif
 
       ! set return code
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetCoord
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGetLocations"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridGetLocations - Gets locations from a PhysGrid
 
@@ -970,42 +951,36 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if name requested, get name
       if (present(name)) then
-         call ESMF_GetName(physgrid%ptr%locations%base, name, status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridGetLocations: error getting name"
-            return
-         endif
+        call ESMF_GetName(physgrid%ptr%locations%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! if locations requested, get them
       if (present(locationArray)) then
-         locationArray = physgrid%ptr%locations%compLocations
-         if (present(total)) then
-           if (total) locationArray = physgrid%ptr%locations%totalLocations
-         endif
+        locationArray = physgrid%ptr%locations%compLocations
+        if (present(total)) then
+          if (total) locationArray = physgrid%ptr%locations%totalLocations
+        endif
       endif
 
       ! set return code
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetLocations
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSetLocations"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridSetLocations - Sets grid regions from input array.
 
@@ -1047,49 +1022,43 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
       character (len=ESMF_MAXSTR) :: name_tmp        ! temp for name creation 
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if name specified, add name.  otherwise, make one up based on PhysGrid.
       if (present(name)) then
         call ESMF_SetName(physgrid%ptr%regions%base, name, &
-                          "PhysGridLocations", status)
+                          "PhysGridLocations", localrc)
       else
-        call ESMF_GetName(physgrid%ptr%base, name_tmp, status)
+        call ESMF_GetName(physgrid%ptr%base, name_tmp, localrc)
         name_tmp = trim(name_tmp) // 'Locations'
         call ESMF_SetName(physgrid%ptr%regions%base, name_tmp, &
-                          "PhysGridLocations", status)
+                          "PhysGridLocations", localrc)
       endif
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridSetLocations: error setting name"
-         return
-      endif
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set locations
       if (present(total)) then
-          if (total) physgrid%ptr%locations%totalLocations => locationArray
-          if (.not.total) physgrid%ptr%locations%compLocations => locationArray
+        if (total) physgrid%ptr%locations%totalLocations => locationArray
+        if (.not.total) physgrid%ptr%locations%compLocations => locationArray
       else
-          physgrid%ptr%locations%compLocations => locationArray
+        physgrid%ptr%locations%compLocations => locationArray
       endif
 
       ! set return code
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSetLocations
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSetRegions"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridSetRegions - Sets grid regions from input array.
 
@@ -1144,34 +1113,28 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
-      character (len=ESMF_MAXSTR) :: name_tmp        ! temp for name creation 
+      integer :: localrc                             ! Error status
+      character(len=ESMF_MAXSTR) :: name_tmp         ! temp for name creation 
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if name specified, add name.  otherwise, make one up based on PhysGrid.
       if (present(name)) then
         call ESMF_SetName(physgrid%ptr%regions%base, name, &
-                          "PhysGridRegions", status)
+                          "PhysGridRegions", localrc)
       else
-        call ESMF_GetName(physgrid%ptr%base, name_tmp, status)
+        call ESMF_GetName(physgrid%ptr%base, name_tmp, localrc)
         name_tmp = trim(name_tmp) // 'Region'
         call ESMF_SetName(physgrid%ptr%regions%base, name_tmp, &
-                          "PhysGridRegions", status)
+                          "PhysGridRegions", localrc)
       endif
-      if (status /= ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_PhysGridSetRegions: error setting name"
-        return
-      endif
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set region type
       physgrid%ptr%regions%regionType = regionType
@@ -1185,30 +1148,36 @@
         physgrid%ptr%regions%ellipse = ellipseArray
 
       else
-        print *, "ERROR in ESMF_PhysGridSetRegions: unknown region type"
+        print logMsg, "unknown region type"
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                    ESMF_CONTEXT, rc)
         return
 
       endif
 
       ! define bounding box for each region to aid in future searches
       if (regionType == ESMF_REGION_TYPE_POLYGON) then
-         !TODO: create bbox array for polygons
+        !TODO: create bbox array for polygons
 
       else if (regionType == ESMF_REGION_TYPE_ELLIPSE) then
-         !TODO: define bounding box for elliptical region
+        !TODO: define bounding box for elliptical region
 
       else
-         print *, "ERROR in ESMF_PhysGridSetRegions: unknown region type"
-         return
+        print logMsg, "unknown region type"
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                    ESMF_CONTEXT, rc)
+        return
 
       endif
 
       ! set return code
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSetRegions
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGetRegions"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridGetRegions - Gets region information from a PhysGrid
 
@@ -1265,75 +1234,77 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if name requested, get name
       if (present(name)) then
-         call ESMF_GetName(physgrid%ptr%regions%base, name, status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridGetRegions: error getting name"
-            return
-         endif
+        call ESMF_GetName(physgrid%ptr%regions%base, name, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
       endif
 
       ! if number of vertices requested, get it
       if (present(numVertices)) then
-         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
-            numVertices = physgrid%ptr%regions%numVertices
-         else
-            print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
-            return
-         endif
+        if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
+          numVertices = physgrid%ptr%regions%numVertices
+        else
+          print logMsg, "invalid region type"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
       endif
 
       ! if vertex coordinates requested, get them
       if (present(vertexArray)) then
-         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
-            !TODO: consistency check for array sizes, shapes
-            !TODO: return pointer or copy array?
-            vertexArray = physgrid%ptr%regions%vertices
-         else
-            print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
-            return
-         endif
+        if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_POLYGON) then
+          !TODO: consistency check for array sizes, shapes
+          !TODO: return pointer or copy array?
+          vertexArray = physgrid%ptr%regions%vertices
+        else
+          print logMsg, "invalid region type"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
       endif
 
       ! if ellipses requested, get them
       if (present(ellipseArray)) then
-         if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_ELLIPSE) then
-            !TODO: consistency check for array sizes, shapes
-            !TODO: return pointer or copy array?
-            ellipseArray = physgrid%ptr%regions%ellipse
-         else
-            print *, "ERROR in ESMF_PhysGridGetRegions: invalid region type"
-            return
-         endif
+        if (physgrid%ptr%regions%regionType == ESMF_REGION_TYPE_ELLIPSE) then
+          !TODO: consistency check for array sizes, shapes
+          !TODO: return pointer or copy array?
+          ellipseArray = physgrid%ptr%regions%ellipse
+        else
+          print logMsg, "invalid region type"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
       endif
 
       ! if bounding boxes requested, get them
       if (present(bboxArray)) then
-         !TODO: consistency check for array sizes, shapes
-         !TODO: return pointer or copy array?
-         !bboxArray = physgrid%ptr%regions%bbox
+        !TODO: consistency check for array sizes, shapes
+        !TODO: return pointer or copy array?
+        !bboxArray = physgrid%ptr%regions%bbox
       endif
 
       ! set return code
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetRegions
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSetMask"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridSetMask - Sets grid mask from input array.
 
@@ -1379,21 +1350,14 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
+      integer :: localrc                             ! Error status
       integer :: n, numMaskOld, numMaskNew
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
       type(ESMF_GridMask), dimension(:), allocatable :: tempMask
                                                      ! temporary array of masks
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! increment mask counter
       numMaskOld = physgrid%ptr%numMasks
@@ -1401,49 +1365,39 @@
 
       ! if first mask, allocate mask array
       if (numMaskNew == 1) then
-         allocate(physgrid%ptr%masks(1), stat=status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridSetMask: mask allocate"
-            return
-         endif
+        allocate(physgrid%ptr%masks(1), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "new PhysGrid masks", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! if not first mask, resize mask array to make room for new mask
       else
-         allocate(tempMask(numMaskOld), stat=status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridSetMask: tempMask allocate"
-            return
-         endif
+        allocate(tempMask(numMaskOld), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "tempMask array", &
+                                       ESMF_CONTEXT, rc)) return
 
-         ! store old values before resizing array
-         do n = 1, numMaskOld
-            tempMask(n) = physgrid%ptr%masks(n)
-         enddo
+        ! store old values before resizing array
+        do n = 1, numMaskOld
+          tempMask(n) = physgrid%ptr%masks(n)
+        enddo
 
-         ! destroy old array to create new one
-         deallocate(physgrid%ptr%masks, stat=status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridSetMask: mask deallocate"
-            return
-         endif
+        ! destroy old array to create new one
+        deallocate(physgrid%ptr%masks, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate PhysGrid masks", &
+                                       ESMF_CONTEXT, rc)) return
 
-         ! allocate new mask array of correct size
-         allocate(physgrid%ptr%masks(numMaskNew), stat=status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridSetMask: mask reallocate"
-            return
-         endif
+        ! allocate new mask array of correct size
+        allocate(physgrid%ptr%masks(numMaskNew), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid masks", &
+                                       ESMF_CONTEXT, rc)) return
 
-         ! fill new array with old values
-         do n = 1, numMaskOld
-            physgrid%ptr%masks(n) = tempMask(n)
-         enddo
+        ! fill new array with old values
+        do n = 1, numMaskOld
+          physgrid%ptr%masks(n) = tempMask(n)
+        enddo
 
-         deallocate(tempMask, stat=status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridSetMask: tempMask deallocate"
-            return
-         endif
+        deallocate(tempMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate tempMask", &
+                                       ESMF_CONTEXT, rc)) return
 
       endif
 
@@ -1452,20 +1406,21 @@
       physgrid%ptr%numMasks = numMaskNew
 
       call ESMF_BaseCreate(physgrid%ptr%masks(numMaskNew)%base, &
-                           "PhysGridMask", name, 0, status)
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridCreate: Mask BaseCreate"
-         return
-      endif
+                           "PhysGridMask", name, 0, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       physgrid%ptr%masks(numMaskNew)%maskType = maskType
       physgrid%ptr%masks(numMaskNew)%data = maskArray
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSetMask
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGetMask"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridGetMask - Gets grid mask from PhysGrid object.
 
@@ -1503,71 +1458,72 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
       integer :: n
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
+      character(len=ESMF_MAXSTR) :: name_tmp         ! temp for name check 
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
       logical :: found                               ! name search flag
-      character (len=ESMF_MAXSTR) :: name_tmp        ! temp for name check 
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if id supplied, check for valid id and return appropriate mask
       if (present(id)) then
 
-         ! check for valid id
-         if (id < 1 .or. id > physgrid%ptr%numMasks) then
-            print *, "ERROR in ESMF_PhysGridGetMask: invalid mask id"
-            return
-         endif
+        ! check for valid id
+        if (id < 1 .or. id > physgrid%ptr%numMasks) then
+          print logMsg, "invalid mask id"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
 
-         ! get mask associated with id
-         maskArray = physgrid%ptr%masks(id)%data
+        ! get mask associated with id
+        maskArray = physgrid%ptr%masks(id)%data
 
       ! if name supplied, check for valid id and return appropriate mask
       else if (present(name)) then
 
-         found = .false.
-         name_loop: do n=1,physgrid%ptr%numMasks
+        found = .false.
+        name_loop: do n=1,physgrid%ptr%numMasks
             
-            call ESMF_GetName(physgrid%ptr%masks(n)%base, name_tmp, status)
-            if (status /= ESMF_SUCCESS) then
-               print *, "ERROR in ESMF_PhysGridGetMask: error retrieving name"
-               return
-            endif
+          call ESMF_GetName(physgrid%ptr%masks(n)%base, name_tmp, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
-            if (trim(name) == trim(name_tmp)) then
-               maskArray = physgrid%ptr%masks(id)%data
-               found = .true.
-               exit name_loop
-            endif
-         end do name_loop
+          if (trim(name) == trim(name_tmp)) then
+            maskArray = physgrid%ptr%masks(id)%data
+            found = .true.
+            exit name_loop
+          endif
+        end do name_loop
 
-         if (.not. found) then
-            print *, "ERROR in ESMF_PhysGridGetMask: no mask matches name"
-            print *, "Requested name:",trim(name)
-            return
-         endif
+        if (.not. found) then
+          print logMsg, "no mask matches name.  Requested name: ", trim(name)
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
+          return
+        endif
 
       ! if we enter this else branch, neither id nor mask has been 
       ! supplied so return error
       else
-         print *, "ERROR in ESMF_PhysGridGetMask: id or name must be supplied"
-         return
+        print logMsg, "id or name must be supplied"
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                    ESMF_CONTEXT, rc)
+        return
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetMask
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSetMetric"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridSetMetric - Sets grid metric from input array.
 
@@ -1603,21 +1559,14 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
       integer :: n, numMetricOld, numMetricNew
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
       type(ESMF_Array), dimension(:), allocatable :: tempMetric
-                                                    ! temporary array of metrics
+                                                     ! temporary array of metrics
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! increment metric counter
       numMetricOld = physgrid%ptr%numMetrics
@@ -1625,19 +1574,15 @@
 
       ! if first metric, allocate metric array
       if (numMetricNew == 1) then
-        allocate(physgrid%ptr%metrics(1), stat=status)
-        if (status /= ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetric: metric allocate"
-          return
-        endif
+        allocate(physgrid%ptr%metrics(1), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "new PhysGrid metrics", &
+                                       ESMF_CONTEXT, rc)) return
 
       ! if not first metric, resize metric array to make room for new metric
       else
-        allocate(tempMetric(numMetricOld), stat=status)
-        if (status /= ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetric: tempMetric allocate"
-          return
-        endif
+        allocate(tempMetric(numMetricOld), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "tempMetric", &
+                                       ESMF_CONTEXT, rc)) return
 
         ! store old values before resizing array
         do n = 1, numMetricOld
@@ -1645,29 +1590,23 @@
         enddo
 
         ! destroy old array to create new one
-        deallocate(physgrid%ptr%metrics, stat=status)
-        if (status /= ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetric: metric deallocate"
-          return
-        endif
+        deallocate(physgrid%ptr%metrics, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate PhysGrid metrics", &
+                                       ESMF_CONTEXT, rc)) return
 
         ! allocate new metric array of correct size
-        allocate(physgrid%ptr%metrics(numMetricNew), stat=status)
-        if (status /= ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetric: metric reallocate"
-          return
-        endif
+        allocate(physgrid%ptr%metrics(numMetricNew), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "PhysGrid metrics", &
+                                       ESMF_CONTEXT, rc)) return
 
         ! fill new array with old values
         do n = 1, numMetricOld
           physgrid%ptr%metrics(n) = tempMetric(n)
         enddo
 
-        deallocate(tempMetric, stat=status)
-        if (status /= ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_PhysGridSetMetric: tempMetric deallocate"
-          return
-        endif
+        deallocate(tempMetric, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate tempMetric", &
+                                       ESMF_CONTEXT, rc)) return
       endif
 
       ! reset number of metrics and add new metric
@@ -1675,19 +1614,20 @@
       physgrid%ptr%numMetrics = numMetricNew
 
       call ESMF_ArraySet(physgrid%ptr%metrics(numMetricNew), name=name, &
-                         rc=status)
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridSetMetric: error setting metric name"
-         return
-      endif
+                         rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       physgrid%ptr%metrics(numMetricNew) = metricArray
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSetMetric
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridGetMetric"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridGetMetric - Gets grid metric from PhysGrid object.
 
@@ -1724,28 +1664,25 @@
 !EOPI
 ! !REQUIREMENTS: 
 
-
       ! local variables
+      integer :: localrc                             ! Error status
       integer :: n
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      character(len=ESMF_MAXSTR) :: name_tmp        ! temp for name check 
+      character(len=ESMF_MAXSTR) :: logMsg
+      logical :: dummy
       logical :: found                               ! name search flag
-      character (len=ESMF_MAXSTR) :: name_tmp        ! temp for name check 
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! if id supplied, check for valid id and return appropriate metric
       if (present(id)) then
 
         ! check for valid id
         if (id < 1 .or. id > physgrid%ptr%numMetrics) then
-          print *, "ERROR in ESMF_PhysGridGetMetric: invalid metric id"
+          print logMsg, "invalid metric id"
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
           return
         endif
 
@@ -1758,11 +1695,10 @@
         found = .false.
         name_loop: do n=1,physgrid%ptr%numMetrics
             
-          call ESMF_ArrayGet(physgrid%ptr%metrics(n), name=name_tmp, rc=status)
-          if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridGetMetric: error retrieving name"
-            return
-          endif
+          call ESMF_ArrayGet(physgrid%ptr%metrics(n), name=name_tmp, rc=localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
 
           if (trim(name) == trim(name_tmp)) then
             metricArray = physgrid%ptr%metrics(id)
@@ -1772,23 +1708,28 @@
         end do name_loop
 
         if (.not. found) then
-          print *, "ERROR in ESMF_PhysGridGetMetric: no metric matches name"
-          print *, "Requested name:",trim(name)
+          print logMsg, "No metric matches name.  Requested name: ", trim(name)
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                      ESMF_CONTEXT, rc)
           return
         endif
 
       ! if we enter this else branch, neither id nor name has been 
       ! supplied so return error
       else
-        print *, "ERROR in ESMF_PhysGridGetMetric: id or name must be supplied"
+        print logMsg, "id or name must be supplied"
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+                                    ESMF_CONTEXT, rc)
         return
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridGetMetric
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridValidate"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridValidate - Check internal consistency of a PhysGrid
 
@@ -1822,6 +1763,8 @@
       end subroutine ESMF_PhysGridValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridPrint"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridPrint - Print the contents of a PhysGrid
 
@@ -1850,19 +1793,12 @@
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-
       ! local variables
+      integer :: localrc                             ! Error status
       integer :: i
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
       
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! This code will surely change, but for development purposes it
       ! is necessary to have some information available currently.
@@ -1890,6 +1826,8 @@
       end subroutine ESMF_PhysGridPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSearchBboxSphericalPoint"
 !!BOPI
 !! !IROUTINE: ESMF_PhysGridSearchBboxSphericalPoint - Search grid for a point
 !
@@ -1934,6 +1872,8 @@
 !!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
+!      character(len=ESMF_MAXSTR) :: logMsg
+!      logical :: dummy
 !!
 !!     broadcast the point to all DEs
 !!
@@ -2024,8 +1964,10 @@
 !!
 !      ncells = global_sum(found)
 !      if (ncells > 1) then
-!         print *,'PhysGridSearch: more than one cell contains this point'
-!         rc = ESMF_FAILURE
+!        print logMsg, "more than one cell contains this point"
+!        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+!                                    ESMF_CONTEXT, rc)
+!        return
 !      endif
 !
 !!
@@ -2043,6 +1985,8 @@
 !      end subroutine ESMF_PhysGridSearchBboxSphericalPoint
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSearchBboxCartesianPoint"
 !!BOPI
 !! !IROUTINE: ESMF_PhysGridSearchBboxCartesianPoint - Search grid for a point
 !
@@ -2087,6 +2031,8 @@
 !!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
+!      character(len=ESMF_MAXSTR) :: logMsg
+!      logical :: dummy
 !!
 !!     broadcast the point to all DEs
 !!
@@ -2160,8 +2106,10 @@
 !!
 !      ncells = global_sum(found)
 !      if (ncells > 1) then
-!         print *,'PhysGridSearch: more than one cell contains this point'
-!         rc = ESMF_FAILURE
+!        print logMsg, "more than one cell contains this point"
+!        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+!                                    ESMF_CONTEXT, rc)
+!        return
 !      endif
 !
 !!
@@ -2179,6 +2127,8 @@
 !      end subroutine ESMF_PhysGridSearchBboxCartesianPoint
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridSearchGeneralSphericalPoint"
 !!BOPI
 !! !IROUTINE: ESMF_PhysGridSearchGeneralSphericalPoint - Search grid for a point
 !
@@ -2222,6 +2172,8 @@
 !!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
+!      character(len=ESMF_MAXSTR) :: logMsg
+!      logical :: dummy
 !!
 !!     broadcast the point to all DEs
 !!
@@ -2327,8 +2279,10 @@
 !!
 !      ncells = global_sum(found)
 !      if (ncells > 1) then
-!         print *,'PhysGridSearch: more than one cell contains this point'
-!         rc = ESMF_FAILURE
+!        print logMsg, "more than one cell contains this point"
+!        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_INCOMP, logMsg, &
+!                                    ESMF_CONTEXT, rc)
+!        return
 !      endif
 !
 !!
@@ -2346,6 +2300,8 @@
 !      end subroutine ESMF_PhysGridSearchGeneralSphericalPoint
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridPointInCell"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridPointInCell - Checks whether cell contains point
 !
@@ -2387,10 +2343,8 @@
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
       integer :: ncorn, next_n   ! corner index
       integer :: num_corners     ! number of corners in each grid cell
 
@@ -2407,13 +2361,8 @@
       real(kind=ESMF_KIND_R8) :: zero, one
       real(kind=ESMF_KIND_R8) :: minX, maxX, minY, maxY
       
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! set default return value
       ESMF_PhysGridPointInCell = .false.
@@ -2438,64 +2387,64 @@
       num_corners = size(cornerX)
 
       corner_loop: do ncorn=1,num_corners
-         next_n = MOD(ncorn,num_corners) + 1
+        next_n = MOD(ncorn,num_corners) + 1
 
-         ! here we take the cross product of the vector making
-         ! up each cell side with the vector formed by the vertex
-         ! and search point.  if all the cross products are
-         ! the same sign, the point is contained in the cell.
-         vec1X = cornerX(next_n) - cornerX(ncorn)
-         vec1Y = cornerY(next_n) - cornerY(ncorn)
-         vec2X = pointX - cornerX(ncorn)
-         vec2Y = pointY - cornerY(ncorn)
+        ! here we take the cross product of the vector making
+        ! up each cell side with the vector formed by the vertex
+        ! and search point.  if all the cross products are
+        ! the same sign, the point is contained in the cell.
+        vec1X = cornerX(next_n) - cornerX(ncorn)
+        vec1Y = cornerY(next_n) - cornerY(ncorn)
+        vec2X = pointX - cornerX(ncorn)
+        vec2Y = pointY - cornerY(ncorn)
 
-         ! if search point coincident with vertex then cell contains the point
-         if (vec2X == 0 .and. vec2Y == 0) then
-            ESMF_PhysGridPointInCell = .true.
-            exit corner_loop
-         endif
+        ! if search point coincident with vertex then cell contains the point
+        if (vec2X == 0 .and. vec2Y == 0) then
+          ESMF_PhysGridPointInCell = .true.
+          exit corner_loop
+        endif
 
-         ! if cell side has zero length (degenerate vertices)
-         ! then skip the side and move on to the next
-         if (vec1X == 0 .and. vec1Y == 0) cycle corner_loop
+        ! if cell side has zero length (degenerate vertices)
+        ! then skip the side and move on to the next
+        if (vec1X == 0 .and. vec1Y == 0) cycle corner_loop
 
-         ! compute cross product
-         cross_product = vec1X*vec2Y - vec2X*vec1Y
+        ! compute cross product
+        cross_product = vec1X*vec2Y - vec2X*vec1Y
 
-         ! if the cross product is zero, the point
-         ! lies exactly on the side and is contained in the cell
-         ! TODO:  talk to Phil - not exactly true since if either all
-         !        three x-points or all three y-points are colinear the
-         !        cross product will be zero but the point not necessarily inside
-         if (cross_product == zero) then
-            ESMF_PhysGridPointInCell = .true.
-            exit corner_loop
-         endif
+        ! if the cross product is zero, the point
+        ! lies exactly on the side and is contained in the cell
+        ! TODO:  talk to Phil - not exactly true since if either all
+        !        three x-points or all three y-points are colinear the
+        !        cross product will be zero but the point not necessarily inside
+        if (cross_product == zero) then
+          ESMF_PhysGridPointInCell = .true.
+          exit corner_loop
+        endif
 
         ! if this is the first side, set a reference cross product
         ! to the current value
         ! otherwise, if this product is a different sign than
         ! previous (reference) cross products, exit the loop
-         if (ref_product == zero) then
-            ref_product = cross_product
-            test_product = one
-         else
-            test_product = cross_product*ref_product
-         endif
-         if (test_product < zero) exit corner_loop ! x-prod has different sign
+        if (ref_product == zero) then
+          ref_product = cross_product
+          test_product = one
+        else
+          test_product = cross_product*ref_product
+        endif
+        if (test_product < zero) exit corner_loop ! x-prod has different sign
 
       end do corner_loop
 
       ! if cross products all same sign this location contains the pt
       if (test_product > zero)  ESMF_PhysGridPointInCell = .true.
 
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      return
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_PhysGridPointInCell
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridCompDistSpherical"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridCompDistSpherical - compute distance spherical coords
 !
@@ -2537,20 +2486,13 @@
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
       real(kind=ESMF_KIND_R8) :: rlon1, rlat1, rlon2, rlat2  ! lon/lat in radians
       real(kind=ESMF_KIND_R8) :: pi
       
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! set constants
       pi = 3.1416d0   ! TODO really set pi, just a bug fix for now
@@ -2573,11 +2515,13 @@
    !  ???? JW
       endif
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_PhysGridCompDistSpherical
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridCompDistCartesian"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridCompDistCartesian - Distance in Cartesian coords
 !
@@ -2611,27 +2555,22 @@
 !EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-
       ! local variables
-      integer :: status                              ! Error status
-      logical :: rcpresent                           ! Return code present
+      integer :: localrc                             ! Error status
       
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! compute distance using the usual Cartesian formula
       ESMF_PhysGridCompDistCartesian = sqrt( (x2-x1)**2 + (y2-y1)**2 )
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_PhysGridCompDistCartesian
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMaskTypeEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridMaskTypeEqual - equality of PhysGrid mask types
 !
@@ -2664,6 +2603,8 @@
       end function ESMF_GridMaskTypeEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridMaskTypeNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_GridMaskTypeNotEqual - non-equality of PhysGrid mask types
 !
@@ -2697,6 +2638,8 @@
       end function ESMF_GridMaskTypeNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegionTypeEqual"
 !BOPI
 ! !IROUTINE: ESMF_RegionTypeEqual - equality of PhysGrid region kinds
 !
@@ -2730,6 +2673,8 @@
       end function ESMF_RegionTypeEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegionTypeNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_RegionTypeNotEqual - non-equality of PhysGrid region kinds
 !
@@ -2763,6 +2708,8 @@
       end function ESMF_RegionTypeNotEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridOrientEqual"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridOrientEqual - equality of PhysGrid orientation
 !
@@ -2796,6 +2743,8 @@
       end function ESMF_PhysGridOrientEqual
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PhysGridOrientNotEqual"
 !BOPI
 ! !IROUTINE: ESMF_PhysGridOrientNotEqual - non-equality of PhysGrid orientations
 !

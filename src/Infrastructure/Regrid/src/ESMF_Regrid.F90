@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.77 2004/05/24 23:02:47 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.78 2004/06/04 21:55:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -93,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.77 2004/05/24 23:02:47 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.78 2004/06/04 21:55:23 jwolfe Exp $'
 
 !==============================================================================
 
@@ -440,8 +440,11 @@
       srcLocalArray = srcarray
       call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, localrc)
 
-      allocate(dstDimOrder(rank))
-      allocate(srcDimOrder(rank))
+      allocate(dstDimOrder(rank), &
+               srcDimOrder(rank), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dim orders", &
+                                     ESMF_CONTEXT, rc)) return
+
       call ESMF_FieldDataMapGet(dstDataMap, dataIndices=dstDimOrder, rc=localrc)
       call ESMF_FieldDataMapGet(srcDataMap, dataIndices=srcDimOrder, rc=localrc)
 
@@ -564,8 +567,10 @@
           enddo
 
         else
-          allocate(dindex(rank,2))
-          allocate(sindex(rank,2))
+          allocate(dindex(rank,2), &
+                   sindex(rank,2), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "Indexes", &
+                                         ESMF_CONTEXT, rc)) return
           do n = 1,numlinks
             dindex(1,1) = 1
             dindex(1,2) = size(dstData3D,dstUndecomp)
@@ -596,8 +601,10 @@
    !               + (gatheredData(si1:si2,sj1:sj2) * weights(n))
 
           enddo
-          deallocate(dindex)
-          deallocate(sindex)
+          deallocate(dindex, &
+                     sindex, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate indexes", &
+                                         ESMF_CONTEXT, rc)) return
         endif
 
       case default
@@ -608,8 +615,10 @@
       end select
 
       ! nuke temp arrays
-      deallocate(dstDimOrder)
-      deallocate(srcDimOrder)
+      deallocate(dstDimOrder, &
+                 srcDimOrder, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate dim orders", &
+                                     ESMF_CONTEXT, rc)) return
 
       ! set return codes
       if (present(rc)) rc = ESMF_SUCCESS
@@ -660,7 +669,9 @@
                                rc=localrc)
       call ESMF_RouteDestroy(route, localrc)
       call ESMF_TransformValuesDestroy(tv, localrc)
- !     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
@@ -836,7 +847,9 @@
                              parentDELayout, routehandle, regridmethod, &
                              regridnorm=regridnorm, &
                              srcmask=srcmask, dstmask=dstmask, rc=localrc)
-  !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
@@ -907,7 +920,9 @@
       ! Execute the communications call.
       call ESMF_RegridRun(srcarray, dstarray, srcDataMap, dstDataMap, &
                           routehandle, localrc)
-  !    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       ! Set return code if user specified it
       if (present(rc)) rc = ESMF_SUCCESS
@@ -946,7 +961,9 @@
       if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_RouteHandleDestroy(routehandle, rc=localrc)
- !     if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
 
       if (present(rc)) rc = ESMF_SUCCESS
 
