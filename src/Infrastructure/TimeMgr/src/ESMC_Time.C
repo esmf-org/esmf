@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.71 2004/11/24 22:42:42 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.72 2004/11/30 22:03:42 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.71 2004/11/24 22:42:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.72 2004/11/30 22:03:42 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -206,6 +206,30 @@
         ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
                                               ", calendar required.", &rc);
         *this = saveTime; return(rc);
+      }
+
+      // if specified, positive month-of-the-year required; further calendar-
+      //   specific validation performed within ESMC_CalendarConvertToTime()
+      if (mm != ESMC_NULL_POINTER) {
+        if (*mm < 1) {
+          char logMsg[ESMF_MAXSTR];
+          sprintf(logMsg, "; month-of-the-year mm=%d (must be >=1).", *mm);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                logMsg, &rc);
+          *this = saveTime; return(rc);
+        }
+      }
+
+      // if specified, positive day-of-the-month required; further calendar-
+      //   specific validation performed within ESMC_CalendarConvertToTime()
+      if (dd != ESMC_NULL_POINTER) {
+        if (*dd < 1) {
+          char logMsg[ESMF_MAXSTR];
+          sprintf(logMsg, "; day-of-the-month dd=%d (must be >=1).", *dd);
+          ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                logMsg, &rc);
+          *this = saveTime; return(rc);
+        }
       }
 
       // year required
