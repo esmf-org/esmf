@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.22 2004/04/24 01:31:28 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.23 2004/05/05 22:56:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.22 2004/04/24 01:31:28 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.23 2004/05/05 22:56:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -747,6 +747,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the MOD operator
+      ! timestep = ESMF_TimeIntervalFunction(MOD)(timestep, timestep)
       write(name, *) "Gregorian Calendar Interval Modulus test 1"
       write(failMsg, *) " Did not return mm=10 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=4, &
@@ -762,6 +764,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the MOD operator
+      ! timestep = ESMF_TimeIntervalFunction(MOD)(timestep, timestep)
       write(name, *) "Gregorian Calendar Interval Modulus test 2"
       write(failMsg, *) " Did not return yy=2 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=5, &
@@ -777,6 +781,8 @@
 
       ! ----------------------------------------------------------------------------
       !NEX_UTest
+      ! Testing the MOD operator
+      ! timestep = ESMF_TimeIntervalFunction(MOD)(timestep, timestep)
       write(name, *) "Gregorian Calendar Interval Modulus test 3"
       write(failMsg, *) " Did not return d=7 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, d=15, &
