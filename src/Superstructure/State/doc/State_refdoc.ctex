@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.8 2004/12/14 22:44:15 nscollins Exp $
+% $Id: State_refdoc.ctex,v 1.9 2004/12/22 01:16:55 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -106,6 +106,13 @@
 \input{ESMF_StateGet_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_StateGet_fapi}
+#endif
+
+\subsection{Class API: State Communications}
+#ifdef STANDALONE
+\input{ESMF_StateReconcile_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/State/doc/ESMF_StateReconcile_fapi}
 #endif
 
 #ifdef STANDALONE
