@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.7 2003/10/07 22:33:12 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.8 2003/10/09 22:05:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,7 +15,6 @@
 #if 0
 !------------------------------------------------------------------------------
 ! Macros for the Array class.
-
 ! these are defined because they contain a variable number of commas.
 ! they are used as parms in macro calls, and are rescanned by the
 ! preprocessor after expansion.
@@ -27,18 +26,32 @@
 #define COL3 :,:,:
 #define COL4 :,:,:,:
 #define COL5 :,:,:,:,:
+#define COL6 :,:,:,:,:,:
+#define COL7 :,:,:,:,:,:,:
 
 #define LEN1 counts(1)
-#define LEN2 counts(1), counts(2)
-#define LEN3 counts(1), counts(2), counts(3)
-#define LEN4 counts(1), counts(2), counts(3), counts(4)
-#define LEN5 counts(1), counts(2), counts(3), counts(4), counts(5)
+#define LEN2 counts(1),counts(2)
+#define LEN3 counts(1),counts(2),counts(3)
+#define LEN4 counts(1),counts(2),counts(3),counts(4)
+#define LEN5 counts(1),counts(2),counts(3),counts(4),counts(5)
+#define LEN6 counts(1),counts(2),counts(3),counts(4),counts(5),counts(6)
+#define LEN7 counts(1),counts(2),counts(3),counts(4),counts(5),counts(6),counts(7)
+
+#define RNG1 lb(1):ub(1)
+#define RNG2 lb(1):ub(1),lb(2):ub(2)
+#define RNG3 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3)
+#define RNG4 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4)
+#define RNG5 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5)
+#define RNG6 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6)
+#define RNG7 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6),lb(7):ub(7)
 
 #define LOC1 1
 #define LOC2 1,1
 #define LOC3 1,1,1
 #define LOC4 1,1,1,1
 #define LOC5 1,1,1,1,1
+#define LOC6 1,1,1,1,1,1
+#define LOC7 1,1,1,1,1,1,1
 
 #if 0
 !------------------------------------------------------------------------------
@@ -222,14 +235,14 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define ArrayCreateByMTArrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOP @\
 ! !IROUTINE: ESMF_ArrayCreateByMTArr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 array @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByMTArr##mtypekind##mrank##D(f90arr, counts, halo_width, rc) @\
+      function ESMF_ArrayCreateByMTArr##mtypekind##mrank##D(f90arr, counts, halo_width, lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
       type(ESMF_Array) :: ESMF_ArrayCreateByMTArr##mtypekind##mrank##D @\
@@ -239,6 +252,8 @@
       !mname (ESMF_KIND_##mtypekind), dimension(mdim), allocatable, target :: f90arr @\
       integer, dimension(:), intent(in) :: counts @\
       integer, intent(in), optional :: halo_width @\
+      integer, dimension(:), intent(in), optional :: lbounds @\
+      integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -261,6 +276,12 @@
 !   An integer count of the width of the halo region on all sides of @\
 !   the array. The default is 0, no halo region. @\
 ! @\
+!  \item[{[lbounds]}] @\
+!  An integer array of lower index values.  Must be the same length as the rank. @\
+! @\
+!  \item[{[ubounds]}] @\
+! An integer array of upper index values.  Must be the same length as the rank. @\
+! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -274,6 +295,7 @@
         type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
+        integer, dimension(ESMF_MAXDIM) :: lb, ub ! local copy of bounds @\
         logical :: rcpresent                ! did user specify rc? @\
  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
@@ -295,6 +317,7 @@
         !endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
+        ! Lower and upper bounds also. @\
         if (present(halo_width)) then @\
           hwidth = halo_width @\
         else @\
@@ -311,8 +334,8 @@
  @\
         newp => f90arr    ! must be ptr assignment, => @\
         call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, & @\
-                                  newp, ESMF_DATA_SPACE, status) @\
-        @\
+                                  newp, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
+ @\
  @\
 !       ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByMTArr##mtypekind##mrank##D = array @\
@@ -379,12 +402,14 @@
 ! !REQUIREMENTS: @\
  @\
         ! Local variables @\
-        type (ESMF_Array) :: array          ! new array object @\
-        integer :: status                   ! local error status @\
-        logical :: rcpresent                ! did user specify rc? @\
-        integer :: hwidth                   ! local copy of halo width @\
-        type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
-        integer, dimension(mrank) :: counts ! per dim @\
+        type (ESMF_Array) :: array           ! new array object @\
+        integer :: status                    ! local error status @\
+        logical :: rcpresent                 ! did user specify rc? @\
+        integer :: hwidth                    ! local copy of halo width @\
+        type (ESMF_CopyFlag) :: copy         ! do we copy or ref? @\
+        integer, dimension(mrank) :: counts  ! per dim @\
+        integer, dimension(mrank) :: lbounds ! lower index bounds @\
+        integer, dimension(mrank) :: ubounds ! upper index bounds @\
  @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp @\
  @\
@@ -416,6 +441,8 @@
         ! Get sizes from current array, although the construct routine @\
         !   does not need it for an already allocated array.  @\
         counts = shape(f90arr) @\
+        lbounds = lbound(f90arr) @\
+        ubounds = ubound(f90arr) @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
         if (present(halo_width)) then @\
@@ -434,8 +461,8 @@
  @\
         newp => f90arr    ! must be ptr assignment, => @\
         call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
-                                  newp, copy, status) @\
-        @\
+                                  newp, copy, lbounds, ubounds, status) @\
+ @\
  @\
 !       ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByFullArr##mtypekind##mrank##D = array @\
@@ -459,7 +486,8 @@
 ! !IROUTINE: ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D - make an ESMF array from an unallocated F90 pointer @\
  @\
 ! !INTERFACE: @\
-      function ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, halo_width, rc) @\
+      function ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D(f90ptr, counts, halo_width, & @\
+                                                     lbounds, ubounds, rc) @\
 ! @\
 ! !RETURN VALUE: @\
       type(ESMF_Array) :: ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D @\
@@ -468,6 +496,8 @@
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
       integer, dimension(:), intent(in) :: counts @\
       integer, intent(in), optional :: halo_width @\
+      integer, dimension(:), intent(in), optional :: lbounds @\
+      integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -487,6 +517,12 @@
 ! @\
 !  \item[{[halo_width]}] @\
 !   Set the maximum width of the halo region on all edges. Defaults to 0. @\
+! @\
+!  \item[{[lbounds]}] @\
+!  An integer array of lower index values.  Must be the same length as the rank. @\
+! @\
+!  \item[{[ubounds]}] @\
+! An integer array of upper index values.  Must be the same length as the rank. @\
 ! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
@@ -535,8 +571,8 @@
         endif @\
  @\
         call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
-                                  f90ptr, ESMF_DATA_SPACE, status) @\
-        @\
+                                 f90ptr, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
+ @\
  @\
 !       ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByMTPtr##mtypekind##mrank##D = array @\
@@ -608,6 +644,8 @@
         logical :: rcpresent                ! did user specify rc? @\
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
         integer, dimension(mrank) :: counts ! per dim @\
+        integer, dimension(mrank) :: lbounds ! per dim @\
+        integer, dimension(mrank) :: ubounds ! per dim @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -637,6 +675,8 @@
         ! Get sizes from current array, although the construct routine @\
         !   does not need it for an already allocated array.  @\
         counts = shape(f90ptr) @\
+        lbounds = lbound(f90ptr) @\
+        ubounds = ubound(f90ptr) @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
         if (present(halo_width)) then @\
@@ -654,8 +694,8 @@
         endif @\
  @\
         call ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth,& @\
-                                  f90ptr, copy, status) @\
-        @\
+                                  f90ptr, copy, lbounds, ubounds, status) @\
+ @\
  @\
 !       ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByFullPtr##mtypekind##mrank##D = array @\
@@ -673,14 +713,15 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayConstructF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define ArrayConstructF90PtrMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
 !BOPI @\
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D - Create an F90 Ptr of the proper T/K/R @\
  @\
 ! !INTERFACE: @\
-      subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, f90ptr, docopy, rc) @\
+      subroutine ESMF_ArrayConstructF90Ptr##mtypekind##mrank##D(array, counts, hwidth, f90ptr, & @\
+                                                   docopy, lbounds, ubounds, rc) @\
 ! @\
 ! !ARGUMENTS: @\
       type(ESMF_Array), intent(inout) :: array @\
@@ -688,6 +729,8 @@
       integer, intent(in) :: hwidth @\
       mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer, optional :: f90ptr  @\
       type(ESMF_CopyFlag), intent(in), optional :: docopy @\
+      integer, dimension(:), intent(in), optional :: lbounds @\
+      integer, dimension(:), intent(in), optional :: ubounds @\
       integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -721,6 +764,12 @@
 !   An optional copy flag which can be specified if an F90 pointer is also @\
 !   given.  Can either make a new copy of the data or ref existing data. @\
 ! @\
+!  \item[{[lbounds]}] @\
+!  An integer array of lower index values.  Must be the same length as the rank. @\
+! @\
+!  \item[{[ubounds]}] @\
+! An integer array of upper index values.  Must be the same length as the rank. @\
+! @\
 !  \item[{[rc]}] @\
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
 !  \end{description} @\
@@ -740,7 +789,7 @@
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
-        integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds @\
+        integer, dimension(ESMF_MAXDIM) :: lb, ub @\
         integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
@@ -777,7 +826,16 @@
         endif @\
  @\
         if (willalloc) then @\
-            allocate(newp ( mlen ), stat=status) @\
+            ! Assume defaults first, then alter if lb or ub specified. @\
+            lb = 1 @\
+            ub(1:size(counts)) = counts @\
+            if (present(lbounds)) then @\
+                lb(1:size(lbounds)) = lbounds @\
+            endif @\
+            if (present(ubounds)) then @\
+                ub(1:size(ubounds)) = ubounds @\
+            endif @\
+            allocate(newp ( mrng ), stat=status) @\
             if (status .ne. 0) then     ! f90 status, not ESMF @\
               print *, "Array space allocate error" @\
               return @\
@@ -791,14 +849,10 @@
         ! Now set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
-        !  and set them in the array object.  For now, used fixed values. @\
-        lbounds = 1 @\
-        ubounds = 1 @\
-        ubounds(1:mrank) = counts(1:mrank) @\
+	! Until we need to use byte offsets, leave them 0. @\
         offsets = 0 @\
  @\
-        wrap%##mtypekind##mrank##Dptr => newp @\
+        wrap % ##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
                                  lbounds, ubounds, offsets, & @\
                                  ESMF_TRUE, do_dealloc, hwidth, status) @\
@@ -821,7 +875,7 @@
 !------------------------------------------------------------------------------
 #endif
 
-#define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define ArrayGetDataMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly >  @\
 !BOP @\
@@ -846,7 +900,7 @@
         logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, counts(mrank)         ! size info for the array @\
+        integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: localp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
@@ -873,21 +927,26 @@
  @\
         ! Allocate a new buffer if requested and return a copy @\
         if (copyreq) then @\
-          call c_ESMC_ArrayGetLengths(array, mrank, counts, status) @\
+          call c_ESMC_ArrayGetLbounds(array, mrank, lb, status) @\
           if (status .ne. ESMF_SUCCESS) then @\
             print *, "Array - cannot retrieve array dim sizes" @\
             return @\
           endif @\
-          allocate(localp( mlen ), stat=status) @\
+          call c_ESMC_ArrayGetUbounds(array, mrank, ub, status) @\
+          if (status .ne. ESMF_SUCCESS) then @\
+            print *, "Array - cannot retrieve array dim sizes" @\
+            return @\
+          endif @\
+          allocate(localp( mrng ), stat=status) @\
           if (status .ne. 0) then     ! f90 status, not ESMF @\
             print *, "Array do_copy allocate error" @\
             return @\
           endif @\
           ! this must do a contents assignment @\
-          localp = wrap%##mtypekind##mrank##Dptr @\
+          localp = wrap % ##mtypekind##mrank##Dptr @\
           f90ptr => localp  @\
         else @\
-          f90ptr => wrap%##mtypekind##mrank##Dptr @\
+          f90ptr => wrap % ##mtypekind##mrank##Dptr @\
         endif @\
  @\
         if (rcpresent) rc = ESMF_SUCCESS @\
@@ -928,7 +987,7 @@
         status = ESMF_FAILURE  @\
  @\
         call c_ESMC_ArrayGetF90Ptr(array, wrap, status) @\
-        deallocate(wrap%##mtypekind##mrank##Dptr) @\
+        deallocate(wrap % ##mtypekind##mrank##Dptr) @\
  @\
         if (present(rc)) rc = status @\
  @\

@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.16 2003/10/07 22:33:12 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.17 2003/10/09 22:05:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -398,7 +398,8 @@
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
             FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &type, &kind, 
-                                                 counts, &halo_width, &status);
+                                         counts, lbounds, ubounds,   
+                                         &halo_width, &status);
     } 
 
     

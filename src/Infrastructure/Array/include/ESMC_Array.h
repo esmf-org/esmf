@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.15 2003/10/07 22:33:11 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.16 2003/10/09 22:05:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,7 +56,8 @@ class ESMC_ArrayConfig {
 // private static data - address of fortran callback funcs
 extern "C" {
  void FTN(f_esmf_arrayf90allocate)(ESMC_Array**, int *, ESMC_DataType*,
-                                   ESMC_DataKind*, int*, int*, int *);
+                                   ESMC_DataKind*, int*, int*, 
+                                   int *, int *, int *);
  void FTN(f_esmf_arrayf90deallocate)(ESMC_Array**, int*, ESMC_DataType*,
                                      ESMC_DataKind *, int*);
 }
@@ -150,6 +151,13 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     int ESMC_ArraySetOrigin(ESMC_ArrayOrigin o) { this->origin = o; 
                                                        return ESMF_SUCCESS;}
     ESMC_ArrayOrigin ESMC_ArrayGetOrigin(void) { return this->origin; }
+
+    int ESMC_ArrayGetLbounds(int n, int *l) { for (int i = 0; i < n; i++)
+                                                  l[i] = this->lbound[i]; 
+                                              return ESMF_SUCCESS;}
+    int ESMC_ArrayGetUbounds(int n, int *u) { for (int i = 0; i < n; i++)
+                                                  u[i] = this->ubound[i]; 
+                                              return ESMF_SUCCESS;}
 
     // copy the contents of an f90 ptr
     int ESMC_ArraySetF90Ptr(const struct c_F90ptr *p);

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_AllocMacros.h,v 1.4 2003/10/07 22:33:12 nscollins Exp $
+! $Id: ESMF_AllocMacros.h,v 1.5 2003/10/09 22:05:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,9 +23,9 @@
 ! Allocate the contents of the array.
 !------------------------------------------------------------------------------
 #endif
-#define AllocAllocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define AllocAllocateMacro(mtypekind, mrank, mrng, mloc) \
 ! <Created by macro - do not edit directly >  @\
-        allocate(local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mlen ), stat=status) @\
+        allocate(local##mtypekind##mrank##D % mtypekind##mrank##Dptr( mrng ), stat=status) @\
         if (status .ne. 0) then @\
           print *, "ESMC_ArrayCreate: Allocation error" @\
           return @\
@@ -34,16 +34,12 @@
         ! Set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
-        !  and set them in the array object.  For now, used fixed values. @\
-        lbounds = 1 @\
-        ubounds = 1 @\
-        ubounds(1:mrank) = counts(1:mrank) @\
+        ! Since I am not sure what these are used for, leave them 0 for now. @\
         offsets = 0 @\
  @\
         call c_ESMC_ArraySetInfo(array, local##mtypekind##mrank##D, & @\
-                        local##mtypekind##mrank##D%mtypekind##mrank##Dptr( mloc ), & @\
-                        counts, lbounds, ubounds, offsets, & @\
+                        local##mtypekind##mrank##D % mtypekind##mrank##Dptr( mloc ), & @\
+                        counts, lb, ub, offsets, & @\
                         ESMF_TRUE, ESMF_TRUE, hwidth, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
@@ -57,10 +53,10 @@
 ! Deallocate the contents of the array.
 !------------------------------------------------------------------------------
 #endif
-#define AllocDeallocateMacro(mname, mtypekind, mrank, mdim, mlen, mloc) \
+#define AllocDeallocateMacro(mtypekind, mrank) \
 ! <Created by macro - do not edit directly >  @\
         call c_ESMC_ArrayGetF90Ptr(array, local##mtypekind##mrank##D, status) @\
-        deallocate(local##mtypekind##mrank##D%mtypekind##mrank##Dptr, stat=status)  @\
-        nullify(local##mtypekind##mrank##D%mtypekind##mrank##Dptr) @\
+        deallocate(local##mtypekind##mrank##D % mtypekind##mrank##Dptr, stat=status)  @\
+        nullify(local##mtypekind##mrank##D % mtypekind##mrank##Dptr) @\
 ! < End macro - do not edit directly >  @\
 

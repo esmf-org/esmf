@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.22 2003/10/07 22:33:12 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.23 2003/10/09 22:05:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.22 2003/10/07 22:33:12 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.23 2003/10/09 22:05:18 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -451,13 +451,18 @@ end subroutine
          call c_ESMC_ArrayGetLengths(array, lrank, counts, status)
       endif
 
+      if (present(lbounds)) then
+          call c_ESMC_ArrayGetLbounds(array, lbounds, status)
+      endif
    
-      ! TODO: add these methods
-      !integer, dimension(:), intent(out), optional :: lbounds
-      !integer, dimension(:), intent(out), optional :: ubounds
-      !integer, dimension(:), intent(out), optional :: strides
-      !type(ESMF_Pointer), intent(out), optional :: base
-
+      if (present(lbounds)) then
+          call c_ESMC_ArrayGetUbounds(array, ubounds, status)
+      endif
+   
+      if (present(base)) then
+          call c_ESMC_ArrayGetBaseAddr(array, base, status)
+      endif
+   
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_ArrayGet

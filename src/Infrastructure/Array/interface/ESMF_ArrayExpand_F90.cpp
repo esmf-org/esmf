@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.5 2003/09/22 18:00:45 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.6 2003/10/09 22:05:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.5 2003/09/22 18:00:45 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.6 2003/10/09 22:05:19 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -200,106 +200,11 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayCreateByList -- Create an Array specifying all options.
-
-! !INTERFACE:
-      function ESMF_ArrayCreateByList(rank, type, kind, counts, halo_width, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayCreateByList
-!
-! !ARGUMENTS:
-      integer, intent(in) :: rank
-      type(ESMF_DataType), intent(in) :: type
-      type(ESMF_DataKind), intent(in) :: kind
-      integer, dimension(:), intent(in) :: counts
-      integer, intent(in), optional :: halo_width 
-      integer, intent(out), optional :: rc 
-!
-! !DESCRIPTION:
-!  Create a new Array and allocate data space, which remains uninitialized.
-!  The return value is a new Array.
-!    
-!  The arguments are:
-!  \begin{description}
-!
-!  \item[rank]
-!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
-!
-!  \item[type]
-!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
-!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
-!    {\tt ESMF\_DATA\_CHARACTER}.
-!
-!  \item[kind]
-!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
-!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
-!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
-!
-!  \item[counts]
-!    The number of items in each dimension of the array.  This is a 1D
-!    integer array the same length as the rank.
-!
-!  \item[{[halo_width]}] 
-!   Set the maximum width of the halo region on all edges. Defaults to 0.
-! 
-!   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-
-        ! Local vars
-        type (ESMF_Array) :: array          ! new C++ Array
-        integer :: hwidth                   ! local copy of halo width 
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
-
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-        array%this = ESMF_NULL_POINTER
-
-        ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-        ! Always supply a halo value, setting it to 0 if not specified. 
-        if (present(halo_width)) then 
-          hwidth = halo_width 
-        else 
-          hwidth = 0 
-        endif 
- 
-        ! TODO: should this take the counts, or not?  for now i am going to
-        !  set the counts after i have created the f90 array and not here.
-        call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
-                                            ESMF_FROM_FORTRAN, status)
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Array construction error"
-          return
-        endif
-
-        call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, &
-                                                     rank, type, kind, status)
-
-        ! Set return values
-        ESMF_ArrayCreateByList = array 
-        if (rcpresent) rc = status
-
-        end function ESMF_ArrayCreateByList
-
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateBySpec(spec, counts, halo_width, rc)
+      function ESMF_ArrayCreateBySpec(spec, counts, halo_width, &
+                                      lbounds, ubounds, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateBySpec
@@ -308,6 +213,8 @@ end interface
       type(ESMF_ArraySpec), intent(in) :: spec
       integer, intent(in), dimension(:) :: counts
       integer, intent(in), optional :: halo_width 
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -326,6 +233,12 @@ end interface
 !
 !  \item[{[halo_width]}] 
 !   Set the maximum width of the halo region on all edges. Defaults to 0.
+! 
+!  \item[{[lbounds]}] 
+!   An integer array of length rank, with the lower index for each dimension.
+!
+!  \item[{[ubounds]}] 
+!   An integer array of length rank, with the upper index for each dimension.
 ! 
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -358,10 +271,127 @@ end interface
         
         ! Call the list function to make the array
         ESMF_ArrayCreateBySpec = ESMF_ArrayCreateByList(rank, type, kind, &
-                                                   counts, halo_width, status)
+                                                       counts, halo_width, &
+                                                       lbounds, ubounds, status)
         if (rcpresent) rc = status
 
         end function ESMF_ArrayCreateBySpec
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayCreateByList -- Create an Array specifying all options.
+
+! !INTERFACE:
+      function ESMF_ArrayCreateByList(rank, type, kind, counts, &
+                                      halo_width, lbounds, ubounds, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Array) :: ESMF_ArrayCreateByList
+!
+! !ARGUMENTS:
+      integer, intent(in) :: rank
+      type(ESMF_DataType), intent(in) :: type
+      type(ESMF_DataKind), intent(in) :: kind
+      integer, dimension(:), intent(in) :: counts
+      integer, intent(in), optional :: halo_width 
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new Array and allocate data space, which remains uninitialized.
+!  The return value is a new Array.
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!  \item[rank]
+!    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
+!
+!  \item[type]
+!    Array type.  Valid types include {\tt ESMF\_DATA\_INTEGER},
+!    {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL}, 
+!    {\tt ESMF\_DATA\_CHARACTER}.
+!
+!  \item[kind]
+!    Array kind.  Valid kinds include {\tt ESMF\_KIND\_I4}, 
+!    {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8}, 
+!    {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}. 
+!
+!  \item[counts]
+!    The number of items in each dimension of the array.  This is a 1D
+!    integer array the same length as the rank.
+!
+!  \item[{[halo_width]}] 
+!   Set the maximum width of the halo region on all edges. Defaults to 0.
+! 
+!  \item[{[lbounds]}] 
+!   An integer array of length rank, with the lower index for each dimension.
+!
+!  \item[{[ubounds]}] 
+!   An integer array of length rank, with the upper index for each dimension.
+! 
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+
+        ! Local vars
+        type (ESMF_Array) :: array          ! new C++ Array
+        integer :: hwidth                   ! local copy of halo width 
+        integer, dimension(ESMF_MAXDIM) :: lb, ub  ! local bounds
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        array%this = ESMF_NULL_POINTER
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Always supply a halo value, setting it to 0 if not specified. 
+        if (present(halo_width)) then 
+          hwidth = halo_width 
+        else 
+          hwidth = 0 
+        endif 
+        ! Assume defaults first, then alter if lb or ub specified. 
+        lb = 1 
+        ub(1:size(counts)) = counts 
+        if (present(lbounds)) then 
+            lb(1:size(lbounds)) = lbounds 
+        endif 
+        if (present(ubounds)) then 
+            ub(1:size(ubounds)) = ubounds 
+        endif 
+
+ 
+        ! TODO: should this take the counts, or not?  for now i am going to
+        !  set the counts after i have created the f90 array and not here.
+        call c_ESMC_ArrayCreateNoData(array, rank, type, kind, &
+                                            ESMF_FROM_FORTRAN, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array construction error"
+          return
+        endif
+
+        call ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, &
+                                       kind, lb, ub, status)
+
+        ! Set return values
+        ESMF_ArrayCreateByList = array 
+        if (rcpresent) rc = status
+
+        end function ESMF_ArrayCreateByList
 
 
 !------------------------------------------------------------------------------
@@ -369,7 +399,8 @@ end interface
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add F90 ptr to array
 
 ! !INTERFACE:
-     subroutine ESMF_ArrayConstructF90Ptr(array, counts, hwidth, rank, type, kind, rc)
+     subroutine ESMF_ArrayConstructF90Ptr(array, counts, hwidth, &
+                                         rank, type, kind, lbounds, ubounds, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(inout) :: array
@@ -378,7 +409,9 @@ end interface
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
-      integer, intent(out), optional :: rc 
+      integer, dimension(:), intent(in) :: lbounds
+      integer, dimension(:), intent(in) :: ubounds
+      integer, intent(out) :: rc 
 !
 ! !DESCRIPTION:
 !  Take a partially created {\tt Array} and T/K/R information and call the
@@ -404,19 +437,25 @@ end interface
 !  \item[rank]
 !    Array rank.
 !    This must match what is already in the array - it is here only as
-!    a convienience.
+!    a convenience.
 !
 !  \item[type]
 !    Array type.
 !    This must match what is already in the array - it is here only as
-!    a convienience.
+!    a convenience.
 !
 !  \item[kind]
 !    Array kind. 
 !    This must match what is already in the array - it is here only as
-!    a convienience.
+!    a convenience.
 !
-!   \item[{[rc]}]
+!   \item[lbounds]
+!    The lower index values per rank.
+!
+!   \item[ubounds]
+!    The upper index values per rank.
+!
+!   \item[rc]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -426,18 +465,13 @@ end interface
 
 
         ! Local vars
-        integer :: status                   ! local error status
-        logical :: rcpresent                ! did user specify rc?
         integer :: localkind, localtype
 
-        status = ESMF_FAILURE
-        rcpresent = .FALSE.
-
         ! Initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
+        ! Note from this point down in the calling stack rc is not optional.
+        ! This is all internal code, heavily macroized - no reason to add
+        ! unnecessary code to check for non-present error return variables.
+        rc = ESMF_FAILURE
 
         localtype = type%dtype
         localkind = kind%dkind
@@ -454,11 +488,14 @@ end interface
               case (1)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI21D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI21D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI41D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI41D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI81D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI81D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -466,11 +503,14 @@ end interface
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI22D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI22D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI42D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI42D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI82D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI82D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -478,11 +518,14 @@ end interface
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI23D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI23D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI43D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI43D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI83D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI83D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -490,11 +533,14 @@ end interface
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI24D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI24D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI44D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI44D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI84D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI84D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -502,11 +548,14 @@ end interface
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
-                    call ESMF_ArrayConstructF90PtrI25D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI25D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I4%dkind)
-                    call ESMF_ArrayConstructF90PtrI45D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI45D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_I8%dkind)
-                    call ESMF_ArrayConstructF90PtrI85D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrI85D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -519,9 +568,11 @@ end interface
               case (1)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR41D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR41D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR81D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR81D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -529,9 +580,11 @@ end interface
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR42D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR42D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR82D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR82D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -539,9 +592,11 @@ end interface
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR43D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR43D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR83D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR83D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -549,9 +604,11 @@ end interface
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR44D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR44D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR84D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR84D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -559,9 +616,11 @@ end interface
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
-                    call ESMF_ArrayConstructF90PtrR45D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR45D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case (ESMF_R8%dkind)
-                    call ESMF_ArrayConstructF90PtrR85D(array, counts, hwidth, rc=status)
+                    call ESMF_ArrayConstructF90PtrR85D(array, counts, hwidth, &
+                         lbounds=lbounds, ubounds=ubounds, rc=rc)
                   case default
                     print *, "unsupported kind"
                 end select
@@ -573,9 +632,7 @@ end interface
             print *, "unsupported type"
          end select
 
-
-        ! Set return code if caller specified it
-        if (rcpresent) rc = status
+        ! Note: rc is already set, nothing to do here.
 
         end subroutine ESMF_ArrayConstructF90Ptr
 
@@ -613,55 +670,55 @@ end interface
 
 !! < start of macros which become actual function bodies after expansion >
 
-ArrayCreateByMTArrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayCreateByMTArrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayCreateByMTArrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayCreateByMTArrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(integer, I2, 2, COL2, LEN2, RNG1, LOC2)
 
-ArrayCreateByMTArrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayCreateByMTArrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayCreateByMTArrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayCreateByMTArrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayCreateByMTArrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayCreateByMTArrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayCreateByMTArrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayCreateByMTArrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayCreateByMTArrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayCreateByMTArrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayCreateByMTArrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayCreateByMTArrMacro(real, R4, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayCreateByMTArrMacro(real, R8, 1, COL1, LEN1, LOC1)
+ArrayCreateByMTArrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayCreateByMTArrMacro(real, R4, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayCreateByMTArrMacro(real, R8, 2, COL2, LEN2, LOC2)
+ArrayCreateByMTArrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayCreateByMTArrMacro(real, R4, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayCreateByMTArrMacro(real, R8, 3, COL3, LEN3, LOC3)
+ArrayCreateByMTArrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayCreateByMTArrMacro(real, R4, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayCreateByMTArrMacro(real, R8, 4, COL4, LEN4, LOC4)
+ArrayCreateByMTArrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayCreateByMTArrMacro(real, R4, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, LOC5)
+ArrayCreateByMTArrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 
 !------------------------------------------------------------------------------
@@ -837,110 +894,110 @@ ArrayCreateByFullPtrMacro(real, R8, 5, COL5, LEN5, LOC5)
 
 !! < start of macros which become actual function bodies after expansion >
 
-ArrayConstructF90PtrMacro(integer, I2, 1, COL1, LEN1, LOC1)
+ArrayConstructF90PtrMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayConstructF90PtrMacro(integer, I4, 1, COL1, LEN1, LOC1)
+ArrayConstructF90PtrMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayConstructF90PtrMacro(integer, I8, 1, COL1, LEN1, LOC1)
+ArrayConstructF90PtrMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayConstructF90PtrMacro(integer, I2, 2, COL2, LEN2, LOC2)
+ArrayConstructF90PtrMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayConstructF90PtrMacro(integer, I4, 2, COL2, LEN2, LOC2)
+ArrayConstructF90PtrMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayConstructF90PtrMacro(integer, I8, 2, COL2, LEN2, LOC2)
+ArrayConstructF90PtrMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayConstructF90PtrMacro(integer, I2, 3, COL3, LEN3, LOC3)
+ArrayConstructF90PtrMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayConstructF90PtrMacro(integer, I4, 3, COL3, LEN3, LOC3)
+ArrayConstructF90PtrMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayConstructF90PtrMacro(integer, I8, 3, COL3, LEN3, LOC3)
+ArrayConstructF90PtrMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayConstructF90PtrMacro(integer, I2, 4, COL4, LEN4, LOC4)
+ArrayConstructF90PtrMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayConstructF90PtrMacro(integer, I4, 4, COL4, LEN4, LOC4)
+ArrayConstructF90PtrMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayConstructF90PtrMacro(integer, I8, 4, COL4, LEN4, LOC4)
+ArrayConstructF90PtrMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayConstructF90PtrMacro(integer, I2, 5, COL5, LEN5, LOC5)
+ArrayConstructF90PtrMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayConstructF90PtrMacro(integer, I4, 5, COL5, LEN5, LOC5)
+ArrayConstructF90PtrMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayConstructF90PtrMacro(integer, I8, 5, COL5, LEN5, LOC5)
+ArrayConstructF90PtrMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayConstructF90PtrMacro(real, R4, 1, COL1, LEN1, LOC1)
+ArrayConstructF90PtrMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayConstructF90PtrMacro(real, R8, 1, COL1, LEN1, LOC1)
+ArrayConstructF90PtrMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayConstructF90PtrMacro(real, R4, 2, COL2, LEN2, LOC2)
+ArrayConstructF90PtrMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayConstructF90PtrMacro(real, R8, 2, COL2, LEN2, LOC2)
+ArrayConstructF90PtrMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayConstructF90PtrMacro(real, R4, 3, COL3, LEN3, LOC3)
+ArrayConstructF90PtrMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayConstructF90PtrMacro(real, R8, 3, COL3, LEN3, LOC3)
+ArrayConstructF90PtrMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayConstructF90PtrMacro(real, R4, 4, COL4, LEN4, LOC4)
+ArrayConstructF90PtrMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayConstructF90PtrMacro(real, R8, 4, COL4, LEN4, LOC4)
+ArrayConstructF90PtrMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayConstructF90PtrMacro(real, R4, 5, COL5, LEN5, LOC5)
+ArrayConstructF90PtrMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayConstructF90PtrMacro(real, R8, 5, COL5, LEN5, LOC5)
+ArrayConstructF90PtrMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 !! < start of macros which become actual function bodies after expansion >
 
-ArrayGetDataMacro(integer, I2, 1, COL1, LEN1, LOC1)
+ArrayGetDataMacro(integer, I2, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayGetDataMacro(integer, I4, 1, COL1, LEN1, LOC1)
+ArrayGetDataMacro(integer, I4, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayGetDataMacro(integer, I8, 1, COL1, LEN1, LOC1)
+ArrayGetDataMacro(integer, I8, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayGetDataMacro(integer, I2, 2, COL2, LEN2, LOC2)
+ArrayGetDataMacro(integer, I2, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayGetDataMacro(integer, I4, 2, COL2, LEN2, LOC2)
+ArrayGetDataMacro(integer, I4, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayGetDataMacro(integer, I8, 2, COL2, LEN2, LOC2)
+ArrayGetDataMacro(integer, I8, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayGetDataMacro(integer, I2, 3, COL3, LEN3, LOC3)
+ArrayGetDataMacro(integer, I2, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayGetDataMacro(integer, I4, 3, COL3, LEN3, LOC3)
+ArrayGetDataMacro(integer, I4, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayGetDataMacro(integer, I8, 3, COL3, LEN3, LOC3)
+ArrayGetDataMacro(integer, I8, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayGetDataMacro(integer, I2, 4, COL4, LEN4, LOC4)
+ArrayGetDataMacro(integer, I2, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayGetDataMacro(integer, I4, 4, COL4, LEN4, LOC4)
+ArrayGetDataMacro(integer, I4, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayGetDataMacro(integer, I8, 4, COL4, LEN4, LOC4)
+ArrayGetDataMacro(integer, I8, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayGetDataMacro(integer, I2, 5, COL5, LEN5, LOC5)
+ArrayGetDataMacro(integer, I2, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayGetDataMacro(integer, I4, 5, COL5, LEN5, LOC5)
+ArrayGetDataMacro(integer, I4, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayGetDataMacro(integer, I8, 5, COL5, LEN5, LOC5)
+ArrayGetDataMacro(integer, I8, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayGetDataMacro(real, R4, 1, COL1, LEN1, LOC1)
+ArrayGetDataMacro(real, R4, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayGetDataMacro(real, R8, 1, COL1, LEN1, LOC1)
+ArrayGetDataMacro(real, R8, 1, COL1, LEN1, RNG1, LOC1)
 
-ArrayGetDataMacro(real, R4, 2, COL2, LEN2, LOC2)
+ArrayGetDataMacro(real, R4, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayGetDataMacro(real, R8, 2, COL2, LEN2, LOC2)
+ArrayGetDataMacro(real, R8, 2, COL2, LEN2, RNG2, LOC2)
 
-ArrayGetDataMacro(real, R4, 3, COL3, LEN3, LOC3)
+ArrayGetDataMacro(real, R4, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayGetDataMacro(real, R8, 3, COL3, LEN3, LOC3)
+ArrayGetDataMacro(real, R8, 3, COL3, LEN3, RNG3, LOC3)
 
-ArrayGetDataMacro(real, R4, 4, COL4, LEN4, LOC4)
+ArrayGetDataMacro(real, R4, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayGetDataMacro(real, R8, 4, COL4, LEN4, LOC4)
+ArrayGetDataMacro(real, R8, 4, COL4, LEN4, RNG4, LOC4)
 
-ArrayGetDataMacro(real, R4, 5, COL5, LEN5, LOC5)
+ArrayGetDataMacro(real, R4, 5, COL5, LEN5, RNG5, LOC5)
 
-ArrayGetDataMacro(real, R8, 5, COL5, LEN5, LOC5)
+ArrayGetDataMacro(real, R8, 5, COL5, LEN5, RNG5, LOC5)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -1098,7 +1155,8 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 ! !IROUTINE:  ESMF_ArrayF90Allocate - Allocate an F90 pointer and set Array info
 !
 ! !INTERFACE: 
-     subroutine ESMF_ArrayF90Allocate(array, rank, type, kind, counts, hwidth, rc)
+     subroutine ESMF_ArrayF90Allocate(array, rank, type, kind, &
+                                      counts, lbounds, ubounds, hwidth, rc)
 ! 
 ! !ARGUMENTS: 
       type(ESMF_Array), intent(inout) :: array 
@@ -1106,6 +1164,8 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
       integer, dimension(:), intent(in) :: counts 
+      integer, dimension(:), intent(in) :: lbounds 
+      integer, dimension(:), intent(in) :: ubounds 
       integer, intent(in) :: hwidth 
       integer, intent(out), optional :: rc 
 ! 
@@ -1123,6 +1183,10 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 !          The {\tt Array} kind (short/2, long/8, etc).  
 !     \item[counts]  
 !          An integer array, size {\tt rank}, of each dimension length. 
+!     \item[lbounds]  
+!          An integer array, size {\tt rank}, of each dimensions lower index.
+!     \item[ubounds]  
+!          An integer array, size {\tt rank}, of each dimensions upper index.
 !     \item[hwidth]  
 !          An integer width, single value, applied to each dimension. 
 !     \item[{[rc]}]  
@@ -1133,8 +1197,8 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 ! !REQUIREMENTS: 
  
     integer :: status                               ! local error status 
-    integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
-    integer, dimension(ESMF_MAXDIM) :: strides, offsets
+    integer, dimension(ESMF_MAXDIM) :: lb, ub
+    integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind, localtype
 
     !! local variables, expanded by macro
@@ -1144,6 +1208,9 @@ ArrayAllLocalVarMacro()
     status = ESMF_FAILURE  
     if (present(rc)) rc = ESMF_FAILURE
  
+    lb(1:size(lbounds)) = lbounds
+    ub(1:size(ubounds)) = ubounds
+
     localtype = type%dtype
     localkind = kind%dkind
 
@@ -1154,55 +1221,55 @@ ArrayAllLocalVarMacro()
           case (1)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(I2, 1, RNG1, LOC1)
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(I4, 1, RNG1, LOC1)
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(I8, 1, RNG1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(I2, 2, RNG2, LOC2)
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(I4, 2, RNG2, LOC2)
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(I8, 2, RNG2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
+AllocAllocateMacro(I2, 3, RNG3, LOC3)       
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
+AllocAllocateMacro(I4, 3, RNG3, LOC3)       
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+AllocAllocateMacro(I8, 3, RNG3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
+AllocAllocateMacro(I2, 4, RNG4, LOC4)       
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
+AllocAllocateMacro(I4, 4, RNG4, LOC4)       
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+AllocAllocateMacro(I8, 4, RNG4, LOC4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocAllocateMacro(integer, I2, 5, COL5, LEN5, LOC5)       
+AllocAllocateMacro(I2, 5, RNG5, LOC5)       
               case (ESMF_I4%dkind)
-AllocAllocateMacro(integer, I4, 5, COL5, LEN5, LOC5)       
+AllocAllocateMacro(I4, 5, RNG5, LOC5)       
               case (ESMF_I8%dkind)
-AllocAllocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
+AllocAllocateMacro(I8, 5, RNG5, LOC5)
               case default
             end select
 
@@ -1214,45 +1281,45 @@ AllocAllocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
           case (1)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(R4, 1, RNG1, LOC1)
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+AllocAllocateMacro(R8, 1, RNG1, LOC1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(R4, 2, RNG2, LOC2)
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+AllocAllocateMacro(R8, 2, RNG2, LOC2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
+AllocAllocateMacro(R4, 3, RNG3, LOC3)       
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+AllocAllocateMacro(R8, 3, RNG3, LOC3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
+AllocAllocateMacro(R4, 4, RNG4, LOC4)       
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+AllocAllocateMacro(R8, 4, RNG4, LOC4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocAllocateMacro(real, R4, 5, COL5, LEN5, LOC5)       
+AllocAllocateMacro(R4, 5, RNG5, LOC5)       
               case (ESMF_R8%dkind)
-AllocAllocateMacro(real, R8, 5, COL5, LEN5, LOC5)
+AllocAllocateMacro(R8, 5, RNG5, LOC5)
               case default
             end select
 
@@ -1318,55 +1385,55 @@ ArrayAllLocalVarMacro()
           case (1)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(I2, 1)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(I4, 1)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(I8, 1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(I2, 2)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(I4, 2)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(I8, 2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 3, COL3, LEN3, LOC3)       
+AllocDeallocateMacro(I2, 3)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 3, COL3, LEN3, LOC3)       
+AllocDeallocateMacro(I4, 3)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 3, COL3, LEN3, LOC3)
+AllocDeallocateMacro(I8, 3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 4, COL4, LEN4, LOC4)       
+AllocDeallocateMacro(I2, 4)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 4, COL4, LEN4, LOC4)       
+AllocDeallocateMacro(I4, 4)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 4, COL4, LEN4, LOC4)
+AllocDeallocateMacro(I8, 4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
-AllocDeallocateMacro(integer, I2, 5, COL5, LEN5, LOC5)       
+AllocDeallocateMacro(I2, 5)
               case (ESMF_I4%dkind)
-AllocDeallocateMacro(integer, I4, 5, COL5, LEN5, LOC5)       
+AllocDeallocateMacro(I4, 5)
               case (ESMF_I8%dkind)
-AllocDeallocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
+AllocDeallocateMacro(I8, 5)
               case default
             end select
 
@@ -1378,45 +1445,45 @@ AllocDeallocateMacro(integer, I8, 5, COL5, LEN5, LOC5)
           case (1)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(R4, 1)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 1, COL1, LEN1, LOC1)
+AllocDeallocateMacro(R8, 1)
               case default
             end select
 
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(R4, 2)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 2, COL2, LEN2, LOC2)
+AllocDeallocateMacro(R8, 2)
               case default
             end select
 
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 3, COL3, LEN3, LOC3)       
+AllocDeallocateMacro(R4, 3)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
+AllocDeallocateMacro(R8, 3)
               case default
             end select
 
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 4, COL4, LEN4, LOC4)       
+AllocDeallocateMacro(R4, 4)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
+AllocDeallocateMacro(R8, 4)
               case default
             end select
 
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
-AllocDeallocateMacro(real, R4, 5, COL5, LEN5, LOC5)       
+AllocDeallocateMacro(R4, 5)
               case (ESMF_R8%dkind)
-AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
+AllocDeallocateMacro(R8, 5)
               case default
             end select
 
