@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.9 2003/03/04 01:10:08 eschwab Exp $
+# $Id: do_newclass,v 1.10 2003/03/04 22:42:29 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -79,12 +79,6 @@ endif
         sed 's/<Comp>/'$comp'/g' > ../interface/ESMF_${class}_C.F90
       endif
 
-      # F90 unit test driver
-      if(!(-r ../tests/ESMF_${class}Test.F90)) then
-        cat $DOCT_DIR/ESMF_classTest.F90 | \
-        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
-        sed 's/<Comp>/'$comp'/g' > ../tests/ESMF_${class}Test.F90
-      endif
       breaksw
   case c:
       # C++ implementation file
@@ -115,14 +109,24 @@ endif
         sed 's/<Comp>/'$comp'/g' > ../interface/ESMC_${class}_F.C
       endif
 
-      # C++ unit test driver
-      if(!(-r ../tests/ESMC_${class}Test.C)) then
-        cat $DOCT_DIR/ESMC_classTest.C | \
-        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
-        sed 's/<Comp>/'$comp'/g' > ../tests/ESMC_${class}Test.C
-      endif
       breaksw
   default:
     echo "Valid options are: [ c | f]"
     exit
   endsw
+
+# get unit test drivers in both languages (implementation and interface)
+
+  # F90 unit test driver
+  if(!(-r ../tests/ESMF_${class}Test.F90)) then
+    cat $DOCT_DIR/ESMF_classTest.F90 | \
+    sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+    sed 's/<Comp>/'$comp'/g' > ../tests/ESMF_${class}Test.F90
+  endif
+
+  # C++ unit test driver
+  if(!(-r ../tests/ESMC_${class}Test.C)) then
+    cat $DOCT_DIR/ESMC_classTest.C | \
+    sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+    sed 's/<Comp>/'$comp'/g' > ../tests/ESMC_${class}Test.C
+  endif
