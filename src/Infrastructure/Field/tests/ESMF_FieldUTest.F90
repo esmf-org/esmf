@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.66 2004/08/02 17:02:41 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.67 2004/08/26 20:36:40 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.66 2004/08/02 17:02:41 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.67 2004/08/26 20:36:40 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -50,7 +50,7 @@
       character(ESMF_MAXSTR) :: name
 
 !     !LOCAL VARIABLES:
-      integer :: x, y, i, count
+      integer :: x, y, i, count, npets
       type(ESMF_DELayout) :: delayout
       type(ESMF_VM) :: vm
       type(ESMF_Grid) :: grid, grid2, grid3, grid4
@@ -82,8 +82,10 @@
 !------------------------------------------------------------------------------- 
       print *, "Starting job"
 
-      call ESMF_Initialize(rc=rc)
-      call ESMF_VMGetGlobal(vm, rc)
+      call ESMF_Initialize(vm=vm, rc=rc)
+      call ESMF_VMGet(vm, petCount=npets, rc=rc)
+      print *, "NUMBER_OF_PROCESSORS ", npets
+
 
       !------------------------------------------------------------------------
       ! several calls to field need a valid grid.  these will be used in
