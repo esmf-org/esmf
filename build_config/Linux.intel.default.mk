@@ -1,4 +1,4 @@
-# $Id: Linux.intel.default.mk,v 1.2 2003/10/15 23:38:31 nscollins Exp $
+# $Id: Linux.intel.default.mk,v 1.3 2003/10/16 17:53:48 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -19,7 +19,6 @@ endif
 
 ifeq ($(ESMF_COMM),lam)
 # this section is set up for LAM mpi
-#ESMC_MPIRUN   = 
 MPI_HOME       = 
 MPI_LIB        = -lmpi -llam
 MPI_INCLUDE    = 
@@ -27,7 +26,6 @@ MPIRUN         =  mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpich)
-#ESMC_MPIRUN   = 
 MPI_HOME       = 
 MPI_LIB        = -lmpich 
 MPI_INCLUDE    = -DESMF_MPICH=1
@@ -36,11 +34,10 @@ endif
 
 ifeq ($(ESMF_COMM),mpiuni)
 # this section is set up to bypass all MPI
-# #ESMC_MPIRUN      = 
-# MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
-# MPI_LIB        = -lmpiuni
-# MPI_INCLUDE    = -I${MPI_HOME}
-# MPIRUN         =  ${MPI_HOME}/mpirun
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_LIB        = -lmpiuni
+MPI_INCLUDE    = -I${MPI_HOME}
+MPIRUN         =  ${MPI_HOME}/mpirun
 endif
 
 
@@ -60,66 +57,44 @@ SED		   = /bin/sed
 SH_LD		   = ecc 
 # ################## Compilers, Linkers, and Loaders ########################
 #
+ifneq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
 C_CC		   = ecc -size_lp64
 C_FC		   = efc -size_lp64
-C_CLINKER	   = ecc -size_lp64
-C_FLINKER	   = efc -size_lp64
-CXX_CC		   = ecc  -size_lp64
-CXX_FC		   = efc -mp  -size_lp64
-CXX_CLINKER	   = ecc -size_lp64
-CXX_FLINKER	   = ecc -size_lp64
-C_F90CXXLD         = efc -mp -size_lp64
-C_CXXF90LD         = ecc  -size_lp64
-C_CXXSO            = ecc -shared -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = icc
 C_FC		   = ifc
-C_CLINKER	   = icc
-C_FLINKER	   = ifc
-CXX_CC		   = icc
-CXX_FC		   = ifc -mp
-CXX_CLINKER	   = icc
-CXX_FLINKER	   = icc
-C_F90CXXLD         = ifc -mp
-C_CXXF90LD         = icc 
-C_CXXSO            = icc -shared 
 endif
+endif
+
 ifeq ($(ESMF_COMM),mpich)
 ifeq ($(ESMF_PREC),64)
 C_CC		   = mpiCC -size_lp64
 C_FC		   = mpif90 -size_lp64
-C_CLINKER	   = mpiCC -size_lp64
-C_FLINKER	   = mpif90 -size_lp64
-CXX_CC		   = mpiCC  -size_lp64
-CXX_FC		   = mpif90 -mp  -size_lp64
-CXX_CLINKER	   = mpiCC -size_lp64
-CXX_FLINKER	   = mpiCC -size_lp64
-C_F90CXXLD         = mpif90 -mp -size_lp64
-C_CXXF90LD         = mpiCC  -size_lp64
-C_CXXSO            = mpiCC -shared -size_lp64
 endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = mpiCC
 C_FC		   = mpif90
-C_CLINKER	   = mpiCC
-C_FLINKER	   = mpif90
-CXX_CC		   = mpiCC
-CXX_FC		   = mpif90 -mp
-CXX_CLINKER	   = mpiCC
-CXX_FLINKER	   = mpiCC
-C_F90CXXLD         = mpif90 -mp
-C_CXXF90LD         = mpiCC 
-C_CXXSO            = mpiCC -shared 
 endif
 endif
+
+C_CLINKER	   = ${C_CC}
+C_FLINKER	   = ${C_FC}
+CXX_CC		   = ${C_CC}
+CXX_FC		   = ${C_FC} -mp
+CXX_CLINKER	   = ${C_CC}
+CXX_FLINKER	   = ${C_CC}
+C_F90CXXLD         = ${C_FC} -mp
+C_CXXF90LD         = ${C_CC}
+C_CXXSO            = ${C_CC} -shared
+
 # ######################### C and Fortran compiler flags ####################
 C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CCV		   = ${C_CC} -V -c -w -x c
-C_FCV              = efc -V -c -w
+C_FCV              = ${C_FC} -V -c -w
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc -lf2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
