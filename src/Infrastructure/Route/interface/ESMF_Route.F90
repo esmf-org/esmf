@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.48 2004/04/12 15:44:39 theurich Exp $
+! $Id: ESMF_Route.F90,v 1.49 2004/04/12 16:07:21 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -97,7 +97,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.48 2004/04/12 15:44:39 theurich Exp $'
+      '$Id: ESMF_Route.F90,v 1.49 2004/04/12 16:07:21 theurich Exp $'
 
 !==============================================================================
 !
@@ -1293,7 +1293,12 @@
                my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
                dst_global_start, dst_global_count, layout_dst, &
                my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
-               src_global_start, src_global_count, layout_src, rc)
+               src_global_start, src_global_count, layout_src, rc &
+#ifdef ESMF_ENABLE_VM
+               , delayout_dst, delayout_src &
+#endif
+                                            )
+
 
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
@@ -1313,6 +1318,9 @@
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: src_global_count
       type(ESMF_DELayout), intent(in) :: layout_src
       integer, intent(out), optional :: rc
+#ifdef ESMF_ENABLE_VM
+      type(ESMF_newDELayout), intent(in), optional :: delayout_dst, delayout_src
+#endif
 
 !
 ! !DESCRIPTION:
@@ -1362,11 +1370,19 @@
         enddo
 
         ! Call C++  code
+#ifdef ESMF_ENABLE_VM
+        call c_ESMC_RoutePrecomputeRegrid(route, rank, &
+           my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
+           dst_global_start, dst_global_count, delayout_dst, &
+           my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
+           src_global_start, src_global_count, delayout_src, status)
+#else
         call c_ESMC_RoutePrecomputeRegrid(route, rank, &
            my_DE_dst, AI_dst_exc, AI_dst_tot, AI_dst_count, &
            dst_global_start, dst_global_count, layout_dst, &
            my_DE_src, AI_src_exc, AI_src_tot, AI_src_count, &
            src_global_start, src_global_count, layout_src, status)
+#endif
         if (status .ne. ESMF_SUCCESS) then  
           print *, "Route PrecomputeRegrid error"
           ! don't return before adding 1 back to AIs

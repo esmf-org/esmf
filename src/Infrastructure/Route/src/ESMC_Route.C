@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.85 2004/04/12 15:44:40 theurich Exp $
+// $Id: ESMC_Route.C,v 1.86 2004/04/12 16:07:22 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.85 2004/04/12 15:44:40 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.86 2004/04/12 16:07:22 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1513,7 +1513,9 @@ static int maxroutes = 10;
 
           // get the parent DE identifier for this DE in the rcv layout
 #ifdef ESMF_ENABLE_VM
-  // GJT_TODO
+          delayout_rcv->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
+            &their_de_parent, 1);
+          printf("Match1: %d, %d\n", their_de, their_de_parent);
 #else
           layout_rcv->ESMC_DELayoutGetParentDEID(their_de, layout, 
                                                  &their_de_parent);
@@ -1582,7 +1584,9 @@ static int maxroutes = 10;
 
           // get the parent DE identifier for this DE in the snd layout
 #ifdef ESMF_ENABLE_VM
-  // GJT_TODO
+          delayout_snd->ESMC_newDELayoutGetDEMatch(their_de, *delayout, NULL,
+            &their_de_parent, 1);
+          printf("Match2: %d, %d\n", their_de, their_de_parent);
 #else
           layout_snd->ESMC_DELayoutGetParentDEID(their_de, layout, 
                                                  &their_de_parent);
