@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.1 2003/10/22 01:23:30 eschwab Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.2 2003/10/22 02:33:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmEx.F90,v 1.1 2003/10/22 01:23:30 eschwab Exp $'
+      '$Id: ESMF_AlarmEx.F90,v 1.2 2003/10/22 02:33:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -56,9 +56,6 @@
       ! name, loop counters, result code
       character (len=ESMF_MAXSTR) :: name
       integer :: i, j, rc
-
-      ! initialize ESMF framework
-      !call ESMF_FrameworkInitialize(rc)
 
 !
 !  Setup clock
@@ -246,8 +243,5 @@
       call ESMF_AlarmDestroy(alarm(1), rc=rc)
       call ESMF_AlarmDestroy(alarm(2), rc=rc)
       call ESMF_ClockDestroy(clock, rc=rc)
-
-      ! finalize ESMF framework
-      !call ESMF_FrameworkFinalize(rc)
 
       end program ESMF_AlarmEx

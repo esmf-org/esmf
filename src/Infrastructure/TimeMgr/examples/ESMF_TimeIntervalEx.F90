@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalEx.F90,v 1.12 2003/10/20 20:13:57 cdeluca Exp $
+! $Id: ESMF_TimeIntervalEx.F90,v 1.13 2003/10/22 02:33:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalEx.F90,v 1.12 2003/10/20 20:13:57 cdeluca Exp $'
+      '$Id: ESMF_TimeIntervalEx.F90,v 1.13 2003/10/22 02:33:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate some time intervals
@@ -44,9 +44,6 @@
 
       ! result code
       integer :: rc
-
-      ! initialize ESMF framework
-      call ESMF_Initialize(rc)
 
       ! initialize time interval1 to 1 day, 1800 seconds (0.5 hour)
       call ESMF_TimeIntervalSet(timeInterval1, d=1, s=1800, rc=rc)
@@ -151,8 +148,5 @@
       else if (timeInterval2 == timeInterval1) then
         print *, "TimeInterval2 is equal to TimeInterval1"
       end if
-
-      ! finalize ESMF framework
-      call ESMF_Finalize(rc)
 
       end program ESMF_TimeIntervalEx
