@@ -1,4 +1,4 @@
-% $Id: ESMF_archoverview.tex,v 1.2 2003/04/09 17:08:24 cdeluca Exp $
+% $Id: ESMF_archoverview.tex,v 1.3 2003/05/07 18:31:31 cdeluca Exp $
 
 \section{Architectural Overview}
 \label{sec:ArchOver}
@@ -15,12 +15,14 @@ to Earth science applications, specialized libraries to support consistent time 
 performance, error handling and scalable I/O tools. The {\bf Infrastructure} layer is described in section \ref{sec:infrastructure}.
 A hierarchical combination of {\bf Superstructure}, user code components and Infrastructure are joined together
 to form what is termed an {\it application component} in the ESMF programming paradigm.
+\begin{center}
 \begin{figure}
 \caption{Schematic of ESMF ``sandwich'' architecture. In this design the framework consists of two parts. An upper level
-{\bf Superstructure} layer and a lower-level {\bf Infrastructure} layer. User code (components) is sandwiched between these two layers.}
+{\bf Superstructure} layer and a lower-level {\bf Infrastructure} layer. User code is sandwiched between these two layers.}
 \label{fig:TheESMFwich}
-\scalebox{0.5}{\includegraphics{esfmwich.eps}}
+\scalebox{1.0}{\includegraphics{esmfwich.EPS}}
 \end{figure}
+\end{center}
 
 \subsection{Programming Paradigm}
 A complete, executable assembly of {\bf Superstructure}, user code components and {\bf Infrastructure} collectively forms an ESMF {\it application component}.
@@ -34,13 +36,15 @@ the user code components and that supports a unified high-level {\bf Superstruct
 components. A foundation-level {\bf Infrastructure} is also provided, figure \ref{fig:ESMFApplication} (2),
 to both accelerate user code development and ensure compatibility
 and consistency between components and between hardware platforms. 
+\begin{center}
 \begin{figure}
 \caption{The ESMF programming paradigm defines how an overall application is constructed. An application is an assembly
 of one or more gridded and coupler components (1). Components may make use of the ESMF {\bf Infrastructure} toolkit (2). All components,
 gridded components, coupler components and the top-level application component are primarily user written (3).}
 \label{fig:ESMFApplication}
-\scalebox{0.5}{\includegraphics{ESMFprogrammingparadigm.eps}}
+\scalebox{.5}{\includegraphics{ESMFprogrammingparadigm.eps}}
 \end{figure}
+\end{center}
 
 \subsection{Superstructure}
 \label{sec:superstructure}

@@ -13,12 +13,12 @@ to realize this goal.  Section \ref{sec:Support} of this document includes
 instructions on submitting comments on ESMF v1.0 to our development team.
 
 Our next major release, ESMF v2.0, will occur in April 2004.  At that time, 
-the {\it ESMF User's Guide} will be expanded to include a comprehensive section 
-on how to adapt application codes for the framework, and support staff will be 
-available to assist users with ESMF adoption.  We anticipate, but have 
+the {\it ESMF Reference Manual} will cover a broader range of functionality
+and the interfaces and documentation will be more polished and consistent.  
+We anticipate, but have 
 not scheduled, other public releases and patches between now and ESMF v2.0.  
-Our development focus will be on developing an easy to use, production-quality 
-product.  
+Our focus during this year will be on developing an easy to use, 
+production-quality product.  
 
 \section{What is the Earth System Modeling Framework?}
 
@@ -31,7 +31,7 @@ model components, and a {\it superstructure} for coupling them.
 User code sits between these two layers, making calls to the infrastructure
 libraries beneath it and being scheduled and synchronized by the 
 superstructure above it.  The configuration resembles a sandwich, as
-shown in Figure 1.
+shown in Figure~\ref{fig:TheESMFwich}.
 
 The ESMF architecture is scalable, flexible paradigm for building highly 
 complex climate, weather, and related applications from components such
@@ -63,13 +63,27 @@ ESMF, please see the \htmladdnormallink{{\it ESMF Architecture Document}}
 The {\it Reference Manual} is divided into two main parts.  The 
 first part is a description 
 of the classes in the ESMF superstructure, and the second part is a 
-description of classes in the ESMF infrastructure.  The major class
-presented in the superstructure is the Component class, which can 
-be of type Gridded Component, Coupler Component, or Application Component.
+description of classes in the ESMF infrastructure.  The major classes
+in the ESMF superstructure are Components, which typically represent
+large pieces of functionality such as models, model couplers, and 
+dynamics and physics packages; and States, which are the data structures
+used to store the fields and other data Components require or can 
+make available.  There are both data structures and utilities in the ESMF 
+infrastructure; classes include but are not limited to Fields, 
+collections of Fields (Bundles), Arrays, and utilities for communication,
+decomposition, time management, and application configuration.
 
 For a broad overview of how the ESMF software works, see the 
-\htmladdnormallink{{\it ESMF User's Guide}}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc}.
+\htmladdnormallink{{\it ESMF User's Guide}}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc}.  This 
 
+\begin{center}
+\begin{figure}
+\caption{Schematic of ESMF ``sandwich'' architecture. In this design the framework consists of two parts. An upper level
+{\bf Superstructure} layer and a lower-level {\bf Infrastructure} layer. User code is sandwiched between these two layers.}
+\label{fig:TheESMFwich}
+\scalebox{1.0}{\includegraphics{esmfwich.EPS}}
+\end{figure}
+\end{center}
 
 
 
