@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.115 2004/11/16 17:00:45 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.116 2004/11/23 06:31:35 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -233,7 +233,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.115 2004/11/16 17:00:45 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.116 2004/11/23 06:31:35 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -365,6 +365,7 @@ end function
         logical :: rcpresent                         ! did user specify rc?
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
         character(len=ESMF_MAXSTR) :: msgbuf
+				integer, pointer :: petlist_loc(:) 
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -477,13 +478,14 @@ end function
         ! petlist
         if (present(petlist)) then
           compp%npetlist = size(petlist)
-          allocate(compp%petlist(size(petlist)))
+          allocate(petlist_loc(compp%npetlist))
+					compp%petlist => petlist_loc
           compp%petlist = petlist
         else
           compp%npetlist = 0
           allocate(compp%petlist(0))
         endif
-      
+				
         ! instantiate a default VMPlan
         call ESMF_VMPlanConstruct(compp%vmplan, compp%vm_parent, &
                                   compp%npetlist, compp%petlist)
