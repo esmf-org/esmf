@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.14 2004/06/12 17:17:58 cdeluca Exp $
+! $Id: CouplerMod.F90,v 1.15 2005/02/28 17:03:54 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -68,7 +68,6 @@
       character (len=ESMF_MAXSTR) :: statename
       type(ESMF_Field) :: srcfield, dstfield
       type(ESMF_VM) :: vm
-      type(ESMF_DELayout) :: cpllayout
 
       print *, "Coupler Init starting"
 
@@ -79,9 +78,8 @@
       call ESMF_StateGetField(importState, "SIE", srcfield, rc=rc)
       call ESMF_StateGetField(exportState, "SIE", dstfield, rc=rc)
      
-      ! Get VM info from coupler component and create default layout
+      ! Get VM info from coupler component
       call ESMF_CplCompGet(comp, vm=vm, rc=rc)
-      cpllayout = ESMF_DELayoutCreate(vm, rc=rc)
 
       ! Now see which way we're going so we set the correct fields needed
       ! and compute the right routehandle
@@ -94,7 +92,7 @@
         call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
         ! Precompute and return a routehandle which identifies this operation
-        call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
+        call ESMF_FieldRedistStore(srcfield, dstfield, vm, &
                                    rh_Flow_to_Inject, rc=rc)
 
       endif
@@ -107,7 +105,7 @@
         call ESMF_StateSetNeeded(importState, "FLAG", ESMF_NEEDED, rc)
 
         ! Precompute and return a routehandle which identifies this operation
-        call ESMF_FieldRedistStore(srcfield, dstfield, cpllayout, &
+        call ESMF_FieldRedistStore(srcfield, dstfield, vm, &
                                    rh_Inject_to_Flow, rc=rc)
 
       endif

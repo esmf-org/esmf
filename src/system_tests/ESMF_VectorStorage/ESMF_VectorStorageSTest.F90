@@ -1,4 +1,4 @@
-! $Id: ESMF_VectorStorageSTest.F90,v 1.5 2005/02/14 04:07:17 theurich Exp $
+! $Id: ESMF_VectorStorageSTest.F90,v 1.6 2005/02/28 17:04:39 nscollins Exp $
 !
 ! System test VectorStorage
 !  Description on Sourceforge under System Test #XXXXX
@@ -187,9 +187,9 @@
      ! vector Field back to a different regularly distributed Field
      rh12 = ESMF_RouteHandleCreate(status)
      rh23 = ESMF_RouteHandleCreate(status)
-     call ESMF_FieldRedistStore(humidity1, humidity2, delayout2, &
+     call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
                                 routehandle=rh12, rc=status)
-     call ESMF_FieldRedistStore(humidity2, humidity3, delayout2, &
+     call ESMF_FieldRedistStore(humidity2, humidity3, vm, &
                                 routehandle=rh23, rc=status)
 
     ! get coordinate arrays available for setting the source data array

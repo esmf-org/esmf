@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.11 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: user_coupler.F90,v 1.12 2005/02/28 17:04:29 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -66,7 +66,6 @@
         ! Local variables
         type(ESMF_Field) :: humidity1, humidity2
         type(ESMF_VM) :: vm
-        type(ESMF_DELayout) :: cpllayout
         integer :: status
 
         print *, "User Coupler Init starting"
@@ -80,14 +79,12 @@
         call ESMF_FieldPrint(humidity2, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
-        ! Get VM from coupler component and create a layout with all the PETs
+        ! Get VM from coupler component to use in computing the redist
         call ESMF_CplCompGet(comp, vm=vm, rc=status)
-        if (status .ne. ESMF_SUCCESS) goto 10 
-        cpllayout = ESMF_DELayoutCreate(vm, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
         ! Precompute communication patterns
-        call ESMF_FieldRedistStore(humidity1, humidity2, cpllayout, &
+        call ESMF_FieldRedistStore(humidity1, humidity2, vm, &
                                    routehandle, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10 
 
