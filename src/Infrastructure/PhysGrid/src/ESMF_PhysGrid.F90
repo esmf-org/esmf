@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.12 2002/12/31 16:31:53 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.13 2002/12/31 20:50:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -183,7 +183,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.12 2002/12/31 16:31:53 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.13 2002/12/31 20:50:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -343,8 +343,7 @@
 !     ESMF_PhysGridCreateInternal - Create a new PhysGrid internally
 
 ! !INTERFACE:
-      function ESMF_PhysGridCreateInternal(name, &
-                                           local_min_coord1, &
+      function ESMF_PhysGridCreateInternal(local_min_coord1, &
                                            local_max_coord1, &
                                            local_nmax1, &
                                            local_min_coord2, &
@@ -355,13 +354,12 @@
                                            global_nmax1, &
                                            global_min_coord2, &
                                            global_max_coord2, &
-                                           global_nmax2, rc)
+                                           global_nmax2, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_PhysGrid) :: ESMF_PhysGridCreateInternal
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in), optional :: name  
       real, intent(in) :: local_min_coord1
       real, intent(in) :: local_max_coord1
       integer, intent(in) :: local_nmax1
@@ -374,6 +372,7 @@
       real, intent(in) :: global_min_coord2
       real, intent(in) :: global_max_coord2
       integer, intent(in) :: global_nmax2
+      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -383,8 +382,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          {\tt PhysGrid} name.
 !     \item[[local\_min\_coord1]]
 !          Minimum local physical coordinate in the 1st coordinate direction.
 !     \item[[local\_max\_coord1]]
@@ -409,6 +406,8 @@
 !          Maximum global physical coordinate in the 2nd coordinate direction.
 !     \item[[global\_nmax2]]
 !          Number of global grid increments in the 2nd coordinate direction.
+!     \item[[name]]
+!          {\tt PhysGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -439,13 +438,13 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_PhysGridConstructInternal(physgrid, name, local_min_coord1, &
+      call ESMF_PhysGridConstructInternal(physgrid, local_min_coord1, &
                                           local_max_coord1, local_nmax1, &
                                           local_min_coord2, local_max_coord2, &
                                           local_nmax2, global_min_coord1, &
                                           global_max_coord1, global_nmax1, &
                                           global_min_coord2, global_max_coord2, &
-                                          global_nmax2, status)
+                                          global_nmax2, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysGridCreateInternal: PhysGrid construct"
         return
@@ -588,7 +587,7 @@
 !                                      PhysGrid
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridConstructInternal(physgrid, name, &
+      subroutine ESMF_PhysGridConstructInternal(physgrid, &
                                                 local_min_coord1, &
                                                 local_max_coord1, &
                                                 local_nmax1, &
@@ -600,11 +599,10 @@
                                                 global_nmax1, &
                                                 global_min_coord2, &
                                                 global_max_coord2, &
-                                                global_nmax2, rc)
+                                                global_nmax2, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_PhysGridType) :: physgrid  
-      character (len = *), intent(in), optional :: name  ! name
       real, intent(in) :: local_min_coord1
       real, intent(in) :: local_max_coord1
       integer, intent(in) :: local_nmax1
@@ -617,6 +615,7 @@
       real, intent(in) :: global_min_coord2
       real, intent(in) :: global_max_coord2
       integer, intent(in) :: global_nmax2
+      character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
@@ -631,8 +630,6 @@
 !     \begin{description}
 !     \item[physgrid] 
 !          Pointer to a {\tt PhysGrid}.
-!     \item[[name]]
-!          {\tt PhysGrid} name.
 !     \item[[local\_min\_coord1]]
 !          Minimum local physical coordinate in the 1st coordinate direction.
 !     \item[[local\_max\_coord1]]
@@ -657,6 +654,8 @@
 !          Maximum global physical coordinate in the 2nd coordinate direction.
 !     \item[[global\_nmax2]]
 !          Number of global grid increments in the 2nd coordinate direction.
+!     \item[[name]]
+!          {\tt PhysGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.12 2002/12/31 17:08:34 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.13 2002/12/31 20:50:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -181,7 +181,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.12 2002/12/31 17:08:34 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.13 2002/12/31 20:50:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -391,8 +391,8 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructInternal(distgrid, name, nDE_i, nDE_j, i_max, &
-                                          j_max, rc)
+      call ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, i_max, &
+                                          j_max, name, rc)
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => distgrid
@@ -550,16 +550,16 @@
 !     ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructInternal(distgrid, name, nDE_i, nDE_j, &
-                                                i_max, j_max, rc)
+      subroutine ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, &
+                                                i_max, j_max, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid 
-      character (len = *), intent(in), optional :: name  
       integer, intent(in) :: nDE_i
       integer, intent(in) :: nDE_j
       integer, intent(in) :: i_max
       integer, intent(in) :: j_max
+      character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -574,8 +574,6 @@
 !     \begin{description}
 !     \item[distgrid] 
 !          Pointer to a {\tt DistGrid}.
-!     \item[[name]] 
-!          {\tt DistGrid} name.
 !     \item[[nDE\_i]] 
 !          Number of distributed elements (DE's) in the 1st direction.
 !     \item[[nDE\_j]] 
@@ -584,6 +582,8 @@
 !          Global number of computation cells in the 1st direction.
 !     \item[[j\_max]] 
 !          Global number of computation cells in the 2nd direction.
+!     \item[[name]] 
+!          {\tt DistGrid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.17 2002/12/31 16:31:14 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.18 2002/12/31 20:49:47 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -195,7 +195,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.17 2002/12/31 16:31:14 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.18 2002/12/31 20:49:47 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -406,17 +406,18 @@
 ! !IROUTINE: ESMF_GridCreateInternal - Create a new Grid internally
 
 ! !INTERFACE:
-      function ESMF_GridCreateInternal(name, horz_gridtype, vert_gridtype, &
+      function ESMF_GridCreateInternal(i_max, j_max, &
+                                       horz_gridtype, vert_gridtype, &
                                        horz_stagger, vert_stagger, &
                                        horz_coord_system, vert_coord_system, &
-                                       x_min, x_max, y_min, y_max, i_max, &
-                                       j_max, rc)
+                                       x_min, x_max, y_min, y_max, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateInternal
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in) :: name
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -427,8 +428,7 @@
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
       real, intent(in), optional :: y_max
-      integer, intent(in) :: i_max
-      integer, intent(in) :: j_max
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -438,8 +438,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          {\tt Grid} name.
+!     \item[[i\_max]]
+!          Number of grid increments in the i-direction.
+!     \item[[j\_max]]
+!          Number of grid increments in the j-direction.
 !     \item[[horz\_gridtype]]
 !          Integer specifier to denote horizontal gridtype:
 !             horz\_gridtype=1   equally-spaced lat/lon grid
@@ -478,10 +480,8 @@
 !          Minimum physical coordinate in the y-direction.
 !     \item[[y\_max]]
 !          Maximum physical coordinate in the y-direction.
-!     \item[[i\_max]]
-!          Number of grid increments in the i-direction.
-!     \item[[j\_max]]
-!          Number of grid increments in the j-direction.
+!     \item[[name]]
+!          {\tt Grid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -512,11 +512,11 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_GridConstruct(grid, name, horz_gridtype, vert_gridtype, &
+      call ESMF_GridConstruct(grid, i_max, j_max, &
+                              horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
-                              x_min, x_max, y_min, y_max, i_max, &
-                              j_max, status)
+                              x_min, x_max, y_min, y_max, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
@@ -533,14 +533,14 @@
 ! !IROUTINE: ESMF_GridCreateRead - Create a new Grid read in from a file
 
 ! !INTERFACE:
-      function ESMF_GridCreateRead(name, iospec, rc)
+      function ESMF_GridCreateRead(iospec, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateRead
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in) :: name
       type(ESMF_IOSpec), intent(in) :: iospec   ! file specs
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -550,10 +550,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          {\tt Grid} name.
 !     \item[[iospec]]
 !          File I/O specification.
+!     \item[[name]]
+!          {\tt Grid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -601,14 +601,14 @@
 ! !IROUTINE: ESMF_GridCreateCopy - Create a new Grid by copying another Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateCopy(name, grid_in, rc)
+      function ESMF_GridCreateCopy(grid_in, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateCopy
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -618,10 +618,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          {\tt Grid} name.
 !     \item[[grid\_in]]
 !          {\tt Grid} to be copied.
+!     \item[[name]]
+!          {\tt Grid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -669,19 +669,19 @@
 ! !IROUTINE: ESMF_GridCreateCutout - Create a new Grid as a subset of an existing Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateCutout(name, grid_in, i_min, i_max, j_min, &
-                                     j_max, rc)
+      function ESMF_GridCreateCutout(grid_in, i_min, i_max, j_min, j_max, &
+                                     name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateCutout
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in
       integer, intent(in) :: i_min
       integer, intent(in) :: i_max
       integer, intent(in) :: j_min
       integer, intent(in) :: j_max
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -691,8 +691,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          {\tt Grid} name.
 !     \item[[grid\_in]]
 !          {\tt Grid} to be partially copied.
 !     \item[[i\_min]]
@@ -703,6 +701,8 @@
 !          Minimum global j-index for the region of the grid to be cutout.
 !     \item[[j\_max]]
 !          Maximum global j-index for the region of the grid to be cutout.
+!     \item[[name]]
+!          {\tt Grid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -750,17 +750,17 @@
 ! !IROUTINE: ESMF_GridCreateChangeResolution - Create a new Grid by coarsening or refining an existing Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateChangeResolution(name, grid_in, i_resolution, &
-                                               j_resolution, rc)
+      function ESMF_GridCreateChangeResolution(grid_in, i_resolution, &
+                                               j_resolution, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateChangeResolution
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in
       integer, intent(in) :: i_resolution
       integer, intent(in) :: j_resolution
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -770,8 +770,6 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          {\tt Grid} name.
 !     \item[[grid\_in]]
 !          Source {\tt Grid} to be coarsened or refined.
 !     \item[[i\_resolution]]
@@ -784,6 +782,8 @@
 !          times as resolved in the i-direction as the source {\tt Grid},
 !          whereas j\_resolution=-3 means the new {\tt Grid} will sample every
 !          third point in the j-direction.
+!     \item[[name]]
+!          {\tt Grid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -831,15 +831,15 @@
 ! !IROUTINE: ESMF_GridCreateExchange - Create a new Grid from the intersection of two existing grids
 
 ! !INTERFACE:
-      function ESMF_GridCreateExchange(name, grid_in1, grid_in2, rc)
+      function ESMF_GridCreateExchange(grid_in1, grid_in2, name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateExchange
 !
 ! !ARGUMENTS:
-      character (len=*), intent(in) :: name
       type(ESMF_Grid), intent(in) :: grid_in1
       type(ESMF_Grid), intent(in) :: grid_in2
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -849,12 +849,12 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[[name]]
-!          New {\tt Grid} name.
 !     \item[[grid\_in1]]
 !          First source {\tt Grid}.
 !     \item[[grid\_in2]]
 !          Second source {\tt Grid}.
+!     \item[[name]]
+!          New {\tt Grid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -933,16 +933,16 @@
 ! !IROUTINE: ESMF_GridConstructInternal - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridConstructInternal(grid, name, &
+      subroutine ESMF_GridConstructInternal(grid, i_max, j_max, &
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
-                                            x_min, x_max, y_min, y_max, i_max, &
-                                            j_max, rc)
+                                            x_min, x_max, y_min, y_max, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
-      character (len = *), intent(in), optional :: name
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -953,8 +953,7 @@
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
       real, intent(in), optional :: y_max
-      integer, intent(in) :: i_max
-      integer, intent(in) :: j_max
+      character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -969,6 +968,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid}
+!     \item[[i\_max]]
+!          Number of grid increments in the i-direction.
+!     \item[[j\_max]]
+!          Number of grid increments in the j-direction.
 !     \item[[horz\_gridtype]]
 !          Integer specifier to denote horizontal gridtype:
 !             horz\_gridtype=1   equally-spaced lat/lon grid
@@ -1007,10 +1010,6 @@
 !          Minimum physical coordinate in the y-direction.
 !     \item[[y\_max]]
 !          Maximum physical coordinate in the y-direction.
-!     \item[[i\_max]]
-!          Number of grid increments in the i-direction.
-!     \item[[j\_max]]
-!          Number of grid increments in the j-direction.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1058,9 +1057,9 @@
 
 !     Create main physgrid
       physgrid_name = 'base'
-      call ESMF_GridAddPhysGrid(grid, physgrid_name, physgrid_id, &
+      call ESMF_GridAddPhysGrid(grid, i_max, j_max, physgrid_id, &
                                 x_min, x_max, y_min, y_max, &
-                                i_max, j_max, status)
+                                physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternal: Add physgrid"
         return
@@ -1197,20 +1196,20 @@
 ! !IROUTINE: ESMF_GridAddPhysGrid - Add a PhysGrid to a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridAddPhysGrid(grid, physgrid_name, physgrid_id, &
+      subroutine ESMF_GridAddPhysGrid(grid, i_max, j_max, physgrid_id, &
                                       x_min, x_max, y_min, y_max, &
-                                      i_max, j_max, rc)
+                                      physgrid_name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
-      character (len=*), intent(in), optional :: physgrid_name
+      integer, intent(in) :: i_max
+      integer, intent(in) :: j_max
       integer, intent(out) :: physgrid_id
       real, intent(in), optional :: x_min
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
       real, intent(in), optional :: y_max
-      integer, intent(in) :: i_max
-      integer, intent(in) :: j_max
+      character (len=*), intent(in), optional :: physgrid_name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1220,8 +1219,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item [[physgrid\_name]]
-!          {\tt PhysGrid} name.
+!     \item[[i\_max]]
+!          Number of grid increments in the i-direction.
+!     \item[[j\_max]]
+!          Number of grid increments in the j-direction.
 !     \item [[physgrid\_id]]
 !          Integer identifier for {\tt PhysGrid}.
 !     \item[[x\_min]]
@@ -1232,10 +1233,8 @@
 !          Minimum physical coordinate in the y-direction.
 !     \item[[y\_max]]
 !          Maximum physical coordinate in the y-direction.
-!     \item[[i\_max]]
-!          Number of grid increments in the i-direction.
-!     \item[[j\_max]]
-!          Number of grid increments in the j-direction.
+!     \item [[physgrid\_name]]
+!          {\tt PhysGrid} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1272,19 +1271,20 @@
       local_min_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%start)
       local_max_coord2 = delta2 * real(grid%distgrid%ptr%MyDE%n_dir2%end)
       local_nmax2 = grid%distgrid%ptr%MyDE%n_dir2%size
-      grid%physgrids(1) = ESMF_PhysGridCreate(physgrid_name, &
-                                       local_min_coord1=local_min_coord1, &
-                                       local_max_coord1=local_max_coord1, &
-                                       local_nmax1=local_nmax1, &
-                                       local_min_coord2=local_min_coord2, &
-                                       local_max_coord2=local_max_coord2, &
-                                       local_nmax2=local_nmax2, &
-                                       global_min_coord1=x_min, &
-                                       global_max_coord1=x_max, &
-                                       global_nmax1=i_max, &
-                                       global_min_coord2=y_min, &
-                                       global_max_coord2=y_max, &
-                                       global_nmax2=j_max, rc=status)
+      grid%physgrids(1) = &
+                  ESMF_PhysGridCreate(local_min_coord1=local_min_coord1, &
+                                      local_max_coord1=local_max_coord1, &
+                                      local_nmax1=local_nmax1, &
+                                      local_min_coord2=local_min_coord2, &
+                                      local_max_coord2=local_max_coord2, &
+                                      local_nmax2=local_nmax2, &
+                                      global_min_coord1=x_min, &
+                                      global_max_coord1=x_max, &
+                                      global_nmax1=i_max, &
+                                      global_min_coord2=y_min, &
+                                      global_max_coord2=y_max, &
+                                      global_nmax2=j_max, &
+                                      name=physgrid_name, rc=status)
 
       end subroutine ESMF_GridAddPhysGrid
 
@@ -1795,7 +1795,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
-      character (len=*), intent(in) :: name  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1832,7 +1832,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
-      character (len=*), intent(in) :: name  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1864,13 +1864,13 @@
 ! !IROUTINE: ESMF_GridSetLMaskCopy - Copies a logical mask from one grid to another.
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetLMaskCopy(Grid, name, Grid_in, name_in, rc)
+      subroutine ESMF_GridSetLMaskCopy(Grid, Grid_in, name, name_in, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
       type(ESMF_Grid), intent(in) :: grid_in
-      character (len=*), intent(in) :: name_in  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
+      character (len=*), intent(in), optional :: name_in
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1880,10 +1880,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
-!           {\tt LMask} name to be set.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item [[name]]
+!           {\tt LMask} name to be set.
 !     \item [[name\_in]]
 !           {\tt LMask} name to be copied.
 !     \item[[rc]]
@@ -1908,7 +1908,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
-      character (len=*), intent(in) :: name  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1945,7 +1945,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
-      character (len=*), intent(in) :: name  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1977,13 +1977,13 @@
 ! !IROUTINE: ESMF_GridSetMMaskCopy - Copies a multiplicative mask from one grid to another.
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetMMaskCopy(Grid, name, Grid_in, name_in, rc)
+      subroutine ESMF_GridSetMMaskCopy(Grid, Grid_in, name, name_in, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
       type(ESMF_Grid), intent(in) :: grid_in
-      character (len=*), intent(in) :: name_in  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
+      character (len=*), intent(in), optional :: name_in
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1994,10 +1994,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
-!           {\tt MMask} name to be set.
 !     \item[grid\_in]
 !          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item [[name]]
+!           {\tt MMask} name to be set.
 !     \item [[name\_in]]
 !           {\tt MMask} name to be copied.
 !     \item[[rc]]
@@ -2022,7 +2022,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Array), intent(in) :: array
-      character (len=*), intent(in) :: name  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2059,7 +2059,7 @@
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
       real, dimension (:), pointer :: buffer
-      character (len=*), intent(in) :: name  ! TODO: optional?
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2095,8 +2095,8 @@
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: name  ! TODO: optional?
       integer, intent(in) :: id
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2107,10 +2107,10 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item [[name]]
-!           {\tt Metric} name.
 !     \item[[id]]
 !          Identifier for predescribed metrics.  TODO: make list
+!     \item [[name]]
+!           {\tt Metric} name.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
