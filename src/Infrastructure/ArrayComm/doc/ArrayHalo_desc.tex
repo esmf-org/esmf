@@ -1,0 +1,11 @@
+% $Id: ArrayHalo_desc.tex,v 1.1 2003/11/13 22:29:18 nscollins Exp $
+
+%\subsection{Description}
+
+Halo operations update ghost-cell or halo regions at the boundaries
+of a local data decomposition.  Halo regions are to be considered
+read-only by the local process; their data values can be used to
+compute the new values for cells which are local to this process,
+but they cannot be updated except by a Halo operation.
+
+
