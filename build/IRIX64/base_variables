@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.5 2002/12/20 17:50:13 nscollins Exp $ 
+# $Id: base_variables,v 1.6 2003/01/06 21:19:28 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -31,6 +31,12 @@ G_FOPTFLAGS	   = -g
 O_COPTFLAGS	   = -O3
 #O_FOPTFLAGS	   = -Ofast=ip27 -IPA:cprop=OFF -OPT:IEEE_arithmetic=1
 O_FOPTFLAGS	   = -O3
+# ########################## Fortran compiler ##############################
+#     
+F_FREECPP       = -freeform -cpp
+F_FIXCPP        = -fixedform -cpp -extend_source
+F_FREENOCPP     = -freeform -nocpp
+F_FIXNOCPP      = -fixedform -nocpp -extend_source
 # ########################## C++ compiler ##################################
 #
 CXX_CC		   = CC -64 -mp -woff 1164 -no_prelink -ptused
