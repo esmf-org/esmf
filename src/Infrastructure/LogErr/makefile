@@ -1,12 +1,10 @@
-# $Id: makefile,v 1.3 2003/04/15 20:21:31 nscollins Exp $
+# $Id: makefile,v 1.4 2003/09/17 20:15:36 flanigan Exp $
 
 LOCDIR    = src/Infrastructure/LogErr/
 
 include $(ESMF_DIR)/makefile
 
-#DIRS      = doc
-DIRS      = interface src examples doc
-#DIRS      = src interface examples tests doc
+DIRS      = interface src doc
 
 CLEANDIRS   =
 CLEANFILES  =
