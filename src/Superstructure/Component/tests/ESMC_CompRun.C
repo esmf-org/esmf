@@ -1,4 +1,4 @@
-// $Id: ESMC_CompRun.C,v 1.8 2004/04/28 23:12:11 cdeluca Exp $
+// $Id: ESMC_CompRun.C,v 1.9 2004/04/29 17:27:32 nscollins Exp $
 //
 // Test code which creates a new Component in C++.  The called
 // component is still in F90.
@@ -43,8 +43,7 @@ main(int argc, char **argv)
     // TODO: query framework for default layout here
 
     cname = "Atmosphere";
-    delayout = NULL;
-    comp1 = ESMC_GridCompCreate(cname, delayout, ESMF_ATM, NULL, "grid.rc", &rc);
+    comp1 = ESMC_GridCompCreate(cname, ESMF_ATM, NULL, "grid.rc", &rc);
 
     printf("Grid Comp Create returned, name = '%s'\n", cname);
 
@@ -55,6 +54,10 @@ main(int argc, char **argv)
     // register other entry points
     rc = comp1->ESMC_GridCompSetServices(FTN(externaluser_setservices));
 
+    // in a real application, these need to be created first.
+    instate = NULL;
+    outstate = NULL;
+    clock = NULL;
     rc = comp1->ESMC_GridCompInitialize(instate, outstate, clock, 0);
     printf("Grid Comp Initialize returned\n");
 
