@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.7 2003/05/02 14:26:22 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.8 2003/05/02 19:26:02 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -17,12 +17,13 @@
 
     ! ESMF Framework module
     use ESMF_Mod
-    use ArraysGlobalMod2
+    use InjectArraysMod
     
     implicit none
     
     ! Private data block
     type injectdata
+       type(ESMF_Calendar) :: gregorianCalendar
        type(ESMF_Time) :: inject_start_time
        type(ESMF_Time) :: inject_stop_time
        real :: inject_energy
@@ -53,7 +54,6 @@
         ! local variables
         type(injectdata), pointer :: datablock
         type(wrapper) :: wrap
-        type(ESMF_Calendar) :: gregorianCalendar
 
         print *, "in user register routine"
 
@@ -69,31 +69,8 @@
         print *, "Registered Initialize, Run, and Finalize routines"
 
 
+        ! Allocate private persistent space
         allocate(datablock)
-
-        ! initialize calendar to be Gregorian type
-        call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
-
-        ! initialize start time to 12May2003, 3:00 pm
-        ! for testing, initialize start time to 13May2003, 2:00 pm
-        call ESMF_TimeInit(datablock%inject_start_time, &
-                           YR=int(2003,kind=ESMF_IKIND_I8), &
-                           MM=5, DD=12, H=14, M=0, &
-                           S=int(0,kind=ESMF_IKIND_I8), &
-                           cal=gregorianCalendar, rc=rc)
-
-        ! initialize stop time to 13May2003, 2:00 pm
-        call ESMF_TimeInit(datablock%inject_stop_time, &
-                           YR=int(2003,kind=ESMF_IKIND_I8), &
-                           MM=5, DD=13, H=14, M=0, &
-                           S=int(0,kind=ESMF_IKIND_I8), &
-                           cal=gregorianCalendar, rc=rc)
-
-
-        datablock%inject_energy = 600.0
-        datablock%inject_velocity = 4.5
-        datablock%inject_density = 2.0
-
         wrap%ptr => datablock
         call ESMF_GridCompSetInternalState(comp, wrap, rc)
 
@@ -118,25 +95,59 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real(kind=ESMF_IKIND_R4) :: x_min, x_max, y_min, y_max
+      real :: x_min, x_max, y_min, y_max
       integer :: i_max, j_max
+      real :: in_energy, in_velocity, in_rho
+      integer :: printout
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
+      type(injectdata), pointer :: datablock
+      type(wrapper) :: wrap
+      namelist /input/ i_max, j_max, x_min, x_max, y_min, y_max, &
+                       printout, in_energy, in_velocity, in_rho
+
 
       !
       ! Set initial values
       !
       rc = ESMF_FAILURE
    
-      ! Grid parameters
-      i_max = 156
-      j_max = 72 
-      x_min = 0.0
-      x_max = 2.0e+05
-      y_min = 0.0
-      y_max = 5.0e+04
+      !
+      ! Read in input file
+      !
+      open(10, status="old", file="coupled_inject_input")
+      read(10, input, end=20)
+   20 continue
+
+      ! Set peristent values in saved data block
+      call ESMF_GridCompGetInternalState(gcomp, wrap, rc)
+      datablock => wrap%ptr
+
+      ! initialize calendar to be Gregorian type
+      call ESMF_CalendarInit(datablock%gregorianCalendar, &
+                                          ESMF_CAL_GREGORIAN, rc)
+
+      ! initialize start time to 12May2003, 3:00 pm
+      ! for testing, initialize start time to 13May2003, 2:00 pm
+      call ESMF_TimeInit(datablock%inject_start_time, &
+                                 YR=int(2003,kind=ESMF_IKIND_I8), &
+                                 MM=5, DD=12, H=14, M=0, &
+                                 S=int(0,kind=ESMF_IKIND_I8), &
+                                 cal=datablock%gregorianCalendar, rc=rc)
+
+      ! initialize stop time to 13May2003, 2:00 pm
+      call ESMF_TimeInit(datablock%inject_stop_time, &
+                                 YR=int(2003,kind=ESMF_IKIND_I8), &
+                                 MM=5, DD=13, H=14, M=0, &
+                                 S=int(0,kind=ESMF_IKIND_I8), &
+                                 cal=datablock%gregorianCalendar, rc=rc)
+
+
+      datablock%inject_energy = in_energy
+      datablock%inject_velocity = in_velocity
+      datablock%inject_density = in_rho
 
       !
       ! Query component for information.
@@ -180,14 +191,16 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
       !
       ! create space for data arrays
       !
-      call ArraysGlobalAlloc(grid, rc)
+      call InjectArraysAlloc(grid, rc)
       if(rc .NE. ESMF_SUCCESS) then
-        print *, "ERROR in injector_init:  arraysglobalalloc"
+        print *, "ERROR in injector_init:  injectarraysalloc"
         return
       endif
 
       ! For initialization, add all fields to the import state.  Only the ones
       !  needed will be copied over to the export state for coupling.
+      !  These are empty and will be filled in by the first run of the 
+      !  Coupler.
       call ESMF_StateAddData(importstate, field_sie, rc)
       call ESMF_StateAddData(importstate, field_u, rc)
       call ESMF_StateAddData(importstate, field_v, rc)
@@ -368,7 +381,7 @@ subroutine injector_init(gcomp, importstate, exportstate, clock, rc)
         print *, "Injector Finalize starting"
     
         ! Release our field and data space
-        call ArraysGlobalDealloc(rc)
+        call InjectArraysDealloc(rc)
 
 
         ! Get our local info and release it

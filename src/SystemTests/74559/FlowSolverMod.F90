@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.7 2003/05/02 14:27:47 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.8 2003/05/02 19:26:02 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@
 ! ESMF modules
 !
       use ESMF_Mod
-      use ArraysGlobalMod
+      use FlowArraysMod
     
       implicit none
     
@@ -227,7 +227,7 @@
 !
 ! create space for global arrays
 !
-      call ArraysGlobalAlloc(grid, status)
+      call FlowArraysAlloc(grid, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  arraysglobalalloc"
         return
@@ -1260,7 +1260,7 @@
         rc = ESMF_FAILURE
       endif
 
-      call ArraysGlobalDealloc(status)
+      call FlowArraysDealloc(status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flow_Final"
         return
