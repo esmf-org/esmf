@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.2 2003/01/23 21:05:49 nscollins Exp $
+// $Id: ESMC_State.h,v 1.3 2003/01/29 15:59:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,14 +58,18 @@ enum ESMC_StateType {
                 ESMC_StateImpExp, ESMC_StateUnknown };
 
 enum objtype { Bundle=1, Field=2, Array=3 };
+enum needed { Needed=1, NotNeeded=2 };
+enum ready { ReadyToRead=1, ReadyToWrite=2 };
 
 struct ESMC_DataHolder {
-        enum objtype ot;
- 	union Holder {
-          ESMC_Bundle *bp;
-          ESMC_Field *fp;
-          ESMC_Array *ap;
-        } *holder;
+    enum objtype ot;
+    union Holder {
+        ESMC_Bundle *bp;
+        ESMC_Field *fp;
+        ESMC_Array *ap;
+    } *holder;
+    enum needed nt;
+    enum ready ready;
 };
     
  // class configuration type
