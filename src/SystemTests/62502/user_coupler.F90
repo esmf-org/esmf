@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2003/03/02 19:01:45 nscollins Exp $
+! $Id: user_coupler.F90,v 1.2 2003/03/03 17:33:39 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -69,21 +69,14 @@
 !     ! Local variables
         type(ESMF_State) :: mystatelist(2)
         type(ESMF_Field) :: humidity
-        type(ESMF_Layout) :: mylayout
-        integer :: de_id                        ! the current DE
-
 
         print *, "User Coupler Init starting"
 
         ! This is where the model specific setup code goes.  
 
         ! Query component for information.
-        call ESMF_CompGet(comp, statelist=mystatelist, layout=mylayout, rc=rc)
+        call ESMF_CompGet(comp, statelist=mystatelist, rc=rc)
  
-        ! Something to show we are running on different procs
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
-        print *, "User Coupler Init running on DE ", de_id
-
         ! Print initial states
         call ESMF_StatePrint(mystatelist(1), rc=rc)
         call ESMF_StatePrint(mystatelist(2), rc=rc)
@@ -104,16 +97,9 @@
 !     ! Local variables
         type(ESMF_State) :: mystatelist(2), mysource, mydest
         type(ESMF_Field) :: humidity
-        type(ESMF_Layout) :: mylayout
-        integer :: de_id                        ! the current DE
         integer :: status
 
         print *, "User Coupler Run starting"
-
-        ! Something to show we are running on different procs
-        call ESMF_CompGet(comp, layout=mylayout, rc=status)
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc=status)
-        print *, "User Coupler Run running on DE ", de_id
 
         ! Get information from the component.
         call ESMF_CompGet(comp, statelist=mystatelist, rc=status)
@@ -148,18 +134,9 @@
         integer :: rc
 
 !     ! Local variables
-        type(ESMF_Layout) :: mylayout
-        integer :: de_id                        ! the current DE
 
         print *, "User Coupler Final starting"
     
-        ! Query component for information.
-        call ESMF_CompGet(comp, layout=mylayout, rc=rc)
- 
-        ! Something to show we are running on different procs
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
-        print *, "User Coupler Final running on DE ", de_id
-
         print *, "User Coupler Final returning"
    
     end subroutine user_final

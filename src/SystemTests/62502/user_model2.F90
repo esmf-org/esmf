@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.1 2003/03/02 19:01:45 nscollins Exp $
+! $Id: user_model2.F90,v 1.2 2003/03/03 17:33:39 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -69,20 +69,11 @@
 !     ! Local variables
         type(ESMF_State) :: myimport
         type(ESMF_Field) :: humidity
-        type(ESMF_Layout) :: mylayout
-        integer :: de_id                        ! the current DE
 
 
         print *, "User Comp Init starting"
 
         ! This is where the model specific setup code goes.  
-
-        ! Query component for information.
-        call ESMF_CompGet(comp, layout=mylayout, rc=rc)
- 
-        ! Something to show we are running on different procs
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
-        print *, "User Comp Init running on DE ", de_id
 
         ! Initially import state is empty.
         call ESMF_CompGet(comp, import=myimport, rc=rc)
@@ -104,16 +95,12 @@
 !     ! Local variables
         type(ESMF_State) :: myimport
         type(ESMF_Field) :: humidity
-        type(ESMF_Layout) :: mylayout
-        integer :: de_id                        ! the current DE
         integer :: status
 
         print *, "User Comp Run starting"
 
         ! Something to show we are running on different procs
-        call ESMF_CompGet(comp, import=myimport, layout=mylayout, rc=status)
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc=status)
-        print *, "User Comp Run running on DE ", de_id
+        call ESMF_CompGet(comp, import=myimport, rc=status)
 
         ! Get information from the component.
         call ESMF_StatePrint(myimport, rc=status)
@@ -140,17 +127,9 @@
         integer :: rc
 
 !     ! Local variables
-        type(ESMF_Layout) :: mylayout
-        integer :: de_id                        ! the current DE
 
         print *, "User Comp Final starting"
     
-        ! Query component for information.
-        call ESMF_CompGet(comp, layout=mylayout, rc=rc)
- 
-        ! Something to show we are running on different procs
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc)
-        print *, "User Comp Final running on DE ", de_id
 
         print *, "User Comp Final returning"
    
