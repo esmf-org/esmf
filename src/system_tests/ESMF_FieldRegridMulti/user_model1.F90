@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.2 2004/02/17 17:08:03 jwolfe Exp $
+! $Id: user_model1.F90,v 1.3 2004/02/19 21:33:55 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -100,7 +100,7 @@
         real(ESMF_KIND_R8), dimension(:,:,:), pointer :: idata
         integer :: nDE_i, nDE_j
         real(ESMF_KIND_R8) :: min(2), max(2)
-        integer :: counts(ESMF_MAXGRIDDIM)
+        integer :: counts(3), order(3)
         integer :: ni, nj, nk, de_id
         type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
         type(ESMF_GridStagger) :: horz_stagger, vert_stagger
@@ -143,13 +143,13 @@
         ! Create a datamap to tell the framework which of the 2 axes
         ! correspond to the grid, and which one is multiple scalar
         ! values for the same grid cell.
-        datamap = ESMF_DataMapCreate(ESMF_IO_IJ, rc=rc)
-
-        ! Create the Array and then add it to the field
-        array1 = ESMF_ArrayCreate(arrayspec, counts, rc=rc)
+        order(1) = 0
+        order(2) = 1
+        order(3) = 2
+        datamap = ESMF_DataMapCreate(order, counts=counts(1:1), rc=rc)
 
         ! Create the field 
-        humidity = ESMF_FieldCreate(grid1, array=array1, datamap=datamap, &
+        humidity = ESMF_FieldCreate(grid1, arrayspec=arrayspec, datamap=datamap, &
                                     horizRelloc=ESMF_CELL_CENTER, &
                                     haloWidth=0, name="humidity", rc=rc)
 
