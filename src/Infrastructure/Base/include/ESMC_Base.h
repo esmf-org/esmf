@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.10 2003/03/29 01:44:38 eschwab Exp $
+// $Id: ESMC_Base.h,v 1.11 2003/04/02 20:11:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,6 +44,9 @@ enum ESMC_Status { ESMF_STATE_UNINIT=1,
                    ESMF_STATE_ALLOCATED,
                    ESMF_STATE_BUSY,
                    ESMF_STATE_INVALID };
+
+#define ESMC_NULL_POINTER (0)
+#define ESMC_BAD_POINTER (-1)
 
 // ESMF data types and kinds
 enum ESMC_DataType { ESMF_DATA_INTEGER=1,
