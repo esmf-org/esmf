@@ -1,4 +1,4 @@
-% $Id: Alarm_fex.tex,v 1.6 2003/08/29 22:12:05 eschwab Exp $
+% $Id: Alarm_fex.tex,v 1.7 2003/08/29 22:26:14 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -9,29 +9,30 @@ type(ESMF_Alarm) :: alarm1, alarm2
 ! Initialize one to be a one-shot
 type(ESMF_Time) :: alarmTime
 call ESMF_TimeSet(alarmTime, yr=2002, mm=8, dd=30, calendar=gregorian)
-call ESMF_AlarmSet(alarm1, ringTime=alarmTime)
+call ESMF_AlarmSetup(alarm1, ringTime=alarmTime)
 
 ! Initialize other to ring on an interval
 type(ESMF_TimeInterval) :: alarmInterval
-call ESMF_TimeIntervalInit(alarmInterval, dd=1)
-call ESMF_AlarmInit(alarm2, ringInterval=alarmInterval)
+call ESMF_TimeIntervalSet(alarmInterval, dd=1)
+call ESMF_AlarmSetup(alarm2, ringInterval=alarmInterval)
 
 ! Associate alarms with clock
 call ESMF_ClockAddAlarm(modelTime, alarm1)
 call ESMF_ClockAddAlarm(modelTime, alarm2)
 
 ! Time step, clock reports active alarms in RingingAlarms list
-call ESMF_ClockAdvance(modelTime, ringingAlarms, numActiveAlarms)
+call ESMF_ClockAdvance(modelTime, numRingingAlarms=numActiveAlarms)
 
 ! Process any active alarms
+type(ESMF_Pointer) :: alarm
 do i=1,numActiveAlarms
-  if (ringingAlarms(i) == alarm(i)) then
-    ! process alarm(i)
-    call ProcessAlarm(i)
+  call ESMF_ClockGetRingingAlarm(modelTime, i, alarm)
+  ! process alarm(i)
+  call ProcessAlarm(alarm)  ! user method
 
-   ! after processing alarms, turn off interval alarm to prepare for next
-   !   ring time
-   call ESMF_AlarmTurnOff(alarm(i))
+ ! after processing alarms, turn off interval alarm to prepare for next
+ !   ring time
+ call ESMF_AlarmRingerOff(alarm)
 end do
 
 end if

@@ -1,4 +1,4 @@
-% $Id: Clock_fex.tex,v 1.8 2003/08/29 22:12:05 eschwab Exp $
+% $Id: Clock_fex.tex,v 1.9 2003/08/29 22:26:14 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -14,13 +14,13 @@ call ESMF_CalendarSet(gregorian, ESMF_CAL_GREGORIAN)
 type(ESMF_TimeInterval) :: timeStep
 type(ESMF_Time) :: startTime, stopTime, refTime
 
-call ESMF_TimeIntervalSet(timeStep, ...)
+call ESMF_TimeIntervalSet(timeStep, d=1)
 call ESMF_TimeSet(startTime, yr=2002, mm=8, dd=1, gregorian)
 call ESMF_TimeSet(stopTime, yr=2003, mm=7, dd=31, gregorian)
 call ESMF_TimeSet(refTime, yr=2000, mm=1, dd=1, gregorian)
 
 ! Initialize the Clock
-call ESMF_ClockSet(modelTime, timeStep, startTime, stopTime, refTime)
+call ESMF_ClockSetup(modelTime, timeStep, startTime, stopTime, refTime)
 
 ! Start time advance
 call ESMF_ClockAdvance(modelTime)

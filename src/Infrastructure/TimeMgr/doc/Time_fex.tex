@@ -1,4 +1,4 @@
-% $Id: Time_fex.tex,v 1.7 2003/08/29 22:12:05 eschwab Exp $
+% $Id: Time_fex.tex,v 1.8 2003/08/29 22:26:14 eschwab Exp $
 
 \begin{verbatim}
 use ESMF_Mod
@@ -11,7 +11,7 @@ call ESMF_TimeSet(startTime1, yr=2002, mm=8, dd=1, &
                   h=14, m=25, s=45, ms=250, gregorian)
 
 ! Initialize second to real time (wall clock time)
-call ESMF_TimeGetRealTime(startTime2)
+call ESMF_TimeSyncToRealTime(startTime2)
 
 ! Initialize third to be same as second
 startTime3 = startTime2
