@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.66 2004/11/30 20:59:45 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.67 2004/12/02 17:23:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -4193,6 +4193,11 @@ end function
       endif
 
       ! TODO: decide if these need to be sent before or after
+      allocate(bp%flist(bp%field_count), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, &
+                                     "Field list", &
+                                     ESMF_CONTEXT, rc)) return
+
       do i = 1, bp%field_count
           bp%flist(i) = ESMF_FieldDeserialize(buffer, offset, localrc)
           if (ESMF_LogMsgFoundError(localrc, &
