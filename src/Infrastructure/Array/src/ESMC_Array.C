@@ -28,6 +28,7 @@
 #include <string.h>
 #include <assert.h>
 // associated class definition file
+#include "ESMC_Base.h"
 #include "ESMC_Array.h"
 #include "ESMC_DELayout.h"
 
@@ -35,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.30 2004/04/28 23:11:47 cdeluca Exp $";
+            "$Id: ESMC_Array.C,v 1.31 2004/06/03 12:17:38 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -667,6 +668,87 @@
     return ESMF_SUCCESS; 
 
  } // end ESMC_ArraySetF90Ptr
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayComputeAxisIndex - compute AIs for Arrays for local/global
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayComputeAxisIndex(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DELayout *layout,    // in - layout for the distributed array
+      int decompids[],          // in  - decomposition identifier for each
+                                //       axis (array)
+      int size_decomp) {        // in  - size of decomp array
+
+//
+// !DESCRIPTION:
+//     Compute the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} values.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i, de_pos[ESMF_MAXDIM];
+    int global_counts[ESMF_MAXDIM], global_position[ESMF_MAXDIM], rc;
+    ESMC_AxisIndex *AIPtr;
+
+    for (i=0; i < ESMF_MAXDIM; i++)
+      de_pos[i] = 1;
+
+    rc = layout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, NULL, 
+                                  NULL, NULL, de_pos, size_decomp);
+
+    // Calculate global_positions 
+    for (i=0; i < size_decomp; i++) {
+      global_counts[i] = counts[i] + 1;
+      if (decompids[i] != 0) 
+         global_counts[i] *= de_pos[decompids[i]];
+    }
+
+
+    // loop to set AxisIndex array
+    AIPtr=ai_total;
+    for (i=0; i<size_decomp; i++, AIPtr++) {
+      // check if decomp is out of bounds
+      if ((decompids[i] < 0) || (decompids[i] > size_decomp)) 
+        return(ESMF_FAILURE);
+
+      // if decomp is 0, no decomposition of the axis
+      if (decompids[i] == 0) {
+        AIPtr->min = 0;
+        AIPtr->max = global_counts[i]-1;
+        AIPtr->stride = global_counts[i]; // jw?
+      }
+      // if decomp is 1, use nxDELayout
+      if (decompids[i] == 1) {    
+        int n1 = (global_counts[i]+de_pos[0]-1)/de_pos[0]; // round to nearest
+        AIPtr->min = 0;
+        AIPtr->max = n1-1;        
+        AIPtr->stride = n1;    // jw?      
+      } 
+      // if decomp is 2, use nyDELayout
+      if (decompids[i] == 2) {    
+        int n2 = (global_counts[i]+de_pos[1]-1)/de_pos[1]; // round to nearest
+        AIPtr->min = 0;
+        AIPtr->max = n2-1;
+        AIPtr->stride = n2;   // jw?
+      }
+    }
+     
+    for (i=0; i<this->rank; i++) {
+        ai_comp[i].min = ai_total[i].min + hwidth[0][0];
+        ai_comp[i].max = ai_total[i].max - hwidth[0][0];
+        ai_excl[i].min = ai_comp[i].min + hwidth[0][0];
+        ai_excl[i].max = ai_comp[i].max - hwidth[0][0];
+    }
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_ArrayComputeAxisIndex
 
 //-----------------------------------------------------------------------------
 //BOP
