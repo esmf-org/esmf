@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.5 2003/11/18 01:03:11 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.6 2003/11/18 01:07:57 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -62,7 +62,7 @@
 !$b$ & specific heat capacity\\
 !$q_{o}$ & artificial viscosity coefficient, dimensionless\\
 !$u_{in}$ & inflow velocity (representative velocity)\\
-!\end{tabular}}
+!\end{tabular}
 !
 !
 !EOP
