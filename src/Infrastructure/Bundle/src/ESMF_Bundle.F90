@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.33 2004/03/20 00:08:39 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.34 2004/03/22 21:50:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -154,10 +154,6 @@
 !
        public ESMF_BundleCreate       ! Create a new Bundle
        public ESMF_BundleDestroy      ! Destroy a Bundle
-
-!      public ESMF_BundleAttachData   ! Associate data with a Bundle -
-!                                     !   reference (default) or copy
-!      public ESMF_BundleDetachData   ! Disassociate data with a Bundle
 
        public ESMF_BundleGetName      ! Get Bundle name
 
