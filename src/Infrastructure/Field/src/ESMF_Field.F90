@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.39 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.40 2003/07/18 20:41:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.39 2003/07/17 20:02:47 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.40 2003/07/18 20:41:14 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1016,7 +1016,7 @@
       endif 
 
       call ESMF_ArraySpecGet(arrayspec, rank=rank, rc=status)
-      call ESMF_GridGetDE(grid, lcelltot_index=index, rc=status)
+      call ESMF_GridGetDE(grid, ai_global=index, rc=status)
       if(status .ne. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE"
         return
