@@ -135,6 +135,7 @@
        haloWidth=0, name="u2", iospec=iospec, rc=status)
   if (status.NE.ESMF_SUCCESS) then
      print*, "'field_u2  = ESMF_FieldCreate' failed"
+     finalrc = ESMF_FAILURE
   endif
 
 !!$  call ESMF_FieldGetDataPointer(field_u2, u2, rc=status)
