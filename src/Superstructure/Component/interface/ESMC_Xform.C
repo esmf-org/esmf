@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.C,v 1.5 2003/02/10 17:53:31 nscollins Exp $
+// $Id: ESMC_Xform.C,v 1.6 2003/02/19 18:50:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Xform.C,v 1.5 2003/02/10 17:53:31 nscollins Exp $";
+               "$Id: ESMC_Xform.C,v 1.6 2003/02/19 18:50:50 nscollins Exp $";
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -75,6 +75,11 @@
 //
 //  code goes here
 //
+    // TODO: this is remnants of the original template code which
+    // was going to do the implementation in C++.  this maybe needs to be
+    // turned into a call to the f_esmf_XXX interface code, although it
+    // is a shallow class, so it doesn't need to call thru to F90?
+
     // this->name = name;
     // this->funcp = funcp;
     return ESMF_FAILURE;

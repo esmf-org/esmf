@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.4 2003/02/18 17:00:59 nscollins Exp $
+// $Id: ESMC_Comp_F.C,v 1.5 2003/02/19 18:50:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 //
 //==============================================================================
 //
-// This file contains the Fortran interface code to link F90 and C++.
+// This file contains Fortran interface code to link F90 and C++.
 //
 //------------------------------------------------------------------------------
 // INCLUDES
@@ -26,23 +26,54 @@
 //BOP
 // !DESCRIPTION:
 //
-// The code in this file implements the inter-language code which provides
-//  callbacks to user-supplied functions instead of forcing them to 
-//  have unique entry point names over the entire set of possible components.
+// The {\tt Component} implementation language is Fortran 90, but the
+// routines which register function and data addresses to be used later
+// in callback code must be implemented in C++.  These routines here
+// allow the F90 to call the C++ support routines.
+//
+// For the general C++ interfaces to the public entry points, see
+// the file {\tt ESMF_Comp_C.F90}.
+//
 //
 //EOP
 
 
-// the interface subroutine names MUST be in lower case
+// these interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_compregister)(ESMC_Comp **ptr, int type, void (func)(), 
+     // these first two have no leading c_ and are ESMF and not ESMC because 
+     // they're to be called directly by F90 user code.  making them different
+     // seems like an invitation to errors; also if they don't have the
+     // leading c_ then we may run into naming conflicts with the real
+     // C++ code which does the work (which was why the prefix was added 
+     // in the first place).
+     //
+     // also note they CANNOT have prototypes in fortran because the routine 
+     // types and data types are private/different for each call so there
+     // is no correct prototype syntax which will work.
+
+     void FTN(esmf_compsetroutine)(ESMC_Comp **ptr, int type, void (func)(), 
                                    int *status) {
-         //*status = (*ptr)->ESMC_CompRegister(type, func);
+         //*status = (*ptr)->ESMC_CompSetRoutine(type, func);
      }
 
-     void FTN(c_esmc_compcall)(ESMC_Comp **ptr, int type, int *status) {
-         //*status = (*ptr)->ESMC_CompCall(type, func);
+     void FTN(esmf_compsetdataptr)(ESMC_Comp **ptr, int type, void (func)(), 
+                                   int *status) {
+         //*status = (*ptr)->ESMC_CompSetDataPtr(type, func);
+     }
+
+     // the rest of these routines follow the normal naming conventions and
+     // are called from the framework internals.
+     void FTN(c_esmc_compcallroutine)(ESMC_Comp **ptr, int type, int *status) {
+         //*status = (*ptr)->ESMC_CompCallRoutine(type, func);
+     }
+
+     void FTN(c_esmc_compgetroutine)(ESMC_Comp **ptr, int type, int *status) {
+         //*status = (*ptr)->ESMC_CompGetRoutine(type, func);
+     }
+
+     void FTN(c_esmc_compgetdataptr)(ESMC_Comp **ptr, int type, int *status) {
+         //*status = (*ptr)->ESMC_CompGetDataPtr(type, func);
      }
 
 };

@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform_F.C,v 1.2 2003/02/05 03:49:34 nscollins Exp $
+// $Id: ESMC_Xform_F.C,v 1.3 2003/02/19 18:50:50 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 //
 //==============================================================================
 //
-// This file contains the Fortran interface code to link F90 and C++.
+// This file contains interface code to link F90 and C++.
 //
 //------------------------------------------------------------------------------
 // INCLUDES
@@ -27,8 +27,14 @@
 //BOP
 // !DESCRIPTION:
 //
-// The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Xform} class functions.
+// The {\tt Transform} implementation language is Fortran 90, but the
+// routines which register function and data addresses to be used later
+// in callback code must be implemented in C++.  These routines here
+// allow the F90 to call the C++ support routines.
+//
+// For the general C++ interfaces to the public entry points, see
+// the file {\tt ESMF_Xform_C.F90}.
+//
 //
 //EOP
 
@@ -36,13 +42,25 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_xforminit)(ESMC_Xform *ptr, char *name, void *funcp, int *status) {
-         *status = ptr->ESMC_XformInit(name, funcp);
+     // TODO: add the proper entry points here.
+     //       these are just a best guess at this point.
+
+     // and note again - these are *NOT* wrappers for externally visible
+     // ESMF routines.  the bulk of the xform implementation is done in
+     // F90, and only those methods which need to manipulate function or
+     // data pointers are implemented in C++ and these are wrappers for
+     // those calls.
+
+     void FTN(c_esmc_xformcallroutine)(ESMC_Xform **ptr, int type, int *status) {
+         //*status = (*ptr)->ESMC_XformCallRoutine(type, func);
      }
 
+     void FTN(c_esmc_xformgetroutine)(ESMC_Xform **ptr, int type, int *status) {
+         //*status = (*ptr)->ESMC_XformGetRoutine(type, func);
+     }
 
-     void FTN(c_esmc_xformprint)(ESMC_Xform *ptr, char *opts, int *status) {
-         *status = ptr->ESMC_XformPrint(opts);
+     void FTN(c_esmc_xformgetdataptr)(ESMC_Xform **ptr, int type, int *status) {
+         //*status = (*ptr)->ESMC_XformGetDataPtr(type, func);
      }
 
 };

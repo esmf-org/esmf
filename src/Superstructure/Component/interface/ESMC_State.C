@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.4 2003/02/10 17:53:30 nscollins Exp $
+// $Id: ESMC_State.C,v 1.5 2003/02/19 18:50:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,10 +14,9 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ State methods declared
-// in the companion file ESMC\_State.h
-//
-// < insert a paragraph or two explaining what you'll find in this file >
+// The code in this file implements the C++ {\tt State} methods declared
+// in the companion file {\tt ESMC\_State.h}.  These are wrappers for the
+// actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
 //
@@ -40,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.4 2003/02/10 17:53:30 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.5 2003/02/19 18:50:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -81,6 +80,11 @@
 //
 //  code goes here
 //
+    // TODO: this is remnants of the original template code which
+    // was going to do the implementation in C++.  this needs to be
+    // turned into a call to the f_esmf_XXX interface code.
+    // Same goes for the rest of the functions in this file.
+
     return new ESMC_State;
 
  } // end ESMC_StateCreate

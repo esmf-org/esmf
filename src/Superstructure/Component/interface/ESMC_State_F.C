@@ -1,4 +1,4 @@
-// $Id: ESMC_State_F.C,v 1.1 2003/01/07 21:38:17 nscollins Exp $
+// $Id: ESMC_State_F.C,v 1.2 2003/02/19 18:50:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -12,7 +12,7 @@
 //
 //==============================================================================
 //
-// This file contains the Fortran interface code to link F90 and C++.
+// This file contains interface code to link F90 and C++.
 //
 //------------------------------------------------------------------------------
 // INCLUDES
@@ -26,8 +26,11 @@
 //BOP
 // !DESCRIPTION:
 //
-// The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt State} class functions.
+// The {\tt State} implementation language is Fortran 90, but if any
+// callback routines are needed this is where they should go.
+//
+// For the general C++ interfaces to the public entry points, see 
+// the file {\tt ESMF_State_C.F90}.
 //
 //EOP
 
@@ -35,17 +38,8 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_statecreate)(ESMC_State *ptr, int *status) {
-         ptr = ESMC_StateCreate(status);
-     }
-
-     void FTN(c_esmc_statedestroy)(ESMC_State *ptr, int *status) {
-         *status = ESMC_StateDestroy(ptr);
-     }
-
-     void FTN(c_esmc_stateprint)(ESMC_State *ptr, char *opts, int *status) {
-         *status = ptr->ESMC_StatePrint(opts);
-     }
+     // currently there are no places in the State code where
+     // the F90 routines need to call into C++.
 
 };
 

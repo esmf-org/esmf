@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.4 2003/02/10 17:53:26 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.5 2003/02/19 18:50:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,10 +14,9 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ Component methods declared
-// in the companion file ESMC\_Comp.h
-//
-// < insert a paragraph or two explaining what you'll find in this file >
+// The code in this file implements the C++ {\tt Component} methods declared
+// in the companion file {\tt ESMC\_Comp.h}.  They are wrappers for the
+// actual code which is implemented in F90.
 //
 //-----------------------------------------------------------------------------
 //
@@ -46,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.4 2003/02/10 17:53:26 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.5 2003/02/19 18:50:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -88,6 +87,10 @@
 
     ESMC_Comp *comp = new ESMC_Comp;
 
+    // TODO: this is remnants of the original template code which
+    // was going to do the implementation in C++.  this needs to be
+    // turned into a call to the f_esmf_XXX interface code.
+    // Same goes for the rest of the functions in this file.
     *rc = comp->ESMC_CompConstruct(name, layout, ctype, mtype, filepath);
 
     return comp;
