@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.55 2003/10/22 04:16:58 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.56 2003/11/26 20:51:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.55 2003/10/22 04:16:58 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.56 2003/11/26 20:51:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -902,13 +902,16 @@
         	call ESMF_ClockGet(clock_gregorian, prevTime=previousTime, rc=rc)
         	timeDiff =  currentTime - previousTime 
         	if((timeDiff.ne.timeStep).and.(testResults.eq.0)) then	
-	     	testResults=1
-             	call ESMF_TimeIntervalPrint(timeStep, rc=rc)
-             	call ESMF_TimeIntervalPrint(timeDiff, rc=rc)
-             	call ESMF_TimePrint(currentTime, rc=rc)
-             	call ESMF_TimePrint(previousTime, rc=rc)
+	     		testResults=1
+             		call ESMF_TimeIntervalPrint(timeStep, rc=rc)
+             		call ESMF_TimeIntervalPrint(timeDiff, rc=rc)
+             		call ESMF_TimePrint(currentTime, rc=rc)
+             		call ESMF_TimePrint(previousTime, rc=rc)
+	                ! Exit loop on first failure
+			goto 10
         	end if
       	end do
+10    continue
 
       end if
 		
