@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.28 2004/04/19 23:10:32 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.29 2004/04/20 19:07:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
    public ESMF_FieldRegridStore, ESMF_FieldRegrid, ESMF_FieldRegridRelease 
 
    public ESMF_FieldGather   ! Combine 1 decomposed field into 1 on 1 DE
-   public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
+   !public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
 
    public ESMF_FieldScatter  ! Split 1 field into a decomposed one over N DEs
    !public ESMF_FieldBroadcast! Send 1 field to all DEs, none decomposed
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.28 2004/04/19 23:10:32 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.29 2004/04/20 19:07:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -133,6 +133,7 @@
 !   These include Reduction operations, Halo, and Transpose.
 !
 !------------------------------------------------------------------------------
+#if 0
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldAllGather - Data allgather operation on a Field
@@ -206,6 +207,7 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldAllGather
+#endif
 
 
 !------------------------------------------------------------------------------
