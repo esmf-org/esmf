@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.25 2003/03/21 23:14:08 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.26 2003/03/22 00:51:25 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.25 2003/03/21 23:14:08 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.26 2003/03/22 00:51:25 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -363,6 +363,8 @@
     int sright, rright;
     int sstrides[ESMF_MAXDIM], rstrides[ESMF_MAXDIM];
     int snums[ESMF_MAXDIM], rnums[ESMF_MAXDIM];
+    char *srcmem, *rcvmem;
+    int srccount, rcvcount;
 
     rc = layout->ESMC_DELayoutGetDEid(&mydeid);
     rc = ct->ESMC_CommTableGetCount(&ccount);
@@ -441,28 +443,34 @@
             for (l=0; l<snums[j] || l<rnums[j]; l++, 
                             srcbytes += sstrides[j], rcvbytes += rstrides[j]) {
          
-                 printf("ready to call send/recv, l=%d:\n", l);
-                 printf(" next srcaddr=0x%08lx, dstaddr=0x%08lx, srcbytes=%d, rcvbytes=%d\n", 
-                            (long int)((char *)srcaddr+srcbytes), 
-                            (long int)((char *)dstaddr+rcvbytes), 
-                            srcbytes, rcvbytes);
-                 printf(" sending %d bytes and receiving %d bytes with DE %d\n", 
-                                   sright-sleft+1, rright-rleft+1, theirdeid);
+                 srcmem = (char *)srcaddr+srcbytes; 
+                 rcvmem = (char *)dstaddr+rcvbytes; 
+                 srccount = sendxp ? sright-sleft+1 : 0;
+                 rcvcount = recvxp ? rright-rleft+1 : 0;
 
-                 printf(" (sleft=%d, sright=%d, rleft=%d, rright=%d)\n", 
+                 printf("ready to send %d bytes from 0x%08x on DE %d to DE %d\n",
+                            srccount, (long int)srcmem, mydeid, theirdeid);
+                 printf(" and to receive %d bytes into 0x%08x on DE %d from DE %d\n", 
+                            rcvcount, (long int)rcvmem, mydeid, theirdeid);
+
+                 printf(" (l=%d, srcbytes=%d, rcvbytes=%d, ", 
+                                 l, srcbytes, rcvbytes);
+                 printf("sleft=%d, sright=%d, rleft=%d, rright=%d)\n", 
                                    sleft, sright, rleft, rright);
                  printf(" (j=%d, sstrides[j]=%d, rstrides[j]=%d)\n", 
                                     j, sstrides[j], rstrides[j]);
 
-                //rc = layout->ESMC_DELayoutSendRecv(mydeid, 
-                //             (void *)((char *)srcaddr+srcbytes), 
-                //             sright-sleft,
-                //             theirdeid, 
-                //             (void *)((char *)dstaddr+rcvbytes), 
-                //             rright-rleft);
-                //
-                // and what do we call when we run out of sends but there's
-                // still stuff to receive?  can we use the same call?
+             
+                // TODO: here's where we're ready to make the call.
+                //  theirdeid  is the other processor de number
+                //  srcmem and rcvmem are the mem addresses 
+                //  srccount and rcvcount are the byte counts.  they are 0
+                //    if there is nothing to send or receive, respectively.
+                //  (i don't know the arg order, but here are all the things
+                //   i'm guessing it needs.  it probably doesn't need mydeid,
+                //   but if it does, that's the variable name.)
+                //rc = layout->ESMC_DELayoutSendRecv(mydeid, theirdeid, 
+                //                     srcmem, srccount, rcvmem, rcvcount);
             }
         }
 
