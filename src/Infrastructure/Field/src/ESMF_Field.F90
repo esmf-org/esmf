@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.58 2003/08/12 22:48:40 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.59 2003/08/13 21:48:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -227,7 +227,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.58 2003/08/12 22:48:40 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.59 2003/08/13 21:48:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2492,6 +2492,7 @@
       integer :: my_DE
       integer, dimension(ESMF_MAXGRIDDIM) :: global_count
       integer, dimension(:,:), allocatable :: global_start
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: ai_global
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
       integer :: AI_count
@@ -2541,7 +2542,15 @@
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridGet returned failure"
          return
-      endif 
+      endif
+      call ESMF_GridGetDE(ftypep%grid, ai_global=ai_global, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+         print *, "ERROR in FieldHalo: GridGetDE returned failure"
+         return
+      endif
+      ! TODO:  once the system test for periodic boundaries functions,
+      !        clean up this part -- if AI's can go in as global, then no
+      !        need for global_ai
 
       ! set up things we need to find a cached route or precompute one
       call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
@@ -2550,20 +2559,20 @@
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
-                               AI_count, layout, my_DE, src_AI, src_AI, &
-                               AI_count, layout, periodic, &
-                               hascachedroute, route, status)
+!      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
+!                               AI_count, layout, my_DE, src_AI, src_AI, &
+!                               AI_count, layout, periodic, &
+!                               hascachedroute, route, status)
 
-      if (.not. hascachedroute) then
+!      if (.not. hascachedroute) then
           ! Create the route object.
           route = ESMF_RouteCreate(layout, rc) 
 
           call ESMF_RoutePrecomputeHalo(route, datarank, my_DE, src_AI, dst_AI, &
                                         AI_count, global_start, global_count, &
-                                        layout, periodic, status)
+                                        ai_global, layout, periodic, status)
 
-      endif
+!      endif
 
       ! Once table is full, execute the communications it represents.
 
