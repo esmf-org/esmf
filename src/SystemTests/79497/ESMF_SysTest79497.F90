@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.13 2003/09/02 17:08:12 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.14 2003/09/02 17:15:47 nscollins Exp $
 !
 ! System test code #79497
 
@@ -268,7 +268,7 @@
   
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! Component test finished correctly."
+          write(finalMsg, *) "SUCCESS!! Regrid test finished correctly."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif
