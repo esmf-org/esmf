@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.9 2003/04/02 20:15:18 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.10 2003/04/05 01:52:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.9 2003/04/02 20:15:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.10 2003/04/05 01:52:13 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -202,7 +202,7 @@
 //
 // !ARGUMENTS:
       int YR, int MM, int DD, int D,          // in
-      ESMC_BaseTime *T) {                     // out
+      ESMC_BaseTime *T) const {               // out
 //
 // !DESCRIPTION:
 //     Converts a calendar-specific date to core {\tt ESMC\_BaseTime}
@@ -255,8 +255,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_BaseTime *T,                      // in
-      int *YR, int *MM, int *DD, int *D) {   // out
+      const ESMC_BaseTime *T,                      // in
+      int *YR, int *MM, int *DD, int *D) const {   // out
 //
 // !DESCRIPTION:
 //     Converts a core {\tt ESMC\_BaseTime} representation to a
