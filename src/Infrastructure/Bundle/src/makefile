@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/04/19 22:01:20 nscollins Exp $ 
+# $Id: makefile,v 1.7 2004/04/19 22:18:00 nscollins Exp $ 
 
 
 ALL: build_here 
@@ -24,6 +24,6 @@ CLEANDIRS   =
 CLEANFILES  = ESMF_BundleGet.F90
 CLOBBERDIRS =
 
-ESMF_BundleGet.o:   ESMF_Bundle.o
+ESMF_BundleGet.o:   ESMF_Bundle.o ESMF_BundleGet.F90
 
 ESMF_BundleGet.F90: ESMF_BundleGet.cpp ESMF_BundleGetMacros.h ESMF_Bundle.o
