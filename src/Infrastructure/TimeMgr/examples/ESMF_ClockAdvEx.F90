@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.15 2003/10/22 01:21:15 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.16 2003/10/22 03:35:14 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -32,7 +32,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockAdvEx.F90,v 1.15 2003/10/22 01:21:15 eschwab Exp $'
+      '$Id: ESMF_ClockAdvEx.F90,v 1.16 2003/10/22 03:35:14 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -62,9 +62,6 @@
       ! initialization
       !
 
-      ! initialize ESMF framework
-      call ESMF_Initialize(rc)
-
       ! initialize calendar to be Gregorian type
       call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
@@ -84,7 +81,8 @@
                         calendar=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
-      clock = ESMF_ClockCreate(timeStep, startTime, stopTime, refTime, rc)
+      clock = ESMF_ClockCreate("Clock A", timeStep, startTime, stopTime, &
+                               refTime, rc)
 
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currtime", rc)        ! default format
@@ -234,8 +232,5 @@
    
       ! destroy clock
       call ESMF_ClockDestroy(clock, rc)
-
-      ! finalize ESMF framework
-      call ESMF_Finalize(rc)
 
       end program ESMF_ClockAdvEx
