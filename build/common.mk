@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.68 2004/08/04 17:20:58 svasquez Exp $
+#  $Id: common.mk,v 1.69 2004/08/04 20:49:31 svasquez Exp $
 #===============================================================================
 #   common.mk
 #
@@ -139,7 +139,7 @@ SOURCE		= ${SOURCEC} ${SOURCEF}
 OBJS		= ${OBJSC} ${OBJSF}
 
 DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results.pl -d $(ESMF_TESTDIR) 
-DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results
+DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.pl -d $(ESMF_EXDIR)
 DO_EX_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.bash
 DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results.pl -d $(ESMF_TESTDIR)
 DO_SUM_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary
@@ -572,11 +572,7 @@ check_tests:
 #
 examples: chkopts chkdir_examples build_libs
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples tree
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_EX_RESULTS) ; \
-        else \
-                $(DO_EX_RESULTS.BASH)  ; \
-        fi; \
+	$(DO_EX_RESULTS) ; \
 
 
 tree_examples: tree_build_examples tree_run_examples
@@ -586,6 +582,7 @@ tree_examples: tree_build_examples tree_run_examples
 #
 examples_uni: chkopts chkdir_examples  
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples_uni tree
+	$(DO_EX_RESULTS) ; \
 
 tree_examples_uni: tree_build_examples tree_run_examples_uni
 
@@ -618,11 +615,7 @@ $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o $(ESMFLIB)
 #
 run_examples:  chkopts chkdir_examples
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_examples tree
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_EX_RESULTS) ; \
-        else \
-                $(DO_EX_RESULTS.BASH)  ; \
-        fi; \
+	$(DO_EX_RESULTS) ; \
 
 tree_run_examples: $(EXAMPLES_RUN) 
 
@@ -631,11 +624,7 @@ tree_run_examples: $(EXAMPLES_RUN)
 #
 run_examples_uni:  chkopts chkdir_examples
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_examples_uni tree 
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_EX_RESULTS) ; \
-        else \
-                $(DO_EX_RESULTS.BASH)  ; \
-        fi; \
+	$(DO_EX_RESULTS) ; \
 
 tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 
@@ -643,11 +632,7 @@ tree_run_examples_uni: $(EXAMPLES_RUN_UNI)
 # report statistics on examples
 #
 check_examples:
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_EX_RESULTS) ; \
-        else \
-                $(DO_EX_RESULTS.BASH)  ; \
-        fi; \
+	$(DO_EX_RESULTS) ; \
 
 
 #-------------------------------------------------------------------------------
