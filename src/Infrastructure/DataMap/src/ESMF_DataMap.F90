@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.3 2003/12/08 18:52:47 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.4 2004/01/06 16:44:59 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,8 +109,10 @@
                            ESMF_CELL_NWCORNER  = ESMF_RelLoc( 7), &
                            ESMF_CELL_SECORNER  = ESMF_RelLoc( 8), &
                            ESMF_CELL_SWCORNER  = ESMF_RelLoc( 9), &
-                           ESMF_CELL_CELL      = ESMF_RelLoc(10), &
-                           ESMF_CELL_VERTEX    = ESMF_RelLoc(11)
+                           ESMF_CELL_TOPFACE   = ESMF_RelLoc(10), &
+                           ESMF_CELL_BOTFACE   = ESMF_RelLoc(11), &
+                           ESMF_CELL_CELL      = ESMF_RelLoc(12), &
+                           ESMF_CELL_VERTEX    = ESMF_RelLoc(13)
 
  
 !------------------------------------------------------------------------------
@@ -220,7 +222,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.3 2003/12/08 18:52:47 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.4 2004/01/06 16:44:59 pwjones Exp $'
 !------------------------------------------------------------------------------
 
 
