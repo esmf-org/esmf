@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.11 2003/05/29 20:59:10 flanigan Exp $ 
+# $Id: makefile,v 1.12 2004/03/23 17:33:17 cdeluca Exp $ 
 ALL: alldoc
 
 CFLAGS    =
@@ -13,17 +13,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Regrid/doc
 
-DVIFILES  =	Regrid_reqdoc.dvi \
-		Regrid_desdoc.dvi \
-		Regrid_refdoc.dvi
+DVIFILES  =	Regrid_refdoc.dvi
 
-PDFFILES  =     ${ESMC_DOCDIR}/Regrid_reqdoc.pdf \
-		${ESMC_DOCDIR}/Regrid_desdoc.pdf \
-		${ESMC_DOCDIR}/Regrid_refdoc.pdf
+PDFFILES  =     ${ESMC_DOCDIR}/Regrid_refdoc.pdf
 
-HTMLFILES =	${ESMC_DOCDIR}/Regrid_reqdoc \
-		${ESMC_DOCDIR}/Regrid_desdoc \
-		${ESMC_DOCDIR}/Regrid_refdoc
+HTMLFILES =	${ESMC_DOCDIR}/Regrid_refdoc
 
 #
 # Tex Files to make
@@ -56,9 +50,9 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Regrid_desdoc Regrid_reqdoc Regrid_refdoc $(HTMLFILES)
+CLEANDIRS   = Regrid_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              *.ORIG Regrid_desdoc.tex Regrid_reqdoc.tex Regrid_refdoc.tex \
+              *.ORIG Regrid_refdoc.tex \
               $(PDFFILES)
 CLOBBERDIRS =
 

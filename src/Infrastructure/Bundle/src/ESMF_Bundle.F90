@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.34 2004/03/22 21:50:40 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.35 2004/03/23 17:33:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -399,12 +399,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Bundle}.
+!      Attaches an integer attribute to an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -456,12 +456,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer list attribute to a {\tt ESMF\_Bundle}.
+!      Attaches an integer list attribute to an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [count]
@@ -521,12 +521,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_Bundle}.
+!      Attaches a real attribute to an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -578,12 +578,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_Bundle}.
+!      Attaches a real list attribute to an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [count]
@@ -643,12 +643,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_Bundle}.
+!      Attaches an logical attribute to an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -700,12 +700,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_Bundle}.
+!      Attaches an logical list attribute to an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [count]
@@ -765,12 +765,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_Bundle}.
+!      Attaches a character attribute to an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -875,7 +875,7 @@ end function
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
+!      Add an {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  
 !      The {\tt ESMF\_Field} must have the
 !      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the 
 !      {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
@@ -942,7 +942,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Create a {\tt ESMF\_Bundle} from a list of existing
+!     Create an {\tt ESMF\_Bundle} from a list of existing
 !     gridded {\tt ESMF\_Fields}.  Optionally create a packed
 !     {\tt ESMF\_Array} which collects all {\tt ESMF\_Field} data into
 !     a single contiguous memory buffer.  All {\tt ESMF\_Field}s
@@ -1127,7 +1127,7 @@ end function
 !
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1195,7 +1195,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return pointers to all fields in a {\tt ESMF\_Bundle}.
+!      Return pointers to all fields in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1233,14 +1233,14 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Bundle}.
+!      Returns an integer attribute from an {\tt ESMF\_Bundle}.
 !
 ! 
 !     The arguments are:
 !     \begin{description}
 !
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !
 !     \item [name]
 !           The name of the Attribute to retrieve.
@@ -1296,12 +1296,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from a {\tt ESMF\_Bundle}.
+!      Returns an integer list attribute from an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -1361,12 +1361,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Bundle}.
+!      Returns a real attribute from an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1417,12 +1417,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Bundle}.
+!      Returns a real attribute from an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -1482,12 +1482,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from a {\tt ESMF\_Bundle}.
+!      Returns an logical attribute from an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1539,12 +1539,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from a {\tt ESMF\_Bundle}.
+!      Returns an logical list attribute from an {\tt ESMF\_Bundle}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -1604,13 +1604,13 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Bundle}.
+!      Returns an integer attribute from an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1663,7 +1663,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [count]
 !           The number of attributes on this object.
 !     \item [{[rc]}] 
@@ -1716,7 +1716,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [name]
 !           The name of the Attribute to query.
 !     \item [type]
@@ -1781,7 +1781,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [num]
 !           The number of the Attribute to query.
 !     \item [name]
@@ -1881,7 +1881,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return a {\tt ESMF\_Field} from a {\tt ESMF\_Bundle} by name.
+!      Return an {\tt ESMF\_Field} from an {\tt ESMF\_Bundle} by name.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1981,7 +1981,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Return a {\tt ESMF\_Field} from a {\tt ESMF\_Bundle} by index number.
+!      Return an {\tt ESMF\_Field} from an {\tt ESMF\_Bundle} by index number.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2123,12 +2123,12 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Return an array of {\tt ESMF\_Field} names in a {\tt ESMF\_Bundle}.
+!      Return an array of {\tt ESMF\_Field} names in an {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [namelist]
 !           An array of character strings where each {\tt ESMF\_Field} name
 !           is returned. 
@@ -2167,7 +2167,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [grid]
 !           The {\tt ESMF\_Grid} associated with all {\tt ESMF\_Field}s in this 
 !           {\tt ESMF\_Bundle}.
@@ -2270,7 +2270,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object to query.
+!           An {\tt ESMF\_Bundle} object to query.
 !     \item [dimcount]
 !           The number of dimensions.
 !     \item [{[rc]}]
@@ -2487,7 +2487,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
-!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
+!      are added to an {\tt ESMF\_Bundle} which already has Packed data, the data will
 !      have to be copied into a new {\tt ESMF\_Array}.
 !
 !     The arguments are:
@@ -2557,13 +2557,13 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print information about a {\tt ESMF\_Bundle}.  The options control the
+!      Print information about an {\tt ESMF\_Bundle}.  The options control the
 !      type of information and level of detail.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[options]}]
 !           The print options.
 !     \item [{[rc]}]
@@ -2627,7 +2627,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[iospec]}]
 !           The file I/O specification.
 !     \item [{[rc]}]
@@ -2671,7 +2671,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[iospec]}]
 !           The I/O specification.
 !     \item [{[rc]}]
@@ -2785,7 +2785,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Allows data values associated with a {\tt ESMF\_Bundle} to be set through the
+!      Allows data values associated with an {\tt ESMF\_Bundle} to be set through the
 !      {\tt ESMF\_Bundle} interface instead of detaching data and setting it in a loop.
 !      Various restrictions on data types may be imposed.
 ! 
@@ -2833,7 +2833,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [grid]
 !           The {\tt ESMF\_Grid} which all {\tt ESMF\_Field}s added to this
 !           {\tt ESMF\_Bundle} must have.
@@ -2910,7 +2910,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[options]}]
 !           The validate options.
 !     \item [{[rc]}]
@@ -2970,7 +2970,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[subarray]}]
 !           The subset to write.
 !     \item [{[iospec]}]
@@ -3010,7 +3010,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt ESMF\_Bundle} object.
+!           An {\tt ESMF\_Bundle} object.
 !     \item [{[iospec]}]
 !           The I/O specification.
 !     \item [{[rc]}]
@@ -3175,7 +3175,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
-!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
+!      are added to an {\tt ESMF\_Bundle} which already has Packed data, the data will
 !      have to be copied into a new {\tt ESMF\_Array}.
 !
 !     The arguments are:
@@ -3237,7 +3237,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs a {\tt ESMF\_Bundle} from a list of existing
+!     Constructs an {\tt ESMF\_Bundle} from a list of existing
 !     gridded {\tt ESMF\_Fields}.  This routine requires an existing
 !     {\tt ESMF\_Bundle} type as an input and fills in
 !     the internals.  {\tt ESMF\_BundleCreateNew()} does
@@ -3247,7 +3247,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [btype]
-!           Pointer to a {\tt ESMF\_Bundle} object.
+!           Pointer to an {\tt ESMF\_Bundle} object.
 !     \item [fieldCount]
 !           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of
@@ -3319,7 +3319,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs the internals of a {\tt ESMF\_Bundle}, given an existing
+!     Constructs the internals of an {\tt ESMF\_Bundle}, given an existing
 !     {\tt ESMF\_Bundle} type as an input.
 !
 !     The arguments are:
@@ -3394,7 +3394,7 @@ end function
 !
 !     \begin{description}
 !     \item [btype]
-!           Pointer to a {\tt ESMF\_Bundle} object.
+!           Pointer to an {\tt ESMF\_Bundle} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

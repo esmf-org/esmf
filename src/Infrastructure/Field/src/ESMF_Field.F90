@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.132 2004/03/22 18:21:02 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.133 2004/03/23 17:33:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 ! description 
 ! expressed as a set of {\tt ESMF\_Attributes} with a data {\tt ESMF\_Array}, 
 ! {\tt ESMF\_Grid}, and I/O specification, or {\tt ESMF\_IOSpec}.  
-! A {\tt ESMF\_DataMap} describes the 
+! An {\tt ESMF\_DataMap} describes the 
 ! relationship of the {\tt ESMF\_Array} to the {\tt ESMF\_Grid}.  
 !
 ! This type is implemented in Fortran 90 and a corresponding
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.132 2004/03/22 18:21:02 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.133 2004/03/23 17:33:16 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -234,7 +234,7 @@
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a complete
-!     {\tt ESMF\_Field}.  These method all contain a {\tt ESMF\_Grid} and {\tt ESMF\_Data}.  The variations
+!     {\tt ESMF\_Field}.  These method all contain an {\tt ESMF\_Grid} and {\tt ESMF\_Data}.  The variations
 !     allow the user to specify the data using either a Fortran array or 
 !     an {\tt ESMF\_Array}.
 !    
@@ -256,8 +256,8 @@
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create 
-!     a {\tt ESMF\_Field} without allocating or referencing any associated data.
-!     The variations allow a {\tt ESMF\_Grid} to be specified or not, and for
+!     an {\tt ESMF\_Field} without allocating or referencing any associated data.
+!     The variations allow an {\tt ESMF\_Grid} to be specified or not, and for
 !     the data description to be specified or not.
  
 !EOPI
@@ -387,12 +387,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Field}.
+!      Attaches an integer attribute to an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -444,12 +444,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an integer list attribute to a {\tt ESMF\_Field}.
+!      Attaches an integer list attribute to an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [count]
@@ -509,12 +509,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_Field}.
+!      Attaches a real attribute to an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -566,12 +566,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_Field}.
+!      Attaches a real list attribute to an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [count]
@@ -631,12 +631,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_Field}.
+!      Attaches an logical attribute to an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -688,12 +688,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_Field}.
+!      Attaches an logical list attribute to an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [count]
@@ -753,12 +753,12 @@
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_Field}.
+!      Attaches a character attribute to an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to set.
 !     \item [value]
@@ -819,13 +819,13 @@
 !
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreate()}.
-!     Create a {\tt ESMF\_Field} and allocate space internally for a
+!     Create an {\tt ESMF\_Field} and allocate space internally for a
 !     gridded {\tt ESMF\_Array}.  Return a new {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           {\tt ESMF\_Data} specification. 
 !     \item [{[allocflag]}]
@@ -924,7 +924,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Includes data specification and allocated memory. 
 !     \item [{[copyflag]}]
@@ -1108,13 +1108,13 @@
 !
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
-!     Creates a {\tt ESMF\_Field} in its entirety except for the assignment
+!     Creates an {\tt ESMF\_Field} in its entirety except for the assignment
 !     or allocation of an associated raw data buffer.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
@@ -1201,13 +1201,13 @@
 !
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
-!     This version of {\tt ESMF\_FieldCreate} builds a {\tt ESMF\_Field} 
+!     This version of {\tt ESMF\_FieldCreate} builds an {\tt ESMF\_Field} 
 !     and depends on a later call to add an {\tt ESMF\_Array} to it.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
@@ -1286,7 +1286,7 @@
 ! !DESCRIPTION:
 !     An interface function to {\tt ESMF\_FieldCreateNoData()}.
 !     This version of {\tt ESMF\_FieldCreate} builds an empty {\tt ESMF\_Field} 
-!     and depends on later calls to add a {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
+!     and depends on later calls to add an {\tt ESMF\_Grid} and {\tt ESMF\_Array} to 
 !     it.  
 !
 !     The arguments are:
@@ -1357,7 +1357,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1424,7 +1424,7 @@
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Query a {\tt ESMF\_Field} for various things.  All arguments after
+!      Query an {\tt ESMF\_Field} for various things.  All arguments after
 !      the {\tt Field} are optional.  To select individual items use the
 !      named\_argument=value syntax.
 !
@@ -1432,7 +1432,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[grid]}]
 !           {\tt ESMF\_Grid}.
 !     \item [{[array]}]
@@ -1619,12 +1619,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Field}.
+!      Returns an integer attribute from an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1676,13 +1676,13 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer list attribute from a {\tt ESMF\_Field}.
+!      Returns an integer list attribute from an {\tt ESMF\_Field}.
 !
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -1742,12 +1742,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Field}.
+!      Returns a real attribute from an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1799,12 +1799,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_Field}.
+!      Returns a real attribute from an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -1864,12 +1864,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from a {\tt ESMF\_Field}.
+!      Returns an logical attribute from an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -1921,12 +1921,12 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from a {\tt ESMF\_Field}.
+!      Returns an logical list attribute from an {\tt ESMF\_Field}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [count]
@@ -1986,13 +1986,13 @@
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_Field}.
+!      Returns an integer attribute from an {\tt ESMF\_Field}.
 !
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to retrieve.
 !     \item [value]
@@ -2046,7 +2046,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [count]
 !           The number of attributes on this object.
 !     \item [{[rc]}] 
@@ -2100,7 +2100,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the Attribute to query.
 !     \item [type]
@@ -2166,7 +2166,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [num]
 !           The number of the Attribute to query.
 !     \item [name]
@@ -2231,7 +2231,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [Grid]
 !           {\tt ESMF\_Grid} returned.
 !     \item [{[rc]}]
@@ -2290,7 +2290,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[ndim]}]
 !           Number of dimensions.
 !     \item [{[ncell]}]
@@ -2339,7 +2339,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[ndim]}]
 !           Number of dimensions.
 !     \item [{[ncell]}]
@@ -2382,7 +2382,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[array]}]
 !           Field {\tt ESMF\_Array}.
 !     \item [{[rc]}]
@@ -2457,7 +2457,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[size]}]
 !           Field size.
 !     \item [indexorder]
@@ -2497,7 +2497,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [datamap]
 !           Field {\tt ESMF\_DataMap}.
 !     \item [{[rc]}]
@@ -2558,7 +2558,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[size]}]
 !           Field size.
 !     \item [indexorder]
@@ -2601,7 +2601,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[horzRelloc]}]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
@@ -2639,7 +2639,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [options]
 !           Print options.
 !     \item [{[rc]}]
@@ -2737,7 +2737,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[gname]}]
 !            {\tt ESMF\_Grid} name.
 !     \item [{[dnames]}]
@@ -2783,13 +2783,13 @@
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a {\tt ESMF\_Field} from the 
+!      all data associated with an {\tt ESMF\_Field} from the 
 !      last call to WriteRestart.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[iospec]}]
 !            I/O specification.
 !     \item [{[rc]}]
@@ -2833,7 +2833,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[array]}]
 !           {\tt ESMF\_Array} containing data.
 !     \item [{[rc]}]
@@ -2905,12 +2905,12 @@
 !  Used only with the version of {\tt ESMF\_FieldCreate} which creates an empty 
 !  {\tt ESMF\_Field} and allows the {\tt ESMF\_Grid} to be specified later.  
 !  Otherwise it is an error to try to change the {\tt ESMF\_Grid} 
-!  associated with a {\tt ESMF\_Field}.
+!  associated with an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [grid]
 !           {\tt ESMF\_Grid} to be added.
 !     \item [{[rc]}]
@@ -2968,7 +2968,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!  Used to set the ordering of a {\tt ESMF\_Field}.  If an initialized 
+!  Used to set the ordering of an {\tt ESMF\_Field}.  If an initialized 
 !  {\tt ESMF\_DataMap} and associated data are already in the 
 !  {\tt ESMF\_Field}, the data will be reordered according to the new 
 !  specification.
@@ -2976,7 +2976,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [datamap]
 !           New memory order of data.
 !     \item [{[rc]}]
@@ -3036,14 +3036,14 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Allows specified data values associated with a {\tt ESMF\_Field} to be set 
+!      Allows specified data values associated with an {\tt ESMF\_Field} to be set 
 !      through the {\tt ESMF\_Field} interface instead of detaching data and setting 
 !      it outside the framework.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [index]
 !           Index or range to set.
 !     \item [values]
@@ -3075,12 +3075,12 @@
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
-!     Routine to validate the internal state of a {\tt ESMF\_Field}.
+!     Routine to validate the internal state of an {\tt ESMF\_Field}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [opt]
 !           Validation option.
 !     \item [{[rc]}]
@@ -3140,7 +3140,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [name]
-!           A {\tt ESMF\_Field} name.
+!           An {\tt ESMF\_Field} name.
 !     \item [{[subset]}]
 !            {\tt ESMF\_Subset}.
 !     \item [{[iospec]}]
@@ -3223,7 +3223,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
-!           A {\tt ESMF\_Field} object.
+!           An {\tt ESMF\_Field} object.
 !     \item [{[iospec]}]
 !            I/O specification.
 !     \item [{[rc]}]
@@ -3277,9 +3277,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[allocflag]}]
@@ -3428,9 +3428,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [array]
 !           Data. 
 !     \item [{[horzRelloc]}] 
@@ -3514,9 +3514,9 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [arrayspec]
 !           Data specification. 
 !     \item [{[horzRelloc]}] 
@@ -3638,14 +3638,14 @@
 !
 ! !DESCRIPTION:
 ! 
-! Constructs a {\tt ESMF\_Field} except for its internal data {\tt ESMF\_Array}.
+! Constructs an {\tt ESMF\_Field} except for its internal data {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [grid] 
-!           Pointer to a {\tt ESMF\_Grid} object. 
+!           Pointer to an {\tt ESMF\_Grid} object. 
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
@@ -3753,7 +3753,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftypep]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[name]}]
 !           {\tt ESMF\_Field} name.
 !     \item [{[iospec]}]
@@ -3822,7 +3822,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item [ftype]
-!           Pointer to a {\tt ESMF\_Field} object.
+!           Pointer to an {\tt ESMF\_Field} object.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

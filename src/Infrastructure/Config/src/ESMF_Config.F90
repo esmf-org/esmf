@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.5 2004/03/08 16:44:07 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.6 2004/03/23 17:33:16 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -846,10 +846,9 @@
 ! Earth System Modeling Framework
 !BOP -------------------------------------------------------------------
 !
-! !IROUTINE: ESMF_ConfigGetAttribute - Get a character
+! !IROUTINE: ESMF_ConfigGetChar - Get a character
 !
 ! !INTERFACE:
-      ! Private name; call using ESMF_ConfigGetAttribute()
       subroutine ESMF_ConfigGetChar( cf, c, label, default, rc )
 
 ! !ARGUMENTS:
