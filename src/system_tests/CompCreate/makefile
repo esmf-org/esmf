@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/09/24 22:22:40 nscollins Exp $ 
+# $Id: makefile,v 1.5 2003/09/24 22:36:48 nscollins Exp $ 
 
 ALL: system_tests
 
@@ -39,11 +39,11 @@ CLOBBERDIRS =
 
 RUN_CompCreate:
 	-@rm -f testlog stdlog.* logfile.* CompCreate.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/CompCreate > $(ESMC_TESTDIR)/CompCreate.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_CompCreateSTest > $(ESMC_TESTDIR)/ESMF_CompCreateSTest.stdout
 
 RUN_CompCreateUNI:
 	-@rm -f testlog stdlog.* logfile.* CompCreate.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/CompCreate > $(ESMC_TESTDIR)/CompCreate.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_CompCreateSTest > $(ESMC_TESTDIR)/ESMF_CompCreateSTest.stdout
 
 CompCreate.rm:
 	echo "CompCreate.rm target called here."
