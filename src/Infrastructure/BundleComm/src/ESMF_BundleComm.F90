@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleComm.F90,v 1.2 2004/02/19 21:23:34 jwolfe Exp $
+! $Id: ESMF_BundleComm.F90,v 1.3 2004/02/25 18:59:10 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 
 !------------------------------------------------------------------------------
 !
-!BOP
+!BOPI
 ! !MODULE: ESMF_BundleCommMod - Communication routines for Bundle objects
 !
 ! !DESCRIPTION:
@@ -88,12 +88,12 @@
    !public ESMF_BundleAllReduce  ! Global reduction operation, return on each DE
 
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BundleComm.F90,v 1.2 2004/02/19 21:23:34 jwolfe Exp $'
+      '$Id: ESMF_BundleComm.F90,v 1.3 2004/02/25 18:59:10 cdeluca Exp $'
 
 !==============================================================================
 !

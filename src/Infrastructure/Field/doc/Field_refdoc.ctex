@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.13 2003/12/17 20:24:44 svasquez Exp $
+% $Id: Field_refdoc.ctex,v 1.14 2004/02/25 18:59:11 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -92,8 +92,10 @@
 \subsection{Class API}
 #ifdef STANDALONE
 \input{ESMF_Field_fapi}
+\input{../../FieldComm/doc/ESMF_FieldComm_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Field/doc/ESMF_Field_fapi}
+\input{../Infrastructure/FieldComm/doc/ESMF_FieldComm_fapi}
 #endif
 
 #ifdef STANDALONE

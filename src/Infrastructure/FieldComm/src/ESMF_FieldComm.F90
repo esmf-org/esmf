@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.4 2004/02/19 21:26:19 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.5 2004/02/25 18:59:11 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 
 !------------------------------------------------------------------------------
 !
-!BOP
+!BOPI
 ! !MODULE: ESMF_FieldCommMod - Communication routines for Field objects
 !
 ! !DESCRIPTION:
@@ -87,12 +87,12 @@
    !public ESMF_FieldAllReduce  ! Global reduction operation, return on each DE
 
 !
-!EOP
+!EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.4 2004/02/19 21:26:19 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.5 2004/02/25 18:59:11 cdeluca Exp $'
 
 !==============================================================================
 !
