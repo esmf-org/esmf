@@ -1,0 +1,83 @@
+% $Id: ESMF_usrdoc.tex,v 1.13 2003/05/07 04:34:32 cdeluca Exp 
+
+\documentclass[english]{article}
+\usepackage{babel}
+\usepackage{supertabular}
+\usepackage{html}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage[T1]{fontenc}
+
+\newcommand{\docmttype}{User's Guide}
+\newcommand{\req}[1]{\section{\hspace{.2in}#1}}
+\newcommand{\sreq}[1]{\subsection{\hspace{.2in}#1}}
+\newcommand{\ssreq}[1]{\subsubsection{\hspace{.2in}#1}}
+\newcommand{\mytitle}{\longname \docmttype ~~}
+\newcommand{\myversion}{Version 1.0}
+
+\newenvironment
+{reqlist}
+{\begin{list} {} {} \rm \item[]}
+{\end{list}}
+
+%===============================================================================
+% User-defined commands
+%-------------------------------------------------------------------------------
+\newcommand{\longname}{ESMF }
+\newcommand{\funcname}{ESMF }
+\newcommand{\shortname}{REF}
+\newcommand{\myauthors}{ESMF Joint Specification Team:  V. Balaji, Tom Bettge, Byron Boville, Nancy Collins, Tony Craig, Carlos Cruz, Arlindo da Silva, Cecelia DeLuca, Brian Eaton, Bob Hallberg, Chris Hill, Mark Iredell, Rob Jacob, Phil Jones, Brian Kauffman, Jay Larson, John Michalakes, David Neckels, Jim Rosinski, Earl Schwab, Shepard Smithline, Max Suarez, Jon Wolfe, Weiyu Yang, Mike Young, Leonid Zaslavsky}
+%===============================================================================
+\setlength{\textwidth}{6.5truein}
+\setlength{\textheight}{8.5truein}
+\setlength{\oddsidemargin}{0in}
+\setlength{\unitlength}{1truecm}
+
+\begin{document}
+
+\bodytext{BGCOLOR=white LINK=#083194 VLINK=#21004A}
+
+% Title page
+
+\input{../../scripts/doc_templates/templates/title_alldoc}
+
+\newpage
+\tableofcontents
+
+\newpage
+
+%\section{Introduction}
+\input{ESMF_usrintro}
+
+%\section{ESMF Support and Contacts}
+\input{ESMF_usrsupport}
+
+\newpage
+%\section{Quick Start}
+\input{ESMF_quickstart}
+
+%\section{ESMF Architectural Overview}
+\input{ESMF_archoverview}
+
+#include "../Demo/coupled_flow/doc/Demo_usrdoc.ctex"
+
+%\section{ESMF Technical Overview}
+\input{ESMF_techoverview}
+
+%\section{Looking Ahead:  How to Adapt Applications for ESMF}
+\input{ESMF_adoption}
+
+%\section{Glossary}
+\input{ESMF_terms}
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
