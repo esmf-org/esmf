@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.26 2003/03/22 00:51:25 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.27 2003/03/24 16:02:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.26 2003/03/22 00:51:25 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.27 2003/03/24 16:02:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -140,7 +140,7 @@
 
     this->layout = layout;
     rc = layout->ESMC_DELayoutGetNumDEs(&decount);
-    rc = layout->ESMC_DELayoutGetDEid(&myde);
+    rc = layout->ESMC_DELayoutGetDEID(&myde);
     
     routeid = rseqnum++;
     sendRT = ESMC_RTableCreate(myde, decount, &rc);
@@ -366,7 +366,7 @@
     char *srcmem, *rcvmem;
     int srccount, rcvcount;
 
-    rc = layout->ESMC_DELayoutGetDEid(&mydeid);
+    rc = layout->ESMC_DELayoutGetDEID(&mydeid);
     rc = ct->ESMC_CommTableGetCount(&ccount);
 
     // for each destination in the comm table
