@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.26 2004/03/18 21:49:29 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.27 2004/03/19 13:50:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.26 2004/03/18 21:49:29 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.27 2004/03/19 13:50:49 theurich Exp $'
 
 !==============================================================================
 !
@@ -250,8 +250,8 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
-      function ESMF_GridCompCreateConf(name, delayout, gridcomptype, grid, clock, &
-                                                        config, configFile, rc)
+      function ESMF_GridCompCreateConf(name, delayout, gridcomptype, grid, &
+        clock, config, configFile, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateConf
@@ -324,7 +324,8 @@
    
         ! Call construction method to initialize gridcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
-                                gridcomptype=gridcomptype, configFile=configFile, &
+                                gridcomptype=gridcomptype, &
+                                configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
                                 rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -347,7 +348,8 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_GridCompCreate()      
       function ESMF_GridCompCreateVM(vm, &
-        name, delayout, gridcomptype, grid, clock, config, configFile, petList, rc)
+        name, delayout, gridcomptype, grid, clock, config, configFile, &
+        petList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_GridComp) :: ESMF_GridCompCreateVM
@@ -422,8 +424,9 @@
         endif
    
         ! Call construction method to initialize gridcomp internals
-        call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, delayout, &
-                                gridcomptype=gridcomptype, configFile=configFile, &
+        call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_GRID, name, delayout, &
+                                gridcomptype=gridcomptype, &
+                                configFile=configFile, &
                                 config=config, grid=grid, clock=clock, &
                                 vm=vm, petList=petList, rc=status)
         if (status .ne. ESMF_SUCCESS) then

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.77 2004/03/18 21:49:29 cdeluca Exp $
+! $Id: ESMF_Comp.F90,v 1.78 2004/03/19 13:50:49 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -187,10 +187,10 @@
       public ESMF_CompValidate, ESMF_CompPrint
 
 #ifdef ESMF_ENABLE_VM
-      public ESMF_CompVMDefMaxThreads
-      public ESMF_CompVMDefMinThreads
-      public ESMF_CompVMDefMaxPEs
-      public ESMF_CompReturn
+      public ESMF_CompSetVMMaxThreads
+      public ESMF_CompSetVMMinThreads
+      public ESMF_CompSetVMMaxPEs
+      public ESMF_CompWait
 #endif
 
 !EOPI
@@ -200,7 +200,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.77 2004/03/18 21:49:29 cdeluca Exp $'
+      '$Id: ESMF_Comp.F90,v 1.78 2004/03/19 13:50:49 theurich Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
