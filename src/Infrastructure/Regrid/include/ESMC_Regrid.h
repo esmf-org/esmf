@@ -1,4 +1,4 @@
-// $Id: ESMC_Regrid.h,v 1.3 2003/03/11 03:01:02 cdeluca Exp $
+// $Id: ESMC_Regrid.h,v 1.4 2003/04/01 21:54:25 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Regrid members and declares method 
-// signatures (prototypes).  The companion file ESMC_Regrid.C contains
+// signatures (prototypes).  The companion file ESMC\_Regrid.C contains
 // the definitions (full code bodies) for the Regrid methods.
 //
 // 
@@ -83,7 +83,7 @@
 
   public:
  // the following methods apply to deep classes only
- // ESMC_RegridCreate and ESMC_RegridDestroy are declared below,
+ // ESMC\_RegridCreate and ESMC\_RegridDestroy are declared below,
  // outside the ESMC_Regrid declaration
 
  // or

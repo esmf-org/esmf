@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.36 2003/03/17 22:36:09 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.37 2003/04/01 21:54:22 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.36 2003/03/17 22:36:09 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.37 2003/04/01 21:54:22 flanigan Exp $'
 
 !==============================================================================
 !
@@ -727,7 +727,7 @@
 !          Class to be queried.
 !     \item[[covers\_domain]]
 !          Logical identifier if distgrid covers the entire physical domain.
-!     \item[[gcell_count]]
+!     \item[[gcell\_count]]
 !          Global total number of cells.
 !     \item[[gcell\_dim]]
 !          Array of the global number of cells in each dimension.
@@ -825,7 +825,7 @@
 !          Class to be set.
 !     \item[[covers\_domain]]
 !          Logical identifier if distgrid covers the entire physical domain.
-!     \item[[gcell_count]]
+!     \item[[gcell\_count]]
 !          Global total number of cells.
 !     \item[[gcell\_dim]]
 !          Array of the global number of cells in each dimension.

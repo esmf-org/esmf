@@ -134,47 +134,48 @@
 #include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
 
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
-%\end{htmlonly}
-%\part{Infrastructure Fields and Grids: Distributed Grids}
-%\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Distributed Grids}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Distributed Grids}
+\label{part:Infrastructure_Fields_and_Grids:_Distributed_Grids}
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%#include "../Infrastructure/DistGrid/doc/DistGrid_desdoc.ctex"
+#include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
-%\end{htmlonly}
-%\part{Infrastructure Fields and Grids: Regridding}
-%\label{part:Infrastructure_Fields_and_Grids:_Regridding}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Regridding}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Regridding}
+\label{part:Infrastructure_Fields_and_Grids:_Regridding}
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%#include "../Infrastructure/Regrid/doc/Regrid_desdoc.ctex"
-%====================================================================================================
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
-%\end{htmlonly}
-%\part{Infrastructure Utilities: Time Management}
-%\label{part:Infrastructure_Utilities:_Time_Management}
+#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+====================================================================================================
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Utilities: Time Management}
+\end{htmlonly}
+\part{Infrastructure Utilities: Time Management}
+\label{part:Infrastructure_Utilities:_Time_Management}
 
-%#include "../Infrastructure/TimeMgr/doc/TimeMgr_desdoc.ctex"
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+#include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
 
 %====================================================================================================
