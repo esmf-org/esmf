@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.4 2003/12/16 22:21:23 svasquez Exp $
+% $Id: State_refdoc.ctex,v 1.5 2004/03/22 19:18:03 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -63,7 +63,7 @@
 \input{../Superstructure/State/doc/ESMF_StateEx_fapi}
 #endif
 
-\subsection{Restrictions}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{State_rest}
 #elif defined(CONSTITUENT)
