@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2001/11/15 22:56:37 dneckels Exp $
+# $Id: makefile,v 1.3 2001/11/28 18:32:45 dneckels Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -9,11 +9,12 @@
 ALL: all
 
 DIRS = src
+CLEANDIRS = lib mod test${BOPT}
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 build_libs:
-	-@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
+	@${OMAKE} ESMF_DIR=${ESMF_DIR} ESMF_ARCH=${ESMF_ARCH} BOPT=${BOPT} ACTION=vpathlib tree 
 	
 
 #-------------------------------------------------------------------------------
@@ -218,6 +219,20 @@ html: chkdir_doc tex
 	-@echo "========================================="
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=buildhtml  tree 
+
+# Clean recursively deletes files that each makefile wants
+# deleted.   Remove the .mod files here manually since the case
+# of mods is not really predictable.
+clean: chkopts
+	@rm -f ${ESMC_MODDIR}/*.mod
+	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+	   ACTION=clean_recursive  tree 
+
+clobber: chkopts clean
+	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+	   ACTION=clobber_recursive  tree 
+	
+
 
 
 # Deletes man pages (HTML version)

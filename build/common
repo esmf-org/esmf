@@ -1,4 +1,4 @@
-# $Id: common,v 1.3 2001/11/15 22:56:37 dneckels Exp $ 
+# $Id: common,v 1.4 2001/11/28 18:32:45 dneckels Exp $ 
 #
 #
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -100,22 +100,14 @@ libfast: chkalice_dir ${SOURCEC} ${SOURCEF}
 	  ${RM} -f ${OBJSC} ${SOBJS}; \
 	fi
 
-# Removes garbage files
-clean::
-	@-${RM} -f *.o *~ ex[0-9] ex[0-9][0-9] ex[0-9]f ex[0-9][0-9]f \
-	       ${CLEANFILES} ${TESTS} ex[0-9]f90 ex[0-9][0-9]f90 \
-	       PI* *.ln l.outa* mputil.mp_* core core.* *.tmp *.map gmon.out \
-	       trashz \#*\# *.mex* *.stolen *.trace Log.* joe jeff *.stolen \
-	       output/*~ .mpirtmp mon.out *.aus *.mon.* __* p4pg ins10*.c \
-	       ex[0-9].exe ex[0-9][0-9].exe ex[0-9]f.exe ex[0-9][0-9]f.exe \
-	       *.ad.c *.ad.h ad_deriv.h .adic* *.cp_ *.cp__ *.c*.c \
-               .adic* *.dep *.proj ctoatmp AliceArena* *.L *.anl main
+clobber_recursive:
+	@if [ "$(CLEANDIRS)" != "" ] ; then \
+		rm -rf $(CLEANDIRS) ; fi
 
-cleanstolen:
-	@-${RM} -f *.stolen
+clean_recursive:
+	@if [ "$(CLEANFILES)" != "" ] ; then \
+		rm -f $(CLEANFILES) ; fi
 
-cleanadic:
-	@-${RM} -f *.ad.*
 #
 #  testexamples_X - Runs various Alice test suites
 #    1 - basic C suite used in installation tests
@@ -181,7 +173,7 @@ buildexamples_15: ${BUILDEXAMPLES_15}
 #    #requiresscalar   real (or complex)
 
 tree: ${ACTION}
-	-@if [ "${DIRS}" != "" ]; then \
+	@if [ "${DIRS}" != "" ]; then \
 	  for dir in ${DIRS} foo ; do \
             if [ -d $$dir ]; then \
 	      r=`egrep requirespackage $$dir/makefile`; \
@@ -218,6 +210,9 @@ tree: ${ACTION}
             (cd $$dir ; \
             echo ${ACTION} in: `pwd`; \
             ${OMAKE} -f makefile tree ACTION=${ACTION} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH});\
+            if [ "$$?" != 0 ]; then \
+              exit 1; \
+            fi; \
 	  done ; \
         fi
 
