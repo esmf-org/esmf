@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.18 2003/08/28 21:30:16 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.19 2003/08/29 21:09:11 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.18 2003/08/28 21:30:16 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.19 2003/08/29 21:09:11 jwolfe Exp $'
 
 !==============================================================================
 
@@ -138,7 +138,7 @@
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_LocalArray) :: srcCenterX, srcCenterY, centerCoordArray
-      type(ESMF_DomainList), pointer :: sendDomainList, recvDomainList
+      type(ESMF_DomainList) :: sendDomainList, recvDomainList
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route
@@ -278,7 +278,7 @@
       ! Execute Route now to gather grid center coordinates from source
       ! This same Route will be executed at RegridRun time to bring over
       !  data values using the same patterns.
-      size = recvDomainList%total_size
+      size = recvDomainList%total_points
       srcCenterX = ESMF_LocalArrayCreate(1, type, kind, size, status)
       srcCenterY = ESMF_LocalArrayCreate(1, type, kind, size, status)
 

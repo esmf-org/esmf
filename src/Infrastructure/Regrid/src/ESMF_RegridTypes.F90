@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.12 2003/08/28 17:23:28 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.13 2003/08/29 21:09:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -152,7 +152,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.12 2003/08/28 17:23:28 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.13 2003/08/29 21:09:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -214,8 +214,6 @@
       type (ESMF_ARRAY) :: &! temps for use when re-sizing arrays
          src_add_tmp, dst_add_tmp, weights_tmp
 
-      rc = ESMF_FAILURE
-
       call ESMF_LocalArrayGetData(tv%srcindex, src_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(tv%dstindex, dst_ptr, ESMF_DATA_REF, rc)
       call ESMF_LocalArrayGetData(tv%weights, wgt_ptr, ESMF_DATA_REF, rc)
@@ -242,8 +240,7 @@
       dst_ptr((tv%numlinks * 2) + 1) = dst_add(2)
       wgt_ptr(tv%numlinks, 1) = weight
 
-
-      rc = ESMF_SUCCESS      
+      rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridAddLink
 
@@ -311,9 +308,16 @@
       logical :: rcpresent
       integer :: stat, status
 
-      rcpresent=.FALSE.
       status = ESMF_FAILURE
-      if (present(rc)) rcpresent = .TRUE.
+      rcpresent=.FALSE.
+
+!     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
       
       ! Get name if requested
       if (present(name)) then
@@ -418,9 +422,12 @@
       logical :: rcpresent
       integer :: stat, status
 
+      status = ESMF_SUCCESS
       rcpresent=.FALSE.
-      status = ESMF_FAILURE
-      if (present(rc)) rcpresent = .TRUE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
       
       ! Set name if requested
       if (present(name)) then
@@ -522,24 +529,34 @@
 !EOP
 ! !REQUIREMENTS:
 
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
-        regrid%method    = ESMF_RegridMethod_none
-        regrid%num_links = 0
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
 
-!       deallocate regrid transform
-        !TODO
-        !destroy src_add, dst_add, weights ESMF arrays
-        nullify(regrid%src_add)
-        nullify(regrid%dst_add)
-        nullify(regrid%weights)
+      regrid%method    = ESMF_RegridMethod_none
+      regrid%num_links = 0
 
-!       destroy communication structures
-        !TODO
-        !destroy route regrid%gather
-        nullify(regrid%gather)
+!     deallocate regrid transform
+      !TODO
+      !destroy src_add, dst_add, weights ESMF arrays
+      nullify(regrid%src_add)
+      nullify(regrid%dst_add)
+      nullify(regrid%weights)
+
+!     destroy communication structures
+      !TODO
+      !destroy route regrid%gather
+      nullify(regrid%gather)
 
         ! blithly assume the world is a good place
-        rc = ESMF_SUCCESS
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
 

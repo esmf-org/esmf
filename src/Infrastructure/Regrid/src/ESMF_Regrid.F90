@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.32 2003/08/28 20:04:56 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.33 2003/08/29 21:09:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.32 2003/08/28 20:04:56 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.33 2003/08/29 21:09:00 jwolfe Exp $'
 
 !==============================================================================
 
@@ -128,10 +128,10 @@
 
 ! !INTERFACE:
       subroutine ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &
-                                            dstarray, dstgrid, dstdatamap, &
-                                            routehandle, regridmethod, &
-                                            srcmask, dstmask, &
-                                            blocking, rc)
+                                   dstarray, dstgrid, dstdatamap, &
+                                   routehandle, regridmethod, &
+                                   srcmask, dstmask, &
+                                   blocking, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
@@ -976,7 +976,7 @@
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+ !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
@@ -989,7 +989,7 @@
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
+ !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
@@ -1007,12 +1007,16 @@
       endif
 
 
+ !     call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
+ !                                dst_grid, dst_datamap, parentlayout, &
+ !                                routehandle, regridtype, &    
+ !                                srcmask, dstmask, blocking, status)
       call ESMF_ArrayRegridStore(src_array, src_grid, src_datamap, &      
-                                       dst_grid, dst_datamap, parentlayout, &
-                                       routehandle, regridtype, &    
-                                       srcmask, dstmask, blocking, status)
+                                 dst_grid, dst_datamap, srclayout, &
+                                 routehandle, regridtype, &    
+                                 srcmask, dstmask, blocking, status)
 
-      call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
+!      call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1094,7 +1098,7 @@
 
 
       ! Our DE number in the parent layout
-      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
+      ! call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1108,7 +1112,7 @@
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_FieldGetGrid(srcfield, src_grid, rc=status)
       call ESMF_GridGetDELayout(src_grid, srclayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+ !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
@@ -1121,7 +1125,7 @@
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_FieldGetGrid(dstfield, dst_grid, rc=status)
       call ESMF_GridGetDELayout(dst_grid, dstlayout, status)
-      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
+ !     call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
