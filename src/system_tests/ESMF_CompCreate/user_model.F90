@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.3 2004/04/13 22:00:42 nscollins Exp $
+! $Id: user_model.F90,v 1.4 2004/04/15 19:55:59 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -152,7 +152,6 @@
         integer :: rc
 
         type(ESMF_Field) :: humidity
-        type(ESMF_newDELayout) :: mylayout
         integer, save :: onetime=1              ! static variable
 
         integer :: status
