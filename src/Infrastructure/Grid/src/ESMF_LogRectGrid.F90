@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.12 2004/02/09 22:15:24 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.13 2004/02/10 00:07:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.12 2004/02/09 22:15:24 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.13 2004/02/10 00:07:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1431,7 +1431,6 @@
       grid%gridStatus = ESMF_GridStatus_Init
 
 !     Clean up
-      deallocate(coords)
       deallocate(coordsUse1)
       deallocate(coordsUse2)
       if (numDims.ge.3) deallocate(coordsUse3)
@@ -3486,9 +3485,6 @@
         print *, "ERROR in ESMF_LRGridSetCoordCompute: PhysGrid set locations"
         return
       endif
-
-      ! clean up
-      deallocate(arrayTemp)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
