@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.194 2004/09/02 21:24:18 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.195 2004/09/21 20:26:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.194 2004/09/02 21:24:18 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.195 2004/09/21 20:26:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1059,13 +1059,9 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_UNKNOWN
       case(0)
-        ! TODO: decide if it's ok to create an empty grid and then delete 
-        !   it without being created further. (allow it for now)
-        !localrc = ESMF_FAILURE
+        ! allow a user to create an empty grid and then delete 
+        ! it without being created further.
         localrc = ESMF_SUCCESS
-        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
-                                  "GridStructureUnknown not supported", &
-                                  ESMF_CONTEXT, rc)) return
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
