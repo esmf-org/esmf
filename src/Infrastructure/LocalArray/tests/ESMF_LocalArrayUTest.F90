@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.27 2004/08/26 21:27:14 svasquez Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.28 2004/10/05 16:15:07 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -50,7 +50,7 @@
     
     call ESMF_Initialize(vm=vm, rc=rc)
     call ESMF_VMGet(vm, petCount=npets, rc=rc)
-    print *, "NUMBER_OF_PROCESSORS ", npets
+    print '(/, a, i3)' , "NUMBER_OF_PROCESSORS", npets
 
 !-------------------------------------------------------------------------------
 !   ! Test 1:
