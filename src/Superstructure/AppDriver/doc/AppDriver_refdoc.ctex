@@ -1,4 +1,4 @@
-% $Id: AppDriver_refdoc.ctex,v 1.4 2004/02/27 17:40:23 cdeluca Exp $
+% $Id: AppDriver_refdoc.ctex,v 1.5 2004/02/27 18:50:09 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
 \newpage
 #endif
 
-\section{The ESMF Application Driver}
+\section{Application Driver and Core ESMF Commands}
 
 \subsection{Description}
 #ifdef STANDALONE
