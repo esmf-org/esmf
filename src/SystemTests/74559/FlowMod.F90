@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.6 2003/04/25 16:49:59 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.7 2003/04/25 22:07:24 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -175,6 +175,7 @@
       integer :: status
       logical :: rcpresent
       integer :: i, j, n, x, y, nx, ny
+      integer, dimension(1,2) :: local, global
       double precision :: s_
       type(ESMF_Grid) :: grid
       type(ESMF_DElayout) :: layout
@@ -321,8 +322,14 @@
 !
       do n = 1, nobsdesc
         do j = jobs_min(n),jobs_max(n)
+          global(1,2) = j
           do i = iobs_min(n),iobs_max(n)
-            flag(i,j) = -1
+            global(1,1) = i
+            call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
+                                             local2d=local, rc=status)
+            if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
+              flag(local(1,1),local(1,2)) = -1
+            endif
           enddo
         enddo
       enddo
@@ -330,7 +337,13 @@
 ! add inflow section
 !
       do i = iflo_min, iflo_max
-        flag(i,1) = 10
+        global(1,1) = i
+        global(1,2) = 1
+        call ESMF_GridGlobalToLocalIndex(grid, global2d=global, &
+                                         local2d=local, rc=status)
+        if(local(1,1).ne.-1 .and. local(1,2).ne.-1) then
+          flag(local(1,1),local(1,2)) = 10
+        endif
       enddo
 !
 ! obstacle normal boundary conditions here
