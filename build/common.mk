@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.18 2003/10/17 19:30:43 nscollins Exp $
+#  $Id: common.mk,v 1.19 2003/10/17 21:15:11 nscollins Exp $
 #
 #  common.mk
 #
@@ -117,7 +117,7 @@ ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
 		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_BUILD_DIR}/build_config/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_SITE) \
-		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR)
+		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) $(MPI_INCLUDE)
 
 CCPPFLAGS	+= ${PCONF} ${ESMC_PARCH} -DS${ESMF_PREC}=1 ${CPPFLAGS} \
 	 	  -D__SDIR__='"${LOCDIR}"'
