@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.8 2003/01/21 01:14:27 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.9 2003/01/22 03:07:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -148,7 +148,7 @@
     public ESMF_RegridCreate      ! create and fill a regrid object
     public ESMF_RegridDestroy     ! deallocate memory associated with a regrid
 
-    public ESMF_RegridDo          ! perform a regrid operation
+    !public ESMF_RegridDo          ! perform a regrid operation
 
     !public ESMF_RegridGetName     ! Get name of regrid
     !public ESMF_RegridGetField    ! Get fields associated with this regrid
@@ -163,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Regrid.F90,v 1.8 2003/01/21 01:14:27 nscollins Exp $'
+      '$Id: ESMF_Regrid.F90,v 1.9 2003/01/22 03:07:46 nscollins Exp $'
 
 !==============================================================================
 !
