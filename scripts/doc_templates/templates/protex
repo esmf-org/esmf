@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.11 2003/02/21 16:16:21 nscollins Exp $
+#  $Id: protex,v 1.12 2003/02/27 18:56:35 rstaufer Exp $
 #
 #BOP
 #
@@ -22,6 +22,7 @@
 # \begin{tabular}{|c|l|} \hline \hline
 #   -h   & Help mode: list command line options   \\ \hline
 #   -b   & Bare mode, meaning no preamble, etc.  \\ \hline
+#   -i   & internal mode: omit prologues marked !BOPI  \\ \hline
 #   +/-n & New Page for each subsection (wastes paper) \\ \hline
 #   +/-l & Listing mode, default is prologues only \\ \hline
 #   +/-s & Shut-up mode, i.e., ignore any code from BOC to EOC \\ \hline
@@ -82,6 +83,10 @@
 #                       to "\label{app:ProLogues}"
 #  10/10/2002 da Silva  Introduced ARGUMENTS keyword, touch ups.
 #
+#  15Jan2003  R. Staufer  Modified table of contents to print only section headers - no descriptions
+#
+#  25Feb2003  R. Staufer  Added BOPI/EOPI and -i (internal) switch to provide the option of omitting prologue information from output files.
+#
 #EOP
 #----------------------------------------------------------------------------
 
@@ -95,7 +100,7 @@
 # -----------------------
   $GlobOptions = 'hb';    # Global options (i.e for all files)
   $LangOptions = 'ACFS';  # Options for setting programming languages
-  $SwOptions   = 'flnsx'; # Options that can change for each input 
+  $SwOptions   = 'flinsx'; # Options that can change for each input 
                           #   file
   $RegOptions  = "$GlobOptions$LangOptions";
                           # Scan for global options until first first
@@ -195,6 +200,8 @@ ARG:
         $eoi_string = '!EOI';
         $bop_string = '!BOP';
         $eop_string = '!EOP';
+        $bopi_string = '!BOPI';
+        $eopi_string = '!EOPI';
         $boc_string = '!BOC';
         $eoc_string = '!EOC';
 #}#   end if
@@ -205,6 +212,8 @@ ARG:
         $eoi_string = '--EOI';
         $bop_string = '--BOP';
         $eop_string = '--EOP';
+        $bopi_string = '--BOPI';
+        $eopi_string = '--EOPI';
         $boc_string = '--BOC';
         $eoc_string = '--EOC';
 }#   end if
@@ -215,6 +224,8 @@ ARG:
         $eoi_string = '//EOI';
         $bop_string = '//BOP';
         $eop_string = '//EOP';
+        $bopi_string = '//BOPI';
+        $eopi_string = '//EOPI';
         $boc_string = '//BOC';
         $eoc_string = '//EOC';
 }#   end if
@@ -225,6 +236,8 @@ ARG:
         $eoi_string = '#EOI';
         $bop_string = '#BOP';
         $eop_string = '#EOP';
+        $bopi_string = '#BOPI'; 
+	$eopi_string = '#EOPI';
         $boc_string = '#BOC';
         $eoc_string = '#EOC';
 }#   end if
@@ -349,7 +362,7 @@ LINE:
         if ($Fld[1] eq $bop_string) {
            if ( $source ) { &do_eoc(); }
            print ' ';
-           print '%/////////////////////////////////////////////////////////////';
+           print '%/////////////////////////////////////////////////////////////'; 
            &do_beg();
            if ($first == 0) {
               ### print "\\newpage";
@@ -359,14 +372,40 @@ LINE:
            else {
               unless($opt_b){print "\\section{Routine/Function Prologues} \\label{app:ProLogues}";}
 }#         end if
-
+	
            $first = 0;
            $prologue = 1;
            $verb = 0;
            $source = 0;
            &set_missing();   # no required keyword yet
            next LINE;
-}#      end if
+}#     end if
+
+#	Beginning of internal prologue
+#	------------------------------
+	if ($Fld[1] eq $bopi_string) {
+	   if ($opt_i) {$prologue = 0;}
+           else {
+              if ($source) { &do_eoc(); }
+              print ' ';
+              print '%/////////////////////////////////////////////////////////////';  
+              &do_beg();
+              if ($first ==0) {
+                 ### print "\\newpage";
+                 print " ";
+                 print "\\mbox{}\\hrulefill\\";
+                 print " ";}
+              else {
+                 unless($opt_b){print "\\section{Routine/Function Prologues} \\label{app:ProLogues}";}
+}#            endif              
+              $first = 0;
+              $prologue = 1;
+              $verb = 0;
+              $source = 0;
+              &set_missing();    # no required keyword yet
+              next LINE;
+           }#   endelse 
+        }#    endif
 
 #       A new subroutine/function
 #       -------------------------
@@ -434,8 +473,6 @@ LINE:
               $name_is = $_;
               s/_/\\_/g;                        # Replace "_" with "\_"
 	      @words = split " ", $_;
-              #print @words;
-              #printf "\\subsubsection {%s} \n\n", $_;
               printf "\\subsubsection [$words[1]] {$_}\n\n";
               $have_name = 1;
               next LINE;
@@ -564,13 +601,29 @@ KEY:       foreach $key ( @keys ) {
               $verb = 0;
 }#         end if
            $prologue = 0;
-#           &check_if_all_there(); # check if all required keyword are there.
+#           &check_if_all_there(); # check if all required keywords are there.
            if ( $opt_l ) {
               $Fld[1] = $boc_string;}
            else { next LINE; }
 }#      end if
 
         unless ( $opt_s ) {
+
+#       End of Internal Prologue
+#	------------------------
+
+	if ($Fld[1] eq $eopi_string) {
+           if ($verb) {
+              print "\\end{verbatim}";
+              $verb = 0;
+}#         endif
+           $prologue = 0;
+#          &check_if_all_there(); # check if all required keywords are there.
+           if ($opt_l) {
+              $Fld[1] = $boc_string;}
+           else { next LINE; }
+}#       endif
+
 #
 #          Beginning of source code section
 #          --------------------------------
@@ -862,7 +915,7 @@ sub print_preamble {
     print "\\pagestyle{myheadings}";
     print "\\markboth{}{}";
     print "%-------------------------------------------------------------";
-}#end unless
+}#  end unless
 
     # in your main document before you include any protex-generated files 
     # for the first time, if you define these three variables as length 
