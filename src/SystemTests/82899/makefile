@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/08/01 15:55:43 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/08/01 21:09:55 nscollins Exp $ 
 
 ALL:  system_tests
 
@@ -41,7 +41,7 @@ CLOBBERDIRS =
 
 RUN_ESMF_SysTest82899:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest82899.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest82899 > $(ESMC_TESTDIR)/ESMF_SysTest82899.stdout
+	-${MPIRUN} -np 12 $(ESMC_TESTDIR)/ESMF_SysTest82899 > $(ESMC_TESTDIR)/ESMF_SysTest82899.stdout
 
 RUN_ESMF_SysTest82899UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest82899.tmps
