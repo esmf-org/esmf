@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.14 2003/06/06 14:25:50 svasquez Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.15 2003/06/06 21:11:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.14 2003/06/06 14:25:50 svasquez Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.15 2003/06/06 21:11:58 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -147,10 +147,10 @@
 
       !NEX_UTest
       ! Verifing that an uninitialized Grid can be printed
-      call ESMF_GridPrint(grid, "", rc=rc)
+      call ESMF_GridPrint(grid3, "", rc=rc)
       write(failMsg, *) ""
       write(name, *) "Printing an uninitialized Grid Test"
-      call 
+!     call 
       ! Second grid
       gname = "test grid 2"
       grid2 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
