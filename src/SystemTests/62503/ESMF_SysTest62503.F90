@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.11 2003/06/20 17:45:54 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.12 2003/07/24 00:16:48 nscollins Exp $
 !
 ! System test code #62503
 
@@ -263,7 +263,7 @@
                           testname, failMsg, testresult, ESMF_SRCLINE)
   
         ! Separate message to console, for quick confirmation of success/failure
-        if (rc .eq. ESMF_SUCCESS)) then
+        if (rc .eq. ESMF_SUCCESS) then
           write(finalMsg, *) "SUCCESS!! Component test finished correctly."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc

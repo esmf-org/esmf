@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2003/04/24 16:43:14 nscollins Exp $
+! $Id: user_model2.F90,v 1.9 2003/07/24 00:16:48 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -87,11 +87,11 @@
         integer :: i, x, y
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
-        type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
+        type(ESMF_ArraySpec) :: arrayspec
         integer, dimension(:,:), pointer :: idata
         integer :: nDE_i, nDE_j
         real :: x_min, x_max, y_min, y_max
-        integer :: i_max, j_max
+        integer :: counts(2)
         integer :: ni, nj, de_id
         integer :: horz_gridtype, vert_gridtype
         integer :: horz_stagger, vert_stagger
@@ -104,8 +104,8 @@
         call ESMF_GridCompGet(comp, layout=layout, rc=status)
 
         ! Add a "humidity" field to the import state.
-        i_max = 40
-        j_max = 20
+        counts(1) = 40
+        counts(2) = 20
         x_min = 0.0
         x_max = 20.0
         y_min = 0.0
@@ -117,7 +117,7 @@
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
 
-        grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+        grid1 = ESMF_GridCreate(counts=counts, &
                                 x_min=x_min, x_max=x_max, &
                                 y_min=y_min, y_max=y_max, &
                                 layout=layout, &
@@ -129,22 +129,23 @@
                                 vert_coord_system=vert_coord_system, &
                                 name="source grid", rc=status)
 
-        ! Set initial data values over exclusive domain to the de identifier
-        call ESMF_GridGetDE(grid1, lcellexc_index=index, rc=rc)
-        ni = index(1)%r - index(1)%l + 1
-        nj = index(2)%r - index(2)%l + 1
-        print *, "allocating", ni, " by ",nj," cells on DE", de_id
+        ! Figure out our local processor id
+        call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
-        allocate(idata(ni,nj))
+        ! Set up a 2D integer array
+        call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+                                kind=ESMF_KIND_I4)
 
-        ! Create Array based on an existing, allocated F90 pointer.
-        ! Data is type Integer, 1D, but uninitialized.
-        array1 = ESMF_ArrayCreate(idata, ESMF_DATA_REF, rc)
-        print *, "Array Create returned"
-
-        humidity = ESMF_FieldCreate(grid1, array1, relloc=ESMF_CELL_CENTER, &
+        ! Create the field and have it create the array internally
+        humidity = ESMF_FieldCreate(grid1, arrayspec, relloc=ESMF_CELL_CENTER, &
                                          name="humidity", rc=rc)
 
+        ! Get the allocated array back and get an F90 array pointer
+        call ESMF_FieldGetData(humidity, array1, rc)
+        call ESMF_ArrayGetData(array1, idata, rc=rc)
+
+        ! Set initial data values over exclusive domain to the de identifier
+        idata = de_id
 
         call ESMF_StateAddData(importstate, humidity, rc)
         call ESMF_StatePrint(importstate, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.16 2003/07/17 20:02:47 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.17 2003/07/24 00:16:47 nscollins Exp $
 !
 ! System test code #69527
 
@@ -29,7 +29,7 @@
     integer :: row_to_reduce
     integer :: timestep, rowlen, rowi, rstart, rend
     integer :: result, len, de_id, ndes, rightvalue 
-    integer :: i_max, j_max
+    integer :: counts(2)
     integer :: horz_gridtype, vert_gridtype
     integer :: horz_stagger, vert_stagger
     integer :: horz_coord_system, vert_coord_system
@@ -88,8 +88,8 @@
 !   !  The user creates a simple horizontal Grid internally by passing all
 !   !  necessary information through the CreateInternal argument list.
 
-      i_max = 41
-      j_max = 20
+      counts(1) = 41
+      counts(2) = 20
       x_min = 0.0
       x_max = 20.5
       y_min = 0.0
@@ -99,7 +99,7 @@
       horz_coord_system = ESMF_CoordSystem_Cartesian
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      grid1 = ESMF_GridCreate(counts=counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layout1, &
@@ -117,7 +117,7 @@
 
 
     ! Allocate and set initial data values.  These are different on each DE.
-    call ESMF_GridGetDE(grid1, lcelltot_count=ni, rc=rc)
+    call ESMF_GridGetDE(grid1, local_cell_count=ni, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "allocating", ni, " cells on DE", de_id
     allocate(idata(ni))
@@ -182,7 +182,7 @@
 
     ! Get the mapping between local and global indices for this DE
     !   and count of row size
-    call ESMF_GridGetDE(grid1, lcelltot_index=index, rc=rc)
+    call ESMF_GridGetDE(grid1, ai_global=index, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
  
     ! Create a new Fortran array for just the part of this row on this DE
