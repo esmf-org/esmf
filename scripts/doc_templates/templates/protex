@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.10 2003/02/21 16:05:45 nscollins Exp $
+#  $Id: protex,v 1.11 2003/02/21 16:16:21 nscollins Exp $
 #
 #BOP
 #
@@ -631,9 +631,10 @@ KEY:       foreach $key ( @keys ) {
   if ( $source ) { &do_eoc(); }     
   print '%...............................................................';
  
-  print "\\setlength{\\parskip}{\\oldparskip}";
-  print "\\setlength{\\parindent}{\\oldparindent}";
-  print "\\setlength{\\baselineskip}{\\oldbaselineskip}";
+  # see comment above where these are originally set.
+  #print "\\setlength{\\parskip}{\\oldparskip}";
+  #print "\\setlength{\\parindent}{\\oldparindent}";
+  #print "\\setlength{\\baselineskip}{\\oldbaselineskip}";
 
   unless ( $opt_b ) {
      print "\\end{document}";
@@ -863,11 +864,26 @@ sub print_preamble {
     print "%-------------------------------------------------------------";
 }#end unless
 
-    print "\\setlength{\\oldparskip}{\\parskip}";
+    # in your main document before you include any protex-generated files 
+    # for the first time, if you define these three variables as length 
+    # settings (like this:)
+    #   \newlength{\oldparskip}
+    #   \newlength{\oldparindent}
+    #   \newlength{\oldbaselineskip}
+    # then 1) comment in all the lines below, and 2) find the 3 reset lines
+    # further down and comment in them as well. 
+    # then protex will override the paragraph and skip settings during 
+    # the source sections, but will restore the original document settings 
+    # at the end.   if someone can figure out how to check to see if a
+    # latex variable exists, and do a conditional section, we could make
+    # this fully self-contained.
+    # nsc feb 2003
+
+    #print "\\setlength{\\oldparskip}{\\parskip}";
     print "\\setlength{\\parskip}{0pt}";
-    print "\\setlength{\\oldparindent}{\\parindent}";
+    #print "\\setlength{\\oldparindent}{\\parindent}";
     print "\\setlength{\\parindent}{0pt}";
-    print "\\setlength{\\oldbaselineskip}{\\baselineskip}";
+    #print "\\setlength{\\oldbaselineskip}{\\baselineskip}";
     print "\\setlength{\\baselineskip}{11pt}";
 
 }# end sub print_preamble
