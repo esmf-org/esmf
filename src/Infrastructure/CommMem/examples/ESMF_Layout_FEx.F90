@@ -1,4 +1,4 @@
-! $Id: ESMF_Layout_FEx.F90,v 1.2 2003/02/14 01:05:08 eschwab Exp $
+! $Id: ESMF_Layout_FEx.F90,v 1.3 2003/02/21 05:29:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,7 +15,7 @@
 ! !DESCRIPTION:
 !
 ! Excercises the Layout F90 to C++ interface.
-! Uses data from Test 62501: row 5
+! pre-test for System Test #62501: Uses data from Test 62501: row 5
 !
 ! on halem, run with
 ! bsub -P "hp606" -q general -n 4 prun -n 2 -N 1 ./ESMF_Layout_FEx
