@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.5 2003/03/14 05:17:39 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.6 2003/03/26 01:09:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,7 +27,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.5 2003/03/14 05:17:39 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.6 2003/03/26 01:09:38 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -49,10 +49,10 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *TimeStep,    // in
-      ESMC_Time         *StartTime,   // in
-      ESMC_Time         *StopTime,    // in
-      ESMC_Time         *RefTime) {   // in
+      ESMC_TimeInterval *timeStep,    // in
+      ESMC_Time         *startTime,   // in
+      ESMC_Time         *stopTime,    // in
+      ESMC_Time         *refTime) {   // in
 
 // !DESCRIPTION:
 //      Initializes a {\tt Clock} with given values
@@ -60,9 +60,11 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    TimeStep  = *timeStep;
+    StartTime = *startTime;
+    StopTime  = *stopTime;
+    RefTime   = *refTime;
+
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockInit
@@ -78,8 +80,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm *RingingList,            // out - list of ringing alarms
-      int        *NumRingingAlarms) {     // out - number of ringing alarms
+      ESMC_Alarm *ringingList,            // out - list of ringing alarms
+      int        *numRingingAlarms) {     // out - number of ringing alarms
 //
 // !DESCRIPTION:
 //     Advances a clock's current time by timestep, then checks
@@ -97,6 +99,31 @@
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockAdvance
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockIsStopTime - check if Clock's stop time has been reached
+//
+// !INTERFACE:
+      bool ESMC_Clock::ESMC_ClockIsStopTime(
+//
+// !RETURN VALUE:
+//    bool is stop time or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    checks if {\tt Clock}'s stop time has been reached.
+//
+//EOP
+// !REQUIREMENTS:
+
+    *rc = ESMF_SUCCESS;
+
+    return(CurrTime >= StopTime);
+
+ } // end ESMC_ClockIsStopTime
 
 //-------------------------------------------------------------------------
 //BOP
@@ -138,15 +165,15 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *TimeStep,             // out
-      ESMC_Time         *StartTime,            // out
-      ESMC_Time         *StopTime,             // out
-      ESMC_Time         *RefTime,              // out
-      ESMC_Time         *CurrTime,             // out
-      ESMC_Time         *PrevTime,             // out
-      ESMF_IKIND_I8     *AdvanceCount,         // out
-      ESMC_Alarm        *AlarmList[],          // out
-      int               *NumAlarms ) const {   // out 
+      ESMC_TimeInterval *timeStep,             // out
+      ESMC_Time         *startTime,            // out
+      ESMC_Time         *stopTime,             // out
+      ESMC_Time         *refTime,              // out
+      ESMC_Time         *currTime,             // out
+      ESMC_Time         *prevTime,             // out
+      ESMF_IKIND_I8     *advanceCount,         // out
+      ESMC_Alarm        *alarmList[],          // out
+      int               *numAlarms ) const {   // out 
 //
 // !DESCRIPTION:
 //      Print information about a {\tt Clock}.  The options control the
