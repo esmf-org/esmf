@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.105 2004/02/17 19:44:15 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.106 2004/02/17 21:26:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.105 2004/02/17 19:44:15 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.106 2004/02/17 21:26:37 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1125,7 +1125,7 @@
             arraycounts(i) = counts(j) 
             j = j + 1
          else
-            arraycounts(i) = gridcounts(dimorder(i)) 
+            arraycounts(i) = gridcounts(dimorder(i)) + (2 * hwidth)
          endif
       enddo
 
