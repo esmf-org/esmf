@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.82 2004/10/14 18:54:46 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.83 2004/10/14 18:59:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -321,7 +321,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.82 2004/10/14 18:54:46 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.83 2004/10/14 18:59:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1494,7 +1494,7 @@
         end do name_loop
 
         if (.not. found) then
-          write(*,logMsg) "no mask matches name.  Requested name: ", trim(name)
+          write(logMsg, *) "no mask matches name.  Requested name: ", trim(name)
           call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, logMsg, &
                                       ESMF_CONTEXT, rc)
           return
@@ -1699,7 +1699,7 @@
         end do name_loop
 
         if (.not. found) then
-          write(*, logMsg) "No metric matches name.  Requested name: ", trim(name)
+          write(logMsg, *) "No metric matches name.  Requested name: ", trim(name)
           call ESMF_LogMsgSetError(ESMF_RC_ARG_INCOMP, logMsg, &
                                       ESMF_CONTEXT, rc)
           return
