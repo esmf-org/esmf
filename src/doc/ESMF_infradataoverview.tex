@@ -1,4 +1,4 @@
-% $Id: ESMF_infradataoverview.tex,v 1.6 2004/02/05 00:11:15 cdeluca Exp $
+% $Id: ESMF_infradataoverview.tex,v 1.7 2004/02/19 00:12:43 svasquez Exp $
 
 \section{Overview of Infrastructure Data Classes}
 
@@ -212,6 +212,31 @@ can be contained by multiple Bundles.
 
 \end{description}
 
+\subsection{Attributes}
+
+Attributes are implemented in the Base class so they can be attached to
+any object in the system which is built on the Base object.  (This is true
+for all deep objects in the system.)  Attributes are created by making a
+private copy of the information provided during the Set call.  Lists of
+values are supported, but they are not intended for problem-sized
+data arrays.   Data is also copied during a Get operation.
+
+There are routines for setting and getting single values and lists of
+int/I4, double/R8, and logical (ESMF\_Logical) types, and char */character
+strings.  (Arrays of character strings are not supported.)
+
+Attributes can be gotten by name.  The type and count can also be queried
+by name and then a specific Get call can be made.  (The arguments to the
+Get routines are typed and overloaded, so the type of the Attribute must
+match the type of the argument receiving it.)
+
+A count of all Attributes associated with an object can be returned, and
+then Attributes can also be queried and retrieved by number, for iterating
+an unknown Attribute list.
+
+For this release, Fields, Bundles, and States have Attribute support enabled.
+
+\input{../Infrastructure/Base/doc/ESMF_Base_fapi}
 
 
 \subsection{Data Class Communication Methods}
