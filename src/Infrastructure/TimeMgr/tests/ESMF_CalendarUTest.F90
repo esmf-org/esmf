@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.27 2004/06/14 23:22:07 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.28 2004/06/17 18:49:01 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.27 2004/06/14 23:22:07 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.28 2004/06/17 18:49:01 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -226,6 +226,46 @@
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar,calendartype)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Equal CalendarType Test" 
+      calendarsEqual = (gregorianCalendar == ESMF_CAL_GREGORIAN)
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendartype,calendar)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "CalendarType Equal Calendar Test" 
+      calendarsEqual = (ESMF_CAL_GREGORIAN == gregorianCalendar)
+      call ESMF_Test((calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendar,calendartype)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Equal CalendarType Test" 
+      calendarsEqual = (gregorianCalendar == ESMF_CAL_NOLEAP)
+      call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type equality
+      ! calendarsEqual = ESMF_CalendarOperator(==)(calendartype,calendar)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "CalendarType Equal Calendar Test" 
+      calendarsEqual = (ESMF_CAL_NOLEAP == gregorianCalendar)
+      call ESMF_Test((.not.calendarsEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
 
       !EX_UTest
       ! initialize secand calendar to be Julian Day type
@@ -279,11 +319,51 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing for calendar equality
+      ! Testing for calendar inequality
       ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar1,calendar2)
       write(failMsg, *) "Returned equal"
       write(name, *) "Calendars Equal Test" 
       calendarsNotEqual = (gregorianCalendar2 /= gregorianCalendar1)
+      call ESMF_Test((.not.calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type inequality
+      ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar,calendartype)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar and Calendar Type Equal Test" 
+      calendarsNotEqual = (gregorianCalendar /= ESMF_CAL_360DAY)
+      call ESMF_Test((calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type inequality
+      ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendartype,calendar)
+      write(failMsg, *) "Returned equal"
+      write(name, *) "Calendar Type and Calendar Equal Test" 
+      calendarsNotEqual = (ESMF_CAL_360DAY /= gregorianCalendar)
+      call ESMF_Test((calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type inequality
+      ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendar,calendartype)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar and Calendar Type Equal Test" 
+      calendarsNotEqual = (gregorianCalendar /= ESMF_CAL_GREGORIAN)
+      call ESMF_Test((.not.calendarsNotEqual), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      ! Testing for calendar type inequality
+      ! calendarsNotEqual = ESMF_CalendarOperator(/=)(calendartype,calendar)
+      write(failMsg, *) "Returned not equal"
+      write(name, *) "Calendar Type and Calendar Equal Test" 
+      calendarsNotEqual = (ESMF_CAL_GREGORIAN /= gregorianCalendar)
       call ESMF_Test((.not.calendarsNotEqual), &
                       name, failMsg, result, ESMF_SRCLINE)
 
