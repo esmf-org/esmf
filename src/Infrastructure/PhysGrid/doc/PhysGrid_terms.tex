@@ -1,13 +1,29 @@
-% $Id: PhysGrid_terms.tex,v 1.2 2002/03/07 02:49:02 cnh Exp $
+% $Id: PhysGrid_terms.tex,v 1.3 2002/03/21 22:29:55 rhallberg Exp $
 
 \begin{description}
 
-\item [physical location] \label<glos:PhysLoc> The location in 2-dimensional
- (horizontal) or 3-dimensional physical space to which data pertain.  A
- physical location may be a point or region in either the horizontal or the
- vertical.
+\item [Cell] \label{glos:Cell} A physical location that is specified by both
+its extent (vertices) and a nominal central location.  Cells are basic to the
+discrete description of continuous fields in a finite volume formulation.
 
-\item [<item2>] \label<glos:item2> <Description item 2.>
+\item [Grid] An ESMF Grid. This is an ESMF General Design Element
+(Dsgn\_GENn.m), discussed in its own Requirements and  Design documents. It
+contains all physical grid (via the PhysGrid facilty) and memory organization
+and layout information (via the DistGrid facility) required to manipulate
+consistently defined Gridded Fields, as well as to create and operate with Grid
+Transforms.
+
+\item [Logically rectangular grid] \label{glos:RecGrid} A grid in which
+physically adjacent points have sequential indices, and in which the extent of
+each index is independent of the other indices.
+
+\item [Metrics] \label{glos:Metrics} Terms relating changes in nondimensional
+index space to physical distances.
+
+\item [Physical location] \label{glos:PhysLoc} The location in 2-dimensional
+(horizontal) or 3-dimensional physical space to which data pertain.  A
+physical location may be a point or region in either the horizontal or the
+vertical.
 
 \end{description}
 
