@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayExpand_F90.cpp,v 1.6 2003/10/09 22:05:19 nscollins Exp $
+! $Id: ESMF_ArrayExpand_F90.cpp,v 1.7 2004/02/11 16:51:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.6 2003/10/09 22:05:19 nscollins Exp $'
+      '$Id: ESMF_ArrayExpand_F90.cpp,v 1.7 2004/02/11 16:51:56 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -90,15 +90,15 @@ ArrayAllTypeMacro()
 
 !BOP
 ! !IROUTINE: ESMF_ArrayCreate -- Generic interface to create an Array
-
+!
 ! !INTERFACE:
      interface ESMF_ArrayCreate
-
+!
 ! !PRIVATE MEMBER FUNCTIONS:
 !
         module procedure ESMF_ArrayCreateByList      ! specify TKR
         module procedure ESMF_ArrayCreateBySpec      ! specify ArraySpec
-   
+!   
         ! Plus interfaces for each T/K/R 
 
 !EOP
@@ -171,10 +171,10 @@ end interface
 
 !BOP
 ! !IROUTINE: ESMF_ArrayGetData -- Get an F90 pointer to the data contents
-
+!
 ! !INTERFACE:
      interface ESMF_ArrayGetData
-
+!
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
@@ -201,7 +201,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayCreateBySpec -- Create a new Array from an ArraySpec
-
+!
 ! !INTERFACE:
       function ESMF_ArrayCreateBySpec(spec, counts, halo_width, &
                                       lbounds, ubounds, rc)
@@ -281,7 +281,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ArrayCreateByList -- Create an Array specifying all options.
-
+!
 ! !INTERFACE:
       function ESMF_ArrayCreateByList(rank, type, kind, counts, &
                                       halo_width, lbounds, ubounds, rc)
@@ -397,7 +397,7 @@ end interface
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_ArrayConstructF90Ptr - Create and add F90 ptr to array
-
+!
 ! !INTERFACE:
      subroutine ESMF_ArrayConstructF90Ptr(array, counts, hwidth, &
                                          rank, type, kind, lbounds, ubounds, rc)
@@ -663,6 +663,8 @@ end interface
 !
 ! TODO: code goes here
 !
+        rc = ESMF_FAILURE
+
         end subroutine ESMF_ArraySetData
 
 !------------------------------------------------------------------------------
@@ -1108,6 +1110,12 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           rc = ESMF_FAILURE
         endif
 
+        ! Simple validity check 
+        if (array%this .eq. ESMF_NULL_POINTER) then
+            print *, "Array not initialized or Destroyed"
+            return 
+        endif
+
         needsdealloc = .FALSE.
 
         ! TODO: document the current rule - if we do the allocate in
@@ -1137,7 +1145,10 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           return
         endif
 
-!       set return code if user specified it
+        ! mark this as destroyed 
+        array%this = ESMF_NULL_POINTER
+
+        ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayDestroy
