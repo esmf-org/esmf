@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.16 2003/10/17 16:02:24 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.17 2004/03/19 07:16:52 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,6 +105,42 @@ void FTN(c_esmf_logclosefile)(
   
 }
 
+//---------------------------------------------------------------------------------
+//BOP
+// !IROUTINE: C_ESMF_LogWrite- writes messages
+//
+// !INTERFACE:
+     void FTN(c_esmf_logwrite)(
+//
+// !RETURN VALUE:
+// none
+//
+// !ARGUMENTS:
+      ESMC_Log *aLog,
+      char msg[],
+      int msglen)
+//
+// !DESCRIPTION:
+//    This routine is called by {\tt ESMF\_LogWarnMsg} (defined in ESMF\_LogErr.F90).  
+//    {\tt C\_ESMF\_LogWarnMsg} calls the C++ method that actually writes the warning.
+//
+//EOP
+//-------------------------------------------------------------------------
+{
+    char *msgCopy = NULL;
+
+    if ((msg != NULL) && (msglen > 0)) {
+        msgCopy = new char[msglen+1];
+        strncpy(msgCopy, msg, msglen);
+        msgCopy[msglen] = '\0';
+    }
+
+    //aLog->ESMC_LogWarnFortran(*errCode, *line, fileCopy, dirCopy, msgCopy);
+
+    if (msgCopy != NULL)
+        delete[] msgCopy;
+  
+}
 //-----------------------------------------------------------------------
 //BOP
 // !IROUTINE: ESMF_LogInfo -  writes miscellaneous information to a log file

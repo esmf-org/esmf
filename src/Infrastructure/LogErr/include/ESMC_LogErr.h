@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.18 2003/10/16 23:33:54 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.19 2004/03/19 07:16:52 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -128,6 +128,7 @@ class ESMC_Log {
                      char dir[], char msg[]);
     void ESMC_LogWarn_(int errCode, int line, char file[],
                      char dir[]);
+    void ESMC_LogWrite(int logtype, char msg[]);
     void ESMC_LogWarnFortran(int errCode, int line, char file[],
          char dir[], char msg[]);
     void ESMC_LogErr_(int errCode, int line, char file[], char dir[]);

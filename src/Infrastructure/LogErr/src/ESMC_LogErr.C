@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.20 2003/10/17 21:16:53 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.21 2004/03/19 07:16:52 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.20 2003/10/17 21:16:53 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.21 2004/03/19 07:16:52 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -88,7 +88,7 @@ void ESMC_Log::ESMC_LogOpenFile(
 //
 
 {
-   
+   printf("%s",__DATE__," Open");
    if (!ESMC_LogNameValid(name,ESMF_FALSE) ) {
       printf("File name is already being used.\n");
       ESMC_LogExit();
@@ -160,6 +160,7 @@ void ESMC_Log::ESMC_LogOpenFortFile(
 {
     
 //   ESMC_Logical  fortIsOpen;
+   printf("%s",__TIME__," OpenFort");
    if (!ESMC_LogNameValid(name,ESMF_TRUE) ) {
       printf("File name is already being used.\n");
       ESMC_LogExit();
@@ -819,6 +820,56 @@ void ESMC_Log::ESMC_LogErrMsg_(
    }
 }
 
+//----------------------------------------------------------------------------
+//BOP
+// !IROUTINE: ESMC_logWrite - write to log file
+//
+// !INTERFACE:
+
+void ESMC_Log::ESMC_LogWrite(
+
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+      int logtype,  // Log Type   
+      char msg[]	// Log Entry
+    )
+// !DESCRIPTION:
+// Prints log messsge, line number, file, directory
+//EOP
+{ 
+ 	int fortIO=ESMF_FALSE;
+#ifdef HAS_MPI
+ 	int rank;
+#endif
+	flush=ESMF_TRUE;
+  	struct tm *timePtr;  
+  	time_t timeVal;   
+  	char* timeAsc;    
+
+	
+  	time(&timeVal);
+  	timePtr=localtime(&timeVal);
+  	timeAsc=asctime(timePtr);
+  	int len1=strlen(timeAsc);
+  	timeAsc[len1-1]='\0';
+    fprintf(logErrCFilePtr[numFilePtr],"%s",timeAsc," :",msg);
+    //fprintf(logErrCFilePtr[numFilePtr],"%s",underline);
+    if (flush==ESMF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+/*  
+//#ifdef HAS_MPI
+  rank=MPI::COMM_WORLD.Get_rank();
+  if (fortIO == ESMF_TRUE) { 
+   sprintf(stringToPrint,"PE: %d",rank);
+   FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,72);
+  } else {
+    fprintf(logErrCFilePtr[numFilePtr],"PE: %d",rank);
+    if (flush==ESMF_TRUE) fflush(logErrCFilePtr[numFilePtr]);
+  } 
+#endif
+*/
+}
 
 
 //-----------------------------------------------------------------------------

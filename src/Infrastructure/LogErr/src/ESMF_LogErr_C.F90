@@ -1,4 +1,4 @@
-!  $Id: ESMF_LogErr_C.F90,v 1.4 2003/07/24 20:01:40 dneckels Exp $
+!  $Id: ESMF_LogErr_C.F90,v 1.5 2004/03/19 07:16:52 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_LogErr_C.F90,v 1.4 2003/07/24 20:01:40 dneckels Exp $'
+!      '$Id: ESMF_LogErr_C.F90,v 1.5 2004/03/19 07:16:52 cpboulder Exp $'
 !==============================================================================
    subroutine f_esmf_logopenfortran(isOpen, unitNumber, nameLogFile)
          use ESMF_BaseMod    ! ESMF base class
@@ -33,7 +33,7 @@
                                             !otherwise set to ESMF_LOG_FALSE
       integer, intent(inout) ::  unitNumber ! Fortran unit number for I/O
       character (len=32), intent(in) :: nameLogFile
-
+      print *,"f_esmf_logopen_fortran"
       call ESMF_LogOpenFortran(isOpen, unitNumber, nameLogFile)
 
    end subroutine f_esmf_logopenfortran
