@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.23 2004/06/23 19:22:39 cdeluca Exp $
+! $Id: ESMF_GCompEx.F90,v 1.24 2004/12/29 20:56:32 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -14,15 +14,6 @@
 !
 !-----------------------------------------------------------------------------
 
-    ! Example Gridded Component
-    module ESMF_GriddedCompEx
-    
-    ! ESMF Framework module
-    use ESMF_Mod
-    implicit none
-    public GComp_SetServices
-
-    contains
 !EOC
 
 !BOP
@@ -46,6 +37,16 @@
 !EOP
 
 !BOC
+    ! Example Gridded Component
+    module ESMF_GriddedCompEx
+    
+    ! ESMF Framework module
+    use ESMF_Mod
+    implicit none
+    public GComp_SetServices
+
+    contains
+
     subroutine GComp_SetServices(comp, rc)
         type(ESMF_GridComp) :: comp
         integer :: rc

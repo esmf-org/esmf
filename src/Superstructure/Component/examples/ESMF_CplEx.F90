@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.24 2004/09/22 17:16:56 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.25 2004/12/29 20:56:32 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -14,15 +14,6 @@
 !
 !-----------------------------------------------------------------------------
 
-    ! Example Coupler Component
-    module ESMF_CouplerEx
-    
-    ! ESMF Framework module
-    use ESMF_Mod
-    implicit none
-    public CPL_SetServices
-
-    contains
 !EOC
 
 !BOP
@@ -46,6 +37,16 @@
 !EOP
 
 !BOC
+    ! Example Coupler Component
+    module ESMF_CouplerEx
+    
+    ! ESMF Framework module
+    use ESMF_Mod
+    implicit none
+    public CPL_SetServices
+
+    contains
+
     subroutine CPL_SetServices(comp, rc)
         type(ESMF_CplComp) :: comp
         integer :: rc
