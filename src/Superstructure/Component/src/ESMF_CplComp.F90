@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.12 2004/02/09 21:54:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.11 2004/01/27 18:05:46 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.12 2004/02/09 21:54:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -330,8 +330,8 @@
 ! !IROUTINE: ESMF_CplCompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompInitialize(component, importstate, &
-                                             exportstate, clock, phase, rc)
+      recursive subroutine ESMF_CplCompInitialize(component, importstate, &
+                                                  exportstate, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -383,7 +383,7 @@
 ! !IROUTINE: ESMF_CplCompRun -- Call Component Run routine with 2 States
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompRun(component, importstate, exportstate, &
+    recursive subroutine ESMF_CplCompRun(component, importstate, exportstate, &
                                                                   clock, phase, rc)
 !
 !
@@ -545,8 +545,8 @@
 ! !IROUTINE: ESMF_CplCompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompFinalize(component, importstate, exportstate, &
-                                                            clock, phase, rc)
+    recursive subroutine ESMF_CplCompFinalize(component, importstate, &
+                                              exportstate, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -598,7 +598,7 @@
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the Component's checkpoint routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompWriteRestart(component, iospec, clock, phase, rc)
+    recursive subroutine ESMF_CplCompWriteRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -643,7 +643,7 @@
 ! !IROUTINE: ESMF_CplCompReadRestart -- Call the Component's restore routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompReadRestart(component, iospec, clock, phase, rc)
+     recursive subroutine ESMF_CplCompReadRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:

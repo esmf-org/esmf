@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.13 2004/01/27 18:05:46 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.14 2004/02/09 21:54:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.13 2004/01/27 18:05:46 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.14 2004/02/09 21:54:57 nscollins Exp $'
 
 !==============================================================================
 !
@@ -349,7 +349,7 @@
 ! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompInitialize(component, importstate, &
+      recursive subroutine ESMF_GridCompInitialize(component, importstate, &
                                            exportstate, clock, phase, rc)
 !
 !
@@ -399,7 +399,7 @@
 ! !IROUTINE: ESMF_GridCompRun -- Call the Component's run routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompRun(component, importstate, &
+      recursive subroutine ESMF_GridCompRun(component, importstate, &
                                            exportstate, clock, phase, rc)
 !
 !
@@ -568,7 +568,7 @@
 ! !IROUTINE: ESMF_GridCompFinalize -- Call the Component's finalize routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompFinalize(component, importstate, &
+      recursive subroutine ESMF_GridCompFinalize(component, importstate, &
                                            exportstate, clock, phase, rc)
 !
 !
@@ -618,7 +618,7 @@
 ! !IROUTINE: ESMF_GridCompWriteRestart -- Call the Component's save routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompWriteRestart(component, iospec, clock, phase, rc)
+      recursive subroutine ESMF_GridCompWriteRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -663,7 +663,7 @@
 ! !IROUTINE: ESMF_GridCompReadRestart -- Call the Component's restore routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompReadRestart(component, iospec, clock, phase, rc)
+      recursive subroutine ESMF_GridCompReadRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
