@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.3 2003/08/27 14:26:06 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.4 2003/08/27 23:28:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,6 +55,9 @@
       type ESMF_TransformValues      
       sequence
         integer :: numlinks
+        ! TODO: some domain list or count array needed here...
+        !    decide what is really needed - this is just a guess for now.
+        integer, dimension(:), pointer :: countsperdomain
         type (ESMF_LocalArray) :: srcindex             
         type (ESMF_LocalArray) :: dstindex        
         type (ESMF_LocalArray) :: weights
@@ -111,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.3 2003/08/27 14:26:06 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.4 2003/08/27 23:28:13 nscollins Exp $'
 
 !==============================================================================
 
