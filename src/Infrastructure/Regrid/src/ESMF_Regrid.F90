@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.38 2003/09/23 16:27:44 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.39 2003/09/23 19:24:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -112,7 +112,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.38 2003/09/23 16:27:44 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.39 2003/09/23 19:24:33 nscollins Exp $'
 
 !==============================================================================
 
@@ -376,6 +376,9 @@
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_Route) :: rh
+      type(ESMF_LocalArray) :: srcindexarr, dstindexarr, weightsarr
+      type(ESMF_DomainList) :: domainlist
+      integer :: numlinks
       type(ESMF_LocalArray) :: gatheredArray, srcLocalArray
       type(ESMF_TransformValues) :: tv
 
@@ -400,9 +403,13 @@
      ! srcIndex, dstIndex and weights TKR can be fixed, but unfortunately the
      ! gatheredData and dstData can be whatever the user wants - so this code
      ! might need to move into another file and be macroized heavily for TKR.
-     call ESMF_LocalArrayGetData(tv%srcindex, srcIndex, ESMF_DATA_REF, rc)
-     call ESMF_LocalArrayGetData(tv%dstindex, dstIndex, ESMF_DATA_REF, rc)
-     call ESMF_LocalArrayGetData(tv%weights, weights, ESMF_DATA_REF, rc)
+     call ESMF_TransformValuesGet(tv, numlist=numlinks, domainlist=domainlist, &
+                                  srcindex=srcindexarr, dstindex=dstindexarr, &
+                                  weights=weightsarr, rc=rc)
+
+     call ESMF_LocalArrayGetData(srcindexarr, srcIndex, ESMF_DATA_REF, rc)
+     call ESMF_LocalArrayGetData(dstindexarr, dstIndex, ESMF_DATA_REF, rc)
+     call ESMF_LocalArrayGetData(weightsarr, weights, ESMF_DATA_REF, rc)
 
      ! from the domain or from someplace, get the counts of how many data points
      ! we are expecting from other DEs.  we might also need to know what
@@ -410,7 +417,9 @@
      ! execution time.  or does the incoming data have to match the type
      ! of the outgoing array?  so we can get the data type and shape from
      ! the dstarray argument to this function.  and what about halo widths?
-     size = tv%domainlist%total_points
+
+     !size = tv%domainlist%total_points
+     size = domainlist%total_points
 
      ! TODO: fix to allow for rank > gridrank
 
@@ -437,7 +446,7 @@
 
      !*** do the regrid
 
-     do n=1,tv%numlinks
+     do n=1,numlinks
        dstData(dstIndex(n)) = dstData(dstIndex(n)) &
                             + (gatheredData(srcIndex(n)) * weights(n))
      end do

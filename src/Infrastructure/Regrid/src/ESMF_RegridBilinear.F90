@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.24 2003/09/23 16:27:58 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.25 2003/09/23 19:24:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.24 2003/09/23 16:27:58 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.25 2003/09/23 19:24:33 nscollins Exp $'
 
 !==============================================================================
 
@@ -142,6 +142,7 @@
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: myAI
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
+      type(ESMF_LocalArray) :: srcindex, dstindex, weights
       type(ESMF_LocalArray) :: srcLocalCoordXArray, srcLocalCoordYArray
       type(ESMF_LocalArray) :: srcGatheredCoordXArray, srcGatheredCoordYArray
       type(ESMF_LocalArray) :: dstLocalCoordArray, srcLocalCoordArray
@@ -365,33 +366,30 @@
 
       ! now all necessary data is local
 
-      ! Allocate space for the search to put links between grids.
-      ! TODO: this code should go into its own subroutine at some point.
-      allocate(tv, stat=status)
-      if (status .ne. 0) then
-          print *, "error in allocation of TransformValues type"
-          return
-      endif
+      ! Create a Transform Values object
+      tv = ESMF_TransformValuesCreate(rc)
+ 
 
-      ! initialize the rest of the tv structure.
-      tv%numlinks = 0
-   
       ! TODO: the *4 is to guarentee the max allocation possible is enough
       !  for bilinear interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
       size_xy(1) = dstCounts(1)*4
       size_xy(2) = dstCounts(2)*4
       size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
-      tv%domainlist = recvDomainList
-      tv%srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
+      !tv%domainlist = recvDomainList
+      srcindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size, status)
-      tv%dstindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
+      dstindex = ESMF_LocalArrayCreate(1, ESMF_DATA_INTEGER, ESMF_I4, &
                                           size, status) 
       allocate(tempCrud(size))
-      tv%weights = ESMF_LocalArrayCreate(tempCrud, ESMF_DATA_REF, status)
+      weights = ESMF_LocalArrayCreate(tempCrud, ESMF_DATA_REF, status)
    !   tv%weights  = ESMF_LocalArrayCreate(2, ESMF_DATA_REAL, ESMF_R8, &
    !                                       size_x0, status)
  
+      ! set the values in the TV
+      call ESMF_TransformValuesSet(tv, size, recvDomainList, &
+                                   srcindex, dstindex, weights, rc)
+
       ! set up mask and logical found arrays for search
       allocate(found(dstCounts(1),dstCounts(2)))
       found = .FALSE.
