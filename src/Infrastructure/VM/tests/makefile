@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2005/01/25 18:44:04 jwolfe Exp $ 
+# $Id: makefile,v 1.9 2005/01/26 21:30:19 jwolfe Exp $ 
 
 ALL:  build_tests
 
@@ -37,13 +37,7 @@ TESTS_RUN     = RUN_ESMF_VMUTest \
 #		RUN_ESMF_VMThreadBarrierUTest
 
 TESTS_RUN_UNI = RUN_ESMF_VMUTestUNI \
-                RUN_ESMF_VMSendVMRecvUTestUNI \
-                RUN_ESMF_VMScatterUTestUNI \
-                RUN_ESMF_VMGatherUTestUNI \
-		RUN_ESMF_VMBroadcastUTestUNI \
-		RUN_ESMF_VMBarrierUTestUNI
-
-#		RUN_ESMF_VMThreadBarrierUTestUNI
+                RUN_ESMF_VMSendVMRecvUTestUNI
 
 TESTS_RM      = ESMF_VMUTest.rm
 
