@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.16 2004/04/20 22:51:54 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.17 2004/04/23 21:22:43 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -337,7 +337,6 @@
       integer, intent(out), optional :: rc   @\
  @\
         ! Local variables @\
-        integer :: i                        ! temp var @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\
@@ -492,7 +491,7 @@
         logical :: copyreq                  ! did user specify copy? @\
  @\
         type (ESMF_ArrWrap##mrank##D##mtypekind) :: wrap     ! for passing f90 ptr to C++ @\
-        integer :: rank, lb(mrank), ub(mrank)  ! size info for the array @\
+        integer :: lb(mrank), ub(mrank)  ! size info for the array @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: lp ! local copy @\
  @\
         ! initialize return code; assume failure until success is certain @\
