@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.12 2003/02/11 15:57:59 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.13 2003/02/11 16:38:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -191,7 +191,7 @@
       end type
 
 !     ! allocation size to grow by
-      integer :: chunksize = 16
+      integer, parameter :: chunksize = 16
 !------------------------------------------------------------------------------
 !     ! ESMF_State
 !
@@ -244,7 +244,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.12 2003/02/11 15:57:59 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.13 2003/02/11 16:38:08 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -756,6 +756,7 @@ end function
 !       ! TODO: add working code here
 
 !       ! round up to next multiple of chunksize
+        print *, itemcount, chunksize, mod(itemcount, chunksize)
         allocsize = itemcount + chunksize - mod(itemcount,chunksize)
         allocate(stypep%datalist(allocsize), stat=status)
         if(status .NE. 0) then     ! this is an F90 rc, not ESMF
@@ -834,7 +835,7 @@ end function
 
         ! Set statename on base object
         call ESMF_SetName(stypep%base, statename, "States", status)
-        if(status .NE. 0) then
+        if (status .ne. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_StateConstructEmpty: SetName"
           return
         endif
