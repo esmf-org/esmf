@@ -1,4 +1,4 @@
-% $Id: AppDriver_desc.tex,v 1.4 2003/11/12 22:29:15 nscollins Exp $
+% $Id: AppDriver_desc.tex,v 1.5 2003/11/12 23:13:06 nscollins Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -19,15 +19,15 @@ choices about:
 
 \item[Serial vs. Concurrent Execution]
 
-In a Serial Execution strategy each processor 
+In a Serial Execution model each processor 
 executs the same Component until it has produced data needed
 by another Component, and then all processors change to
 running the next Component.  This has the appeal of simplicity
-of data consumption and production; when a Component starts
+of data consumption and production: when a Component starts
 all required data is available for use, and when a Component finishes
-all data produced has been computed.  This strategy also has
+all data produced has been computed.  This approach also has
 the possibility of less data movement if the gridding and
-data decomposition is done such that each processor contains
+data decomposition is done such that each processor's memory contains
 the data needed by the next Component.
 
 In a Concurrent Execution model subgroups of processors run
@@ -46,14 +46,15 @@ Component and putting it into the form expected by another Component.
 This might include regridding, change of units, averaging or binning.
 
 Couplers can be written for pairwise data exchange: the Coupler takes
-data from a single Component and formats it for another single Component.
-This simplifies the structure of the Component code.
+data from a single Component and transforms it for another single Component.
+This simplifies the structure of the Coupler Component code.
 
-Coupler can also be written in the "hub and spoke" model where a
+Couplers can also be written a the "hub and spoke" model where a
 single Coupler accepts data from all other Components, can do data
-merging or splitting, and format data for all other Compoents.
+merging or splitting, and formats data for all other Components.
 
-Mixtures of these, and multiple Couplers, are also possible.
+Multiple Couplers, using either of the above two models or some mixture of
+these approaches, are also possible.
 
 \item[Implementation Language]
 
@@ -66,11 +67,11 @@ Fortran or C++.
 On a multiple processor machine a cooperating job can either be run
 by starting the same executable on all nodes.  All processors run the
 same code, but the computation proceeds by each processor working on
-a different subset of data.  This is a {\tt SPMD} model, Single Process
+a different subset of data.  This is a {\tt SPMD} model, Single Program
 Multiple Data.  
 
 The alternative is to start a different executable on different
-processors.  This is a {\tt MPMD} model, Multiple Process Multiple Data.
+processors.  This is a {\tt MPMD} model, Multiple Program Multiple Data.
 There are complications with many job control systems on multiprocessor
 machine in getting the different executables started, and getting
 inter-process communcations established.
@@ -78,10 +79,10 @@ inter-process communcations established.
 \end{description}
 
 
-Examples of a subset of these combinations are found in the
-subdirectories here.
-
-One of the simpler examples is {\tt seq\_pairwise\_fdriver\_spmd} which
+Examples of these combinations are found in the
+subdirectories under the {\tt src/Superstructure/AppDriver } directory.
+A good place to begin with is
+{\tt seq\_pairwise\_fdriver\_spmd} which
 has sequential component execution, a pairwise coupler, a main program
 in Fortran, and all processors launch the same executable.
 
