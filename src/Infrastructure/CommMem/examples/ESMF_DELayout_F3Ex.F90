@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx3.F90,v 1.4 2003/09/04 18:57:55 cdeluca Exp $
+! $Id: ESMF_DELayout_F3Ex.F90,v 1.1 2003/09/17 22:00:15 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
