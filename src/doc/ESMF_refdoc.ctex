@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.41 2004/03/16 21:08:53 nscollins Exp $
+% $Id: ESMF_refdoc.ctex,v 1.42 2004/03/17 23:39:49 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -109,23 +109,19 @@
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
-#include "../Infrastructure/DataMap/doc/DataMap_refdoc.ctex"
+#include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
 
 #include "../Infrastructure/ArrayComm/doc/Array_refdoc.ctex"
 
-#include "../Infrastructure/Bundle/doc/Bundle_refdoc.ctex"
+#include "../Infrastructure/DataMap/doc/DataMap_refdoc.ctex"
 
 #include "../Infrastructure/Grid/doc/Grid_refdoc.ctex"
 
-%#include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
+#include "../Infrastructure/Grid/doc/ArraySpec_refdoc.ctex"
 
-%#include "../Infrastructure/DistGrid/doc/DistGrid_refdoc.ctex"
-
-%#include "../Infrastructure/Regrid/doc/Regrid_refdoc.ctex"
-
+#include "../Infrastructure/Grid/doc/IOSpec_refdoc.ctex"
 
 %===============================================================================
-
 \newpage
 \begin{htmlonly}
 \addcontentsline{toc}{part}{Infrastructure:  Utilities}
@@ -138,6 +134,7 @@
 \input{ESMF_infrautiloverview}
 
 \newpage
+
 #include "../Infrastructure/TimeMgr/doc/TimeMgr_refdoc.ctex"
 
 #include "../Infrastructure/DELayout/doc/CommMem_refdoc.ctex"
@@ -147,10 +144,7 @@
 %#include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
 #include "../Infrastructure/LogErr/doc/LogErr_refdoc.ctex"
-
 %#include "../Infrastructure/Machine/doc/Machine_refdoc.ctex"
-
-%#include "../Infrastructure/Route/doc/Route_refdoc.ctex"
 
 %#include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
