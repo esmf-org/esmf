@@ -1,4 +1,4 @@
-% $Id: ESMF_superoverview.tex,v 1.16 2004/04/23 16:17:21 cdeluca Exp $
+% $Id: ESMF_superoverview.tex,v 1.17 2004/04/23 16:38:20 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,16 +47,6 @@ Sequential or concurrent component execution.\\
 Single program, multiple datastream (SPMD) applications for 
 maximum portability and reconfigurability.\\[.03in] \hline
 \end{tabular}
-\end{center}
-
-\begin{center}
-\begin{figure}
-\caption{ESMF enables applications such as a seasonal forecast
-model to be structured hierarchically, and reconfigured and 
-extended easily.}
-\label{fig:tree}
-\scalebox{1.0}{\includegraphics{ESMF_tree.eps}}
-\end{figure}
 \end{center}
 
 \subsection{Superstructure Classes}
@@ -126,11 +116,11 @@ and atmosphere components.
 
 \begin{center}
 \begin{figure}
-\caption{A call to a standard ESMF initialize (run, finalize) method
-by a parent component triggers calls to initialize (run, finalize) 
-all of its child components.}
-\label{fig:appunit}
-\scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
+\caption{ESMF enables applications such as a seasonal forecast
+model to be structured hierarchically, and reconfigured and 
+extended easily.}
+\label{fig:tree}
+\scalebox{1.0}{\includegraphics{ESMF_tree.eps}}
 \end{figure}
 \end{center}
 
@@ -175,6 +165,16 @@ We might have, for example, atmosphere and land components created
 on the same subset of DEs, ocean and sea ice components created on 
 the remainder of DEs, and a Coupler created across all the DEs in
 the application.
+
+\begin{center}
+\begin{figure}
+\caption{A call to a standard ESMF initialize (run, finalize) method
+by a parent component triggers calls to initialize (run, finalize) 
+all of its child components.}
+\label{fig:appunit}
+\scalebox{1.0}{\includegraphics{ESMF_appunit.eps}}
+\end{figure}
+\end{center}
 
 \subsection{Performance}
 \label{sec:performance}
