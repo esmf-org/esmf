@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.37 2004/04/14 20:06:24 jwolfe Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.38 2004/04/14 20:41:08 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.37 2004/04/14 20:06:24 jwolfe Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.38 2004/04/14 20:41:08 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -557,7 +557,7 @@
       type(ESMF_Array), intent(inout) :: array
       type(ESMF_RouteHandle), intent(in) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -899,7 +899,7 @@
       type(ESMF_Array), intent(inout) :: dstArray
       type(ESMF_RouteHandle), intent(in) :: routehandle
       type(ESMF_BlockingFlag), intent(in), optional :: blocking
-      type(ESMF_DELayoutCommHandle), intent(inout), optional :: commhandle
+      type(ESMF_CommHandle), intent(inout), optional :: commhandle
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
