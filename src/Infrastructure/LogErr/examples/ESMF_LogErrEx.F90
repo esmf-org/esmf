@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.5 2004/06/15 07:35:23 cpboulder Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.6 2004/06/15 10:58:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,7 +48,7 @@
     ! Initialize ESMF to initialize the default log
     call ESMF_Initialize(rc=rc1)
     ! LogWrite 
-    call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
+    ret= ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
     ! LogMsgFoundAllocError
@@ -68,7 +68,7 @@
     ! Open a log named "Testlog.txt" associated with alog.
     call ESMF_LogOpen(alog, "TestLog.txt",rc=rc1)
     ! LogWrite
-    call ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog)
+    ret= ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog)
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello", ESMF_CONTEXT, &
           rcToReturn=rc2,log=alog)
