@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.8 2003/03/25 00:00:40 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.9 2003/03/27 16:06:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF.h>
+#include "ESMF.h"
 !
 !==============================================================================
 !BOP
@@ -39,11 +39,8 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.8 2003/03/25 00:00:40 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.9 2003/03/27 16:06:06 nscollins Exp $'
 !------------------------------------------------------------------------------
-
-      ! Some common definitions.  This requires the C preprocessor.
-      #include "ESMF.h"
 
 
 !     ! Local variables
