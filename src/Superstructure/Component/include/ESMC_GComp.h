@@ -1,4 +1,4 @@
-// $Id: ESMC_GComp.h,v 1.5 2003/09/23 15:16:25 nscollins Exp $
+// $Id: ESMC_GComp.h,v 1.6 2004/04/20 19:03:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,21 +42,13 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-#include <ESMC_Comp.h> 
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
+ #include <ESMC_Comp.h> 
 
 // !PUBLIC TYPES:
- class ESMC_GCompConfig;
  class ESMC_GComp;
 
 // !PRIVATE TYPES:
 
- // class configuration type
- class ESMC_GCompConfig {
-   private:
- //   < insert resource items here >
- };
 
  // class declaration type
  class ESMC_GComp : public ESMC_Base {    // inherits from ESMC_Base class
@@ -70,10 +62,6 @@
     int ESMC_GCompInit(void);
     int ESMC_GCompRun(void);
     int ESMC_GCompFinalize(void);
-
- // optional configuration methods
-    int ESMC_GCompGetConfig(ESMC_GCompConfig *config) const;
-    int ESMC_GCompSetConfig(const ESMC_GCompConfig *config);
 
  // accessor methods for class members
     //int ESMC_GCompGet<Value>(<value type> *value) const;

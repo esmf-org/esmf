@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.16 2004/04/19 22:32:08 nscollins Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.17 2004/04/20 19:03:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.16 2004/04/19 22:32:08 nscollins Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.17 2004/04/20 19:03:26 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -38,29 +38,6 @@
 !  fashion as C++ name mangling.
 ! 
 !EOP
-!------------------------------------------------------------------------------
-   subroutine f_esmf_frameworkinitialize(lang, defaultCalendar, rc)
-       use ESMF_CalendarMod
-       use ESMF_CompMod
-
-       integer :: lang
-       type(ESMF_CalendarType) :: defaultCalendar
-       integer :: rc
-
-       call ESMF_FrameworkInternalInit(lang, defaultCalendar, rc)
-
-   end subroutine f_esmf_frameworkinitialize
-
-   subroutine f_esmf_frameworkfinalize(rc)
-       use ESMF_CompMod
-
-       integer :: rc
-
-       call ESMF_Finalize(rc)
-
-   end subroutine f_esmf_frameworkfinalize
-
-
 !------------------------------------------------------------------------------
 
    subroutine f_esmf_gridcompcreate(gcomp, name, layout, mtype, grid, clock, &

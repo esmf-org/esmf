@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.15 2004/04/13 17:30:31 nscollins Exp $
+// $Id: ESMC_Comp.h,v 1.16 2004/04/20 19:03:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,19 +66,12 @@ extern const char *ESMC_SetReadRestart;
 #include "ESMC_FTable.h"  // function & data pointer table 
 
 // !PUBLIC TYPES:
- class ESMC_CompConfig;
  class ESMC_Comp;
 
 // TODO: need C++ interface to config objects.  REMOVE THIS WHEN READY.
 #define ESMC_Config char
 
 // !PRIVATE TYPES:
-
- // class configuration type
- class ESMC_CompConfig {
-   private:
- //   < insert resource items here >
- };
 
  // class declaration type
  class ESMC_Comp : public ESMC_Base {    // inherits from ESMC_Base class
@@ -94,10 +87,6 @@ extern const char *ESMC_SetReadRestart;
     int ESMC_CompInit(void);
     int ESMC_CompRun(int timesteps);
     int ESMC_CompFinal(void);
-
- // optional configuration methods
-    int ESMC_CompGetConfig(ESMC_CompConfig *config) const;
-    int ESMC_CompSetConfig(const ESMC_CompConfig *config);
 
  // accessor methods for class members.  these need more options.
     int ESMC_CompGet(char *name) const;
@@ -137,11 +126,6 @@ extern const char *ESMC_SetReadRestart;
                                       char *filepath, int *rc);
  int ESMC_CompDestroy(ESMC_Comp *comp);
 
- int ESMC_Initialize(ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR);
- int ESMC_Initialize(int argc, char **argv,
-                     ESMC_CalendarType defaultCalendar=ESMC_CAL_NOCALENDAR);
- int ESMC_Finalize(void);
-
 // prototypes for fortran interface routines
 extern "C" {
    void FTN(f_esmf_compcreate)(ESMC_Comp *compp, char *name, int *rc, int nlen);
@@ -150,10 +134,6 @@ extern "C" {
    void FTN(f_esmf_comprun)(ESMC_Comp *compp, char *name, int *rc, int nlen);
    void FTN(f_esmf_compfinalize)(ESMC_Comp *compp, char *name, int *rc, int nlen);
 
-   void FTN(f_esmf_frameworkinitialize)(int *language, 
-                                        ESMC_CalendarType *defaultCalendar,
-                                        int *rc);
-   void FTN(f_esmf_frameworkfinalize)(int *rc);
 };
 
  #endif  // ESMC_Comp_H

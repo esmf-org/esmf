@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.6 2004/04/13 17:30:31 nscollins Exp $
+// $Id: ESMC_GridComp.h,v 1.7 2004/04/20 19:03:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,16 +52,9 @@
 
 
 // !PUBLIC TYPES:
- class ESMC_GridCompConfig;
  class ESMC_GridComp;
 
 // !PRIVATE TYPES:
-
- // class configuration type
- class ESMC_GridCompConfig {
-   private:
- //   < insert resource items here >
- };
 
  // class declaration type
  class ESMC_GridComp : public ESMC_Base {    // inherits from ESMC_Base class
@@ -80,10 +73,6 @@
                        ESMC_Clock *clock, int phase);
   int ESMC_GridCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
                             ESMC_Clock *clock, int phase);
-
- // optional configuration methods
-  int ESMC_GridCompGetConfig(ESMC_GridCompConfig *config) const;
-  int ESMC_GridCompSetConfig(ESMC_GridCompConfig *config);
 
  // accessor methods for class members.  these need more options.
   int ESMC_GridCompGet(char *name) const;

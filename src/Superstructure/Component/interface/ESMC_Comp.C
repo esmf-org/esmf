@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.20 2004/04/13 17:30:31 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.21 2004/04/20 19:03:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,13 +23,9 @@
  // insert any higher level, 3rd party or system includes here
 #include <string.h>
 #include <stdio.h>
-#include "ESMC_Machine.h"
 #include "ESMC.h"
+#include "ESMC_Machine.h"
 
-// public globals, to be filled in by ESMC_Initialize()
-//  and used by MPI_Init().   set once, treat as read-only!
-int globalargc;
-char **globalargv;
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -57,7 +53,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.20 2004/04/13 17:30:31 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.21 2004/04/20 19:03:26 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -382,91 +378,4 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 
  } // end ~ESMC_Comp
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
-//
-// !INTERFACE:
-      int ESMC_Initialize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_CalendarType defaultCalendar) { // in - optional time manager
-                                           //      default calendar type
-//
-// !DESCRIPTION:
-//
-//EOP
-
-    int rc;
-    ESMC_MainLanguage l = ESMF_MAIN_C;
-
-    globalargc = 0;
-    globalargv = NULL;
-
-    FTN(f_esmf_frameworkinitialize)((int*)&l, &defaultCalendar, &rc);
-
-    return rc;
-
- } // end ESMC_Initialize
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Initialize - Initialize the ESMF Framework
-//
-// !INTERFACE:
-      int ESMC_Initialize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int argc, char **argv,       // in - the arguments to the program
-      ESMC_CalendarType defaultCalendar) {  // in - optional time manager
-                                            //      default calendar type
-//
-// !DESCRIPTION:
-//
-//EOP
-
-    int rc;
-    ESMC_MainLanguage l = ESMF_MAIN_C;
-
-    // make this public so the mpi init code in Machine can grab them.
-    globalargc = argc;
-    globalargv = argv;
-
-    FTN(f_esmf_frameworkinitialize)((int*)&l, &defaultCalendar, &rc);
-
-    return rc;
-
- } // end ESMC_Initialize
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_Finalize - Finalize the ESMF Framework
-//
-// !INTERFACE:
-      int ESMC_Finalize(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) {
-//
-// !DESCRIPTION:
-//
-//EOP
-
-    int rc;
-
-    FTN(f_esmf_frameworkfinalize)(&rc);
-
-    return rc;
-
- } // end ESMC_FrameworkFinallize
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.88 2004/04/20 14:59:31 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.89 2004/04/20 19:03:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -178,22 +178,6 @@
 
 
 !------------------------------------------------------------------------------
-!     ! Main program source
-!     !   ESMF_Initialize is called from what language?
-      integer, parameter :: ESMF_MAIN_C=1, ESMF_MAIN_F90=2
-
-!------------------------------------------------------------------------------
-!     ! Private global variables
-
-      ! Has framework init routine been run?
-      logical :: frameworknotinit = .true. 
- 
-      ! A 1 x N global delayout, currently only for debugging but maybe
-      !  has more uses?
-      type(ESMF_VM):: GlobalVM
-      type(ESMF_newDELayout) :: GlobalLayout
-
-!------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Config   ! TODO: move to its own file 
       public ESMF_GridCompType, ESMF_ATM, ESMF_LAND, ESMF_OCEAN, &
@@ -207,14 +191,11 @@
       public ESMF_CompType
       public ESMF_COMPTYPE_GRID, ESMF_COMPTYPE_CPL 
       public ESMF_CplComp, ESMF_GridComp
-      public ESMF_MAIN_C, ESMF_MAIN_F90
 
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_Initialize, ESMF_Finalize
-      public ESMF_FrameworkInternalInit   ! should be private to framework
 
       ! These have to be public so other component types can call them,
       !  but they are not intended to be used outside the Framework code.
@@ -238,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.88 2004/04/20 14:59:31 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.89 2004/04/20 19:03:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -373,17 +354,6 @@ end function
         integer :: status                            ! local error status
         logical :: rcpresent                         ! did user specify rc?
         character(len=ESMF_MAXSTR) :: fullpath       ! config file + dirPath
-
-        ! Has the Full ESMF Framework initialization been run?
-        ! This only happens once per process at the start.
-        if (frameworknotinit) then
-          call ESMF_Initialize(rc=status)
-          if (status .ne. ESMF_SUCCESS) then
-            if (present(rc)) rc = ESMF_FAILURE
-            return
-          endif
-          frameworknotinit = .false.    ! only called one time ever.
-        endif
 
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -645,6 +615,7 @@ end function
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
+        type(ESMF_newDELayout) :: GlobalLayout
         integer :: callrc
 
         ! Initialize return code; assume failure until success is certain
@@ -664,6 +635,7 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
+        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
 	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
 	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -784,6 +756,7 @@ end function
         integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type(ESMF_newDELayout) :: GlobalLayout
 
         ! WriteRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -795,6 +768,7 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
+        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
 	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
 	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -873,6 +847,7 @@ end function
         integer :: lde_id                       ! the DE in the subcomp delayout
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
+        type(ESMF_newDELayout) :: GlobalLayout
 
         ! ReadRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -884,6 +859,7 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
+        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
 	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
 	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -974,6 +950,7 @@ end function
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
+        type(ESMF_newDELayout) :: GlobalLayout
         integer :: callrc
 
         ! Finalize return code; assume failure until success is certain
@@ -993,6 +970,7 @@ end function
 
         ! See if this is currently finalizening on a DE which is part of the
         ! proper delayout.
+        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
 	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
 	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -1123,6 +1101,7 @@ end function
         logical :: isdel, esdel
         integer :: dummy
         type(ESMF_BlockingFlag):: blocking
+        type(ESMF_newDELayout) :: GlobalLayout
         integer :: callrc
 
         ! Run return code; assume failure until success is certain
@@ -1142,6 +1121,7 @@ end function
 
         ! See if this is currently running on a DE which is part of the
         ! proper delayout.
+        call ESMF_newDELayoutGetGlobal(GlobalLayout, status)
 	call ESMF_newDELayoutGet(GlobalLayout, localDE=gde_id, rc=status)
 	call ESMF_newDELayoutGet(compp%delayout, localDE=lde_id, rc=status)
         if (status .ne. ESMF_SUCCESS) then
@@ -1561,199 +1541,6 @@ end function
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_CompPrint
-
-
-
-!------------------------------------------------------------------------------
-! 
-! ESMF Framework wide initialization routine. Called exactly once per
-!  execution by each participating process.
-!
-!------------------------------------------------------------------------------
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_Initialize - Initialize the ESMF Framework.
-!
-! !INTERFACE:
-      subroutine ESMF_Initialize(defaultCalendar, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
-      integer,                 intent(out), optional :: rc     
-
-!
-! !DESCRIPTION:
-!     Initialize the ESMF framework.
-!
-!     The argument is:
-!     \begin{description}
-!     \item [{[defaultCalendar]}]
-!           Sets the default calendar to be used by ESMF Time Manager.
-!           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-
-      call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultCalendar, rc)
-
-      end subroutine ESMF_Initialize
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_FrameworkInternalInit - internal routine called by both F90 and C++
-!
-! !INTERFACE:
-      subroutine ESMF_FrameworkInternalInit(lang, defaultCalendar, rc)
-!
-! !ARGUMENTS:
-      integer,                 intent(in)            :: lang     
-      type(ESMF_CalendarType), intent(in),  optional :: defaultCalendar     
-      integer,                 intent(out), optional :: rc     
-
-!
-! !DESCRIPTION:
-!     Initialize the ESMF framework.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [lang]
-!           Flag to say whether main program is F90 or C++.  Affects things
-!           related to initialization, such as starting MPI.
-!     \item [{[defaultCalendar]}]
-!           Sets the default calendar to be used by ESMF Time Manager.
-!           If not specified, defaults to {\tt ESMF\_CAL\_NOCALENDAR}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-
-      logical :: rcpresent                       ! Return code present   
-      integer :: status
-      logical, save :: already_init = .false.    ! Static, maintains state.
-
-      ! Initialize return code
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      if (already_init) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-      endif
-
-      ! Initialize the default time manager calendar
-      call ESMF_CalendarInitialize(defaultCalendar, status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the default time manager calendar"
-          return
-      endif
-
-      ! Initialize the VM. This creates the GlobalVM.
-      ! Note that ESMF_VMInitialize _must_ be called before any other
-      ! mechanism calls MPI_Init. This is because MPI_Init on some systems
-      ! will spawn helper threads which might have signal handlers installed
-      ! incompatible with vmachine. ESMF_VMInitialize must install correct
-      ! signal handlers _before_ possible helper threads are spawned by 
-      ! MPI_Init.
-      call ESMF_VMInitialize(status);
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing VM"
-          return
-      endif
-
-      ! Initialize the machine model, the comms, etc.
-      call ESMF_MachineInitialize(lang, status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error initializing the machine characteristics"
-          return
-      endif
-
-      ! Create a global VM
-      call ESMF_VMGetGlobal(GlobalVM, rc)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error getting global vm"
-          return
-      endif
-
-      ! Create a global newDELayout
-      GlobalLayout = ESMF_newDELayoutCreate(GlobalVM, rc=status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error creating global delayout"
-          return
-      endif
-
-      already_init = .true.
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FrameworkInternalInit
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_Finalize - Clean up and close the ESMF Framework.
-!
-! !INTERFACE:
-      subroutine ESMF_Finalize(rc)
-!
-! !ARGUMENTS:
-      integer, intent(out), optional :: rc     
-
-!
-! !DESCRIPTION:
-!     Finalize the ESMF Framework.
-!
-!     The argument is:
-!     \begin{description}
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-
-      logical :: rcpresent                        ! Return code present   
-      integer :: status
-      logical, save :: already_final = .false.    ! Static, maintains state.
-
-      ! Initialize return code
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      if (already_final) then
-          if (rcpresent) rc = ESMF_SUCCESS
-          return
-      endif
-
-      ! Finalize the VM
-      call ESMF_VMFinalize(status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing VM"
-          return
-      endif
-
-      ! Where MPI is shut down, files closed, etc.
-      call ESMF_MachineFinalize()
-
-      ! Delete any internal built-in time manager calendars
-      call ESMF_CalendarFinalize(status)
-      if (status .ne. ESMF_SUCCESS) then
-          print *, "Error finalizing the time manager calendars"
-          return
-      endif
-
-      already_final = .true.
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_Finalize
 
 
 !------------------------------------------------------------------------------

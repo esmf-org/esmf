@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.6 2004/04/13 17:30:31 nscollins Exp $
+// $Id: ESMC_CplComp.h,v 1.7 2004/04/20 19:03:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -51,16 +51,9 @@
 #include "ESMC_Comp.h"
 
 // !PUBLIC TYPES:
- class ESMC_CplCompConfig;
  class ESMC_CplComp;
 
 // !PRIVATE TYPES:
-
- // class configuration type
- class ESMC_CplCompConfig {
-   private:
- //   < insert resource items here >
- };
 
  // class declaration type
  class ESMC_CplComp : public ESMC_Base {    // inherits from ESMC_Base class
@@ -80,9 +73,6 @@
   int ESMC_CplCompFinalize(ESMC_State *importState, ESMC_State *exportState, 
                             ESMC_Clock *clock, int phase);
 
- // optional configuration methods
-  int ESMC_CplCompGetConfig(ESMC_CplCompConfig *config) const;
-  int ESMC_CplCompSetConfig(ESMC_CplCompConfig *config);
 
  // accessor methods for class members.  these need more options.
   int ESMC_CplCompGet(char *name) const;
