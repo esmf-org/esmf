@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.21 2002/05/23 20:07:18 jwolfe Exp $
+% $Id: DistGrid_req.tex,v 1.22 2002/05/23 21:15:02 cdeluca Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -240,7 +240,7 @@ synchronization of computational domains across a distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} 
@@ -272,7 +272,7 @@ specify this as input information for grid topology generation.
 {\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
-{\bf Notes:} it is natural to treat this as a distributed grid
+{\bf Notes:} It is natural to treat this as a distributed grid
   feature, rather than having separate edge detection code in
   applications. There is more than one way to treat LBCs in a
   distributed grid: these will be spelt out anon.
@@ -303,7 +303,7 @@ computational domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -652,7 +652,7 @@ data arrays where each array element is a derived data type.
 \begin{reqlist}
 {\bf Priority:} \\
 {\bf Source:} \\
-{\bf Status:} Proposed. \\ Rejected -- arrays only should suffice
+{\bf Status:} Proposed. \\ 
 {\bf Verification:} \\
 {\bf Notes:} I hope this isn't required, but see
   Section~\ref{DG:Unstructured} below.
@@ -682,7 +682,7 @@ data transfer may not be complete when the call returns.
 {\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
-{\bf Notes:} maybe we're pre-empting design issues, but I'd want
+{\bf Notes:} Maybe we're pre-empting design issues, but I'd want
   issues like wait-for-completion dealt with within distributed grids.
 \end{reqlist}
 
@@ -808,7 +808,7 @@ either axis.
 
 \begin{reqlist}
 {\bf Priority:} \\ 
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, MIT
+{\bf Source:} CAM-FV (2D decomposition), NSIPP, MIT \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} 
@@ -1133,7 +1133,7 @@ It shall be possible to perform gather, scatter, broadcast, and reduction in bot
 
 \begin{reqlist}
 {\bf Priority:} \\ 
-{\bf Source:} NCEP-SSI, MIT
+{\bf Source:} NCEP-SSI, MIT \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} 
@@ -1439,7 +1439,7 @@ grids and ungridded location streams.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} PSAS, NSIPP, NCEP-SSI (milestone), MIT(assimilation  and lagrangian diagnostics)
+{\bf Source:} PSAS, NSIPP, NCEP-SSI (milestone), MIT(assimilation  and lagrangian diagnostics) \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} The method to generate the background grid requires
@@ -1487,5 +1487,12 @@ streams, using the background grid.
 {\bf Verification:} \\
 {\bf Notes:} Needed for PSAS, but not a milestone.
 \end{reqlist}
+
+
+
+
+
+
+
 
 
