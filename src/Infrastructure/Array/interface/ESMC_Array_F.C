@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.31 2004/12/01 18:33:16 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.32 2004/12/02 18:28:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -387,6 +387,8 @@ extern "C" {
      }
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayserialize"
 //BOP
 // !IROUTINE:  c_ESMC_ArraySerialize - Serialize Array object 
 //
@@ -426,6 +428,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraydeserialize"
 //BOP
 // !IROUTINE:  c_ESMC_ArrayDeserialize - Deserialize Array object 
 //
@@ -459,6 +463,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arrayserializenodata"
 //BOP
 // !IROUTINE:  c_ESMC_ArraySerializeNoData - Serialize Array object 
 //
@@ -498,6 +504,8 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_arraydeserializenodata"
 //BOP
 // !IROUTINE:  c_ESMC_ArrayDeserializeNoData - Deserialize Array object 
 //
@@ -530,6 +538,7 @@ extern "C" {
 }  // end c_ESMC_ArrayDeserializeNoData
 
 
+#undef  ESMC_METHOD
 }
 
 
