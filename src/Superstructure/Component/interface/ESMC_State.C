@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.3 2003/02/03 18:41:19 nscollins Exp $
+// $Id: ESMC_State.C,v 1.4 2003/02/10 17:53:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.3 2003/02/03 18:41:19 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.4 2003/02/10 17:53:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -53,7 +53,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_StateCreate - Create a new State
+// !IROUTINE:  ESMC_StateCreate - Create a new State
 //
 // !INTERFACE:
       ESMC_State *ESMC_StateCreate(
@@ -87,7 +87,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_StateDestroy - free a State created with Create
+// !IROUTINE:  ESMC_StateDestroy - free a State created with Create
 //
 // !INTERFACE:
       int ESMC_StateDestroy(

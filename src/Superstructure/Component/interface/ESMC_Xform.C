@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.C,v 1.4 2003/02/05 03:49:34 nscollins Exp $
+// $Id: ESMC_Xform.C,v 1.5 2003/02/10 17:53:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Xform.C,v 1.4 2003/02/05 03:49:34 nscollins Exp $";
+               "$Id: ESMC_Xform.C,v 1.5 2003/02/10 17:53:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -53,7 +53,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_XformInit - Initialize a new Xform
+// !IROUTINE:  ESMC_XformInit - Initialize a new Xform
 //
 // !INTERFACE:
       int ESMC_Xform::ESMC_XformInit(
