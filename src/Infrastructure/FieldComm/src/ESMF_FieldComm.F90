@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.27 2004/04/19 21:55:25 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.28 2004/04/19 23:10:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.27 2004/04/19 21:55:25 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.28 2004/04/19 23:10:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -812,7 +812,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_Grid) :: dstGrid
+      !type(ESMF_Grid) :: dstGrid
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
@@ -928,12 +928,13 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_Route) :: route
-      type(ESMF_newDELayout) :: srcDElayout, dstDElayout, parentDElayout
+      type(ESMF_newDELayout) :: srcDElayout, dstDElayout
+      !type(ESMF_newDELayout) :: parentDElayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: my_src_DE, my_dst_DE, my_DE
+      integer :: my_src_DE, my_dst_DE
+      !integer :: my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
       type(ESMF_DataMap) :: src_datamap, dst_datamap
@@ -1111,15 +1112,10 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_Route) :: route
       type(ESMF_newDELayout) :: srcDElayout, dstDElayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: i
-      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
-                                         global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
@@ -1256,10 +1252,9 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_newDELayout) :: delayout          ! layout
       type(ESMF_Array) :: dstarray                ! Destination array
-      integer :: i, datarank, thisdim, thislength, numDims
+      integer :: i, datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       integer :: decomps(ESMF_MAXGRIDDIM), decompids(ESMF_MAXDIM)
@@ -1376,10 +1371,8 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
-      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_newDELayout) :: delayout
-      type(ESMF_Grid) :: grid
-      integer :: i, j, datarank, thisdim, numDims
+      integer :: datarank, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc
