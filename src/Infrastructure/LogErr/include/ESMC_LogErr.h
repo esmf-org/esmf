@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.1 2003/03/19 16:01:08 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.2 2003/03/28 23:06:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,13 +27,14 @@
 // inlined are defined in the companion file ESMC\_LogErr.C
 //
 // !USES:
+#include "ESMC.h"
+
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <mpi.h>
 #include <mpi++.h>
 #include <time.h>
-#include "ftn.h"
 #include <ctype.h>
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
