@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.42 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.43 2003/09/12 22:37:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.42 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.43 2003/09/12 22:37:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -220,6 +220,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_PhysGridSetCoordFromArray
          module procedure ESMF_PhysGridSetCoordInternal
+         module procedure ESMF_PhysGridSetCoordSpecd
 !        module procedure ESMF_PhysGridSetCoordStagger
 !        module procedure ESMF_PhysGridSetCoordRead
 
@@ -819,7 +820,6 @@
         return
       endif
 
-!TODO: compute all grid coordinates and stuff
 !      Fill in physgrid derived type with function arguments
        call ESMF_PhysGridSet(physgrid, relloc=relloc, dim_num=dim_num, &
                              local_min=local_min, local_max=local_max, &
@@ -906,6 +906,8 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       integer :: i
+      integer :: ncoord_locs
+      integer, dimension(6) :: coord_loc
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -930,7 +932,15 @@
         print *, "ERROR in ESMF_PhysGridConstructSpecd: PhysGrid set"
         return
       endif
- !TODO: add set coord call
+
+!     Set up necessary coordinate structure  TODO: do this once in Grid and
+!                                                  point at data?
+      coord_loc(1) = 1
+      coord_loc(2) = 2
+      ncoord_locs  = 2
+      call ESMF_PhysGridSetCoord(physgrid, ncoord_locs, coord_loc, &
+                                 1, counts(1), 1, counts(2), &
+                                 delta1, delta2, status)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1480,7 +1490,7 @@
       integer :: local_n1, local_n2               ! counters
       integer :: l1, l2
       logical :: rcpresent                        ! Return code present
-      real(selected_real_kind(6,45)), dimension(:,:,:), pointer :: temp
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp
       type(ESMF_LocalArray) :: array_temp
       
 
@@ -1500,7 +1510,7 @@
 
       l1 = (global_nmax1 - global_nmin1) + 1
       l2 = (global_nmax2 - global_nmin2) + 1
-      allocate(temp(2,l1,l2))    ! TODO: hardcoded for dim=2 for now
+      allocate(temp(l1,l2,2))    ! TODO: hardcoded for dim=2 for now
 
 !     Loop over number of coordinate location specifiers
       do i = 1,ncoord_locs
@@ -1516,10 +1526,10 @@
             local_n1 = (global_n1 - global_nmin1) + 1
             do global_n2 = global_nmin2,global_nmax2
               local_n2 = (global_n2 - global_nmin2) + 1
-              temp(1,local_n1,local_n2) = delta1*0.5*real(global_n1+global_n1-1)
+              temp(local_n1,local_n2,1) = delta1*0.5*real(global_n1+global_n1-1)
             enddo
           enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
           physgrid%center_coord = array_temp
 
         case (ESMF_CellLoc_Center_Y)
@@ -1527,10 +1537,10 @@
             local_n2 = (global_n2 - global_nmin2) + 1
             do global_n1 = global_nmin1,global_nmax1
               local_n1 = (global_n1 - global_nmin1) + 1
-              temp(2,local_n1,local_n2) = delta2*0.5*real(global_n2+global_n2-1)
+              temp(local_n1,local_n2,2) = delta2*0.5*real(global_n2+global_n2-1)
             enddo
           enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
           physgrid%center_coord = array_temp
 
         case (ESMF_CellLoc_Corner_X)
@@ -1538,10 +1548,10 @@
             local_n1 = (global_n1 - global_nmin1) + 1
             do global_n2 = global_nmin2,global_nmax2
               local_n2 = (global_n2 - global_nmin2) + 1
-              temp(1,local_n1,local_n2) = delta1*real(global_n1)
+              temp(local_n1,local_n2,1) = delta1*real(global_n1)
             enddo
           enddo
-          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
           physgrid%corner_coord = array_temp
 
   !      case (ESMF_CellLoc_Corner_Y)
@@ -1549,10 +1559,10 @@
   !          local_n2 = (global_n2 - global_nmin2) + 1
   !          do global_n1 = global_nmin1,global_nmax1
   !            local_n1 = (global_n1 - global_nmin1) + 1
-  !            temp(2,local_n1,local_n2) = delta2*real(global_n2)
+  !            temp(local_n1,local_n2,2) = delta2*real(global_n2)
   !          enddo
   !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
   !        physgrid%corner_coord = array_temp
 
   !      case (ESMF_CellLoc_NFace_X)
@@ -1560,10 +1570,10 @@
   !          local_n1 = (global_n1 - global_nmin1) + 1
   !          do global_n2 = global_nmin2,global_nmax2
   !            local_n2 = (global_n2 - global_nmin2) + 1
-  !            temp(1,local_n1,local_n2) = delta1*0.5*real(global_n1+global_n1-1)
+  !            temp(local_n1,local_n2,1) = delta1*0.5*real(global_n1+global_n1-1)
   !          enddo
   !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
   !        physgrid%nface_coord = array_temp
 
   !      case (ESMF_CellLoc_NFace_Y)
@@ -1571,10 +1581,10 @@
   !          local_n2 = (global_n2 - global_nmin2) + 1
   !          do global_n1 = global_nmin1,global_nmax1
   !            local_n1 = (global_n1 - global_nmin1) + 1
-  !            temp(2,local_n1,local_n2) = delta2*real(global_n2)
+  !            temp(local_n1,local_n2,2) = delta2*real(global_n2)
   !          enddo
   !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
   !        physgrid%nface_coord = array_temp
 
   !      case (ESMF_CellLoc_EFace_X)
@@ -1582,10 +1592,10 @@
   !          local_n1 = (global_n1 - global_nmin1) + 1
   !          do global_n2 = global_nmin2,global_nmax2
   !            local_n2 = (global_n2 - global_nmin2) + 1
-  !            temp(1,local_n1,local_n2) = delta1*real(global_n1)
+  !            temp(local_n1,local_n2,1) = delta1*real(global_n1)
   !          enddo
   !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
   !        physgrid%eface_coord = array_temp
 
   !      case (ESMF_CellLoc_EFace_Y)
@@ -1593,10 +1603,10 @@
   !          local_n2 = (global_n2 - global_nmin2) + 1
   !          do global_n1 = global_nmin1,global_nmax1
   !            local_n1 = (global_n1 - global_nmin1) + 1
-  !            temp(2,local_n1,local_n2) = delta2*0.5*real(global_n2+global_n2-1)
+  !            temp(local_n1,local_n2,2) = delta2*0.5*real(global_n2+global_n2-1)
   !          enddo
   !        enddo
-  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_REF, rc)
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
   !        physgrid%eface_coord = array_temp
 
         end select
@@ -1610,6 +1620,154 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_PhysGridSetCoordInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_PhysGridSetCoordSpecd - Set Coords for a PhysGrid from specs
+
+! !INTERFACE:
+      subroutine ESMF_PhysGridSetCoordSpecd(physgrid, ncoord_locs, coord_loc, &
+                                            local_nmin1, local_nmax1, &
+                                            local_nmin2, local_nmax2, &
+                                            delta1, delta2, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_PhysGridType) :: physgrid
+      integer, intent(in) :: ncoord_locs
+      integer, dimension(:), intent(in) :: coord_loc
+      integer, intent(in) :: local_nmin1
+      integer, intent(in) :: local_nmax1
+      integer, intent(in) :: local_nmin2
+      integer, intent(in) :: local_nmax2
+      real, dimension(:), intent(in) :: delta1
+      real, dimension(:), intent(in) :: delta2
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Compute a {\tt ESMF\_PhysGrid}'s coordinates from a given gridtype and set of
+!     physical parameters.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[physgrid]
+!          Class to be modified.
+!     \item[[ncoord\_locs]]
+!          Number of coordinate location specifiers
+!     \item[[coord\_loc]]
+!          Array of integer specifiers to denote coordinate location relative
+!          to the cell (center, corner, face)
+!     \item[[local\_nmin1]]
+!          Local minimum counter in the 1st direction
+!     \item[[local\_nmax1]]
+!          Local maximum counter in the 1st direction
+!     \item[[local\_nmin2]]
+!          Local minimum counter in the 2nd direction
+!     \item[[local\_nmax2]]
+!          Local maximum counter in the 2nd direction
+!     \item[[delta1]]
+!          Array of grid cell sizes in the 1st direction
+!     \item[[delta2]]
+!          Array of grid cell sizes in the 2nd direction
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      integer :: i                                ! local counter
+      integer :: local_n1, local_n2               ! counters
+      integer :: l1, l2
+      logical :: rcpresent                        ! Return code present
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: temp
+      real(ESMF_KIND_R8) :: xLoc, yLoc
+      type(ESMF_LocalArray) :: array_temp
+      
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     If no coordinate location specifiers, return with error
+      if(ncoord_locs.le.0) then
+        print *, "ERROR in ESMF_PhysGridSetCoordSpecd: bad ncoord_locs"
+        return
+      endif
+
+      l1 = (local_nmax1 - local_nmin1) + 1
+      l2 = (local_nmax2 - local_nmin2) + 1
+      allocate(temp(l1,l2,2))    ! TODO: hardcoded for dim=2 for now
+
+!     Loop over number of coordinate location specifiers
+      do i = 1,ncoord_locs
+
+!       For now, a case construct for the different coordinate locations
+        select case (coord_loc(i))
+
+        case (ESMF_CellLoc_Unknown)
+          status = ESMF_FAILURE
+
+        case (ESMF_CellLoc_Center_X)
+          xLoc = physgrid%local_min(1)
+          do local_n1 = local_nmin1,local_nmax1
+            do local_n2 = local_nmin2,local_nmax2
+              temp(local_n1,local_n2,1) = 0.5*delta1(local_n1) + xLoc
+            enddo
+            xLoc = xLoc + delta1(local_n1)
+          enddo
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
+          physgrid%center_coord = array_temp
+
+        case (ESMF_CellLoc_Center_Y)
+          yLoc = physgrid%local_min(2)
+          do local_n2 = local_nmin2,local_nmax2
+            do local_n1 = local_nmin1,local_nmax1
+              temp(local_n1,local_n2,2) = 0.5*delta2(local_n2) + yLoc
+            enddo
+            yLoc = yLoc + delta2(local_n2)
+          enddo
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
+          physgrid%center_coord = array_temp
+
+        case (ESMF_CellLoc_Corner_X)
+          xLoc = physgrid%local_min(1)
+          do local_n1 = local_nmin1,local_nmax1
+            do local_n2 = local_nmin2,local_nmax2
+              temp(local_n1,local_n2,1) = delta1(local_n1) + xLoc
+            enddo
+            xLoc = xLoc + delta1(local_n1)
+          enddo
+          array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
+          physgrid%corner_coord = array_temp
+
+  !      case (ESMF_CellLoc_Corner_Y)
+  !        yLoc = physgrid%local_min(2)
+  !        do local_n2 = local_nmin2,local_nmax2
+  !          do local_n1 = local_nmin1,local_nmax1
+  !            temp(local_n1,local_n2,2) = delta2(local_n2) + yLoc
+  !          enddo
+  !          yLoc = yLoc + delta2(local_n2)
+  !        enddo
+  !        array_temp = ESMF_LocalArrayCreate(temp, ESMF_DATA_COPY, rc)
+  !        physgrid%corner_coord = array_temp
+
+        end select
+
+      enddo
+
+      deallocate(temp)    ! TODO: figure out how to load one array
+
+!     call ESMF_LocalArrayPrint(physgrid%center_coord1, "foo", rc)
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_PhysGridSetCoordSpecd
 
 !------------------------------------------------------------------------------
 !BOP
