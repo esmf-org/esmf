@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.13 2004/05/26 11:38:07 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.14 2004/06/02 14:24:12 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -104,11 +104,9 @@
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
 // !DESCRIPTION:
-//      
 //     
 //
 //EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
 
     int rc = ESMF_FAILURE;
     int i, j, k, l, m;     // general counter vars
@@ -152,8 +150,240 @@
  //jw                                             //localAxisCounts, local_maxlength,
  //jw                                             ai_comp, ai_total, 
  //jw                                             this->kind, NULL);
-      } 
+    }
 
+#if 0
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGatherArray - all gather a distributed array
+//
+// !INTERFACE:
+      int ESMC_newDELayout::ESMC_newDELayoutGatherArray(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      void *DistArray,           // in  - distributed array
+      int global_dimlength[],    // in
+      int decompids[],           // in  - decomposition identifier for each
+                                 //       axis for the array
+      int size_decomp,           // in  - size of decomp arrays
+      int localDimCounts[],      // in  -
+      int localMaxDimCount[],    // in  -
+      ESMC_AxisIndex *AIPtr,     // in  - pointer to array of AxisIndex
+                                 //       structures for exclusive data
+      ESMC_AxisIndex *AIPtr2,    // in  - pointer to array of AxisIndex
+                                 //       structures for total data
+      ESMC_DataKind datatype,    // in  - real, integer, *4, *8
+      void *GlobalArray) {       // out - global array
+//
+// !DESCRIPTION:
+//    returns an array of AxisIndex types representing the decomposition of
+//    an arbitrary number of axis by a layout
+//
+//EOP
+
+  int rc = ESMF_FAILURE;
+  int i, j, k, l, m;     // general counter vars
+
+  // get layout size
+  int nx, ny, nde, ncount[2], thisde;
+  delayout->ESMC_newDELayoutGet(&nde, NULL, NULL, NULL, 0, &thisde,
+                            NULL, NULL, ncount, 2);
+  nx = ncount[0];
+  ny = ncount[1];
+  int rankx, ranky;
+  int bytesperitem = ESMC_DataKindSize(datatype);
+ 
+
+  // switch based on array rank
+  switch (size_decomp) {
+    case 2:
+      {
+        // figure out which ranks are decomposed and figure out the
+        // number of separate data chunks per rank and size of data
+        // chunks
+        int rmax[2];
+        int rsize[2];
+        int rsize_tot[2];
+        int rskip[2];
+        int rbreak[1];
+        int rbcount = 0;
+        for (i=0; i<size_decomp; i++) {
+          rmax[i] = global_dimlength[i];
+          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
+          rsize_tot[i] = AIPtr2[i].max - AIPtr2[i].min + 1;
+          if (decompids[i] == 0) {
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+          if (decompids[i] == 1) {
+            rankx = i;
+          }
+          if (decompids[i] == 2) {
+            ranky = i;
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+        }
+        rskip[0] = 1;
+        for (i=1; i<size_decomp; i++)  
+          rskip[i] = rskip[i-1]*rmax[i-1];
+         
+        // loop over ranks, skipping the first decomposed one, loading
+        // up chunks of data to gather
+        int k, j_tot, jMax, displsX, displsY;
+        void *sendbuf, *recvbuf;
+        int sendcount;
+        int* recvcounts = new int[nde];
+        int* displs = new int[nde];
+        if (localMaxDimCount == NULL) {
+          jMax = rsize[rbreak[0]];
+        } else {
+          jMax = localMaxDimCount[rbreak[0]];
+        }
+        for (int j=0; j<jMax; j++) {
+          j_tot = j + AIPtr[ranky].min;
+          sendbuf = DistArray;  // void * at this point, cast to char * to increment
+          sendbuf = (void *)((char *)sendbuf + 
+                        (j_tot*rsize_tot[rankx] + AIPtr[rankx].min) * bytesperitem);
+  
+          sendcount = rsize[rankx];
+          if (j >= rsize[rbreak[0]]) 
+            sendcount = 0;
+          
+          recvbuf = GlobalArray;   // ditto comment above
+          recvbuf = (void *)((char *)recvbuf + (j*rmax[rankx]) * bytesperitem);
+          displsY = 0;
+          for (int ky=0; ky<ny; ky++) {
+            displsX = 0;
+            for (int kx=0; kx<nx; kx++) {
+              k = ky*nx + kx;
+              if (localDimCounts == NULL) 
+                recvcounts[k] = rsize[rankx];
+              else {
+                recvcounts[k] = localDimCounts[rankx*nde + k];
+                if (j >= localDimCounts[ranky*nde + k]) recvcounts[k] = 0;
+              }
+              displs[k] = displsX + displsY;
+              displsX  += recvcounts[k];
+            }
+            if (localDimCounts == NULL) 
+              displsY += rsize[ranky] * rskip[ranky];
+            else 
+              displsY += localDimCounts[ranky*nde + k] * rskip[ranky];
+            
+          }
+          // call layout gather routine
+          layout->ESMC_newDELayoutGatherV(sendbuf, sendcount, 
+                                          recvbuf, recvcounts, 
+                                          displs, ESMC_TRUE);
+          //comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
+          //                         displs, datatype);
+        }
+        delete [] recvcounts;
+        delete [] displs;
+      }
+    break;
+    case 3:
+      {
+        // figure out which ranks are decomposed and figure out the
+        // number of separate data chunks per rank and size of data
+        // chunks
+        int rmax[3];
+        int rsize[3];
+        int rskip[3];
+        int rbreak[2];
+        int rbcount = 0;
+        for (i=0; i<size_decomp; i++) {
+          rmax[i] = global_dimlength[i];
+          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
+          if (decompids[i] == 0) {
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+          if (decompids[i] == 1) {
+            rankx = i;
+          }
+          if (decompids[i] == 2) {
+            ranky = i;
+            rbreak[rbcount]=i;
+            rbcount++;
+          }
+        }
+        rskip[0] = 1;
+        for (i=1; i<size_decomp; i++) {
+          rskip[i] = rskip[i-1]*rmax[i-1];
+        }
+        // loop over ranks, skipping the first decomposed one, loading
+        // up chunks of data to gather
+        int k, iMax, jMax, displsX, displsY;
+        void *sendbuf, *recvbuf;
+        int sendcount;
+        int* recvcounts = new int[nde];
+        int* displs = new int[nde];
+        if (localMaxDimCount == NULL) {
+          iMax = rsize[rbreak[1]];
+        } else {
+          iMax = localMaxDimCount[rbreak[1]];
+        }
+        if (localMaxDimCount == NULL) {
+          jMax = rsize[rbreak[0]];
+        } else {
+          jMax = localMaxDimCount[rbreak[0]];
+        }
+        for (i=0; i<iMax; i++) {
+          for (int j=0; j<jMax; j++) {
+            sendbuf = DistArray;  // void * must be cast to char * to increment
+            sendbuf = (void *)((char *)sendbuf + 
+                    (j*rsize[rankx] + i*rsize[rankx]*rsize[rbreak[0]]) * bytesperitem);
+            sendcount = rsize[rankx];
+            if (i >= rsize[rbreak[1]] || j >= rsize[rbreak[0]]) {
+              sendcount = 0;
+            }
+            recvbuf = GlobalArray;   // ditto comment above
+            recvbuf = (void *)((char *)recvbuf + 
+                       (j*rmax[rankx] + i*rmax[rankx]*rmax[rbreak[0]]) * bytesperitem);
+            displsY = 0;
+            for (int ky=0; ky<ny; ky++) {
+              displsX = 0;
+              for (int kx=0; kx<nx; kx++) {
+                k = ky*nx + kx;
+                if (localDimCounts == NULL) {
+                  recvcounts[k] = rsize[rankx];
+                } else {
+                  recvcounts[k] = localDimCounts[rankx*nde + k];
+                  if (j >= localDimCounts[ranky*nde + k]) recvcounts[k] = 0;
+                }
+                displs[k] = displsX + displsY;
+                displsX  += recvcounts[k];
+              }
+              if (localDimCounts == NULL) {
+                displsY += rsize[ranky] * rskip[ranky];
+              } else {
+                displsY += localDimCounts[ranky*nde + k] * rskip[ranky];
+              }
+            }
+          // call layout gather routine
+          comm.ESMC_CommAllGatherV(sendbuf, sendcount, recvbuf, recvcounts, 
+                                   displs, datatype);
+          }
+        }
+        delete [] recvcounts;
+        delete [] displs;
+      }
+      break;
+    default:
+      cout << "no code to handle array rank " << size_decomp << " yet\n";
+      break;
+  }
+
+  rc = ESMF_SUCCESS;
+  return rc;
+
+ } // end ESMC_newDELayoutGatherArray
+#endif
 
     if (thisde == deid)
        *Array_out = gathered;
