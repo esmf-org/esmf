@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newclass,v 1.5 2002/10/24 17:06:21 eschwab Exp $
+# $Id: do_newclass,v 1.6 2003/02/28 01:03:13 eschwab Exp $
 #
 #===============================================================================
 # do_newclass
@@ -27,7 +27,6 @@
 # Template files that pertain to classes or modules have 
 # "class" as the root of their filename.
 #
-# E. Schwab                                                       Oct 7, 2002
 #===============================================================================
  
 if($#argv != 2) then
@@ -55,6 +54,12 @@ endif
         sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
         sed 's/<Comp>/'$comp'/g' > ESMF_$class.F90
       endif
+
+      if(!(-r ../tests/ESMF_${class}Test.F90)) then
+        cat $DOCT_DIR/ESMF_classTest.F90 | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../tests/ESMF_${class}Test.F90
+      endif
       breaksw
   case c:
       if(!(-r ESMC_$class.C)) then
@@ -66,6 +71,11 @@ endif
         cat $DOCT_DIR/ESMC_class.h | \
         sed 's/<Class>/'$class'/g' | sed 's/<Comp>/'$comp'/g' \
            > ../include/ESMC_$class.h
+
+      if(!(-r ../tests/ESMC_${class}Test.C)) then
+        cat $DOCT_DIR/ESMC_classTest.C | \
+        sed 's/<Class>/'$class'/g' | sed 's/<class>/'$classlow'/g' | \
+        sed 's/<Comp>/'$comp'/g' > ../tests/ESMC_${class}Test.C
       endif
       breaksw
   default:

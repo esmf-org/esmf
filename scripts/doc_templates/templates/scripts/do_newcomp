@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.8 2003/02/21 16:05:45 nscollins Exp $
+# $Id: do_newcomp,v 1.9 2003/02/28 01:03:13 eschwab Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -32,7 +32,6 @@
 # of their filename.  Template files that pertain to classes or modules have 
 # "class" as the root of their filename.
 #
-# E. Schwab                                                       Oct 7, 2002
 #===============================================================================
  
 if($#argv != 2) then
@@ -56,6 +55,7 @@ endif
   set intfdir=$cwd/$comp/interface
   set exdir=$cwd/$comp/examples
   set incdir=$cwd/$comp/include
+  set tstdir=$cwd/$comp/tests
   set DOCT_DIR=$DOC_DIR/templates
 
 # Fill the source directories with template files
@@ -79,6 +79,11 @@ endif
   if(!(-r $intfdir/makefile)) then
       cat $DOCT_DIR/makefile.srcinter | \
       sed 's/<Comp>/'$comp'/g' > $intfdir/makefile
+  endif
+
+  if(!(-r $tstdir/makefile)) then
+      cat $DOCT_DIR/makefile.tests | \
+      sed 's/<Comp>/'$comp'/g' > $tstdir/makefile
   endif
 
 # include files
@@ -106,7 +111,7 @@ endif
       endif
 
       if(!(-r $intfdir/ESMC_class_F.C)) then
-          cp $DOCT_DIR/inter_ESMC_class_F.C $intfdir
+          cp $DOCT_DIR/inter_ESMC_class_F.C $intfdir/ESMC_class_F.C
           chmod 644 $intfdir/ESMC_class_F.C
       endif
       breaksw
@@ -119,6 +124,25 @@ endif
       if(!(-r $intfdir/ESMF_class_C.F90)) then
           cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
           sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class_C.F90
+      endif
+      breaksw
+  default:
+    echo "Valid options are: [ c | f ]"
+    exit
+  endsw
+
+# test files
+  switch ($lang) 
+  case f:
+      if(!(-r $tstdir/ESMF_classTest.F90)) then
+          cat $DOCT_DIR/ESMF_classTest.F90 | \
+          sed 's/<Comp>/'$comp'/g' > $tstdir/ESMF_classTest.F90
+      endif
+      breaksw
+  case c:
+      if(!(-r $tstdir/ESMC_classTest.C)) then
+          cat $DOCT_DIR/ESMC_classTest.C | \
+          sed 's/<Comp>/'$comp'/g' > $tstdir/ESMC_classTest.C
       endif
       breaksw
   default:
