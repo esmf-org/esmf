@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/02/27 21:29:01 nscollins Exp $ 
+# $Id: makefile,v 1.5 2003/02/27 21:47:02 flanigan Exp $ 
 
 ALL:
 
@@ -29,7 +29,7 @@ DIRS =
 # user_model (and .mod file) has to be built first
 ESMF_SysTest63029.o: user_model.o
 
-ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.o chkopts
+$(ESMC_TESTDIR)/ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.o chkopts
 	-${F90CXXLD} -o ESMF_SysTest63029 ESMF_SysTest63029.o user_model.o \
 	    -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_SysTest63029.o
