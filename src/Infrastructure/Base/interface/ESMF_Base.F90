@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.15 2002/12/13 20:15:18 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.16 2002/12/13 20:24:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -193,6 +193,7 @@
 
 !  Overloaded = operator functions
       public ESMF_sfeq, ESMF_dteq, ESMF_dkeq
+      public ESMF_sfne, ESMF_dtne, ESMF_dkne
 !
 !
 !EOP
@@ -201,11 +202,11 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.15 2002/12/13 20:15:18 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.16 2002/12/13 20:24:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
-! overload .eq. with additional derived types so you can compare them as if
+! overload .eq. & .ne. with additional derived types so you can compare them as if
 !  they were simple integers
 
 interface operator (.eq.)
@@ -214,39 +215,64 @@ interface operator (.eq.)
  module procedure ESMF_dkeq
 end interface
 
+interface operator (.ne.)
+ module procedure ESMF_sfne
+ module procedure ESMF_dtne
+ module procedure ESMF_dkne
+end interface
+
       contains
 
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_Status flags to see if they're the same
+! function to compare two ESMF_Status flags to see if they're the same or not
 
 function ESMF_sfeq(sf1, sf2)
  logical ESMF_sfeq
  type(ESMF_Status), intent(in) :: sf1, sf2
 
  ESMF_sfeq = (sf1%status .eq. sf2%status)
+end function
 
+function ESMF_sfne(sf1, sf2)
+ logical ESMF_sfne
+ type(ESMF_Status), intent(in) :: sf1, sf2
+
+ ESMF_sfne = (sf1%status .ne. sf2%status)
 end function
 !------------------------------------------------------------------------------
-! function to compare two ESMF_DataTypes to see if they're the same
+! function to compare two ESMF_DataTypes to see if they're the same or not
 
 function ESMF_dteq(dt1, dt2)
  logical ESMF_dteq
  type(ESMF_DataType), intent(in) :: dt1, dt2
 
  ESMF_dteq = (dt1%dtype .eq. dt2%dtype)
+end function
 
+function ESMF_dtne(dt1, dt2)
+ logical ESMF_dtne
+ type(ESMF_DataType), intent(in) :: dt1, dt2
+
+ ESMF_dtne = (dt1%dtype .ne. dt2%dtype)
 end function
 !------------------------------------------------------------------------------
-! function to compare two ESMF_DataKinds to see if they're the same
+! function to compare two ESMF_DataKinds to see if they're the same or not
 
 function ESMF_dkeq(dk1, dk2)
  logical ESMF_dkeq
  type(ESMF_DataKind), intent(in) :: dk1, dk2
 
  ESMF_dkeq = (dk1%dkind .eq. dk2%dkind)
-
 end function
+
+function ESMF_dkne(dk1, dk2)
+ logical ESMF_dkne
+ type(ESMF_DataKind), intent(in) :: dk1, dk2
+
+ ESMF_dkne = (dk1%dkind .ne. dk2%dkind)
+end function
+
 
 
 !------------------------------------------------------------------------------
