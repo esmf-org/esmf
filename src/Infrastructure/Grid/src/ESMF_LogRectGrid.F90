@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.9 2004/01/31 00:07:35 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.10 2004/02/03 21:39:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.9 2004/01/31 00:07:35 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.10 2004/02/03 21:39:12 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -233,6 +233,7 @@
                                              dimNames, dimUnits, &
                                              coordOrder, coordIndex, periodic, &
                                              layout, decompIds, &
+                                             countsPerDEDim1, countsPerDEDim2, &
                                              name, rc)
 !
 ! !RETURN VALUE:
@@ -242,9 +243,9 @@
       integer, intent(in) :: numDims
       integer, dimension(numDims), intent(in) :: counts
       real(ESMF_KIND_R8), dimension(numDims), intent(in) :: minGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: &
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                             maxGlobalCoordPerDim
-      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: deltaPerDim
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: deltaPerDim
       type(ESMF_GridKind), intent(in), optional :: horzGridKind
       type(ESMF_GridKind), intent(in), optional :: vertGridKind
       type(ESMF_GridStagger), intent(in), optional :: horzStagger
@@ -258,6 +259,8 @@
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       type(ESMF_DELayout), intent(in), optional :: layout
       integer, dimension(:), intent(in), optional :: decompIds
+      integer, dimension(:), intent(in), optional :: countsPerDEDim1
+      integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character(len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -302,6 +305,10 @@
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[{[decompIds]}]
 !          Identifier for which Grid axes are decomposed.
+!     \item[{[countsPerDEDim1]}]
+!          Array of number of grid increments per DE in the first direction.
+!     \item[{[countsPerDEDim2]}]
+!          Array of number of grid increments per DE in the second direction.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -316,8 +323,8 @@
       logical :: rcpresent                        ! Return code present
 
 !     Initialize pointers
-      nullify(grid)
-      nullify(ESMF_GridCreateLogRectUniform%ptr)
+    !  nullify(grid)
+    !  nullify(ESMF_GridCreateLogRectUniform%ptr)
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -351,8 +358,11 @@
 
 !     if layout information available, call grid distribute method
       if (present(layout)) then
-        call ESMF_LRGridDistribute(grid, layout, decompIds=decompIds, &
-                                   name=name, rc=status)
+        call ESMF_LRGridDistribute(grid, layout, &
+                                   countsPerDEDim1=countsPerDEDim1, &
+                                   countsPerDEDim2=countsPerDEDim2, &
+                                   decompIds=decompIds, name=name, &
+                                   rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridCreateLogRectUniform: Grid distribute"
           return
@@ -391,7 +401,7 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
-      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: &
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                  minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
@@ -402,13 +412,13 @@
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
-      character (len=*), dimension(numDims), intent(in), optional :: dimNames
-      character (len=*), dimension(numDims), intent(in), optional :: dimUnits
+      character (len=*), dimension(:), intent(in), optional :: dimNames
+      character (len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
-      type(ESMF_Logical), dimension(numDims), intent(in), optional :: periodic
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       type(ESMF_DELayout), intent(in), optional :: layout
-      integer, dimension(:), intent(in), optional :: decompIds
+      integer, dimension(numDims), intent(in), optional :: decompIds
       integer, dimension(:), intent(in), optional :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
       character (len=*), intent(in), optional :: name
@@ -520,8 +530,11 @@
 
 !     if layout information available, call grid distribute method
       if (present(layout)) then
-        call ESMF_LRGridDistribute(grid, layout, countsPerDEDim1, &
-                                   countsPerDEDim2, decompIds, name, rc)
+        call ESMF_LRGridDistribute(grid, layout, &
+                                   countsPerDEDim1=countsPerDEDim1, &
+                                   countsPerDEDim2=countsPerDEDim2, &
+                                   decompIds=decompIds, name=name, &
+                                   rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridCreateLogRect: Grid distribute"
           return
@@ -1370,6 +1383,12 @@
 
       grid%gridStatus = ESMF_GridStatus_Init
 
+!     Clean up
+      deallocate(coords)
+      deallocate(coordsUse1)
+      deallocate(coordsUse2)
+      if (numDims.ge.3) deallocate(coordsUse3)
+
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridConstructSpecd
@@ -1424,17 +1443,17 @@
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
       character(len=ESMF_MAXSTR) :: distGridName, physGridName
-      character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimNames
-      character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimUnits
-      integer :: distGridId, physGridId, numDE1, numDE2
-      integer :: i, counts(ESMF_MAXGRIDDIM), numDims, numDimsGrid
-      integer, dimension(ESMF_MAXGRIDDIM) :: decompIdsUse
+      character(len=ESMF_MAXSTR), dimension(:), allocatable :: dimNames, dimUnits
+      integer :: distGridId, physGridId, nDEs(0:2)
+      integer :: i, numDims, numDimsGrid
+      integer, dimension(:), allocatable :: decompIdsUse, counts
       integer, dimension(:), allocatable :: countsPerDE1Use, countsPerDE2Use, &
                                             countsPerDE3Use
+      logical, dimension(2) :: need
       real(ESMF_KIND_R8) :: delta
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: min, max
+      real(ESMF_KIND_R8), dimension(:), allocatable :: min, max
       real(ESMF_KIND_R8), dimension(:), pointer :: coord1, coord2, coord3
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
       type(ESMF_LocalArray), dimension(:), pointer :: coords
       type(ESMF_RelLoc) :: relloc
 
@@ -1446,24 +1465,20 @@
         rc = ESMF_FAILURE
       endif
 
-!     Fill in defaults for necessary but optional variables
-!  TODO: fill in countsPerDEDim if not present
-
-      do i = 1,ESMF_MAXGRIDDIM
-        decompIdsUse(i) = 0
-      enddo
-      if(present(decompIds)) then
-        decompIdsUse = decompIds
-      else
-        do i = 1, numDims
-          decompIdsUse(i) = i
-        enddo
-      endif
-
+!     Set 
 !     Extract some information from the Grid
       numDims = grid%numDims
-      allocate(coords(numDims))
-      coords  = grid%gridSpecific%logRectGrid%coords
+      allocate(counts(numDims))
+      allocate(min(numDims))
+      allocate(max(numDims))
+      allocate(dimNames(numDims))
+      allocate(dimUnits(numDims))
+      allocate(periodic(numDims))
+
+      if (associated(grid%gridSpecific%logRectGrid%coords)) then
+        allocate(coords(numDims))
+        coords = grid%gridSpecific%logRectGrid%coords
+      endif
       do i = 1,numDims
         counts(i)   = grid%gridSpecific%logRectGrid%countPerDim(i)
         min(i)      = grid%minGlobalCoordPerDim(i)
@@ -1503,14 +1518,49 @@
         endif
       endif
 
-      call ESMF_DELayoutGetSize(layout, numDE1, numDE2, status)
+!     Fill in defaults for necessary but optional variables
+      allocate(decompIdsUse(numDims))
+      decompIdsUse = 0
+      if(present(decompIds)) then
+        decompIdsUse = decompIds
+      else
+        do i = 1, numDims
+          decompIdsUse(i) = i
+        enddo
+      endif
+
+      nDEs(0) = 1
+      call ESMF_DELayoutGetSize(layout, nDEs(1), nDEs(2), status)
       ! For now, but TODO modify the following by decompids
-      allocate(countsPerDE1Use(numDE1))
-      allocate(countsPerDE2Use(numDE2))
-      allocate(countsPerDE3Use(1     ))
-      countsPerDE1Use = countsPerDEDim1
-      countsPerDE2Use = countsPerDEDim2
-      countsPerDE3Use(1) = counts(3)
+      allocate(countsPerDE1Use(nDEs(1)))
+      allocate(countsPerDE2Use(nDEs(2)))
+      if (numDims.ge.3) allocate(countsPerDE3Use(nDEs(0)))
+!     if there is an axis to decompose, either grab the specfied countsPerDE
+!     or parse the global count
+      need = .false.
+      do i = 1,numDims
+        if (decompIdsUse(i).eq.1) need(1)=.true.
+        if (decompIdsUse(i).eq.2) need(2)=.true.
+      enddo
+
+      countsPerDE1Use(:) = counts(1)
+      countsPerDE2Use(:) = counts(2)
+      if (numDims.ge.3) countsPerDE3Use(:) = counts(3)
+
+      if (need(1)) then
+        if(present(countsPerDEDim1)) then
+          countsPerDE1Use = countsPerDEDim1
+        else
+          call ESMF_DELayoutParse(layout, 1, counts(1), countsPerDE1Use, rc)
+        endif
+      endif
+      if (need(2)) then
+        if(present(countsPerDEDim2)) then
+          countsPerDE2Use = countsPerDEDim2
+        else
+          call ESMF_DELayoutParse(layout, 2, counts(2), countsPerDE2Use, rc)
+        endif
+      endif
 
 !     Create DistGrid and PhysGrid at cell center
       numDimsGrid = numDims
@@ -1522,8 +1572,8 @@
       relloc = ESMF_CELL_CENTER
       call ESMF_LRGridAddDistGrid(grid, distGridId, numDimsGrid, counts, &
                                   layout, decompIdsUse(1:2), periodic, &
-                                  countsPerDEDim1=countsPerDEDim1, &
-                                  countsPerDEDim2=countsPerDEDim2, &
+                                  countsPerDEDim1=countsPerDE1Use, &
+                                  countsPerDEDim2=countsPerDE2Use, &
                                   distGridName=distGridName, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridDistribute: Add DistGrid"
@@ -1531,7 +1581,7 @@
       endif
       distGridId = distGridId + 1 
       call ESMF_LRGridAddPhysGrid(grid, physGridId, relloc, numDims, coord1, &
-                                  coord2, countsPerDEDim1, countsPerDEDim2, &
+                                  coord2, countsPerDE1Use, countsPerDE2Use, &
                                   dimNames, dimUnits, physGridName, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridDistribute: Add PhysGrid"
@@ -1891,10 +1941,22 @@
       endif
 
 !     Clean up
+      deallocate(counts)
+      deallocate(min)
+      deallocate(max)
+      deallocate(dimNames)
+      deallocate(dimUnits)
+      deallocate(periodic)
+      if (associated(coords)) deallocate(coords)
+      deallocate(coord1)
+      if (numDims.ge.2) deallocate(coord2)
+      if (numDims.ge.3) deallocate(coord3)
+      deallocate(decompIdsUse)
       deallocate(countsPerDE1Use)
       deallocate(countsPerDE2Use)
-      deallocate(countsPerDE3Use)
+      if (numDims.ge.3) deallocate(countsPerDE3Use)
 
+      grid%gridStatus = ESMF_GridStatus_Ready
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDistribute
@@ -1966,7 +2028,7 @@
       !TODO: add status to deallocate calls and trap errors
       deallocate(grid%physgrids)
 
-      deallocate(grid%distGridIndex)
+  !    deallocate(grid%distGridIndex)   TODO: not yet implemented
 
       do n = 1,grid%numDistGridsAlloc
          call ESMF_DistGridDestroy(grid%distgrids(n), rc=status)
@@ -2289,7 +2351,7 @@
           coordCyclic(2)      = .false.
 
         ! ESMF_GridKind_XY
-        case (5)
+        case (7)
           coordSystem         = ESMF_CoordSystem_Cartesian
           coordNames(1)       = 'x'
           coordNames(2)       = 'y'
@@ -2595,7 +2657,7 @@
 
 ! !INTERFACE:
       subroutine ESMF_LRGridGetCoord(grid, physGridId, relloc, centerCoord, &
-                                   cornerCoord, faceCoord, total, rc)
+                                     cornerCoord, faceCoord, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -2824,6 +2886,7 @@
 
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
+      distGridIdUse = 1          ! default
       if (present(distGridId)) distGridIdUse = distGridId
 
 !     call DistGrid method to retrieve information otherwise not available
@@ -2891,6 +2954,7 @@
 
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
+      distGridIdUse = 1          ! default
       if (present(distGridId)) distGridIdUse = distGridId
 
 !     call DistGrid method to retrieve information otherwise not available
@@ -2982,6 +3046,7 @@
 
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
+      distGridIdUse = 1          ! default
       if (present(distGridId)) distGridIdUse = distGridId
 
 !     call DistGrid method to retrieve information otherwise not available
@@ -3076,6 +3141,7 @@
 
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
+      distGridIdUse = 1          ! default
       if (present(distGridId)) distGridIdUse = distGridId
 
 !     call DistGrid method to retrieve information otherwise not available
@@ -3374,6 +3440,9 @@
         return
       endif
 
+      ! clean up
+      deallocate(arrayTemp)
+
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridSetCoordCompute
@@ -3547,6 +3616,7 @@
 
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
+        distGridIdUse = 1          ! default
         if (present(distGridId)) distGridIdUse = distGridId
       endif
 
@@ -4251,7 +4321,10 @@
         i1    = i1 + countsPerDEDim2(j)
       enddo
 
-      grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_REF, status)
+      grid%boundingBoxes = ESMF_LocalArrayCreate(boxes, ESMF_DATA_COPY, status)
+
+!     Clean up
+      deallocate(boxes)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
