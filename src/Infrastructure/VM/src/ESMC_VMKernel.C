@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.37 2005/03/22 03:55:51 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.38 2005/03/22 22:31:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2641,7 +2641,7 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
     // first transfering data to the smallest receiver PET and then to the
     // other one. A sendrecv has two receiver PETs, one is the local PET and
     // the other is rcv.
-    if (mypet<=dst){
+    if (mypet<dst){
       // mypet is the first receiver
       vmk_recv(recvData, recvSize, src);
       vmk_send(sendData, sendSize, dst);
@@ -2667,7 +2667,7 @@ void ESMC_VMK::vmk_sendrecv(void *sendData, int sendSize, int dst,
   (*commhandle)->handles = new vmk_commhandle*[(*commhandle)->nelements];
   for (int i=0; i<(*commhandle)->nelements; i++)
     (*commhandle)->handles[i] = new vmk_commhandle;
-  if (mypet<=dst){
+  if (mypet<dst){
     // mypet is the first receiver
     vmk_recv(recvData, recvSize, src, &((*commhandle)->handles[0]));
     vmk_send(sendData, sendSize, dst, &((*commhandle)->handles[1]));
