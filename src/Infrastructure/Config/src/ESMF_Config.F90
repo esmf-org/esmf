@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.16 2004/08/19 16:52:19 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.17 2004/09/10 16:26:51 theurich Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -256,7 +256,7 @@
        character, parameter :: TAB = achar(09)   ! TAB
        character, parameter :: EOL = achar(10)   ! end of line mark (newline)
        character, parameter :: EOB = achar(00)   ! end of buffer mark (null)
-       character, parameter :: NULL= achar(00)   ! what it says
+       character, parameter :: NUL = achar(00)   ! what it says
        
        character(len=*), parameter :: myname='ESMF_ConfigMod'
 
