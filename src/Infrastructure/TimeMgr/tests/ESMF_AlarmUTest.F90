@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.1 2004/04/07 22:10:07 svasquez Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.2 2004/04/08 04:25:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,7 +10,7 @@
 !
 !==============================================================================
 !
-      program ESMF_ClockTest
+      program ESMF_AlarmTest
 
 !------------------------------------------------------------------------------
 !
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.1 2004/04/07 22:10:07 svasquez Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.2 2004/04/08 04:25:19 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -127,21 +127,26 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
-      ! Test Setting the Start Time
-      year = 30067
-      day2 = 25
-      hour = 7
-      minute = 33
-      second = 51
       write(failMsg, *) " Returned ESMF_FAILURE"
-      write(name, *) "Set Start Time Initialization Test"
-      call ESMF_TimeSet(startTime, yy_i8=year, mm=6, dd=25, &
-                                   h=hour, m=56, s_i8=second, &
-                                   calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Stop Time Initialization Test"
+      call ESMF_TimeSet(stopTime, yy=2003, mm=3, dd=24, &
+                                  calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
       ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Initialization Test"
+      clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, &
+                               stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
   
       ! finalize ESMF framework
       call ESMF_Finalize(rc)
