@@ -1,4 +1,4 @@
-% $Id: CommMem_desdoc.ctex,v 1.4 2003/03/31 20:44:44 flanigan Exp $
+% $Id: CommMem_desdoc.ctex,v 1.5 2003/05/07 23:16:09 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,84 +66,6 @@
 \input{CommMem_param}
 #elif defined(CONSTITUENT)
 \input{../src/Infrastructure/CommMem/doc/CommMem_param}
-#endif
-
-\section{Machine Class Design}
-
-\subsection{Description}
-#ifdef STANDALONE
-\input{ESMC_Machine_desc}
-#elif defined(CONSTITUENT)
-\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_desc}
-#endif
-
-\subsection{Design}
-#ifdef STANDALONE
-\input{ESMC_Machine_design}
-#elif defined(CONSTITUENT)
-\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_design}
-#endif
-
-\subsubsection{Class Definition}
-#ifdef STANDALONE
-\input{ESMC_Machine_def}
-#elif defined(CONSTITUENT)
-\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_def}
-#endif
-
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-%\input{ESMC_Machine_rest}
-#elif defined(CONSTITUENT)
-%\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_rest}
-#endif
-
-\section{Machine Class F90 Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-%\input{ESMC_Machine_fex}
-#elif defined(CONSTITUENT)
-%\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_fex}
-#endif
-
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-%\input{ESMC_Machine_fparam}
-#elif defined(CONSTITUENT)
-%\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_fparam}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-%\input{ESMC_Machine_fapi}
-#elif defined(CONSTITUENT)
-%\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_fapi}
-#endif
-
-\section{Machine Class C++ Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMC_Machine_ccex}
-#elif defined(CONSTITUENT)
-\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_ccex}
-#endif
-
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-%\input{ESMC_Machine_ccparam}
-#elif defined(CONSTITUENT)
-%\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_ccparam}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMC_Machine_chapi}
-\input{ESMC_Machine_ccapi}
-#elif defined(CONSTITUENT)
-\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_chapi}
-\input{../src/Infrastructure/CommMem/doc/ESMC_Machine_ccapi}
 #endif
 
 \section{PE Class Design}

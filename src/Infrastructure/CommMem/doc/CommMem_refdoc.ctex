@@ -1,4 +1,4 @@
-% $Id: CommMem_refdoc.ctex,v 1.7 2003/05/07 04:34:29 cdeluca Exp $
+% $Id: CommMem_refdoc.ctex,v 1.8 2003/05/07 23:16:10 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -401,7 +401,7 @@
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_DELayout_fapi}
+\input{ESMF_DELayout_fapi}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/CommMem/doc/ESMF_DELayout_fapi}
 #endif
