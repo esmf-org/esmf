@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.9 2002/10/29 23:10:50 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.10 2002/11/08 22:34:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -179,6 +179,10 @@
       public ESMF_AttributeGetObjectList
       public ESMF_AttributeCopy
       public ESMF_AttributeCopyAll
+ 
+!  Misc methods
+      public ESMF_SetPointer
+      public ESMF_GetPointer
 !
 !
 !EOP
@@ -186,7 +190,7 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.9 2002/10/29 23:10:50 nscollins Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.10 2002/11/08 22:34:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 !-------------------------------------------------------------------------
@@ -475,6 +479,60 @@
 ! !REQUIREMENTS:  FLD1.5.4
 
       end subroutine ESMF_AttributeCopyAll
+
+!=========================================================================
+!BOP
+!
+!IROUTINE:  ESMC_SetPointer - set an opaque value
+
+!
+! !INTERFACE:
+      subroutine ESMF_SetPointer(ptype, contents, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Pointer) :: ptype 
+      integer*8, intent(in) :: contents
+      integer, intent(out), optional :: rc  
+
+!
+! !DESCRIPTION:
+!   Set the contents of an opaque pointer type.
+
+!
+!EOP
+! !REQUIREMENTS:
+      ptype%ptr = contents
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_SetPointer
+!-------------------------------------------------------------------------
+!BOP
+!
+!IROUTINE:  ESMC_GetPointer - get an opaque value
+
+!
+! !INTERFACE:
+      function ESMF_GetPointer(ptype, rc)
+!
+! !RETURN VALUE:
+      integer*8 :: ESMF_GetPointer
+
+! !ARGUMENTS:
+      type(ESMF_Pointer), intent(in) :: ptype 
+      integer, intent(out), optional :: rc  
+
+!
+! !DESCRIPTION:
+!   Get the contents of an opaque pointer type.
+
+!
+!EOP
+! !REQUIREMENTS:
+      ESMF_GetPointer = ptype%ptr
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end function ESMF_GetPointer
+
 !-------------------------------------------------------------------------
 !BOP
 !
