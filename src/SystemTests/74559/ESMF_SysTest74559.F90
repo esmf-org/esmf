@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74559.F90,v 1.3 2003/04/28 17:48:06 nscollins Exp $
+! $Id: ESMF_SysTest74559.F90,v 1.4 2003/04/28 23:38:39 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !
@@ -22,18 +22,19 @@
     ! ESMF Framework module
     use ESMF_Mod
     
-    use HeatFlowMod, only : HeatMod_register
-    use     FlowMod, only : FlowMod_register
-    use      CplMod, only : Coupler_register
+    use   InjectorMod, only : Injector_register
+    use FlowSolverMod, only : FlowSolver_register
+    use    CouplerMod, only : Coupler_register
 
     implicit none
     
     ! Local variables
-    integer :: de_id, ndes, rc, delist(8)
-    integer :: mid, quart
+    integer :: de_id, ndes, rc, delist(16)
+    integer :: i, mid, quart
     character(len=ESMF_MAXSTR) :: aname, cnameHI, cnameFS, cplname
     type(ESMF_DELayout) :: layoutApp, layoutHI, layoutFS
-    type(ESMF_State) :: HIimp, HIexp, FSimp, FSexp, cplstateF2H, cplstateH2F
+    type(ESMF_State) :: HIimp, HIexp, FSimp, FSexp
+    type(ESMF_State) :: cplstateF2H, cplstateH2F, cplbothlists
     type(ESMF_AppComp) :: app
     type(ESMF_GridComp) :: compHI, compFS
     type(ESMF_CplComp) :: cpl
@@ -73,6 +74,10 @@
         print *, "This system test needs to run at least 4-way, current np = ", ndes
         goto 10
     endif
+    if (mod(ndes, 4) .ne. 0) then
+        print *, "This system test needs to run on a multiple of 4 processes"
+        goto 10
+    endif
 
     ! Set up the component layouts so they are different, so we can show
     !  we really are routing data between processors.
@@ -83,15 +88,15 @@
     ! Create the 2 model components and coupler.  The first component will
     !  run on a 2 x N/2 layout, the second will be on a 4 x N/4 layout.
     !  The coupler will run on the original default 1 x N layout.
-    cnameHI = "Heat injector model"
-    delist = (/ (i=0, ndes-1) /)
+    cnameHI = "Injector model"
+    delist = (/ (i, i=0, ndes-1) /)
     layoutHI = ESMF_DELayoutCreate(delist, 2, (/ mid, 2 /), (/ 0, 0 /), rc)
     HIcomp = ESMF_GridCompCreate(cnameHS, layout=layoutHI, rc=rc)
     print *, "Created component ", trim(cnameHS), "rc =", rc
     call ESMF_DELayoutPrint(layoutHI, rc=rc)
 
-    cnameFS = "Flow solver model"
-    delist = (/ (i=0, ndes-1) /)
+    cnameFS = "Flow Solver model"
+    delist = (/ (i, i=0, ndes-1) /)
     layoutFS = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
     FScomp = ESMF_GridCompCreate(cnameFS, layout=layoutFS, rc=rc)
     print *, "Created component ", trim(cnameFS), "rc =", rc
@@ -110,10 +115,10 @@
 !  Register section
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-      call ESMF_GridCompSetServices(HIcomp, HeatMod_register, rc)
+      call ESMF_GridCompSetServices(HIcomp, Injector_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
-      call ESMF_GridCompSetServices(FScomp, FlowMod_register, rc)
+      call ESMF_GridCompSetServices(FScomp, FlowSolver_register, rc)
       print *, "Comp SetServices finished, rc= ", rc
 
       call ESMF_CplCompSetServices(cpl, Coupler_register, rc)
@@ -128,14 +133,16 @@
       call ESMF_CalendarInit(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
 
       ! initialize time interval to 2 seconds
-      call ESMF_TimeIntervalInit(timeStep, S=2, rc=rc)
+      call ESMF_TimeIntervalInit(timeStep, S=int(2,kind=ESMF_IKIND_I8), rc=rc)
 
-      ! initialize start time to 14May2003, 9:00 am
-      call ESMF_TimeInit(startTime, YR=2003, MM=5, DD=14, H=9, M=0, S=0, &
+      ! initialize start time to 13May2003, 9:00 am
+      call ESMF_TimeInit(startTime, YR=int(2003,kind=ESMF_IKIND_I8), &
+                         MM=5, DD=13, H=9, M=0, S=int(0,kind=ESMF_IKIND_I8), &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize stop time to 15May2003, 9:00 am
-      call ESMF_TimeInit(stopTime, YR=2003, MM=5, DD=15, H=9, M=0, S=0, &
+      call ESMF_TimeInit(stopTime, YR=int(2003,kind=ESMF_IKIND_I8), &
+                         MM=5, DD=15, H=9, M=0, S=int(0,kind=ESMF_IKIND_I8), &
                          cal=gregorianCalendar, rc=rc)
 
       ! initialize the clock with the above values
@@ -149,33 +156,38 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
  
-      HIimp = ESMF_StateCreate("Heat Injection Feedback", ESMF_STATEIMPORT, &
+      HIimp = ESMF_StateCreate("Injection Feedback", ESMF_STATEIMPORT, &
                                cnameHI)
-      HIexp = ESMF_StateCreate("Heat Injection Source", ESMF_STATEEXPORT, &
+      HIexp = ESMF_StateCreate("Injection Input", ESMF_STATEEXPORT, &
                                cnameHI)
 
       call ESMF_GridCompInitialize(HIcomp, HIimp, HIexp, clock, rc=rc)
       print *, "Heat Model Initialize finished, rc =", rc
  
-      FSimp = ESMF_StateCreate("Flow Solver Input", ESMF_STATEIMPORT, &
+      FSimp = ESMF_StateCreate("FlowSolver Input", ESMF_STATEIMPORT, &
                                cnameFS)
-      FSexp = ESMF_StateCreate("Flow Solver Feedback ", ESMF_STATEEXPORT, &
+      FSexp = ESMF_StateCreate("FlowSolver Feedback ", ESMF_STATEEXPORT, &
                                 cnameFS)
 
       call ESMF_GridCompInitialize(FScomp, FSimp, FSexp, clock, rc=rc)
       print *, "Flow Model Initialize finished, rc =", rc
 
-      cplstateH2F = ESMF_StateCreate("Coupler States Heat to Flow", &
+      cplstateH2F = ESMF_StateCreate("Coupler States Injector to FlowSolver", &
                                                       ESMF_STATELIST, cplname)
       call ESMF_StateAddData(cplstate, HIexp, rc=rc)
       call ESMF_StateAddData(cplstate, FSimp, rc=rc)
  
-      cplstateF2H = ESMF_StateCreate("Coupler States Flow to Heat", &
+      cplstateF2H = ESMF_StateCreate("Coupler States FlowSolver to Injector", &
                                                       ESMF_STATELIST, cplname)
-      call ESMF_StateAddData(cplstate, FSimp, rc=rc)
-      call ESMF_StateAddData(cplstate, HIexp, rc=rc)
+      call ESMF_StateAddData(cplstate, FSexp, rc=rc)
+      call ESMF_StateAddData(cplstate, HIimp, rc=rc)
  
-      call ESMF_CplCompInitialize(cpl, cplstateH2F, clock, rc=rc)
+      cplbothlists = ESMF_StateCreate("All Coupler states", ESMF_STATELIST, cplname)
+
+      call ESMF_StateAddData(cplbothlists, cplstateH2F, rc=rc)
+      call ESMF_StateAddData(cplbothlists, cplstateF2H, rc=rc)
+
+      call ESMF_CplCompInitialize(cpl, cplbothlists, clock, rc=rc)
       print *, "Coupler Initialize finished, rc =", rc
  
 !------------------------------------------------------------------------------
