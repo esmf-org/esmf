@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.74 2003/09/12 22:34:44 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.75 2003/10/13 22:31:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,13 +49,13 @@
       private
 
 !------------------------------------------------------------------------------
-!     ! ESMF_MyDE
+!     ! ESMF_DistGridLocal
 !
-!     ! Description of ESMF_MyDE
+!     ! Description of ESMF_DistGridLocal
 
-      type ESMF_MyDE
+      type ESMF_DistGridLocal
       sequence
-!     private
+      !private
         integer :: MyDE             ! identifier for this DE
         integer :: local_cell_count ! local (on this DE) number of cells
         integer, dimension(ESMF_MAXGRIDDIM) :: local_axis_length
@@ -66,35 +66,61 @@
       end type
 
 !------------------------------------------------------------------------------
+!     ! ESMF_DistGridGlobal
+!
+!     ! Description of ESMF_DistGridGlobal
+
+      type ESMF_DistGridGlobal
+      sequence
+      !private
+        ! values where there are only 1 per Grid
+        integer :: global_cell_count   ! global number of cells
+        integer :: local_cell_max      ! maximum number of cells on any one DE
+        ! values where there are 1 per dimension of the Grid
+        integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
+                                       ! global number of cells in each dim
+        integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
+                                       ! maximum DE cell counts in each dim
+
+        ! values where there are 1 per DE in this Grid.  For the 2d values
+        ! below, one dim is per DE, the other dim is per grid dimension.
+        integer, dimension(:), pointer :: local_cell_count
+                                       ! number of cells on each DE
+        integer, dimension(:,:), pointer :: local_axis_length
+                                       ! number of cells along each axis
+        integer, dimension(:,:), pointer :: global_start  
+                                       ! offset of each DE in the global grid
+        type (ESMF_AxisIndex), dimension(:,:), pointer :: ai_global
+                                       ! AIs for each DE
+
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_DistGridType
 !
-!     !  Description of ESMF_DistGrid. 
+!     !  Description of ESMF_DistGridType. 
 
       type ESMF_DistGridType
       sequence
-!     private
+      !private
+
         type (ESMF_Base) :: base
-        type (ESMF_DELayout) :: layout  ! TODO: should this be a pointer?
-        type (ESMF_MyDE) :: MyDE       ! local DE identifiers
+        logical :: covers_domain       ! does distgrid cover the entire 
+                                       ! physical domain?
+        integer :: grid_boundary_width ! number of exterior cells
+
+        type (ESMF_DELayout) :: layout ! TODO: should this be a pointer?
+        ! 1 per dimension of the Grid
         integer, dimension(ESMF_MAXGRIDDIM) :: decompids
-        logical :: covers_domain       ! identifier if distgrid covers
-                                       ! the entire physical domain
-        integer :: global_cell_count   ! global number of cells
-        integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim
-                                       ! global number of cells in each
-                                       ! dimension
-        integer, dimension(:), pointer :: local_cell_count
-                                       ! array of the numbers of cells on each
-                                       ! DE
-        integer, dimension(:,:), pointer :: local_axis_length
-                                       ! array of the numbers of cells along each
-                                       ! axis on each DE
-        integer :: local_cell_max      ! maximum number of cells on any DE
-        integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
-                                       ! maximum DE cell counts in each
-                                       ! grid dimension
-        integer, dimension(:,:), pointer :: global_start
-        type (ESMF_AxisIndex), dimension(:,:), pointer :: ai_global
+
+        ! sizes where they differ depending on if you are asking about the
+        ! total number of cells including the boundary, or just the
+        ! computational cells
+        type (ESMF_DistGridLocal) :: MyDE_total 
+        type (ESMF_DistGridLocal) :: MyDE_comp 
+        type (ESMF_DistGridGlobal) :: global_total
+        type (ESMF_DistGridGlobal) :: global_comp
+
       end type
 
 !------------------------------------------------------------------------------
@@ -104,16 +130,16 @@
 
       type ESMF_DistGrid
       sequence
-!     private
+      !private
         type (ESMF_DistGridType), pointer :: ptr     ! pointer to a distgrid
                                                      ! type
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_MyDE
       public ESMF_DistGrid
-      public ESMF_DistGridType
+      public ESMF_DistGridType   ! TODO: this is really internal to Grid
+      public ESMF_DistGridLocal, ESMF_DistGridGlobal  ! ditto
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -144,7 +170,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.74 2003/09/12 22:34:44 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.75 2003/10/13 22:31:31 nscollins Exp $'
 
 !==============================================================================
 !
@@ -252,12 +278,12 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
+      type(ESMF_DistGridType), pointer :: dgtype    ! Pointer to new distgrid
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
 
 !     Initialize pointers
-      nullify(distgrid)
+      nullify(dgtype)
       nullify(ESMF_DistGridCreateEmpty%ptr)
 
 !     Initialize return code
@@ -268,7 +294,7 @@
         rc = ESMF_FAILURE
       endif
 
-      allocate(distgrid, stat=status)
+      allocate(dgtype, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
@@ -277,14 +303,14 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstructNew(distgrid, name, status)
+      call ESMF_DistGridConstructNew(dgtype, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridCreateEmpty: DistGrid construct"
         return
       endif
 
 !     Set return values.
-      ESMF_DistGridCreateEmpty%ptr => distgrid
+      ESMF_DistGridCreateEmpty%ptr => dgtype
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_DistGridCreateEmpty
@@ -326,14 +352,14 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
+      type(ESMF_DistGridType), pointer :: dgtype    ! Pointer to new distgrid
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: nDEs(2)
       integer, dimension(:), allocatable :: countsPerDE1, countsPerDE2
 
 !     Initialize pointers
-      nullify(distgrid)
+      nullify(dgtype)
       nullify(ESMF_DistGridCreateInternal%ptr)
 
 !     Initialize return code
@@ -344,7 +370,7 @@
         rc = ESMF_FAILURE
       endif
 
-      allocate(distgrid, stat=status)
+      allocate(dgtype, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
@@ -361,11 +387,11 @@
       call ESMF_DELayoutParse(layout, 2, counts(2), countsPerDE2, rc)
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstruct(distgrid, layout, countsPerDE1, &
+      call ESMF_DistGridConstruct(dgtype, layout, countsPerDE1, &
                                   countsPerDE2, periodic, name, rc)
 
 !     Set return values.
-      ESMF_DistGridCreateInternal%ptr => distgrid
+      ESMF_DistGridCreateInternal%ptr => dgtype
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_DistGridCreateInternal
@@ -411,12 +437,12 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_DistGridType), pointer :: distgrid  ! Pointer to new distgrid
+      type(ESMF_DistGridType), pointer :: dgtype    ! Pointer to new distgrid
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
 
 !     Initialize pointers
-      nullify(distgrid)
+      nullify(dgtype)
       nullify(ESMF_DistGridCreateIntSpec%ptr)
 
 !     Initialize return code
@@ -427,7 +453,7 @@
         rc = ESMF_FAILURE
       endif
 
-      allocate(distgrid, stat=status)
+      allocate(dgtype, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status .NE. ESMF_SUCCESS) then
@@ -436,11 +462,11 @@
       endif
 
 !     Call construction method to allocate and initialize grid internals.
-      call ESMF_DistGridConstruct(distgrid, layout, countsPerDE1, &
+      call ESMF_DistGridConstruct(dgtype, layout, countsPerDE1, &
                                   countsPerDE2, periodic, name, rc)
 
 !     Set return values.
-      ESMF_DistGridCreateIntSpec%ptr => distgrid
+      ESMF_DistGridCreateIntSpec%ptr => dgtype
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_DistGridCreateIntSpec
@@ -512,10 +538,10 @@
 ! !IROUTINE: ESMF_DistGridConstructNew - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructNew(distgrid, name, rc)
+      subroutine ESMF_DistGridConstructNew(dgtype, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid 
+      type(ESMF_DistGridType) :: dgtype 
       character (len = *), intent(in), optional :: name  ! name
       integer, intent(out), optional :: rc               ! return code
 !
@@ -529,7 +555,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Pointer to a {\tt ESMF\_DistGrid}.
 !     \item[[name]] 
 !          Name of the {\tt ESMF\_DistGrid}.
@@ -553,7 +579,7 @@
       endif
 
 !     Set the DistGrid name if present, otherwise construct a default one
-      call ESMF_SetName(distgrid%base, name, "DistGrid", status)
+      call ESMF_SetName(dgtype%base, name, "DistGrid", status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructNew: Setname"
         return
@@ -561,26 +587,51 @@
 
 !     Initialize distgrid contents  TODO:  move this into the derived type
 !                                          as defaults
-      distgrid%MyDE%MyDE = 0
-      distgrid%MyDE%local_cell_count = 0
+      dgtype%covers_domain = .false.
+      dgtype%grid_boundary_width = 1   ! TODO: this must be settable
       do i = 1,ESMF_MAXGRIDDIM
-        distgrid%MyDE%local_axis_length = 0
-        distgrid%MyDE%ai_global(i)%min = 0
-        distgrid%MyDE%ai_global(i)%max = 0
-        distgrid%MyDE%ai_global(i)%stride = 0
+        dgtype%decompids(i) = 0
       enddo
-      distgrid%covers_domain = .false.
-      distgrid%global_cell_count = 0
-      distgrid%local_cell_max = 0
+
+      dgtype%MyDE_total%MyDE = 0
+      dgtype%MyDE_total%local_cell_count = 0
       do i = 1,ESMF_MAXGRIDDIM
-        distgrid%decompids(i) = 0
-        distgrid%global_cell_dim(i) = 0
-        distgrid%local_cell_max_dim(i) = 0
+        dgtype%MyDE_total%local_axis_length = 0
+        dgtype%MyDE_total%ai_global(i)%min = 0
+        dgtype%MyDE_total%ai_global(i)%max = 0
+        dgtype%MyDE_total%ai_global(i)%stride = 0
       enddo
-      nullify(distgrid%local_cell_count)
-      nullify(distgrid%local_axis_length)
-      nullify(distgrid%global_start)
-      nullify(distgrid%ai_global)
+
+      dgtype%MyDE_comp%MyDE = 0
+      dgtype%MyDE_comp%local_cell_count = 0
+      do i = 1,ESMF_MAXGRIDDIM
+        dgtype%MyDE_comp%local_axis_length = 0
+        dgtype%MyDE_comp%ai_global(i)%min = 0
+        dgtype%MyDE_comp%ai_global(i)%max = 0
+        dgtype%MyDE_comp%ai_global(i)%stride = 0
+      enddo
+
+      dgtype%global_total%global_cell_count = 0
+      dgtype%global_total%local_cell_max = 0
+      do i = 1,ESMF_MAXGRIDDIM
+        dgtype%global_total%global_cell_dim(i) = 0
+        dgtype%global_total%local_cell_max_dim(i) = 0
+      enddo
+      nullify(dgtype%global_total%local_cell_count)
+      nullify(dgtype%global_total%local_axis_length)
+      nullify(dgtype%global_total%global_start)
+      nullify(dgtype%global_total%ai_global)
+
+      dgtype%global_comp%global_cell_count = 0
+      dgtype%global_comp%local_cell_max = 0
+      do i = 1,ESMF_MAXGRIDDIM
+        dgtype%global_comp%global_cell_dim(i) = 0
+        dgtype%global_comp%local_cell_max_dim(i) = 0
+      enddo
+      nullify(dgtype%global_comp%local_cell_count)
+      nullify(dgtype%global_comp%local_axis_length)
+      nullify(dgtype%global_comp%global_start)
+      nullify(dgtype%global_comp%ai_global)
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -591,11 +642,12 @@
 ! !IROUTINE: ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructInternal(distgrid, layout, countsPerDE1, &
-                                                countsPerDE2, periodic, name, rc)
+      subroutine ESMF_DistGridConstructInternal(dgtype, layout, &
+                                                countsPerDE1, countsPerDE2, &
+                                                periodic, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid 
+      type(ESMF_DistGridType) :: dgtype 
       type (ESMF_DELayout), intent(in) :: layout
       integer, dimension(:) :: countsPerDE1
       integer, dimension(:) :: countsPerDE2
@@ -613,17 +665,20 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Pointer to a {\tt ESMF\_DistGrid}.
-!     \item[[layout]]
+!     \item[{[layout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
-!     \item[[countsPerDE1]]
+!     \item[{[countsPerDE1]}]
 !          Array of number of computational cells per DE in first direction.
-!     \item[[countsPerDE2]]
+!     \item[{[countsPerDE2]}]
 !          Array of number of computational cells per DE in second direction.
-!     \item[[name]] 
+!     \item[{[periodic]}] 
+!          Logical value for whether the axes are periodic, one value per axis.
+!          Default is non-periodic.
+!     \item[{[name]}] 
 !          {\tt ESMF\_DistGrid} name.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -633,7 +688,7 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: global_cell_count
-      integer :: i, nDE
+      integer :: i, nDE, bnd
       integer, dimension(ESMF_MAXGRIDDIM) :: global_cell_dim, nDEs
 
 !     Initialize return code
@@ -652,14 +707,15 @@
 !     endif
  
 !     Initialize the derived type contents
-      call ESMF_DistGridConstructNew(distgrid, name, status)
+      call ESMF_DistGridConstructNew(dgtype, name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: DistGrid construct"
         return
       endif
 
-!     Fill in distgrid derived type with input or default
-!     TODO:  temporary fix, also add defaults to objects
+      ! Fill in distgrid derived type with input or default
+      ! TODO:  temporary fix, also add defaults to objects
+      ! First do computational area only.
       global_cell_count = 1
       global_cell_dim(1) = 0
       global_cell_dim(2) = 0
@@ -678,9 +734,36 @@
         return
       endif
 
-      call ESMF_DistGridSet(distgrid, covers_domain=.true., &
+      call ESMF_DistGridSet(dgtype, covers_domain=.true., &
                             global_cell_count=global_cell_count, &
                             global_cell_dim=global_cell_dim, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set"
+        return
+      endif
+
+      ! now repeat the process, accounting for boundary cells
+      global_cell_count = 1
+      global_cell_dim(1) = 0
+      global_cell_dim(2) = 0
+      bnd = dgtype%grid_boundary_width
+      do i = 1,size(countsPerDE1)
+        global_cell_dim(1) = global_cell_dim(1) + countsPerDE1(i) + 2*bnd
+      enddo
+      if(global_cell_dim(1).ne.0) global_cell_count = global_cell_count &
+                                                    * global_cell_dim(1)
+      do i = 1,size(countsPerDE2)
+        global_cell_dim(2) = global_cell_dim(2) + countsPerDE2(i) + 2*bnd
+      enddo
+      if(global_cell_dim(2).ne.0) global_cell_count = global_cell_count &
+                                                    * global_cell_dim(2)
+      if(global_cell_count.le.0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: global_cell_count le 0"
+        return
+      endif
+
+      call ESMF_DistGridSet(dgtype, global_cell_count=global_cell_count, &
+                     global_cell_dim=global_cell_dim, total=.TRUE., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: distgrid set"
         return
@@ -693,45 +776,67 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: DELayout get size"
         return
       endif
-      distgrid%layout = layout
+      dgtype%layout = layout
 
 !     Allocate resources based on number of DE's
-      allocate(distgrid%local_cell_count(nDE), stat=status)
+      allocate(dgtype%global_total%local_cell_count(nDE), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
-      allocate(distgrid%local_axis_length(nDE,ESMF_MAXGRIDDIM), stat=status)
+      allocate(dgtype%global_comp%local_cell_count(nDE), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
-      allocate(distgrid%global_start(nDE,ESMF_MAXGRIDDIM), stat=status)
+      allocate(dgtype%global_total%local_axis_length(nDE,ESMF_MAXGRIDDIM), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
-      allocate(distgrid%ai_global(nDE,ESMF_MAXGRIDDIM), stat=status)
+      allocate(dgtype%global_comp%local_axis_length(nDE,ESMF_MAXGRIDDIM), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        return
+      endif
+      allocate(dgtype%global_total%global_start(nDE,ESMF_MAXGRIDDIM), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        return
+      endif
+      allocate(dgtype%global_comp%global_start(nDE,ESMF_MAXGRIDDIM), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        return
+      endif
+      allocate(dgtype%global_total%ai_global(nDE,ESMF_MAXGRIDDIM), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        return
+      endif
+      allocate(dgtype%global_comp%ai_global(nDE,ESMF_MAXGRIDDIM), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
       endif
 
-!     Parse problem size
-      call ESMF_DistGridSetCounts(distgrid, nDEs, countsPerDE1, countsPerDE2, &
-                                  periodic, status)
+!     Parse problem size, first with and then without boundary cells
+      call ESMF_DistGridSetCounts(dgtype, nDEs, countsPerDE1, countsPerDE2, &
+                                  periodic, total=.FALSE., rc=status)
+      call ESMF_DistGridSetCounts(dgtype, nDEs, countsPerDE1, countsPerDE2, &
+                                  periodic, total=.TRUE., rc=status)
         
 !     Fill in DE derived type
-      call ESMF_DistGridSetDE(distgrid, status)
+      call ESMF_DistGridSetDE(dgtype, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_DistGridConstructInternal: Set de"
         return
       endif
 
 !     Calculate other distgrid values from DE information
-!     distgrid%local_cell_max = GlobalCommMax()
+!     dgtype%local_cell_max = GlobalCommMax()
 !     do i = 1,ESMF_MAXGRIDDIM
-!       distgrid%local_cell_max_dim(i) = GlobalCommMax()
+!       dgtype%local_cell_max_dim(i) = GlobalCommMax()
 !     enddo
 
       if(status .NE. ESMF_SUCCESS) then
@@ -800,18 +905,19 @@
 ! !IROUTINE: ESMF_DistGridGet - Get information from a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGet(distgrid, covers_domain, global_cell_count, &
+      subroutine ESMF_DistGridGet(dgtype, covers_domain, global_cell_count, &
                                   global_cell_dim, global_start, &
-                                  local_cell_max, local_cell_max_dim, rc)
+                                  local_cell_max, local_cell_max_dim, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       logical, intent(inout), optional :: covers_domain
       integer, intent(inout), optional :: global_cell_count
       integer, dimension(:), intent(inout), optional :: global_cell_dim
       integer, dimension(:,:), intent(inout), optional :: global_start
       integer, intent(inout), optional :: local_cell_max
       integer, dimension(:), intent(inout), optional :: local_cell_max_dim
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc              
 !
 ! !DESCRIPTION:
@@ -819,23 +925,26 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Class to be queried.
-!     \item[[covers\_domain]]
+!     \item[{[covers\_domain]}]
 !          Logical identifier if distgrid covers the entire physical domain.
-!     \item[[global\_cell\_count]]
+!     \item[{[global\_cell\_count]}]
 !          Global total number of cells.
-!     \item[[global\_cell\_dim]]
+!     \item[{[global\_cell\_dim]}]
 !          Array of the global number of cells in each dimension.
-!     \item[[global\_start]]
+!     \item[{[global\_start]}]
 !          Array of the global starting count on each DE in each dimension,
 !          dimensioned (nDEs, ESMF\_MAXGRIDDIM)
-!     \item[[local\_cell\_max]]
+!     \item[{[local\_cell\_max]}]
 !          Maximum number of cells on any {\tt ESMF\_DE}.
-!     \item[[local\_cell\_max\_dim]]
+!     \item[{[local\_cell\_max\_dim]}]
 !          Array of the maximum number of cells in each dimension on
 !          any {\tt ESMF\_DE}.
-!     \item[[rc]] 
+!     \item[{[total]}] 
+!          Logical; if TRUE return these values including boundary cells.  Default is
+!          FALSE, returning only computational cells.
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -845,8 +954,9 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: i, j, nDEs(2)
+      type(ESMF_DistGridGlobal), pointer :: glob
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -854,38 +964,46 @@
         rc = ESMF_FAILURE
       endif
 
-!     if present, get information from distgrid derived type
-      if(present(covers_domain)) covers_domain = distgrid%covers_domain
+      ! If total is true, get info for the total cells including
+      ! boundary areas; otherwise get only computational areas.
+      if (present(total) .and. total) then
+        glob => dgtype%global_total
+      else
+        glob => dgtype%global_comp
+      endif
+
+      ! If present, get information from distgrid derived type
+      if(present(covers_domain)) covers_domain = dgtype%covers_domain
 
       if(present(global_cell_count)) &
-                 global_cell_count = distgrid%global_cell_count
+                 global_cell_count = glob%global_cell_count
 
       if(present(global_cell_dim)) then
                  ! TODO: add check that global_cell_dim is large enough
                  !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          global_cell_dim(i) = distgrid%global_cell_dim(i)
+          global_cell_dim(i) = glob%global_cell_dim(i)
         enddo
       endif
 
       if(present(global_start)) then
                  ! TODO: add check that global_start is large enough
                  !       or use the size of the array for the loop limit
-        call ESMF_DELayoutGetSize(distgrid%layout, nDEs(1), nDEs(2), rc)
+        call ESMF_DELayoutGetSize(dgtype%layout, nDEs(1), nDEs(2), rc)
         do i = 1, nDEs(1)*nDEs(2)
           do j = 1,ESMF_MAXGRIDDIM
-            global_start(i,j) = distgrid%global_start(i,j)
+            global_start(i,j) = glob%global_start(i,j)
           enddo
         enddo
       endif
 
-      if(present(local_cell_max)) local_cell_max = distgrid%local_cell_max
+      if(present(local_cell_max)) local_cell_max = glob%local_cell_max
 
       if(present(local_cell_max_dim)) then
                  ! TODO: add check that local_cell_max_dim is large enough
                  !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          local_cell_max_dim(i) = distgrid%local_cell_max_dim(i)
+          local_cell_max_dim(i) = glob%local_cell_max_dim(i)
         enddo
       endif
 
@@ -898,17 +1016,18 @@
 ! !IROUTINE: ESMF_DistGridSet - Set information about a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSet(distgrid, covers_domain, global_cell_count, &
+      subroutine ESMF_DistGridSet(dgtype, covers_domain, global_cell_count, &
                                   global_cell_dim, local_cell_max, &
-                                  local_cell_max_dim, rc)
+                                  local_cell_max_dim, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       logical, intent(in), optional :: covers_domain
       integer, intent(in), optional :: global_cell_count
       integer, dimension(:), intent(in), optional :: global_cell_dim
       integer, intent(in), optional :: local_cell_max
       integer, dimension(:), intent(in), optional :: local_cell_max_dim
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc             
 
 !
@@ -917,20 +1036,23 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Class to be set.
-!     \item[[covers\_domain]]
+!     \item[{[covers\_domain]}]
 !          Logical identifier if distgrid covers the entire physical domain.
-!     \item[[global\_cell\_count]]
+!     \item[{[global\_cell\_count]}]
 !          Global total number of cells.
-!     \item[[global\_cell\_dim]]
+!     \item[{[global\_cell\_dim]}]
 !          Array of the global number of cells in each dimension.
-!     \item[[local\_cell\_max]]
+!     \item[{[local\_cell\_max]}]
 !          Maximum number of cells on any {\tt ESMF\_DE}.
-!     \item[[local\_cell\_max\_dim]]
+!     \item[{[local\_cell\_max\_dim]}]
 !          Array of the maximum number of cells in each dimension on
 !          any {\tt ESMF\_DE}.
-!     \item[[rc]] 
+!     \item[{[total]}]
+!          Logical; if TRUE, sets counts for total cells including boundary cells.
+!          Default is FALSE, sets only computational cells.
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -939,6 +1061,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
+      type(ESMF_DistGridGlobal), pointer :: glob
       integer :: i
 
 !     Initialize return code
@@ -949,27 +1072,35 @@
         rc = ESMF_FAILURE
       endif
 
+      ! If total is true, set info for the total cells including
+      ! boundary areas; otherwise set only computational areas.
+      if (present(total) .and. total) then
+        glob => dgtype%global_total
+      else
+        glob => dgtype%global_comp
+      endif
+
 !     if present, set information filling in distgrid derived type
-      if(present(covers_domain)) distgrid%covers_domain = covers_domain
+      if(present(covers_domain)) dgtype%covers_domain = covers_domain
 
       if(present(global_cell_count)) &
-                 distgrid%global_cell_count = global_cell_count
+                 glob%global_cell_count = global_cell_count
 
       if(present(global_cell_dim)) then
                  ! TODO: add check that global_cell_dim is large enough
                  !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          distgrid%global_cell_dim(i) = global_cell_dim(i)
+          glob%global_cell_dim(i) = global_cell_dim(i)
         enddo
       endif
 
-      if(present(local_cell_max)) distgrid%local_cell_max = local_cell_max
+      if(present(local_cell_max)) glob%local_cell_max = local_cell_max
 
       if(present(local_cell_max_dim)) then
                  ! TODO: add check that local_cell_max_dim is large enough
                  !       or use the size of the array for the loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          distgrid%local_cell_max_dim(i) = local_cell_max_dim(i)
+          glob%local_cell_max_dim(i) = local_cell_max_dim(i)
         enddo
       endif
 
@@ -1119,15 +1250,16 @@
 ! !IROUTINE: ESMF_DistGridGetCounts - Get extent counts for a DistGrid for a given DE
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetCounts(distgrid, DE_id, lcell_count, &
-                                        gcell_start, gcell_end, rc)
+      subroutine ESMF_DistGridGetCounts(dgtype, DE_id, lcell_count, &
+                                        gcell_start, gcell_end, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       integer, intent(in) :: DE_id
       integer, dimension(:), intent(inout), optional :: lcell_count
       integer, dimension(:), intent(inout), optional :: gcell_start
       integer, dimension(:), intent(inout), optional :: gcell_end
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 
 !
@@ -1136,19 +1268,22 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Class to be modified.
-!     \item[[DE\_id]]
+!     \item[{[DE\_id]}]
 !          Given {\tt ESMF\_DE}'s identifier.
-!     \item[[lcell\_count]]
+!     \item[{[lcell\_count]}]
 !          Array of the number of cells per dimension for this {\tt ESMF\_DE}.
-!     \item[[gcell\_start]]
+!     \item[{[gcell\_start]}]
 !          Array of the starting position, in the global decompostion, for
 !          the cells per dimension for this {\t ESMF\_DE}.
-!     \item[[gcell\_end]]
+!     \item[{[gcell\_end]}]
 !          Array of the ending position, in the global decompostion, for
 !          the cells per dimension for this {\tt ESMF\_DE}.
-!     \item[[rc]] 
+!     \item[{[total]}]
+!          Logical; if TRUE, return counts for total cells including boundary cells.
+!          Default is FALSE, return only computational cells.
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1157,6 +1292,7 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
+      type(ESMF_DistGridGlobal), pointer :: glob
       integer :: i
 
 !     Initialize return code
@@ -1167,25 +1303,33 @@
         rc = ESMF_FAILURE
       endif
 
+      ! If total is true, set info for the total cells including
+      ! boundary areas; otherwise set only computational areas.
+      if (present(total) .and. total) then
+        glob => dgtype%global_total
+      else
+        glob => dgtype%global_comp
+      endif
+
 !     Retrieve extent counts for each axis from the de identifier
 !     TODO:  check validity of DE_id
       if(present(lcell_count)) then
         ! TODO:  add check for array size or use size for loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          lcell_count(i) = distgrid%ai_global(DE_id,i)%max &
-                         - distgrid%ai_global(DE_id,i)%min + 1
+          lcell_count(i) = glob%ai_global(DE_id,i)%max &
+                         - glob%ai_global(DE_id,i)%min + 1
         enddo
       endif
       if(present(gcell_start)) then
         ! TODO:  add check for array size or use size for loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          gcell_start(i) = distgrid%ai_global(DE_id,i)%min
+          gcell_start(i) = glob%ai_global(DE_id,i)%min
         enddo
       endif
       if(present(gcell_end)) then
         ! TODO:  add check for array size or use size for loop limit
         do i = 1,ESMF_MAXGRIDDIM
-          gcell_end(i) = distgrid%ai_global(DE_id,i)%max
+          gcell_end(i) = glob%ai_global(DE_id,i)%max
         enddo
       endif
 
@@ -1198,15 +1342,16 @@
 ! !IROUTINE: ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetCountsInternal(distgrid, nDE, countsPerDE1, &
-                                                countsPerDE2, periodic, rc)
+      subroutine ESMF_DistGridSetCountsInternal(dgtype, nDE, countsPerDE1, &
+                                             countsPerDE2, periodic, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       integer, dimension(ESMF_MAXGRIDDIM), intent(in) :: nDE
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
       type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 
 !
@@ -1215,15 +1360,18 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Class to be modified.
-!     \item[[nDE]]
+!     \item[nDE]
 !          Array of number of {\tt ESMF\_DE}'s in the each direction.
-!     \item[[countsPerDE1]]
+!     \item[countsPerDE1]
 !          Array of number of computational cells per DE in first direction.
-!     \item[[countsPerDE2]]
+!     \item[countsPerDE2]
 !          Array of number of computational cells per DE in second direction.
-!     \item[[rc]] 
+!     \item[{[total]}] 
+!          Logical; if TRUE set the total counts.  Defaults to setting the
+!          computational region only.
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1235,8 +1383,10 @@
       integer :: global_start, global_end           ! global counters
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
+      type(ESMF_DistGridGlobal), pointer :: glob
+      integer :: bnd
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1244,52 +1394,61 @@
         rc = ESMF_FAILURE
       endif
 
-!     Calculate number of local counts on each DE
+      ! If total is true, set info for the total cells including
+      ! boundary areas; otherwise set only computational areas.
+      if (present(total) .and. total) then
+        glob => dgtype%global_total
+        bnd = dgtype%grid_boundary_width * 2
+      else
+        glob => dgtype%global_comp
+        bnd = 0
+      endif
+
+      ! Calculate number of local counts on each DE, respecting the setting
+      ! of the total parameter - if set, this includes boundary cells. 
       do j = 1,nDE(1)
         do i = 1,nDE(2)
           de = (i-1)*nDE(1) + j
-          distgrid%local_cell_count(de) = countsPerDE1(j)*countsPerDE2(i)
-          distgrid%local_axis_length(de,1) = countsPerDE1(j)
-          distgrid%local_axis_length(de,2) = countsPerDE2(i)
+          glob%local_cell_count(de) = (countsPerDE1(j) + bnd) *   &
+                                        (countsPerDE2(i) + bnd)
+          glob%local_axis_length(de,1) = countsPerDE1(j) + bnd
+          glob%local_axis_length(de,2) = countsPerDE2(i) + bnd
         enddo
       enddo
 
-!     Set extent counts for each axis from the number of de's and number
-!     of cells
-!     First in the 1 decomposition
+      ! Set extent counts per axis from the number of de's and number of cells
+      ! First in the 1 decomposition
 
       global_start = 1
       global_end = 0
-!     if (periodic(1).eq.ESMF_TRUE) then
-!       global_start = countsPerDE1(nDE(1)) + 1
-!       global_end   = countsPerDE1(nDE(1))
-!     endif
       
       do j = 1,nDE(1)
-        global_end = global_end + countsPerDE1(j)
+        global_end = global_end + countsPerDE1(j) + bnd
         do i = 1,nDE(2)
           de = (i-1)*nDE(1) + j
-          distgrid%global_start(de,1) = global_start - 1
-          distgrid%ai_global(de,1)%min = global_start
-          distgrid%ai_global(de,1)%max = global_end
+          glob%global_start(de,1) = global_start - 1
+          glob%ai_global(de,1)%min = global_start
+          glob%ai_global(de,1)%max = global_end
         enddo
         global_start = global_end + 1
       enddo
       do j = 1,nDE(1)
         do i = 1,nDE(2)
           de = (i-1)*nDE(1) + j
-          distgrid%ai_global(de,1)%stride = global_end
+          glob%ai_global(de,1)%stride = global_end
           if (present(periodic)) then
             if (periodic(1).eq.ESMF_TRUE) &
-            distgrid%ai_global(de,1)%stride = global_end + countsPerDE1(1) &
+            glob%ai_global(de,1)%stride = global_end + countsPerDE1(1) &
                                             + countsPerDE1(nDE(1))
           endif
         enddo
       enddo
 
-!     Then the 2 decomposition
+      ! Then the 2 decomposition
       global_start = 1
       global_end = 0
+      ! TODO: this code was removed from the 1 decomp case above.  should it be
+      !  removed from here as well?
       if (present(periodic)) then
         if (periodic(2).eq.ESMF_TRUE) then
           global_start = countsPerDE2(nDE(2)) + 1
@@ -1298,22 +1457,22 @@
       endif
 
       do j = 1,nDE(2)
-        global_end = global_end + countsPerDE2(j)
+        global_end = global_end + countsPerDE2(j) + bnd
         do i = 1,nDE(1)
           de = (j-1)*nDE(1) + i
-          distgrid%global_start(de,2) = global_start - 1
-          distgrid%ai_global(de,2)%min = global_start
-          distgrid%ai_global(de,2)%max = global_end
+          glob%global_start(de,2) = global_start - 1
+          glob%ai_global(de,2)%min = global_start
+          glob%ai_global(de,2)%max = global_end
         enddo
         global_start = global_end + 1
       enddo
       do j = 1,nDE(2)
         do i = 1,nDE(1)
           de = (j-1)*nDE(1) + i
-          distgrid%ai_global(de,2)%stride = global_end
+          glob%ai_global(de,2)%stride = global_end
           if (present(periodic)) then
             if (periodic(2).eq.ESMF_TRUE) &
-            distgrid%ai_global(de,2)%stride = global_end + countsPerDE2(1) &
+            glob%ai_global(de,2)%stride = global_end + countsPerDE2(1) &
                                             + countsPerDE2(nDE(2))
           endif
         enddo
@@ -1328,18 +1487,19 @@
 ! !IROUTINE: ESMF_DistGridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetDE(distgrid, MyDE, local_cell_count, &
+      subroutine ESMF_DistGridGetDE(dgtype, MyDE, local_cell_count, &
                                     local_axis_length, global_start, &
-                                    ai_global, rc)
+                                    ai_global, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: local_cell_count
       integer, dimension(:), intent(inout), optional :: local_axis_length
       integer, dimension(:,:), intent(inout), optional :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
-                        optional :: ai_global
+                                                         optional :: ai_global
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 
 !
@@ -1348,19 +1508,23 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid]
+!     \item[dgtype]
 !          Class to be modified.
-!     \item[[MyDE]]
+!     \item[{[MyDE]}]
 !          Identifier for this {\tt ESMF\_DE}.
-!     \item[[local\_cell\_count]]
+!     \item[{[local\_cell\_count]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
-!     \item[[local\_axis\_length]]
+!     \item[{[local\_axis\_length]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells along each axis.
-!     \item[[global\_start]]
+!     \item[{[global\_start]}]
 !          Global index of starting count for cells.
-!     \item[[ai\_global]]
+!     \item[{[ai\_global]}]
 !          Axis indices for cells on this DE.
-!     \item[[rc]]
+!     \item[{[total]}]
+!          Logical flag; if TRUE, return the information for the total cells
+!          including the boundary widths, not just the computational cells.
+!          The default is FALSE; return computational cells only.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1370,8 +1534,9 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: i
+      type(ESMF_DistGridLocal), pointer :: me
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1379,21 +1544,29 @@
         rc = ESMF_FAILURE
       endif
 
-!     if present, get information from distgrid derived type
-      if(present(MyDE)) MyDE = distgrid%myDE%MyDE
+      ! If total is true, return info for the total cells including
+      ! boundary areas; otherwise return computational areas.
+      if (present(total) .and. total) then
+        me => dgtype%MyDE_total
+      else
+        me => dgtype%MyDE_comp
+      endif
+
+      ! If present, get information from distgrid derived type
+      if(present(MyDE)) MyDE = me%MyDE
 
       if(present(local_cell_count)) &
-                 local_cell_count = distgrid%myDE%local_cell_count
+                 local_cell_count = me%local_cell_count
 
       if(present(local_axis_length)) then
         do i = 1,size(local_axis_length)
-          local_axis_length(i) = distgrid%myDE%local_axis_length(i)
+          local_axis_length(i) = me%local_axis_length(i)
         enddo
       endif
 
-!jw      if(present(global_start)) global_start = distgrid%myDE%ai_global%min
+!jw   if(present(global_start)) global_start = me%ai_global%min
 
-      if(present(ai_global)) ai_global = distgrid%myDE%ai_global
+      if(present(ai_global)) ai_global = me%ai_global
 ! TODO:  how to query for parts of an Index type
 
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1405,10 +1578,10 @@
 ! !IROUTINE: ESMF_DistGridSetDEInternal - Set DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetDEInternal(distgrid, rc)
+      subroutine ESMF_DistGridSetDEInternal(dgtype, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType) :: dgtype
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -1417,9 +1590,9 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Class to be modified.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1429,6 +1602,7 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: DE_id, local_cell_count, local_count_dim
+      integer :: comp_cell_count, comp_count_dim
       integer :: i
 
 !     Initialize return code
@@ -1439,28 +1613,38 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_DELayoutGetDEid(distgrid%layout, DE_id, status)
+      call ESMF_DELayoutGetDEid(dgtype%layout, DE_id, status)
       if((status .NE. ESMF_SUCCESS) .or. (DE_id .lt. 0)) then
         print *, "ERROR in ESMF_DistGridSetDEInternal: layout get DEid"
         return
       endif
       DE_id = DE_id + 1    ! TODO:  have to add one to go from C
 
-      distgrid%MyDE%MyDE = DE_id
+      dgtype%MyDE_comp%MyDE = DE_id
+      dgtype%MyDE_total%MyDE = DE_id
+
 !     TODO: need to create the following with ESMFArrayCreate before doing this
-!     distgrid%DEids(DE_id) = DE_id        ! need to add capability for this
+!     dgtype%DEids(DE_id) = DE_id        ! need to add capability for this
 !                                          ! not to be true
 
       local_cell_count = 1
+      comp_cell_count = 1
       do i=1,ESMF_MAXGRIDDIM
-        distgrid%MyDE%ai_global(i) = distgrid%ai_global(DE_id,i)
-        distgrid%MyDE%global_start(i) = distgrid%global_start(DE_id,i)
-        distgrid%MyDE%local_axis_length(i) = distgrid%local_axis_length(DE_id,i)
-        local_count_dim = distgrid%local_axis_length(DE_id,i)
+        dgtype%MyDE_comp%ai_global(i) = dgtype%global_comp%ai_global(DE_id,i)
+        dgtype%MyDE_comp%global_start(i) = dgtype%global_comp%global_start(DE_id,i)
+        dgtype%MyDE_comp%local_axis_length(i) = dgtype%global_comp%local_axis_length(DE_id,i)
+        comp_count_dim = dgtype%global_comp%local_axis_length(DE_id,i)
+        if (comp_count_dim.ne.0) comp_cell_count = comp_cell_count &
+                                                   * comp_count_dim
+        dgtype%MyDE_total%ai_global(i) = dgtype%global_total%ai_global(DE_id,i)
+        dgtype%MyDE_total%global_start(i) = dgtype%global_total%global_start(DE_id,i)
+        dgtype%MyDE_total%local_axis_length(i) = dgtype%global_total%local_axis_length(DE_id,i)
+        local_count_dim = dgtype%global_total%local_axis_length(DE_id,i)
         if (local_count_dim.ne.0) local_cell_count = local_cell_count &
                                                    * local_count_dim
       enddo
-      distgrid%MyDE%local_cell_count = local_cell_count
+      dgtype%MyDE_comp%local_cell_count = comp_cell_count
+      dgtype%MyDE_total%local_cell_count = local_cell_count
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1471,11 +1655,12 @@
 ! !IROUTINE: ESMF_DistGridGetAllAxisIndex - Get array of AxisIndices for DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetAllAxisIndex(distgrid, AI, rc)
+      subroutine ESMF_DistGridGetAllAxisIndex(dgtype, AI, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 
 !
@@ -1484,11 +1669,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid]
+!     \item[dgtype]
 !          Class to be modified.
-!     \item[[AI]]
+!     \item[{[AI]}]
 !          Array of {\tt AxisIndices} corresponding to the {\tt DistGrid}.
-!     \item[[rc]]
+!     \item[{[total]}]
+!          Logical; if TRUE return AIs for all cells including boundary cells.
+!          Default is FALSE, returning AIs which describe only computational cells.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1497,8 +1685,9 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
+      type(ESMF_DistGridGlobal), pointer :: glob
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1506,8 +1695,16 @@
         rc = ESMF_FAILURE
       endif
 
-!     get information from distgrid derived type
-      AI => distgrid%ai_global
+      ! If total is true, return info for the AIs including
+      ! boundary areas; otherwise return computational AIs.
+      if (present(total) .and. total) then
+        glob => dgtype%global_total
+      else
+        glob => dgtype%global_comp
+      endif
+
+      ! Get information from distgrid derived type
+      AI => glob%ai_global
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1518,11 +1715,12 @@
 ! !IROUTINE: ESMF_DistGridGetAllCounts - Get array of counts for DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetAllCounts(distgrid, counts, rc)
+      subroutine ESMF_DistGridGetAllCounts(dgtype, counts, total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType), target :: dgtype
       integer, dimension(:,:), pointer :: counts
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc            
 
 !
@@ -1531,11 +1729,14 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid]
+!     \item[dgtype]
 !          Class to be modified.
-!     \item[[counts]]
+!     \item[{[counts]}]
 !          Array of the numbers of cells along each axis on each DE
-!     \item[[rc]]
+!     \item[{[total]}]
+!          Logical; if TRUE return counts including boundary cells.  Default is FALSE,
+!          returning only computational cells.
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1544,9 +1745,10 @@
 
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
+      type(ESMF_DistGridGlobal), pointer :: glob
       integer :: nDEs(2), i, j
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
@@ -1554,12 +1756,20 @@
         rc = ESMF_FAILURE
       endif
 
-!     get information from distgrid derived type
+      ! If total is true, return info for the total cells including
+      ! boundary areas; otherwise return computational areas.
+      if (present(total) .and. total) then
+        glob => dgtype%global_total
+      else
+        glob => dgtype%global_comp
+      endif
+
+      ! Get information from distgrid derived type
       ! TODO:  add check for array size or use size for loop limit
-      call ESMF_DELayoutGetSize(distgrid%layout, nDEs(1), nDEs(2), rc)
+      call ESMF_DELayoutGetSize(dgtype%layout, nDEs(1), nDEs(2), rc)
       do i = 1,nDEs(1)*nDEs(2)
         do j = 1,ESMF_MAXGRIDDIM
-          counts(i,j) = distgrid%local_axis_length(i,j)
+          counts(i,j) = glob%local_axis_length(i,j)
         enddo
       enddo
 
@@ -1572,10 +1782,10 @@
 ! !IROUTINE: ESMF_DistGridGetDELayout - Get pointer to a DELayout for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetDELayout(distgrid, layout, rc)
+      subroutine ESMF_DistGridGetDELayout(dgtype, layout, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DistGridType) :: dgtype
       type(ESMF_DELayout) :: layout
       integer, intent(out), optional :: rc            
 
@@ -1585,7 +1795,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid]
+!     \item[dgtype]
 !          Class to be modified.
 !     \item[[layout]]
 !          The {\tt ESMF\_DELayout} corresponding to the {\tt ESMF\_DistGrid}.
@@ -1608,7 +1818,7 @@
       endif
 
 !     get information from distgrid derived type
-      layout = distgrid%layout
+      layout = dgtype%layout
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1619,13 +1829,14 @@
 ! !IROUTINE: ESMF_DistGridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global1D, local1D, &
+      subroutine ESMF_DistGridGlobalToLocalIndex(dgtype, global1D, local1D, &
                                                  global2D, local2D, &
                                                  globalAI1D, localAI1D, &
-                                                 globalAI2D, localAI2D, rc)
+                                                 globalAI2D, localAI2D, &
+                                                 total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), intent(in) :: distgrid
+      type(ESMF_DistGridType), intent(in), target :: dgtype
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: global1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: local1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: global2D
@@ -1634,6 +1845,7 @@
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: localAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  globalAI2D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: localAI2D
+      logical, optional, intent(in) :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1641,29 +1853,32 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
+!     \item[dgtype] 
 !          Class to be used.
-!     \item[[global1D]]
-!          One-dimensional Array of global identifiers to be translated.
-!          Infers translating between positions in memory.
-!     \item[[local1D]]
-!          One-dimensional Array of local identifiers corresponding to
-!          global identifiers.
-!     \item[[global2D]]
-!          Two-dimensional Array of global identifiers to be translated.
-!          Infers translating between indices in ij space.
-!     \item[[local2D]]
-!          Two-dimensional Array of local identifiers corresponding to
-!          global identifiers.
+!     \item[{[global1D]}]
+!        One-dimensional Array of global identifiers to be translated.
+!        Infers translating between positions in memory.
+!     \item[{[local1D]}]
+!        One-dimensional Array of local identifiers corresponding to
+!        global identifiers.
+!     \item[{[global2D]}]
+!        Two-dimensional Array of global identifiers to be translated.
+!        Infers translating between indices in ij space.
+!     \item[{[local2D]}]
+!        Two-dimensional Array of local identifiers corresponding to
+!        global identifiers.
 !     \item[{[globalAI1D]}]
-!          One-dimensional array of global AxisIndices to be translated.
+!        One-dimensional array of global AxisIndices to be translated.
 !     \item[{[localAI1D]}]
-!          One-dimensional array of local AxisIndices corresponding to global AIs.
+!        One-dimensional array of local AxisIndices corresponding to global AIs.
 !     \item[{[globalAI2D]}]
-!          Two-dimensional array of global AxisIndices to be translated.
+!        Two-dimensional array of global AxisIndices to be translated.
 !     \item[{[localAI2D]}]
-!          Two-dimensional array of local AxisIndices corresponding to global AIs.
-!     \item[[rc]] 
+!        Two-dimensional array of local AxisIndices corresponding to global AIs.
+!     \item[{[total]}] 
+!          Logical; if TRUE return values for total cells including boundary
+!          cells.  If FALSE, return computational cells (which is the default).
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -1675,6 +1890,8 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: i, j, base, l1, r1, l2, r2, local_count
+      type(ESMF_DistGridLocal), pointer :: me
+      type(ESMF_DistGridGlobal), pointer :: glob
 
 !     Initialize return code
       status = ESMF_FAILURE
@@ -1684,16 +1901,26 @@
         rc = ESMF_FAILURE
       endif
 
-!     memory translation here
+      ! If total is true, return info for the total cells including
+      ! boundary areas; otherwise return computational areas.
+      if (present(total) .and. total) then
+        me => dgtype%MyDE_total
+        glob => dgtype%global_total
+      else
+        me => dgtype%MyDE_comp
+        glob => dgtype%global_comp
+      endif
+
+      !memory translation here
       if(present(global1D)) then
 
-!     make sure local array is present as well
+      !make sure local array is present as well
         if(.not. present(local1D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: local array not ", &
                    "present"
           return
         endif
-!     make sure array lengths are the same
+      !make sure array lengths are the same
         if(size(global1D) .NE. size(local1D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not ", &
                    "equal"
@@ -1704,85 +1931,94 @@
 !     organized (indexed) by DE  !TODO add coding for other cases
 !     TODO: decide where enumerator for grid organization should be
 !     TODO: this assumes exclusive indexing for local cells - total too?
-!jw        base = distgrid%MyDE%global_start
+!jw        base = dgtype%MyDE%global_start
+! TODO: check this!!
+! nsc - this was in local-to-global but missing here.  does it need to be here?
+        base = 0
+        !if (me%MyDE.ne.1) then
+        !  do i = 1,me%MyDE-1
+        !    base = base + dgtype%local_cell_count(i)
+        !  enddo
+        !endif
         do i = 1, size(global1D)
           local1D(i) = global1D(i) - base
         enddo
   
       endif
 
-!     index translation here
+      !index translation here
       if(present(global2D)) then
 
-!     make sure local array is present as well
+      !make sure local array is present as well
         if(.not. present(local2D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: global array not ", &
                    "present"
           return
         endif
-!     make sure array lengths are the same
+      !make sure array lengths are the same
         if(size(global2D) .NE. size(local2D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not ", &
                    "equal"
           return
         endif
 
-        l1 = distgrid%MyDE%ai_global(1)%min
-        r1 = distgrid%MyDE%ai_global(1)%max
-        l2 = distgrid%MyDE%ai_global(2)%min
-        r2 = distgrid%MyDE%ai_global(2)%max
+        l1 = me%ai_global(1)%min
+        r1 = me%ai_global(1)%max
+        l2 = me%ai_global(2)%min
+        r2 = me%ai_global(2)%max
         do i = 1, size(global2D,1)
           if(global2D(i,1).ge.l1 .and. global2D(i,1).le.r1 .and. &
              global2D(i,2).ge.l2 .and. global2D(i,2).le.r2 ) then
             local2D(i,1) = global2D(i,1) - l1
             local2D(i,2) = global2D(i,2) - l2
           else
-            local2D(i,1) = -1    ! TODO:  make an ESMF_NOTFOUND to use instead of -1
+            local2D(i,1) = -1 ! TODO: make an ESMF_NOTFOUND to use instead of -1
             local2D(i,2) = -1
           endif
         enddo
   
       endif
 
-!     1-D AxisIndex translation here
+      !1-D AxisIndex translation here
       if(present(globalAI1D)) then
-!       make sure local AI array is present as well
+        !make sure local AI array is present as well
         if(.not. present(localAI1D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: local array not ", &
                    "present"
           return
         endif
-!       make sure array lengths are the same
+        !make sure array lengths are the same
         if(size(globalAI1D) .NE. size(localAI1D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not ", &
                    "equal"
           return
         endif
         do i = 1, size(globalAI1D)
-          localAI1D(i)%min = globalAI1D(i)%min - distgrid%MyDE%global_start(i)
-          localAI1D(i)%max = globalAI1D(i)%max - distgrid%MyDE%global_start(i)
+          localAI1D(i)%min = globalAI1D(i)%min - me%global_start(i)
+          localAI1D(i)%max = globalAI1D(i)%max - me%global_start(i)
           localAI1D(i)%stride = localAI1D(i)%max - localAI1D(i)%min + 1
         enddo
       endif
 
-!     2-D AxisIndex translation here
+      !2-D AxisIndex translation here
       if(present(globalAI2D)) then
-!       make sure local ai array is present as well
+        !make sure local ai array is present as well
         if(.not. present(localAI2D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: local array not ", &
                    "present"
           return
         endif
-!       make sure array lengths are the same
+        !make sure array lengths are the same
         if(size(globalAI2D) .NE. size(localAI2D)) then
           print *, "ERROR in ESMF_DistGridGlobalToLocal: array lengths not ", &
                    "equal"
           return
         endif
+
         do j = 1, size(globalAI2D,2)
           do i = 1, size(globalAI2D,1)
-            localAI2D(i,j)%min = globalAI2D(i,j)%min - distgrid%global_start(i,j)
-            localAI2D(i,j)%max = globalAI2D(i,j)%max - distgrid%global_start(i,j)
+            localAI2D(i,j)%min = globalAI2D(i,j)%min - glob%global_start(i,j)
+            localAI2D(i,j)%max = globalAI2D(i,j)%max - glob%global_start(i,j)
             localAI2D(i,j)%stride = localAI2D(i,j)%max - localAI2D(i,j)%min + 1
           enddo
         enddo
@@ -1797,13 +2033,14 @@
 ! !IROUTINE: ESMF_DistGridLocalToGlobalIndex - translate local indexing to global
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridLocalToGlobalIndex(distgrid, local1D, global1D, &
+      subroutine ESMF_DistGridLocalToGlobalIndex(dgtype, local1D, global1D, &
                                                  local2D, global2D, &
                                                  localAI1D, globalAI1D, &
-                                                 localAI2D, globalAI2D, rc)
+                                                 localAI2D, globalAI2D, &
+                                                 total, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGridType), intent(in) :: distgrid
+      type(ESMF_DistGridType), intent(in), target :: dgtype
       integer(ESMF_KIND_I4), dimension(:), optional, intent(in) :: local1D
       integer(ESMF_KIND_I4), dimension(:), optional, intent(out) :: global1D
       integer(ESMF_KIND_I4), dimension(:,:), optional, intent(in) :: local2D
@@ -1812,6 +2049,7 @@
       type(ESMF_AxisIndex), dimension(:), optional, intent(out) :: globalAI1D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(in) ::  localAI2D
       type(ESMF_AxisIndex), dimension(:,:), optional, intent(out) :: globalAI2D
+      logical, optional, intent(in) :: total
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1819,30 +2057,34 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[distgrid] 
-!          Class to be used.
-!     \item[[local1D]]
-!          One-dimensional Array of local identifiers to be translated.
-!          Infers translating between positions in memory.
-!     \item[[global1D]]
-!          One-dimensional Array of global identifiers corresponding to
-!          local identifiers.
-!     \item[[local2D]]
-!          Two-dimensional Array of local identifiers to be translated.
-!          Infers translating between indices in ij space.
-!     \item[[global2D]]
-!          Two-dimensional Array of global identifiers corresponding to
-!          local identifiers.
+!     \item[dgtype] 
+!        Class to be used.
+!     \item[{[local1D]}]
+!        One-dimensional Array of local identifiers to be translated.
+!        Infers translating between positions in memory.
+!     \item[{[global1D]}]
+!        One-dimensional Array of global identifiers corresponding to
+!        local identifiers.
+!     \item[{[local2D]}]
+!        Two-dimensional Array of local identifiers to be translated.
+!        Infers translating between indices in ij space.
+!     \item[{[global2D]}]
+!        Two-dimensional Array of global identifiers corresponding to
+!        local identifiers.
 !     \item[{[localAI1D]}]
-!          One-dimensional array of local AxisIndices to be translated.
+!        One-dimensional array of local AxisIndices to be translated.
 !     \item[{[globalAI1D]}]
-!          One-dimensional array of global AxisIndices corresponding to local AIs.
+!        One-dimensional array of global AxisIndices corresponding to local AIs.
 !     \item[{[localAI2D]}]
-!          Two-dimensional array of local AxisIndices to be translated.
+!        Two-dimensional array of local AxisIndices to be translated.
 !     \item[{[globalAI2D]}]
-!          Two-dimensional array of global AxisIndices corresponding to local AIs.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Two-dimensional array of global AxisIndices corresponding to local AIs.
+!     \item[{[total]}] 
+!        Logical; if TRUE then all values returned are in total cells including
+!        boundary cells.  The default is FALSE; all values returned are in
+!        terms of computational cells.
+!     \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
@@ -1851,13 +2093,25 @@
       integer :: status                             ! Error status
       logical :: rcpresent                          ! Return code present
       integer :: i, j,  base, local_count
+      type(ESMF_DistGridLocal), pointer :: me
+      type(ESMF_DistGridGlobal), pointer :: glob
 
-!     Initialize return code
+      ! Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent=.TRUE.
         rc = ESMF_FAILURE
+      endif
+
+      ! If total is true, return info for the total cells including
+      ! boundary areas; otherwise return computational areas.
+      if (present(total) .and. total) then
+        me => dgtype%MyDE_total
+        glob => dgtype%global_total
+      else
+        me => dgtype%MyDE_comp
+        glob => dgtype%global_comp
       endif
 
 !     1-D memory translation here
@@ -1879,9 +2133,9 @@
 !       TODO: decide where enumerator for grid organization should be
 !       TODO: this assumes exclusive indexing for local cells - total too?
         base = 0
-        if (distgrid%MyDE%MyDE.ne.1) then
-          do i = 1,distgrid%MyDE%MyDE-1
-            base = base + distgrid%local_cell_count(i)
+        if (me%MyDE.ne.1) then
+          do i = 1,me%MyDE-1
+            base = base + glob%local_cell_count(i)
           enddo
         endif
         do i = 1, size(local1D)
@@ -1903,7 +2157,7 @@
                    "equal"
           return
         endif
-!jw        base = distgrid%MyDE%global_start
+!jw        base = me%global_start
         do i = 1, size(local2D,1)
           global2D(i,1) = local2D(i,1) + base
           global2D(i,2) = local2D(i,2) + base
@@ -1924,13 +2178,13 @@
                    "equal"
           return
         endif
-        local_count = distgrid%MyDE%ai_global(1)%max &
-                    - distgrid%MyDE%ai_global(1)%min + 1
+        local_count = me%ai_global(1)%max &
+                    - me%ai_global(1)%min + 1
         do i = 1, size(localAI1D)
-          globalAI1D(i)%min = localAI1D(i)%min + distgrid%MyDE%global_start(1)
-          globalAI1D(i)%max = localAI1D(i)%max + distgrid%MyDE%global_start(1)
+          globalAI1D(i)%min = localAI1D(i)%min + me%global_start(1)
+          globalAI1D(i)%max = localAI1D(i)%max + me%global_start(1)
           globalAI1D(i)%stride = localAI1D(i)%stride - local_count &
-                               + distgrid%MyDE%ai_global(1)%stride
+                               + me%ai_global(1)%stride
         enddo
       endif
 
@@ -1950,12 +2204,12 @@
         endif
         do j = 1, size(localAI2D,2)
           do i = 1, size(localAI2D,1)
-            local_count = distgrid%ai_global(i,j)%max &
-                        - distgrid%ai_global(i,j)%min + 1
-            globalAI2D(i,j)%min = localAI2D(i,j)%min + distgrid%global_start(i,j)
-            globalAI2D(i,j)%max = localAI2D(i,j)%max + distgrid%global_start(i,j)
+            local_count = glob%ai_global(i,j)%max &
+                        - glob%ai_global(i,j)%min + 1
+            globalAI2D(i,j)%min = localAI2D(i,j)%min + glob%global_start(i,j)
+            globalAI2D(i,j)%max = localAI2D(i,j)%max + glob%global_start(i,j)
             globalAI2D(i,j)%stride = localAI2D(i,j)%stride - local_count &
-                                   + distgrid%ai_global(i,j)%stride
+                                   + glob%ai_global(i,j)%stride
           enddo
         enddo
       endif
@@ -2033,14 +2287,13 @@
 
       dg => distgrid%ptr
 
-
       !Print the global axis indicies per DE
-      if (associated(dg%ai_global)) then
-      do i = 1, size(dg%ai_global, 1)
+      if (associated(dg%global_comp%ai_global)) then
+      do i = 1, size(dg%global_comp%ai_global, 1)
          print *, '   DE:', i
-         do j = 1, size(dg%ai_global, 2)
-            print *, 'min:', dg%ai_global(i,j)%min, 'max:', &
-            dg%ai_global(i,j)%max
+         do j = 1, size(dg%global_comp%ai_global, 2)
+            print *, 'min:', dg%global_comp%ai_global(i,j)%min, 'max:', &
+            dg%global_comp%ai_global(i,j)%max
          enddo
       end do
       else
