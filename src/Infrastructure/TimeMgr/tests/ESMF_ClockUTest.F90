@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.72 2004/06/08 00:28:26 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.73 2004/06/08 19:47:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.72 2004/06/08 00:28:26 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.73 2004/06/08 19:47:47 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -69,8 +69,8 @@
 
       ! instantiate timestep, start and stop times
       type(ESMF_TimeInterval) :: timeStep
-      type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2
-      type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime3 
+      type(ESMF_Time) :: startTime, stopTime, startTime2, stopTime2, stopTime3
+      type(ESMF_Time) :: currentTime, previousTime, syncTime, stopTime4
       type(ESMF_TimeInterval) :: currentSimTime, previousSimTime, timeDiff
       integer(ESMF_KIND_I8) :: advanceCounts, year, day2, minute, second
       integer(ESMF_KIND_I4) :: day, hour
@@ -641,6 +641,9 @@
       ! A test must be written that verifies that it works
       write(failMsg, *) " Returned ESMF_FAILURE"
       write(name, *) "Clock Sync to Real Time Test"
+      call ESMF_TimeSet(stopTime4, yy=100000, mm=1, dd=1, &
+                                  calendar=gregorianCalendar, rc=rc)
+      call ESMF_ClockSet(clock2, stopTime=stopTime4, rc=rc)
       call ESMF_ClockSyncToRealTime(clock2,rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -654,6 +657,7 @@
       call ESMF_ClockValidate(clock2,rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
       ! ----------------------------------------------------------------------------
 
       !EX_UTest
