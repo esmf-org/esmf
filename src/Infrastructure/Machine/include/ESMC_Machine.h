@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.h,v 1.2 2003/10/16 20:19:52 nscollins Exp $
+// $Id: ESMC_Machine.h,v 1.3 2003/10/16 22:35:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -160,7 +160,7 @@ enum ESMC_MainLanguage { ESMF_MAIN_C=1, ESMF_MAIN_F90 };
  };   // end class ESMC_Machine
 
 // works on the single public Machine instance.
-int ESMC_MachineInitialize(void);
+int ESMC_MachineInitialize(ESMC_MainLanguage);
 int ESMC_MachineFinalize(void);
 
  #endif  // ESMC_Machine_H

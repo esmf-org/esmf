@@ -1,4 +1,4 @@
-// $Id: ESMC_Mach_F.C,v 1.1 2003/04/24 14:13:20 nscollins Exp $
+// $Id: ESMC_Mach_F.C,v 1.2 2003/10/16 22:35:26 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,8 +34,8 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       void FTN(c_esmc_machineinitialize)(int *status) {
-           *status = ESMC_MachineInitialize();
+       void FTN(c_esmc_machineinitialize)(int *language, int *status) {
+           *status = ESMC_MachineInitialize((ESMC_MainLanguage) *language);
        }
 
        void FTN(c_esmc_machinefinalize)(int *status) {

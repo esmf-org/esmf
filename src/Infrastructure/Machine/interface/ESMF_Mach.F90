@@ -1,4 +1,4 @@
-! $Id: ESMF_Mach.F90,v 1.4 2003/10/16 20:19:53 nscollins Exp $
+! $Id: ESMF_Mach.F90,v 1.5 2003/10/16 22:35:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Mach.F90,v 1.4 2003/10/16 20:19:53 nscollins Exp $'
+      '$Id: ESMF_Mach.F90,v 1.5 2003/10/16 22:35:26 nscollins Exp $'
 
 !==============================================================================
 
@@ -156,7 +156,7 @@
 #endif
 
       ! Routine which interfaces to the C++ creation routine.
-      call c_ESMC_MachineInitialize(status)
+      call c_ESMC_MachineInitialize(language, status)
       if (status .ne. ESMF_SUCCESS) then
         print *, "Machine initialization error"
         return
