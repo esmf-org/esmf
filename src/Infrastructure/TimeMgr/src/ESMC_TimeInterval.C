@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.67 2004/07/20 23:10:01 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.68 2004/08/03 19:45:22 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.67 2004/07/20 23:10:01 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.68 2004/08/03 19:45:22 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -340,7 +340,6 @@
     if (tiToConvert.calendar == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_INTNRL_INCONS,
                                     ", no default calendar.", &rc); return(rc);
-      return(rc);
     }
 
     // if no calendar info, then if any relative calendar unit was Set(),
