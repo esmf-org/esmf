@@ -1,4 +1,4 @@
-$Id: PhysGrid_req.tex,v 1.13 2002/05/13 19:50:39 pwjones Exp $
+$Id: PhysGrid_req.tex,v 1.14 2002/05/14 19:01:05 miredell Exp $
 %cnh m%titude
 %cnh ===============================================================================
 %cnh \req{Initialization of a Physical Grids}
@@ -1573,7 +1573,7 @@ and degrees for the radius and angle in cylindrical coordinates.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection\\
 {\bf Notes:}  This suggestion follows common practice, but is an explicit
@@ -1587,7 +1587,7 @@ units must be assumed.
 (X,Y) or (longitude, latitude).
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1677,7 +1677,7 @@ discussion of options for vertical coordinates at
 http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, POP \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code Inspection\\
 {\bf Notes:} 
@@ -1686,7 +1686,7 @@ http://www.cgd.ucar.edu/cms/eaton/netcdf/CF-20010629.htm)
 \ssreq{Vertical locations may be points}
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, POP \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, POP, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -1712,7 +1712,7 @@ location.  The points may provide a convenient nominal location, even when
 a value actually pertains to a region.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP \\
+{\bf Source:} General Req. 8.0.2, POP, NCEP-GSM \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
@@ -1754,7 +1754,7 @@ Physical Grids (see below) in that there are no concept of neighboring values,
 topology, covering a space, or of locations being exclusive.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2 \\
+{\bf Source:} General Req. 8.0.2, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
@@ -1763,7 +1763,7 @@ topology, covering a space, or of locations being exclusive.
 \sreq{Location streams may be created}
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1772,7 +1772,7 @@ topology, covering a space, or of locations being exclusive.
 \sreq{Location streams may be destroyed}
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1793,7 +1793,7 @@ possibly a different length.
 Location streams may be read from files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1803,7 +1803,7 @@ Location streams may be read from files.
 Location streams may be written to files.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1815,7 +1815,7 @@ location stream element may be uniquely associated with a single grid cell. (A s
 grid cell may contain multiple location stream elements.)
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is necessary for such operations as halo updates on a location
@@ -1906,7 +1906,7 @@ attribute names.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -1918,7 +1918,7 @@ both the total number of elements and the number of elements before the last
 active element location may be queried.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -2092,7 +2092,7 @@ cells, but the relative indices of neighbors are unpredictable.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:}
@@ -2126,7 +2126,7 @@ DistGrid, it may be possible to specify an algorithm for internally
 determining the PhysGrid.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2147,7 +2147,7 @@ providing the data that a PhysGrid will contain.
 Methods shall be provided to query a PhysGrid for all information in contains.
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2158,7 +2158,7 @@ PhysGrids shall specify both the locations of cell vertices, and the locations
 of cell centers.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, ReGrid, NCEP-GSM \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Many models mix finite difference and finite volume concepts.
@@ -2271,7 +2271,7 @@ PhysGrids may have up to 3 dimensions, but must have at least as many dimensions
 underlying DistGrid. 
 \begin{reqlist}
 {\bf Priority:}  \\
-{\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE \\
+{\bf Source:} General Req. 1.5.2, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} If supported, this facility would dramatically complicate implementation,
@@ -2286,7 +2286,7 @@ order.
 \begin{reqlist}
 {\bf Priority:}  \\
 {\bf Source:} Please list required orders in Fortran notation. CCSM-CPL(XY), C
-AM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY) \\
+AM-EUL (XYZ, XZY, ZXY), POP(XYZ), CICE(XY), NCEP(XYZ,XZY,YXZ,ZXY,ZYX) \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} Necessary for support of transposes.
@@ -2344,7 +2344,7 @@ tripolar, and Gaussian cylindrical grids.  Additional requested grids include
 cubed-sphere, polar stereographic, and Lambert conformal projections.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}  Perhaps some of these should be read in from a file, rather than
@@ -2395,7 +2395,7 @@ grids.  Unstructured arrays of logically rectangular grids [for cubed-sphere (Ra
 et al. 1996), reduced grids, and arbitrary nesting] will also be supported.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}  Topologies are intrinsic to both DistGrid and PhysGrid.  Since
@@ -2495,7 +2495,7 @@ wavenumbers (nondimensional m,n) of each of the elements on the grid.  At a
 minimum, rhomboidal and triangular truncations will be supported.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, CCSM-CPL, CAM-EUL \\
+{\bf Source:} General Req. 8.0.2, CCSM-CPL, CAM-EUL, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -2507,7 +2507,7 @@ sphere that is latitude in one dimension and Fourier zonal wavenumber
 (nondimensional m) in the other dimension will be supported.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP \\
+{\bf Source:} NCEP-SSI, NCEP-GSM \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:}
@@ -2536,7 +2536,7 @@ vertical physical space. Regridding would then be able to perform the transform,
 inverse transform, and the adjoint transform.
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} NCEP \\
+{\bf Source:} NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection \\
 {\bf Notes:} 
@@ -2922,7 +2922,7 @@ land.  Masks are also important for nested applications.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} General Req. 8.0.2, POP, CICE \\
+{\bf Source:} General Req. 8.0.2, POP, CICE, NCEP-GSM, NCEP-SSI \\
 {\bf Status:} Proposed \\
 {\bf Verification:} System test\\
 {\bf Notes:} 
