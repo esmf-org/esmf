@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.11 2003/03/13 18:34:45 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.12 2003/03/13 21:16:47 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.11 2003/03/13 18:34:45 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.12 2003/03/13 21:16:47 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -323,49 +323,119 @@
 //    int error return code
 //
 // !ARGUMENTS:A
-      // send/recv flag?
-      ESMC_AxisIndex *my_AI,    // in  - axis indices for this DE and the
-                                //       Field to be communicated from
-      ESMC_AxisIndex *AI,       // in  - array of axis indices for all DE's
-                                //       in the layout for the Field to be
-                                //       communicated with
-      int AI_count,             // in  - number of sets of AI's in the array
-                                //       (should be the same as the number
-                                //       of DE's in the second layout)
-      int rank,                 // in  - rank of data in both Fields
-      ESMC_DELayout *layout1,   // in  - "my" layout 
-      ESMC_DELayout *layout2) { // in  - layout to be communicated with
+      int rank,                    // in  - rank of data in both Fields
+      int my_DE_rcv,               // in  - DE identifier in the DELayout of
+                                   //       the receiving Field
+      ESMC_AxisIndex *AI_rcv,      // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the receiving
+                                   //       Field
+      int AI_rcv_count,            // in  - number of sets of AI's in the rcv
+                                   //       array (should be the same as the 
+                                   //       number of DE's in the rcv layout)
+      ESMC_DELayout *layout_rcv,   // in  - pointer to the rcv DELayout
+      int my_DE_snd,               // in  - DE identifier in the DELayout of
+                                   //       the sending Field
+      ESMC_AxisIndex *AI_snd,      // in  - array of axis indices for all DE's
+                                   //       in the DELayout for the sending
+                                   //       Field
+      int AI_snd_count,            // in  - number of sets of AI's in the snd
+                                   //       array (should be the same as the
+                                   //       number of DE's in the snd layout)
+      ESMC_DELayout *layout_snd) { // in  - pointer to the snd DELayout 
 //
 // !DESCRIPTION:
-//      Initializes a Route with send or receive RouteTables.
+//      Initializes a Route with send and receive RouteTables.
 //      Returns error code if problems are found.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex *their_AI;
+    ESMC_AxisIndex *my_AI, *their_AI;
     ESMC_XPacket *my_XP, *their_XP, *intersect_XP;
-
-    // calculate "my" (local DE's) XPacket in the sense of the global data
-    my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank, my_XP);
-
-    // loop over DE's from layout to be communicated with
     int i, j, k;
     int their_de, their_de_parent;
-    int nx2, ny2;
-    layout2->ESMC_DELayoutGetSize(&nx2, &ny2);
-    for (j=0; j<ny2; j++) {
-      for (i=0; i<nx2; i++) {
-        their_de = j*nx2 + i;
-        // layout2->ESMC_DELayoutGetParentID(their_de, their_de_parent);
-        their_de_parent = their_de;     // temporarily
-        for (k=0; k<rank; k++) {
-          their_AI[k] = AI[their_de,k];
+    int nx, ny;
+
+    // Calculate the sending table.  If this DE is not part of the sending
+    // layout (my_DE_snd = -1 ?  TODO), skip this part
+    if (my_DE_snd != -1) {
+ 
+      // get "my" AI out of the AI_snd array
+      for (k=0; k<rank; k++) {
+        my_AI[k] = AI_snd[my_DE_snd,k];
+      }
+
+      // calculate "my" (local DE's) XPacket in the sense of the global data
+      my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
+
+      // loop over DE's from receiving layout to calculate send table
+      layout_rcv->ESMC_DELayoutGetSize(&nx, &ny);
+      for (j=0; j<ny; j++) {
+        for (i=0; i<nx; i++) {
+          their_de = j*nx + i;
+
+          // get the parent DE identifier for this DE in the rcv layout
+          // layout_rcv->ESMC_DELayoutGetParentID(their_de, their_de_parent);
+          their_de_parent = their_de;     // temporarily
+
+          // get "their" AI out of the AI_rcv array
+          for (k=0; k<rank; k++) {
+            their_AI[k] = AI_rcv[their_de,k];
+          }
+ 
+          // calculate "their" XPacket in the sense of the global data
+          their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
+
+          // calculate the intersection
+          intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
+
+          // TODO: translate from global to local
+
+          // load the intersecting XPacket into the sending RTable
+          // sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
         }
-        their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, their_XP);
-        intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP, intersect_XP);
-        // TODO: translate from global to local
-        // sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+      }
+    }
+
+
+    // Calculate the receiving table.  If this DE is not part of the receiving
+    // layout (my_DE_rcv = -1 ?  TODO), skip this part
+    if (my_DE_rcv != -1) {
+ 
+      // get "my" AI out of the AI_rcv array
+      for (k=0; k<rank; k++) {
+        my_AI[k] = AI_rcv[my_DE_rcv,k];
+      }
+
+      // calculate "my" (local DE's) XPacket in the sense of the global data
+      my_XP->ESMC_XPacketFromAxisIndex(my_AI, rank);
+
+      // loop over DE's from sending layout to calculate receive table
+      layout_snd->ESMC_DELayoutGetSize(&nx, &ny);
+      for (j=0; j<ny; j++) {
+        for (i=0; i<nx; i++) {
+          their_de = j*nx + i;
+
+          // get the parent DE identifier for this DE in the snd layout
+          // layout_snd->ESMC_DELayoutGetParentID(their_de, their_de_parent);
+          their_de_parent = their_de;     // temporarily
+
+          // get "their" AI out of the AI_snd array
+          for (k=0; k<rank; k++) {
+            their_AI[k] = AI_snd[their_de,k];
+          }
+ 
+          // calculate "their" XPacket in the sense of the global data
+          their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank);
+
+          // calculate the intersection
+          intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP);
+
+          // TODO: translate from global to local
+
+          // load the intersecting XPacket into the receiving RTable
+          // recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
+        }
       }
     }
 
