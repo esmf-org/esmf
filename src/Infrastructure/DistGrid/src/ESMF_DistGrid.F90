@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.133 2005/01/12 06:51:11 theurich Exp $
+! $Id: ESMF_DistGrid.F90,v 1.133.2.1 2005/02/09 21:33:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.133 2005/01/12 06:51:11 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.133.2.1 2005/02/09 21:33:25 nscollins Exp $'
 
 !==============================================================================
 !
@@ -391,7 +391,7 @@
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
       integer, dimension(dimCount), intent(in) :: counts
-      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_DELayout), intent(in) :: delayout
       integer, dimension(dimCount), intent(in) :: decompIDs
       integer, dimension(:), intent(in) :: countsPerDEDim1
       integer, dimension(:), intent(in), optional :: countsPerDEDim2
@@ -415,18 +415,18 @@
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
 !     \item[decompIDs]
 !          Identifier for which Grid axes are decomposed.
+!     \item[countsPerDEDim1]
+!          Array of number of grid increments per DE in the first decomposed 
+!          direction.
+!     \item[{[countsPerDEDim2]}]
+!          Array of number of grid increments per DE in the second decomposed
+!          direction.
 !     \item[{[periodic]}] 
 !          Logical specifier (array) to denote periodicity along the coordinate
 !          axes.
 !     \item[{[coversDomain]}] 
 !          Logical specifier (array) to denote if the DistGrid covers the entire
 !          physical domain in each direction.
-!     \item[{[countsPerDEDim1]}]
-!          Array of number of grid increments per DE in the first decomposed 
-!          direction.
-!     \item[{[countsPerDEDim2]}]
-!          Array of number of grid increments per DE in the second decomposed
-!          direction.
 !     \item[{[name]}] 
 !          {\tt ESMF\_DistGrid} name.
 !     \item[{[rc]}] 
@@ -749,7 +749,7 @@
 !          Array of number of computational cells along each axis.
 !     \item[countsPerDEDim1]
 !          Array of number of computational cells per DE in first axis.
-!     \item[countsPerDEDim2]
+!     \item[{[countsPerDEDim2]}]
 !          Array of number of computational cells per DE in second axis.
 !     \item[{[periodic]}] 
 !          Logical value for whether the axes are periodic, one value per axis.
