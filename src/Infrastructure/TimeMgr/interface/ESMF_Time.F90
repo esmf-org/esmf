@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.32 2003/06/10 15:58:37 jwolfe Exp $
+! $Id: ESMF_Time.F90,v 1.33 2003/06/10 23:22:49 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -135,7 +135,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.32 2003/06/10 15:58:37 jwolfe Exp $'
+      '$Id: ESMF_Time.F90,v 1.33 2003/06/10 23:22:49 eschwab Exp $'
 
 !==============================================================================
 !
@@ -323,113 +323,6 @@
       contains
 
 !==============================================================================
-!
-! This section includes the Init methods.
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeInit - Initialize via user-specified unit set
-
-! !INTERFACE:
-      subroutine ESMF_TimeInit(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
-                               d_, h_, m_, s_, ms_, us_, ns_, &
-                               Sn, Sd, cal, tz, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Time), intent(out) :: time
-      integer(ESMF_IKIND_I8), intent(in), optional :: YR
-      integer, intent(in), optional :: MM
-      integer, intent(in), optional :: DD
-      integer(ESMF_IKIND_I8), intent(in), optional :: D
-      integer, intent(in), optional :: H
-      integer, intent(in), optional :: M
-      integer(ESMF_IKIND_I8), intent(in), optional :: S
-      integer, intent(in), optional :: MS
-      integer, intent(in), optional :: US
-      integer, intent(in), optional :: NS
-      double precision, intent(in), optional :: d_
-      double precision, intent(in), optional :: h_
-      double precision, intent(in), optional :: m_
-      double precision, intent(in), optional :: s_
-      double precision, intent(in), optional :: ms_
-      double precision, intent(in), optional :: us_
-      double precision, intent(in), optional :: ns_
-      integer, intent(in), optional :: Sn
-      integer, intent(in), optional :: Sd
-      type(ESMF_Calendar), intent(in), optional :: cal
-      integer, intent(in), optional :: tz
-      integer, intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Initializes a {\tt ESMF\_Time} with set of user-specified units
-!     via F90 optional arguments
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[time]
-!          The object instance to initialize
-!     \item[{[YR]}]
-!          Integer year CCYR (64-bit)
-!     \item[{[MM]}]
-!          Integer month 1-12
-!     \item[{[DD]}]
-!          Integer day of the month 1-31
-!     \item[{[D]}]
-!          Integer Julian days (64-bit)
-!     \item[{[H]}]
-!          Integer hours
-!     \item[{[M]}]
-!          Integer minutes
-!     \item[{[S]}]
-!          Integer seconds (64-bit)
-!     \item[{[MS]}]
-!          Integer milliseconds
-!     \item[{[US]}]
-!          Integer microseconds
-!     \item[{[NS]}]
-!          Integer nanoseconds
-!     \item[{[d\_]}]
-!          Double precision days
-!     \item[{[h\_]}]
-!          Double precision hours
-!     \item[{[m\_]}]
-!          Double precision minutes
-!     \item[{[s\_]}]
-!          Double precision seconds
-!     \item[{[ms\_]}]
-!          Double precision milliseconds
-!     \item[{[us\_]}]
-!          Double precision microseconds
-!     \item[{[ns\_]}]
-!          Double precision nanoseconds
-!     \item[{[Sn]}]
-!          Integer fractional seconds - numerator
-!     \item[{[Sd]}]
-!          Integer fractional seconds - denominator
-!     \item[{[cal]}]
-!          Associated {\tt ESMF\_Calendar}
-!     \item[{[tz]}]
-!          Associated timezone (hours offset from GMT, e.g. EST = -5)
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-! !REQUIREMENTS:
-!     TMGn.n.n
-!EOP
-
-      ! use optional args for any subset
-      call c_ESMC_TimeInit(time, YR, MM, DD, D, H, M, S, MS, US, NS, &
-                           d_, h_, m_, s_, ms_, us_, ns_, &
-                           Sn, Sd, cal, tz, rc)
-
-      end subroutine ESMF_TimeInit
-
-!------------------------------------------------------------------------------
-!
-! This section includes the Time Get and Set methods.
-!
-!------------------------------------------------------------------------------
 !
 ! Generic Get/Set routines which use F90 optional arguments
 !
