@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.16 2004/04/26 15:34:19 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.17 2004/05/26 11:12:01 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -117,22 +117,24 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, i, rc
+    integer :: rc
     logical :: finished
     type(ESMF_Clock) :: tclock
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime, stopTime
-    integer :: delistall(4), delist1(4), delist2(4), delist3(4)
-    character(ESMF_MAXSTR) :: cname, cname1, cname2
+    character(ESMF_MAXSTR) :: cname
     type(ESMF_VM) :: vm
     type(ESMF_State) :: importState, exportState
     type(ESMF_GridComp) :: gcomp
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework and get the global VM
-    call ESMF_Initialize(rc=rc)
-    call ESMF_VMGetGlobal(vm, rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) then
+        print *, "Unable to initialize ESMF Framework"
+        stop
+    endif
 !-------------------------------------------------------------------------
 !   !
 !   !  Create, Init, Run, Finalize, Destroy Components.

@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.21 2004/04/26 15:34:17 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.22 2004/05/26 11:12:01 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
@@ -199,13 +199,12 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, i, rc
+    integer :: rc
     logical :: finished
     type(ESMF_Clock) :: tclock
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime, stopTime
-    integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname, cname1, cname2
     type(ESMF_VM) :: vm
     type(ESMF_State) :: states(2)
@@ -215,8 +214,12 @@
         
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework, and get the default VM
-    call ESMF_Initialize(rc=rc)
-    call ESMF_VMGetGlobal(vm, rc)
+    call ESMF_Initialize(vm=vm, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) then
+        print *, "failed to initialize ESMF Framework"
+        stop
+    endif
+
 !-------------------------------------------------------------------------
 !   !
 !   !  Create, Init, Run, Finalize, Destroy Components.

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplEx.C,v 1.10 2004/04/28 23:12:10 cdeluca Exp $
+// $Id: ESMC_CplEx.C,v 1.11 2004/05/26 11:12:01 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -34,6 +34,8 @@ main(int argc, char **argv) {
         
 //-------------------------------------------------------------------------
 //   // Setup:
+     rc = ESMC_Initialize();
+
      // create clock, layout here.
 
 //-------------------------------------------------------------------------
@@ -85,7 +87,7 @@ main(int argc, char **argv) {
      //rc = ESMC_DELayoutDestroy(layout);
 
      //printf("Comp example 5 returned\n");
-
+     ESMC_Finalize();
 }
 
 // the actual arguments to these routines are yet to be decided.
