@@ -9,6 +9,6 @@ int *rc;
     ESMC_LogSetFilename("aLog1.txt");
     ESMC_LogDefault.ESMC_LogWrite("LogWrite",ESMC_LOG_WARN);
     ESMC_LogDefault.ESMC_LogMsgFoundError(ESMF_TRUE,"Log Found Error",rc);
-    ESMC_LogDefault.ESMC_LogAllocError();
+    ESMC_LogDefault.ESMC_LogAllocError(rc);
 }
 

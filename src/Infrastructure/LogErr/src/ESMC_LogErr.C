@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.56 2004/05/18 20:56:53 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.57 2004/05/18 22:36:53 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.56 2004/05/18 20:56:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.57 2004/05/18 22:36:53 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -475,6 +475,7 @@ bool ESMC_Log::ESMC_LogAllocError(
 //  none
 //
 // !ARGUMENTS:
+	int *rcToReturn
       
     )
 // !DESCRIPTION:
@@ -482,7 +483,8 @@ bool ESMC_Log::ESMC_LogAllocError(
 //EOP
 {
 	int result=false;
-	ESMC_LogWrite("Memory allocation error",ESMC_LOG_ERROR);
+	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+	ESMC_LogWrite(ESMC_LogGetErrMsg(rcToReturn),ESMC_LOG_ERROR);
 	result=true;
 	return result;
 
@@ -503,14 +505,16 @@ bool ESMC_Log::ESMC_LogAllocError(
 // !ARGUMENTS:
     int LINE,
     char FILE[],
-    char method[]      
+    char method[],
+    int *rcToReturn      
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 {
 	int result=false;
-	ESMC_LogWrite("Memory allocation error",ESMC_LOG_ERROR,LINE,FILE,method);
+	if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+	ESMC_LogWrite(ESMC_LogGetErrMsg(rcToReturn),ESMC_LOG_ERROR,LINE,FILE,method);
 	result=ESMF_TRUE;
 	return true;
 }
@@ -527,7 +531,8 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 //  none
 //
 // !ARGUMENTS:
-    char msg[]
+    char msg[],
+    int *rcToReturn
       
     )
 // !DESCRIPTION:
@@ -535,7 +540,8 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
 //EOP
 {
     int result=false;
-    ESMC_LogWrite(strcat("Memory allocation error",msg),ESMC_LOG_ERROR);
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+    ESMC_LogWrite(strcat(ESMC_LogGetErrMsg(rcToReturn),msg),ESMC_LOG_ERROR);
     result=true;
     return result;
 
@@ -557,14 +563,16 @@ bool ESMC_Log::ESMC_LogMsgAllocError(
     char msg[],
     int LINE,
     char FILE[],
-    char method[]      
+    char method[],
+    int *rcToReturn      
     )
 // !DESCRIPTION:
 // Prints log messsge, line number, file, directory
 //EOP
 {
     int result=false;
-    ESMC_LogWrite(strcat("Memory allocation error",msg),ESMC_LOG_ERROR,LINE,FILE,method);
+    if (rcToReturn != ESMC_NULL_POINTER) *rcToReturn=ESMC_RC_MEM;
+    ESMC_LogWrite(strcat(ESMC_LogGetErrMsg(rcToReturn),msg),ESMC_LOG_ERROR,LINE,FILE,method);
     result=ESMF_TRUE;
     return true;
 }
