@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.35 2004/04/23 00:25:50 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.36 2004/04/27 22:58:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -250,6 +250,9 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // common method for positive and negative absolute value
     ESMC_TimeInterval ESMC_TimeIntervalAbsValue(ESMC_AbsValueType) const;
+
+    // reduce time interval to smallest and least number of units
+    int ESMC_TimeIntervalReduce(void);
 
     friend class ESMC_Calendar;
                                                         // (TMG 2.5.5)
