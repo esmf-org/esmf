@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/02/28 01:08:05 eschwab Exp $ 
+# $Id: makefile,v 1.6 2003/03/20 20:32:45 flanigan Exp $ 
 ALL: lib  install
 
 CFLAGS    =
@@ -9,7 +9,6 @@ SOURCEF	  = ESMF_Test.F90
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Baseobj
 LIBBASE	  = libesmf
 DIRS	  = 

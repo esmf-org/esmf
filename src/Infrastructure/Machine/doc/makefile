@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/10 03:03:06 cdeluca Exp $ 
+# $Id: makefile,v 1.4 2003/03/20 20:33:08 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -26,6 +26,17 @@ HTMLFILES = \
 		${ESMC_DOCDIR}/Machine_refdoc
 
 #		${ESMC_DOCDIR}/Machine_reqdoc 
+
+#
+# Tex Files to make
+#
+TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../src/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../include/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+
 
 include $(ESMF_DIR)/makefile
 

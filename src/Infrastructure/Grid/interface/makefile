@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/02/27 17:54:36 flanigan Exp $
+# $Id: makefile,v 1.4 2003/03/20 20:33:01 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -19,7 +19,6 @@ SOURCEH	  =
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Gridobj
 LIBBASE	  = libesmf
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2003/03/11 14:19:54 nscollins Exp $
+# $Id: makefile,v 1.4 2003/03/20 20:33:15 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -21,7 +21,6 @@ STOREH	  =
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
 MANSEC	  = Routeobj

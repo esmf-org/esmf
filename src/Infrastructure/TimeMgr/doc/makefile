@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/03/10 03:03:08 cdeluca Exp $
+# $Id: makefile,v 1.8 2003/03/20 20:33:17 flanigan Exp $
 ALL: lib 
 
 CFLAGS    =
@@ -8,25 +8,37 @@ SOURCEF	  =
 SOURCEH	  = 
 OBJSC     = 
 OBJSF     = 
-TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
-DIRS	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/doc
 
 DVIFILES  = \
 		${ESMC_DOCDIR}/TimeMgr_reqdoc.dvi \
 		${ESMC_DOCDIR}/TimeMgr_desdoc.dvi \
-		${ESMC_DOCDIR}/TimeMgr_refdoc.dvi
+		#${ESMC_DOCDIR}/TimeMgr_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
 HTMLFILES = \
 		${ESMC_DOCDIR}/TimeMgr_reqdoc \
 		${ESMC_DOCDIR}/TimeMgr_desdoc \
-		${ESMC_DOCDIR}/TimeMgr_refdoc
+		#${ESMC_DOCDIR}/TimeMgr_refdoc
+
+
+#
+# Tex Files to make
+#
+TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../src/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../include/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+
 
 include $(ESMF_DIR)/makefile
+
+DIRS = 
 
 # Dvi files
 ${ESMC_DOCDIR}/TimeMgr_desdoc.dvi:

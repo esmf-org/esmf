@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/02/27 17:54:58 flanigan Exp $
+# $Id: makefile,v 1.8 2003/03/20 20:33:18 flanigan Exp $
 
 ALL: lib
 
@@ -12,7 +12,6 @@ STOREH    = ESMC_BaseTime.h ESMC_TimeInterval.h ESMC_Time.h ESMC_Calendar.h \
 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC    = TimeMgrobj
 LIBBASE   = libesmf
 DIRS      =

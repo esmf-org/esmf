@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/02/27 17:54:36 flanigan Exp $
+# $Id: makefile,v 1.5 2003/03/20 20:33:02 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -19,7 +19,7 @@ SOURCEH	  =
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
+
 
 # is MANSEC something about documentation?
 MANSEC	  = Gridobj

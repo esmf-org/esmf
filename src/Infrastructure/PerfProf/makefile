@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:41 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/03/20 20:33:08 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -8,7 +8,6 @@ SOURCEF	  =
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Timeobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/PerfProf/

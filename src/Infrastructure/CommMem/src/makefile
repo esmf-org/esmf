@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2003/03/13 22:56:13 cdeluca Exp $
+# $Id: makefile,v 1.11 2003/03/20 20:32:48 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -21,7 +21,6 @@ STOREH	  = ESMC_Comm.h ESMC_CommMem.h ESMC_DE.h ESMC_DELayout.h ESMC_Machine.h \
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
 MANSEC	  = CommMemobj

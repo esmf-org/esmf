@@ -39,7 +39,12 @@ ESMC_OBJDIR	= ${ESMC_MODDIR}
 ESMC_TESTDIR	= ${ESMF_TOP_DIR}/test/test${BOPT}/${ESMF_ARCH}
 ESMC_DOCDIR	= $(ESMF_TOP_DIR)/doc
 ESMF_BUILD_DOCDIR = $(ESMF_BUILD_DIR)/doc
+
 PROTEX		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/protex 
+CC_PROTEX       = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_ccprotex 
+CH_PROTEX       = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_chprotex 
+F_PROTEX        = ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_fprotex 
+
 DO_LATEX	= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_latex
 DO_L2H		= ${ESMF_TOP_DIR}/scripts/doc_templates/templates/scripts/do_l2h
 PDIR		= ${ESMF_TOP_DIR}/lib/lib${BOPT}/${ESMF_ARCH}

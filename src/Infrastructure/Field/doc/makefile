@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/03/10 21:54:20 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/03/20 20:32:58 flanigan Exp $ 
 ALL: lib 
 
 DESTEX = Bundle_ccex.tex Bundle_ccparam.tex \
@@ -31,7 +31,6 @@ SOURCEF	  =
 SOURCEH	  = 
 OBJSC     = 
 OBJSF     = 
-TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Field/doc
@@ -47,6 +46,17 @@ HTMLFILES = \
 		${ESMC_DOCDIR}/Field_reqdoc \
 		${ESMC_DOCDIR}/Field_desdoc \
 		${ESMC_DOCDIR}/Field_refdoc
+
+#
+# Tex Files to make
+#
+TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../src/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../include/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
+
 
 include $(ESMF_DIR)/makefile
 
@@ -123,23 +133,23 @@ figs.dvi: figs.tex
 
 # source files which gen input for design doc
 ccsrc: ${CSRC}
-	do_ccprotex field ../include/ESMC_Field.h
-	do_ccprotex bundle ../include/ESMC_Bundle.h
-	do_ccprotex array ../../Data/include/ESMC_Array.h
-	do_ccprotex datamap ../include/ESMC_DataMap.h
-	do_ccprotex base ../../Base/include/ESMC_Base.h 
-	touch ccsrc
+# 	do_ccprotex field ../include/ESMC_Field.h
+# 	do_ccprotex bundle ../include/ESMC_Bundle.h
+# 	do_ccprotex array ../../Data/include/ESMC_Array.h
+# 	do_ccprotex datamap ../include/ESMC_DataMap.h
+# 	do_ccprotex base ../../Base/include/ESMC_Base.h 
+# 	touch ccsrc
 
 fsrc:  ${FSRC}
-	do_fprotex field ../src/ESMF_Field.F90
-	do_fprotex bundle ../src/ESMF_Bundle.F90
-	do_fprotex array ../../Data/interface/ESMF_Array.F90
-	do_fprotex datamap ../src/ESMF_DataMap.F90
-	do_fprotex base ../../Base/interface/ESMF_Base.F90
-	do_fprotex fieldex ../examples/ESMF_FieldCreateEx.F90
-	do_fprotex bundleex ../examples/ESMF_BundleCreateEx.F90
-	do_fprotex arrayex ../../Data/examples/ESMF_ArrayCreateEx.F90
-	touch fsrc
+# 	do_fprotex field ../src/ESMF_Field.F90
+# 	do_fprotex bundle ../src/ESMF_Bundle.F90
+# 	do_fprotex array ../../Data/interface/ESMF_Array.F90
+# 	do_fprotex datamap ../src/ESMF_DataMap.F90
+# 	do_fprotex base ../../Base/interface/ESMF_Base.F90
+# 	do_fprotex fieldex ../examples/ESMF_FieldCreateEx.F90
+# 	do_fprotex bundleex ../examples/ESMF_BundleCreateEx.F90
+# 	do_fprotex arrayex ../../Data/examples/ESMF_ArrayCreateEx.F90
+# 	touch fsrc
 
 clean:
 	rm -f *.dvi *.ps Field_reqdoc/* Field_desdoc/* fsrc ccsrc

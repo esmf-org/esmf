@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.17 2003/03/17 18:08:49 flanigan Exp $
+# $Id: makefile,v 1.18 2003/03/20 20:32:31 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -228,11 +228,11 @@ pdf: chkdir_doc tex
 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=buildpdf  tree 
 
-tex: chkdir_doc
-	-@echo "Building .F => .tex files"
-	-@echo "========================================="
-	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=buildtex  tree 
+# tex: chkdir_doc
+# 	-@echo "Building .F => .tex files"
+# 	-@echo "========================================="
+# 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+# 	   ACTION=buildtex  tree 
 
 html: chkdir_doc tex
 	-@echo "Building html files"

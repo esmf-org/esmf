@@ -1,11 +1,10 @@
-# $Id: makefile,v 1.4 2003/02/27 17:54:37 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/03/20 20:33:03 flanigan Exp $ 
 
 
-#DIRS	  =  src interface examples doc
-
+LOCDIR	  = src/Infrastructure/IO/
 
 include $(ESMF_DIR)/makefile
 
-DIRS	  =  interface
-LOCDIR	  = src/Infrastructure/IO/
+DIRS	  =  interface doc
+
 

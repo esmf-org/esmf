@@ -1,12 +1,6 @@
-# $Id: makefile,v 1.4 2003/03/20 20:32:47 flanigan Exp $
+All: tex
 
-All:
-	do_latex CommMem des
-	do_l2h CommMem des
-	dvipdf CommMem_desdoc.dvi
-
-LOCDIR = src/Infrastructure/CommMem/doc
-
+LOCDIR = src/Infrastructure/Route/doc
 
 #
 # Tex Files to make
@@ -18,9 +12,6 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
 
-
 include $(ESMF_DIR)/makefile
 
 DIRS = 
-
-

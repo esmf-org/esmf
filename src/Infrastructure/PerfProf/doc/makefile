@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/10 03:03:07 cdeluca Exp $ 
+# $Id: makefile,v 1.5 2003/03/20 20:33:09 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -8,7 +8,6 @@ SOURCEF	  =
 SOURCEH	  = 
 OBJSC     = 
 OBJSF     = 
-TEXFILES  = 
 MANSEC	  = 
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/PerfProf/doc
@@ -24,6 +23,16 @@ HTMLFILES = \
 		${ESMC_DOCDIR}/PerfProf_reqdoc 
 #		${ESMC_DOCDIR}/PerfProf_desdoc \
 #		${ESMC_DOCDIR}/PerfProf_refdoc
+
+#
+# Tex Files to make
+#
+TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../src/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../include/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
 
 include $(ESMF_DIR)/makefile
 

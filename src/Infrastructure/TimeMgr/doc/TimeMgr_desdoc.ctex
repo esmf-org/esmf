@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desdoc.ctex,v 1.7 2003/02/11 18:55:08 eschwab Exp $
+% $Id: TimeMgr_desdoc.ctex,v 1.8 2003/03/20 20:33:16 flanigan Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -114,9 +114,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{BaseTime_fapi}
+\input{ESMC_BaseTime_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/BaseTime_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_ccapi}
 #endif
 
 \section{BaseTime Class C++ Interface}
@@ -137,10 +137,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{BaseTime_chapi}
+\input{ESMC_BaseTime_chapi}
 %\input{BaseTime_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/BaseTime_chapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_chapi}
 %\input{../Infrastructure/TimeMgr/doc/BaseTime_ccapi}
 #endif
 
@@ -196,9 +196,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{TimeInterval_fapi}
+\input{ESMC_TimeInterval_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_TimeInterval_ccapi}
 #endif
 
 \section{Time Interval Class C++ Interface}
@@ -219,10 +219,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{TimeInterval_chapi}
+\input{ESMC_TimeInterval_chapi}
 %\input{TimeInterval_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_chapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_TimeInterval_chapi}
 %\input{../Infrastructure/TimeMgr/doc/TimeInterval_ccapi}
 #endif
 
@@ -278,9 +278,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Time_fapi}
+\input{ESMC_Time_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Time_ccapi}
 #endif
 
 \section{Time Class C++ Interface}
@@ -301,10 +301,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Time_chapi}
+\input{ESMC_Time_chapi}
 %\input{Time_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Time_chapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Time_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Time_ccapi}
 #endif
 
@@ -360,9 +360,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Calendar_fapi}
+\input{ESMC_Calendar_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_ccapi}
 #endif
 
 \section{Calendar Class C++ Interface}
@@ -383,10 +383,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Calendar_chapi}
+\input{ESMC_Calendar_chapi}
 %\input{Calendar_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_chapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Calendar_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Calendar_ccapi}
 #endif
 
@@ -442,9 +442,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Clock_fapi}
+\input{ESMC_Clock_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Clock_ccapi}
 #endif
 
 \section{Clock Class C++ Interface}
@@ -465,10 +465,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Clock_chapi}
+\input{ESMC_Clock_chapi}
 %\input{Clock_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Clock_chapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Clock_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Clock_ccapi}
 #endif
 
@@ -524,9 +524,9 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Alarm_fapi}
+\input{ESMC_Alarm_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Alarm_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Alarm_ccapi}
 #endif
 
 \section{Alarm C++ Interface}
@@ -547,10 +547,10 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{Alarm_chapi}
+\input{ESMC_Alarm_chapi}
 %\input{Alarm_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Alarm_chapi}
+\input{../Infrastructure/TimeMgr/doc/ESMC_Alarm_chapi}
 %\input{../Infrastructure/TimeMgr/doc/Alarm_ccapi}
 #endif
 

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.9 2003/02/27 17:55:01 flanigan Exp $ 
+# $Id: makefile,v 1.10 2003/03/20 20:33:19 flanigan Exp $ 
 
 all: alldocs
 
@@ -50,6 +50,16 @@ REFREXFILES = Component_refdoc.ctex
 #      comp_ccapi.tex: ../src/ESMC_Component.C
 #                     do_ccprotex comp ../src/ESMC_Component.C
 #
+
+#
+# Tex Files to make
+#
+TEXFILES_TO_MAKE  = $(addsuffix _ccapi.tex, $(basename $(notdir $(wildcard ../src/*.C))))
+TEXFILES_TO_MAKE += $(addsuffix _chapi.tex, $(basename $(notdir $(wildcard ../include/*.h))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.F90))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f))))
+TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../src/*.f90))))
 
 include $(ESMF_DIR)/makefile
 
@@ -114,27 +124,27 @@ Component_refdoc:
 
 ## stuff i added locally
 fsrc:
-	do_fprotex compex ../examples/ESMF_CompEx.F90
-	do_fprotex comp ../src/ESMF_Comp.F90
-	do_fprotex stateex ../examples/ESMF_StateEx.F90
-	do_fprotex state ../src/ESMF_State.F90
-	do_fprotex xformex ../examples/ESMF_XformEx.F90
-	do_fprotex xform ../src/ESMF_Xform.F90
-	do_fprotex appcompex ../examples/ESMF_AppCompEx.F90
-	do_fprotex appmainex ../examples/ESMF_AppMainEx.F90
-	do_fprotex cplex ../examples/ESMF_CplEx.F90
-	do_fprotex gcompex ../examples/ESMF_GCompEx.F90
+# 	do_fprotex compex ../examples/ESMF_CompEx.F90
+# 	do_fprotex comp ../src/ESMF_Comp.F90
+# 	do_fprotex stateex ../examples/ESMF_StateEx.F90
+# 	do_fprotex state ../src/ESMF_State.F90
+# 	do_fprotex xformex ../examples/ESMF_XformEx.F90
+# 	do_fprotex xform ../src/ESMF_Xform.F90
+# 	do_fprotex appcompex ../examples/ESMF_AppCompEx.F90
+# 	do_fprotex appmainex ../examples/ESMF_AppMainEx.F90
+# 	do_fprotex cplex ../examples/ESMF_CplEx.F90
+# 	do_fprotex gcompex ../examples/ESMF_GCompEx.F90
 
 ccsrc:
-	do_ccprotex compex ../examples/ESMC_CompEx.C
-	do_ccprotex comp ../interface/ESMC_Comp.C
-	do_ccprotex stateex ../examples/ESMC_StateEx.C
-	do_ccprotex state ../interface/ESMC_State.C
-	do_ccprotex xformex ../examples/ESMC_XformEx.C
-	do_ccprotex xform ../interface/ESMC_Xform.C
-	do_ccprotex appcompex ../examples/ESMC_AppCompEx.C
-	do_ccprotex appmainex ../examples/ESMC_AppMainEx.C
-	do_ccprotex cplex ../examples/ESMC_CplEx.C
-	do_ccprotex gcompex ../examples/ESMC_GCompEx.C
+# 	do_ccprotex compex ../examples/ESMC_CompEx.C
+# 	do_ccprotex comp ../interface/ESMC_Comp.C
+# 	do_ccprotex stateex ../examples/ESMC_StateEx.C
+# 	do_ccprotex state ../interface/ESMC_State.C
+# 	do_ccprotex xformex ../examples/ESMC_XformEx.C
+# 	do_ccprotex xform ../interface/ESMC_Xform.C
+# 	do_ccprotex appcompex ../examples/ESMC_AppCompEx.C
+# 	do_ccprotex appmainex ../examples/ESMC_AppMainEx.C
+# 	do_ccprotex cplex ../examples/ESMC_CplEx.C
+# 	do_ccprotex gcompex ../examples/ESMC_GCompEx.C
 
 

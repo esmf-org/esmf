@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/02/27 17:54:10 flanigan Exp $ 
+# $Id: makefile,v 1.5 2003/03/20 20:32:44 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -8,7 +8,6 @@ SOURCEF	  = ESMF_Base.F90
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-#TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Baseobj
 LIBBASE	  = libesmf
 DIRS	  = 

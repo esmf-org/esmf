@@ -1,4 +1,4 @@
-# $Id: common,v 1.20 2003/03/17 18:33:16 flanigan Exp $ 
+# $Id: common,v 1.21 2003/03/20 20:32:31 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -277,6 +277,49 @@ alltree: ${ACTION}
 
 # --------------------------------------------------------------------
 .SUFFIXES: .f .f90 .F .F90 ${SUFFIXES} .C .cc .cpp .r .rm .so
+
+
+#
+#  tex targets
+#
+tree_tex: $(TEXFILES_TO_MAKE)
+
+tex:
+	$(MAKE) BOPT=$(BOPT) ACTION=tree_tex tree
+
+#
+# Pattern rules for making Tex files using 
+# protex script.  Input to protex script 
+# is Fortran, C or .h source code.
+#
+%_fapi.tex : ../src/%.F 
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../src/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../src/%.f
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../src/%.f90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_chapi.tex : ../include/%.h
+	export PROTEX=$(PROTEX) ;\
+	$(CH_PROTEX) $* $<
+
+%_ccapi.tex : ../src/%.C
+	export PROTEX=$(PROTEX) ;\
+	$(CC_PROTEX) $* $<
+
+
+
+
+
 
 #  .c.o: 
 #  	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} $<

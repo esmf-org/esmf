@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_chprotex,v 1.4 2003/02/27 20:14:12 eschwab Exp $
+# $Id: do_chprotex,v 1.5 2003/03/20 20:32:35 flanigan Exp $
 #
 #===============================================================================
 # chprotex
@@ -48,5 +48,6 @@ else
   endif
   set class=$1
   set file=$2
-  perl $DOC_DIR/templates/protex ${option} -bC +f $file > ${class}_${fnsuffix}
+#  perl $DOC_DIR/templates/protex ${option} -bC +f $file > ${class}_${fnsuffix}
+  perl $PROTEX ${option} -bC +f $file > ${class}_${fnsuffix}
 endif

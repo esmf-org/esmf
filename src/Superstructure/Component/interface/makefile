@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2003/02/27 21:28:26 nscollins Exp $
+# $Id: makefile,v 1.13 2003/03/20 20:33:20 flanigan Exp $
 
 # leave alone.
 ALL: lib 
@@ -22,7 +22,6 @@ STOREH	  =
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
 # is MANSEC something about documentation?
 MANSEC	  = Componentobj

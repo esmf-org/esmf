@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/10 22:32:39 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/03/20 20:33:00 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -8,7 +8,6 @@ SOURCEF	  = ESMF_DataMap.F90 ESMF_Field.F90 ESMF_Bundle.F90
 SOURCEH	  = 
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 MANSEC	  = Fieldobj
 LIBBASE	  = libesmf
 LOCDIR	  = src/Infrastructure/Field/src
