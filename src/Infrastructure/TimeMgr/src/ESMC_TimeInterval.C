@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.29 2003/06/10 17:29:46 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.30 2003/06/13 19:26:11 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt TimeInterval} methods declared
+// The code in this file implements the C++ {\tt ESMC\_TimeInterval} methods declared
 // in the companion file {\tt ESMC_TimeInterval.h}
 //
 //-------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.29 2003/06/10 17:29:46 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.30 2003/06/13 19:26:11 rstaufer Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -62,7 +62,7 @@
       ...) const {             // out - specifier values (variable args)
 //
 // !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s values in user-specified format.
+//      Gets a {\tt ESMC\_TimeInterval}'s values in user-specified format.
 //      Supports native C++ use.
 //
 //EOP
@@ -88,7 +88,7 @@
       ...) {                   // in - specifier values (variable args)
 //
 // !DESCRIPTION:
-//      Sets a {\tt TimeInterval}'s values in user-specified values.
+//      Sets a {\tt ESMC\_TimeInterval}'s values in user-specified values.
 //      Supports native C++ use.
 //
 //EOP
@@ -140,7 +140,7 @@
       int *Sd) const {          // out - fractional seconds denominator
 //
 // !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s values in user-specified format.
+//      Gets a {\tt ESMC\_TimeInterval}'s values in user-specified format.
 //      This version supports the F90 interface.
 //
 //EOP
@@ -262,7 +262,7 @@
       int *Sd) {                // in - fractional seconds denominator
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt TimeInterval} with values given in F90
+//      Initialzes a {\tt ESMC\_TimeInterval} with values given in F90
 //      variable arg list.
 //
 //EOP
@@ -342,7 +342,7 @@
       ESMF_IKIND_I8 D)  {  // in - calendar interval number of days
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt TimeInterval} with given values
+//      Initialzes a {\tt ESMC\_TimeInterval} with given values
 //
 //EOP
 // !REQUIREMENTS:
@@ -375,7 +375,7 @@
       char *timeString) const {    // out - time interval value in string format
 //
 // !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s value in character format
+//      Gets a {\tt ESMC\_TimeInterval}'s value in character format
 //
 //EOP
 // !REQUIREMENTS:  
@@ -417,7 +417,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s absolute value
+//      Gets a {\tt ESMC\_TimeInterval}'s absolute value
 //
 //EOP
 // !REQUIREMENTS:  TMG 1.5.8
@@ -454,7 +454,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      Gets a {\tt TimeInterval}'s negative absolute value
+//      Gets a {\tt ESMC\_TimeInterval}'s negative absolute value
 //
 //EOP
 // !REQUIREMENTS:  TMG 1.5.8
@@ -553,8 +553,8 @@
       const int &divisor) const {   // in - integer divisor
 //
 // !DESCRIPTION:
-//    Divides a {\tt TimeInterval} by an integer divisor, returns quotient as a
-//    {\tt TimeInterval}
+//    Divides a {\tt ESMC\_TimeInterval} by an integer divisor, returns quotient as a
+//    {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -586,7 +586,7 @@
       const int &divisor) {   // in - integer divisor
 //
 // !DESCRIPTION:
-//    Divides a {\tt TimeInterval} by an integer divisor
+//    Divides a {\tt ESMC\_TimeInterval} by an integer divisor
 //
 //EOP
 // !REQUIREMENTS:  
@@ -616,8 +616,8 @@
       const double &divisor) const {   // in - double precision divisor
 //
 // !DESCRIPTION:
-//    Divides a {\tt TimeInterval} by an double divisor, returns quotient as a
-//    {\tt TimeInterval}
+//    Divides a {\tt ESMC\_TimeInterval} by an double divisor, returns quotient as a
+//    {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -649,7 +649,7 @@
       const double &divisor) {   // in - double precision divisor
 //
 // !DESCRIPTION:
-//    Divides a {\tt TimeInterval} by a double precision divisor
+//    Divides a {\tt ESMC\_TimeInterval} by a double precision divisor
 //
 //EOP
 // !REQUIREMENTS:  
@@ -679,8 +679,8 @@
       const int &multiplier) const {   // in - integer multiplier
 //
 // !DESCRIPTION:
-//     Multiply a {\tt TimeInterval} by an integer, return product as a
-//    {\tt TimeInterval}
+//     Multiply a {\tt ESMC\_TimeInterval} by an integer, return product as a
+//    {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -709,7 +709,7 @@
       const int &multiplier) {   // in - integer multiplier
 //
 // !DESCRIPTION:
-//     Multiply a {\tt TimeInterval} by an integer
+//     Multiply a {\tt ESMC\_TimeInterval} by an integer
 //
 //EOP
 // !REQUIREMENTS:  
@@ -736,8 +736,8 @@
       const ESMC_Fraction &multiplier) const {   // in - fraction multiplier
 //
 // !DESCRIPTION:
-//     Multiply a {\tt TimeInterval} by an fraction, return product as a
-//    {\tt TimeInterval}
+//     Multiply a {\tt ESMC\_TimeInterval} by an fraction, return product as a
+//    {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -764,7 +764,7 @@
       const ESMC_Fraction &multiplier) {   // in - fraction multiplier
 //
 // !DESCRIPTION:
-//     Multiply a {\tt TimeInterval} by a fraction
+//     Multiply a {\tt ESMC\_TimeInterval} by a fraction
 //
 //EOP
 // !REQUIREMENTS:  
@@ -789,8 +789,8 @@
       const double &multiplier) const {   // in - double precision multiplier
 //
 // !DESCRIPTION:
-//     Multiply a {\tt TimeInterval} by an double precision,
-//     return product as a {\tt TimeInterval}
+//     Multiply a {\tt ESMC\_TimeInterval} by an double precision,
+//     return product as a {\tt ESMC\_TimeInterval}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -819,7 +819,7 @@
       const double &multiplier) {   // in - double precision multiplier
 //
 // !DESCRIPTION:
-//     Multiply a {\tt TimeInterval} by a double precision
+//     Multiply a {\tt ESMC\_TimeInterval} by a double precision
 //
 //EOP
 // !REQUIREMENTS:  
@@ -846,7 +846,7 @@
       const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime to copy
 //
 // !DESCRIPTION:
-//    Assign {\tt BaseTime} expression to this time intervals.
+//    Assign {\tt ESMC\_BaseTime} expression to this time intervals.
 //    Supports inherited operators from {\tt ESMC\_BaseTime}
 //
 //EOP
@@ -879,7 +879,7 @@
       ESMF_IKIND_I8 D) {   // in - calendar interval number of days
 //
 // !DESCRIPTION:
-//      restore {\tt TimeInterval} state for persistence/checkpointing
+//      restore {\tt ESMC\_TimeInterval} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  
@@ -917,7 +917,7 @@
       ESMF_IKIND_I8 *D) const {   // out - calendar interval number of days
 //
 // !DESCRIPTION:
-//      return {\tt TimeInterval} state for persistence/checkpointing
+//      return {\tt ESMC\_TimeInterval} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  
@@ -958,7 +958,7 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      validate {\tt TimeInterval} state for testing/debugging
+//      validate {\tt ESMC\_TimeInterval} state for testing/debugging
 //
 //EOP
 // !REQUIREMENTS:  
@@ -981,7 +981,7 @@
       const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
-//      print {\tt TimeInterval} state for testing/debugging
+//      print {\tt ESMC\_TimeInterval} state for testing/debugging
 //
 //EOP
 // !REQUIREMENTS:  
