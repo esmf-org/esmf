@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.52 2004/07/27 22:53:31 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.53 2004/07/28 17:47:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.52 2004/07/27 22:53:31 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.53 2004/07/28 17:47:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -144,7 +144,7 @@
 !-------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_FieldAllGather"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldAllGather - Data allgather operation on a Field
 
 ! !INTERFACE:
@@ -188,7 +188,7 @@
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS: 
 
       integer :: status                           ! Error status
