@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.1 2003/10/22 20:09:41 cdeluca Exp $
+! $Id: ESMF_StateEx.F90,v 1.2 2003/11/27 00:02:36 svasquez Exp $
 !
 ! Example code for creating States.
 
@@ -38,7 +38,7 @@
 
 !   ! This will probably be called from inside the Component Init code
     compname = "Atmosphere"
-    state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, rc)  
+    state1 = ESMF_StateCreate(compname, statetype=ESMF_STATEIMPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(compname)
 
     ! Data would be added here and the State reused inside the run
@@ -55,7 +55,7 @@
     print *, "State Example 2: Export State"
 
     compname = "Ocean"
-    state2 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)  
+    state2 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
     print *, "State Create returned, name = ", trim(compname)
 
     bundlename = "Temperature"
@@ -90,7 +90,7 @@
 
     ! The producing Component creates the menu of data items available.
     compname = "Ocean"
-    state3 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)  
+    state3 = ESMF_StateCreate(compname, statetype=ESMF_STATEEXPORT, rc=rc)  
     print *, "State Create returned", rc, " name = ", trim(compname)
 
     dataname = "Downward wind"
