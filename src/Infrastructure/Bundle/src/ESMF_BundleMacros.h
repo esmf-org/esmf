@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_BundleMacros.h,v 1.4 2004/03/16 18:13:33 nscollins Exp $
+! $Id: ESMF_BundleMacros.h,v 1.5 2004/03/18 17:18:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 ! !IROUTINE: ESMF_BundleGetDataPointer - Retrieve Fortran pointer directly from a Bundle @\
  @\
 ! !INTERFACE: @\
-!     ! Private name; call using ESMF_BundleGetDataPointer()
+!     ! Private name; call using ESMF_BundleGetDataPointer() @\
 !      subroutine ESMF_BundleGetDataPointer<rank><type><kind>(bundle, fieldname, fptr, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
