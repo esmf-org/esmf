@@ -1029,7 +1029,7 @@ subroutine MultPar_SingleLine_V
       rc = 0
 !''''''''''''''''''''''''''''
       !------------------------------------------------------------------------
-      !NEX_UTest
+      !EX_UTest
       ! Test Config Destroy
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Config Destroy Test"
@@ -1063,7 +1063,7 @@ end module config_subrs
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ConfigUTest.F90,v 1.11 2004/06/18 08:01:25 nscollins Exp $'
+      '$Id: ESMF_ConfigUTest.F90,v 1.12 2004/08/09 19:53:55 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       counter_total = 0
