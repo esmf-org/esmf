@@ -1,18 +1,12 @@
-# $Id: makefile,v 1.11 2003/04/24 16:45:43 nscollins Exp $
+# $Id: makefile,v 1.12 2003/07/10 18:51:27 nscollins Exp $
 
 # leave alone.
 ALL: lib 
 
-# don't set these unless absolutely necessary - they've got to be
-#  architecture and compiler independent and should be inherited
-#  from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
-FFLAGS    =
-
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = ESMC_Array_F.C
+SOURCEC	  = ESMC_LocalArray_F.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  =  ESMF_Array.F90 ESMF_Alloc_C.F90
+SOURCEF	  =  ESMF_LocalArray.F90 
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 
@@ -40,7 +34,7 @@ CLEANDIRS   =
 CLEANFILES  =
 CLOBBERDIRS =
 
-# rule for making ESMF_Array.F90 from ESMF_Array_F90.cpp:
+# rule for making ESMF_LocalArray.F90 from ESMF_LocalArray_F90.cpp:
 # either use the F90 with cpp only, or gcc and ignore the
 # warnings about the fortran syntax, depending what is possible on each
 # architecture.  this needs to run on each arch.  nsc 10feb03
@@ -54,7 +48,7 @@ CLOBBERDIRS =
 # actual compile. (These lines are: ^include "fred" in the
 # original source to shield them from the first preprocess pass.)
 #
-#ESMF_Array.F90: ESMF_Array_F90.cpp
-#	gcc -E -P ESMF_Array_F90.cpp | tr "@^" "\n#" > ESMF_Array.F90
+#ESMF_LocalArray.F90: ESMF_LocalArray_F90.cpp
+#	gcc -E -P ESMF_LocalArray_F90.cpp | tr "@^" "\n#" > ESMF_LocalArray.F90
 #
 
