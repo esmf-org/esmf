@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.23 2004/06/23 19:22:39 cdeluca Exp $
+! $Id: ESMF_CplEx.F90,v 1.24 2004/09/22 17:16:56 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -88,7 +88,6 @@
         type(ESMF_State) :: exportState
         type(ESMF_Clock) :: clock
         integer :: rc
-        type(ESMF_State) :: nestedstate
 
         print *, "Coupler Init starting"
     
@@ -132,7 +131,6 @@
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        type(ESMF_State) :: nestedstate
 
         print *, "Coupler Run starting"
 
@@ -166,7 +164,6 @@
         type(ESMF_Clock) :: clock
         integer :: rc
 
-        type(ESMF_State) :: nestedstate
 
         print *, "Coupler Final starting"
     

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplEx.C,v 1.11 2004/05/26 11:12:01 nscollins Exp $
+// $Id: ESMC_CplEx.C,v 1.12 2004/09/22 17:16:56 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -27,14 +27,16 @@
     
 main(int argc, char **argv) {
 //   // Local variables
-     int x, y, rc, mycell;
+     int x, y, rc, finalrc, mycell;
      char compname[32];
      ESMC_DELayout *layout;
      ESMC_Comp *comp1, *comp2, *comp3, *comp4;
         
 //-------------------------------------------------------------------------
 //   // Setup:
+     finalrc = ESMF_SUCCESS;
      rc = ESMC_Initialize();
+     if (rc != ESMF_SUCCESS) finalrc = rc;
 
      // create clock, layout here.
 
@@ -87,7 +89,13 @@ main(int argc, char **argv) {
      //rc = ESMC_DELayoutDestroy(layout);
 
      //printf("Comp example 5 returned\n");
-     ESMC_Finalize();
+     rc = ESMC_Finalize();
+     if (rc != ESMF_SUCCESS) finalrc = rc;
+
+     if (finalrc == ESMF_SUCCESS)
+        printf("PASS: ESMC_CplEx.C\n");
+     else
+        printf("FAIL: ESMC_CplEx.C\n");
 }
 
 // the actual arguments to these routines are yet to be decided.

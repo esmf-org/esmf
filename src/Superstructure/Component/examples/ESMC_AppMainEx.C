@@ -1,4 +1,4 @@
-// $Id: ESMC_AppMainEx.C,v 1.13 2004/05/26 14:23:56 nscollins Exp $
+// $Id: ESMC_AppMainEx.C,v 1.14 2004/09/22 17:16:56 nscollins Exp $
 //
 // Example code which creates a main Application program.
 // This is the cap component which creates other components below it.
@@ -26,7 +26,7 @@ void ATM_SetServices(ESMC_GridComp *gc, int *rc);
     
 main(int argc, char **argv) {
 //   // Local variables
-     int x, y, rc, mycell;
+     int x, y, rc, finalrc, mycell;
      char compname[32];
      ESMC_VM *vm;
      ESMC_GridComp *gcomp1, *gcomp2, *gcomp3, *comp4;
@@ -36,7 +36,10 @@ main(int argc, char **argv) {
         
 //-------------------------------------------------------------------------
 //   // Setup:
+     finalrc = ESMF_SUCCESS;
+
      rc = ESMC_Initialize();
+     if (rc != ESMF_SUCCESS) finalrc = rc;
 
 //-------------------------------------------------------------------------
 //   // Example 1:
@@ -47,6 +50,7 @@ main(int argc, char **argv) {
                                   "setup.rc", clock, &rc);
 
      rc = gcomp1->ESMC_GridCompSetServices(ATM_SetServices); 
+     if (rc != ESMF_SUCCESS) finalrc = rc;
      printf("Gridded Comp example 1 complete\n");
 
 //-------------------------------------------------------------------------
@@ -65,6 +69,7 @@ main(int argc, char **argv) {
      // pass in time: 
      //    as clock, as timestep count, as time interval, as stoptime
      //rc = ESMC_CompRun(comp1, ...);
+     // if (rc != ESMF_SUCCESS) finalrc = rc;
      //  internally calls ATM_Run()
 
      //printf("Comp example 3 returned\n");
@@ -74,6 +79,7 @@ main(int argc, char **argv) {
 //   //
 
 //   //rc = ESMC_CompFinal(comp1, ...);
+     // if (rc != ESMF_SUCCESS) finalrc = rc;
      //  internally calls ATM_Final()
 
      //printf("Comp example 4 returned\n");
@@ -83,14 +89,24 @@ main(int argc, char **argv) {
 //   //
 
      //rc = ESMC_CompDestroy(comp1);
+     // if (rc != ESMF_SUCCESS) finalrc = rc;
 
      //printf("Comp example 5 returned\n");
 
      rc = ESMC_Finalize();
+     if (rc != ESMF_SUCCESS) finalrc = rc;
+
+     if (finalrc == ESMF_SUCCESS) 
+        printf("PASS: ESMC_AppMainEx.C\n");
+     else
+        printf("FAIL: ESMC_AppMainEx.C\n");
+    
 
 }
 
 void ATM_SetServices(ESMC_GridComp *gc, int *rc) {
+    // this is where it should register Init, Run, Finalize
+   *rc = ESMF_SUCCESS;
 }
 
 // the actual arguments to these routines are yet to be decided.
