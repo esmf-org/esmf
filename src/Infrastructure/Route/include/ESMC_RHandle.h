@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.h,v 1.2 2003/08/25 22:48:34 nscollins Exp $
+// $Id: ESMC_RHandle.h,v 1.3 2003/09/23 16:29:05 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,15 +68,19 @@ typedef enum {
         // TODO:  needs a transform type enum
         // TODO:  needs option for single large sparse matrix, etc.
 
+        int numlist;
+        ESMC_DomainList *domainlist;
         ESMC_LocalArray *srcindex;
         ESMC_LocalArray *dstindex;
         ESMC_LocalArray *weights;
 
    public:
  // accessor methods for class members
-    int ESMC_TransformValuesGet(ESMC_LocalArray **si, ESMC_LocalArray **di,
+    int ESMC_TransformValuesGet(int *nnumlist, ESMC_DomainList **dl,
+                                ESMC_LocalArray **si, ESMC_LocalArray **di,
                                 ESMC_LocalArray **w) const;
-    int ESMC_TransformValuesSet(ESMC_LocalArray *si, ESMC_LocalArray *di,
+    int ESMC_TransformValuesSet(int nnumlist, ESMC_DomainList *dl,
+                                ESMC_LocalArray *si, ESMC_LocalArray *di,
                                 ESMC_LocalArray *w);
 
  };   // end class ESMC_TransformValues
@@ -101,10 +105,10 @@ typedef enum {
 
  // accessor methods for class members
     int ESMC_RouteHandleGet(ESMC_HandleType *h, ESMC_Route **rh1,
-                            ESMC_Route **rh2, ESMC_TransformValues **tdata, 
+                            ESMC_Route **rh2, ESMC_TransformValues **td, 
                             char **l) const;
     int ESMC_RouteHandleSet(ESMC_HandleType h, ESMC_Route *rh1,
-                            ESMC_Route *rh2, ESMC_TransformValues *tdata,
+                            ESMC_Route *rh2, ESMC_TransformValues *td,
                             char *l);
 
     ESMC_HandleType ESMC_RouteHandleGetType(void) const { return htype; }
