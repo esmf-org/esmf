@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.59 2004/06/14 22:53:02 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.60 2004/06/15 22:28:28 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.59 2004/06/14 22:53:02 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.60 2004/06/15 22:28:28 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -58,7 +58,7 @@
       type(ESMF_ArraySpec) :: arrayspec
       real, dimension(:,:), pointer :: f90ptr1, f90ptr2
       real(ESMF_KIND_R8) :: minCoord(2)
-      type(ESMF_FieldDataMap) :: dm
+      type(ESMF_FieldDataMap) :: dm, dm1
       type(ESMF_RelLoc) :: rl
       character (len = 20) :: fname, fname1, fname2
       character (len = 20) :: gname, gname3
@@ -394,6 +394,13 @@
       call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Verifing the ESMF_FieldSetDataMap
+       call ESMF_FieldSetDataMap(f3, datamap=dm1, rc=rc)
+       write(failMsg, *) "Did return ESMF_SUCCESS"
+       write(name, *) "Setting a Field Data Map Test"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Verifing that destroying a Grid in a Field is not allowed
        call ESMF_GridDestroy(grid, rc=rc)
