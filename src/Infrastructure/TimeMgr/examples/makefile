@@ -1,27 +1,53 @@
-# $Id: makefile,v 1.3 2003/03/25 00:18:29 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.4 2003/03/28 00:50:57 eschwab Exp $ 
+
+ALL:  examples
 
 CFLAGS    =
 FFLAGS    =
 SOURCEC	  = 
-SOURCEF	  = 
+SOURCEF	  =
+
 SOURCEH	  = 
-OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
-OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
-TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
-MANSEC	  = Timeobj
-LIBBASE	  = libesmf
-DIRS	  = 
+OBJSC	  =  
+OBJSF	  = 
+MANSEC	  = 
+LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/TimeMgr/examples
 
+TESTEXAMPLES_3  = \
+	ESMF_ClockEx RUN_ESMF_ClockEx ESMF_ClockEx.rm \
+	ESMC_ClockEx RUN_ESMC_ClockEx ESMC_ClockEx.rm
 
-include $(ESMF_DIR)/makefile
+EXAMPLESF       = ESMF_ClockEx.F90
+EXAMPLESC       = ESMC_ClockEx.C
 
+include ${ESMF_DIR}/makefile
 
 DIRS = 
 
-CLEANDIRS   =
-CLEANFILES  =
-CLOBBERDIRS =
+examples: ESMF_ClockEx ESMC_ClockEx
 
+ESMF_TimeMgrDir:
+	mkdir -p ${ESMC_TESTDIR}
 
+ESMF_ClockEx: ESMF_ClockEx.o  chkopts
+	${F90CXXLD} -g -o ESMF_ClockEx ESMF_ClockEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_ClockEx.o
+
+RUN_ESMF_ClockEx:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ClockEx.tmps
+	ESMF_ClockEx > ESMF_ClockEx.stdout
+
+ESMF_ClockEx.rm:
+	echo "ESMF_ClockEx.rm target called here."
+
+ESMC_ClockEx: ESMC_ClockEx.o  chkopts
+	${CXXF90LD} -g -o ESMC_ClockEx ESMC_ClockEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMC_ClockEx.o
+
+RUN_ESMC_ClockEx:
+	-@rm -f testlog stdlog.* logfile.* ESMC_ClockEx.tmps
+	ESMC_ClockEx > ESMC_ClockEx.stdout
+
+ESMC_ClockEx.rm:
+	echo "ESMC_ClockEx.rm target called here."
