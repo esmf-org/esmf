@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.148 2004/05/26 18:29:35 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.149 2004/06/03 22:16:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -200,7 +200,7 @@
    public ESMF_FieldSetDataMap         ! Set a DataMap (may reorder if different
                                        !   DataMap is already present)
 
-   public ESMF_FieldAddAttribute       ! Set and Get Attributes
+   public ESMF_FieldAddAttribute       ! Set and Get attributes
    public ESMF_FieldGetAttribute       !  
 
    public ESMF_FieldGetAttributeCount  ! number of attribs
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.148 2004/05/26 18:29:35 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.149 2004/06/03 22:16:05 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -293,7 +293,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldAddAttribute  - Set Field Attributes
+! !IROUTINE: ESMF_FieldAddAttribute  - Set Field attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldAddAttribute 
@@ -316,7 +316,7 @@
 !
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttribute  - Get Field Attributes
+! !IROUTINE: ESMF_FieldGetAttribute  - Get Field attributes
 !
 ! !INTERFACE:
       interface ESMF_FieldGetAttribute 
@@ -339,7 +339,7 @@
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field Attribute
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Get type, count from a Field attribute
 !
 ! !INTERFACE:
       interface ESMF_FieldGetAttributeInfo
@@ -368,7 +368,7 @@
 #define ESMF_METHOD "ESMF_FieldAddIntAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set an integer Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -389,9 +389,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The integer value of the Attribute.
+!           The integer value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -428,7 +428,7 @@
 #define ESMF_METHOD "ESMF_FieldAddIntListAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -450,11 +450,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The integer values of the Attribute.
+!           The integer values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -498,7 +498,7 @@
 #define ESMF_METHOD "ESMF_FieldAddRealAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a real Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -519,9 +519,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The real value of the Attribute.
+!           The real value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -558,7 +558,7 @@
 #define ESMF_METHOD "ESMF_FieldAddRealListAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a real list Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -580,11 +580,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The real values of the Attribute.
+!           The real values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -628,7 +628,7 @@
 #define ESMF_METHOD "ESMF_FieldAddLogicalAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a logical Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -649,9 +649,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The logical true/false value of the Attribute.
+!           The logical true/false value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -688,7 +688,7 @@
 #define ESMF_METHOD "ESMF_FieldAddLogicalListAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -710,11 +710,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The logical true/false values of the Attribute.
+!           The logical true/false values of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -758,7 +758,7 @@
 #define ESMF_METHOD "ESMF_FieldAddCharAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a character Attribute
+! !IROUTINE: ESMF_FieldAddAttribute - Set a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldAddAttribute()
@@ -779,9 +779,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to set.
+!           The name of the attribute to set.
 !     \item [value]
-!           The character value of the Attribute.
+!           The character value of the attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1367,7 +1367,7 @@
 #define ESMF_METHOD "ESMF_FieldGetIntAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer Attribute
+! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1388,9 +1388,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The integer value of the named Attribute.
+!           The integer value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1427,7 +1427,7 @@
 #define ESMF_METHOD "ESMF_FieldGetIntListAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve an integer list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1450,11 +1450,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The integer values of the named Attribute.
+!           The integer values of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1498,7 +1498,7 @@
 #define ESMF_METHOD "ESMF_FieldGetRealAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1519,9 +1519,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The real value of the named Attribute.
+!           The real value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1558,7 +1558,7 @@
 #define ESMF_METHOD "ESMF_FieldGetRealListAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a real list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1580,11 +1580,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The real values of the named Attribute.
+!           The real values of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1649,9 +1649,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The logical value of the named Attribute.
+!           The logical value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1688,7 +1688,7 @@
 #define ESMF_METHOD "ESMF_FieldGetLogicalListAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical list attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1710,11 +1710,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [count]
 !           The number of values to be set.
 !     \item [value]
-!           The logical values of the named Attribute.
+!           The logical values of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1758,7 +1758,7 @@
 #define ESMF_METHOD "ESMF_FieldGetCharAttr()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a character attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1780,9 +1780,9 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to retrieve.
+!           The name of the attribute to retrieve.
 !     \item [value]
-!           The character value of the named Attribute.
+!           The character value of the named attribute.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1819,7 +1819,7 @@
 #define ESMF_METHOD "ESMF_FieldGetAttributeCount()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of Attributes
+! !IROUTINE: ESMF_FieldGetAttributeCount - Query the number of attributes
 !
 ! !INTERFACE:
       subroutine ESMF_FieldGetAttributeCount(field, count, rc)
@@ -1874,7 +1874,7 @@
 #define ESMF_METHOD "ESMF_FieldGetAttrInfoByName()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by name
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by name
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
@@ -1896,11 +1896,11 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
-!           The name of the Attribute to query.
+!           The name of the attribute to query.
 !     \item [type]
-!           The type of the Attribute.
+!           The type of the attribute.
 !     \item [count]
-!           The number of items in this Attribute.  For character types,
+!           The number of items in this attribute.  For character types,
 !           the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1943,7 +1943,7 @@
 #define ESMF_METHOD "ESMF_FieldGetAttrInfoByNum()"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field Attributes by number
+! !IROUTINE: ESMF_FieldGetAttributeInfo - Query Field attributes by number
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
@@ -1966,13 +1966,13 @@
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
 !     \item [num]
-!           The number of the Attribute to query.
+!           The number of the attribute to query.
 !     \item [name]
-!           Returns the name of the Attribute.
+!           Returns the name of the attribute.
 !     \item [type]
-!           Returns the type of the Attribute.
+!           Returns the type of the attribute.
 !     \item [count]
-!           Returns the number of items in this Attribute.  For character types,
+!           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
