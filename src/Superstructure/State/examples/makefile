@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/02/13 15:40:38 nscollins Exp $ 
+# $Id: makefile,v 1.5 2004/06/29 12:56:58 nscollins Exp $ 
 
 ALL:  build_examples
 
@@ -97,5 +97,5 @@ run_ESMC_StateEx_uni:
 run_ESMF_StateEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_StateEx > $(ESMF_EXDIR)/ESMF_StateEx.stdout
 
-run_EMSF_StateEx_uni:
+run_ESMF_StateEx_uni:
 	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_StateEx > $(ESMF_EXDIR)/ESMF_StateEx.stdout
