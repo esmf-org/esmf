@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.25 2003/07/18 21:03:27 eschwab Exp $
+! $Id: ESMF_DELayout.F90,v 1.26 2003/07/23 02:11:34 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -102,13 +102,13 @@
       public ESMF_DELayoutBcast
       public ESMF_DELayoutScatter
       public ESMF_DELayoutAllReduce
-      public ESMF_DELayoutAllGatherVI, ESMF_DELayoutAllGatherVR
+      public ESMF_DELayoutAllGatherV
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.25 2003/07/18 21:03:27 eschwab Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.26 2003/07/23 02:11:34 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -152,6 +152,26 @@
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 !  types of {\tt ESMF\_DELayoutScatter} functions.
+!EOP
+      end interface
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGatherV -- Performs an MPI-like allgatherv()
+
+! !INTERFACE:
+      interface ESMF_DELayoutAllGatherV
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_DELayoutAllGatherVR8
+      module procedure ESMF_DELayoutAllGatherVR4
+      module procedure ESMF_DELayoutAllGatherVI4
+      module procedure ESMF_DELayoutAllGatherVLA
+
+! !DESCRIPTION:
+! This interface provides a single entry point for the various
+!  types of {\tt ESMF\_DELayoutAllGatherV} functions.
 !EOP
       end interface
 
@@ -1683,24 +1703,24 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutAllGatherVI - Perform an "all-gather" for int arrays
+! !IROUTINE: ESMF_DELayoutAllGatherVR8 - Perform an "all-gather" for real*8 arrays
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutAllGatherVI(layout, sndArray, sndLen, &
-                                        rcvArray, rcvLen, rcvDispls, rc)
+      subroutine ESMF_DELayoutAllGatherVR8(layout, sndArray, sndLen, &
+                                           rcvArray, rcvLen, rcvDispls, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      integer, intent(in) :: sndArray(:)
+      real(ESMF_IKIND_R8), intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
-      integer, intent(out) :: rcvArray(:)
+      real(ESMF_IKIND_R8), intent(out) :: rcvArray(:)
       integer, intent(in) :: rcvLen(:)
       integer, intent(in) :: rcvDispls(:)
-      integer, intent(out), optional :: rc 
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform an MPI-like Allgatherv for integer arrays across a layout
+!     Perform an MPI-like Allgatherv for real*8 arrays across a layout.
 !
 !EOP
 
@@ -1717,37 +1737,38 @@
       endif
 
 !     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutAllGatherVI(layout, sndArray, sndLen, &
-                                      rcvArray, rcvLen, rcvDispls, status)
+      call c_ESMC_DELayoutAllGatherVNA(layout, sndArray, sndLen, &
+                                       rcvArray, rcvLen, rcvDispls, &
+                                       ESMF_KIND_R8, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutAllGatherVI error"
+          print *, "ESMF_DELayoutAllGatherVR8 error"
           return
       endif
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_DELayoutAllGatherVI
+      end subroutine ESMF_DELayoutAllGatherVR8
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutAllGatherVR - Perform an "all-gather" for real arrays
+! !IROUTINE: ESMF_DELayoutAllGatherVR4 - Perform an "all-gather" for real*4 arrays
 !
 ! !INTERFACE:
-      subroutine ESMF_DELayoutAllGatherVR(layout, sndArray, sndLen, &
-                                        rcvArray, rcvLen, rcvDispls, rc)
+      subroutine ESMF_DELayoutAllGatherVR4(layout, sndArray, sndLen, &
+                                           rcvArray, rcvLen, rcvDispls, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout) :: layout
-      real, intent(in) :: sndArray(:)
+      real(ESMF_IKIND_R4), intent(in) :: sndArray(:)
       integer, intent(in) :: sndLen
-      real, intent(out) :: rcvArray(:)
+      real(ESMF_IKIND_R4), intent(out) :: rcvArray(:)
       integer, intent(in) :: rcvLen(:)
       integer, intent(in) :: rcvDispls(:)
-      integer, intent(out), optional :: rc 
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Perform an MPI-like Allgatherv for real arrays across a layout.
+!     Perform an MPI-like Allgatherv for real*4 arrays across a layout.
 !
 !EOP
 
@@ -1764,15 +1785,111 @@
       endif
 
 !     Routine which interfaces to the C++ routine.
-      call c_ESMC_DELayoutAllGatherVR(layout, sndArray, sndLen, &
-                                      rcvArray, rcvLen, rcvDispls, status)
+      call c_ESMC_DELayoutAllGatherVNA(layout, sndArray, sndLen, &
+                                       rcvArray, rcvLen, rcvDispls, &
+                                       ESMF_KIND_R4, status)
       if (status .ne. ESMF_SUCCESS) then
-          print *, "ESMF_DELayoutAllGatherVR error"
+          print *, "ESMF_DELayoutAllGatherVR4 error"
           return
       endif
 
 !     set return code if user specified it
       if (rcpresent) rc = ESMF_SUCCESS
-      end subroutine ESMF_DELayoutAllGatherVR
+      end subroutine ESMF_DELayoutAllGatherVR4
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGatherVI4 - Perform an "all-gather" for integer*4 arrays
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutAllGatherVI4(layout, sndArray, sndLen, &
+                                           rcvArray, rcvLen, rcvDispls, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      integer(ESMF_IKIND_I4), intent(in) :: sndArray(:)
+      integer, intent(in) :: sndLen
+      integer(ESMF_IKIND_I4), intent(out) :: rcvArray(:)
+      integer, intent(in) :: rcvLen(:)
+      integer, intent(in) :: rcvDispls(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform an MPI-like Allgatherv for integer*4 arrays across a layout
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutAllGatherVNA(layout, sndArray, sndLen, &
+                                       rcvArray, rcvLen, rcvDispls, &
+                                       ESMF_KIND_I4, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutAllGatherVI4 error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutAllGatherVI4
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutAllGatherVLA - Perform an "all-gather" for local arrays
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutAllGatherVLA(layout, sndArray, sndLen, &
+                                           rcvArray, rcvLen, rcvDispls, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      type(ESMF_LocalArray), intent(in) :: sndArray(:)
+      integer, intent(in) :: sndLen
+      type(ESMF_LocalArray), intent(out) :: rcvArray(:)
+      integer, intent(in) :: rcvLen(:)
+      integer, intent(in) :: rcvDispls(:)
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Perform an MPI-like Allgatherv for local arrays across a layout
+!
+!EOP
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutAllGatherVLA(layout, sndArray, sndLen, &
+                                       rcvArray, rcvLen, rcvDispls, status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutAllGatherVLA error"
+          return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+      end subroutine ESMF_DELayoutAllGatherVLA
 
       end module ESMF_DELayoutMod

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.20 2003/07/18 21:03:27 eschwab Exp $
+// $Id: ESMC_DELayout.h,v 1.21 2003/07/23 02:11:33 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -166,10 +166,12 @@ typedef int ESMC_CommType;
                              ESMC_DataKind type, int srcDEid); 
     int ESMC_DELayoutScatter(ESMC_LocalArray *sndArray,
                              ESMC_LocalArray *rcvArray, int len, int srcDEid); 
-    int ESMC_DELayoutAllGatherVI(int *sndArray, int  sndLen, 
-				 int *rcvArray, int *rcvLen, int *rcvDispls);
-    int ESMC_DELayoutAllGatherVF(float *sndArray, int  sndLen, 
-				 float *rcvArray, int *rcvLen, int *rcvDispls);
+    int ESMC_DELayoutAllGatherV(void *sndArray, int sndLen,
+                                void *rcvArray, int *rcvLen, int *rcvDispls,
+                                ESMC_DataKind kind);
+    int ESMC_DELayoutAllGatherV(ESMC_LocalArray *sndArray, int sndLen,
+                                ESMC_LocalArray *rcvArray, int *rcvLen,
+                                int *rcvDispls);
     int ESMC_DELayoutAllReduce(int *dataArray, int *result, int arrayLen,
 			       ESMC_Op op);
     int ESMC_DELayoutSendRecv(void *sbuf, void *rbuf, int snum, int rnum, 
@@ -211,11 +213,3 @@ typedef int ESMC_CommType;
     int ESMC_DELayoutDestroy(ESMC_DELayout *layout);
 
  #endif  // ESMC_DELayout_H
-
-
-
-
-
-
-
-

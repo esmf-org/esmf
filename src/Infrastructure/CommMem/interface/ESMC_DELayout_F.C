@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.22 2003/07/18 21:03:27 eschwab Exp $
+// $Id: ESMC_DELayout_F.C,v 1.23 2003/07/23 02:11:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -173,19 +173,21 @@ extern "C" {
            *status = (*ptr)->ESMC_DELayoutBcast(buf, *num, *srcde_index, *type);
        }
 
-       void FTN(c_esmc_delayoutallgathervi)(ESMC_DELayout **ptr,
-                                 int *sndarray, int *slen, 
-                                 int *rcvarray, int *rlen, int *rcvdispls, 
-                                 int *status) {
-           *status = (*ptr)->ESMC_DELayoutAllGatherVI(sndarray, *slen,
-                                                    rcvarray,  rlen, rcvdispls);
+       void FTN(c_esmc_delayoutallgathervna)(ESMC_DELayout **ptr,
+                                 void *sndarray, int *slen,
+                                 void *rcvarray, int *rlen, int *rcvdispls,
+                                 ESMC_DataKind *kind, int *status) {
+           *status = (*ptr)->ESMC_DELayoutAllGatherV(sndarray, *slen,
+                                                     rcvarray,  rlen, rcvdispls,
+                                                     *kind);
        }
 
-       void FTN(c_esmc_delayoutallgathervr)(ESMC_DELayout **ptr,
-                                 float *sndarray, int *slen, 
-                                 float *rcvarray, int *rlen, int *rcvdispls, 
-                                 int *status) {
-           *status = (*ptr)->ESMC_DELayoutAllGatherVF(sndarray, *slen,
-                                                    rcvarray,  rlen, rcvdispls);
+       void FTN(c_esmc_delayoutallgathervla)(ESMC_DELayout **ptr,
+                          ESMC_LocalArray *sndarray, int *slen,
+                          ESMC_LocalArray *rcvarray, int *rlen, int *rcvdispls,
+                          int *status) {
+           *status = (*ptr)->ESMC_DELayoutAllGatherV(sndarray, *slen,
+                                                     rcvarray,  rlen, rcvdispls);
        }
+
 };

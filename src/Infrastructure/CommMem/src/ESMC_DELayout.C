@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.36 2003/07/18 21:03:27 eschwab Exp $
+// $Id: ESMC_DELayout.C,v 1.37 2003/07/23 02:11:34 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.36 2003/07/18 21:03:27 eschwab Exp $";
+           "$Id: ESMC_DELayout.C,v 1.37 2003/07/23 02:11:34 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2521,8 +2521,10 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // get DE identified by srcDEid
   rc = ESMC_DELayoutGetDE(srcDEid, &srcDE);
 
-  // get local array types
+  // get local array types (assume send and receive kinds are the same)
   type = sndArray->ESMC_LocalArrayGetKind();
+
+  //cout << "ESMC_DELayoutScatter(): ESMC_LocalArrayGetKind() returned" << type << endl;
 
   // get local array base addresses
   sndArray->ESMC_LocalArrayGetBaseAddr(&sArray);
@@ -2540,23 +2542,24 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutAllGatherVI - Perform MPI-like Allgatherv of equally-sized integer data arrays across a layout
+// !IROUTINE:  ESMC_DELayoutAllGatherV - Perform MPI-like Allgatherv of equally-sized data arrays across a layout
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutAllGatherVI(
+      int ESMC_DELayout::ESMC_DELayoutAllGatherV(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      int *sndArray,           // in  - integer send data array
-      int  sndLen,             // in  - length of send data array
-      int *rcvArray,           // out - gathered data array
-      int *rcvLen,             // in  - array of receive data array lengths
-      int *rcvDispls) {        // in  - array of rcvArray displacements
+      void *sndArray,           // in  - integer send data array
+      int   sndLen,             // in  - length of send data array
+      void *rcvArray,           // out - gathered data array
+      int  *rcvLen,             // in  - array of receive data array lengths
+      int  *rcvDispls,          // in  - array of rcvArray displacements
+      ESMC_DataKind kind) {     // in  - data kind of the arrays
 //
 // !DESCRIPTION:
-//    Perform MPI-like Allgatherv of integer data arrays
+//    Perform MPI-like Allgatherv of data arrays
 //    across all {\tt ESMC\_DE}s in a layout
 //
 //EOP
@@ -2568,34 +2571,34 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // perform Allgatherv operation across all DEs in the layout
   int rc;
   rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
-                                ESMF_KIND_I4);
+                                kind);
   if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutAllGatherVI() error" << endl;
+    cout << "ESMC_DELayoutAllGatherV() error" << endl;
   }
 
   return(rc);
 
- } // end ESMC_DELayoutAllGatherVI
+ } // end ESMC_DELayoutAllGatherV
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutAllGatherVF - Perform MPI-like Allgatherv of equally-sized integer data arrays across a layout
+// !IROUTINE:  ESMC_DELayoutAllGatherV - Perform MPI-like Allgatherv of equally-sized local data arrays across a layout
 //
 // !INTERFACE:
-      int ESMC_DELayout::ESMC_DELayoutAllGatherVF(
+      int ESMC_DELayout::ESMC_DELayoutAllGatherV(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      float *sndArray,         // in  - integer send data array
-      int  sndLen,             // in  - length of send data array
-      float *rcvArray,         // out - gathered data array
-      int *rcvLen,             // in  - array of receive data array lengths
-      int *rcvDispls) {        // in  - array of rcvArray displacements
+      ESMC_LocalArray *sndArray,    // in  - integer send data array
+      int  sndLen,                  // in  - length of send data array
+      ESMC_LocalArray *rcvArray,    // out - gathered data array
+      int *rcvLen,                  // in  - array of receive data array lengths
+      int *rcvDispls) {             // in  - array of rcvArray displacements
 //
 // !DESCRIPTION:
-//    Perform MPI-like Allgatherv of integer data arrays
+//    Perform MPI-like Allgatherv of local data arrays
 //    across all {\tt ESMC\_DE}s in a layout
 //
 //EOP
@@ -2604,17 +2607,31 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   // TODO: make comm public and invoke directly rather than at DELayout level ?
   //       (does not depend on any DELayout knowledge)
 
-  // perform Allgatherv operation across all DEs in the layout
+  void *sArray, *rArray;
+  ESMC_DataKind kind;
   int rc;
-  rc = comm.ESMC_CommAllGatherV(sndArray, sndLen, rcvArray, rcvLen, rcvDispls,
-                                ESMF_KIND_R4);
+
+  if (sndArray == ESMC_NULL_POINTER || rcvArray == ESMC_NULL_POINTER) {
+    return(ESMF_FAILURE);
+  }
+
+  // get local array kinds (assume send and receive kinds are the same)
+  kind = sndArray->ESMC_LocalArrayGetKind();
+
+  // get local array base addresses
+  sndArray->ESMC_LocalArrayGetBaseAddr(&sArray);
+  rcvArray->ESMC_LocalArrayGetBaseAddr(&rArray);
+
+  // perform Allgatherv operation across all DEs in the layout
+  rc = comm.ESMC_CommAllGatherV(sArray, sndLen, rArray, rcvLen, rcvDispls,
+                                kind);
   if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutAllGatherVF() error" << endl;
+    cout << "ESMC_DELayoutAllGatherV() error" << endl;
   }
 
   return(rc);
 
- } // end ESMC_DELayoutAllGatherVF
+ } // end ESMC_DELayoutAllGatherV
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -2656,7 +2673,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
     }
   }
 
-  // cout << "ESMC_DELayoutAllReduce localResult = " << localResult << endl;
+   cout << "ESMC_DELayoutAllReduce localResult = " << localResult << endl;
 
   // perform reduction operation across all DEs in the layout
   int rc;
