@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2004/08/03 19:33:52 nscollins Exp $
+# $Id: makefile,v 1.7 2004/12/08 17:53:11 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -10,11 +10,11 @@ CFLAGS    =
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = 
+SOURCEC	  = ESMC_Test.C
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_Init.F90 ESMF.F90
+SOURCEF	  = ESMF_Init.F90 ESMF.F90 ESMF_Test.F90
 # if you have .h include files in this dir, list them all on the line below.
-SOURCEH	  = 
+SOURCEH	  = ESMC_Test.h
 # list all .h files which should be copied to common include dir
 STOREH	  = 
 
@@ -42,13 +42,8 @@ DIRS	  =
 # if you have class files which need to be compiled in a particular
 # order, list the dependencies below, with no rules following.
 #
-# e.g.:
-#
-# ESMF_Field.o:   ESMF_DataArray.o
-#
-# ESMF_Bundle.o:  ESMF_Field.o
-#
 
+ESMF_Test.o:  ESMF_Init.o 
 
 ESMF.o:  ESMF_Init.o 
 
