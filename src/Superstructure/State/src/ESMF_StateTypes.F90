@@ -1,0 +1,369 @@
+! $Id: ESMF_StateTypes.F90,v 1.1 2004/11/02 00:00:16 nscollins Exp $
+!
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research, 
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+! Laboratory, University of Michigan, National Centers for Environmental 
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!==============================================================================
+!
+#define ESMF_FILENAME "ESMF_StateTypes.F90"
+!
+!     ESMF StateTypes module
+      module ESMF_StateTypesMod
+!
+!==============================================================================
+!
+! This file contains the State class definitions. 
+!  Other files in this directory contain the variou State class methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+!------------------------------------------------------------------------------
+#include "ESMF.h"
+!------------------------------------------------------------------------------
+!BOPI
+! !MODULE: ESMF_StateMod - Data exchange between components
+!
+! !DESCRIPTION:
+!
+! The code in this file implements the Fortran function and subroutine 
+!  interfaces to the {\tt State} class and associated data structures.
+!
+!
+! !USES:
+      use ESMF_BaseTypesMod
+      use ESMF_BaseMod
+      use ESMF_IOSpecMod
+      use ESMF_LogErrMod
+      use ESMF_VMMod
+      use ESMF_ArrayMod
+      use ESMF_ArrayGetMod
+      use ESMF_FieldMod
+      use ESMF_BundleMod
+      use ESMF_XformMod
+      implicit none
+
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+      private
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateType
+!     !   Enumerated value for storing Import or Export State type.
+!
+      type ESMF_StateType
+      sequence
+      !private
+         integer :: state
+      end type
+
+      type(ESMF_StateType), parameter :: &
+                ESMF_STATE_IMPORT   = ESMF_StateType(1), &
+                ESMF_STATE_EXPORT   = ESMF_StateType(2), &
+                ESMF_STATE_UNSPECIFIED = ESMF_StateType(3), &
+                ESMF_STATE_INVALID  = ESMF_StateType(4)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateItemType
+!     !   Each entry in the list of states is either simply a name placeholder
+!     !   or an actual data item - Bundle, Field, Array, or State. 
+!
+      type ESMF_StateItemType
+      sequence
+      !private
+         integer :: ot
+      end type
+
+      type(ESMF_StateItemType), parameter :: &
+                ESMF_STATEITEM_BUNDLE = ESMF_StateItemType(1), &
+                ESMF_STATEITEM_FIELD = ESMF_StateItemType(2), &
+                ESMF_STATEITEM_ARRAY = ESMF_StateItemType(3), &
+                ESMF_STATEITEM_STATE = ESMF_StateItemType(4), &
+                ESMF_STATEITEM_NAME = ESMF_StateItemType(5), &
+                ESMF_STATEITEM_INDIRECT = ESMF_StateItemType(6), &
+                ESMF_STATEITEM_UNKNOWN = ESMF_StateItemType(7)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_NeededFlag
+!     !   For an Export State if all data which can potentially be created is
+!     !   not needed, this flag can be used to mark data which does not need
+!     !   to be created by the Component.
+!
+      type ESMF_NeededFlag
+      sequence
+      !private
+         integer :: needed
+      end type
+
+      type(ESMF_NeededFlag), parameter :: &
+                ESMF_NEEDED = ESMF_NeededFlag(1), &
+                ESMF_NOTNEEDED = ESMF_NeededFlag(2)
+
+!------------------------------------------------------------------------------
+!     ! ESMF_ReadyFlag
+!
+      type ESMF_ReadyFlag
+      sequence
+      !private
+         integer :: ready
+      end type
+
+      type(ESMF_ReadyFlag), parameter :: &
+                ESMF_READYTOWRITE = ESMF_ReadyFlag(1), &
+                ESMF_READYTOREAD = ESMF_ReadyFlag(2), &
+                ESMF_NOTREADY = ESMF_ReadyFlag(3)
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_ReqForRestartFlag
+!
+      type ESMF_ReqForRestartFlag
+      sequence
+      !private
+         integer :: required4restart
+      end type
+
+      type(ESMF_ReqForRestartFlag), parameter :: &
+                ESMF_REQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(1), &
+                ESMF_NOTREQUIRED_FOR_RESTART = ESMF_ReqForRestartFlag(2)
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_ValidFlag
+!
+      type ESMF_ValidFlag
+      sequence
+      !private
+         integer :: valid
+      end type
+
+      type(ESMF_ValidFlag), parameter :: &
+                ESMF_VALID = ESMF_ValidFlag(1), &
+                ESMF_INVALID= ESMF_ValidFlag(2), &
+                ESMF_VALIDITYUNKNOWN = ESMF_ValidFlag(3)
+
+
+!------------------------------------------------------------------------------
+!     ! ESMF_DataHolder
+!
+!     ! Make a single data type for Bundles, Fields, and Arrays.
+!     !  The ObjectType is one level up, because this structure is not
+!     !  allocated until it is actually needed.  This is a private type.
+
+!     ! state has to be different because it's a forward reference.
+
+      type ESMF_DataHolder
+#ifndef ESMF_SEQUENCE_BUG
+      sequence
+#endif
+      !private
+          type(ESMF_Bundle) :: bp
+          type(ESMF_Field)  :: fp 
+          type(ESMF_Array)  :: ap
+          type(ESMF_StateClass), pointer  :: spp
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateItem
+!
+!     ! Description of next Data item in list, or simply a name
+!     !  which holds the place for an optional Data item.
+
+      type ESMF_StateItem
+#ifndef ESMF_SEQUENCE_BUG
+      sequence
+#endif
+      !private
+        type(ESMF_StateItemType) :: otype
+        character(len=ESMF_MAXSTR) :: namep
+        type(ESMF_DataHolder), pointer :: datap
+        integer :: indirect_index
+        type(ESMF_NeededFlag) :: needed
+        type(ESMF_ReadyFlag) :: ready
+        type(ESMF_ValidFlag) :: valid
+        type(ESMF_ReqForRestartFlag) :: reqrestart
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_StateClass
+!
+!     ! Internal State data type.
+
+      type ESMF_StateClass
+#ifndef ESMF_SEQUENCE_BUG
+      sequence
+#endif
+      !private
+        type(ESMF_Base) :: base
+        type(ESMF_Status) :: statestatus
+        type(ESMF_StateType) :: st
+        type(ESMF_NeededFlag) :: needed_default
+        type(ESMF_ReadyFlag) :: ready_default
+        type(ESMF_ValidFlag) :: stvalid_default
+        type(ESMF_ReqForRestartFlag) :: reqrestart_default
+        integer :: alloccount
+        integer :: datacount
+        type(ESMF_StateItem), dimension(:), pointer :: datalist
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_State
+!
+!     ! State data type.
+
+      type ESMF_State
+#ifndef ESMF_SEQUENCE_BUG
+      sequence
+#endif
+      !private
+#ifndef ESMF_NO_INITIALIZERS
+        type(ESMF_StateClass), pointer :: statep => NULL()
+#else
+        type(ESMF_StateClass), pointer :: statep
+#endif
+      end type
+
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+      public ESMF_State
+      public ESMF_StateItemType, ESMF_STATEITEM_BUNDLE, ESMF_STATEITEM_FIELD, &
+                                   ESMF_STATEITEM_ARRAY, ESMF_STATEITEM_STATE, &
+                                   ESMF_STATEITEM_NAME
+      public ESMF_StateType, ESMF_STATE_IMPORT, ESMF_STATE_EXPORT, &
+                                   ESMF_STATE_UNSPECIFIED
+      public ESMF_NeededFlag, ESMF_NEEDED, &
+                                   ESMF_NOTNEEDED
+      public ESMF_ReadyFlag,  ESMF_READYTOWRITE, &
+                                   ESMF_READYTOREAD, &
+                                   ESMF_NOTREADY
+      public ESMF_ReqForRestartFlag,  ESMF_REQUIRED_FOR_RESTART, &
+                                   ESMF_NOTREQUIRED_FOR_RESTART
+      public ESMF_ValidFlag,  ESMF_VALID, &
+                                   ESMF_INVALID, &
+                                   ESMF_VALIDITYUNKNOWN
+
+      ! only public for other files in the state class (should be friend)
+      public ESMF_StateClass, ESMF_StateItem, ESMF_DataHolder
+      public ESMF_STATEITEM_INDIRECT, ESMF_STATEITEM_UNKNOWN
+      public ESMF_STATE_INVALID
+!------------------------------------------------------------------------------
+      public operator(.eq.), operator(.ne.)
+!EOPI
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_StateTypes.F90,v 1.1 2004/11/02 00:00:16 nscollins Exp $'
+
+!==============================================================================
+! 
+! INTERFACE BLOCKS
+!
+!==============================================================================
+
+interface operator (.eq.)
+ module procedure ESMF_oteq
+ module procedure ESMF_imexeq
+ module procedure ESMF_needeq
+ module procedure ESMF_redyeq
+ module procedure ESMF_valideq
+end interface
+
+interface operator (.ne.)
+ module procedure ESMF_otne
+ module procedure ESMF_imexne
+ module procedure ESMF_needne
+ module procedure ESMF_redyne
+ module procedure ESMF_validne
+end interface
+
+
+!==============================================================================
+
+      contains
+
+!==============================================================================
+
+! functions to compare two ESMF types to see if they're the same or not
+
+function ESMF_oteq(s1, s2)
+ logical ESMF_oteq
+ type(ESMF_StateItemType), intent(in) :: s1, s2
+
+ ESMF_oteq = (s1%ot .eq. s2%ot)
+end function
+
+function ESMF_otne(s1, s2)
+ logical ESMF_otne
+ type(ESMF_StateItemType), intent(in) :: s1, s2
+
+ ESMF_otne = (s1%ot .ne. s2%ot)
+end function
+
+
+function ESMF_imexeq(s1, s2)
+ logical ESMF_imexeq
+ type(ESMF_StateType), intent(in) :: s1, s2
+
+ ESMF_imexeq = (s1%state .eq. s2%state)
+end function
+
+function ESMF_imexne(s1, s2)
+ logical ESMF_imexne
+ type(ESMF_StateType), intent(in) :: s1, s2
+
+ ESMF_imexne = (s1%state .ne. s2%state)
+end function
+
+
+function ESMF_needeq(s1, s2)
+ logical ESMF_needeq
+ type(ESMF_NeededFlag), intent(in) :: s1, s2
+
+ ESMF_needeq = (s1%needed .eq. s2%needed)
+end function
+
+function ESMF_needne(s1, s2)
+ logical ESMF_needne
+ type(ESMF_NeededFlag), intent(in) :: s1, s2
+
+ ESMF_needne = (s1%needed .ne. s2%needed)
+end function
+
+
+function ESMF_redyeq(s1, s2)
+ logical ESMF_redyeq
+ type(ESMF_ReadyFlag), intent(in) :: s1, s2
+
+ ESMF_redyeq = (s1%ready .eq. s2%ready)
+end function
+
+function ESMF_redyne(s1, s2)
+ logical ESMF_redyne
+ type(ESMF_ReadyFlag), intent(in) :: s1, s2
+
+ ESMF_redyne = (s1%ready .ne. s2%ready)
+end function
+
+
+function ESMF_valideq(s1, s2)
+ logical ESMF_valideq
+ type(ESMF_ValidFlag), intent(in) :: s1, s2
+
+ ESMF_valideq = (s1%valid .eq. s2%valid)
+end function
+
+function ESMF_validne(s1, s2)
+ logical ESMF_validne
+ type(ESMF_ValidFlag), intent(in) :: s1, s2
+
+ ESMF_validne = (s1%valid .ne. s2%valid)
+end function
+
+
+
+end module ESMF_StateTypesMod
+
