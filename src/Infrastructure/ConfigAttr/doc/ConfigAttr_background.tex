@@ -1,4 +1,4 @@
-% $Id: ConfigAttr_background.tex,v 1.6 2002/10/03 19:57:16 nscollins Exp $
+% $Id: ConfigAttr_background.tex,v 1.7 2002/10/08 16:49:40 cdeluca Exp $
 
 \section{Background}
 As part of their state Earth system models need to maintain ad-hoc sets of
@@ -6,7 +6,7 @@ parameters. These parameters can be related to physical terms (for example
 mixing coefficients, length scales or time scales) or can be related
 to computational aspects (for example directory names, output and input
 locations). Some of these parameters will be explicitly set by user
-input at runtime, others may be automatically determmined from system
+input at runtime, others may be automatically determined from system
 defaults or from other utilities. The parameters may be single valued
 or may be multi-dimensional. Parameters can be of various types float,
 integer, logical, string.
@@ -33,7 +33,7 @@ also use the configuration attributes element.
 Compile time and runtime setting of parameters will initially be through
 text based specification. Extensive automatic systems for choosing parameters or GUI
 based systems for manipulating parameters are not required within the 
-initial ESMF development scope. Such systems are however highly desireable
+initial ESMF development scope. Such systems are however highly desirable
 and it is envisaged that such systems would one-day interface with ESMF applications
 in part through the configuration attributes services.
 Another area that is outside the present scope of the initial ESMF project is automated,
@@ -43,14 +43,14 @@ top of ESMF.
 
 \subsection{Related material}
  Property sheets used in many component based programming environments, for example
-the property sheet notion  systems like Visual C++ (see the {\bf CPropertySheet} and
+the property sheet notion in systems like Visual C++ (see the {\bf CPropertySheet} and
 {\bf CPropertyPage} MFC classes), .NET and J2SE (see {\bf java.beans} class), have parallels with the concepts that need to 
 be supported here. All the ESMF JMC codes contain services of this nature with widely 
-varying degress of spohistication (see for exmple MOM documentation, MITgcm documentation, CCSM documentation). 
+varying degress of sophistication (see for exmple MOM documentation, MITgcm documentation, CCSM documentation). 
 In most cases the existing ESMF JMC codes use the Fortran NAMELIST facility. The 
 widely used dot files and dot subdirectories used for all manner of application configuration on UNIX 
 platforms also perform similar roles (see for example the {\bf pine} mail reader
 documentation or the {\bf OpenSSH} package documentation) to some of the functions envisaged here, as does the Windows 
-registry concept (see {\bf Windows registry} doumentation).
+registry concept (see {\bf Windows registry} documentation).
 
 
