@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2002/12/12 16:16:11 nscollins Exp $
+# $Id: makefile,v 1.4 2003/01/23 20:24:07 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -14,7 +14,7 @@ SOURCEC	  =  ESMC_Array.C ESMC_ArrayMap.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  =  
 # if you have .h include files in this dir, list them all on the line below.
-SOURCEH	  = 
+STOREH	  = ESMC_Alloc.h ESMC_Array.h
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
