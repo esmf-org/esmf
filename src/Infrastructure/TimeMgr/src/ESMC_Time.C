@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.79 2005/02/07 23:38:19 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.80 2005/04/02 00:23:02 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.79 2005/02/07 23:38:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.80 2005/04/02 00:23:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -634,6 +634,47 @@
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_TimeIsLeapYear - Determines if this time is in a leap year
+//
+// !INTERFACE:
+      bool ESMC_Time::ESMC_TimeIsLeapYear(
+//
+// !RETURN VALUE:
+//    bool true if this time is in a leap year, false otherwise.
+//
+// !ARGUMENTS:
+      int *rc) const {    // out - return code
+//
+// !DESCRIPTION:
+//      Determines if this {\tt Time}'s year is a leap year.
+//
+//EOP
+// !REQUIREMENTS:  
+
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_TimeIsLeapYear()"
+
+    // must have a calendar
+    if (this->calendar == ESMC_NULL_POINTER) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+                                            "; calendar is NULL.", rc);
+      return(false);
+    }
+
+    // get the year of this time
+    ESMF_KIND_I8 yy_i8;
+    int rc2 = ESMC_TimeGet((ESMF_KIND_I4 *)ESMC_NULL_POINTER, &yy_i8);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc2, ESMF_ERR_PASSTHRU, rc)) {
+      return(false);
+    }
+
+    // check if it's a leap year within this calendar
+    return(this->calendar->ESMC_CalendarIsLeapYear(yy_i8, rc));
+
+ }  // end ESMC_TimeIsLeapYear
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_TimeIsSameCalendar - Compares 2 ESMC_Time's Calendar types
 //
 // !INTERFACE:
@@ -688,6 +729,9 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+// TODO: Add optional calendar/calendarType arguments; default to 
+//       Gregorian if not specified and no calendar within this given ESMC_Time.
 
  #undef  ESMC_METHOD
  #define ESMC_METHOD "ESMC_TimeSyncToRealTime()"
@@ -1036,6 +1080,15 @@
       return(rc);
     }
 
+    // earliest Julian date representable by the Hatcher algorithm
+    //  is -4712/3/1 == 60 Julian days == 5,184,000 core seconds
+    if (calendar->calendarType == ESMC_CAL_JULIAN &&
+        ESMC_FractionGetw() < 5184000LL) {
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_OBJ_BAD,
+                                 "; Julian time is before -4712/3/1", &rc);
+      return(rc);
+    }
+
     // TODO: other calendar ranges ?
 
     // TODO: valid Timezones ?
@@ -1339,12 +1392,13 @@
         case ESMC_CAL_GREGORIAN:
         case ESMC_CAL_NOLEAP:    // TODO: ?
         case ESMC_CAL_360DAY:    // TODO: ?
-          //  Can be any Monday after the Gregorian reformation of 9/14/1752
+          //  Can be any Monday after the Gregorian reformation of 10/15/1582
           yy_i8=1796; mm=7; dd=4;   // America's 20th birthday was a Monday !
           break;
 
+        case ESMC_CAL_JULIAN:
         case ESMC_CAL_JULIANDAY:
-          //  Can be any Monday before the Gregorian reformation of 9/2/1752
+          //  Can be any Monday before the Julian end of 10/4/1582
           yy_i8=1492; mm=10; dd=29;  // Columbus landed in Cuba on a Monday !
           break;
 
