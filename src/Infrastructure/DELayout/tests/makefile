@@ -1,0 +1,42 @@
+# $Id: makefile,v 1.4 2004/12/17 21:57:25 theurich Exp $ 
+
+ALL:  build_tests
+
+CFLAGS    =
+FFLAGS    =
+SOURCEC	  = 
+SOURCEF	  =
+
+SOURCEH	  = 
+OBJSC	  =  
+OBJSF	  = 
+MANSEC	  = 
+LIBBASE	  = 
+DIRS	  = 
+LOCDIR	  = src/Infrastructure/DELayout/tests
+
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_DELayoutUTest
+
+TESTS_RUN     = RUN_ESMF_DELayoutUTest
+
+TESTS_RUN_UNI = RUN_ESMF_DELayoutUTestUNI
+
+TESTS_RM      =
+
+include ${ESMF_DIR}/makefile
+
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod NULL *.txt stdoutfiles core ESMF_LogFile $(TESTS_BUILD)
+CLOBBERDIRS =
+
+
+#
+# VM
+#
+RUN_ESMF_DELayoutUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
+
+RUN_ESMF_DELayoutUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_DELayoutUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_DELayoutUTest > $(ESMC_TESTDIR)/ESMF_DELayoutUTest.stdout
