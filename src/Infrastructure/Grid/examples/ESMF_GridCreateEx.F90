@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.22 2004/06/17 21:13:28 jwolfe Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.23 2004/06/18 21:54:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
       grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                                        minGlobalCoordPerDim=min, &
                                        maxGlobalCoordPerDim=max, &
-                                       horzStagger=horz_stagger, &
+                                       horzstagger=horz_stagger, &
                                        name=name, rc=rc)
 
       ! distribute the grid
@@ -162,13 +162,13 @@
       ! initialize the grid with the above values
       grid2 = ESMF_GridCreateHorzLatLon(minGlobalCoordPerDim=min, &
                                         delta1=delta1, delta2=delta2, &
-                                        horzStagger=horz_stagger, &
+                                        horzstagger=horz_stagger, &
                                         name=name, rc=rc)
 
       ! add a vertical subgrid to the horizontal grid
       ! note: the vertical subgrid must be added before the grid is
       !      distributed
-      call ESMF_GridAddVertHeight(grid2, delta3, vertStagger=vert_stagger, &
+      call ESMF_GridAddVertHeight(grid2, delta3, vertstagger=vert_stagger, &
                                   rc=rc)
 !EOC
  
