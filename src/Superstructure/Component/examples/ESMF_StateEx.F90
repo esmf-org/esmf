@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.3 2003/02/06 22:18:41 nscollins Exp $
+! $Id: ESMF_StateEx.F90,v 1.4 2003/02/10 16:51:13 nscollins Exp $
 !
 ! Example code for creating States.
 
@@ -16,7 +16,7 @@
     program ESMF_StateExample
     
 !   ! Some common definitions.  This requires the C preprocessor.
-    #include "ESMF.h"
+#include "ESMF.h"
 
 !   ! Other ESMF modules which are needed by States
     use ESMF_IOMod
