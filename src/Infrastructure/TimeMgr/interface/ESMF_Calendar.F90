@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.41 2003/11/11 20:32:41 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.42 2003/11/11 20:40:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -136,7 +136,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.41 2003/11/11 20:32:41 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.42 2003/11/11 20:40:06 eschwab Exp $'
 
 !==============================================================================
 
@@ -499,7 +499,7 @@
 !                               each month. \\
 !          "secondsPerDay"  - print the number of seconds in a day. \\
 !          "secondsPerYear" - print the number of seconds in a year. \\
-!          "daysPerYear"    - print the number of days per year.
+!          "daysPerYear"    - print the number of days per year. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
