@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.41 2003/04/23 21:39:24 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.42 2003/04/24 17:52:22 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.41 2003/04/23 21:39:24 cdeluca Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.42 2003/04/24 17:52:22 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -383,7 +383,7 @@
       subroutine ESMF_DistGridDestroy(distgrid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DistGrid), intent(in) :: distgrid   
+      type(ESMF_DistGrid) :: distgrid   
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
@@ -401,16 +401,39 @@
 !EOP
 ! !REQUIREMENTS: 
 
-      integer :: status=ESMF_SUCCESS               ! Error status
-      logical :: rcpresent=.FALSE.                 ! Return code present
+      integer :: status                            ! Error status
+      logical :: rcpresent                         ! Return code present
 
 !     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
       if(present(rc)) then
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_DELayoutDestroy(distgrid%ptr%layout, status)
+      ! If already destroyed or never created, return ok
+      if (.not. associated(distgrid%ptr)) then
+        print *, "DistGridDestroy called on uninitialized or destroyed DistGrid"
+        if(rcpresent) rc = ESMF_FAILURE   ! should this really be an error?
+        return
+      endif
+
+      ! Destruct all distgrid internals and then free field memory.
+      call ESMF_DistGridDestruct(distgrid, status)
+      ! If error write message and return.
+      if(status .ne. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridDestroy from ESMF_DistGridDestruct"
+        return
+      endif
+
+      deallocate(distgrid%ptr, stat=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridDestroy: DistGrid deallocate"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridDestroy
 
@@ -563,6 +586,13 @@
         rc = ESMF_FAILURE
       endif
 
+!     Error checking for required input   TODO: complete
+!     if (not(associated(layout%ptr))) then
+!       status = ESMF_FAILURE
+!       print *, "ERROR in ESMF_DistGridConstructInternal: unassociated layout"
+!       return
+!     endif
+ 
 !     Initialize the derived type contents
       call ESMF_DistGridConstructNew(distgrid, name, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -661,10 +691,25 @@
 !
 !EOP
 ! !REQUIREMENTS: 
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
 
-!
-!  code goes here
-!
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call ESMF_DELayoutDestroy(distgrid%ptr%layout, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridDestruct: DELayout destroy"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_DistGridDestruct
 
 !------------------------------------------------------------------------------
