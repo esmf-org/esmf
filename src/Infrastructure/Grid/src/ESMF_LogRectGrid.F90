@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.10 2004/02/03 21:39:12 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.11 2004/02/06 20:11:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.10 2004/02/03 21:39:12 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.11 2004/02/06 20:11:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1209,7 +1209,7 @@
                                                 maxGlobalCoordPerDimUse
       real(ESMF_KIND_R8), dimension(:), pointer :: coordsUse1, coordsUse2, &
                                                    coordsUse3
-      type(ESMF_LocalArray), dimension(:), pointer :: coords
+      type(ESMF_LocalArray), dimension(:), allocatable, target :: coords
       type(ESMF_LogRectGrid), target :: lrgrid
 
 !     Initialize return code
@@ -1335,8 +1335,9 @@
 !     Fill in logRectGrid derived type with subroutine arguments
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
-        lrgrid%coords         = coords
+      !  lrgrid%coords         = coords
       enddo
+      lrgrid%coords         => coords
       grid%gridSpecific%logRectGrid => lrgrid
 
 !     Fill in grid derived type with subroutine arguments
