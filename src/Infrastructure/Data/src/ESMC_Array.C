@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.43 2003/04/24 16:45:44 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.44 2003/04/24 20:56:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.43 2003/04/24 16:45:44 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.44 2003/04/24 20:56:29 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -372,7 +372,7 @@
     ESMC_Array *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
-    if (!needs_dealloc)
+    if (needs_dealloc != ESMF_TF_TRUE)
         return ESMF_SUCCESS;
 
     // if there is an F90 dope vector, we have to call back into fortran
