@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2001/11/28 18:32:45 dneckels Exp $
+# $Id: makefile,v 1.4 2001/11/28 19:55:27 dneckels Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -190,7 +190,7 @@ SCRIPTS    = maint/addlinks maint/builddist maint/buildlinks maint/wwwman \
 	     maint/xclude maint/crontab  \
 	     maint/autoftp include/foldinclude/generateincludes
 
-alldoc: chkdir_doc
+alldoc: chkdir_doc tex
 	-@echo "Building All Documentation"
 	-@echo "========================================="
 	-@${OMAKE} tex dvi pdf html
