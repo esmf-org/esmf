@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.50 2003/07/25 17:17:53 dneckels Exp $
+! $Id: ESMF_Base.F90,v 1.51 2003/07/25 17:20:49 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -351,7 +351,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.50 2003/07/25 17:17:53 dneckels Exp $'
+               '$Id: ESMF_Base.F90,v 1.51 2003/07/25 17:20:49 dneckels Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1090,6 +1090,8 @@ end function
      integer :: stride2      ! stride in second direction
 !
 ! !DESCRIPTION:
+!    Convenience function for adding a 2d domain.  Avoids the 
+!    unnecessary hassle of creating a domain, etc...
 !
 !EOP
       type(ESMF_Domain) :: newdomain          ! temp variable to use
@@ -1127,6 +1129,8 @@ end function
      integer :: stride3      ! stride in third direction
 !
 ! !DESCRIPTION:
+!    Convenience function for adding a 3d domain.  Avoids the 
+!    unnecessary hassle of creating a domain, etc...
 !
 !EOP
       type(ESMF_Domain) :: newdomain          ! temp variable to use
