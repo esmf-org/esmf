@@ -51,3 +51,24 @@ ESMF\_LOG\_UPPER: upper bound for fortran unit number
 #endif
 #define ESMF_LOG_UPPER 100
 
+#if 0
+!BOP
+ESMF\_LOG\_INFO: integer to signify log info
+!EOP
+#endif
+#define ESMF_LOG_INFO 0
+
+#if 0
+!BOP
+ESMF\_LOG\_WARN: integer to signify log warning
+!EOP
+#endif
+#define ESMF_LOG_WARN 1
+
+#if 0
+!BOP
+ESMF\_LOG\_ERR: integer to signify log error
+!EOP
+#endif
+#define ESMF_LOG_ERR 2
+
