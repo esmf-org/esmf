@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.3 2004/05/25 16:55:50 cpboulder Exp $
+ $Id: ESMF_LogMacros.inc,v 1.4 2004/05/25 20:35:56 cpboulder Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,26 +22,29 @@
 #define ESMF_LOGMACROS_INC
 
 #define ESMF_CONTEXT  __LINE__,ESMF_FILENAME,ESMF_METHOD
-
+#define ESMC_CONTEXT  __LINE__,ESMC_FILENAME,ESMC_METHOD
 
 #ifndef ESMF_FILENAME
 #define ESMF_FILENAME __FILE__
 #endif
 
+ifndef ESMC_FILENAME
+#define ESMC_FILENAME __FILE__
+#endif
 
 #define ESMC_LogAllocError(rc) \
-ESMC_LogAllocError(ESMF_CONTEXT,rc)
+ESMC_LogAllocError(ESMC_CONTEXT,rc)
 
 #define ESMC_LogFoundError(status,rc) \
-ESMC_LogFoundError(status,ESMF_CONTEXT,rc)
+ESMC_LogFoundError(status,ESMC_CONTEXT,rc)
 
 #define ESMC_LogMsgAllocError(msg,rc) \
-ESMC_LogMsgAllocError(msg,ESMF_CONTEXT,rc)
+ESMC_LogMsgAllocError(msg,ESMC_CONTEXT,rc)
 
 #define ESMC_LogMsgFoundError(status,msg,rc) \
-ESMC_LogMsgFoundError(status,msg,ESMF_CONTEXT,rc)
+ESMC_LogMsgFoundError(status,msg,ESMC_CONTEXT,rc)
 
 #define ESMC_LogWrite(msg,logtype) \
-ESMC_LogWrite(msg,logtype,ESMF_CONTEXT)
+ESMC_LogWrite(msg,logtype,ESMC_CONTEXT)
 
 #endif
