@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.2 2004/05/05 15:37:20 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.3 2004/05/07 12:09:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,10 +76,14 @@
         type(ESMF_ArrayDataMap) :: adm
 
         ! plus the additional information we need about vector ordering
-        ! on individual data items
+        ! on individual data items and the relative locations of the data
+        ! in each grid cell.
         type(ESMF_Logical) :: isScalar                  ! scalar values
         integer, dimension(ESMF_MAXDIM) :: rankLength   ! len if > scalar
         type(ESMF_Interleave) :: interleave             ! if > scalar
+        type(ESMF_RelLoc) :: horzRelloc                 ! data item loc/cell
+        type(ESMF_RelLoc) :: vertRelloc                 ! data item loc/cell
+
       end type
 
 
@@ -106,8 +110,8 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version =  &
-             '$Id: ESMF_FieldDataMap.F90,v 1.2 2004/05/05 15:37:20 nscollins Exp $'
+     character(*), parameter, private :: version =  &
+         '$Id: ESMF_FieldDataMap.F90,v 1.3 2004/05/07 12:09:19 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -145,15 +149,12 @@
 ! end of declarations & definitions
 !------------------------------------------------------------------------------
 
-
       contains
-
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section includes the FieldDataMap Init and Invalidate routines
-!
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -173,33 +174,33 @@
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!     Initialize the contents of a {\tt ESMF\_FieldDataMap} type.
+!  Initialize the contents of a {\tt ESMF\_FieldDataMap} type.
 !
-!     The arguments are:
-!     \begin{description} 
-!     \item [datamap]
-!           An {\tt ESMF\_FieldDataMap} object.
-!     \item [dataIorder] 
-!           An {\tt ESMF\_IndexOrder} object which describes one of several
-!           predefined Index Orders.  There is another version of the Init
-!           call which allows a more general form of the indexing; this is
-!           a convenience routine for the most common cases.
-!     \item [{[counts]}]
-!           If the {\tt ESMF\_Array} object is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may each have an 
-!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
-!           and create the appropriately sized {\tt ESMF\_Array} for each
-!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!           can be obtained from the {\tt ESMF\_Array} and this argument
-!           is unneeded.  If the ranks of the grid and array are the same, 
-!           this is also unneeded.
-!     \item [{[horzRelloc]}]
-!           Relative location of data per grid cell/vertex in the horzontal
-!           grid.
-!     \item [{[vertRelloc]}]
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!	\end{description}
+!  The arguments are:
+!  \begin{description} 
+!  \item [datamap]
+!        An {\tt ESMF\_FieldDataMap} object.
+!  \item [dataIorder] 
+!        An {\tt ESMF\_IndexOrder} object which describes one of several
+!        predefined Index Orders.  There is another version of the Init
+!        call which allows a more general form of the indexing; this is
+!        a convenience routine for the most common cases.
+!  \item [{[counts]}]
+!        If the {\tt ESMF\_Array} object is a higher rank than the
+!        {\tt ESMF\_Grid}, the additional dimensions may each have an 
+!        item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!        call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
+!        and create the appropriately sized {\tt ESMF\_Array} for each
+!        {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!        can be obtained from the {\tt ESMF\_Array} and this argument
+!        is unneeded.  If the ranks of the grid and array are the same, 
+!        this is also unneeded.
+!  \item [{[horzRelloc]}]
+!        Relative location of data per grid cell/vertex in the horzontal
+!        grid.
+!  \item [{[vertRelloc]}]
+!        Relative location of data per grid cell/vertex in the vertical grid.
+!  \end{description}
 !
 !EOP
 ! !REQUIREMENTS: internal
@@ -214,92 +215,30 @@
             rcpresent=.TRUE.
             rc = ESMF_FAILURE    
         else
-          rcpresent = .FALSE.
+            rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the datamap
-
-        ! set up the mapping of grid indicies to array indicies
-        datamap%adm%dataDimOrder(:) = 0
-
-        select case (dataIorder%iorder)
-          case(ESMF_INDEX_I%iorder) 
-            datamap%adm%dataRank = 1
-            datamap%adm%dataDimOrder(1) = 1
-
-          case(ESMF_INDEX_IJ%iorder)
-            datamap%adm%dataRank=2
-            datamap%adm%dataDimOrder(1) = 1
-            datamap%adm%dataDimOrder(2) = 2
-
-          case(ESMF_INDEX_JI%iorder) 
-            datamap%adm%dataRank=2
-            datamap%adm%dataDimOrder(1) = 2
-            datamap%adm%dataDimOrder(2) = 1
-
-          case(ESMF_INDEX_IJK%iorder)
-            datamap%adm%dataRank=3
-            datamap%adm%dataDimOrder(1) = 1
-            datamap%adm%dataDimOrder(2) = 2
-            datamap%adm%dataDimOrder(3) = 3
-
-          case(ESMF_INDEX_JIK%iorder)
-            datamap%adm%dataRank=3
-            datamap%adm%dataDimOrder(1) = 2
-            datamap%adm%dataDimOrder(2) = 1
-            datamap%adm%dataDimOrder(3) = 3
-
-          case(ESMF_INDEX_KJI%iorder)
-            datamap%adm%dataRank=3
-            datamap%adm%dataDimOrder(1) = 3
-            datamap%adm%dataDimOrder(2) = 2
-            datamap%adm%dataDimOrder(3) = 1
-
-          case(ESMF_INDEX_IKJ%iorder)
-            datamap%adm%dataRank=3
-            datamap%adm%dataDimOrder(1) = 1
-            datamap%adm%dataDimOrder(2) = 3
-            datamap%adm%dataDimOrder(3) = 2
-
-          case(ESMF_INDEX_JKI%iorder)
-            datamap%adm%dataRank=3
-            datamap%adm%dataDimOrder(1) = 2
-            datamap%adm%dataDimOrder(2) = 3
-            datamap%adm%dataDimOrder(3) = 1
-
-          case(ESMF_INDEX_KIJ%iorder)
-            datamap%adm%dataRank=3
-            datamap%adm%dataDimOrder(1) = 3
-            datamap%adm%dataDimOrder(2) = 1
-            datamap%adm%dataDimOrder(3) = 2
-
-          case default 
-            print *, "ERROR: ESMF_FieldDataMapInit - unrecognized grid index order"
-            return
-        end select
+        ! initialize the contents of the internal array datamap
+        call ESMF_ArrayDataMapInit(datamap%adm, dataIorder, counts, status)
+        if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
         datamap%rankLength = 0
 
-        datamap%adm%dataNonGridCounts(:) = 1
-        if (present(counts)) then
-          datamap%adm%dataNonGridCounts(1:size(counts)) = counts(:)
-        endif
-
         if (present(horzRelloc)) then
-          datamap%adm%horzRelloc = horzRelloc
+          datamap%horzRelloc = horzRelloc
         else
-          datamap%adm%horzRelloc = ESMF_CELL_CENTER
+          datamap%horzRelloc = ESMF_CELL_CENTER
         endif
 
         if (present(vertRelloc)) then
-          datamap%adm%vertRelloc = vertRelloc
+          datamap%vertRelloc = vertRelloc
         else
-          datamap%adm%vertRelloc = ESMF_CELL_UNDEFINED
+          datamap%vertRelloc = ESMF_CELL_UNDEFINED
         endif
 
         ! mark object as initialized and ready to be used
-        datamap%adm%status = ESMF_STATE_READY
+        datamap%status = ESMF_STATE_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -323,34 +262,36 @@
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
-!      ESMF routine to initialize the contents of a {\tt ESMF\_FieldDataMap} type.
+!   ESMF routine to initialize the contents of a {\tt ESMF\_FieldDataMap} type.
 !
-!     The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           An {\tt ESMF\_FieldDataMap} object.
-!     \item [dataRank] 
-!	    The number of the array dimensions.
-!     \item [dataIndices] 
-!	    TODO: Add description           
-!     \item [{[counts]}]
-!           If the {\tt ESMF\_Array} object is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may each have an
-!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
-!           and create the appropriately sized {\tt ESMF\_Array} for each
-!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!           can be obtained from the {\tt ESMF\_Array} and this argument
-!           is unneeded.  If the ranks of the grid and array are the same,
-!           this is also unneeded.
-!     \item [{[horzRelloc]}]
-!           Relative location of data per grid cell/vertex in the horzontal
-!           grid.
-!     \item [{[vertRelloc]}]
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+! The arguments are:
+! \begin{description}
+! \item [datamap]
+!       An {\tt ESMF\_FieldDataMap} object.
+! \item [dataRank] 
+!       The number of the array dimensions.
+! \item [dataIndices] 
+!	The Grid rank which corresponds to this Array rank.  If
+!       there is no correspondance (because the Array has a higher rank
+!       than the Grid), the value must be 0.  The default is a 1-to-1
+!       mapping of Grid to Array ranks.
+! \item [{[counts]}]
+!       If the {\tt ESMF\_Array} object is a higher rank than the
+!       {\tt ESMF\_Grid}, the additional dimensions may each have an
+!       item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!       call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
+!       and create the appropriately sized {\tt ESMF\_Array} for each
+!       {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!       can be obtained from the {\tt ESMF\_Array} and this argument
+!       is unneeded.  If the ranks of the grid and array are the same,
+!       this is also unneeded.
+! \item [{[horzRelloc]}]
+!       Relative location of data per grid cell/vertex in the horzontal grid.
+! \item [{[vertRelloc]}]
+!       Relative location of data per grid cell/vertex in the vertical grid.
+! \item [{[rc]}]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+! \end{description}
 !
 !EOPI
 ! !REQUIREMENTS: internal
@@ -368,32 +309,22 @@
           rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the datamap
-
-        ! set the defaults
-        datamap%adm%dataDimOrder(:) = 0
-
-        ! now overwrite with what the user passed in
-        datamap%adm%dataRank = dataRank
-        datamap%adm%dataDimOrder(1:size(dataIndices)) = dataIndices
+        ! initialize the contents of the internal array datamap
+        call ESMF_ArrayDataMapInit(datamap%adm, dataRank, dataIndices, &
+                                   counts, status)
+        if (status .ne. ESMF_SUCCESS) return
 
         ! assume scalar data and use the relloc the caller gave
         datamap%rankLength = 0
 
-        ! counts for dimensions not aligned with the grid
-        datamap%adm%dataNonGridCounts(:) = 1
-        if (present(counts)) then
-          datamap%adm%dataNonGridCounts(1:size(counts)) = counts(:)
-        endif
+        datamap%horzRelloc = ESMF_CELL_CENTER
+        if (present(horzRelloc)) datamap%horzRelloc = horzRelloc
 
-        datamap%adm%horzRelloc = ESMF_CELL_CENTER
-        if (present(horzRelloc)) datamap%adm%horzRelloc = horzRelloc
-
-        datamap%adm%vertRelloc = ESMF_CELL_UNDEFINED
-        if (present(vertRelloc)) datamap%adm%vertRelloc = vertRelloc
+        datamap%vertRelloc = ESMF_CELL_UNDEFINED
+        if (present(vertRelloc)) datamap%vertRelloc = vertRelloc
 
         ! mark object as initialized and ready to be used
-        datamap%adm%status = ESMF_STATE_READY
+        datamap%status = ESMF_STATE_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -428,7 +359,9 @@
 !EOP
 ! !REQUIREMENTS: internal
 
-        datamap%adm%status = ESMF_STATE_INVALID
+        call ESMF_ArrayDataMapSetInvalid(datamap%adm, rc)
+
+        datamap%status = ESMF_STATE_INVALID
 
         ! If user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -446,50 +379,50 @@
 ! !IROUTINE: ESMF_FieldDataMapGet - Get object from a FieldDataMap type.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapGet(datamap, dataRank, dataIorder, counts, &
+      subroutine ESMF_FieldDataMapGet(datamap, dataRank, dataIndices, counts, &
                                  horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap), intent(in) :: datamap  
       integer, intent(out), optional :: dataRank    
-      integer, dimension(:), intent(out), optional :: dataIorder
+      integer, dimension(:), intent(out), optional :: dataIndices
       integer, dimension(:), intent(out), optional :: counts 
       type(ESMF_RelLoc), intent(out), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(out), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!   Return info about the current {\tt ESMF\_FieldDataMap} described by this object.
+!   Return info about the current {\tt ESMF\_FieldDataMap} described 
+!   by this object.
 !
-!   The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           An {\tt ESMF\_FieldDataMap} object.
-!     \item [{[datarank]}]
-!	    The number of array dimensions.
-!     \item [{[dataIorder]}] 
-!           An {\tt ESMF\_IndexOrder} object which describes one of several
-!           predefined Index Orders.  There is another version of the Init
-!           call which allows a more general form of the indexing; this is
-!           a convenience routine for the most common cases.
-!     \item [{[counts]}]
-!           If the {\tt ESMF\_Array} object is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may each have an
-!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
-!           and create the appropriately sized {\tt ESMF\_Array} for each
-!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!           can be obtained from the {\tt ESMF\_Array} and this argument
-!           is unneeded.  If the ranks of the grid and array are the same,
-!           this is also unneeded.
-!     \item [{[horzRelloc]}]
-!           Relative location of data per grid cell/vertex in the horzontal
-!           grid.
-!     \item [{[vertRelloc]}]
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+!  The arguments are:
+!  \begin{description}
+!  \item [datamap]
+!        An {\tt ESMF\_FieldDataMap} object.
+!  \item [{[datarank]}]
+!	 The number of array dimensions.
+!  \item [{[dataIndices]}]
+!        The Grid rank which corresponds to this Array rank.  If
+!        there is no correspondance (because the Array has a higher rank
+!        than the Grid), the value will be 0.
+!  \item [{[counts]}]
+!        If the {\tt ESMF\_Array} object is a higher rank than the
+!        {\tt ESMF\_Grid}, the additional dimensions may each have an
+!        item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!        call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
+!        and create the appropriately sized {\tt ESMF\_Array} for each
+!        {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!        can be obtained from the {\tt ESMF\_Array} and this argument
+!        is unneeded.  If the ranks of the grid and array are the same,
+!        this is also unneeded.
+!  \item [{[horzRelloc]}]
+!        Relative location of data per grid cell/vertex in the horzontal
+!        grid.
+!  \item [{[vertRelloc]}]
+!        Relative location of data per grid cell/vertex in the vertical grid.
+!  \item [{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
 !
 !
 !EOP
@@ -498,7 +431,6 @@
         ! local vars
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
-        integer :: i, dimlength
 
         ! initialize return code
         status = ESMF_FAILURE
@@ -509,29 +441,15 @@
         endif
 
 
-        if (present(dataRank)) dataRank = datamap%adm%dataRank
+        ! get any values from the internal array datamap
+        call ESMF_ArrayDataMapGet(datamap%adm, dataRank, dataIndices, &
+                                  counts, status)
+        if (status .ne. ESMF_SUCCESS) return
 
-        if (present(dataIorder)) then
-           dimlength = size(dataIorder,1)
-           if (dimlength .lt. datamap%adm%dataRank) then
-             print *, "ESMF_FieldDataMapGet: dataIorder array too short for dataRank"
-             return
-           endif
+        ! TODO: need to add rankLength and vector information here
 
-           do i=1, dimlength
-             dataIorder(i) = datamap%adm%dataDimOrder(i)
-           enddo
-        endif
-
-        if (present(counts)) then
-           dimlength = size(counts)
-           do i=1, dimlength
-             counts(i) = datamap%adm%dataNonGridCounts(i)
-           enddo
-        endif
-
-        if (present(horzRelloc)) horzRelloc = datamap%adm%horzRelloc
-        if (present(vertRelloc)) vertRelloc = datamap%adm%vertRelloc
+        if (present(horzRelloc)) horzRelloc = datamap%horzRelloc
+        if (present(vertRelloc)) vertRelloc = datamap%vertRelloc
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -543,50 +461,54 @@
 ! !IROUTINE: ESMF_FieldDataMapSet - Set a FieldDataMap type object.
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapSet(datamap, dataRank, dataIorder, counts,  &
+      subroutine ESMF_FieldDataMapSet(datamap, dataRank, dataIndices, counts, &
                                  horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap), intent(inout) :: datamap  
       integer, intent(in), optional :: dataRank    
-      integer, dimension(:), intent(in), optional :: dataIorder
+      integer, dimension(:), intent(in), optional :: dataIndices
       integer, dimension(:), intent(in), optional :: counts 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!   Set info about the given {\tt ESMF\_FieldDataMap}.
+! Set info about the given {\tt ESMF\_FieldDataMap}.
 !
-!   The arguments are:
-!     \begin{description}
-!     \item [datamap]
-!           An {\tt ESMF\_FieldDataMap} object.
-!     \item [{[datarank]}]
-!           The number of array dimensions.
-!     \item [{[dataIorder]}]
-!           An {\tt ESMF\_IndexOrder} object which describes one of several
-!           predefined Index Orders.  There is another version of the Init
-!           call which allows a more general form of the indexing; this is
-!           a convenience routine for the most common cases.
-!     \item [{[counts]}]
-!           If the {\tt ESMF\_Array} object is a higher rank than the
-!           {\tt ESMF\_Grid}, the additional dimensions may each have an
-!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
-!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
-!           and create the appropriately sized {\tt ESMF\_Array} for each
-!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
-!           can be obtained from the {\tt ESMF\_Array} and this argument
-!           is unneeded.  If the ranks of the grid and array are the same,
-!           this is also unneeded.
-!     \item [{[horzRelloc]}]
-!           Relative location of data per grid cell/vertex in the horzontal
-!           grid.
-!     \item [{[vertRelloc]}]
-!           Relative location of data per grid cell/vertex in the vertical grid.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
+! The arguments are:
+!  \begin{description}
+!  \item [datamap]
+!        An {\tt ESMF\_FieldDataMap} object.
+!  \item [{[datarank]}]
+!        The number of array dimensions.
+!  \item [{[dataIndices]}]
+!	 The Grid rank which corresponds to this Array rank.  
+!        If there is no correspondance (because the Array has a higher rank
+!        than the Grid), the value must be 0.  The default is a 1-to-1
+!        mapping of Grid to Array ranks.
+!  \item [{[dataIorder]}]
+!        An {\tt ESMF\_IndexOrder} object which describes one of several
+!        predefined Index Orders.  There is another version of the Init
+!        call which allows a more general form of the indexing; this is
+!        a convenience routine for the most common cases.
+!  \item [{[counts]}]
+!        If the {\tt ESMF\_Array} object is a higher rank than the
+!        {\tt ESMF\_Grid}, the additional dimensions may each have an
+!        item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!        call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_FieldDataMap}
+!        and create the appropriately sized {\tt ESMF\_Array} for each
+!        {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!        can be obtained from the {\tt ESMF\_Array} and this argument
+!        is unneeded.  If the ranks of the grid and array are the same,
+!        this is also unneeded.
+!  \item [{[horzRelloc]}]
+!        Relative location of data per grid cell/vertex in the horzontal grid.
+!  \item [{[vertRelloc]}]
+!        Relative location of data per grid cell/vertex in the vertical grid.
+!  \item [{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
 !
 !
 !EOP
@@ -595,7 +517,6 @@
         ! local vars
         integer :: status                     ! local error status
         logical :: rcpresent                  ! did user specify rc?
-        integer :: i, dimlength
 
         ! initialize return code
         status = ESMF_FAILURE
@@ -606,30 +527,15 @@
         endif
 
 
-        if (present(dataRank)) datamap%adm%dataRank = dataRank
+        ! set the internal array map
+        call ESMF_ArrayDataMapSet(datamap%adm, dataRank, dataIndices, &
+                                   counts, status)
+        if (status .ne. ESMF_SUCCESS) return
 
-        if (present(dataIorder)) then
-           dimlength = size(dataIorder,1)
-           if (dimlength .lt. datamap%adm%dataRank) then
-             print *, "ESMF_FieldDataMapSet: dataIorder array too short for dataRank"
-             return
-           endif
+        ! TODO: add the vector information here
 
-           do i=1, dimlength
-             datamap%adm%dataDimOrder(i) = dataIorder(i)
-           enddo
-        endif
-
-        if (present(counts)) then
-           datamap%adm%dataNonGridCounts(:) = 1
-           dimlength = size(counts)
-           do i=1, dimlength
-             datamap%adm%dataNonGridCounts(i) = counts(i)
-           enddo
-        endif
-
-        if (present(horzRelloc)) datamap%adm%horzRelloc = horzRelloc
-        if (present(vertRelloc)) datamap%adm%vertRelloc = vertRelloc
+        if (present(horzRelloc)) datamap%horzRelloc = horzRelloc
+        if (present(vertRelloc)) datamap%vertRelloc = vertRelloc
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -852,7 +758,7 @@
         endif
 
 
-        if (datamap%adm%status .ne. ESMF_STATE_READY) return
+        if (datamap%status .ne. ESMF_STATE_READY) return
             
         ! TODO: add more validation here - for index numbers, etc
  
@@ -890,40 +796,23 @@
 !EOP
 ! !REQUIREMENTS:
 
-        integer :: i, j
         character (len = ESMF_MAXSTR) :: str
 
         print *, "FieldDataMap print:"
-        if (datamap%adm%status .ne. ESMF_STATE_READY) then
+        if (datamap%status .ne. ESMF_STATE_READY) then
           print *, "Uninitialized or Invalid object"
           if (present(rc)) rc = ESMF_FAILURE
           return
         endif
 
         ! individual data item information
-        print *, " Data rank = ", datamap%adm%dataRank
-        print *, " Data Index Order and Lengths for non-Grid Indices:"
-        j = 1
-        do i=1, ESMF_MAXDIM
-            if (datamap%adm%dataDimOrder(i) .eq. 0) then
-               print *, i, "Non-Grid index, length = ", datamap%adm%dataNonGridCounts(j)
-               j = j + 1
-            else
-               print *, i, "Grid index ", datamap%adm%dataDimOrder(i)
-            endif
-        enddo
-        if (datamap%adm%dataRank .gt. 1) then
-          print *, "  length of each dimension"
-          do i=1, datamap%adm%dataRank
-              print *, i, datamap%rankLength(i)
-          enddo
-        endif
+        call ESMF_ArrayDataMapPrint(datamap%adm, options, rc)
 
-        call ESMF_RelLocString(datamap%adm%horzRelloc, str, rc)
+        call ESMF_RelLocString(datamap%horzRelloc, str, rc)
         print *, "  Horizontal Relative location = ", trim(str)
-        call ESMF_RelLocString(datamap%adm%vertRelloc, str, rc)
+        call ESMF_RelLocString(datamap%vertRelloc, str, rc)
         print *, "  Vertical Relative location = ", trim(str)
-        ! TODO: this needs to become an InterleavePrint() call
+       ! TODO: this needs to become an InterleavePrint() call
        !call ESMF_InterleaveString(datamap%interleave%il_type, str, rc)
        !print *, "  Interleave type = ", trim(str), ".  Start,end,stride = ",  &
        !                                 datamap%interleave%il_start, & 
