@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.35 2005/02/23 05:10:02 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.36 2005/03/02 06:24:33 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -364,7 +364,7 @@ extern "C" {
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
-      " was compiled with ESMF_PTHREADS=off and thus does not support"
+      " was compiled with ESMF_PTHREADS=OFF and thus does not support"
       " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
@@ -414,7 +414,7 @@ extern "C" {
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
-      " was compiled with ESMF_PTHREADS=off and thus does not support"
+      " was compiled with ESMF_PTHREADS=OFF and thus does not support"
       " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 
@@ -464,7 +464,7 @@ extern "C" {
     if (localrc) localrc = ESMF_FAILURE;
     else localrc = ESMF_SUCCESS;
     if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"- this ESMF library"
-      " was compiled with ESMF_PTHREADS=off and thus does not support"
+      " was compiled with ESMF_PTHREADS=OFF and thus does not support"
       " ESMF-threading!", rc)) return;
     //debug: (*ptr)->vmkplan_print();
     // Allocate as many ESMC_VM instances as this PET will spawn 

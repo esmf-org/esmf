@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.19 2005/03/02 04:56:14 theurich Exp $
+#  $Id: build_rules.mk,v 1.20 2005/03/02 06:24:33 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -110,7 +110,7 @@ O_FOPTFLAGS		= -O2 -w
 
 #
 # conditionally add pthread compiler flags
-ifeq ($(ESMF_PTHREADS),on)
+ifeq ($(ESMF_PTHREADS),ON)
 G_COPTFLAGS    +=  -pthread
 G_FOPTFLAGS    +=  -pthread -reentrancy threaded
 O_COPTFLAGS    +=  -pthread
@@ -137,7 +137,7 @@ C_CXXF90LIBS       = -L/usr/opt/F55A/usr/shlib -lfor -lrt
 #C_CXXF90LIBS       = -L/usr/opt/F551/usr/shlib -lfor -lrt
 
 # conditionally add pthread compiler flags
-ifeq ($(ESMF_PTHREADS),on)
+ifeq ($(ESMF_PTHREADS),ON)
 C_CXXF90LD   +=  -pthread
 C_F90CXXLD   +=  -pthread -reentrancy threaded
 endif

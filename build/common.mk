@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.98 2005/03/01 21:14:33 nscollins Exp $
+#  $Id: common.mk,v 1.99 2005/03/02 06:24:33 theurich Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -89,9 +89,12 @@ endif
 
 # Conditionally turn off ESMF's pthread feature set and use pthread_stubs
 ifndef ESMF_PTHREADS
-export ESMF_PTHREADS = on
+export ESMF_PTHREADS = ON
 endif
-ifeq ($(ESMF_PTHREADS),off)
+ifneq ($(ESMF_PTHREADS),ON)
+export ESMF_PTHREADS = OFF
+endif
+ifeq ($(ESMF_PTHREADS),OFF)
 CPPFLAGS       += -DESMF_NO_PTHREADS
 endif
 PTHREAD_STUB_INCLUDE=-I${ESMF_DIR}/src/Infrastructure/stubs/pthread

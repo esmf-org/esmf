@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.27 2005/02/23 05:20:31 theurich Exp $
+# $Id: build_rules.mk,v 1.28 2005/03/02 06:24:33 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -175,7 +175,7 @@ CXX_CC  +=  $(INTEL_C_LIB_FLAG)
 C_FC    +=
 
 # conditionally add pthread compiler flags
-ifeq ($(ESMF_PTHREADS),on)
+ifeq ($(ESMF_PTHREADS),ON)
 C_CC    +=  -pthread
 CXX_CC  +=  -pthread
 C_FC    +=  -threads
