@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.44 2003/04/25 22:10:06 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.45 2003/04/28 17:45:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,6 +148,8 @@
     public ESMF_DistGridGlobalToLocalIndex
     public ESMF_DistGridHalo
     public ESMF_DistGridAllGather
+    public ESMF_DistGridGather
+    public ESMF_DistGridScatter
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
  
@@ -156,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.44 2003/04/25 22:10:06 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.45 2003/04/28 17:45:53 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1934,6 +1936,215 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridAllGather
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridGather - Create 1 copy of an N-way decomposed Array
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGather(distgrid, srcarray, deid, dstarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), intent(in) :: distgrid
+      type(ESMF_Array), intent(inout) :: srcarray
+      integer, intent(in) :: deid
+      type(ESMF_Array), intent(out) :: dstarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Gather an array onto the specified DE number.  All other DEs return
+!     an invalid array object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be used.
+!     \item[srcarray]
+!          N-way decomposed {\tt Array} to be gathered into a single 
+!          full {\tt Array) on one DE.
+!     \item[deid] 
+!          DE number in this layout to gather Array onto.
+!     \item[dstarray]
+!          1 copy on the specified DE in the layout of full {\tt Array} 
+!          containing collected data.  Note that this {\tt Array} is 
+!          not meaningful in a {\tt Field} object anymore unless it
+!          is redistributed, for example with a Scatter operation.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
+      integer :: rank, i, j
+      integer, dimension(:), allocatable :: decompids
+      type(ESMF_AxisIndex), dimension(:), allocatable :: AI_exc, AI_tot, AI_array
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Get Array rank to determine size of some local arrays
+      call ESMF_ArrayGet(srcarray, rank=rank, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridGather: array get"
+        return
+      endif
+
+!     Allocate local axis index arrays
+      allocate(decompids(rank))
+      allocate(AI_exc(rank))
+      allocate(AI_tot(rank))
+      allocate(AI_array(rank))
+
+!     Get array axis indices
+      call ESMF_ArrayGetAxisIndex(srcarray, AI_array, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridGather: array get"
+        return
+      endif
+
+!     Set decompids and local axis indices based on mapping of Array to Grid
+      do i = 1,rank
+        decompids(i) = 0
+        AI_exc(i) = AI_array(i)
+        AI_tot(i) = AI_array(i)
+        do j = 1,ESMF_MAXGRIDDIM
+          if (AI_array(i)%decomp .eq. j) then
+            decompids(i) = j
+            AI_exc(i) = distgrid%MyDE%lcellexc_index(j)
+            AI_tot(i) = distgrid%MyDE%lcelltot_index(j)
+          endif
+        enddo
+      enddo
+
+!     Call Array method with DistGrid AxisIndices
+      call ESMF_ArrayGather(srcarray, distgrid%layout, decompids, &
+                                     AI_exc, AI_tot, deid, dstarray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridGather: ArrayGather failed"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGather
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridScatter - Create an N-way decomposed Array from 1 Array
+
+! !INTERFACE:
+      subroutine ESMF_DistGridScatter(distgrid, deid, srcarray, &
+                                                       dimorder, dstarray, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType), intent(in) :: distgrid
+      integer, intent(in) :: deid
+      type(ESMF_Array), intent(inout) :: srcarray
+      integer, dimension(:), intent(in) :: dimorder
+      type(ESMF_Array), intent(out) :: dstarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Scatter an array from the specified DE number to all DEs in the layout. 
+!     The {\tt srcarray} argument will be ignored for all but the specified
+!     DE.  The decomposition of the grid will determine how the array is
+!     decomposed.  The {\tt dimorder} input controls how the dimension of the
+!     input array are decomposed over the grid.   The destination arrays are
+!     appropriate to be added as data to a {\tt Field} using this {\tt Grid}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid] 
+!          Class to be used.
+!     \item[deid] 
+!          Integer DE number containing the source {\tt Array}.
+!     \item[srcarray]
+!          A single undecomposed {\tt Array} located on the specified DE.
+!          It will be N-way decomposed onto all other DEs in the layout.
+!     \item[dimorder] 
+!          Integer array specifying how the dimensions of the input array
+!          are to be decomposed over the layout.  0 means no decomposition
+!          for the corresponding dimension, and 1 to N indicate the mapping
+!          to the {\tt Grid} dimensions.
+!     \item[dstarray]
+!          Returned N-way decomposed data, different on each DE.
+!          These {\tt Array}s are ready to add to a {\tt Field} object
+!          which uses the same {\tt PhysGrid} and a {\tt DataMap}
+!          which corresponds to the given {\tt dimorder}.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  XXXn.n, YYYn.n
+
+      integer :: status                              ! Error status
+      logical :: rcpresent                           ! Return code present
+      integer :: rank, i, j
+      integer, dimension(:), allocatable :: decompids
+      type(ESMF_AxisIndex), dimension(:), allocatable :: AI_exc, AI_tot, AI_array
+
+!     Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     Get Array rank to determine size of some local arrays
+      call ESMF_ArrayGet(srcarray, rank=rank, rc=status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridScatter: array get"
+        return
+      endif
+
+!     Allocate local axis index arrays
+      allocate(decompids(rank))
+      allocate(AI_exc(rank))
+      allocate(AI_tot(rank))
+      allocate(AI_array(rank))
+
+!     Get array axis indices
+      call ESMF_ArrayGetAxisIndex(srcarray, AI_array, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridScatter: array get"
+        return
+      endif
+
+!     Set decompids and local axis indices based on mapping of Array to Grid
+      do i = 1,rank
+        decompids(i) = 0
+        AI_exc(i) = AI_array(i)
+        AI_tot(i) = AI_array(i)
+        do j = 1,ESMF_MAXGRIDDIM
+          if (AI_array(i)%decomp .eq. j) then
+            decompids(i) = j
+            AI_exc(i) = distgrid%MyDE%lcellexc_index(j)
+            AI_tot(i) = distgrid%MyDE%lcelltot_index(j)
+          endif
+        enddo
+      enddo
+
+!     Call Array method with DistGrid AxisIndices
+      call ESMF_ArrayScatter(srcarray, distgrid%layout, decompids, &
+                                     AI_exc, AI_tot, deid, dstarray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_DistGridScatter: ArrayScatter failed"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridScatter
 
 !------------------------------------------------------------------------------
 !BOP

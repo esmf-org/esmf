@@ -1,5 +1,3 @@
-// $Id: ESMC_Array.C,v 1.44 2003/04/24 20:56:29 nscollins Exp $
-//
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -37,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.44 2003/04/24 20:56:29 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.45 2003/04/28 17:45:17 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1072,6 +1070,231 @@
     return rc;
 
  } // end ESMC_ArrayAllGather
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayGather(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DELayout *layout,     // in  - layout (temporarily)
+      int decompids[],           // in  - decomposition identifier for each
+                                 //       axis for the Array
+      int size_decomp,           // in  - size of decomp array
+      ESMC_AxisIndex *AI_exc,    // in  - axis indices for the exclusive domain
+                                 //       of the Array
+      ESMC_AxisIndex *AI_tot,    // in  - axis indices for the total domain of
+                                 //       the Array
+      int deid,                  // in  - the DE to collect the data on
+      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
+//
+// !DESCRIPTION:
+//      
+//     
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+    int i, j, k, l, m;     // general counter vars
+    int thisde;
+    int i_exc, j_exc;
+    float *fp, *fp0;
+    int *ip, *ip0;
+    int counts[ESMF_MAXDIM];
+    ESMC_Array *gathered;
+
+//  allocate global-sized array on 1 DE and fill with distributed data
+//  from each current Array
+    int gsize=1;
+    int lsize=1;
+    for (i=0; i<rank; i++) {
+      gsize = gsize * AI_exc[i].max;
+      lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
+      counts[i] = AI_exc[i].max;
+    }
+
+    layout->ESMC_DELayoutGetDEID(&thisde);
+
+    // switch based on datatype  TODO: this might be a good place to use templates
+    switch (this->type) {
+      case ESMF_DATA_REAL:
+        // create array with global data buffer
+        if (thisde == deid) {
+          gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+          // allocate global array from this size
+          fp = (float *)(gathered->base_addr);
+
+          // call layoutgather to fill this array
+          fp0 = (float *)this->base_addr;
+
+          // call something which will do a receive
+          layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, fp);
+        } else {
+          // call something which will do a send
+          layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, fp);
+        } 
+
+      break;
+
+      case ESMF_DATA_INTEGER:
+        // create array with global data
+        if (thisde == deid) {
+          gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+          // allocate global array from this size
+          ip = (int *)(gathered->base_addr);
+
+          // call layoutgather to fill this array
+
+          // call something which will do a receive
+          ip0 = (int *)this->base_addr;
+          layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, ip);
+        } else {
+          // call something which will do a send
+          layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, ip);
+        }
+      break;
+      default:
+        printf("no code to handle data type %d yet\n", this->type);
+      break;
+    }
+
+    gathered->ESMC_ArrayPrint();
+
+    if (thisde == deid)
+       *Array_out = gathered;
+    else
+       *Array_out = NULL;
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_ArrayGather
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ArrayScatter - scatter a single Array onto N distributed DEs
+//
+// !INTERFACE:
+      int ESMC_Array::ESMC_ArrayScatter(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_DELayout *layout,     // in  - layout (temporarily)
+      int decompids[],           // in  - decomposition identifier for each
+                                 //       axis for the Array
+      int size_decomp,           // in  - size of decomp array
+      ESMC_AxisIndex *AI_exc,    // in  - axis indices for the exclusive domain
+                                 //       of the Array
+      ESMC_AxisIndex *AI_tot,    // in  - axis indices for the total domain of
+                                 //       the Array
+      int deid,                  // in  - the DE the original Array is on
+      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
+//
+// !DESCRIPTION:
+//      
+//     
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+    int i, j, k, l, m;     // general counter vars
+    int thisde;
+    int i_exc, j_exc;
+    float *fp, *fp0;
+    int *ip, *ip0;
+    int counts[ESMF_MAXDIM];
+    ESMC_Array *scattered;
+
+#if 0
+    // TODO: this is simply a copy of gather - it needs to be fleshed out
+    // and completed.
+
+//  allocate global-sized array on 1 DE and fill with distributed data
+//  from each current Array
+    int gsize=1;
+    int lsize=1;
+    for (i=0; i<rank; i++) {
+      gsize = gsize * AI_exc[i].max;
+      lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
+      counts[i] = AI_exc[i].max;
+    }
+
+    layout->ESMC_DELayoutGetDEID(&thisde);
+
+    // switch based on datatype  TODO: this might be a good place to use templates
+    switch (this->type) {
+      case ESMF_DATA_REAL:
+        // create array with global data buffer
+        if (thisde == deid) {
+          scattered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+          // allocate global array from this size
+          fp = (float *)(scattered->base_addr);
+
+          // call layoutscatter to fill this array
+          fp0 = (float *)this->base_addr;
+
+          // call something which will do a receive
+          layout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, fp);
+        } else {
+          // call something which will do a send
+          layout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, fp);
+        } 
+
+      break;
+
+      case ESMF_DATA_INTEGER:
+        // create array with global data
+        if (thisde == deid) {
+          scattered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
+          // allocate global array from this size
+          ip = (int *)(scattered->base_addr);
+
+          // call layoutscatter to fill this array
+
+          // call something which will do a receive
+          ip0 = (int *)this->base_addr;
+          layout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, ip);
+        } else {
+          // call something which will do a send
+          layout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
+                                            AI_exc, AI_tot, ip);
+        }
+      break;
+      default:
+        printf("no code to handle data type %d yet\n", this->type);
+      break;
+    }
+
+    scattered->ESMC_ArrayPrint();
+
+    *Array_out = scattered;
+    rc = ESMF_SUCCESS;
+#endif
+
+    *Array_out = NULL;
+    rc = ESMF_FAILURE;
+
+    return rc;
+
+ } // end ESMC_ArrayScatter
 
 
 //-----------------------------------------------------------------------------

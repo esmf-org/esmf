@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.19 2003/04/24 23:31:41 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.20 2003/04/28 17:45:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -189,7 +189,9 @@
    public ESMF_FieldReduce             ! Global reduction operations
    !public ESMF_FieldTranspose         ! Transpose operation
    public ESMF_FieldHalo               ! Halo updates
-   public ESMF_FieldAllGather          ! Construct N copies of the data array
+   public ESMF_FieldAllGather          ! Construct N copies of N data arrays
+   public ESMF_FieldGather             ! Construct 1 copy of N data arrays
+   public ESMF_FieldScatter            ! Construct N copies of 1 data array
    public ESMF_FieldRegrid             ! Regridding and interpolation
    public ESMF_FieldRoute              ! Redistribute existing array data
 
@@ -210,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.19 2003/04/24 23:31:41 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.20 2003/04/28 17:45:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2002,6 +2004,7 @@
 !           Field containing data to be gathered.
 !     \item [array] 
 !           Newly created array containing the collected data.
+!           It is the size of the entire undecomposed grid.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2014,7 +2017,7 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: ftypep              ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
-      integer :: i, gridrank, datarank, thisdim
+      integer :: i, gridrank, datarank, thisdim, thislength
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
    
@@ -2050,12 +2053,10 @@
           thisdim = dimorder(i)
           if (thisdim .eq. 0) cycle
      
-          ! TODO: this needs to be hidden behind a method to get & set
-          axis(i)%l = 0
-          axis(i)%r = dimlengths(thisdim)
-          axis(i)%max = dimlengths(thisdim)
-          axis(i)%decomp = thisdim
-          axis(i)%gstart = 0
+          thislength = dimlengths(thisdim)
+     
+          call ESMF_AxisIndexInit(axis(i), 0, thislength, thislength, &
+                                                         thisdim, 0, rc=status)
      
       enddo
 
@@ -2067,8 +2068,7 @@
       endif 
 
       ! Call Grid method to perform actual work
-      call ESMF_GridAllGather(field%ftypep%grid, &
-                              field%ftypep%localfield%localdata, &
+      call ESMF_GridAllGather(ftypep%grid, ftypep%localfield%localdata, &
                               array, status)
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldAllGather: Grid AllGather returned failure"
@@ -2079,6 +2079,200 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldAllGather
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldGather - Data Gather operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldGather(field, destination_de, array, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field                 
+      integer, intent(in) :: destination_de
+      type(ESMF_Array), intent(out) :: array
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Call {\tt Grid} routines to perform a Gather operation over the data
+!     in a {\tt Field}.  If the Field is decomposed over N DEs, this routine
+!     returns a copy of the entire collected data Array on the specified
+!     destination DE number.  On all other DEs, there is no return Array.
+!
+!     \begin{description}
+!     \item [field] 
+!           Field containing data to be gathered.
+!     \item [destination_de] 
+!           Destination DE number where the Gathered Array is to be returned.
+!     \item [array] 
+!           Newly created array containing the collected data on the
+!           specified DE.  It is the size of the entire undecomposed grid.
+!           On all other DEs this return is an invalid object.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
+      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: dimorder(ESMF_MAXDIM)   
+      integer :: dimlengths(ESMF_MAXDIM)   
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ftypep = field%ftypep
+
+      ! Query the datamap and set info for grid so it knows how to
+      !  match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldGather: DataMapGet returned failure"
+        return
+      endif 
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+                                               counts=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldGather: ArrayGet returned failure"
+        return
+      endif 
+
+      ! Set the axis info on the array to pass thru to DistGrid
+      do i=1, gridrank
+          thisdim = dimorder(i)
+          if (thisdim .eq. 0) cycle
+
+          thislength = dimlengths(thisdim)
+     
+          call ESMF_AxisIndexInit(axis(i), 0, thislength, thislength, &
+                                                         thisdim, 0, rc=status)
+     
+      enddo
+
+      ! Attach this info to the array
+      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, axis, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldGather: ArraySetAxisIndex returned failure"
+        return
+      endif 
+
+      ! Call Grid method to perform actual work
+      call ESMF_GridGather(ftypep%grid, ftypep%localfield%localdata, &
+                                        destination_de, array, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldGather: Grid Gather returned failure"
+        return
+      endif 
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGather
+
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldScatter - Data Scatter operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldScatter(array, source_de, field, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Array), intent(inout) :: array
+      integer, intent(in) :: source_de
+      type(ESMF_Field), intent(inout) :: field                 
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Call {\tt Grid} routines to perform a Scatter operation over the data
+!     in an {\tt Array}, returning it as the data array in a {\tt Field}.  
+!     If the Field is decomposed over N DEs, this routine
+!     takes a single array on the specified DE and returns a decomposed copy
+!     on each of the N DEs, as the Array associated with the given empty Field.
+!
+!     \begin{description}
+!     \item [array] 
+!           Input Array containing the collected data.
+!           It must be the size of the entire undecomposed grid.
+!     \item [source_de]
+!           Integer DE number where the data to be Scattered is located.  The
+!           {\tt Array} input is ignored on all other DEs.
+!     \item [field] 
+!           Empty Field containing Grid which will correspond to the data 
+!           in the array which will be scattered.  When this routine returns
+!           each Field will contain a valid data array containing the 
+!           subset of the decomposed data.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
+      type(ESMF_Array) :: dstarray                ! Destination array
+      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: dimorder(ESMF_MAXDIM)   
+      integer :: dimlengths(ESMF_MAXDIM)   
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ftypep = field%ftypep
+
+      ! Query the datamap and set info for grid so it knows how to
+      !  match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldScatter: DataMapGet returned failure"
+        return
+      endif 
+
+      ! Call Grid method to perform actual work
+      call ESMF_GridScatter(field%ftypep%grid, source_de, array, &
+                                       dimorder, dstarray, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldScatter: Grid Scatter returned failure"
+        return
+      endif 
+
+      ! TODO: do we need to set dimorder here?  should datamap be an input
+      !  to this routine, or specified at create time?   or should this be
+      !  a field create method?
+      ftypep%localfield%localdata = dstarray
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldScatter
 
 
 

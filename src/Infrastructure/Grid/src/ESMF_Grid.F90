@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.45 2003/04/25 18:10:04 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.46 2003/04/28 17:45:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -133,6 +133,8 @@
     public ESMF_GridSetRegionID
     public ESMF_GridHalo
     public ESMF_GridAllGather
+    public ESMF_GridGather
+    public ESMF_GridScatter
     public ESMF_GridValidate
     public ESMF_GridPrint
     !public ESMF_GridSearch
@@ -205,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.45 2003/04/25 18:10:04 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.46 2003/04/28 17:45:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2789,6 +2791,141 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridAllGather
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGather - Data Gather operation on a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGather(grid, srcarray, deid, dstarray, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(inout) :: srcarray
+      integer, intent(in) :: deid
+      type(ESMF_Array), intent(out) :: dstarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Call {\tt DistGrid} routines to perform a Gather operation over the 
+!     data in a {\tt Grid}.  It returns the data in the {\tt dstarray}.
+!
+!     \begin{description}
+!     \item [grid]
+!           Grid on which data is defined.
+!     \item [srcarray]
+!           Array containing data to be gathered.  The data inside the
+!           array is not altered, but annotation is attached to the array
+!           for later use (thus the intent must be 'inout'.)
+!     \item [deid]
+!           Destination DE number to gather array onto.  The {\tt dstarray}
+!           return object is only valid on this DE.  On all other DEs in this
+!           layout the {\tt dstarray} return is an invalid {\tt Array}.
+!     \item [dstarray]
+!           Array containing the resulting data on DE {\tt deid}.  On all other
+!           DE numbers in this it is an invalid array.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Call DistGrid method to perform actual work
+      call ESMF_DistGridGather(grid%ptr%distgrid%ptr, srcarray, deid, &
+                                                             dstarray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in GridGather: DistGrid Gather returned failure"
+        return
+      endif
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGather
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridScatter - Data Scatter operation on a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridScatter(grid, deid, srcarray, dimorder, dstarray, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: deid
+      type(ESMF_Array), intent(inout) :: srcarray
+      integer, dimension(:), intent(in) :: dimorder
+      type(ESMF_Array), intent(out) :: dstarray
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Call {\tt DistGrid} routines to perform a Scatter operation over the 
+!     data in a {\tt Grid}.  It returns the data in the {\tt dstarray}.
+!
+!     \begin{description}
+!     \item [grid]
+!           Grid on which output data will be defined.
+!     \item [deid]
+!           Destination DE number to scatter array from.  The {\tt srcarray}
+!           input object is only valid on this DE.  On all other DEs in this
+!           layout the {\tt srcarray} argument is ignored.
+!     \item [srcarray]
+!           Array containing data to be scattered.  The data inside the
+!           array is not altered, but annotation is attached to the array
+!           for later use (thus the intent must be 'inout'.)
+!     \item [dimorder]
+!           Integer dimension list same length as rank of srcarray, specifying 
+!           how to spread dimensions of input array to output arrays.
+!           0 indicates no decomposition, 1 to Ndims indicate index order.
+!     \item [dstarray]
+!           Array containing the resulting data on DE {\tt deid}.  On all other
+!           DE numbers this is an invalid array.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Call DistGrid method to perform actual work
+      call ESMF_DistGridScatter(grid%ptr%distgrid%ptr, deid, srcarray, &
+                                                    dimorder, dstarray, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in GridScatter: DistGrid Scatter returned failure"
+        return
+      endif
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridScatter
 
 !------------------------------------------------------------------------------
 !BOP
