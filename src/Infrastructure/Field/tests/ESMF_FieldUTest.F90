@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.70 2004/09/17 22:09:02 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.71 2004/09/20 22:56:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.70 2004/09/17 22:09:02 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.71 2004/09/20 22:56:14 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -376,7 +376,6 @@
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !EX_UTest
       f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
       !------------------------------------------------------------------------
