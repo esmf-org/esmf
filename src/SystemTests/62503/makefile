@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.1 2003/04/02 20:52:52 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/04/08 23:09:51 nscollins Exp $ 
 
 ALL: system_tests
 
-CFLAGS    =
+CFLAGS    = 
 FFLAGS    =
 SOURCEC	  = 
 SOURCEF	  =
