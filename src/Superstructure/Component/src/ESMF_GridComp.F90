@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.15 2004/02/11 22:18:22 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.16 2004/02/24 14:56:47 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,6 +42,11 @@
       use ESMF_GridTypesMod
       use ESMF_StateMod
       use ESMF_CompMod
+
+#ifdef ESMF_ENABLE_VM
+      use ESMF_VMMod
+#endif
+      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -95,12 +100,22 @@
       public ESMF_GridCompReadRestart
       !public ESMF_GridCompWrite
       !public ESMF_GridCompRead
+
+#ifdef ESMF_ENABLE_VM
+      ! Procedures for VM-enabled mode      
+      public ESMF_GridCompVMDefMaxThreads
+      public ESMF_GridCompVMDefMinThreads
+      public ESMF_GridCompVMDefMaxPEs
+      ! Return from user-provided routines
+      public ESMF_GridCompReturn
+#endif
+      
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.15 2004/02/11 22:18:22 svasquez Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.16 2004/02/24 14:56:47 theurich Exp $'
 
 !==============================================================================
 !
@@ -116,7 +131,10 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         !module procedure ESMF_GridCompCreateNew
         module procedure ESMF_GridCompCreateConf
-
+#ifdef ESMF_ENABLE_VM
+        module procedure ESMF_GridCompCreateVM
+#endif
+        
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
 !     Gridded {\tt Component}.  The difference is whether an already
@@ -344,9 +362,117 @@
         end function ESMF_GridCompCreateConf
     
 
+#ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine.
+! !IROUTINE: ESMF_GridCompCreateVM -- Create a new Component. - VM enabled
+
+! !INTERFACE:
+      function ESMF_GridCompCreateVM(vm, &
+        name, layout, mtype, grid, clock, config, configfile, petlist, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_GridComp) :: ESMF_GridCompCreateVM
+!
+! !ARGUMENTS:
+      !external :: services
+      type(ESMF_VM), intent(in) :: vm
+      character(len=*), intent(in), optional :: name
+      type(ESMF_DELayout), intent(in), optional :: layout
+      type(ESMF_ModelType), intent(in), optional :: mtype 
+      type(ESMF_Grid), intent(in), optional :: grid
+      type(ESMF_Clock), intent(inout), optional :: clock
+      type(ESMF_Config), intent(in), optional :: config
+      character(len=*), intent(in), optional :: configfile
+      integer(ESMF_KIND_I4), intent(in), optional :: petlist(:)
+      integer, intent(out), optional :: rc 
+!
+! !DESCRIPTION:
+!  Create a new Component and set the decomposition characteristics.
+!
+!  The return value is a new Component.
+!    
+!  The arguments are:
+!  \begin{description}
+!
+!   \item[name]
+!    Component name.
+!
+!   \item[{[name]}]
+!    Component name.
+!
+!   \item[{[layout]}]
+!    Component layout.
+!
+!   \item[{[mtype]}]
+!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
+!
+!   \item[{[grid]}]
+!    Default grid associated with this component.
+!
+!   \item[{[clock]}]
+!    Private clock associated with this component.
+!
+!   \item[{[config]}]
+!    Already created {\tt Config} object.   If specified, takes
+!    priority over filename.
+!  
+!   \item[{[configfile]}]
+!    Component-specific configuration filename. 
+!  
+!   \item[{[rc]}]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        ! local vars
+        type (ESMF_CompClass), pointer :: compclass      ! generic comp
+        integer :: status                                ! local error status
+        logical :: rcpresent                             ! did user specify rc?
+
+        ! Initialize the pointer to null.
+        nullify(ESMF_GridCompCreateVM%compp)
+        nullify(compclass)
+
+        ! Initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! Allocate a new comp class
+        allocate(compclass, stat=status)
+        if(status .NE. 0) then
+          print *, "ERROR in ESMF_GridComponentCreate: Allocate"
+          return
+        endif
+   
+        ! Call construction method to initialize component internals
+        call ESMF_CompConstruct(compclass, ESMF_GRIDCOMPTYPE, name, layout, &
+                                mtype=mtype, configfile=configfile, &
+                                config=config, grid=grid, clock=clock, &
+                                vm=vm, petlist=petlist, rc=status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Component construction error"
+          return
+        endif
+
+        ! Set return values
+        ESMF_GridCompCreateVM%compp => compclass
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_GridCompCreateVM
+#endif    
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompInitialize -- Call the Component's init routine
 
 ! !INTERFACE:
       recursive subroutine ESMF_GridCompInitialize(component, importstate, &
@@ -868,6 +994,247 @@
 
         end subroutine ESMF_GridCompDestroy
 
+
+#ifdef ESMF_ENABLE_VM
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompVMDefMaxThreads - Define a VM for this GridComp
+
+! !INTERFACE:
+  subroutine ESMF_GridCompVMDefMaxThreads(component, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) ::            component
+    integer(ESMF_KIND_I4), intent(in), optional:: max
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
+    integer, intent(out), optional  ::            rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[component] 
+!          gridded component object
+!     \item[{[max]}] 
+!          Maximum threading level
+!     \item[{[pref_intra_process]}] 
+!          Intra process communication preference
+!     \item[{[pref_intra_ssi]}] 
+!          Intra SSI communication preference
+!     \item[{[pref_inter_ssi]}] 
+!          Inter process communication preference
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompVMDefMaxThreads(component%compp, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompVMDefMaxThreads error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_GridCompVMDefMaxThreads
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompVMDefMinThreads - Define a VM for this GridComp
+
+! !INTERFACE:
+  subroutine ESMF_GridCompVMDefMinThreads(component, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) ::            component
+    integer(ESMF_KIND_I4), intent(in), optional:: max
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
+    integer, intent(out), optional  ::            rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[component] 
+!          gridded component object
+!     \item[{[max]}] 
+!          Maximum threading level
+!     \item[{[pref_intra_process]}] 
+!          Intra process communication preference
+!     \item[{[pref_intra_ssi]}] 
+!          Intra SSI communication preference
+!     \item[{[pref_inter_ssi]}] 
+!          Inter process communication preference
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompVMDefMinThreads(component%compp, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompVMDefMinThreads error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_GridCompVMDefMinThreads
+!------------------------------------------------------------------------------
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompVMDefMaxPEs - Define a VM for this GridComp
+
+! !INTERFACE:
+  subroutine ESMF_GridCompVMDefMaxPEs(component, max, &
+    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) ::            component
+    integer(ESMF_KIND_I4), intent(in), optional:: max
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
+    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
+    integer, intent(out), optional  ::            rc           
+!
+! !DESCRIPTION:
+!     Print VM internals
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[component] 
+!          gridded component object
+!     \item[{[max]}] 
+!          Maximum threading level
+!     \item[{[pref_intra_process]}] 
+!          Intra process communication preference
+!     \item[{[pref_intra_ssi]}] 
+!          Intra SSI communication preference
+!     \item[{[pref_inter_ssi]}] 
+!          Inter process communication preference
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompVMDefMaxPEs(component%compp, max, &
+      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompVMDefMaxPEs error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_GridCompVMDefMaxPEs
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridCompReturn - Wait for a GridComp to return
+
+! !INTERFACE:
+  subroutine ESMF_GridCompReturn(component, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_GridComp), intent(in) ::            component
+    integer, intent(out), optional  ::            rc           
+!
+! !DESCRIPTION:
+!     Wait for a GridComp to return
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[component] 
+!          gridded component object
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+    integer :: status                     ! local error status
+    logical :: rcpresent
+
+    ! Initialize return code; assume failure until success is certain       
+    status = ESMF_FAILURE
+    rcpresent = .FALSE.
+    if (present(rc)) then
+      rcpresent = .TRUE.  
+      rc = ESMF_FAILURE
+    endif
+
+    ! call CompClass method
+    call ESMF_CompReturn(component%compp, status)
+    if (status .ne. ESMF_SUCCESS) then
+      print *, "ESMF_CompReturn error"
+      return
+    endif
+
+    ! Set return values
+    if (rcpresent) rc = ESMF_SUCCESS
+ 
+  end subroutine ESMF_GridCompReturn
+!------------------------------------------------------------------------------
+#endif
 
 end module ESMF_GridCompMod
 
