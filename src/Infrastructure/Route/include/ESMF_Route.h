@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.h,v 1.1 2003/03/05 17:04:53 nscollins Exp $
+! $Id: ESMF_Route.h,v 1.2 2003/03/05 17:42:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,12 +20,7 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements constants and macros for the Route...
-!
-! < insert a paragraph or two explaining what you'll find in this file >
-!
-! (all lines below between the !BOP and !EOP markers will be included in 
-!  the automated document processing.)
+! The code in this file implements constants and macros for the Route object.
 !
 !------------------------------------------------------------------------------
 !
@@ -35,22 +30,19 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section contains ...
+! This section contains any needed Macros ...
 !
 !
-
-#define ESMF_RouteMACRO1(arg1, arg2)  foo(arg1, arg2)
 
 
 ! 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section contains ...
+! This section contains any needed #defines
 !
 !
 
-#define ESMF_RouteCONSTANT_FRED   23
 
 
 #endif  // ESMF_Route_H
