@@ -1,4 +1,4 @@
-! $Id: ESMF_App.F90,v 1.1 2003/01/07 21:38:18 nscollins Exp $
+! $Id: ESMF_App.F90,v 1.2 2003/01/07 23:14:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,7 +77,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_App.F90,v 1.1 2003/01/07 21:38:18 nscollins Exp $'
+      '$Id: ESMF_App.F90,v 1.2 2003/01/07 23:14:30 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -94,8 +94,8 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
         module procedure ESMF_AppCreateNew
-        module procedure ESMF_AppCreateSPMD
-        module procedure ESMF_AppCreateMPMD
+        !module procedure ESMF_AppCreateSPMD
+        !module procedure ESMF_AppCreateMPMD
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
