@@ -1,4 +1,4 @@
-// $Id: ESMC_Component.C,v 1.3 2003/01/09 19:51:14 nscollins Exp $
+// $Id: ESMC_Component.C,v 1.4 2003/01/09 22:02:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Component.C,v 1.3 2003/01/09 19:51:14 nscollins Exp $";
+           "$Id: ESMC_Component.C,v 1.4 2003/01/09 22:02:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -215,6 +215,7 @@
 //  code goes here
 //
     printf("ComponentInit method called \n");
+    return ESMF_SUCCESS;
 
  } // end ESMC_ComponentInit
 
@@ -240,6 +241,7 @@
 //  code goes here
 //
     printf("ComponentRun method called \n");
+    return ESMF_SUCCESS;
 
  } // end ESMC_ComponentRun
 
@@ -265,6 +267,7 @@
 //  code goes here
 //
     printf("ComponentFinalize method called \n");
+    return ESMF_SUCCESS;
 
  } // end ESMC_ComponentFinalize
 
