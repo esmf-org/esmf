@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.17 2004/06/11 14:55:34 theurich Exp $
+// $Id: ESMC_DELayout_F.C,v 1.18 2004/06/18 21:53:02 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,6 +121,15 @@ extern "C" {
       ESMC_NOT_PRESENT_FILTER(rc));
   }
   
+  void FTN(c_esmc_delayoutvalidate)(ESMC_DELayout **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_delayoutvalidate()"
+    // Call into the actual C++ method wrapped inside LogErr handling
+    ESMC_LogDefault.ESMC_LogMsgFoundError((*ptr)->ESMC_DELayoutValidate(),
+      ESMF_ERR_PASSTHRU,
+      ESMC_NOT_PRESENT_FILTER(rc));
+  }
+
   // - ESMF-private methods:
        
   void FTN(c_esmc_delayoutallfullreduce)(ESMC_DELayout **ptr, 

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.32 2004/06/11 14:55:34 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.33 2004/06/18 21:53:13 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,6 +122,7 @@ module ESMF_DELayoutMod
   public ESMF_DELayoutGetDEMatch
   
   public ESMF_DELayoutPrint
+  public ESMF_DELayoutValidate
       
 ! - ESMF-private methods:
   public ESMF_DELayoutAllFullReduce
@@ -141,7 +142,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.32 2004/06/11 14:55:34 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.33 2004/06/18 21:53:13 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -778,6 +779,50 @@ contains
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_DELayoutPrint
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DELayoutValidate()"
+!BOP
+! !IROUTINE: ESMF_DELayoutValidate - Validate DELayout internals
+
+! !INTERFACE:
+  subroutine ESMF_DELayoutValidate(delayout, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_DELayout),  intent(in)              :: delayout
+    integer,              intent(out),  optional  :: rc  
+!         
+!
+! !DESCRIPTION:
+!   Validate internal information about the specified {\tt ESMF\_DELayout} object.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[delayout] 
+!          Specified {\tt ESMF\_DELayout} object.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_DELayoutValidate(delayout, localrc)
+    
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_DELayoutValidate
 !------------------------------------------------------------------------------
 
 
