@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErrEx.F90,v 1.9 2004/06/18 16:47:39 svasquez Exp $
+! $Id: ESMF_LogErrEx.F90,v 1.10 2004/06/22 17:36:19 cpboulder Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
     if (.NOT.ret) then
         finalrc = ESMF_FAILURE
     end if
-!BOE
+!BOC
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
 !EOC
@@ -90,14 +90,14 @@
     if (rc1.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-!BOE
+!BOC
     ! LogWrite
     ret= ESMF_LogWrite("Log Write 2", ESMF_LOG_INFO, ESMF_CONTEXT,log=alog)
 !EOC
     if (.NOT.ret) then
         finalrc = ESMF_FAILURE
     end if
-!BOE
+!BOC
     ! LogMsgFoundError
     ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello", ESMF_CONTEXT, &
           rcToReturn=rc2,log=alog)
@@ -105,14 +105,14 @@
     if (.NOT.ret) then
         finalrc = ESMF_FAILURE
     end if
-!BOE
+!BOC
     ! LogMsgFoundAllocError
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE, ESMF_CONTEXT, rc2,alog)
 !EOC
     if (.NOT.ret) then
         finalrc = ESMF_FAILURE
     end if
-!BOE
+!BOC
     ! Close the log.
     call ESMF_LogClose(alog,rc2)
 !EOC
