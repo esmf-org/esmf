@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_st_results.pl,v 1.7 2005/02/15 20:36:00 svasquez Exp $
+# $Id: do_st_results.pl,v 1.8 2005/02/15 21:15:55 svasquez Exp $
 # This script runs at the end of the system tests and "check_results" targets.
 # The purpose is to give the user the results of running the system tests.
 
@@ -129,26 +129,7 @@ getopts("d:b:", \%options);
                 }
                 # Calculate fail_count
                 $fail_count = $st_count - $pass_count;
-                print "\n\n";
-                if ($pass_count == $st_count) {
-			if ($pass_count == 1) {
-                        	print "There is $st_count system test, it passed.\n";
-			}
-			else {
-                        	print "There are $st_count system tests, they all passed.\n";
-			}
-                }
-                elsif ($fail_count == $st_count) {
-			if ($fail_count == 1) {
-                        	print "There is $st_count system test, it failed.\n";
-			}
-			else {
-                        	print "There are $st_count system tests, they all failed.\n";
-			}
-                }
-                else {
-                        print "There are $st_count system tests, $pass_count passed and $fail_count failed.\n";
-                }
+		$system_test_count = $st_count;
                 print "\n\n";
                 if ($pass_count != 0) {
                         #Strip the names of failed system_tests
@@ -225,8 +206,8 @@ getopts("d:b:", \%options);
                 }
                 print "\n\nThe stdout files for the system_tests can be found at:\n";
                 print "$TEST_DIR\n\n";
-                
 
+		print "$system_test_count system tests, $pass_count passed and $fail_count failed.\n\n";
 
 }
 exit 0;
