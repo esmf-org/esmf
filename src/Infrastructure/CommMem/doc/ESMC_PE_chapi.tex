@@ -1,0 +1,118 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\parskip        0pt
+\parindent      0pt
+\baselineskip  11pt
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_PE.h,  Date: Mon Dec  9 19:56:32 MST 2002
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsection{C++:  Class Interface ESMC\_PE - one line general statement about this class (Source File: ESMC\_PE.h)}
+
+
+  
+  
+   The code in this file defines the C++ PE members and declares method 
+   signatures (prototypes).  The companion file ESMC\_PE.C contains
+   the definitions (full code bodies) for the PE methods.
+  
+   < insert a paragraph or two explaining what you'll find in this file >
+  
+  -----------------------------------------------------------------------------
+   
+\bigskip{\em USES:}
+\begin{verbatim}  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+  #include <ESMC_Machine.h>  
+  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
+                         // composites, associates, friends)
+ \end{verbatim}{\sf PUBLIC TYPES:}
+\begin{verbatim}   class ESMC_PEConfig;
+  class ESMC_PE;
+ \end{verbatim}{\sf PRIVATE TYPES:}
+\begin{verbatim} 
+  // class configuration type
+   class ESMC_PEConfig {
+     private:
+  //   < insert resource items here >
+   };
+ 
+  // class declaration type
+  class ESMC_PE : public ESMC_Base {    // inherits from ESMC_Base class
+ 
+    private:
+  //  < insert class members here >  corresponds to type ESMF_PE members
+  //                                 in F90 modules
+     int esmfID;    // ESMF assigned ID
+     int cpuID;     // Hardware assigned processor ID
+     int nodeID;    // hardware assigned associated node ID
+     static int peCount;  // number of PEs instantiated
+ 
+     ESMC_Machine *machine;  // interface to specific platform
+     // neighbor connections ?  see ESMC_Layout.h
+ \end{verbatim}{\sf PUBLIC MEMBER FUNCTIONS:}
+\begin{verbatim}   public:
+  // the following method applies to a shallow class
+     int ESMC_PEInit(void);
+     int ESMC_PEInit(int esmfid, int cpuid, int nodeid);
+ 
+  // optional configuration methods
+      int ESMC_PEGetConfig(ESMC_PEConfig *config) const;
+      int ESMC_PESetConfig(const ESMC_PEConfig *config);
+ 
+  // accessor methods for class members
+     int ESMC_PEGetEsmfID(int *id) const;
+     int ESMC_PESetEsmfID(int  id);
+ 
+     int ESMC_PEGetCpuID(int *id) const;
+     int ESMC_PESetCpuID(int  id);
+ 
+     int ESMC_PEGetNodeID(int *id) const;
+     int ESMC_PESetNodeID(int  id);
+     
+  // required methods inherited and overridden from the ESMC_Base class
+     int ESMC_PEValidate(void) const;
+     int ESMC_PEPrint(void) const;
+ 
+  // native C++ constructors/destructors
+ 	ESMC_PE(void);
+ 	~ESMC_PE(void);
+   
+  // < declare the rest of the public interface methods here >
+ 
+     // friend int ESMC_PEListPECompare(const void *pe1, const void *pe2);
+     // friend class ESMC_PEList;  // TODO: ?? implement in ESMC_PEList
+   \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
+\begin{verbatim}   private: 
+  // < declare private interface methods here >\end{verbatim}
+
+%...............................................................

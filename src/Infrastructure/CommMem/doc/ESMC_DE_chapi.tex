@@ -1,0 +1,119 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\parskip        0pt
+\parindent      0pt
+\baselineskip  11pt
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_DE.h,  Date: Mon Dec  9 19:56:31 MST 2002
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsection{C++:  Class Interface ESMC\_DE - Decomposition element (Source File: ESMC\_DE.h)}
+
+
+  
+  
+   The code in this file defines the C++ DE members and declares method 
+   signatures (prototypes).  The companion file ESMC\_DE.C contains
+   the definitions (full code bodies) for the DE methods.
+  
+   ESMF abstraction of a process or thread
+  
+  -----------------------------------------------------------------------------
+   
+\bigskip{\em USES:}
+\begin{verbatim}  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+  #include <ESMC_PE.h> 
+  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
+                         // composites, associates, friends)
+ 
+ enum ESMC_DEType_e {ESMC_PROCESS, ESMC_THREAD};
+ \end{verbatim}{\sf PUBLIC TYPES:}
+\begin{verbatim}   class ESMC_DEConfig;
+  class ESMC_DE;
+ \end{verbatim}{\sf PRIVATE TYPES:}
+\begin{verbatim} 
+  // class configuration type
+   class ESMC_DEConfig {
+     private:
+  //   < insert resource items here >
+   };
+ 
+  // class declaration type
+  class ESMC_DE : public ESMC_Base {    // inherits from ESMC_Base class
+ 
+    private:
+  //  < insert class members here >  corresponds to type ESMF_DE members
+  //                                 in F90 modules
+      int esmfID;     // ESMF assigned ID
+      int pID;        // processID (index)
+      int tID;        // threadID (index)
+      ESMC_DEType_e deType;  // process or thread
+      bool process;   // true if DE is a process
+      bool thread;    // true if DE is a thread
+      ESMC_PE *PE;    // assigned PE from peList
+ \end{verbatim}{\sf PUBLIC MEMBER FUNCTIONS:}
+\begin{verbatim}   public:
+     int ESMC_DEInit(int esmfid, int pid, int tid, bool proc, bool thrd,
+                     ESMC_PE *pe);
+ 
+  // optional configuration methods
+      int ESMC_DEGetConfig(ESMC_DEConfig *config) const;
+      int ESMC_DESetConfig(const ESMC_DEConfig *config);
+ 
+  // accessor methods for class members
+      int ESMC_DEGet<Value>(<value type> *value) const;
+      int ESMC_DESet<Value>(<value type>  value);
+     int ESMC_DESetPE(ESMC_PE *pe);
+     int ESMC_DESetESMFID(int esmfid);
+     int ESMC_DEGetESMFID(int *esmfid) const;
+     int ESMC_DEGetpID(int *pid) const;
+     int ESMC_DEGetType(ESMC_DEType_e *detype) const;
+     
+  // required methods inherited and overridden from the ESMC_Base class
+     int ESMC_DEValidate(void) const;
+     int ESMC_DEPrint(void) const;
+ 
+  // native C++ constructors/destructors
+ 	ESMC_DE(void);
+ 	ESMC_DE(ESMC_DEType_e detype);
+ 	~ESMC_DE(void);
+   
+  // < declare the rest of the public interface methods here >
+ 
+     friend class ESMC_Comm;
+     friend class ESMC_Layout;
+   \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
+\begin{verbatim}   private: 
+  // < declare private interface methods here >\end{verbatim}
+
+%...............................................................

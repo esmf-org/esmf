@@ -1,0 +1,7 @@
+% $Id: ESMC_PE_design.tex,v 1.1 2002/12/10 03:08:26 eschwab Exp $
+
+The PE class encapsulates machine dependent identifying information about
+a processing element, such as cpu ID and node ID.  A machine-indendent ESMF ID
+is also assigned.  A PE is instantiated within a DE upon startup and self-
+discovers its cpu and node IDs.  This information from all DE's is then
+gathered to form the PE list.

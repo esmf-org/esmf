@@ -1,0 +1,151 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\parskip        0pt
+\parindent      0pt
+\baselineskip  11pt
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_Comm.h,  Date: Mon Dec  9 19:56:31 MST 2002
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsection{C++:  Class Interface ESMC\_Comm - Interface to various communications protocols (Source File: ESMC\_Comm.h)}
+
+
+  
+  
+   The code in this file defines the C++ Comm members and declares method 
+   signatures (prototypes).  The companion file ESMC\_Comm.C contains
+   the definitions (full code bodies) for the Comm methods.
+  
+   < insert a paragraph or two explaining what you'll find in this file >
+  
+  -----------------------------------------------------------------------------
+   
+\bigskip{\em USES:}
+\begin{verbatim}  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+  #include <ESMC_DE.h>    // Comm class communicates between DEs
+  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
+                         // composites, associates, friends)
+ \end{verbatim}{\sf PUBLIC TYPES:}
+\begin{verbatim}   class ESMC_CommConfig;
+  class ESMC_Comm;
+ 
+   TODO: ?? bring in from outside program (cmd args, cfg file, etc.)
+  #define ESMC_COMM_NTHREADS 4
+  #define ESMC_COMM_NNODES 2
+ 
+  enum ESMC_Type_e {ESMC_INT=0, ESMC_LONG, ESMC_FLOAT, ESMC_DOUBLE};
+  #define ESMC_COMM_TYPES 4
+ 
+  enum ESMC_Op_e {ESMC_SUM=0, ESMC_MIN, ESMC_MAX};
+  #define ESMC_OP_TYPES 3
+ 
+  #define ESMC_MAX_QUEUE 1000
+ \end{verbatim}{\sf PRIVATE TYPES:}
+\begin{verbatim} 
+  // class configuration type
+   class ESMC_CommConfig {
+     private:
+  //   < insert resource items here >
+   };
+ 
+  // class definition type
+  class ESMC_Comm : public ESMC_Base {    // inherits from ESMC_Base class
+ 
+    private:
+  //  < insert class members here >  corresponds to type ESMF_Comm members
+  //                                 in F90 modules
+      int numDEs;          // number of DEs in communication group
+      ESMC_DE *DE;         // this DE we're communicating on behalf of
+      bool commFinal;      // flag to prevent double finalization via destructor
+      int *threadCount;    // count threads in a barrier
+ 
+      // ESMC-to-MPI type maps
+      int ESMC_TypeToMPI[ESMC_COMM_TYPES];
+      int ESMC_OpToMPI[ESMC_OP_TYPES];
+ 
+      void *ESMC_Request; // linked list of requests
+      void *ESMC_Status;  // linked list of statuses
+ 
+      static pthread_mutex_t initMutex;
+      static pthread_cond_t initCV;
+      static pthread_mutex_t barrierMutex;
+      static pthread_cond_t barrierCV;
+      static pthread_cond_t mainProcBarrierCV;
+      static int threadCountA;
+      static int threadCountB;
+ 
+ \end{verbatim}{\sf PUBLIC MEMBER FUNCTIONS:}
+\begin{verbatim}   public:
+     int ESMC_CommInit(int *argc, char **argv[], ESMC_DE *de);
+     int ESMC_CommFinal(void);
+ 
+  // optional configuration methods
+      int ESMC_CommGetConfig(ESMC_CommConfig *config) const;
+      int ESMC_CommSetConfig(const ESMC_CommConfig *config);
+ 
+  // accessor methods for class members
+      int ESMC_CommGet<Value>(<value type> *value) const;
+      int ESMC_CommSet<Value>(<value type>  value);
+     int ESMC_CommGetNumDEs(int *ndes) const;
+     
+  // required methods inherited and overridden from the ESMC_Base class
+     int ESMC_CommValidate(void) const;
+     int ESMC_CommPrint(void) const;
+ 
+  // native C++ constructors/destructors
+ 	ESMC_Comm(void);
+ 	ESMC_Comm(int *argc, char **argv[], ESMC_DE *de);
+ 	~ESMC_Comm(void);
+   
+  // < declare the rest of the public interface methods here >
+     // point-to-point
+     int ESMC_CommIsend(void *buf, int num, ESMC_Type_e type, ESMC_DE *dest,
+                        int tag, int *request);
+     int ESMC_CommIrecv(void *buf, int num, ESMC_Type_e type, ESMC_DE *source,
+                        int tag, int *request);
+     int ESMC_CommWait(int *request, int *status);
+ 
+     // collectives
+     int ESMC_CommBarrier(void);
+     int ESMC_CommBcast(void *buf, int num, ESMC_Type_e type, ESMC_DE *root);
+     int ESMC_CommScatter(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
+                          ESMC_DE *root);
+     int ESMC_CommAllGather(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
+     int ESMC_CommAlltoAll(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
+     int ESMC_CommReduce(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
+                         ESMC_Op_e op, ESMC_DE *root);
+   \end{verbatim}{\sf PRIVATE MEMBER FUNCTIONS:}
+\begin{verbatim}   private: 
+  // < declare private interface methods here >\end{verbatim}
+
+%...............................................................

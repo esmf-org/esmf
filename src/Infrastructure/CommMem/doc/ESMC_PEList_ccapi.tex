@@ -1,0 +1,360 @@
+%                **** IMPORTANT NOTICE *****
+% This LaTeX file has been automatically produced by ProTeX v. 1.1
+% Any changes made to this file will likely be lost next time
+% this file is regenerated from its source. Send questions 
+% to Arlindo da Silva, dasilva@gsfc.nasa.gov
+ 
+\parskip        0pt
+\parindent      0pt
+\baselineskip  11pt
+ 
+%--------------------- SHORT-HAND MACROS ----------------------
+\def\bv{\begin{verbatim}}
+\def\ev{\end{verbatim}}
+\def\be{\begin{equation}}
+\def\ee{\end{equation}}
+\def\bea{\begin{eqnarray}}
+\def\eea{\end{eqnarray}}
+\def\bi{\begin{itemize}}
+\def\ei{\end{itemize}}
+\def\bn{\begin{enumerate}}
+\def\en{\end{enumerate}}
+\def\bd{\begin{description}}
+\def\ed{\end{description}}
+\def\({\left (}
+\def\){\right )}
+\def\[{\left [}
+\def\]{\right ]}
+\def\<{\left  \langle}
+\def\>{\right \rangle}
+\def\cI{{\cal I}}
+\def\diag{\mathop{\rm diag}}
+\def\tr{\mathop{\rm tr}}
+%-------------------------------------------------------------
+
+\markboth{Left}{Source File: ESMC\_PEList.C,  Date: Mon Dec  9 19:56:32 MST 2002
+}
+
+ 
+%/////////////////////////////////////////////////////////////
+\subsubsection{ESMC\_PEListCreate - Create a new PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       ESMC_PEList *ESMC_PEListCreate(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       pointer to newly allocated ESMC_PEList\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int numpes,          // in - number of PEs in list
+       int *rc) {           // out - return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Create a new PEList from ... Allocates memory for a new PEList
+        object and uses the internal routine ESMC\_PEListContruct to
+        initialize it.  Define for deep classes only, for shallow classes only
+        define and use ESMC\_PEListInit.
+        There can be multiple overloaded methods with the same name, but
+        different argument lists.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListCreate - Create a new PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       ESMC_PEList *ESMC_PEListCreate(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}       pointer to newly allocated ESMC_PEList\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int firstpe,          // in - first PE in list
+       int lastpe,           // in - last PE in list
+       int *rc) {            // out - return code\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Create a new PEList from ... Allocates memory for a new PEList
+        object and uses the internal routine ESMC\_PEListContruct to
+        initialize it.  Define for deep classes only, for shallow classes only
+        define and use ESMC\_PEListInit.
+        There can be multiple overloaded methods with the same name, but
+        different argument lists.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListDestroy - free a PEList created with Create}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEListDestroy(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_PEList *pelist) {    // PE list to destroy\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        ESMF routine which destroys a PEList object previously allocated
+        via an ESMC\_PEListCreate routine.  Define for deep classes only.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListConstruct - fill in an already allocated PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListConstruct(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int numpes) {          // in - number of PEs in list\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        ESMF routine which fills in the contents of an already
+        allocated PEList object.  May need to do additional allocations
+        as needed.  Must call the corresponding ESMC\_PEListDestruct
+        routine to free the additional memory.  Intended for internal
+        ESMF use only; end-users use ESMC\_PEListCreate, which calls
+        ESMC\_PEListConstruct.  Define for deep classes only.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListDestruct - release resources associated w/a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListDestruct(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      none\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        ESMF routine which deallocates any space allocated by
+        ESMC\_PEListConstruct, does any additional cleanup before the
+        original PEList object is freed.  Intended for internal ESMF
+        use only; end-users use ESMC\_PEListDestroy, which calls
+        ESMC\_PEListDestruct.  Define for deep classes only.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListInit - initializes a PEList element}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListInit(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int i,                // in - ith element
+       int esmfid,           // in - ESMF ID
+       int cpuid,            // in - machine cpu ID
+       int nodeid) {         // in - machine node ID\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        ESMF routine which only initializes PE values; it does not
+        allocate any resources.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListGetConfig - get configuration info from a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListGetConfig(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       ESMC_PEListConfig *config) const {  // out - resources\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      Returns the set of resources the PEList object was configured with.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListSetConfig - set configuration info for a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListSetConfig(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       const ESMC_PEListConfig *config) {     // in - resources\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+      Configures the PEList object with set of resources given.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListGet<Value> - get <Value> for a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListGet<Value>(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       <value type> *value) const {     // out - value\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       Returns the value of PEList member <Value>.
+       Can be multiple routines, one per value
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListSet<Value> - set <Value> for a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListSet<Value>(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       <value type> value) {     // in - value\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       Sets the PEList member <Value> with the given value.
+       Can be multiple routines, one per value
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListGetPE - get PE pointer from a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListGetPE(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       int i,                    // in  - ith PE
+       ESMC_PE **pe) const {     // out - pointer to ith PE\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+       Returns a pointer to the ith PE in the list.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListValidate - internal consistency check for a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListValidate(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       void) const {    // in - validate options\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Validates that a PEList is internally consistent.
+        Returns error code if problems are found.  ESMC\_Base class method.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListPrint - print contents of a PEList}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListPrint(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       void) const {     //  in - print options\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Print information about a PEList.  The options control the
+        type of information and level of detail.  ESMC\_Base class method.
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEList - native C++ constructor}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       ESMC_PEList::ESMC_PEList(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       void) {  // in\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Calls standard ESMF deep or shallow methods for initialization
+        with default or passed-in values
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{~ESMC\_PEList - native C++ destructor}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       ESMC_PEList::~ESMC_PEList(void) {\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      none\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}      none\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Calls standard ESMF deep or shallow methods for destruction
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListSort - sort contents of a PEList by node affinity}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEList::ESMC_PEListSort(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int error return code\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       void) {     //  in - none\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Sorts a PEList by node affinity; all PE's within same node
+        will appear contiguously in the PEList  
+   
+%/////////////////////////////////////////////////////////////
+ 
+\mbox{}\hrulefill\ 
+ 
+\subsubsection{ESMC\_PEListPECompare - compares 2 PE's by node affinity}
+
+
+  
+\bigskip{\sf INTERFACE:}
+\begin{verbatim}       int ESMC_PEListPECompare(\end{verbatim}{\em RETURN VALUE:}
+\begin{verbatim}      int comparison result as required by qsort()\end{verbatim}{\em ARGUMENTS:}
+\begin{verbatim}       const void *pe1,       //  in - PE 1
+       const void *pe2) {     //  in - PE 2\end{verbatim}
+{\sf DESCRIPTION:\\ }
+
+
+        Compares 2 PEs by node affinity; used by qsort in ESMC\_PEListSort()
+  
+%...............................................................
