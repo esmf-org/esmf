@@ -3,6 +3,9 @@
 // 2003 Gerhard Theurich, NASA NCCS and SGI Professional Services
 //  < theurich@nccs.gsfc.nasa.gov > or < gtheurich@sgi.com >
 
+#ifndef ESMF_VMACHINE_H
+#define ESMF_VMACHINE_H
+
 #include <pthread.h>
 #include <mpi.h>
 
@@ -242,3 +245,4 @@ class vmplan{
   
 };
 
+#endif  // ESMF_VMACHINE_H
