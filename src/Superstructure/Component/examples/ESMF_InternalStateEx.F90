@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.1 2004/10/27 22:19:51 nscollins Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.2 2004/12/13 18:55:11 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,16 +14,16 @@
 
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_InternalStateEx - Example of using Set/Get Internal State
+! !PROGRAM: ESMF\_InternalStateEx - Example of using Set/Get Internal State
 !
 ! !DESCRIPTION:
 !  Example of using the Component level Internal State routines.
 !  These include:
 !  \begin{description}
-!   \item[ESMF_GridCompGetInternalState]
-!   \item[ESMF_GridCompSetInternalState]
-!   \item[ESMF_CplCompGetInternalState]
-!   \item[ESMF_CplCompSetInternalState]
+!   \item[ESMF\_GridCompGetInternalState]
+!   \item[ESMF\_GridCompSetInternalState]
+!   \item[ESMF\_CplCompGetInternalState]
+!   \item[ESMF\_CplCompSetInternalState]
 !  \end{description}
 !
 !   These routines save the address of an internal, private data block
