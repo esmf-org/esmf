@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62503.F90,v 1.14 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest62503.F90,v 1.15 2003/08/05 21:20:18 nscollins Exp $
 !
 ! System test code #62503
 
@@ -245,7 +245,6 @@
       call ESMF_DELayoutDestroy(layout2, rc)
       call ESMF_DELayoutDestroy(layout3, rc)
 
-      call ESMF_AppCompDestroy(app, rc)
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -273,9 +272,11 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
   
-        call ESMF_FrameworkFinalize(rc)
       endif
     
+      call ESMF_AppCompDestroy(app, rc)
+      ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
+
       end program ESMF_SysTest62503
     
 !\end{verbatim}

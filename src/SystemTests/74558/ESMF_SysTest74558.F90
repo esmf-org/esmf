@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.16 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.17 2003/08/05 21:20:18 nscollins Exp $
 !
 ! System test code #74558
 
@@ -202,9 +202,6 @@
       call ESMF_DELayoutDestroy(layout2, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_AppCompDestroy(app, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-
       print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -230,9 +227,11 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
 
-        call ESMF_FrameworkFinalize(rc)
       endif
     
+      call ESMF_AppCompDestroy(app, rc)
+      ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
+
       end program ESMF_SysTest74558
     
 !\end{verbatim}

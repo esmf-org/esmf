@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62501.F90,v 1.8 2003/06/20 17:45:53 nscollins Exp $
+! $Id: ESMF_SysTest62501.F90,v 1.9 2003/08/05 21:20:17 nscollins Exp $
 !
 ! System test code #62501
 
@@ -229,8 +229,6 @@
     print *, "All Destroy routines done"
 
 
-    call ESMF_FrameworkFinalize(rc)
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
     print *, "System Test #62501 complete!"
@@ -258,6 +256,8 @@
       write(0, *) "" 
     endif
     
+    call ESMF_FrameworkFinalize(rc)
+
 
     end program ESMF_SysTest62501
     

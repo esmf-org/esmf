@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.19 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.20 2003/08/05 21:20:18 nscollins Exp $
 !
 ! System test code #69527
 
@@ -244,9 +244,6 @@
 
     deallocate(idata, stat=rc)
 
-    call ESMF_FrameworkFinalize(rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 10     print *, "System Test #69527 complete!"
@@ -278,10 +275,9 @@
       write(0, *) trim(finalMsg)
       write(0, *) ""
 
-      call ESMF_FrameworkFinalize(rc)
     endif
     
-    
+    call ESMF_FrameworkFinalize(rc)
 
     end program ESMF_SysTest69527
     

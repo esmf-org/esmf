@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest62502.F90,v 1.17 2003/08/01 21:49:07 nscollins Exp $
+! $Id: ESMF_SysTest62502.F90,v 1.18 2003/08/05 21:20:17 nscollins Exp $
 !
 ! System test code #62502
 
@@ -277,10 +277,6 @@
       call ESMF_DELayoutDestroy(layout3, rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_AppCompDestroy(app, rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
-      print *, "All Destroy routines done"
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 10    print *, "System Test #62502 complete!"
@@ -306,9 +302,11 @@
         write(0, *) trim(finalMsg)
         write(0, *) ""
   
-        call ESMF_FrameworkFinalize(rc)
       endif
     
+      call ESMF_AppCompDestroy(app, rc)
+      ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
+
       end program ESMF_SysTest62502
     
 !\end{verbatim}

@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.26 2003/08/01 22:03:53 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.27 2003/08/05 21:20:18 nscollins Exp $
 !
 ! System test code #70385
 
@@ -131,8 +131,6 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
     call ESMF_StateDestroy(import, rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_AppCompDestroy(app, rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
     print *, "All Destroy routines done"
 
 !-------------------------------------------------------------------------
@@ -158,8 +156,10 @@
       write(0, *) trim(finalMsg)
       write(0, *) ""
 
-      call ESMF_FrameworkFinalize(rc)
     endif
+    
+    call ESMF_AppCompDestroy(app, rc)
+    ! call ESMF_FrameworkFinalize(rc)   ! when apps go away
     
     end program ESMF_SysTest70385
     

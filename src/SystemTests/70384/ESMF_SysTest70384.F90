@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70384.F90,v 1.23 2003/08/01 22:49:23 jwolfe Exp $
+! $Id: ESMF_SysTest70384.F90,v 1.24 2003/08/05 21:20:18 nscollins Exp $
 !
 ! System test code #70384
 
@@ -315,9 +315,6 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     print *, "All Destroy routines done"
 
-    call ESMF_FrameworkFinalize(rc)
-    if (rc .ne. ESMF_SUCCESS) goto 20
-
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 20    print *, "System Test #70384 complete!"
@@ -341,9 +338,9 @@
       write(0, *) trim(finalMsg)
       write(0, *) ""
 
-      call ESMF_FrameworkFinalize(rc)
     endif
     
+    call ESMF_FrameworkFinalize(rc)
 
     end program ESMF_SysTest70384
     
