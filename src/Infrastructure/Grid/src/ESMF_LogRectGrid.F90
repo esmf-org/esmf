@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.61 2004/04/21 17:23:28 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.62 2004/04/23 17:27:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4320,7 +4320,7 @@
       do i = 1,dimCount
         centerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, counts, &
                                           haloWidth=gridBoundWidth, rc=status)
-        cornerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, cornerCounts, &
+        cornerArray(i) = ESMF_ArrayCreate(dimCount+1, type, kind, cornerCounts, &
                                           haloWidth=gridBoundWidth, rc=status)
       enddo
 
@@ -4381,13 +4381,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4403,13 +4403,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4425,13 +4425,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4447,13 +4447,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4469,13 +4469,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4491,13 +4491,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4513,13 +4513,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4535,13 +4535,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
@@ -4557,13 +4557,13 @@
               center1(  i,j) = centerUse1 
               center2(  i,j) = centerUse2
               corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
               corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse22
+              corner2(2,i,j) = cornerUse21
               corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse21
+              corner2(4,i,j) = cornerUse22
             enddo
           enddo
 
