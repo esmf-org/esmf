@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.21 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.22 2004/06/14 22:52:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,8 @@
 !
       integer, parameter :: ESMF_HALOHANDLE=1, &
                             ESMF_REDISTHANDLE=2, &
-                            ESMF_REGRIDHANDLE=3
+                            ESMF_REGRIDHANDLE=3, &
+                            ESMF_UNINITIALIZEDHANDLE=4
 
 !------------------------------------------------------------------------------
 !     !  ESMF_RouteHandle
@@ -100,7 +101,8 @@
 ! !PUBLIC TYPES:
       public ESMF_TransformValues
       public ESMF_RouteHandle
-      public ESMF_HALOHANDLE, ESMF_REDISTHANDLE, ESMF_REGRIDHANDLE
+      public ESMF_HALOHANDLE, ESMF_REDISTHANDLE, ESMF_REGRIDHANDLE, &
+             ESMF_UNINITIALIZEDHANDLE
 
 !------------------------------------------------------------------------------
 !
@@ -131,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.21 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.22 2004/06/14 22:52:41 jwolfe Exp $'
 
 !==============================================================================
 
