@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.58 2004/06/14 21:22:22 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.59 2004/06/14 22:53:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.58 2004/06/14 21:22:22 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.59 2004/06/14 22:53:02 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -122,13 +122,12 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
+      !EX_UTest
       ! Verifing that an initialized Field can be printed
-      !call ESMF_FieldPrint(f1, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Printing an initialized Field with no data Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldPrint(f1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing an initialized Field with no data Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -160,10 +159,8 @@
       f2 = ESMF_FieldCreateNoData(rc=rc)
       call ESMF_FieldGet(f1, name=fname1, rc=rc)
       call ESMF_FieldGet(f2, name=fname2, rc=rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f1)
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f1)
+      call ESMF_FieldPrint(f2)
       write(failMsg, *) "default name not unique"
       write(name, *) "Verifing uniqueness of fields created default name"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
@@ -174,9 +171,7 @@
       write(failMsg, *) ""
       write(name, *) "Destroying a Field with no data Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
 
@@ -189,31 +184,28 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      ! Verifing that printing an uninitialized Field is handled properly.
+      call ESMF_FieldPrint(f6, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing an uninitialized Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     ! Verifing that printing an uninitialized Field is handled properly.
-     ! This code is commented out until bug 747699 is fixed.
-     !Commented out because it crashes
-     ! Bug Report 969760 opened.
-     !call ESMF_FieldPrint(f6, rc=rc)
-     !write(failMsg, *) ""
-     !write(name, *) "Printing an uninitialized Field Test"
-     !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-     !------------------------------------------------------------------------
+      !EX_UTest
+      ! verify that querying the name of a destroyed Field is handled properly.
+      call ESMF_FieldGet(f1, name=fname, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting name of a destroyed Field Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
-     ! verify that querying the name of a destroyed Field is handled properly.
-     !call ESMF_FieldGet(f1, name=fname, rc=rc)
-     !write(failMsg, *) ""
-     !write(name, *) "Getting name of a destroyed Field Test"
-     !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-     !------------------------------------------------------------------------
-
+      !EX_UTest
       ! Verifing that printing a destroyed Field is handled properly.
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f1, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Printing destroyed Field Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldPrint(f1, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing destroyed Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -222,9 +214,7 @@
       write(failMsg, *) ""
       write(name, *) "Creating Field with name Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -233,9 +223,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a Field name Test"
       call ESMF_Test((fname.eq."pressure"), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -244,9 +232,7 @@
       write(failMsg, *) ""
       write(name, *) "Recreate a created Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -256,9 +242,7 @@
       write(failMsg, *) ""
       write(name, *) "Recreate a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
 
@@ -298,12 +282,10 @@
       write(failMsg, *) "Field names not unique"
       write(name, *) "Unique default Field names Test, FLD1.5.1 & 1.7.1"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
       !print *, "Field (f1) name = ", trim(fname1)
-      !print *, "Field (f2) name = ", trim(fname2)
-      !call ESMF_FieldPrint(f1)
-      !call ESMF_FieldPrint(f2)
+      print *, "Field (f2) name = ", trim(fname2)
+      call ESMF_FieldPrint(f1)
+      call ESMF_FieldPrint(f2)
       call ESMF_FieldDestroy(f1)
       call ESMF_FieldDestroy(f2)
       !------------------------------------------------------------------------
@@ -409,17 +391,15 @@
       write(failMsg, *) ""
       write(name, *) "Creating a Field with a Grid and Array Test FLD1.1.2"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3)
+      call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
-
+      !EX_UTest
       ! Verifing that destroying a Grid in a Field is not allowed
-      ! call ESMF_GridDestroy(grid, rc=rc)
-      ! write(failMsg, *) ""
-      ! write(name, *) "Destroying a Grid in a Field Test"
-      ! call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+       call ESMF_GridDestroy(grid, rc=rc)
+       write(failMsg, *) ""
+       write(name, *) "Destroying a Grid in a Field Test"
+       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -428,18 +408,17 @@
       write(failMsg, *) ""
       write(name, *) "Destroying a Field with a Grid and Array Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3)
+      call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verifing that a Field cannot be created with an uninitialized Grid and Array
-      !f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
-         !                   ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_FieldPrint(f3)
+      f3 = ESMF_FieldCreate(grid2, arr2, ESMF_DATA_REF, ESMF_CELL_CENTER, &
+                            ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldPrint(f3)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -448,18 +427,17 @@
       write(failMsg, *) ""
       write(name, *) "Destroying a destroyed Field Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f2)
+      call ESMF_FieldPrint(f2)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! Verify that a Grid cannot be gotten from a Field created with no data
-      !f5 = ESMF_FieldCreateNoData(rc=rc)
-      !call ESMF_FieldGet(f5, grid=grid3, rc=rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting a Grid from a Field created with no data Test"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
-      !call ESMF_FieldDestroy(f5, rc=rc)
+      f5 = ESMF_FieldCreateNoData(rc=rc)
+      call ESMF_FieldGet(f5, grid=grid3, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting a Grid from a Field created with no data Test"
+      call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldDestroy(f5, rc=rc)
       !------------------------------------------------------------------------
 
       !EX_UTest
@@ -499,16 +477,19 @@
       !------------------------------------------------------------------------
 
       !EX_UTest
-      ! Req. xxx  - setting and getting Attributes from a Field
+      ! Adding Attributes to a Field
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldAddAttribute(f3, "Scale Factor", 4, rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Adding Attribute to a Field "
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
       ! Getting Attribute count from a Field
-      call ESMF_FieldGetAttributeCount(f1, count, rc=rc)
+      call ESMF_FieldGetAttributeCount(f3, count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute count from a Field "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -525,7 +506,7 @@
 
       !EX_UTest
       ! Getting Attrubute Info from a Field
-      call ESMF_FieldGetAttributeInfo(f1, name="Scale Factor", count=count, rc=rc)
+      call ESMF_FieldGetAttributeInfo(f3, name="Scale Factor", count=count, rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Getting Attribute info from a Field "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
@@ -539,9 +520,8 @@
       call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      !EX_UTest
+      ! Get Field Attribute Test
       intattr = 0
       call ESMF_FieldGetAttribute(f3, "Scale Factor", intattr, rc)
       write(failMsg, *) ""
@@ -552,9 +532,7 @@
       !EX_UTest
       ! test setting a second attribute
       call ESMF_FieldAddAttribute(f3, "Invalid Data Tag", -999, rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       intattr2 = 0
       call ESMF_FieldGetAttribute(f3, "Invalid Data Tag", intattr2, rc)
       print *, "Invalid Data Tag should be -999, is: ", intattr2
@@ -563,34 +541,33 @@
       call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
       ! getting a non-existant attribute
-      !call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
-      !write(failMsg, *) ""
-      !write(name, *) "Getting an non-existant Integer Attribute from a Field"
-      !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
+      write(failMsg, *) ""
+      write(name, *) "Getting an non-existant Integer Attribute from a Field"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
+      !EX_UTest
+      ! getting a non-existant attribute
       ! setting an integer list
-      !call ESMF_FieldAddAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
-      !intattr = 0
-      !count = 4   ! expected number of values
-      !call ESMF_FieldGetAttribute(f3, "Multiple Scale Factors", count, intattrlist, rc)
-      !print *, count, "attributes found in list"
-      !write(failMsg, *) ""
-      !write(name, *) "Getting an Integer List Attribute back from a Field"
-      !call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_FieldAddAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
+      call ESMF_FieldPrint(f3, rc=rc)
+      intattr = 0
+      count = 4   ! expected number of values
+      call ESMF_FieldGetAttribute(f3, "Multiple Scale Factors", count, intattrlist, rc)
+      print *, count, "attributes found in list"
+      write(failMsg, *) ""
+      write(name, *) "Getting an Integer List Attribute back from a Field"
+      call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
  
       !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a real attribute
       rattr = 3.14159
       call ESMF_FieldAddAttribute(f3, "Pi", 3.14159_ESMF_KIND_R8, rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       call ESMF_FieldGetAttribute(f3, "Pi", rattr, rc)
       print *, "Pi should be 3.14159, is: ", rattr
@@ -603,9 +580,7 @@
       ! test setting a real list
       rattrlist = (/ 1.1, 2.2 /)
       call ESMF_FieldAddAttribute(f3, "Vertices", 2, rattrlist, rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       rattr = 0.0
       count = 2   ! expected count
       call ESMF_FieldGetAttribute(f3, "Vertices", count, rattrlist, rc)
@@ -619,9 +594,7 @@
       !EX_UTest
       ! test setting a logical attribute
       call ESMF_FieldAddAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
       call ESMF_FieldGetAttribute(f3, "Sky is Blue", lattr, rc)
       call ESMF_LogicalString(lattr, lattrstr, rc)
@@ -634,9 +607,7 @@
       !EX_UTest
       ! test setting a logical list
       call ESMF_FieldAddAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       lattr = ESMF_FALSE
       count = 3   ! expected count
       call ESMF_FieldGetAttribute(f3, "FlipFlop", count, lattrlist, rc)
@@ -655,9 +626,7 @@
       ! test setting a character attribute
       cattr = "It was a dark and stormy night"
       call ESMF_FieldAddAttribute(f3, "Book", cattr, rc)
-      !Commented out because it crashes
-      ! Bug Report 969760 opened.
-      !call ESMF_FieldPrint(f3, rc=rc)
+      call ESMF_FieldPrint(f3, rc=rc)
       call ESMF_FieldGetAttribute(f3, "Book", cattr2, rc)
       print *, "Book  should be drivel, is: ", trim(cattr2)
       write(failMsg, *) ""
@@ -676,9 +645,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a DataMap from a Field"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      ! Commented out because it crashes
-      ! Bug Report 969760 opened
-      !call ESMF_FieldDataMapPrint(dm, "", rc=rc)
+      call ESMF_FieldDataMapPrint(dm, "", rc=rc)
 
       ! Requirement 1.3 Index Order
       ! It shall be possible to specify the index order of field data and 
