@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.18 2003/11/07 00:01:38 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.19 2004/01/07 22:36:12 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -69,36 +69,36 @@
         type (ESMF_Base) :: base
 
         type (ESMF_Array) :: & 
-           srcarray,   &! source array
-           dstarray     ! destination array
+           srcArray,   &! source array
+           dstArray     ! destination array
 
         type (ESMF_Grid) :: &
-           srcgrid,    &! source grid
-           dstgrid      ! destination grid
+           srcGrid,    &! source grid
+           dstGrid      ! destination grid
 
         type (ESMF_DataMap) :: &
-           srcdatamap,    &! source datamap
-           dstdatamap      ! destination datamap
+           srcDatamap,    &! source datamap
+           dstDatamap      ! destination datamap
 
         integer ::       &
            method,       &! method used for this regridding
-           num_links      ! number of unique links between grids
+           numLinks       ! number of unique links between grids
 
         type (ESMF_Array), pointer :: &
-           src_add,      &! addresses of source field for regrid operation
-           dst_add        ! addresses of destination field for regrid op
+           srcAdd,       &! addresses of source field for regrid operation
+           dstAdd         ! addresses of destination field for regrid op
 
         type (ESMF_Array), pointer :: &
            weights        ! array of weights for performing the
                           ! regridding transformation
 
         integer ::       &
-           redistrb_option  ! option for redistributing data for regrid
+           redistrbOption ! option for redistributing data for regrid
 
         type (ESMF_Route), pointer :: & ! pre-stored redistribution patterns
            gather,       &! not sure, just trying to get it to compile jw
-           src_route,    &! route for redistribution on source side
-           dst_route      ! route for redistribution on destination side
+           srcRoute,     &! route for redistribution on source side
+           dstRoute       ! route for redistribution on destination side
 
       end type
 
@@ -155,14 +155,27 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.18 2003/11/07 00:01:38 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.19 2004/01/07 22:36:12 jwolfe Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+!BOP
+! !INTERFACE:
+      interface ESMF_RegridAddLink
 
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_RegridAddLink1D
+         module procedure ESMF_RegridAddLink2D
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Regrid} add
+!     link methods.
+
+!EOP
+      end interface
 !==============================================================================
 
       contains
@@ -175,16 +188,16 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_RegridAddLink - Adds address pair and regrid weight to regrid
+! !IROUTINE: ESMF_RegridAddLink1D - Adds address pair and regrid weight to regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridAddLink(tv, src_add, dst_add, weight, rc)
+      subroutine ESMF_RegridAddLink1D(tv, srcAdd, dstAdd, weight, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_TransformValues), intent(inout) :: tv
-      integer, intent(in) :: src_add
-      integer, dimension(2), intent(in) :: dst_add
+      integer, intent(in) :: srcAdd
+      integer, intent(in) :: dstAdd
       real(kind=ESMF_KIND_R8), intent(in) :: weight
       integer, intent(out), optional :: rc
 
@@ -197,13 +210,13 @@
 !     \item[transformvalues]
 !          Stored information related to the actual data transformation
 !          needed when moving data from one grid to another.
-!     \item[src\_add]
+!     \item[srcAdd]
 !          Address in source field array for this link.
-!     \item[dst\_add]
+!     \item[dstAdd]
 !          Address in destination field array for this link.
 !     \item[weights]
 !          Regrid weight for this link.
-!     \item[rc]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -212,12 +225,12 @@
 !  TODO
       logical :: rcpresent
       integer :: status
-      integer, dimension(:), pointer :: src_ptr, dst_ptr
-      integer :: numlist
-      real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgt_ptr
-      type(ESMF_LocalArray) :: srcindex, dstindex, weights
+      integer, dimension(:), pointer :: srcPtr, dstPtr
+      integer :: numList
+      real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
+      type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
       type (ESMF_Array) :: &! temps for use when re-sizing arrays
-         src_add_tmp, dst_add_tmp, weights_tmp
+         srcAddTmp, dstAddTmp, weightsTmp
 
 !     Initialize return code
       status = ESMF_SUCCESS
@@ -227,36 +240,114 @@
         rc = ESMF_FAILURE
       endif
 
-      call ESMF_TransformValuesGet(tv, numlist=numlist, srcindex=srcindex, &
-                                   dstindex=dstindex, weights=weights, rc=rc)
-      call ESMF_LocalArrayGetData(srcindex, src_ptr, ESMF_DATA_REF, rc)
-      call ESMF_LocalArrayGetData(dstindex, dst_ptr, ESMF_DATA_REF, rc)
-      call ESMF_LocalArrayGetData(weights, wgt_ptr, ESMF_DATA_REF, rc)
+      call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
+                                   dstIndex=dstIndex, weights=weights, rc=rc)
+      call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, rc)
 
       ! increment number of links for this regrid
-      numlist = numlist + 1
+      numList = numList + 1
 
       !  if new number of links exceeds array sizes, re-size arrays
       ! TODO: resize check
 
       ! Add addresses and weights to regrid arrays
-      src_ptr(numlist) = src_add
-      dst_ptr(2*(numlist-1)+1) = dst_add(1)
-      dst_ptr(2*(numlist-1)+2) = dst_add(2)
-      wgt_ptr(numlist) = weight
-      call ESMF_TransformValuesSet(tv, numlist=numlist, srcindex=srcindex, &
-                                   dstindex=dstindex, weights=weights, rc=rc)
+      srcPtr(numList) = srcAdd
+      dstPtr(numList) = dstAdd
+      wgtPtr(numList) = weight
+      call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
+                                   dstIndex=dstIndex, weights=weights, rc=rc)
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_RegridAddLink
+      end subroutine ESMF_RegridAddLink1D
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RegridAddLink2D - Adds address pair and regrid weight to regrid
+
+! !INTERFACE:
+      subroutine ESMF_RegridAddLink2D(tv, srcAdd, dstAdd, weight, rc)
+!
+! !ARGUMENTS:
+
+      type(ESMF_TransformValues), intent(inout) :: tv
+      integer, intent(in) :: srcAdd
+      integer, dimension(2), intent(in) :: dstAdd
+      real(kind=ESMF_KIND_R8), intent(in) :: weight
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Adds an address pair and regrid weight to an existing regrid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[tv]
+!          Stored information related to the actual data transformation
+!          needed when moving data from one grid to another.
+!     \item[srcAdd]
+!          Address in source field array for this link.
+!     \item[dstAdd]
+!          Address in destination field array for this link.
+!     \item[weights]
+!          Regrid weight for this link.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!  TODO
+      logical :: rcpresent
+      integer :: status
+      integer, dimension(:), pointer :: srcPtr, dstPtr
+      integer :: numList
+      real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
+      type(ESMF_LocalArray) :: srcIndex, dstIndex, weights
+      type (ESMF_Array) :: &! temps for use when re-sizing arrays
+         srcAddTmp, dstAddTmp, weightsTmp
+
+!     Initialize return code
+      status = ESMF_SUCCESS
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
+                                   dstIndex=dstIndex, weights=weights, rc=rc)
+      call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, rc)
+      call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, rc)
+
+      ! increment number of links for this regrid
+      numList = numList + 1
+
+      !  if new number of links exceeds array sizes, re-size arrays
+      ! TODO: resize check
+
+      ! Add addresses and weights to regrid arrays
+      dstPtr(2*(numList-1)+1) = dstAdd(1)
+      dstPtr(2*(numList-1)+2) = dstAdd(2)
+      srcPtr(numList) = srcAdd
+      wgtPtr(numList) = weight
+      call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
+                                   dstIndex=dstIndex, weights=weights, rc=rc)
+
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_RegridAddLink2D
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_RegridRouteConstruct - Constructs a Route used to gather data
 
 ! !INTERFACE:
-      function ESMF_RegridRouteConstruct(srcGrid, dstGrid, srcRelLoc, dstRelLoc, &
+      function ESMF_RegridRouteConstruct(numDims, srcGrid, dstGrid, &
+                                         srcRelLoc, dstRelLoc, &
                                          recvDomainList, total, rc)
 !
 ! !RETURN VALUE:
@@ -264,6 +355,7 @@
 !
 ! !ARGUMENTS:
 
+      integer, intent(in) :: numDims
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_RelLoc), intent(inout) :: srcRelLoc
@@ -356,7 +448,7 @@
       ! TODO: this must be either a parent layout, or the src and dst layouts
       !  must be identical.
       route = ESMF_RouteCreate(srcDELayout, status)
-      call ESMF_RoutePrecomputeDomList(route, 2, myDE, sendDomainList, &
+      call ESMF_RoutePrecomputeDomList(route, numDims, myDE, sendDomainList, &
                                        recvDomainList, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridRouteConstruct: ", &
@@ -377,19 +469,19 @@
 ! !IROUTINE: ESMF_RegridTypeGet - Get attribute of a Regrid type
 
 ! !INTERFACE:
-      subroutine ESMF_RegridTypeGet(regrid, name, srcarray, dstarray, &
-                                    srcgrid,  dstgrid, srcdatamap, dstdatamap, &
-                                    method, num_links , gather, rc)
+      subroutine ESMF_RegridTypeGet(regrid, name, srcArray, dstArray, &
+                                    srcGrid, dstGrid, srcDatamap, dstDatamap, &
+                                    method, numLinks, gather, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_RegridType), intent(in) :: regrid
       character (*), intent(out), optional :: name
-      type (ESMF_Array), intent(out), optional :: srcarray, dstarray
-      type (ESMF_Grid), intent(out), optional :: srcgrid,  dstgrid
-      type (ESMF_DataMap), intent(out), optional :: srcdatamap,  dstdatamap
+      type (ESMF_Array), intent(out), optional :: srcArray, dstArray
+      type (ESMF_Grid), intent(out), optional :: srcGrid,  dstGrid
+      type (ESMF_DataMap), intent(out), optional :: srcDatamap,  dstDatamap
       integer, intent(out), optional :: method
-      integer, intent(out), optional :: num_links
+      integer, intent(out), optional :: numLinks
       type (ESMF_Route), intent(out), optional :: gather
       integer, intent(out), optional :: rc
 
@@ -402,27 +494,23 @@
 !     \begin{description}
 !     \item[regrid]
 !          Regrid type to be queried.
-!     \item[[name]]
+!     \item[{[name]}]
 !          Name for this regrid.
-!     \item[[src\_bundle]]
-!          If created with bundles, the source bundle associated
-!          with this regrid. 
-!     \item[[dst\_bundle]]
-!          If created with bundles, the destination bundle associated
-!          with this regrid. 
-!     \item[[src\_field]]
-!          If created with fields, the source field associated
-!          with this regrid. 
-!     \item[[dst\_field]]
-!          If created with fields, the destination field associated
-!          with this regrid. 
-!     \item[[method]]
+!     \item[{[srcArray]}]
+!          
+!     \item[{[dstArray]}]
+!          
+!     \item[{[srcGrid]}]
+!          
+!     \item[{[dstGrid]}]
+!          
+!     \item[{[method]}]
 !          Integer enum of method used in this regrid.
-!     \item[[num\_links]]
+!     \item[{[numLinks]}]
 !          Number of unique links between grids for this regrid.
-!     \item[[gather]]
+!     \item[{[gather]}]
 !          Route used to gather non-local information to perform regrid.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -450,33 +538,33 @@
       endif
 
       ! Get arrays if requested
-      if (present(srcarray)) then
-         srcarray = regrid%srcarray
+      if (present(srcArray)) then
+         srcArray = regrid%srcArray
       endif
-      if (present(dstarray)) then
-         dstarray = regrid%dstarray
+      if (present(dstArray)) then
+         dstArray = regrid%dstArray
       endif
 
       ! Get grids if requested
-      if (present(srcgrid)) then
-         srcgrid = regrid%srcgrid
+      if (present(srcGrid)) then
+         srcGrid = regrid%srcGrid
       endif
-      if (present(dstgrid)) then
-         dstgrid = regrid%dstgrid
+      if (present(dstGrid)) then
+         dstGrid = regrid%dstGrid
       endif
 
       ! Get datamaps if requested
-      if (present(srcdatamap)) then
-         srcdatamap = regrid%srcdatamap
+      if (present(srcDatamap)) then
+         srcDatamap = regrid%srcDatamap
       endif
-      if (present(dstdatamap)) then
-         dstdatamap = regrid%dstdatamap
+      if (present(dstDatamap)) then
+         dstDatamap = regrid%dstDatamap
       endif
 
       ! get method or number of links
-      if (present(method)) method = regrid%method
-      if (present(num_links)) num_links = regrid%num_links
-      if (present(gather)) gather = regrid%gather
+      if (present(method))   method   = regrid%method
+      if (present(numLinks)) numLinks = regrid%numLinks
+      if (present(gather))   gather   = regrid%gather
 
       if (rcpresent) rc = status
 
@@ -487,24 +575,23 @@
 ! !IROUTINE: ESMF_RegridTypeSet - Set attribute of a Regrid
 
 ! !INTERFACE:
-      subroutine ESMF_RegridTypeSet(regrid, name,                &
-                                    srcarray, dstarray,        &
-                                    srcgrid,  dstgrid,         &
-                                    srcdatamap,  dstdatamap,   &
-                                    method, num_links, gather, rc)
+      subroutine ESMF_RegridTypeSet(regrid, name,              &
+                                    srcArray, dstArray,        &
+                                    srcGrid,  dstGrid,         &
+                                    srcDatamap,  dstDatamap,   &
+                                    method, numLinks, gather, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_RegridType), intent(inout) :: regrid
 
-      character (*),      intent(in), optional :: name
-      type (ESMF_Array),  intent(in), optional :: srcarray, dstarray
-      type (ESMF_Grid),   intent(in), optional :: srcgrid,  dstgrid
-      type (ESMF_DataMap), intent(in), optional :: srcdatamap,  dstdatamap
-      integer,            intent(in), optional :: method
-      integer,            intent(in), optional :: num_links
-      type (ESMF_Route),  intent(in), optional :: gather
-
-      integer,            intent(out), optional :: rc
+      character (*),       intent(in ), optional :: name
+      type (ESMF_Array),   intent(in ), optional :: srcArray,   dstArray
+      type (ESMF_Grid),    intent(in ), optional :: srcGrid,    dstGrid
+      type (ESMF_DataMap), intent(in ), optional :: srcDatamap, dstDatamap
+      integer,             intent(in ), optional :: method
+      integer,             intent(in ), optional :: numLinks
+      type (ESMF_Route),   intent(in ), optional :: gather
+      integer,             intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -515,27 +602,23 @@
 !     \begin{description}
 !     \item[regrid]
 !          Class to be modified.
-!     \item[[name]]
+!     \item[{[name]}]
 !          Name for this regrid.
-!     \item[[src\_bundle]]
-!          If created with bundles, the source bundle associated
-!          with this regrid. 
-!     \item[[dst\_bundle]]
-!          If created with bundles, the destination bundle associated
-!          with this regrid. 
-!     \item[[src\_field]]
-!          If created with fields, the source field associated
-!          with this regrid. 
-!     \item[[dst\_field]]
-!          If created with fields, the destination field associated
-!          with this regrid. 
-!     \item[[method]]
+!     \item[{[srcArray]}]
+!          
+!     \item[{[dstArray]}]
+!          
+!     \item[{[srcGrid]}]
+!          
+!     \item[{[dstGrid]}]
+!         
+!     \item[{[method]}]
 !          Integer enum of method used in this regrid.
-!     \item[[num\_links]]
+!     \item[{[numLinks]}]
 !          Number of unique links between grids for this regrid.
-!     \item[[gather]]
+!     \item[{[gather]}]
 !          Route used to gather non-local information to perform regrid.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -560,21 +643,21 @@
       endif
 
       ! Set arrays if requested
-      if (present(srcarray)) regrid%srcarray = srcarray
-      if (present(dstarray)) regrid%dstarray = dstarray
+      if (present(srcArray)) regrid%srcArray = srcArray
+      if (present(dstArray)) regrid%dstArray = dstArray
       
       ! Set grids if requested
-      if (present(srcgrid)) regrid%srcgrid = srcgrid
-      if (present(dstgrid)) regrid%dstgrid = dstgrid
+      if (present(srcGrid)) regrid%srcGrid = srcGrid
+      if (present(dstGrid)) regrid%dstGrid = dstGrid
       
       ! Set datamaps if requested
-      if (present(srcdatamap)) regrid%srcdatamap = srcdatamap
-      if (present(dstdatamap)) regrid%dstdatamap = dstdatamap
+      if (present(srcDatamap)) regrid%srcDatamap = srcDatamap
+      if (present(dstDatamap)) regrid%dstDatamap = dstDatamap
       
       ! get method or number of links
-      if (present(method)) regrid%method = method
-      if (present(num_links)) regrid%num_links = num_links
-      if (present(gather)) regrid%gather = gather
+      if (present(method))   regrid%method   = method
+      if (present(numLinks)) regrid%numLinks = numLinks
+      if (present(gather))   regrid%gather   = gather
 
       if (rcpresent) rc = status
 
@@ -610,15 +693,15 @@
 
         ! nullify pointers
       
-        nullify(regrid%src_add)
-        nullify(regrid%dst_add)
+        nullify(regrid%srcAdd)
+        nullify(regrid%dstAdd)
         nullify(regrid%weights)
         nullify(regrid%gather)
 
         ! initialize scalars
         
-        regrid%method    = ESMF_RegridMethod_none
-        regrid%num_links = 0
+        regrid%method   = ESMF_RegridMethod_none
+        regrid%numLinks = 0
 
         rc = ESMF_SUCCESS
 
@@ -646,7 +729,7 @@
 !     \begin{description}
 !     \item[regrid]
 !          The regrid object to be destructed.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -664,14 +747,14 @@
         rc = ESMF_FAILURE
       endif
 
-      regrid%method    = ESMF_RegridMethod_none
-      regrid%num_links = 0
+      regrid%method   = ESMF_RegridMethod_none
+      regrid%numLinks = 0
 
 !     deallocate regrid transform
       !TODO
-      !destroy src_add, dst_add, weights ESMF arrays
-      nullify(regrid%src_add)
-      nullify(regrid%dst_add)
+      !destroy srcAdd, dstAdd, weights ESMF arrays
+      nullify(regrid%srcAdd)
+      nullify(regrid%dstAdd)
       nullify(regrid%weights)
 
 !     destroy communication structures
@@ -679,7 +762,7 @@
       !destroy route regrid%gather
       nullify(regrid%gather)
 
-        ! blithly assume the world is a good place
+      ! blithly assume the world is a good place
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct

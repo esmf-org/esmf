@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.39 2003/11/07 00:00:08 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.40 2004/01/07 22:37:14 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.39 2003/11/07 00:00:08 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.40 2004/01/07 22:37:14 jwolfe Exp $'
 
 !==============================================================================
 
@@ -147,7 +147,7 @@
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
       type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
-      type(ESMF_RegridType) :: temp_regrid
+      type(ESMF_RegridType) :: tempRegrid
       type(ESMF_TransformValues) :: tv
       character (len = ESMF_MAXSTR) :: name
 
@@ -168,7 +168,7 @@
       endif
 
       ! Set name and field pointers
-      call ESMF_RegridTypeSet(temp_regrid, name=name, srcArray = srcArray, &
+      call ESMF_RegridTypeSet(tempRegrid, name=name, srcArray = srcArray, &
                               dstArray = dstArray, &
                               method = ESMF_RegridMethod_Bilinear, rc=status)
       if(status .NE. ESMF_SUCCESS) then
@@ -250,11 +250,11 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      route = ESMF_RegridRouteConstruct(srcGrid, dstGrid, srcRelLoc, dstRelLoc, &
+      route = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, srcRelLoc, dstRelLoc, &
                                         recvDomainList, total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
-      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, srcRelLoc, &
+      tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, srcRelLoc, &
                                             dstRelLoc, recvDomainListTot, &
                                             total=.true., rc=status)
 
@@ -304,7 +304,7 @@
       endif
      
       ! Loop through domains for the search routine
-      call ESMF_GridGet(srcGrid, horz_coord_system=coordSystem, rc=status)
+      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=status)
       num_domains = recvDomainListTot%num_domains
       indexMod = -1
       start = 1
@@ -433,8 +433,8 @@
                  dstAdd(2)  ! address in dest grid
          
       real (ESMF_KIND_R8) ::  &
-         lon_thresh,    &! threshold for checking longitude crossing
-         lon_cycle,     &! 360 for degrees, 2pi for radians
+         lonThresh,     &! threshold for checking longitude crossing
+         lonCycle,      &! 360 for degrees, 2pi for radians
          dx1, dx2, dx3, &! differences for iterative scheme
          dy1, dy2, dy3, &! differences for iterative scheme
          iguess, jguess,&! initial guess for location within grid box
@@ -472,11 +472,11 @@
       pi   = 3.1416
  !     if (dst_phys_grid%coord_system == ESMF_CoordSystem_Spherical) then
  !        if (units = 'degrees') then
- !           lon_thresh = 270.0
- !           lon_cycle  = 360.0
+ !           lonThresh = 270.0
+ !           lonCycle  = 360.0
  !        else if (units = 'radians') then
- !           lon_thresh = 1.5*pi
- !           lon_cycle  = 2.0*pi
+ !           lonThresh = 1.5*pi
+ !           lonCycle  = 2.0*pi
  !        endif
  !     endif
 
@@ -517,22 +517,22 @@
 
               ! check longitude domain in spherical coords
        !       if (dst_grid%coord_system == ESMF_CoordSystem_Spherical) then
-       !         if (srcX(1) - dstX >  lon_thresh) &
-       !             srcX(1) = srcX(1) - lon_cycle
-       !         if (srcX(1) - dstX < -lon_thresh) &
-       !             srcX(1) = srcX(1) + lon_cycle
-       !         if (srcX(2) - dstX >  lon_thresh) &
-       !             srcX(2) = srcX(2) - lon_cycle
-       !         if (srcX(2) - dstX < -lon_thresh) &
-       !             srcX(2) = srcX(2) + lon_cycle
-       !         if (srcX(3) - dstX >  lon_thresh) &
-       !             srcX(3) = srcX(3) - lon_cycle
-       !         if (srcX(3) - dstX < -lon_thresh) &
-       !             srcX(3) = srcX(3) + lon_cycle
-       !         if (srcX(4) - dstX >  lon_thresh) &
-       !             srcX(4) = srcX(4) - lon_cycle
-       !         if (srcX(4) - dstX < -lon_thresh) &
-       !             srcX(4) = srcX(4) + lon_cycle
+       !         if (srcX(1) - dstX >  lonThresh) &
+       !             srcX(1) = srcX(1) - lonCycle
+       !         if (srcX(1) - dstX < -lonThresh) &
+       !             srcX(1) = srcX(1) + lonCycle
+       !         if (srcX(2) - dstX >  lonThresh) &
+       !             srcX(2) = srcX(2) - lonCycle
+       !         if (srcX(2) - dstX < -lonThresh) &
+       !             srcX(2) = srcX(2) + lonCycle
+       !         if (srcX(3) - dstX >  lonThresh) &
+       !             srcX(3) = srcX(3) - lonCycle
+       !         if (srcX(3) - dstX < -lonThresh) &
+       !             srcX(3) = srcX(3) + lonCycle
+       !         if (srcX(4) - dstX >  lonThresh) &
+       !             srcX(4) = srcX(4) - lonCycle
+       !         if (srcX(4) - dstX < -lonThresh) &
+       !             srcX(4) = srcX(4) + lonCycle
        !       endif
 
               ! check to see if point inside cell

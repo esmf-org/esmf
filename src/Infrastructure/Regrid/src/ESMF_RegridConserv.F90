@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.10 2003/09/09 22:43:42 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.11 2004/01/07 22:35:01 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.10 2003/09/09 22:43:42 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.11 2004/01/07 22:35:01 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -169,8 +169,8 @@
          status             ! error flag
 
       integer, dimension(3) :: &
-         src_add,          &! address in gathered source grid (i,j,DE)
-         dst_add            ! address in dest grid (i,j,DE)
+         srcAdd,           &! address in gathered source grid (i,j,DE)
+         dstAdd             ! address in dest grid (i,j,DE)
          
       real (ESMF_KIND_R8) :: &
          lon_thresh,    &! threshold for checking longitude crossing
@@ -313,8 +313,8 @@
 !      nx_dst, ny_dst, nsbdm_dst   ! dest   grid size
 !
 !   integer (int_kind), dimension(3) :: &
-!      src_add,           &! current address for source      grid cell
-!      dst_add             ! current address for destination grid cell
+!      srcAdd,            &! current address for source      grid cell
+!      dstAdd              ! current address for destination grid cell
 !
 !   logical (log_kind) :: &
 !      lcoinc,            &! flag for coincident segments
@@ -379,8 +379,8 @@
 !
 !   nwgt = regrid%num_wts
 !
-!   regrid%src_add = 0
-!   regrid%dst_add = 0
+!   regrid%srcAdd  = 0
+!   regrid%dstAdd  = 0
 !   regrid%weights = c0
 !
 !!-----------------------------------------------------------------------
@@ -390,14 +390,14 @@
 !!
 !!-----------------------------------------------------------------------
 !
-!   dst_add = 0
+!   dstAdd = 0
 !   do k=1,nsbdm_src
 !   do j=1,ny_src
 !   do i=1,nx_src
 !
-!      src_add(1) = i
-!      src_add(2) = j
-!      src_add(3) = k
+!      srcAdd(1) = i
+!      srcAdd(2) = j
+!      srcAdd(3) = k
 !
 !      xref = regrid%src_grid%center_x(i,j,k)
 !      yref = regrid%src_grid%center_y(i,j,k)
@@ -481,12 +481,12 @@
 !
 !            xbeg = x_intersect + xoff
 !            ybeg = y_intersect + yoff
-!            call SCRIP_Grid_Intersect(dst_add, x_intersect, y_intersect,   &
+!            call SCRIP_Grid_Intersect(dstAdd, x_intersect, y_intersect,   &
 !                                      xoff, yoff, lcoinc, regrid%dst_grid, &
 !                                      xbeg, ybeg, xend, yend, full_line)
-!            ii = dst_add(1)
-!            jj = dst_add(2)
-!            kk = dst_add(3)
+!            ii = dstAdd(1)
+!            jj = dstAdd(2)
+!            kk = dstAdd(3)
 !
 !            !***
 !            !*** compute line integral for this subsegment.
@@ -510,9 +510,8 @@
 !            !*** also add contributions to cell areas and centroids.
 !            !***
 !
-!            if (dst_add(1) /= 0 .and. regrid%src_grid%mask(i,j,k)) then
-!               call SCRIP_Regrid_AddLink(regrid, &
-!                                         src_add, dst_add, weights)
+!            if (dstAdd(1) /= 0 .and. regrid%src_grid%mask(i,j,k)) then
+!               call SCRIP_Regrid_AddLink(regrid, srcAdd, dstAdd, weights)
 !               src_frac( i, j, k) = src_frac( i, j, k) + weights(1)
 !               dst_frac(ii,jj,kk) = dst_frac(ii,jj,kk) + weights(1)
 !            endif
@@ -550,14 +549,14 @@
 !!
 !!-----------------------------------------------------------------------
 !
-!   src_add = 0
+!   srcAdd = 0
 !   do kk=1,nsbdm_dst
 !   do jj=1,ny_dst
 !   do ii=1,nx_dst
 !
-!      dst_add(1) = ii
-!      dst_add(2) = jj
-!      dst_add(3) = kk
+!      dstAdd(1) = ii
+!      dstAdd(2) = jj
+!      dstAdd(3) = kk
 !
 !      xref = regrid%src_grid%center_x(ii,jj,kk)
 !      yref = regrid%src_grid%center_y(ii,jj,kk)
@@ -640,12 +639,12 @@
 !
 !            xbeg = x_intersect + xoff
 !            ybeg = y_intersect + yoff
-!            call SCRIP_Grid_Intersect(src_add, x_intersect, y_intersect,   &
+!            call SCRIP_Grid_Intersect(srcAdd, x_intersect, y_intersect,    &
 !                                      xoff, yoff, lcoinc, regrid%src_grid, &
 !                                      xbeg, ybeg, xend, yend, full_line)
-!            i = src_add(1)
-!            j = src_add(2)
-!            k = src_add(3)
+!            i = srcAdd(1)
+!            j = srcAdd(2)
+!            k = srcAdd(3)
 !
 !            !***
 !            !*** compute line integral for this subsegment.
@@ -669,10 +668,9 @@
 !            !*** also add contributions to cell areas and centroids.
 !            !***
 !
-!            if (src_add(1) /= 0) then
+!            if (srcAdd(1) /= 0) then
 !               if (regrid%src_grid%mask(i,j,k)) then
-!                  call SCRIP_Regrid_AddLink(regrid, &
-!                                            src_add, dst_add, weights)
+!                  call SCRIP_Regrid_AddLink(regrid, srcAdd, dstAdd, weights)
 !                  src_frac( i, j, k) = src_frac( i, j, k) + weights(1)
 !                  dst_frac(ii,jj,kk) = dst_frac(ii,jj,kk) + weights(1)
 !               endif
@@ -721,37 +719,37 @@
 !   weights(2) =  pi*pi
 !   weights(3) =  c0
 !
-!   src_add = 0
+!   srcAdd = 0
 !   pole_loop1: do k=1,nsbdm_src
 !   do j=1,ny_src
 !   do i=1,nx_src
 !      if (regrid%src_grid%area(i,j,k) < -1.5*pi .and. &
 !          regrid%src_grid%center_y(i,j,k) > c0) then
-!         src_add(1) = i
-!         src_add(2) = j
-!         src_add(3) = k
+!         srcAdd(1) = i
+!         srcAdd(2) = j
+!         srcAdd(3) = k
 !         exit pole_loop1
 !      endif
 !   end do
 !   end do
 !   end do pole_loop1
 !
-!   dst_add = 0
+!   dstAdd = 0
 !   pole_loop2: do kk=1,nsbdm_dst
 !   do jj=1,ny_dst
 !   do ii=1,nx_dst
 !      if (regrid%dst_grid%area(ii,jj,kk) < -1.5*pi .and. &
 !          regrid%dst_grid%center_y(ii,jj,kk) > c0) then
-!         dst_add(1) = ii
-!         dst_add(2) = jj
-!         dst_add(3) = kk
+!         dstAdd(1) = ii
+!         dstAdd(2) = jj
+!         dstAdd(3) = kk
 !         exit pole_loop2
 !      endif
 !   end do
 !   end do
 !   end do pole_loop2
 !
-!   if (src_add(1) /=0) then
+!   if (srcAdd(1) /=0) then
 !      regrid%src_grid%area(i,j,k) = &
 !      regrid%src_grid%area(i,j,k) + weights(1)
 !      src_centroid_x(i,j,k) = &
@@ -760,7 +758,7 @@
 !      src_centroid_y(i,j,k) + weights(3)
 !   endif
 !
-!   if (dst_add(1) /=0) then
+!   if (dstAdd(1) /=0) then
 !      regrid%dst_grid%area(ii,jj,kk) = &
 !      regrid%dst_grid%area(ii,jj,kk) + weights(1)
 !      dst_centroid_x(ii,jj,kk) = &
@@ -769,8 +767,8 @@
 !      dst_centroid_y(ii,jj,kk) + weights(3)
 !   endif
 !
-!   if (src_add(1) /= 0 .and. dst_add(1) /=0) then
-!      call SCRIP_Regrid_AddLink(regrid, src_add, dst_add, weights)
+!   if (srcAdd(1) /= 0 .and. dstAdd(1) /=0) then
+!      call SCRIP_Regrid_AddLink(regrid, srcAdd, dstAdd, weights)
 !
 !      src_frac( i, j, k) = src_frac( i, j, k) + weights(1)
 !      dst_frac(ii,jj,kk) = dst_frac(ii,jj,kk) + weights(1)
@@ -781,37 +779,37 @@
 !   weights(2) = -pi*pi
 !   weights(3) =  c0
 !
-!   src_add = 0
+!   srcAdd = 0
 !   pole_loop3: do k=1,nsbdm_src
 !   do j=1,ny_src
 !   do i=1,nx_src
 !      if (regrid%src_grid%area(i,j,k) < -1.5*pi .and. &
 !          regrid%src_grid%center_y(i,j,k) < c0) then
-!         src_add(1) = i
-!         src_add(2) = j
-!         src_add(3) = k
+!         srcAdd(1) = i
+!         srcAdd(2) = j
+!         srcAdd(3) = k
 !         exit pole_loop3
 !      endif
 !   end do
 !   end do
 !   end do pole_loop3
 !
-!   dst_add = 0
+!   dstAdd = 0
 !   pole_loop4: do kk=1,nsbdm_dst
 !   do jj=1,ny_dst
 !   do ii=1,nx_dst
 !      if (regrid%dst_grid%area(ii,jj,kk) < -1.5*pi .and. &
 !          regrid%dst_grid%center_y(ii,jj,kk) < c0) then
-!         dst_add(1) = ii
-!         dst_add(2) = jj
-!         dst_add(3) = kk
+!         dstAdd(1) = ii
+!         dstAdd(2) = jj
+!         dstAdd(3) = kk
 !         exit pole_loop4
 !      endif
 !   end do
 !   end do
 !   end do pole_loop4
 !
-!   if (src_add(1) /=0) then
+!   if (srcAdd(1) /=0) then
 !      regrid%src_grid%area(i,j,k) = &
 !      regrid%src_grid%area(i,j,k) + weights(1)
 !      src_centroid_x(i,j,k) = &
@@ -820,7 +818,7 @@
 !      src_centroid_y(i,j,k) + weights(3)
 !   endif
 !
-!   if (dst_add(1) /=0) then
+!   if (dstAdd(1) /=0) then
 !      regrid%dst_grid%area(ii,jj,kk) = &
 !      regrid%dst_grid%area(ii,jj,kk) + weights(1)
 !      dst_centroid_x(ii,jj,kk) = &
@@ -829,8 +827,8 @@
 !      dst_centroid_y(ii,jj,kk) + weights(3)
 !   endif
 !
-!   if (src_add(1) /= 0 .and. dst_add(1) /=0) then
-!      call SCRIP_Regrid_AddLink(regrid, src_add, dst_add, weights)
+!   if (srcAdd(1) /= 0 .and. dstAdd(1) /=0) then
+!      call SCRIP_Regrid_AddLink(regrid, srcAdd, dstAdd, weights)
 !
 !      src_frac( i, j, k) = src_frac( i, j, k) + weights(1)
 !      dst_frac(ii,jj,kk) = dst_frac(ii,jj,kk) + weights(1)
@@ -860,12 +858,12 @@
 !!-----------------------------------------------------------------------
 !
 !   do n=1,regrid%num_links
-!      i  = regrid%src_add(1,n)
-!      j  = regrid%src_add(2,n)
-!      k  = regrid%src_add(3,n)
-!      ii = regrid%dst_add(1,n)
-!      jj = regrid%dst_add(2,n)
-!      kk = regrid%dst_add(3,n)
+!      i  = regrid%srcAdd(1,n)
+!      j  = regrid%srcAdd(2,n)
+!      k  = regrid%srcAdd(3,n)
+!      ii = regrid%dstAdd(1,n)
+!      jj = regrid%dstAdd(2,n)
+!      kk = regrid%dstAdd(3,n)
 !      weights = regrid%weights(:,n)
 !
 !      !select case(norm_opt)
@@ -953,20 +951,20 @@
 !   end do
 !   end do
 !
-!   do n=1,regrid%num_links
-!      src_add = regrid%src_add(:,n)
-!      dst_add = regrid%dst_add(:,n)
+!   do n=1,regrid%numLinks
+!      srcAdd = regrid%srcAdd(:,n)
+!      dstAdd = regrid%dstAdd(:,n)
 !        
 !      if (regrid%weights(1,n) < -.01) then
-!         print *,'Regrid weight < 0 ',src_add,dst_add,regrid%weights(1,n)
+!         print *,'Regrid weight < 0 ',srcAdd,dstAdd,regrid%weights(1,n)
 !      endif
 !      !if (norm_opt /= norm_opt_none .and. wts_map1(1,n) > 1.01) then
 !      if (regrid%weights(1,n) > 1.01) then
-!         print *,'Regrid weight > 1 ',src_add,dst_add,regrid%weights(1,n)
+!         print *,'Regrid weight > 1 ',srcAdd,dstAdd,regrid%weights(1,n)
 !      endif
 !      !*** sum the 1st weight for east dest grid point
-!      dst_centroid_y(dst_add(1),dst_add(2),dst_add(3)) = & 
-!      dst_centroid_y(dst_add(1),dst_add(2),dst_add(3)) + regrid%weights(1,n)
+!      dst_centroid_y(dstAdd(1),dstAdd(2),dstAdd(3)) = & 
+!      dst_centroid_y(dstAdd(1),dstAdd(2),dstAdd(3)) + regrid%weights(1,n)
 !   end do
 !
 !   !*** check whether weights sum to the correct values

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.8 2003/09/09 22:43:42 nscollins Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.9 2004/01/07 22:35:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -57,7 +57,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.8 2003/09/09 22:43:42 nscollins Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.9 2004/01/07 22:35:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -151,10 +151,10 @@
          status             ! error flag
 
       integer, dimension(:,:), allocatable :: &
-         src_add            ! src neighbor addresses (nnbr,3)
+         srcAdd             ! src neighbor addresses (nnbr,3)
 
       integer, dimension(:,:,:), allocatable :: &
-         dst_add            ! address in dest grid (i,j,DE)
+         dstadd             ! address in dest grid (i,j,DE)
          
       real(ESMF_KIND_R8), dimension(:), allocatable :: &
          weights,          &! normalized distance to each neighbor
@@ -250,7 +250,7 @@
       !   nnbrs = 4
       !endif
 
-      !allocate(src_add(nnbrs,3), weights(nnbrs), wgtstmp(1))
+      !allocate(srcAdd(nnbrs,3), weights(nnbrs), wgtstmp(1))
 
       !
       ! loop through points in exclusive domain on local dest DEs
@@ -279,9 +279,9 @@
                ! addresses and distances
                !
 
-      !         dst_add(1) = i
-      !         dst_add(2) = j
-      !         dst_add(3) = iDE
+      !         dstAdd(1) = i
+      !         dstAdd(2) = j
+      !         dstAdd(3) = iDE
       !         weights = 1.e+20
       !         do n=1,noverlap_src_DEs
 
@@ -308,12 +308,12 @@
       !                check_loop: do nchk=1,nnbrs
       !                   if (distance < weights(nchk)) then
       !                      do inbr=num_neighbors,nchk+1,-1
-      !                         src_add(inbr,:) = src_add(inbr-1,:)
+      !                         srcAdd(inbr,:) = srcAdd(inbr-1,:)
       !                         weights(inbr) = weights(inbr-1)
       !                      end do
-      !                      src_add(nchk,1) = iii
-      !                      src_add(nchk,2) = jjj
-      !                      src_add(nchk,3) = n
+      !                      srcAdd(nchk,1) = iii
+      !                      srcAdd(nchk,2) = jjj
+      !                      srcAdd(nchk,3) = n
       !                      weights(nchk) = distance
       !                      exit check_loop
       !                   endif
@@ -330,14 +330,14 @@
 
       !         dist_tot = zero
       !         do inbr=1,nnbrs
-      !            iii = src_add(inbr,1)
-      !            jjj = src_add(inbr,2)
-      !            n   = src_add(inbr,3)
+      !            iii = srcAdd(inbr,1)
+      !            jjj = srcAdd(inbr,2)
+      !            n   = srcAdd(inbr,3)
       !            if (src_grid_mask(iii,jjj,n)) then
       !               weights(inbr) = one/weights(inbr)
       !               dist_tot = dist_tot + weights(inbr)
       !            else
-      !               src_add(inbr,:) = 0
+      !               srcAdd(inbr,:) = 0
       !               weights(inbr) = zero
       !            endif
       !         end do
@@ -349,11 +349,11 @@
 
       !         if (dist_tot /= zero) then
       !            do inbr=1,nnbrs
-      !               if (src_add(inbr,1) /= 0) then
+      !               if (srcAdd(inbr,1) /= 0) then
       !                  wgtstmp(1) = weights(inbr)/dist_tot
       !                  call ESMF_RegridAddLink(&
       !                           ESMF_RegridConsByFieldNearNbr, &
-      !                           src_add, dst_add, wgtstmp(1), rc)
+      !                           srcAdd, dstAdd, wgtstmp(1), rc)
       !               endif
       !            end do
       !         endif
@@ -364,7 +364,7 @@
       !end do    ! loop over local dst DEs
       
       !deallocate(src_center_x, src_center_y)
-      !deallocate(src_add, weights, wgtstmp)
+      !deallocate(srcAdd, weights, wgtstmp)
       
       end function ESMF_RegridConsByFieldNearNbr
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.42 2003/10/07 22:36:24 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.43 2004/01/07 22:34:36 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.42 2003/10/07 22:36:24 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.43 2004/01/07 22:34:36 jwolfe Exp $'
 
 !==============================================================================
 
@@ -461,23 +461,22 @@
 
 ! !INTERFACE:
       subroutine ESMF_RegridGet(regrid, name,            &
-                                srcarray, dstarray,  &
-                                srcgrid,  dstgrid,   &
-                                srcdatamap,  dstdatamap,   &
-                                method, num_links , gather, rc)
+                                srcArray, dstArray,  &
+                                srcGrid,  dstGrid,   &
+                                srcDatamap,  dstDatamap,   &
+                                method, numLinks , gather, rc)
 !
 ! !ARGUMENTS:
 
-      type(ESMF_Regrid),  intent(inout) :: regrid
-      character (*),      intent(out), optional :: name
-      type (ESMF_Array),  intent(out), optional :: srcarray, dstarray
-      type (ESMF_Grid),   intent(out), optional :: srcgrid,  dstgrid
-      type (ESMF_DataMap),  intent(out), optional :: srcdatamap,  dstdatamap
-      integer,            intent(out), optional :: method
-      integer,            intent(out), optional :: num_links
-      type (ESMF_Route),  intent(out), optional :: gather
-
-      integer,            intent(out), optional :: rc
+      type(ESMF_Regrid),    intent(inout) :: regrid
+      character (*),        intent(out), optional :: name
+      type (ESMF_Array),    intent(out), optional :: srcArray, dstArray
+      type (ESMF_Grid),     intent(out), optional :: srcGrid,  dstGrid
+      type (ESMF_DataMap),  intent(out), optional :: srcDatamap,  dstDatamap
+      integer,              intent(out), optional :: method
+      integer,              intent(out), optional :: numLinks
+      type (ESMF_Route),    intent(out), optional :: gather
+      integer,              intent(out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -490,27 +489,27 @@
 !          Regrid to be queried.
 !     \item[TODO:] fix this doc - make it match arg list and fix double
 !          brackets to be bracket, curley brace, bracket.
-!     \item[[name]]
+!     \item[{[name]}]
 !          Name for this regrid.
-!     \item[[srcbundle]]
-!          If created with bundles, the source bundle associated
-!          with this regrid. 
-!     \item[[dstbundle]]
-!          If created with bundles, the destination bundle associated
-!          with this regrid. 
-!     \item[[srcfield]]
-!          If created with fields, the source field associated
-!          with this regrid. 
-!     \item[[dstfield]]
-!          If created with fields, the destination field associated
-!          with this regrid. 
-!     \item[[method]]
+!     \item[{[srcArray]}]
+!          
+!     \item[{[dstArray]}]
+!          
+!     \item[{[srcGrid]}]
+!          
+!     \item[{[dstGrid]}]
+!          
+!     \item[{[srcDatamap]}]
+!          
+!     \item[{[dstDatamap]}]
+!          
+!     \item[{[method]}]
 !          Integer enum of method used in this regrid.
-!     \item[[num\_links]]
+!     \item[{[numLinks]}]
 !          Number of unique links between grids for this regrid.
-!     \item[[gather]]
+!     \item[{[gather]}]
 !          Route used to gather non-local information to perform regrid.
-!     \item[[rc]]
+!     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -581,8 +580,8 @@
              return
          endif
       endif
-      if (present(num_links)) then
-         call ESMF_RegridTypeGet(regrid%ptr, num_links=num_links, rc=status)
+      if (present(numLinks)) then
+         call ESMF_RegridTypeGet(regrid%ptr, numLinks=numLinks, rc=status)
          if (status .ne. ESMF_SUCCESS) then
              print *, "ESMF_RegridGet: failed getting regrid ..."
              return
