@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest79497.F90,v 1.11 2003/08/29 22:45:51 nscollins Exp $
+! $Id: ESMF_SysTest79497.F90,v 1.12 2003/09/02 16:24:29 jwolfe Exp $
 !
 ! System test code #79497
 
@@ -70,11 +70,6 @@
 !-------------------------------------------------------------------------
 !
 
-    !! BYPASS CODE:  This system test isn't working yet.
-    !!  remove the next line to run the actual test and debug it.
-    rc = ESMF_FAILURE
-    goto 10
-
     ! Create the top level application component.
     aname = "System Test #79497"
     app = ESMF_AppCompCreate(aname, rc=rc)
@@ -88,6 +83,13 @@
       print *, "This system test needs to run at least 6-way, current np = ", ndes
       goto 10
     endif
+
+    !! BYPASS CODE:  This system test isn't working yet.
+    !!  remove the next line to run the actual test and debug it.
+    rc = ESMF_SUCCESS
+    ! Figure out our local processor id for message below.
+    call ESMF_DELayoutGetDEID(layout1, de_id, rc)
+    goto 10
 
     mid = ndes / 2
 
