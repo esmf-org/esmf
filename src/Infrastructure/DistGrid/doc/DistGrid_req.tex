@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.6 2002/03/26 06:28:11 vbalaji Exp $
+% $Id: DistGrid_req.tex,v 1.7 2002/03/27 00:01:22 vbalaji Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -102,12 +102,12 @@ each point in the domain to one PE for computation.
 \item[Notes] in multi-threaded applications, the PE assignment is done
   only for each ``MPI process''. Additional threaded PEs work on
   partitions within these computational domains.
-
-  The partitions do not necessarily have a ``domain'' associated with
-  it. The partitions may define a task queue from which PEs assigned
-  to threads pop tasks. The pool of PEs available for threading is
-  drawn from the associated PElist, of which not all are part of the
-  PE layout.
+  
+  The partitions do not necessarily have a PE associated with it. The
+  partitions may define a task queue from which PEs assigned to
+  threads pop tasks. The pool of PEs available for threading is drawn
+  from the associated PElist, of which not all are part of the PE
+  layout.
 \end{reqlist}
 
 \sreq{User-specified computational domain decomposition}
@@ -488,7 +488,7 @@ data arrays where each array element is a derived data type.
 It shall be possible to create a copy on any PE of the entire global
 array from a distributed array.
 
-\sreq{Partial gather}
+\sreq{Partial gather} \label{DG:PartGather}
 
 In a 2D decomposition, it shall be possible to perform a gather along
 either axis.
@@ -588,10 +588,11 @@ floating-point or complex array.
 \item[Notes]
 \end{reqlist}
 
-\ssreq{FP and complex global sum along under a mask} \label{DG:masksum}
+\ssreq{FP and complex global sum under a mask} \label{DG:masksum}
 
 ESMF shall provide methods to compute the global sum of a 2D-decomposed
-floating-point or complex array under control of a mask.
+floating-point or complex array under control of a mask. The mask
+omits an arbitrary list of array locations from the sum.
 
 \begin{reqlist}
 \item[Priority]
@@ -640,9 +641,9 @@ distributed floating-point or complex array.
 \item[Status]
 \item[Verification]
 \item[Notes] A checksum is different from a sum in that there is no
-  data loss when thedata has a dynamic range exceeding the FP or
-  complex precision. It is done by casting all FP numbers as integers before
-  summing.
+  data loss when the data has a dynamic range exceeding the FP or
+  complex precision. It is done by casting all FP numbers as integers
+  before summing.
 \end{reqlist}
 
 %
@@ -820,6 +821,44 @@ data there may diverge because of FP roundoff error. ESMF will provide
 methods to enforce exact redundancy.
 
 \req{Spectral grid}
+
+Spectral models generally have two associated grids, one in physical
+space, and one in phase (wavenumber) space. The sequence of
+transformations to pass data between the two grids is treated at its
+highest level within the Regrid semantics. Within these, there is
+generally a specific step to redistribute data to optimize specific
+operations (FFTS and LTs). This section will highlight the specific
+requirements of these redistributions.
+
+\sreq{Globalize on one axis}
+
+There will be an efficient method to create an array where all the
+global data is available along one of the axes of distribution.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] Already covered by Req.~\ref{DG:PartGather}, but
+  highlighted here.
+\end{reqlist}
+
+\sreq{Transpose axis of globalization}
+
+There will be an efficient method to transpose an array global along
+one axis, into one global along another. Note that this is a matrix
+transpose, as opposed to the general redistribution that we've called
+a data transpose in~\ref{DG:Transpose}.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] Already covered by Req.~\ref{DG:PartGather}, but
+  highlighted here.
+\end{reqlist}
 
 \req{Exchange grid}
 
