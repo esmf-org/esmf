@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.8 2003/08/04 20:26:00 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.9 2003/08/28 15:51:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,6 +201,17 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
                           ESMC_Logical contig, ESMC_Logical dealloc);
     // TODO: add Get method
 
+    // Restructuring methods and higher level functions.  If we accumulate
+    // enough of these they should be moved to another source file.
+
+    // create a new array from an old one, decreasing the rank by one.
+    ESMC_LocalArray *ESMC_LocalArraySlice(int slicedim, int sliceloc, 
+                                          int *rc) const;
+ 
+    // point to the same data but create a different F90 pointer with
+    // different rank/sizes - the number of items must match.
+    ESMC_LocalArray *ESMC_LocalArrayReshape(int rank, int *newcounts, 
+                                            int *rc) const; 
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

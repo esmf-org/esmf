@@ -13,7 +13,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the C++ Array methods declared
-// in the companion file ESMC_Array.h.  
+// in the companion file ESMC_LocalArray.h.  
 //
 // The {\tt ESMF\_Array} object allows C++ to emulate the richer
 // Fortran language Array operations.  It allows strided access, 
@@ -34,26 +34,22 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.4 2003/08/04 22:01:41 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.5 2003/08/28 15:51:10 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
-//
-// This section includes all the Array routines
-//
-//
-
+// This section includes all the Local Array create/destroy routines.
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayCreate - Create a new Array
+// !IROUTINE:  ESMC_LocalArrayCreate - Create a new Array
 //
 // !INTERFACE:
       ESMC_LocalArray *ESMC_LocalArrayCreate(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
+//     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
@@ -384,63 +380,15 @@
     return rc;
 
  } // end ESMC_LocalArrayDestruct
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_LocalArrayGet<Value> - get <Value> for a LocalArray
-//
-// !INTERFACE:
-      //int ESMC_LocalArray::ESMC_LocalArrayGet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      //<value type> *value) const {     // out - value
-//
-// !DESCRIPTION:
-//     Returns the value of {\tt ESMC\_LocalArray} member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- //} // end ESMC_LocalArrayGet<Value>
-
+// get/set routines.
 //-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_LocalArraySet<Value> - set <Value> for a LocalArray
-//
-// !INTERFACE:
-      //int ESMC_LocalArray::ESMC_LocalArraySet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      //const <value type> *value) {     // in - value
-//
-// !DESCRIPTION:
-//     Sets the value of {\tt ESMC\_LocalArray} member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    //int rc = ESMF_FAILURE;
-
-    //return rc;
-
- //} // end ESMC_LocalArraySet<Value>
-
+// Note that most of the Get/Set routines are by value and are inline in
+//  the include file.
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LocalArraySetInfo - Set the most common F90 needs
@@ -575,8 +523,79 @@
  } // end ESMC_LocalArraySetF90Ptr
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Higher level Array functions.  Might need to move to another file if
+// there are enough of them...
+//-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_LocalArrayValidate - internal consistency check for a LocalArray
+// !IROUTINE:  ESMC_LocalArraySlice - drop an array by one dimension
+//
+// !INTERFACE:
+      ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArraySlice(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int slicedim,             // in - which dim to slice
+      int sliceloc,             // in - at which location on that dim
+      int *rc) const {          // out - return code
+//
+// !DESCRIPTION:
+//      Creates a (N-1)D array from an existing one.  Copies data if
+//      it exists.  Returns a new array.
+//
+//EOP
+
+    ESMC_LocalArray *newa;
+
+    *rc = ESMF_FAILURE;
+
+    return NULL;
+
+ } // end ESMC_LocalArraySlice
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LocalArrayReshape - change the rank or counts on an array
+//
+// !INTERFACE:
+      ESMC_LocalArray *ESMC_LocalArray::ESMC_LocalArrayReshape(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rank,                 // in - new rank
+      int *newcounts,           // in - new counts along each rank dim
+      int *rc) const {          // out - return code
+//
+// !DESCRIPTION:
+//      Creates a new array based on an old one.  The original data is
+//      referenced and therefore shared with the old array, but it can be
+//      iterated with an F90 pointer of a different configuration.
+//
+//EOP
+
+    ESMC_LocalArray *newa;
+
+    *rc = ESMF_FAILURE;
+
+    return NULL;
+
+ } // end ESMC_LocalArrayReshape
+
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+// Standard methods - Validate, Print, Read, Write
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LocalArrayValidate - internal consistency check
 //
 // !INTERFACE:
       int ESMC_LocalArray::ESMC_LocalArrayValidate(
@@ -592,7 +611,6 @@
 //      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
 
 //
 //  code goes here
@@ -602,7 +620,6 @@
     return rc;
 
  } // end ESMC_LocalArrayValidate
-
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -987,9 +1004,12 @@
 
  } // end ESMC_LocalArrayWrite
 
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
+// native constructor/destructors
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LocalArray - native C++ constructor
