@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp_F.C,v 1.21 2004/03/19 20:33:34 theurich Exp $
+// $Id: ESMC_Comp_F.C,v 1.22 2004/04/13 17:30:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,9 +24,7 @@
 #include "ESMC_Comp.h"
 #include "ESMC_FTable.h"
 
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_VM.h"
-#endif
 
 #include "trim.h"
 //------------------------------------------------------------------------------
@@ -210,7 +208,6 @@ extern "C" {
 }
 
 
-#ifdef ESMF_ENABLE_VM
 // these interface subroutine names MUST be in lower case
 extern "C" {
 
@@ -219,17 +216,19 @@ extern "C" {
     ESMC_VMPlan **ptr_vmplan, // p2 to the VMPlan for component's VM
     void **vm_info,           // p2 to member which holds info
     void **vm_cargo,          // p2 to member which holds cargo
-    int *status){             // return error code in status
+    int *status) {            // return error code in status
+
     // Things get a little confusing here with pointers, so I will define
     // some temp. variables that make matters a little clearer I hope:
     ESMC_VM &vm_parent = **ptr_vm_parent;     // reference to parent VM
     ESMC_VMPlan &vmplan = **ptr_vmplan;       // reference to VMPlan
+
     // Now call the vmachine_exit function which will block respective PETs
     vm_parent.vmachine_exit(vmplan, *vm_info);
     cargotype *cargo = (cargotype *)*vm_cargo;
     delete cargo;
+
     *status = ESMF_SUCCESS;
   }
 
 }
-#endif

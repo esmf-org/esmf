@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.h,v 1.8 2004/04/01 15:59:06 theurich Exp $
+// $Id: ESMC_FTable.h,v 1.9 2004/04/13 17:30:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,9 +42,8 @@
 //  This function does NOT inherit from the base class; it is embedded
 //  in other classes which inherit from base.
 
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_VM.h"
-#endif
+
 
 // !PUBLIC TYPES:
  class ESMC_FTable;

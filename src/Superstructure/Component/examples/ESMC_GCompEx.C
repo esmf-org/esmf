@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.5 2004/01/28 23:14:49 nscollins Exp $
+// $Id: ESMC_GCompEx.C,v 1.6 2004/04/13 17:30:31 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -33,7 +33,7 @@ main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, mycell;
      char compname[32];
-     ESMC_DELayout *layout;
+     ESMC_newDELayout *layout;
      ESMC_Comp *comp1, *comp2, *comp3, *comp4;
         
 //-------------------------------------------------------------------------
@@ -86,7 +86,7 @@ main(int argc, char **argv) {
 //   //
 
      //rc = ESMC_CompDestroy(comp1);
-     //rc = ESMC_DELayoutDestroy(layout);
+     //rc = ESMC_newDELayoutDestroy(layout);
 
      //printf("Comp example 5 returned\n");
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.h,v 1.5 2004/03/18 21:49:29 cdeluca Exp $
+// $Id: ESMC_GridComp.h,v 1.6 2004/04/13 17:30:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 // !USES:
 #include "ESMC.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_DELayout.h"
+#include "ESMC_newDELayout.h"
 #include "ESMC_Time.h"
 #include "ESMC_Clock.h"
 #include "ESMC_Grid.h"
@@ -115,7 +115,7 @@
 // were a method, the ESMC_GridComp object on whose behalf it was being invoked
 // an ESMC_GridComp object.
 
- ESMC_GridComp *ESMC_GridCompCreate(char *name, ESMC_DELayout *layout,
+ ESMC_GridComp *ESMC_GridCompCreate(char *name, ESMC_newDELayout *layout,
                                       enum ESMC_GridCompType mtype,
                                       ESMC_Grid *grid,
                                       char *configFile, int *rc);
@@ -125,7 +125,7 @@
 // prototypes for fortran interface routines
 extern "C" {
  void FTN(f_esmf_gridcompcreate)(ESMC_GridComp *comp, char *name, 
-                         ESMC_DELayout *layout, ESMC_GridCompType *mtype, 
+                         ESMC_newDELayout *layout, ESMC_GridCompType *mtype, 
                          ESMC_Grid *grid, ESMC_Config *config, 
                          char *configFile, int *rc, int nlen, int clen);
  void FTN(f_esmf_gridcompdestroy)(ESMC_GridComp *comp, int *rc);

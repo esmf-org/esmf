@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.19 2004/04/09 20:19:53 eschwab Exp $
+// $Id: ESMC_Comp.C,v 1.20 2004/04/13 17:30:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,7 +57,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.19 2004/04/09 20:19:53 eschwab Exp $";
+           "$Id: ESMC_Comp.C,v 1.20 2004/04/13 17:30:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -80,7 +80,7 @@ const char *ESMC_SetReadRestart  = "ESMF_ReadRestart";
 //
 // !ARGUMENTS:
       char *name,
-      ESMC_DELayout *layout,
+      ESMC_newDELayout *layout,
       enum ESMC_CompType ctype,
       enum ESMC_GridCompType mtype,
       char *filepath,

@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.14 2004/04/09 20:19:53 eschwab Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.15 2004/04/13 17:30:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.14 2004/04/09 20:19:53 eschwab Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.15 2004/04/13 17:30:46 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -67,7 +67,7 @@
                                      config, configFile, rc)
        !use ESMF_BaseMod    ! ESMF base class
        use ESMF_ConfigMod
-       use ESMF_DELayoutMod
+       use ESMF_newDELayoutMod
        use ESMF_ClockMod
        use ESMF_GridTypesMod
        use ESMF_GridCompMod
@@ -75,7 +75,7 @@
 
        type(ESMF_GridComp) :: gcomp
        character(len=*) :: name
-       type(ESMF_DELayout) :: layout
+       type(ESMF_newDELayout) :: layout
        type(ESMF_GridCompType) :: mtype
        type(ESMF_Grid) :: grid
        type(ESMF_Clock) :: clock
@@ -206,14 +206,14 @@
 
    subroutine f_esmf_cplcompcreate(ccomp, name, layout, config, configFile, clock, rc)
        !use ESMF_BaseMod    ! ESMF base class
-       use ESMF_DELayoutMod
+       use ESMF_newDELayoutMod
        use ESMF_ClockMod
        use ESMF_CompMod
        use ESMF_CplCompMod
 
        type(ESMF_CplComp) :: ccomp
        character(len=*) :: name
-       type(ESMF_DELayout) :: layout
+       type(ESMF_newDELayout) :: layout
        type(ESMF_Config) :: config
        character(len=*) :: configFile
        type(ESMF_Clock) :: clock

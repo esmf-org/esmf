@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.30 2004/03/24 20:01:00 cdeluca Exp $
+! $Id: ESMF_GridComp.F90,v 1.31 2004/04/13 17:30:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,17 +36,14 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_MachineMod
+      use ESMF_VMMod
       use ESMF_ConfigMod
-      use ESMF_DELayoutMod
+      use ESMF_newDELayoutMod
       use ESMF_ClockMod
       use ESMF_GridTypesMod
       use ESMF_StateMod
       use ESMF_CompMod
 
-#ifdef ESMF_ENABLE_VM
-      use ESMF_VMMod
-#endif
-      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -101,21 +98,19 @@
       !public ESMF_GridCompWrite
       !public ESMF_GridCompRead
 
-#ifdef ESMF_ENABLE_VM
       ! Procedures for VM-enabled mode      
       public ESMF_GridCompSetVMMaxThreads
       public ESMF_GridCompSetVMMinThreads
       public ESMF_GridCompSetVMMaxPEs
       ! Return from user-provided routines
       public ESMF_GridCompWait
-#endif
       
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.30 2004/03/24 20:01:00 cdeluca Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.31 2004/04/13 17:30:47 nscollins Exp $'
 
 !==============================================================================
 !
@@ -131,9 +126,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         !module procedure ESMF_GridCompCreateNew
         module procedure ESMF_GridCompCreateConf
-#ifdef ESMF_ENABLE_VM
         module procedure ESMF_GridCompCreateVM
-#endif
         
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
@@ -171,7 +164,7 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_DELayout), intent(in) :: delayout
+      type(ESMF_newDELayout), intent(in) :: delayout
       type(ESMF_GridCompType), intent(in) :: gridcomptype 
       type(ESMF_Grid), intent(in) :: grid
       type(ESMF_Config), intent(in) :: config
@@ -259,7 +252,7 @@
 ! !ARGUMENTS:
       !external :: services
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(inout), optional :: clock
@@ -340,7 +333,6 @@
         end function ESMF_GridCompCreateConf
     
 
-#ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_GridCompCreate - Create a new GridComp with VM enabled
@@ -358,7 +350,7 @@
       !external :: services
       type(ESMF_VM),        intent(in)              :: vm
       character(len=*),     intent(in),    optional :: name
-      type(ESMF_DELayout),  intent(in),    optional :: delayout
+      type(ESMF_newDELayout),  intent(in),    optional :: delayout
       type(ESMF_GridCompType), intent(in),    optional :: gridcomptype 
       type(ESMF_Grid),      intent(in),    optional :: grid
       type(ESMF_Clock),     intent(inout), optional :: clock
@@ -439,7 +431,6 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_GridCompCreateVM
-#endif    
 
 !------------------------------------------------------------------------------
 !BOP
@@ -564,7 +555,7 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(in) :: gridcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: delayout
+      type(ESMF_newDELayout), intent(out), optional :: delayout
       type(ESMF_GridCompType), intent(out), optional :: gridcomptype 
       type(ESMF_Grid), intent(out), optional :: grid
       type(ESMF_Clock), intent(out), optional :: clock
@@ -796,7 +787,7 @@
 ! !ARGUMENTS:
       type(ESMF_GridComp), intent(inout) :: gridcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_GridCompType), intent(in), optional :: gridcomptype 
       type(ESMF_Grid), intent(in), optional :: grid
       type(ESMF_Clock), intent(in), optional :: clock
@@ -922,7 +913,6 @@
 
 
 
-#ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_GridCompSetVMMaxThreads - Define a VM for this GridComp
@@ -1156,7 +1146,7 @@
  
   end subroutine ESMF_GridCompWait
 !------------------------------------------------------------------------------
-#endif
+
 
 end module ESMF_GridCompMod
 

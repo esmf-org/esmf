@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.6 2004/04/01 16:00:28 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.7 2004/04/13 17:30:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.6 2004/04/01 16:00:28 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.7 2004/04/13 17:30:46 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -553,7 +553,6 @@
  } // end ESMC_FTableCallVFuncPtr
 
  
-#ifdef ESMF_ENABLE_VM 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_FTableCallVFuncPtr - call a function w/ proper args
@@ -667,7 +666,6 @@
     return ESMF_FAILURE;
 
  } // end ESMC_FTableCallVFuncPtr
-#endif
  
 //-----------------------------------------------------------------------------
 //BOP

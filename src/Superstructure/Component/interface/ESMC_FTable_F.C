@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.13 2004/04/01 16:03:04 theurich Exp $
+// $Id: ESMC_FTable_F.C,v 1.14 2004/04/13 17:30:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,9 +25,7 @@
 #include "ESMC_FTable.h"
 #include "ESMC_Array.h"
 
-#ifdef ESMF_ENABLE_VM
 #include "ESMC_VM.h"
-#endif
 
 #include "trim.h"
 //------------------------------------------------------------------------------
@@ -190,7 +188,6 @@ extern "C" {
      }
      
    
-#ifdef ESMF_ENABLE_VM       
 // VM-enabled CallBack loop     
      
 static void *ESMC_FTableCallEntryPointVMHop(void *vm, void *cargoin){
@@ -249,7 +246,6 @@ void FTN(c_esmc_ftablecallentrypointvm)(
   delete[] name;
   *status = ESMF_SUCCESS;
 }
-#endif
 
 };
 

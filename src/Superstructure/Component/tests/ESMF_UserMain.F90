@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.11 2004/03/18 21:49:29 cdeluca Exp $
+! $Id: ESMF_UserMain.F90,v 1.12 2004/04/13 17:30:47 nscollins Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -39,7 +39,7 @@
     integer(ESMF_KIND_I8) :: advanceCount
 
     type(ESMF_Config) :: tconfig
-    type(ESMF_DELayout) :: tlayout
+    type(ESMF_newDELayout) :: tlayout
 
     type(ESMF_Grid) :: grid1, grid2
     type(ESMF_State) :: atmimport, ocnexport

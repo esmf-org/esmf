@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.5 2004/03/18 21:49:29 cdeluca Exp $
+// $Id: ESMC_CplComp.h,v 1.6 2004/04/13 17:30:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 // !USES:
 #include "ESMC.h"
 #include "ESMC_Base.h"  // all classes inherit from the ESMC Base class.
-#include "ESMC_DELayout.h"
+#include "ESMC_newDELayout.h"
 #include "ESMC_Time.h"
 #include "ESMC_Clock.h"
 #include "ESMC_Grid.h"
@@ -114,7 +114,7 @@
 // were a method, the ESMC_CplComp object on whose behalf it was being invoked
 // an ESMC_CplComp object.
 
- ESMC_CplComp *ESMC_CplCompCreate(char *name, ESMC_DELayout *layout,
+ ESMC_CplComp *ESMC_CplCompCreate(char *name, ESMC_newDELayout *layout,
                                       char *configFile, int *rc);
  int ESMC_CplCompDestroy(ESMC_CplComp *comp);
 
@@ -122,7 +122,7 @@
 // prototypes for fortran interface routines
 extern "C" {
  void FTN(f_esmf_cplcompcreate)(ESMC_CplComp *comp, char *name, 
-                         ESMC_DELayout *layout, ESMC_Config *config, 
+                         ESMC_newDELayout *layout, ESMC_Config *config, 
                          char *configFile, int *rc, int nlen, int clen);
  void FTN(f_esmf_cplcompdestroy)(ESMC_CplComp *comp, int *rc);
  void FTN(f_esmf_cplcompinitialize)(ESMC_CplComp *ccomp, 

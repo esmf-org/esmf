@@ -1,4 +1,4 @@
-// $Id: ESMC_GridComp.C,v 1.4 2004/03/18 21:49:29 cdeluca Exp $
+// $Id: ESMC_GridComp.C,v 1.5 2004/04/13 17:30:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_GridComp.C,v 1.4 2004/03/18 21:49:29 cdeluca Exp $";
+           "$Id: ESMC_GridComp.C,v 1.5 2004/04/13 17:30:46 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -96,7 +96,7 @@ extern "C" { void ESMC_SetServ(ESMC_GridComp * const, void (*)(ESMC_GridComp *, 
 //
 // !ARGUMENTS:
       char *name,
-      ESMC_DELayout *layout,
+      ESMC_newDELayout *layout,
       enum ESMC_GridCompType mtype,
       ESMC_Grid *grid,
       char *configFile,

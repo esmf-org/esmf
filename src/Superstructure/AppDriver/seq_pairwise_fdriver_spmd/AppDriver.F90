@@ -36,7 +36,7 @@
     type(ESMF_GridComp) :: compGridded
 
     ! States and Layouts
-    type(ESMF_DELayout) :: defaultlayout
+    type(ESMF_newDELayout) :: defaultlayout
     type(ESMF_State) :: defaultstate
 
     ! Configuration information
@@ -108,7 +108,7 @@
  
     ! Create a default layout, which is 1xN in topology, where N is the
     !  number of DEs this program was started on.
-    defaultlayout = ESMF_DELayoutCreate(rc=rc)
+    defaultlayout = ESMF_newDELayoutCreate(rc=rc)
 
 
     ! Create the top Gridded component, passing in the default layout.
@@ -222,7 +222,7 @@
 
       call ESMF_GridCompDestroy(compGridded, rc)
 
-      call ESMF_DELayoutDestroy(defaultLayout, rc)
+      call ESMF_newDELayoutDestroy(defaultLayout, rc)
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------

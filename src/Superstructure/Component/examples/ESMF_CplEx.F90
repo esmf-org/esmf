@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.14 2004/03/18 21:49:29 cdeluca Exp $
+! $Id: ESMF_CplEx.F90,v 1.15 2004/04/13 17:30:31 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -151,7 +151,7 @@
     type(ESMF_Time) :: startTime, stopTime
     integer :: delistall(4), delist1(4), delist2(4), delist3(4)
     character(ESMF_MAXSTR) :: cname
-    type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
+    type(ESMF_newDELayout) :: layoutall, layout1, layout2, layout3
     type(ESMF_State) :: importState, exportState
     type(ESMF_CplComp) :: cpl
         
@@ -167,7 +167,7 @@
     ! Create the top level application component
 
     delist1 = (/ (i, i=0,3) /)
-    layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
+    layout1 = ESMF_newDELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
 
     cname = "Atmosphere Model Coupler"
     cpl = ESMF_CplCompCreate(cname, layout1, configFile="setup.rc", rc=rc)  

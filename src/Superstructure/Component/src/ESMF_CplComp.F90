@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.23 2004/03/24 20:00:59 cdeluca Exp $
+! $Id: ESMF_CplComp.F90,v 1.24 2004/04/13 17:30:46 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,17 +36,14 @@
       use ESMF_BaseMod
       use ESMF_IOSpecMod
       use ESMF_MachineMod
+      use ESMF_VMMod
       use ESMF_ConfigMod
-      use ESMF_DELayoutMod
+      use ESMF_newDELayoutMod
       use ESMF_ClockMod
       use ESMF_GridMod
       use ESMF_StateMod
       use ESMF_CompMod
 
-#ifdef ESMF_ENABLE_VM
-      use ESMF_VMMod
-#endif
-      
       implicit none
 
 !------------------------------------------------------------------------------
@@ -96,14 +93,12 @@
       !public ESMF_CplCompWrite
       !public ESMF_CplCompRead
 
-#ifdef ESMF_ENABLE_VM
       ! Procedures for VM-enabled mode      
       public ESMF_CplCompSetVMMaxThreads
       public ESMF_CplCompSetVMMinThreads
       public ESMF_CplCompSetVMMaxPEs
       ! Return from user-provided routines
       public ESMF_CplCompWait
-#endif
 
       !public operator(.eq.), operator(.ne.), assignment(=)
 
@@ -112,7 +107,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.23 2004/03/24 20:00:59 cdeluca Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.24 2004/04/13 17:30:46 nscollins Exp $'
 
 !==============================================================================
 !
@@ -128,9 +123,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
         !module procedure ESMF_CplCompCreateNew
         module procedure ESMF_CplCompCreateConf
-#ifdef ESMF_ENABLE_VM
         module procedure ESMF_CplCompCreateVM
-#endif
 
 ! !DESCRIPTION:
 !     This interface provides an entry point for methods that create a 
@@ -177,7 +170,7 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in) :: name
-      type(ESMF_DELayout), intent(in) :: delayout
+      type(ESMF_newDELayout), intent(in) :: delayout
       type(ESMF_Config), intent(in) :: config
       type(ESMF_Clock), intent(in) :: clock
       integer, intent(out), optional :: rc 
@@ -257,7 +250,7 @@
 !
 ! !ARGUMENTS:
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
@@ -328,7 +321,6 @@
         end function ESMF_CplCompCreateConf
     
 
-#ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp with VM enabled
@@ -344,7 +336,7 @@
 ! !ARGUMENTS:
       type(ESMF_VM),        intent(in)              :: vm
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Config), intent(in), optional :: config
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Clock), intent(in), optional :: clock
@@ -414,7 +406,7 @@
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_CplCompCreateVM
-#endif    
+
 
 !------------------------------------------------------------------------------
 !BOP
@@ -535,7 +527,7 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(in) :: cplcomp
       character(len=*), intent(out), optional :: name
-      type(ESMF_DELayout), intent(out), optional :: delayout
+      type(ESMF_newDELayout), intent(out), optional :: delayout
       type(ESMF_Clock), intent(out), optional :: clock
       character(len=*), intent(out), optional :: configFile
       type(ESMF_Config), intent(out), optional :: config
@@ -753,7 +745,7 @@
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: cplcomp
       character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: delayout
+      type(ESMF_newDELayout), intent(in), optional :: delayout
       type(ESMF_Clock), intent(in), optional :: clock
       character(len=*), intent(in), optional :: configFile
       type(ESMF_Config), intent(in), optional :: config
@@ -869,7 +861,6 @@
 
 
 
-#ifdef ESMF_ENABLE_VM
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Define a VM for this CplComp
@@ -1103,7 +1094,7 @@
  
   end subroutine ESMF_CplCompWait
 !------------------------------------------------------------------------------
-#endif
+
 
 
 end module ESMF_CplCompMod
