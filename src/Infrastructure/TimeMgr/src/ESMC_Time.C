@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.14 2003/04/08 20:02:19 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.15 2003/04/09 15:25:22 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.14 2003/04/08 20:02:19 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.15 2003/04/09 15:25:22 flanigan Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -825,7 +825,7 @@
 //
 // !DESCRIPTION:
 //    Assign {\tt BaseTime} expression to this time.  Supports inherited
-//    operators from {\tt ESMC_BaseTime}
+//    operators from {\tt ESMC\_BaseTime}
 //
 // !REQUIREMENTS:  
 
