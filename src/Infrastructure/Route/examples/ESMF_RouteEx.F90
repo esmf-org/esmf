@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.6 2004/01/07 21:53:42 svasquez Exp $
+! $Id: ESMF_RouteEx.F90,v 1.7 2004/02/10 17:42:00 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -65,7 +65,7 @@
     end if
 
     field1 = ESMF_FieldCreate(grid, arraya, &
-                         relloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
+                         horizRelloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
@@ -87,7 +87,7 @@
 
 !   !   arrayspec = ESMF_ArraySpecCreate()
 
-    field2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(grid, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
 
     if (rc.NE.ESMF_SUCCESS) then
