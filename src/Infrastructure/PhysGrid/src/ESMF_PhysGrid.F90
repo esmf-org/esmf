@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.17 2003/01/15 21:05:03 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.18 2003/01/16 17:24:18 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -184,7 +184,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.17 2003/01/15 21:05:03 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.18 2003/01/16 17:24:18 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -275,8 +275,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridCreateNew - Create a new PhysGrid
+! !IROUTINE: ESMF_PhysGridCreateNew - Create a new PhysGrid
 
 ! !INTERFACE:
       function ESMF_PhysGridCreateNew(name, rc)
@@ -340,8 +339,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridCreateInternal - Create a new PhysGrid internally
+! !IROUTINE: ESMF_PhysGridCreateInternal - Create a new PhysGrid internally
 
 ! !INTERFACE:
       function ESMF_PhysGridCreateInternal(local_min_coord1, &
@@ -459,8 +457,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridDestroy - Free all resources associated with a PhysGrid 
+! !IROUTINE: ESMF_PhysGridDestroy - Free all resources associated with a PhysGrid 
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridDestroy(physgrid, rc)
@@ -471,7 +468,7 @@
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt PhysGrid} object previously allocated
-!     via an {\tt ESMF_PhysGridCreate routine}.
+!     via an {\tt ESMF\_PhysGridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -491,9 +488,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridConstructNew - Construct the internals of an allocated
-!                                 PhysGrid
+! !IROUTINE: ESMF_PhysGridConstructNew - Construct the internals of an allocated PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridConstructNew(physgrid, name, rc)
@@ -583,9 +578,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridConstructInternal - Construct the internals of an allocated
-!                                      PhysGrid
+! !IROUTINE: ESMF_PhysGridConstructInternal - Construct the internals of an allocated PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridConstructInternal(physgrid, &
@@ -697,8 +690,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridDestruct - Free any PhysGrid memory allocated internally
+! !IROUTINE: ESMF_PhysGridDestruct - Free any PhysGrid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridDestruct(physgrid, rc)
@@ -712,7 +704,7 @@
 !    {\tt  ESMF\_PhysGridConstruct}, does any additional cleanup before the
 !     original PhysGrid object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_PhysGridDestroy}, which calls
-!     {\tt ESMF_PhysGridDestruct}.  
+!     {\tt ESMF\_PhysGridDestruct}.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -732,8 +724,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridGetInfo - Get information from a PhysGrid
+! !IROUTINE: ESMF_PhysGridGetInfo - Get information from a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridGetInfo(physgrid, local_min_coord1, &
@@ -838,8 +829,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridSetInfo - Set information for a PhysGrid
+! !IROUTINE: ESMF_PhysGridSetInfo - Set information for a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetInfo(physgrid, local_min_coord1, &
@@ -944,8 +934,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridGetConfig - Get configuration information from a PhysGrid
+! !IROUTINE: ESMF_PhysGridGetConfig - Get configuration information from a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridGetConfig(physgrid, config, rc)
@@ -978,8 +967,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridSetConfig - Set configuration information for a PhysGrid
+! !IROUTINE: ESMF_PhysGridSetConfig - Set configuration information for a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetConfig(physgrid, config, rc)
@@ -1013,8 +1001,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridGetValue - Get <Value> for a PhysGrid
+! !IROUTINE: ESMF_PhysGridGetValue - Get <Value> for a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridGetValue(physgrid, value, rc)
@@ -1049,8 +1036,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridSetValue - Set <Value> for a PhysGrid
+! !IROUTINE: ESMF_PhysGridSetValue - Set <Value> for a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetValue(PhysGrid, value, rc)
@@ -1085,8 +1071,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridSetCoordInternal - Set Coords for a PhysGrid internally
+! !IROUTINE: ESMF_PhysGridSetCoordInternal - Set Coords for a PhysGrid internally
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridSetCoordInternal(physgrid, ncoord_locs, &
@@ -1222,8 +1207,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridValidate - Check internal consistency of a PhysGrid
+! !IROUTINE: ESMF_PhysGridValidate - Check internal consistency of a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridValidate(physgrid, opt, rc)
@@ -1256,8 +1240,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_PhysGridPrint - Print the contents of a PhysGrid
+! !IROUTINE: ESMF_PhysGridPrint - Print the contents of a PhysGrid
 
 ! !INTERFACE:
       subroutine ESMF_PhysGridPrint(physgrid, opt, rc)
