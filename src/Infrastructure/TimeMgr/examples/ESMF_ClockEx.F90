@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.12 2003/04/28 23:21:39 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.13 2003/04/29 23:07:10 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -33,7 +33,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockEx.F90,v 1.12 2003/04/28 23:21:39 eschwab Exp $'
+      '$Id: ESMF_ClockEx.F90,v 1.13 2003/04/29 23:07:10 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate a clock 
@@ -79,12 +79,17 @@
       ! initialize the clock with the above values
       call ESMF_ClockInit(clock, timeStep, startTime, stopTime, rc=rc)
 
+      ! print starting time (initial current time)
+      call ESMF_ClockPrint(clock, "currtime", rc)        ! default format
+      call ESMF_ClockPrint(clock, "currtime string", rc) ! string format
+
       !
       ! time step clock from start time to stop time
       !
 
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
         call ESMF_ClockAdvance(clock, rc=rc)
+        call ESMF_ClockPrint(clock, "currtime string", rc)
       end do
 
       !
