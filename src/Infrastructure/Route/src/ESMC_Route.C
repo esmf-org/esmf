@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.8 2003/03/11 22:59:42 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.9 2003/03/12 19:11:33 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.8 2003/03/11 22:59:42 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.9 2003/03/12 19:11:33 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -279,6 +279,38 @@
     return rc;
 
  } // end ESMC_RouteSetRecv
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RouteRun - Execute the comm routine described by this obj
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteRun(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//     none
+//
+// !DESCRIPTION:
+//     Calls the communications routines to send/recv the information
+//     set up in this table.
+//
+//EOP
+// !REQUIREMENTS:  
+    
+    int rc = ESMF_FAILURE;
+
+    // for each destination de in the comm table
+    //    look up the corresponding send/recv xpackets in the rtables
+    //    prep the arguments for the comm routines
+    //    and call the comm routines - possibly multiple times, one for
+    //    each disjoint piece?
+
+    return rc;
+
+ } // end ESMC_RouteRun
 
 //-----------------------------------------------------------------------------
 //BOP

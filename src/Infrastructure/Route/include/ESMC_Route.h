@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.10 2003/03/11 22:57:20 nscollins Exp $
+// $Id: ESMC_Route.h,v 1.11 2003/03/12 19:11:32 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,6 +76,9 @@
     int ESMC_RouteSetSend(int dst_de, void *base_addr, ESMC_XPacket *xp);
     int ESMC_RouteSetRecv(int src_de, void *base_addr, ESMC_XPacket *xp);
     
+ // execute the communication routines set up in this route object
+    int ESMC_RouteRun(void);
+
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;
     int ESMC_RoutePrint(const char *options) const;
