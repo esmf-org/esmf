@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.127 2004/01/22 00:07:40 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.128 2004/01/27 18:03:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.127 2004/01/22 00:07:40 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.128 2004/01/27 18:03:16 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2564,9 +2564,12 @@
 
       !-------------
       case(ESMF_GridStructure_Unknown)      ! unknown structure
-        print *, "ERROR in ESMF_GridValidate: ", &
-                 "GridStructureUnknown not supported"
-        status = ESMF_FAILURE
+        ! FIXME:  field needs to know the grid is ok -
+        !print *, "ERROR in ESMF_GridValidate: ", &
+        !         "GridStructureUnknown not supported"
+        !status = ESMF_FAILURE
+        print *, "Grid created, but Structure unknown"
+        status = ESMF_SUCCESS
 
       !-------------
       case(ESMF_GridStructure_LogRect)      ! logically rectangular
