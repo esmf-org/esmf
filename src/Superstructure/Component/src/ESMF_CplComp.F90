@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.44 2004/06/10 21:43:51 jwolfe Exp $
+! $Id: ESMF_CplComp.F90,v 1.45 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.44 2004/06/10 21:43:51 jwolfe Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.45 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -868,14 +868,14 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Print information about an {\tt ESMF\_CplComp}.
+!  Prints information about an {\tt ESMF\_CplComp} to {\tt stdout}.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
 !    {\tt ESMF\_CplComp} to print.
 !   \item[{[options]}]
-!    Print options.  See {\ref XX} for the list of standard options.
+!    Print options are not yet supported.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1253,14 +1253,15 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Ensure an {\tt ESMF\_CplComp} is valid.
+!   Currently all this method does is to check that the 
+!   {\tt cplcomp} exists.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[cplcomp]
 !    {\tt ESMF\_CplComp} to validate.
 !   \item[{[options]}]
-!    Validation options.  See {\ref XX} for the list of standard options.
+!    Validation options are not yet supported.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

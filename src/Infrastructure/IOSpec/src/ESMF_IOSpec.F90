@@ -1,4 +1,4 @@
-! $Id: ESMF_IOSpec.F90,v 1.12 2004/06/10 23:39:50 cdeluca Exp $
+! $Id: ESMF_IOSpec.F90,v 1.13 2004/06/21 22:52:03 cdeluca Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IOSpec module
@@ -76,7 +76,7 @@
           type (ESMF_IOFileFormat) :: iofileformat
           type (ESMF_IORWType) :: iorwtype
           character(len=ESMF_MAXSTR) :: filename
-          logical :: async_io       ! TODO: should be a derived type or enum
+          logical :: asyncIO       ! TODO: should be a derived type or enum
       end type
 
       ! This type captures information about what's currently being
@@ -250,7 +250,7 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_IOSpecGet(iospec, filename, iofileformat, &
-                                iorwtype, async_io, rc)
+                                iorwtype, asyncIO, rc)
 !
 !
 ! !PARAMETERS:
@@ -258,7 +258,7 @@ end function
       character(len=*), intent(out), optional :: filename
       type (ESMF_IOFileFormat), intent(out), optional :: iofileformat
       type (ESMF_IORWType), intent(out), optional :: iorwtype
-      logical, intent(out), optional :: async_io
+      logical, intent(out), optional :: asyncIO
       integer, intent(out), optional :: rc
 
 !
@@ -282,8 +282,8 @@ end function
           iofileformat = iospec%iofileformat
       endif
 
-      if (present(async_io)) then
-          async_io = iospec%async_io
+      if (present(asyncIO)) then
+          asyncIO = iospec%asyncIO
       endif
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -297,7 +297,7 @@ end function
 !
 ! !INTERFACE:
       subroutine ESMF_IOSpecSet(iospec, filename, iofileformat, &
-                                iorwtype, async_io, rc)
+                                iorwtype, asyncIO, rc)
 !
 !
 ! !PARAMETERS:
@@ -305,7 +305,7 @@ end function
       character(len=*), intent(in), optional :: filename
       type (ESMF_IOFileFormat), intent(in), optional :: iofileformat
       type (ESMF_IORWType), intent(in), optional :: iorwtype
-      logical, intent(in), optional :: async_io
+      logical, intent(in), optional :: asyncIO
       integer, intent(out), optional :: rc
 
 !
@@ -335,10 +335,10 @@ end function
           iospec%iofileformat = ESMF_IO_FILEFORMAT_UNSPECIFIED
       endif
 
-      if (present(async_io)) then
-          iospec%async_io = async_io
+      if (present(asyncIO)) then
+          iospec%asyncIO = asyncIO
       else
-          iospec%async_io = .false.
+          iospec%asyncIO = .false.
       endif
 
       iospec%iostatus = ESMF_STATUS_READY

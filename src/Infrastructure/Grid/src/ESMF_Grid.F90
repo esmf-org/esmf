@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.176 2004/06/21 14:33:14 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.177 2004/06/21 22:52:03 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.176 2004/06/21 14:33:14 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.177 2004/06/21 22:52:03 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -227,16 +227,16 @@
 !
 ! !DESCRIPTION:
 !     This routine adds a vertical subGrid to an already 
-!     allocated {\tt ESMF\_Grid}.
+!     allocated {\tt grid}.
 !     This explicit interface only creates vertical subGrids with coordinate
 !     systems where the zero point is defined at the bottom.
-!     Only one vertical subGrid is allowed for any Grid, 
+!     Only one vertical subGrid is allowed for any {\tt ESMF\_Grid}, 
 !     so if a vertical subGrid
 !     already exists for the Grid that is passed in, an error is returned.
 !     This routine generates {\tt ESMF\_Grid} coordinates from either of two
 !     optional sets of arguments:
 !     \begin{enumerate}
-!     \item given array of deltas (variable delta) and assumes 0 is 
+!     \item given array of deltas (variable delta), assuming 0 is 
 !        the minimum or starting coordinate
 !     \item given array of coordinates (variable coords)
 !     \end{enumerate}
@@ -360,7 +360,7 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object and constructs its
-!     internals, but does not fill in any contents.  Return a pointer to
+!     internals, but does not fill in any contents.  Returns a pointer to
 !     the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
@@ -423,7 +423,7 @@
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_Grid} object, constructs its
-!     internals, and reads a {\tt ESMF\_Grid} in from a file.  Return a pointer to
+!     internals, and reads an {\tt ESMF\_Grid} in from a file.  Return a pointer to
 !     the new {\tt ESMF\_Grid}.
 !
 !     The arguments are:
@@ -930,13 +930,13 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt ESMF\_Grid} object previously allocated
+!     Destroys an {\tt ESMF\_Grid} object previously allocated
 !     via an {\tt ESMF\_GridCreate routine}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          The class to be destroyed.
+!          {\tt ESMF\_Grid} to be destroyed.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1049,20 +1049,20 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.
+!     Sets the decomposition of the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be distributed.
 !     \item[delayout]
-!         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!         {\tt ESMF\_DELayout} on which the {\tt grid} is to be decomposed.
 !     \item[{[countsPerDEDim1]}]
 !          Array of number of grid increments per DE in the x-direction.
 !     \item[{[countsPerDEDim2]}]
 !          Array of number of grid increments per DE in the y-direction.
 !     \item[{[decompIds]}]
-!          Identifier for which Grid axes are decomposed.
+!          Identifier for which {\tt grid} axes are decomposed.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -1173,7 +1173,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version sets a variety of information about a {\tt ESMF\_Grid}, depending
+!     Gets information about an {\tt ESMF\_Grid}, depending
 !     on a list of optional arguments.
 !
 !     The arguments are:
@@ -1205,7 +1205,7 @@
 !     \item[{[coordorder]}]
 !          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
 !     \item[{[dimCount]}]
-!          Number of dimensions represented by this Grid.
+!          Number of dimensions represented by this {\tt grid}.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
@@ -1341,18 +1341,17 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Determines the appropriate physGrid to query from either a physGridId or
-!     relloc and returns the requested information.
+!     Returns coordinate information for the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be queried.
 !     \item[{[horzrelloc]}]
-!          Horizontal relative location of the {\tt ESMF\_PhysGrid} to be
+!          Horizontal relative location of the {\tt grid} to be
 !          queried.
 !     \item[{[vertrelloc]}]
-!          Vertical relative location of the {\tt ESMF\_PhysGrid} to be
+!          Vertical relative location of the {\tt grid} to be
 !          queried.
 !     \item[{[centerCoord]}]
 !          Coordinates of each cell center.  The dimension index should
@@ -1469,13 +1468,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get a {\tt ESMF\_DistGrid} attribute with the given value.  Since a single
-!     {\tt ESMF\_Grid} can have many {\tt ESMF\_DistGrids}, the correct
-!     {\tt ESMF\_DistGrid} must be identified by this calling routine.  For a 3D
-!     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
-!     and vertical grids if querying for an array of values, like 
-!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} are identified
-!     using the set of input variables:  horzrelloc and/or vertrelloc.
+!     Gets {\tt grid} information for a particular Decomposition Element (DE).
 !
 !     The arguments are:
 !     \begin{description}
@@ -1598,24 +1591,24 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
-!     integer cell identifiers from global indexing to local indexing
+!     Translates an array of integer cell identifiers from global indexing 
+!     to DE-local indexing.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
 !     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers to be
+!          One-dimensional array of global identifiers to be
 !          translated.  Infers translating between positions in memory.
 !     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers
+!          One-dimensional array of local identifiers
 !          corresponding to global identifiers.
 !     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers to be
+!          Two-dimensional array of global identifiers to be
 !          translated.  Infers translating between indices in ij space.
 !     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers
+!          Two-dimensional array of local identifiers
 !          corresponding to global identifiers.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1706,24 +1699,24 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Provides access to a {\tt ESMF\_DistGrid} routine that translates an array of
-!     integer cell identifiers from global indexing to local indexing
+!     Translates an array of integer cell identifiers from DE-local indexing 
+!     to global indexing.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be used.
 !     \item[{[local1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
+!          One-dimensional array of local identifiers to be
 !          translated.  Infers translating between positions in memory.
 !     \item[{[global1D]}]
-!          One-dimensional {\tt ESMF\_LocalArray} of global identifiers
+!          One-dimensional array of global identifiers
 !          corresponding to local identifiers.
 !     \item[{[local2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of local identifiers to be
+!          Two-dimensional array of local identifiers to be
 !          translated.  Infers translating between indices in ij space.
 !     \item[{[global2D]}]
-!          Two-dimensional {\tt ESMF\_LocalArray} of global identifiers
+!          Two-dimensional array of global identifiers
 !          corresponding to local identifiers.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1798,23 +1791,22 @@
 ! !IROUTINE: ESMF_GridPrint - Print the contents of a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridPrint(grid, opt, rc)
+      subroutine ESMF_GridPrint(grid, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in) :: opt
+      character (len=*), intent(in) :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Print information about a {\t ESMF\_Grid}.
+!      Prints information about the {\tt grid} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Class to be queried.
-!     \item[opt]
-!          Print options that control the type of information and level of
-!          detail.
+!          {\tt ESMF\_Grid} to be queried.
+!     \item[options]
+!          Print options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1900,8 +1892,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     This version sets a variety of information about a {\tt ESMF\_Grid}, depending
-!     on a list of optional arguments.
+!     Sets information for the {\tt grid}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -2453,22 +2444,22 @@
 ! !IROUTINE: ESMF_GridValidate - Check validity of a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridValidate(grid, opt, rc)
+      subroutine ESMF_GridValidate(grid, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      character (len=*), intent(in), optional :: opt
+      character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Validates that a {\tt ESMF\_Grid} is internally consistent.
+!     Validates that an {\tt ESMF\_Grid} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
-!          Class to be queried.
-!     \item[{[opt]}]
-!          Validation options.
+!          {\tt ESMF\_Grid} to be queried.
+!     \item[{[options]}]
+!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2503,7 +2494,7 @@
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT
       case(1)
-        call ESMF_LRGridValidate(grid, opt, localrc)
+        call ESMF_LRGridValidate(grid, options, localrc)
 
       !-------------
       ! ESMF_GRID_STRUCTURE_LOGRECT_BLK

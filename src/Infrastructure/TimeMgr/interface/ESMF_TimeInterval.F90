@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.61 2004/06/17 20:59:47 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.62 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.61 2004/06/17 20:59:47 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.62 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1117,7 +1117,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out the contents of an {\tt ESMF\_TimeInterval}, in support of
+!     Prints out the contents of an {\tt ESMF\_TimeInterval} to {\tt stdout}, in support of
 !     testing and debugging.  The options control the type of information and
 !     level of detail.
 !
@@ -1126,9 +1126,9 @@
 !     \item[timeinterval]
 !          Time interval to be printed out.
 !     \item[{[options]}]
-!          Print options.  If none specified, prints all TimeInterval
+!          Print options.  If none specified, prints all {\tt timeinterval}
 !          property values. \\
-!          "string" - prints TimeInterval's value in ISO 8601 format
+!          "string" - prints {\tt timeinterval}'s value in ISO 8601 format
 !                     PyYmMdDThHmMsS.  See ~\cite{ISO}. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1359,7 +1359,7 @@
 !     \item[timeinterval]
 !          {\tt ESMF\_TimeInterval} to be validated.
 !     \item[{[options]}]
-!          Validation options.  TODO:  To be determined.
+!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

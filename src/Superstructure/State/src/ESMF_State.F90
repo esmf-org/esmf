@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.66 2004/06/16 12:12:26 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.67 2004/06/21 22:52:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -289,7 +289,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.66 2004/06/16 12:12:26 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.67 2004/06/21 22:52:05 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -2944,14 +2944,14 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about an state.
+!     Prints information about the {\tt state} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !       The {\tt ESMF\_State} to print.
 !     \item[{[options]}]
-!       Print options.  See {\ref xxx} for standard options.
+!       Print options are not yet supported.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !      \end{description}
@@ -3169,7 +3169,7 @@ end function
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateValidate"
 !BOP
-! !IROUTINE: ESMF_StateValidate -- Validate the internal data for a State
+! !IROUTINE: ESMF_StateValidate - Check validity of a State
 !
 ! !INTERFACE:
       subroutine ESMF_StateValidate(state, options, rc)
@@ -3180,14 +3180,17 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to validate information inside an state.
+!     Validates that the {\tt state} is internally consistent.
+!      Currently this method determines if the {\tt state} is uninitialized 
+!      or already destroyed.  The method returns an error code if problems 
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[state]
 !       The {\tt ESMF\_State} to validate.
 !     \item[{[options]}]
-!       Validation options.  See {\ref XX} for standard options.
+!       Validation options are not yet supported.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

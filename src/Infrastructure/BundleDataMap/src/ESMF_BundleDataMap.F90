@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.22 2004/06/15 11:18:37 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.23 2004/06/21 22:52:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.22 2004/06/15 11:18:37 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.23 2004/06/21 22:52:01 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -201,19 +201,14 @@
 !
 ! !DESCRIPTION:
 !           Prints diagnostic information about the {\tt bundledatamap}
-!           to {\tt stdout}.  The {\tt options} control the type of 
-!           information and level of detail; the "brief" option is
-!           the only one implemented and is executed by default.
+!           to {\tt stdout}.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
 !           {\tt ESMF\_BundleDataMap} to print.
 !     \item [{[options]}]
-!           Print options.  See Section~\ref{sec:printoptions} for a list
-!           of standard options.  The "brief" option is the only one 
-!           currently implemented, and is executed no matter what value
-!           (if any) is passed in for this argument.
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -414,19 +409,14 @@
 !      Validates that the {\tt bundledatamap} is internally consistent.
 !      Currently this method determines if the {\tt bundledatamap} is uninitialized 
 !      or already destroyed.  The method returns an error code if problems 
-!      are found.  Only the "brief" option described in Section 
-!      \ref{sec:validateoptions} is currently supported.  This is also 
-!      the default option.
+!      are found.  
 !
 !      The arguments are:
 !     \begin{description}
 !     \item [bundledatamap]
 !           {\tt ESMF\_BundleDataMap} to validate.
 !     \item [{[options]}]
-!           Validation options.  See Section \ref{sec:validateoptions} for 
-!           standard option strings.  Please note that only the "brief" option 
-!           is currently supported and will be executed no matter what value
-!           (if any) is passed in for this argument.
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt bundledatamap}
 !           is valid.

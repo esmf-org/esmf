@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.72 2004/06/18 20:10:33 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -137,7 +137,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.72 2004/06/18 20:10:33 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -913,8 +913,10 @@
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out an {\tt ESMF\_Calendar}'s properties, in support of testing    !     and debugging.  The options control the type of information and level     
-!     of detail. 
+!     Prints out an {\tt ESMF\_Calendar}'s properties to {\tt stdio}, 
+!     in support of testing and debugging.  The options control the 
+!     type of information and level of detail. 
+!
 !
 !     The arguments are:
 !     \begin{description}
@@ -1231,15 +1233,14 @@
       integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check whether a {\tt calendar} is valid.  The options control
-!     the type of validation.
+!     Checks whether a {\tt calendar} is valid.  
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
 !          {\tt ESMF\_Calendar} to be validated.
 !     \item[{[options]}]
-!          Validation options.  TODO:  To be determined.
+!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

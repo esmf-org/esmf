@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.57 2004/06/13 05:25:43 cdeluca Exp $
+! $Id: ESMF_Alarm.F90,v 1.58 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.57 2004/06/13 05:25:43 cdeluca Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.58 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -710,7 +710,7 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out an {\tt ESMF\_Alarm}'s properties, in support of testing
+!     Prints out an {\tt ESMF\_Alarm}'s properties to {\tt stdout}, in support of testing
 !     and debugging.  The options control the type of information and level
 !     of detail.
 ! 
@@ -719,7 +719,7 @@
 !     \item[alarm]
 !          {\tt ESMF\_Alarm} to be printed out.
 !     \item[{[options]}]
-!          Print options. If none specified, prints all alarm property values.\\
+!          Print options. If none specified, prints all {\tt alarm} property values.\\
 !          "clock"        - print the associated clock's name. \\
 !          "enabled"      - print the alarm's ability to ring. \\
 !          "name"         - print the alarm's name. \\
@@ -999,15 +999,14 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt ESMF\_Alarm}'s properties.  The
-!     options control the type of validation.
+!     Performs a validation check on an {\tt ESMF\_Alarm}'s properties.
 !
 !     The arguments are:  
 !     \begin{description}
 !     \item[alarm]
 !          {\tt ESMF\_Alarm} to be validated.
 !     \item[{[options]}]
-!          Validation options.  TODO:  To be determined.
+!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 

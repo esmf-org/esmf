@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.57 2004/06/13 05:25:44 cdeluca Exp $
+! $Id: ESMF_Clock.F90,v 1.58 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.57 2004/06/13 05:25:44 cdeluca Exp $'
+      '$Id: ESMF_Clock.F90,v 1.58 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -740,7 +740,7 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out an {\tt ESMF\_Clock}'s properties, in support of testing
+!     Prints out an {\tt ESMF\_Clock}'s properties to {\tt stdout}, in support of testing
 !     and debugging.  The options control the type of information and level     
 !     of detail.
 ! 
@@ -749,7 +749,7 @@
 !     \item[clock]
 !          {\tt ESMF\_Clock} to be printed out.
 !     \item[{[options]}]
-!          Print options. If none specified, prints all clock property values.\\
+!          Print options. If none specified, prints all {\tt clock} property values.\\
 !          "advanceCount" - print the number of times the clock has been
 !                           advanced. \\
 !          "alarmCount"   - print the number of alarms in the clock's list. \\
@@ -945,15 +945,14 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check whether a {\tt clock} is valid.  The options control
-!     the type of validation.
+!     Checks whether a {\tt clock} is valid.  
 !
 !     The arguments are:  
 !     \begin{description}
 !     \item[clock]
 !          {\tt ESMF\_Clock} to be validated.
 !     \item[{[options]}]
-!          Validation options.  TODO: To be determined.
+!          Validation options are not yet supported.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description} 

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArraySpec.F90,v 1.8 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_ArraySpec.F90,v 1.9 2004/06/21 22:52:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -82,7 +82,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArraySpec.F90,v 1.8 2004/06/08 09:27:15 nscollins Exp $'
+      '$Id: ESMF_ArraySpec.F90,v 1.9 2004/06/21 22:52:00 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -131,7 +131,7 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Return information about the contents of an {\tt ESMF\_ArraySpec}.
+! Returns information about the contents of an {\tt ESMF\_ArraySpec}.
 !
 ! The arguments are:
 ! \begin{description}
@@ -180,7 +180,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecSetThree"
 !BOP
-! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
+! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec using type,kind,rank
 !
 ! !INTERFACE:
      ! Private name; call using ESMF_ArraySpecSet()
@@ -257,7 +257,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArraySpecSetTwo"
 !BOPI
-! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec
+! !IROUTINE: ESMF_ArraySpecSet - Set values for an ArraySpec using type and kind
 !
 ! !INTERFACE:
      ! Private name; call using ESMF_ArraySpecSet()

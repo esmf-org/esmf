@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.170 2004/06/17 11:34:32 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.171 2004/06/21 22:52:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -281,7 +281,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.170 2004/06/17 11:34:32 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.171 2004/06/21 22:52:01 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -2274,13 +2274,13 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Routine to print information about a field.
+!     Prints information about the {\tt field} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !     \item [{[options]}]
-!           Print options.
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2771,18 +2771,14 @@
 !      Validates that the {\tt field} is internally consistent.
 !      Currently this method determines if the {\tt field} is uninitialized 
 !      or already destroyed.  The method returns an error code if problems 
-!      are found.  Only the "brief" option described in Section 
-!      \ref{sec:validateoptions} is currently supported.  This is also 
-!      the default option.
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [field]
 !           {\tt ESMF\_Field} to validate.
 !     \item [options]
-!           Validation options.  See Section \ref{sec:validateoptions} for 
-!           standard option strings.  Please note that only the "brief" option 
-!           is currently supported; other values will be ignored.
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if the {\tt field} 
 !           is valid.

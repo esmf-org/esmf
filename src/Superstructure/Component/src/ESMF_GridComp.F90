@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.53 2004/06/10 21:44:05 jwolfe Exp $
+! $Id: ESMF_GridComp.F90,v 1.54 2004/06/21 22:52:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -88,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.53 2004/06/10 21:44:05 jwolfe Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.54 2004/06/21 22:52:05 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -919,14 +919,14 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Print information about an {\tt ESMF\_GridComp}.
+!  Prints information about an {\tt ESMF\_GridComp} to {\tt stdout}.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[gridcomp]
 !    {\tt ESMF\_GridComp} to print.
 !   \item[{[options]}]
-!    Print options.  See {\ref XX} for the list of standard options.
+!    Print options are not yet supported.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -1305,7 +1305,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_GridCompValidate"
 !BOP
-! !IROUTINE: ESMF_GridCompValidate - Ensure the GridComp is internally consistent
+! !IROUTINE: ESMF_GridCompValidate - Check validity of a GridComp
 !
 ! !INTERFACE:
       subroutine ESMF_GridCompValidate(gridcomp, options, rc)
@@ -1316,14 +1316,15 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!   Ensure an {\tt ESMF\_GridComp} is valid.
+!   Currently all this method does is to check that the 
+!   {\tt gridcomp} exists.
 !
 !  The arguments are:
 !  \begin{description}
 !   \item[gridcomp]
 !    {\tt ESMF\_GridComp} to validate.
 !   \item[{[options]}]  
-!    Validation options.  See {\ref XX} for the list of standard options.
+!    Validation options are not yet supported.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}

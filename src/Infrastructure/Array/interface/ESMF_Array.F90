@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.13 2004/06/08 09:27:14 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.14 2004/06/21 22:51:59 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.13 2004/06/08 09:27:14 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.14 2004/06/21 22:51:59 cdeluca Exp $'
 !
 !==============================================================================
 !
@@ -389,14 +389,14 @@ end subroutine
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Print information about an {\tt ESMF\_Array}.
+!     Prints information about the {\tt array} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array}.
 !     \item [{[options]}]
-!           The standard print options. See {\ref:xx}.
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -780,7 +780,7 @@ end subroutine
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_ArrayValidate"
 !BOP
-! !IROUTINE: ESMF_ArrayValidate - Check validity of Array object
+! !IROUTINE: ESMF_ArrayValidate - Check validity of an Array 
 !
 ! !INTERFACE:
       subroutine ESMF_ArrayValidate(array, options, rc)
@@ -792,14 +792,17 @@ end subroutine
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Verify an {\tt ESMF\_Array} is internally consistent.
+!      Validates that the {\tt array} is internally consistent.
+!      Currently this method determines if the {\tt array} has a valid
+!      data pointer.  The method returns an error code if problems 
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [array]
 !           An {\tt ESMF\_Array}.
 !     \item [{[options]}]
-!           The standard validation options.
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

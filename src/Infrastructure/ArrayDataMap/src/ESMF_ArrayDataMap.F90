@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.21 2004/06/17 16:38:08 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.22 2004/06/21 22:52:00 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.21 2004/06/17 16:38:08 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.22 2004/06/21 22:52:00 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -324,11 +324,11 @@ end function
 ! !IROUTINE: ESMF_ArrayDataMapGet - Get values from an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapGet(datamap, dataRank, dataIndexList, &
+      subroutine ESMF_ArrayDataMapGet(arraydatamap, dataRank, dataIndexList, &
                                       counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap  
+      type(ESMF_ArrayDataMap), intent(in) :: arraydatamap  
       integer, intent(out), optional :: dataRank    
       integer, dimension(:), intent(out), optional :: dataIndexList
       integer, dimension(:), intent(out), optional :: counts 
@@ -339,7 +339,7 @@ end function
 !
 !   The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [{[datarank]}]
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
@@ -375,25 +375,25 @@ end function
         endif
 
 
-        if (present(dataRank)) dataRank = datamap%dataRank
+        if (present(dataRank)) dataRank = arraydatamap%dataRank
 
         if (present(dataIndexList)) then
            dimlength = size(dataIndexList,1)
-           if (dimlength .lt. datamap%dataRank) then
+           if (dimlength .lt. arraydatamap%dataRank) then
               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "dataIndexList array too short for dataRank", &
                                  ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
-             dataIndexList(i) = datamap%dataDimOrder(i)
+             dataIndexList(i) = arraydatamap%dataDimOrder(i)
            enddo
         endif
 
         if (present(counts)) then
            dimlength = size(counts)
            do i=1, dimlength
-             counts(i) = datamap%dataNonGridCounts(i)
+             counts(i) = arraydatamap%dataNonGridCounts(i)
            enddo
         endif
 
@@ -409,22 +409,22 @@ end function
 ! !IROUTINE: ESMF_ArrayDataMapPrint - Print an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapPrint(datamap, options, rc)
+      subroutine ESMF_ArrayDataMapPrint(arraydatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap
+      type(ESMF_ArrayDataMap), intent(in) :: arraydatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Print information about an {\tt ESMF\_ArrayDataMap}.
+!     Prints information about the {\tt arraydatamap} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           {\tt ESMF\_ArrayDataMap} to print.
 !     \item [{[options]}]
-!           Standard print options.
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -437,7 +437,7 @@ end function
       !jw  write(msgbuf,*)  "ArrayDataMap print:"
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write(*,*)  "ArrayDataMap print:"
-        if (datamap%status .ne. ESMF_STATUS_READY) then
+        if (arraydatamap%status .ne. ESMF_STATUS_READY) then
       !jw    write(msgbuf,*)  "Uninitialized or Invalid object"
       !jw    if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
           write(*,*)  "Uninitialized or Invalid object"
@@ -446,23 +446,23 @@ end function
         endif
 
         ! individual data item information
-      !jw  write(msgbuf,*)  " Data rank = ", datamap%dataRank
+      !jw  write(msgbuf,*)  " Data rank = ", arraydatamap%dataRank
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-        write(*,*)  " Data rank = ", datamap%dataRank
+        write(*,*)  " Data rank = ", arraydatamap%dataRank
       !jw  write(msgbuf,*)  " Data Index Order and Lengths for non-Grid Indices:"
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write(*,*)  " Data Index Order and Lengths for non-Grid Indices:"
         j = 1
         do i=1, ESMF_MAXDIM
-            if (datamap%dataDimOrder(i) .eq. 0) then
-      !jw         write(msgbuf,*)  i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
+            if (arraydatamap%dataDimOrder(i) .eq. 0) then
+      !jw         write(msgbuf,*)  i, "Non-Grid index, length = ", arraydatamap%dataNonGridCounts(j)
       !jw         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-               write(*,*)  i, "Non-Grid index, length = ", datamap%dataNonGridCounts(j)
+               write(*,*)  i, "Non-Grid index, length = ", arraydatamap%dataNonGridCounts(j)
                j = j + 1
             else
-      !jw         write(msgbuf,*)  i, "Grid index ", datamap%dataDimOrder(i)
+      !jw         write(msgbuf,*)  i, "Grid index ", arraydatamap%dataDimOrder(i)
       !jw         if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
-               write(*,*)  i, "Grid index ", datamap%dataDimOrder(i)
+               write(*,*)  i, "Grid index ", arraydatamap%dataDimOrder(i)
             endif
         enddo
 
@@ -476,10 +476,11 @@ end function
 ! !IROUTINE: ESMF_ArrayDataMapSet - Set values in an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapSet(datamap, dataRank, dataIndexList, counts, rc)
+      subroutine ESMF_ArrayDataMapSet(arraydatamap, dataRank, &
+                                      dataIndexList, counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(inout) :: datamap  
+      type(ESMF_ArrayDataMap), intent(inout) :: arraydatamap  
       integer, intent(in), optional :: dataRank    
       integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts 
@@ -490,7 +491,7 @@ end function
 !
 !   The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [{[datarank]}]
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
@@ -538,26 +539,26 @@ end function
         endif
 
 
-        if (present(dataRank)) datamap%dataRank = dataRank
+        if (present(dataRank)) arraydatamap%dataRank = dataRank
 
         if (present(dataIndexList)) then
            dimlength = size(dataIndexList,1)
-           if (dimlength .lt. datamap%dataRank) then
+           if (dimlength .lt. arraydatamap%dataRank) then
               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "dataIndexList array too short for dataRank", &
                                  ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
-             datamap%dataDimOrder(i) = dataIndexList(i)
+             arraydatamap%dataDimOrder(i) = dataIndexList(i)
            enddo
         endif
 
         if (present(counts)) then
-           datamap%dataNonGridCounts(:) = 1
+           arraydatamap%dataNonGridCounts(:) = 1
            dimlength = size(counts)
            do i=1, dimlength
-             datamap%dataNonGridCounts(i) = counts(i)
+             arraydatamap%dataNonGridCounts(i) = counts(i)
            enddo
         endif
 
@@ -575,11 +576,11 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayDataMapSetDefault()
-      subroutine ESMF_ArrayDataMapSetDefExplicit(datamap, dataRank, &
+      subroutine ESMF_ArrayDataMapSetDefExplicit(arraydatamap, dataRank, &
                                                  dataIndexList, counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap) :: datamap
+      type(ESMF_ArrayDataMap) :: arraydatamap
       integer, intent(in) :: dataRank
       integer, dimension(:), intent(in), optional :: dataIndexList
       integer, dimension(:), intent(in), optional :: counts
@@ -591,7 +592,7 @@ end function
 !     not specified here will be overwritten with default values.
 !
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [datarank]
 !	    The number of dimensions in the data {\tt ESMF\_Array}.
@@ -643,36 +644,36 @@ end function
           rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the datamap
-        datamap%dataRank = dataRank
+        ! initialize the contents of the arraydatamap
+        arraydatamap%dataRank = dataRank
 
         ! set the defaults
-        datamap%dataDimOrder(:) = 0
-        datamap%dataDimOrder(1:dataRank) = (/ (i,i=1,dataRank) /)
+        arraydatamap%dataDimOrder(:) = 0
+        arraydatamap%dataDimOrder(1:dataRank) = (/ (i,i=1,dataRank) /)
 
         ! now overwrite with what the user passed in
         if (present(dataIndexList)) then
            dimlength = size(dataIndexList,1)
-           if (dimlength .lt. datamap%dataRank) then
+           if (dimlength .lt. arraydatamap%dataRank) then
               if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
                                 "dataIndexList array too short for dataRank", &
                                  ESMF_CONTEXT, rc)) return
            endif
 
            do i=1, dimlength
-             datamap%dataDimOrder(i) = dataIndexList(i)
+             arraydatamap%dataDimOrder(i) = dataIndexList(i)
            enddo
         endif
 
 
         ! counts for dimensions not aligned with the grid
-        datamap%dataNonGridCounts(:) = 1
+        arraydatamap%dataNonGridCounts(:) = 1
         if (present(counts)) then
-          datamap%dataNonGridCounts(1:size(counts)) = counts(:)
+          arraydatamap%dataNonGridCounts(1:size(counts)) = counts(:)
         endif
 
         ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATUS_READY
+        arraydatamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -688,11 +689,11 @@ end function
 
 ! !INTERFACE:
       ! Private name; call using ESMF_ArrayDataMapSetDefault()
-      subroutine ESMF_ArrayDataMapSetDefIndex(datamap, dataIorder, counts, rc)
+      subroutine ESMF_ArrayDataMapSetDefIndex(arraydatamap, indexorder, counts, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap) :: datamap
-      type(ESMF_IndexOrder), intent(in) :: dataIorder
+      type(ESMF_ArrayDataMap) :: arraydatamap
+      type(ESMF_IndexOrder), intent(in) :: indexorder
       integer, dimension(:), intent(in), optional :: counts 
       integer, intent(out), optional :: rc  
 !
@@ -702,9 +703,9 @@ end function
 !     not specified here will be overwritten with default values.
 !
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           An {\tt ESMF\_ArrayDataMap}.
-!     \item [dataIorder]
+!     \item [indexorder]
 !           An {\tt ESMF\_DataIndexOrder} which specifies one of several
 !           common predefined mappings between the grid and data ranks.
 !           This is simply a convenience for the common cases; there is
@@ -741,61 +742,61 @@ end function
           rcpresent = .FALSE.
         endif
 
-        ! initialize the contents of the datamap
+        ! initialize the contents of the arraydatamap
 
         ! set up the mapping of grid indicies to array indicies
-        datamap%dataDimOrder(:) = 0
+        arraydatamap%dataDimOrder(:) = 0
 
-        select case (dataIorder%iorder)
+        select case (indexorder%iorder)
           case(ESMF_INDEX_I%iorder) 
-            datamap%dataRank = 1
-            datamap%dataDimOrder(1) = 1
+            arraydatamap%dataRank = 1
+            arraydatamap%dataDimOrder(1) = 1
 
           case(ESMF_INDEX_IJ%iorder)
-            datamap%dataRank=2
-            datamap%dataDimOrder(1) = 1
-            datamap%dataDimOrder(2) = 2
+            arraydatamap%dataRank=2
+            arraydatamap%dataDimOrder(1) = 1
+            arraydatamap%dataDimOrder(2) = 2
 
           case(ESMF_INDEX_JI%iorder) 
-            datamap%dataRank=2
-            datamap%dataDimOrder(1) = 2
-            datamap%dataDimOrder(2) = 1
+            arraydatamap%dataRank=2
+            arraydatamap%dataDimOrder(1) = 2
+            arraydatamap%dataDimOrder(2) = 1
 
           case(ESMF_INDEX_IJK%iorder)
-            datamap%dataRank=3
-            datamap%dataDimOrder(1) = 1
-            datamap%dataDimOrder(2) = 2
-            datamap%dataDimOrder(3) = 3
+            arraydatamap%dataRank=3
+            arraydatamap%dataDimOrder(1) = 1
+            arraydatamap%dataDimOrder(2) = 2
+            arraydatamap%dataDimOrder(3) = 3
 
           case(ESMF_INDEX_JIK%iorder)
-            datamap%dataRank=3
-            datamap%dataDimOrder(1) = 2
-            datamap%dataDimOrder(2) = 1
-            datamap%dataDimOrder(3) = 3
+            arraydatamap%dataRank=3
+            arraydatamap%dataDimOrder(1) = 2
+            arraydatamap%dataDimOrder(2) = 1
+            arraydatamap%dataDimOrder(3) = 3
 
           case(ESMF_INDEX_KJI%iorder)
-            datamap%dataRank=3
-            datamap%dataDimOrder(1) = 3
-            datamap%dataDimOrder(2) = 2
-            datamap%dataDimOrder(3) = 1
+            arraydatamap%dataRank=3
+            arraydatamap%dataDimOrder(1) = 3
+            arraydatamap%dataDimOrder(2) = 2
+            arraydatamap%dataDimOrder(3) = 1
 
           case(ESMF_INDEX_IKJ%iorder)
-            datamap%dataRank=3
-            datamap%dataDimOrder(1) = 1
-            datamap%dataDimOrder(2) = 3
-            datamap%dataDimOrder(3) = 2
+            arraydatamap%dataRank=3
+            arraydatamap%dataDimOrder(1) = 1
+            arraydatamap%dataDimOrder(2) = 3
+            arraydatamap%dataDimOrder(3) = 2
 
           case(ESMF_INDEX_JKI%iorder)
-            datamap%dataRank=3
-            datamap%dataDimOrder(1) = 2
-            datamap%dataDimOrder(2) = 3
-            datamap%dataDimOrder(3) = 1
+            arraydatamap%dataRank=3
+            arraydatamap%dataDimOrder(1) = 2
+            arraydatamap%dataDimOrder(2) = 3
+            arraydatamap%dataDimOrder(3) = 1
 
           case(ESMF_INDEX_KIJ%iorder)
-            datamap%dataRank=3
-            datamap%dataDimOrder(1) = 3
-            datamap%dataDimOrder(2) = 1
-            datamap%dataDimOrder(3) = 2
+            arraydatamap%dataRank=3
+            arraydatamap%dataDimOrder(1) = 3
+            arraydatamap%dataDimOrder(2) = 1
+            arraydatamap%dataDimOrder(3) = 2
 
           case default 
             if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, &
@@ -803,13 +804,13 @@ end function
                                  ESMF_CONTEXT, rc)) return
         end select
 
-        datamap%dataNonGridCounts(:) = 1
+        arraydatamap%dataNonGridCounts(:) = 1
         if (present(counts)) then
-          datamap%dataNonGridCounts(1:size(counts)) = counts(:)
+          arraydatamap%dataNonGridCounts(1:size(counts)) = counts(:)
         endif
 
         ! mark object as initialized and ready to be used
-        datamap%status = ESMF_STATUS_READY
+        arraydatamap%status = ESMF_STATUS_READY
 
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
@@ -824,10 +825,10 @@ end function
 ! !IROUTINE:  ESMF_ArrayDataMapSetInvalid - Set ArrayDataMap to invalid status
 
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapSetInvalid(datamap, rc)
+      subroutine ESMF_ArrayDataMapSetInvalid(arraydatamap, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(inout) :: datamap
+      type(ESMF_ArrayDataMap), intent(inout) :: arraydatamap
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -836,7 +837,7 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           An {\tt ESMF\_ArrayDataMap}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -845,7 +846,7 @@ end function
 !
 !EOP
 
-        datamap%status = ESMF_STATUS_INVALID
+        arraydatamap%status = ESMF_STATUS_INVALID
 
         ! If user asked for it, return error code
         if (present(rc)) rc = ESMF_SUCCESS
@@ -860,22 +861,26 @@ end function
 ! !IROUTINE: ESMF_ArrayDataMapValidate - Check validity of an ArrayDataMap
 !
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapValidate(datamap, options, rc)
+      subroutine ESMF_ArrayDataMapValidate(arraydatamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_ArrayDataMap), intent(in) :: datamap
+      type(ESMF_ArrayDataMap), intent(in) :: arraydatamap
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Validate the internal state of an {\tt ESMF\_ArrayDataMap}.
+!      Validates that the {\tt arraydatamap} is internally consistent.
+!      Currently this method determines if the {\tt arraydatamap}  
+!      is set up for use.  The method returns an error code if problems 
+!      are found.  
+
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [datamap]
+!     \item [arraydatamap]
 !           {\tt ESMF\_ArrayDataMap} to validate.
 !     \item [{[options]}]
-!           Validation options.
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !       \end{description}
@@ -885,7 +890,7 @@ end function
         ! initialize return code
         if (present(rc)) rc = ESMF_FAILURE
 
-        if (datamap%status .ne. ESMF_STATUS_READY) return
+        if (arraydatamap%status .ne. ESMF_STATUS_READY) return
             
         ! TODO: add more validation here - for index numbers, etc
  

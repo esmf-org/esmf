@@ -285,7 +285,7 @@ These are:
 as a consistent way of setting configuration parameters.
 \end{itemize}
 
-\section{Overall Rules and Behaviors}
+\section{Overall Rules and Behavior}
 
 \subsection{Allocation Rules}
 
@@ -315,64 +315,11 @@ the name is a character string and the value can be either a single
 value or list of {\tt int}/{\tt I*4}, {\tt double}/{\tt R*8},
 logical ({\tt ESMF\_Logical}), or {\tt char *}/{\tt character} values.
 Attributes can be associated with Fields, Bundles, and States. 
-Mixed types are not allowed in a single Attribute, and all Attribute
+Mixed types are not allowed in a single attribute, and all attribute
 names must be unique within a single object.    Attributes are set
 by name, and can be retrieved either directly by name or by querying
-for a count of Attributes and retrieving Attribute names and values
+for a count of attributes and retrieving names and values
 by index number.
-
-\subsection{Common Options for Print Methods}
-\label{sec:printoptions}
-All ESMF classes have a print method to print out internal information, 
-usually for debugging purposes.  All print methods support a common
-set of options, including:
-
-\begin{itemize}
-\item{\bf "brief"}
-   Print the most important parts of the object, including information
-   about subobjects (e.g. Fields will call Print on their Grids, Arrays
-   and DataMaps).  This is the default if no option string is specified.
-\item{\bf "full"}
-   Print in excruciating detail, as much information as possible.
-\item{\bf "object only"}
-   Print only information about the object itself, nothing about
-   subobjects it may contain (like states, bundles, fields).
-\item{\bf "label=mystring"}
-   Prepend {\tt mystring} in front of the print so user can give simple
-   labels to identify which object is being printed.
-
-\end{itemize}
-
-Multiple options can be specified by separating them with commas:
-
-{\tt call ESMF\_<Class>Print(object, "brief, object only", rc) }
-{\tt call ESMF\_<Class>Print(object, "full, label=Temperature", rc) }
-
-Objects may have in addition specific flags which select options
-that are only applicable to themselves.
-
-\subsection{Common Options for Validate Methods}
-\label{sec:validateoptions}
-Most ESMF classes have a validate method to verify that a 
-particular object has been initialized and that it is internally consistent.
-All validate methods support a common set of options, including:
-
-\begin{itemize}
-\item{\bf "brief"}
-   Validate the most important parts of the object, including 
-   subobjects (e.g. Fields will call Validate on their Grids, Arrays
-   and DataMaps).  This is the default if no option string is specified.
-\item{\bf "full"}
-   Validate in excruciating detail, may be slow.
-\item{\bf "object only"}
-   Validate only information about the object itself, not validating any
-   subobjects it may contain.
-
-\end{itemize}
-
-Multiple options can be specified by separating them with commas:
-
-{\tt call ESMF\_<Class>Validate(object, "brief, object only", rc) }
 
 \section{Integrating ESMF into Applications}
 

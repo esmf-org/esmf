@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.31 2004/06/21 18:25:17 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.32 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -148,7 +148,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.31 2004/06/21 18:25:17 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.32 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 
@@ -1315,7 +1315,8 @@ module ESMF_VMMod
     integer,        intent(out),  optional  :: rc           
 !
 ! !DESCRIPTION:
-!   Print internal information about the specified {\tt ESMF\_VM} object.
+!   Prints internal information about the specified {\tt ESMF\_VM} to
+!   {\tt stdout}.
 !
 !   The arguments are:
 !   \begin{description}

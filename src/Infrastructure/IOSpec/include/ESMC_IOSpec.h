@@ -1,4 +1,4 @@
-// $Id: ESMC_IOSpec.h,v 1.2 2004/03/18 16:25:21 nscollins Exp $
+// $Id: ESMC_IOSpec.h,v 1.3 2004/06/21 22:52:03 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -54,7 +54,7 @@ class ESMC_IOSpec {
     ESMC_IOFileFormat iofileformat;
     ESMC_IORWType     iorwtype;
     char              filename[ESMF_MAXSTR];
-    bool              async_io;  // TODO:  should be class or enum
+    bool              asyncIO;  // TODO:  should be class or enum
 
   public:
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.20 2004/06/15 07:57:28 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.21 2004/06/21 22:52:02 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -113,7 +113,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.20 2004/06/15 07:57:28 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.21 2004/06/21 22:52:02 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -249,14 +249,14 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!     Print information about an {\tt ESMF\_FieldDataMap}.
+!     Prints information about the {\tt fielddatamap} to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fielddatamap]
 !           {\tt ESMF\_FieldDataMap} to print.
 !     \item [{[options]}]
-!           Print options.
+!           Print options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -488,12 +488,12 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldDataMapSetDefault()
-      subroutine ESMF_FieldDataMapSetDefIndex(fielddatamap, dataIndexOrder, counts, &
+      subroutine ESMF_FieldDataMapSetDefIndex(fielddatamap, indexorder, counts, &
                                               horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap) :: fielddatamap
-      type(ESMF_IndexOrder), intent(in) :: dataIndexOrder
+      type(ESMF_IndexOrder), intent(in) :: indexorder
       integer, dimension(:), intent(in), optional :: counts 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -507,7 +507,7 @@
 !     \begin{description}
 !     \item [fielddatamap]
 !           An {\tt ESMF\_FieldDataMap}.
-!     \item [dataIorder]
+!     \item [indexorder]
 !           An {\tt ESMF\_DataIndexOrder} which specifies one of several
 !           common predefined mappings between the grid and data ranks.
 !           This is simply a convenience for the common cases; there is
@@ -549,7 +549,7 @@
         endif
 
         ! initialize the contents of the internal array fielddatamap
-        call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, dataIndexOrder, &
+        call ESMF_ArrayDataMapSetDefault(fielddatamap%adm, indexorder, &
                                          counts, status)
         if (status .ne. ESMF_SUCCESS) return
 
@@ -632,18 +632,14 @@
 !      Validates that the {\tt fielddatamap} is internally consistent.
 !      Currently this method determines if the {\tt fielddatamap} is uninitialized 
 !      or already destroyed.  The method returns an error code if problems 
-!      are found.  Only the "brief" option described in Section 
-!      \ref{sec:validateoptions} is currently supported.  This is also 
-!      the default option.
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fielddatamap]
 !           {\tt ESMF\_FieldDataMap} to validate.
 !     \item [{[options]}]
-!           Validation options.  See Section \ref{sec:validateoptions} for 
-!           standard option strings.  Please note that only the "brief" option 
-!           is currently supported; other values will be ignored.
+!           Validation options are not yet supported.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.72 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_Time.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.72 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_Time.F90,v 1.73 2004/06/21 22:52:04 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -714,7 +714,7 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Prints out the contents of an {\tt ESMF\_Time}, in support of testing
+!     Prints out the contents of an {\tt ESMF\_Time} to {\tt stdout}, in support of testing
 !     and debugging.  The options control the type of information and level
 !     of detail.
 !
@@ -997,10 +997,10 @@
 !     \item[time]
 !          {\tt ESMF\_Time} instant to be validated.
 !     \item[{[options]}]
-!          Validation options. If none specified, validates all Time property
+!          Validation options. If none specified, validates all {\tt time} property
 !            values. \\
-!          "calendar" - validate only the time's calendar. \\
-!          "timezone" - validate only the time's time zone. \\
+!          "calendar" - validate only the {\tt time}'s calendar. \\
+!          "timezone" - validate only the {\tt time}'s timezone. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}

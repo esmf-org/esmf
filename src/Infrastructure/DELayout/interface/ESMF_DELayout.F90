@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.35 2004/06/21 20:14:29 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.36 2004/06/21 22:52:01 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -142,7 +142,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.35 2004/06/21 20:14:29 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.36 2004/06/21 22:52:01 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -751,14 +751,15 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!   Print internal information about the specified {\tt ESMF\_DELayout} object.
+!   Prints internal information about the specified {\tt ESMF\_DELayout} 
+!   object to {\tt stdout}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[delayout] 
 !          Specified {\tt ESMF\_DELayout} object.
 !     \item[{[options]}] 
-!          Output options.
+!          Print options are not yet supported.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -797,7 +798,9 @@ contains
 !         
 !
 ! !DESCRIPTION:
-!   Validate internal information about the specified {\tt ESMF\_DELayout} object.
+!      Validates that the {\tt delayout} is internally consistent.
+!      The method returns an error code if problems 
+!      are found.  
 !
 !     The arguments are:
 !     \begin{description}
