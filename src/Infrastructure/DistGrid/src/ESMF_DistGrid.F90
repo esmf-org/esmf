@@ -218,7 +218,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.106 2004/04/06 12:22:30 theurich Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.107 2004/04/06 12:30:38 theurich Exp $'
 
 !==============================================================================
 !
@@ -459,7 +459,7 @@
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
-                                  name=name, rc=rc
+                                  name=name, rc=rc &
 #ifdef ESMF_ENABLE_VM      
                                   , delayout=delayout &
 #endif
