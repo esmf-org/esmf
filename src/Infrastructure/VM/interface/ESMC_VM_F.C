@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.25 2004/11/18 23:46:05 nscollins Exp $
+// $Id: ESMC_VM_F.C,v 1.26 2004/12/29 21:31:32 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -234,6 +234,14 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmthreadbarrier()"
     (*ptr)->vmk_threadbarrier();
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when ESMC_VMK done
+  }
+
+  void FTN(c_esmc_vmgetcurrent)(ESMC_VM **ptr, int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmgetcurrent()"
+    int localrc;
+    *ptr = ESMC_VMGetCurrent(&localrc);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
   }
 
   void FTN(c_esmc_vminitialize)(ESMC_VM **ptr, int *rc){

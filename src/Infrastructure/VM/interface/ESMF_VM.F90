@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.47 2004/12/28 07:05:45 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.48 2004/12/29 21:31:32 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,6 +132,7 @@ module ESMF_VMMod
   public ESMF_VMGather
   public ESMF_VMGet
   public ESMF_VMGetGlobal
+  public ESMF_VMGetCurrent
   public ESMF_VMGetPETLocalInfo
   public ESMF_VMPrint
   public ESMF_VMRecv
@@ -157,7 +158,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.47 2004/12/28 07:05:45 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.48 2004/12/29 21:31:32 theurich Exp $'
 
 !==============================================================================
 
@@ -1702,6 +1703,47 @@ module ESMF_VMMod
     if (present(rc)) rc = ESMF_SUCCESS
  
   end subroutine ESMF_VMGetGlobal
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-public method -------------------------------
+!BOP
+! !IROUTINE: ESMF_VMGetCurrent - Get Current VM
+
+! !INTERFACE:
+  subroutine ESMF_VMGetCurrent(vm, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM), intent(out)            :: vm
+    integer,       intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get the {\tt ESMF\_VM} object of the current context.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!     Upon return this holds the {\tt ESMF\_VM} object of the current context.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGetCurrent(vm, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGetCurrent
 !------------------------------------------------------------------------------
 
 
