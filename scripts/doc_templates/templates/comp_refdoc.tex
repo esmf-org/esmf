@@ -1,4 +1,4 @@
-% $Id: comp_refdoc.tex,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: comp_refdoc.tex,v 1.2 2001/12/14 22:08:06 cdeluca Exp $
 
 \documentclass[]{article}
 
@@ -44,35 +44,27 @@
 %\section{Synopsis}
 \input{comp_syn}
 
+\section{Installation and General Usage}
+See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
+usage of the ESMF libraries.
+
 %\section{Architecture}
 \input{comp_arch}
 
-\section{<Name1> Class Description}
+\newpage
+\section{<Name1> Class}
+
+\subsection{Description}
 \input{class_desc}
 
 \subsection{Restrictions}
 input{class_rest}
 
-\section{<Name1> Interface}
+\subsection{Use and Examples}
+\input{class_ex} 
 
-%\subsection{Use and Examples}
-\input{class_fex} 
-% or
-\input{class_cex}
-
-%\subsection{Parameters and Definitions}
-\input{class_fparam}
-% or
-\input{class_cex}
-
-%\subsection{Class API}
-\input{class_fapi}
-% or
-\input{class_capi}
-
-\section{<Name2> Class}
-
-% Subsections same as <Name1> Class ...
+\newpage
+\section{<Name2> Class} ...
 
 %\section{Glossary}
 \input{comp_glos}
@@ -81,6 +73,32 @@ input{class_rest}
 \bibliography{comp} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
+
+\newpage
+\setcounter{section}{1}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\section*{Appendix A:  Fortran Interface}
+\addcontentsline{toc}{section}{Appendix A:  Fortran Interface}
+
+%\input{<Name1>}
+
+\newpage
+\setcounter{section}{2}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}}
+
+\section*{Appendix B:  Class Implementations}
+\addcontentsline{toc}{section}{Appendix B:  Class Implementations}
+
+\subsection{Public Classes}
+
+%\input{<Name1>}
+
+\subsection{Private Classes}
+
+%\input{<Name2>}
 
 \end{document}
 
