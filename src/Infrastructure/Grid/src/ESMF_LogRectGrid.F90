@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.25 2004/03/01 17:32:15 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.26 2004/03/02 00:03:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.25 2004/03/01 17:32:15 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.26 2004/03/02 00:03:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2997,21 +2997,26 @@
 ! !IROUTINE: ESMF_LRGridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGetDE(grid, distGridId, physGridId, relloc, MyDE, &
-                                  localCellCount, localCellCountPerDim, &
+      subroutine ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
+                                  horzPhysGridId, vertPhysGridId, &
+                                  horzRelLoc, vertRelLoc, &
+                                  myDE, localCellCount, localCellCountPerDim, &
                                   globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
-      integer, intent(inout), optional :: MyDE
+      integer, intent(in), optional :: horzDistGridId
+      integer, intent(in), optional :: vertDistGridId
+      integer, intent(in), optional :: horzPhysGridId
+      integer, intent(in), optional :: vertPhysGridId
+      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
+      integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
-                        optional :: globalAIPerDim
+      type(ESMF_AxisIndex), dimension(:), intent(inout), &
+                                            optional :: globalAIPerDim
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -3057,7 +3062,7 @@
 ! TODO: add code to get distgridId from relloc or physgridId, test for the
 !       presence of at least one of these optional arguments
       distGridIdUse = 1          ! default
-      if (present(distGridId)) distGridIdUse = distGridId
+      if (present(horzDistGridId)) distGridIdUse = horzDistGridId
 
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
