@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.53 2004/12/28 22:06:59 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.54 2005/03/29 21:23:52 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -91,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.53 2004/12/28 22:06:59 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.54 2005/03/29 21:23:52 theurich Exp $'
 
 !==============================================================================
 !
@@ -316,19 +316,20 @@
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
       function ESMF_CplCompCreateVM(vm, name, config, configFile, &
-                                    clock, petList, rc)
+                                    clock, petList, contextflag, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateVM
 !
 ! !ARGUMENTS:
-      type(ESMF_VM),     intent(in)            :: vm
-      character(len=*),  intent(in),  optional :: name
-      type(ESMF_Config), intent(in),  optional :: config
-      character(len=*),  intent(in),  optional :: configFile
-      type(ESMF_Clock),  intent(in),  optional :: clock
-      integer,           intent(in),  optional :: petList(:)
-      integer,           intent(out), optional :: rc 
+      type(ESMF_VM),          intent(in)            :: vm
+      character(len=*),       intent(in),  optional :: name
+      type(ESMF_Config),      intent(in),  optional :: config
+      character(len=*),       intent(in),  optional :: configFile
+      type(ESMF_Clock),       intent(in),  optional :: clock
+      integer,                intent(in),  optional :: petList(:)
+      type(ESMF_ContextFlag), intent(in),  optional :: contextflag
+      integer,                intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new {\tt ESMF\_CplComp}, setting the resources explicitly.
@@ -369,6 +370,10 @@
 !    component is giving to the created child 
 !    component. If {\tt petList} is not specified all of the 
 !    parents {\tt PET}s will be given to the child component.
+!   \item[{[contextflag]}]
+!    Specify the component's VM context. The default context is
+!    {\tt ESMF\_CHILD\_IN\_NEW\_VM}. See section \ref{opt:contextflag} for a
+!    complete list of valid flags.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -394,7 +399,8 @@
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
-                                clock=clock, vm=vm, petList=petList, rc=localrc)
+                                clock=clock, vm=vm, petList=petList, &
+                                contextflag=contextflag, rc=localrc)
         if (ESMF_LogMsgFoundError(localrc, &
                                   ESMF_ERR_PASSTHRU, &
                                        ESMF_CONTEXT, rc)) return
@@ -745,17 +751,18 @@
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompGet(cplcomp, name, config, &
-                                                   configFile, clock, vm, rc)
+      subroutine ESMF_CplCompGet(cplcomp, name, config, configFile, clock, &
+        vm, contextflag, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_CplComp), intent(in) :: cplcomp
-      character(len=*), intent(out), optional :: name
-      type(ESMF_Config), intent(out), optional :: config
-      character(len=*), intent(out), optional :: configFile
-      type(ESMF_Clock), intent(out), optional :: clock
-      type(ESMF_VM), intent(out), optional :: vm
-      integer, intent(out), optional :: rc             
+      type(ESMF_CplComp),     intent(in)            :: cplcomp
+      character(len=*),       intent(out), optional :: name
+      type(ESMF_Config),      intent(out), optional :: config
+      character(len=*),       intent(out), optional :: configFile
+      type(ESMF_Clock),       intent(out), optional :: clock
+      type(ESMF_VM),          intent(out), optional :: vm
+      type(ESMF_ContextFlag), intent(out), optional :: contextflag
+      integer,                intent(out), optional :: rc             
 
 !
 ! !DESCRIPTION:
@@ -779,14 +786,17 @@
 !    Return the private clock for this {\tt ESMF\_CplComp}.
 !   \item[{[vm]}]
 !    Return the {\tt ESMF\_VM} for this {\tt ESMF\_CplComp}.
+!   \item[{[contextflag]}]
+!    Return the {\tt ESMF\_ContextFlag} for this {\tt ESMF\_GridComp}.
+!    See section \ref{opt:contextflag} for a complete list of valid flags.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
 
-        call ESMF_CompGet(cplcomp%compp, name, vm=vm, clock=clock, &
-                          configFile=configFile, config=config, rc=rc)
+        call ESMF_CompGet(cplcomp%compp, name, vm=vm, contextflag=contextflag, &
+          clock=clock, configFile=configFile, config=config, rc=rc)
 
         end subroutine ESMF_CplCompGet
 
