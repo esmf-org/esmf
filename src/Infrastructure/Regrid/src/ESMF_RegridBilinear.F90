@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.19 2003/08/29 21:09:11 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.20 2003/08/29 22:04:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.19 2003/08/29 21:09:11 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.20 2003/08/29 22:04:03 jwolfe Exp $'
 
 !==============================================================================
 
@@ -138,6 +138,7 @@
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_LocalArray) :: srcCenterX, srcCenterY, centerCoordArray
+      type(ESMF_LocalArray) :: centerCoordXArray, centerCoordYArray
       type(ESMF_DomainList) :: sendDomainList, recvDomainList
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
@@ -282,12 +283,21 @@
       srcCenterX = ESMF_LocalArrayCreate(1, type, kind, size, status)
       srcCenterY = ESMF_LocalArrayCreate(1, type, kind, size, status)
 
-      !call ESMF_RouteRun(route, center_coord(1,1,1), srcCenterX, status)
-      !call ESMF_RouteRun(route, center_coord(2,1,1), srcCenterY, status)
+      ! create local arrays of the x and y coords
+      ! TODO: a better design?
+      centerCoordXArray = ESMF_LocalArraySlice(centerCoordArray, 1, 1, status)
+      centerCoordYArray = ESMF_LocalArraySlice(centerCoordArray, 1, 2, status)
+
+      call ESMF_RouteRun(route, centerCoordXArray, srcCenterX, status)
+      call ESMF_RouteRun(route, centerCoordYArray, srcCenterY, status)
 
       ! Get pointers to data inside the LocalArrays
       call ESMF_LocalArrayGetData(srcCenterX, src_center_x, ESMF_DATA_REF, status)
       call ESMF_LocalArrayGetData(srcCenterY, src_center_y, ESMF_DATA_REF, status)
+      call ESMF_LocalArrayGetData(centerCoordXArray, centerCoordX, &
+                                  ESMF_DATA_REF, status)
+      call ESMF_LocalArrayGetData(centerCoordYArray, centerCoordY, &
+                                  ESMF_DATA_REF, status)
       
       ! now all necessary data is local
 
