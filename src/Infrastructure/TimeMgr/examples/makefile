@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.22 2004/06/11 17:27:04 eschwab Exp $
+# $Id: makefile,v 1.23 2004/06/18 20:41:42 eschwab Exp $
 
 ALL:  build_examples
 #
@@ -60,8 +60,8 @@ EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \
                     $(ESMF_EXDIR)/ESMF_TimeIntervalEx \
                     $(ESMF_EXDIR)/ESMF_CalendarEx \
                     $(ESMF_EXDIR)/ESMF_ClockEx \
-		    $(ESMF_EXDIR)/ESMC_ClockEx \
                     $(ESMF_EXDIR)/ESMF_AlarmEx
+#		    $(ESMF_EXDIR)/ESMC_ClockEx
 
 #
 # List the example run targets in EXAMPLES_RUN and
@@ -76,15 +76,15 @@ EXAMPLES_RUN     =  run_ESMF_TimeEx \
                     run_ESMF_TimeIntervalEx \
                     run_ESMF_CalendarEx \
                     run_ESMF_ClockEx \
-		    run_ESMC_ClockEx \
                     run_ESMF_AlarmEx
+#		    run_ESMC_ClockEx
 
 EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
                     run_ESMF_TimeIntervalEx_uni \
                     run_ESMF_CalendarEx_uni \
                     run_ESMF_ClockEx_uni \
-		    run_ESMC_ClockEx_uni \
                     run_ESMF_AlarmEx_uni
+#		    run_ESMC_ClockEx_uni
 
 include ${ESMF_DIR}/makefile
 
@@ -136,11 +136,11 @@ run_ESMF_ClockEx:
 #
 # ESMC_ClockEx
 #
-run_ESMC_ClockEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
+#run_ESMC_ClockEx_uni:
+#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
 
-run_ESMC_ClockEx:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
+#run_ESMC_ClockEx:
+#	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ClockEx > $(ESMF_EXDIR)/ESMC_ClockEx.stdout
 
 # ESMF_AlarmEx
 #
