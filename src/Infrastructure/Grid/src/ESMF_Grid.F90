@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.103 2003/10/13 22:35:29 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.104 2003/10/13 23:07:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -229,7 +229,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.103 2003/10/13 22:35:29 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.104 2003/10/13 23:07:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1291,7 +1291,7 @@
                               numDE1, numDE2, ESMF_MAXGRIDDIM
          return
       endif
-      call ESMF_DistGridGetAllCounts(grid%distgrid%ptr, countsPerAxis, status)
+      call ESMF_DistGridGetAllCounts(grid%distgrid%ptr, countsPerAxis, rc=status)
       call ESMF_GridSetBoundingBoxes(grid, numDims, min, delta, countsPerAxis, &
                                      numDE1, numDE2, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1803,11 +1803,11 @@
         endif
 
         localMinCoord(i) = delta(i) &
-                         * real(grid%distgrid%ptr%MyDE%ai_global(i)%min - 1)
+                         * real(grid%distgrid%ptr%MyDE_comp%ai_global(i)%min - 1)
         localMaxCoord(i) = delta(i) &
-                         * real(grid%distgrid%ptr%MyDE%ai_global(i)%max)
-        localCounts(i)   = grid%distgrid%ptr%MyDE%ai_global(i)%max &
-                         - grid%distgrid%ptr%MyDE%ai_global(i)%min + 1
+                         * real(grid%distgrid%ptr%MyDE_comp%ai_global(i)%max)
+        localCounts(i)   = grid%distgrid%ptr%MyDE_comp%ai_global(i)%max &
+                         - grid%distgrid%ptr%MyDE_comp%ai_global(i)%min + 1
       enddo
 
       ! set parameters based on grid type
@@ -2558,7 +2558,7 @@
 !     to the application level
       call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, local_cell_count, &
                               local_axis_length, global_start, ai_global, &
-                              status)
+                              rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
         return
@@ -2995,7 +2995,7 @@
                                            global1D, local1D, &
                                            global2D, local2D, &
                                            globalAI1D, localAI1D, &
-                                           globalAI2D, localAI2D, status)
+                                           globalAI2D, localAI2D, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGlobalToLocalIndex: distgrid global to local"
         return
@@ -3079,7 +3079,7 @@
                                            local1D, global1D, &
                                            local2D, global2D, &
                                            localAI1D, globalAI1D, &
-                                           localAI2D, globalAI2D, status)
+                                           localAI2D, globalAI2D, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridLocalToGlobalIndex: distgrid local to global"
         return

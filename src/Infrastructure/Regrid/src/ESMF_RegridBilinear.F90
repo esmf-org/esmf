@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.31 2003/10/13 22:36:11 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.32 2003/10/13 23:06:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.31 2003/10/13 22:36:11 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.32 2003/10/13 23:06:53 jwolfe Exp $'
 
 !==============================================================================
 
@@ -151,7 +151,7 @@
       type(ESMF_DomainList) :: sendDomainList, recvDomainList
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_RelLoc) :: srcRelLoc, dstRelLoc
-      type(ESMF_Route) :: route
+      type(ESMF_Route) :: route, tempRoute
       type(ESMF_RouteHandle) :: rh
       type(ESMF_RegridType) :: temp_regrid
       type(ESMF_TransformValues) :: tv
@@ -192,7 +192,8 @@
                  "returned failure"
         return
       endif
-      call ESMF_GridGetDE(srcGrid, ai_global=myTotalAI, .true., rc=status)
+      call ESMF_GridGetDE(srcGrid, ai_global=myTotalAI, rc=status)
+   ! TODO   call ESMF_GridGetDE(srcGrid, ai_global=myTotalAI, total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
                  "returned failure"
@@ -294,7 +295,7 @@
         return
       endif
       call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainList, status)
+                                     recvDomainList, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridBoxIntersectRecv ", &
                  "returned failure"
@@ -420,10 +421,11 @@
         srcSizeY = recvDomainList%domains(i)%ai(2)%max &
                  - recvDomainList%domains(i)%ai(2)%min + 1
         stop  = start + srcSizeX*srcSizeY - 1
-        call ESMF_RegridBilinearSearch(tv, recvDomainList%domains(i), found, &
-                                       foundCount, coordSystem, &
+        call ESMF_RegridBilinearSearch(tv, recvDomainList%domains(i), &
+                                       coordSystem, &
                                        srcSizeX, srcSizeY, start-1, &
                                        dstCounts(1), dstCounts(2), &
+                                       found, foundCount, &
                                        srcGatheredCoordX(start:stop), &
                                        srcGatheredCoordY(start:stop), &
                                        dstLocalCoordX, dstLocalCoordY, &
@@ -457,7 +459,7 @@
                                            found, foundCount, &
                                            srcCenterX, srcCenterY, &
                                            dstCenterX, dstCenterY, &
-                                           srcGridMask, dstGridMask, &
+        !                                   srcGridMask, dstGridMask, &
                                            srcUserMask, dstUserMask, rc)
 !
 ! !ARGUMENTS:
@@ -470,13 +472,13 @@
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
       logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
-      logical, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
+      integer, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterY
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterX
       real(ESMF_KIND_R8), dimension(dstSizeX,dstSizeY), intent(in) :: dstCenterY
-      logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcGridMask
-      logical, dimension(dstSizeX,dstSizeY), intent(in) :: dstGridMask
+  !    logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcGridMask
+  !    logical, dimension(dstSizeX,dstSizeY), intent(in) :: dstGridMask
       logical, dimension(srcSizeX,srcSizeY), intent(in) :: srcUserMask
       logical, dimension(dstSizeX,dstSizeY), intent(in) :: dstUserMask
       integer, intent(out), optional :: rc
@@ -715,10 +717,10 @@
               ! not be assigned weights or marked found.  Keep track of the total
               ! number of valid source points 
               srcValidCount = 0
-              if (srcGridMask(iii,jjj)) srcValidCount = srcValidCount + 1
-              if (srcGridMask(ip1,jjj)) srcValidCount = srcValidCount + 1
-              if (srcGridMask(iii,jp1)) srcValidCount = srcValidCount + 1
-              if (srcGridMask(ip1,jp1)) srcValidCount = srcValidCount + 1
+    !          if (srcGridMask(iii,jjj)) srcValidCount = srcValidCount + 1
+    !          if (srcGridMask(ip1,jjj)) srcValidCount = srcValidCount + 1
+    !          if (srcGridMask(iii,jp1)) srcValidCount = srcValidCount + 1
+    !          if (srcGridMask(ip1,jp1)) srcValidCount = srcValidCount + 1
     
               if ((foundCount(i,j)+srcValidCount) .ne. srcCount) then
                 found(i,j) = .false.
@@ -761,10 +763,10 @@
               ! not be assigned weights or marked found.  Keep track of the total
               ! number of valid source points 
               srcValidCount = 0
-              if (srcGridMask(iii,jjj)) srcValidCount = srcValidCount + 1
-              if (srcGridMask(ip1,jjj)) srcValidCount = srcValidCount + 1
-              if (srcGridMask(iii,jp1)) srcValidCount = srcValidCount + 1
-              if (srcGridMask(ip1,jp1)) srcValidCount = srcValidCount + 1
+     !         if (srcGridMask(iii,jjj)) srcValidCount = srcValidCount + 1
+     !         if (srcGridMask(ip1,jjj)) srcValidCount = srcValidCount + 1
+     !         if (srcGridMask(iii,jp1)) srcValidCount = srcValidCount + 1
+     !         if (srcGridMask(ip1,jp1)) srcValidCount = srcValidCount + 1
     
               if ((foundCount(i,j)+srcValidCount) .ne. srcCount) then
                 found(i,j) = .false.
@@ -774,25 +776,29 @@
             endif
 
             ! now store this link into address, weight arrays
-            if (srcUserMask(iii,jjj) .and. srcGridMask(iii,jjj)) then
+!            if (srcUserMask(iii,jjj) .and. srcGridMask(iii,jjj)) then
+            if (srcUserMask(iii,jjj)) then
               dstAdd(1) = i
               dstAdd(2) = j
               srcAdd = (jjj-1)*srcICount + iii + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc)
             endif
-            if (srcUserMask(ip1,jjj) .and. srcGridMask(ip1,jjj)) then
+!            if (srcUserMask(ip1,jjj) .and. srcGridMask(ip1,jjj)) then
+            if (srcUserMask(ip1,jjj)) then
               dstAdd(1) = i
               dstAdd(2) = j
               srcAdd = (jjj-1)*srcICount + ip1 + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc)
             endif
-            if (srcUserMask(ip1,jp1) .and. srcGridMask(ip1,jp1)) then
+!            if (srcUserMask(ip1,jp1) .and. srcGridMask(ip1,jp1)) then
+            if (srcUserMask(ip1,jp1)) then
               dstAdd(1) = i
               dstAdd(2) = j
               srcAdd = (jp1-1)*srcICount + ip1 + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc)
             endif
-            if (srcUserMask(iii,jp1) .and. srcGridMask(iii,jp1)) then
+       !     if (srcUserMask(iii,jp1) .and. srcGridMask(iii,jp1)) then
+            if (srcUserMask(iii,jp1)) then
               dstAdd(1) = i
               dstAdd(2) = j
               srcAdd = (jp1-1)*srcICount + iii + srcStart

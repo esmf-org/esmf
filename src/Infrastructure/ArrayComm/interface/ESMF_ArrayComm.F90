@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.1 2003/10/07 22:29:46 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.2 2003/10/13 23:07:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.1 2003/10/07 22:29:46 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.2 2003/10/13 23:07:42 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -161,7 +161,7 @@
 
       ! allocate globalindex array and get all of them from the grid
       allocate(globalindex(nDEs,ESMF_MAXGRIDDIM), stat=status)
-      call ESMF_GridGetAllAxisIndex(grid, globalindex, status)
+      call ESMF_GridGetAllAxisIndex(grid, globalindex, rc=status)
 
       if (present(totalindex)) then
           call c_ESMC_ArrayGetAllAxisIndex(array, ESMF_DOMAIN_TOTAL, &

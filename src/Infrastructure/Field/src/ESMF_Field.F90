@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.80 2003/10/09 22:55:17 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.81 2003/10/13 23:07:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -235,7 +235,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.80 2003/10/09 22:55:17 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.81 2003/10/13 23:07:24 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4090,7 +4090,7 @@
         call ESMF_GridGetPhysGrid(dst_grid, dst_relloc, localMin=dst_min, &
                                   localMax=dst_max, rc=status)
         call ESMF_GridBoxIntersectRecv(src_grid, dst_min, dst_max, &
-                                       recvDomainList, status)
+                                       recvDomainList, rc=status)
       endif
 
       if (rcpresent) rc = ESMF_SUCCESS
