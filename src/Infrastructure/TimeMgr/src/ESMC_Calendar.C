@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.20 2003/04/23 16:26:20 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.21 2003/04/23 18:55:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.20 2003/04/23 16:26:20 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.21 2003/04/23 18:55:32 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -283,6 +283,7 @@
             }
             T->S += (DD-1) * SecondsPerDay + 148600915200LL;
                                           // ^ adjust to match Julian time zero
+                                          // = (1/1/0000) - (11/24/-4713)
             break;
         }
         // convert 360 Day Date => Time
@@ -292,6 +293,7 @@
                   + (MM-1) * 30 * SecondsPerDay   // each month has 30 days
                   + (DD-1) * SecondsPerDay + 146565244800LL;
                                           // ^ adjust to match Julian time zero
+                                          // = (1/1/0000) - (11/24/-4713)
             break;
         }
         // convert Julian Date => Time
@@ -383,6 +385,7 @@
         {
             ESMF_IKIND_I8 tmpS = T->S - 148600915200LL;
                                      // ^ adjust to match Julian time zero
+                                     // = (1/1/0000) - (11/24/-4713)
 
             if (YR != ESMC_NULL_POINTER) {
               *YR = tmpS / SecondsPerYear;
@@ -417,6 +420,7 @@
         {
             ESMF_IKIND_I8 tmpS = T->S - 146565244800LL;
                                      // ^ adjust to match Julian time zero
+                                     // = (1/1/0000) - (11/24/-4713)
 
             if (YR != ESMC_NULL_POINTER) {
               *YR = tmpS / SecondsPerYear;
