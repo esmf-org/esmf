@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.4 2003/03/24 17:41:38 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.5 2003/03/27 01:54:41 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.4 2003/03/24 17:41:38 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.5 2003/03/27 01:54:41 eschwab Exp $'
 
 !==============================================================================
 !
@@ -163,12 +163,15 @@
 ! !IROUTINE: ESMF_TimeIntervalInit - Initialize via user-specified unit set
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalInit(timeinterval, D, H, M, S, MS, US, NS, &
+      subroutine ESMF_TimeIntervalInit(timeinterval, YY, MO, D, H, M, S, &
+                                       MS, US, NS, &
                                        d_, h_, m_, s_, ms_, us_, ns_, &
                                        Sn, Sd, cal, rc)
 
 ! !ARGUMENTS:
       type(ESMF_TimeInterval), intent(inout) :: timeinterval
+      integer, intent(in), optional :: YY
+      integer, intent(in), optional :: MO
       integer, intent(in), optional :: D
       integer, intent(in), optional :: H
       integer, intent(in), optional :: M
@@ -196,8 +199,12 @@
 !     \begin{description}
 !     \item[timeinterval]
 !          The object instance to initialize
+!     \item[{[YY]}]
+!          Integer number of interval years
+!     \item[{[MO]}]
+!          Integer number of interval months
 !     \item[{[D]}]
-!          Integer days
+!          Integer number of interval days
 !     \item[{[H]}]
 !          Integer hours
 !     \item[{[M]}]
@@ -239,9 +246,10 @@
 !EOP
 
       ! use optional args for any subset
-!      call c_ESMC_TimeIntervalInit(timeinterval, D, H, M, S, MS, US, NS, &
-!                                   d_, h_, m_, s_, ms_, us_, ns_, &
-!                                   Sn, Sd, cal, rc)
+      call c_ESMC_TimeIntervalInit(timeinterval, YY, MO, D, H, M, S, &
+                                   MS, US, NS, &
+                                   d_, h_, m_, s_, ms_, us_, ns_, &
+                                   Sn, Sd, cal, rc)
 
       end subroutine ESMF_TimeIntervalInit
 
