@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.83 2004/06/23 13:37:32 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.84 2004/07/22 15:11:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.83 2004/06/23 13:37:32 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.84 2004/07/22 15:11:44 nscollins Exp $'
 
 !==============================================================================
 
@@ -199,7 +199,7 @@
       ! TODO: so this code needs to be overhauled...   
 
       integer :: localrc            ! Error status
-      character(len=ESMF_MAXSTR) :: regrid_name
+      !character(len=ESMF_MAXSTR) :: regrid_name
       logical :: dummy
 
       ! Initialize return code; assume failure until success is certain
@@ -384,7 +384,7 @@
 !EOPI
 
       integer :: localrc
-      integer :: i, i2, n, d1, d2, s1, s2, asize, rank, counts(ESMF_MAXDIM)
+      integer :: i, i2, n, d1, d2, s1, asize, rank, counts(ESMF_MAXDIM)
       integer :: dstUndecomp, srcUndecomp, srcUndecompSize, srcStride
       integer :: di1, di2, dj1, dj2, dk1, dk2
       integer :: si1, si2, sj1, sj2, sk1, sk2
@@ -397,7 +397,7 @@
       real(ESMF_KIND_R8), dimension(:), pointer :: gatheredData
       real(ESMF_KIND_R8), dimension(:,:), pointer :: dstData2D
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: dstData3D
-      real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
+      !real(ESMF_KIND_R8), dimension(:,:,:,:), pointer :: dstData4D
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
       type(ESMF_Route) :: rh
@@ -657,7 +657,7 @@
 !EOPI
 
       integer :: localrc            ! Error status
-      type(ESMF_RouteHandle) :: rhandle1
+      !type(ESMF_RouteHandle) :: rhandle1
       type(ESMF_Route) :: route
       type(ESMF_TransformValues) :: tv
 
@@ -831,8 +831,8 @@
 ! !REQUIREMENTS:
 
       integer :: localrc        ! local error status
-      integer :: size_rank_trans
-      integer :: size_decomp
+      !integer :: size_rank_trans
+      !integer :: size_decomp
       type(ESMF_Array) :: dstarray     ! is this really needed?
 
       ! assume failure until success certain
