@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.118 2004/07/22 14:46:44 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.119 2004/07/27 22:54:28 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1652,7 +1652,17 @@
         enddo
       endif
 
-!jw   if (present(globalStartPerDim)) globalStartPerDim = me%globalAIPerDim%min
+      if (present(globalStartPerDim)) then
+        i2 = size(globalStartPerDim)
+        if (size(globalStartPerDim).gt.dgtype%dimCount) then
+          i2 = dgtype%dimCount
+          print logMsg, "size of array gt dimCount"
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+        endif
+        do i = 1,i2
+          globalStartPerDim(i) = me%globalStartPerDim(i)
+        enddo
+      endif
 
       if (present(globalAIPerDim)) then
         i2 = size(globalAIPerDim)
