@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.12 2002/12/06 16:23:40 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.13 2002/12/09 21:18:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,6 +39,7 @@
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_IOMod          ! ESMF I/O class
+!     use ESMF_LayoutMod      ! ESMF layout class
       use ESMF_PhysGridMod    ! ESMF physical grid class
       implicit none
 
@@ -135,7 +136,7 @@
 !
 ! !PUBLIC DATA MEMBERS:
 
-   integer, parameter ::                   &! recognized grid types
+   integer, parameter ::                    &! recognized grid types
       ESMF_GridType_Unknown           =  0, &! unknown or undefined grid
       ESMF_GridType_LatLon            =  1, &! equally-spaced lat/lon grid
       ESMF_GridType_Mercator          =  2, &! Mercator lat/lon grid
@@ -147,18 +148,18 @@
       ESMF_GridType_LatLonGauss       =  8, &! lat/lon grid with Gaussian latitudes
       ESMF_GridType_SphericalSpectral =  9, &! spectral space for spherical harmonics
       ESMF_GridType_Geodesic          = 10, &! spherical geodesic grid
-      ESMF_GridType_CubedSphere       = 11  ! cubed sphere grid
+      ESMF_GridType_CubedSphere       = 11   ! cubed sphere grid
 
-   integer, parameter ::                   &! recognized staggering types
+   integer, parameter ::                    &! recognized staggering types
       ESMF_GridStagger_Unknown        =  0, &! unknown or undefined staggering
       ESMF_GridStagger_A              =  1, &! Arakawa A (centered velocity)
       ESMF_GridStagger_B              =  2, &! Arakawa B (velocities at grid corner)
       ESMF_GridStagger_C              =  3, &! Arakawa C (velocities at cell faces)
       ESMF_GridStagger_Z              =  4, &! C grid equiv for geodesic grid
       ESMF_GridStagger_VertCenter     =  5, &! vert velocity at vertical midpoints
-      ESMF_GridStagger_VertFace       =  6  ! vert velocity/Pgrad at top(bottom)face
+      ESMF_GridStagger_VertFace       =  6   ! vert velocity/Pgrad at top(bottom)face
 
-   integer, parameter ::                   &! recognized coordinate systems
+   integer, parameter ::                    &! recognized coordinate systems
       ESMF_CoordSystem_Unknown        =  0, &! unknown or undefined coord system
       ESMF_CoordSystem_Spherical      =  1, &! spherical coordinates (lat/lon)
       ESMF_CoordSystem_Cartesian      =  2, &! Cartesian coordinates (x,y)
@@ -173,7 +174,7 @@
       ESMF_CoordSystem_Eta            = 11, &! vertical eta coordinate
       ESMF_CoordSystem_Isopycnal      = 12, &! vertical density coordinate
       ESMF_CoordSystem_Hybrid         = 13, &! hybrid vertical coordinates
-      ESMF_CoordSystem_Lagrangian     = 14  ! Lagrangian coordinates
+      ESMF_CoordSystem_Lagrangian     = 14   ! Lagrangian coordinates
       ! I'm sure there are more - I'm not sure
       ! what the atmospheric ESMF models are using for vertical coords
 
@@ -182,7 +183,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.12 2002/12/06 16:23:40 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.13 2002/12/09 21:18:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -395,7 +396,9 @@
 ! !IROUTINE: ESMF_GridCreateInternal - Create a new Grid internally
 
 ! !INTERFACE:
-      function ESMF_GridCreateInternal(name, gridtype, coord_system, &
+      function ESMF_GridCreateInternal(name, horz_gridtype, vert_gridtype, &
+                                       horz_stagger, vert_stagger, &
+                                       horz_coord_system, vert_coord_system, &
                                        x_min, x_max, y_min, y_max, i_max, &
                                        j_max, rc)
 !
@@ -404,8 +407,12 @@
 !
 ! !ARGUMENTS:
       character (len=*), intent(in) :: name
-      integer, intent(in), optional :: gridtype
-      integer, intent(in), optional :: coord_system
+      integer, intent(in), optional :: horz_gridtype
+      integer, intent(in), optional :: vert_gridtype
+      integer, intent(in), optional :: horz_stagger
+      integer, intent(in), optional :: vert_stagger
+      integer, intent(in), optional :: horz_coord_system
+      integer, intent(in), optional :: vert_coord_system
       real, intent(in), optional :: x_min
       real, intent(in), optional :: x_max
       real, intent(in), optional :: y_min
@@ -423,15 +430,36 @@
 !     \begin{description}
 !     \item[[name]]
 !          {\tt Grid} name.
-!     \item[[gridtype]]
-!          Integer specifier to denote gridtype:
-!             gridtype=1   lat-lon
+!     \item[[horz\_gridtype]]
+!          Integer specifier to denote horizontal gridtype:
+!             horz\_gridtype=1   equally-spaced lat/lon grid
 !             TODO:  fill out
-!     \item[[coord\_system]]
-!          Integer specifier to denote coordinate system:
-!             coord\_system=1   spherical
-!             coord\_system=2   Cartesian
-!             coord\_system=3   cylindrical
+!     \item[[vert\_gridtype]]
+!          Integer specifier to denote vertical gridtype:
+!             vert\_gridtype=0   no vertical grid
+!             TODO:  fill out
+!     \item[[horz\_stagger]]
+!          Integer specifier to denote horizontal grid stagger:
+!             horz\_stagger=1   Arakawa A (centered velocity)
+!             horz\_stagger=2   Arakawa B (velocities at grid corners)
+!             horz\_stagger=3   Arakawa C (velocities at cell faces)
+!             TODO:  fill out
+!     \item[[vert\_stagger]]
+!          Integer specifier to denote vertical grid stagger:
+!             vert\_stagger=1   Arakawa A (centered velocity)
+!             vert\_stagger=2   Arakawa B (velocities at grid corners)
+!             vert\_stagger=3   Arakawa C (velocities at cell faces)
+!             TODO:  fill out
+!     \item[[horz\_coord\_system]]
+!          Integer specifier to denote horizontal coordinate system:
+!             horz\_coord\_system=1   spherical
+!             horz\_coord\_system=2   Cartesian
+!             horz\_coord\_system=3   cylindrical
+!     \item[[vert\_coord\_system]]
+!          Integer specifier to denote vertical coordinate system:
+!             vert\_coord\_system=1   spherical
+!             vert\_coord\_system=2   Cartesian
+!             vert\_coord\_system=3   cylindrical
 !     \item[[x\_min]]
 !          Minimum physical coordinate in the x-direction.
 !     \item[[x\_max]]
@@ -441,9 +469,9 @@
 !     \item[[y\_max]]
 !          Maximum physical coordinate in the y-direction.
 !     \item[[i\_max]]
-!          Number of even-spaced grid increments in the i-direction.
+!          Number of grid increments in the i-direction.
 !     \item[[j\_max]]
-!          Number of even-spaced grid increments in the j-direction.
+!          Number of grid increments in the j-direction.
 !     \item[[rc]]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
@@ -451,9 +479,14 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
-      integer :: status=ESMF_FAILURE              ! Error status
-      logical :: rcpresent=.FALSE.                ! Return code present
+      type(ESMF_GridType), pointer :: grid    ! Pointer to new grid
+      character(len=4) :: physgrid_name       !
+      integer :: coord_id                     ! integer identifier for coordinate
+      integer :: physgrid_id                  ! integer identifier for physgrid
+      integer :: nproc_i                      ! Number of processors in 1st dir
+      integer :: nproc_j                      ! Number of processors in 2nd dir
+      integer :: status=ESMF_FAILURE          ! Error status
+      logical :: rcpresent=.FALSE.            ! Return code present
 
 !     Initialize pointers
       nullify(grid)
@@ -479,6 +512,53 @@
         print *, "ERROR in ESMF_GridCreateInternal: Grid construct"
         return
       endif
+
+!     Set grid attributes from subroutine arguments
+!     grid%base%name = name    ! TODO  base doesn't have name yet
+      grid%horz_gridtype = horz_gridtype
+      grid%vert_gridtype = vert_gridtype
+      grid%horz_stagger = horz_stagger
+      grid%vert_stagger = vert_stagger
+      grid%horz_coord_system = horz_coord_system
+      grid%vert_coord_system = vert_coord_system
+
+!     Call layout to get processor count in i and j directions
+!     call ESMF_LayoutGetSizeXY(nproc_i, nproc_j, status)  !TODO  do this here
+                                    ! or in DistGrid?
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Layout get size xy"
+        return
+      endif
+      nproc_i = 1
+      nproc_j = 1
+!     grid%distgrid = ESMF_DistGridCreate(nproc_i, nproc_j, status)  ! TODO finish
+                                    ! argument list
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Distgrid create"
+        return
+      endif
+
+!     Create main physgrid
+      grid%num_physgrids = 1
+      physgrid_name = 'base'
+      physgrid_id = 1
+!     grid%physgrids(1) = ESMF_PhysGridCreateInternal(physgrid_name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Physgrid create internal"
+        return
+      endif
+!     Call SetCoordinateCompute to create physical coordinates of subgrid
+      do coord_id = 1,6
+         call ESMF_GridSetCoordinateCompute(grid, physgrid_id, coord_id, status)
+      enddo
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateInternal: Grid set coordinate compute"
+        return
+      endif
+
+!     Create any necessary physgrids to support staggering  TODO
+
+!     Create vertical physgrid if requested
 
 !     Set return values.
       ESMF_GridCreateInternal%ptr => grid
@@ -949,7 +1029,7 @@
       subroutine ESMF_GridDestruct(grid, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_GridType), intent(in) :: grid
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1168,11 +1248,12 @@
 ! !IROUTINE: ESMF_GridSetCoordinateCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordinateCompute(Grid, id, rc)
+      subroutine ESMF_GridSetCoordinateCompute(Grid, physgrid_id, coord_id, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: id
+      type(ESMF_GridType) :: grid
+      integer, intent(in) :: physgrid_id
+      integer, intent(in) :: coord_id
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1183,7 +1264,9 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
-!     \item[[id]]
+!     \item[[physgrid_id]]
+!          Identifier for physgrid.
+!     \item[[coord_id]]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
 !             2  center\_y
