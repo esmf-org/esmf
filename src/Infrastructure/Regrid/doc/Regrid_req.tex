@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.3 2002/03/19 00:13:01 pwjones Exp $
+% $Id: Regrid_req.tex,v 1.4 2002/03/25 23:25:48 miredell Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -75,6 +75,8 @@ a single call must be supported.
 Regridding will assume source and destination grids will be
 in compatible coordinate systems.  This also applies to vertical
 grid systems.
+That is, no knowledge of units or physics must be necessary
+to perform regridding.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -84,6 +86,11 @@ grid systems.
 {\bf Notes:} Supporting map projections from spherical to x-y grids is
              beyond the scope of ESMF.  Also, vertical regridding
              between all possible vertical grid systems is problematic.
+             \\
+             MI - I assume this requirement does not preclude support
+             of interfacing, say, 
+             a sea ice model on a polar stereographic grid
+             with an atmospheric model on a lat-lon grid.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -125,6 +132,13 @@ At least one regridding method between two gridded fields must be
              for 2-d fields. A Monte Carlo method could be used for
              3-d fields.  Obviously, conservation has no meaning
              for ungridded data.
+             \\
+             MI - Some grids may not have conservation properties
+             associated with them (e.g., grid point values rather
+             than grid cell values) and so would not have this requirement.
+             Some grids may have a higher-order integration method
+             associated with them (overlappping functions as weights),
+             potentially making conservative regridding difficult and expensive.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -198,20 +212,91 @@ to cell sides.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
-\sreq{Spectral transforms}
+\sreq{Fourier transforms}
 
-Methods shall be supplied for regridding from physical space to
-spectral space.
+Methods shall be supplied for regridding between physical space and
+Fourier space.  The adjoints shall also be supplied.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  \\
+{\bf Source:}  NCEP-GSM, NCEP-SSI (milestone) \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Still not sure whether this is really the right place
              for this functionality.
              Lots of unknowns here, particularly related to
              spectral-space ordering and packing.
+             \\
+             MI - We have declared that Regridding involves linear transforms
+             from one Physical Distributed Grid to another.
+             We have declared that Fourier space and physical space are
+             Physical Distributed Grids.
+             Therefore, Fourier transforms belong in Regridding.
+             We have also noted that Regridding would contain the
+             compute intensive part of the Infrastructure,
+             which surely includes transforms.
+             Yes ordering must be addressed, presumably in Distributed Grids.
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Legendre transforms}
+
+Methods shall be supplied for regridding between spectral space and
+Fourier space.  The adjoints shall also be supplied.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  NCEP-GSM, NCEP-SSI (milestone) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} see notes under Fourier transforms
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Other functional transforms}
+
+Methods shall be supplied for regridding using user-supplied matrices,
+particularly between functional space and physical space.
+The adjoints shall also be supplied.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  NCEP-SSI (milestone) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} MI - The NCEP-SSI transforms between vertical EOF space
+             and vertical model levels.
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Interpolating with ungridded data}
+
+All methods shall work with ungridded data, except that
+no interpolation will be required FROM ungridded data,
+and no conservation properties are required.
+The adjoints shall be supplied for interpolation TO ungridded data.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  NCEP-SSI (milestone) \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} 
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Interpolation adjoints}
+
+Adjoints shall be supplied for all methods.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} MI - It would be nice to have adjoints supplied for all methods.
+             However, methods where adjoints are absolutely required
+             have been so noted within their own respective decriptions.
 \end{reqlist}
 
 %===============================================================================
@@ -248,5 +333,12 @@ containing a point or set of points.
 {\bf Verification:} Unit test \\
 {\bf Notes:} This is required for some of the above functions, but
              should it be here or in one of the other grid modules?
+             \\
+             MI - It should be in the same place as its inverse.
+             That is, this requirement is
+             given a physical location return the grid cell,
+             while its inverse is
+             given a grid cell return the physical location.
+             I suggest these methods belong in Physical Grids.
 \end{reqlist}
 
