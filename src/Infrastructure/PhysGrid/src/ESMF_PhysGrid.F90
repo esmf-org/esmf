@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.21 2003/02/21 21:07:35 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.22 2003/04/16 21:46:06 pwjones Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -143,6 +143,9 @@
 !   public ESMF_PhysGridSetRegionID
    public ESMF_PhysGridValidate
    public ESMF_PhysGridPrint
+!   public ESMF_PhysGridSearchBboxSpherical
+!   public ESMF_PhysGridSearchGeneralSpherical
+!   public ESMF_PhysGridSearchBboxCartesian
  
 !------------------------------------------------------------------------------
 !
@@ -179,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.21 2003/02/21 21:07:35 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.22 2003/04/16 21:46:06 pwjones Exp $'
 
 !==============================================================================
 !
@@ -259,7 +262,54 @@
 !
 !EOP
       end interface 
+!------------------------------------------------------------------------------
+!!BOP
+!! !INTERFACE:
+!      interface ESMF_PhysGridSearchBboxSpherical
 !
+!! !PRIVATE MEMBER FUNCTIONS:
+!         module procedure ESMF_PhysGridSearchBboxSphericalPoint
+!         module procedure ESMF_PhysGridSearchBboxSphericalList
+!
+!! !DESCRIPTION:
+!!     This interface provides a single entry point for methods that 
+!!     search a grid for point(s) using a simple bounding box search
+!!     in spherical coordinates.
+!!
+!!EOP
+!      end interface 
+!------------------------------------------------------------------------------
+!!BOP
+!! !INTERFACE:
+!      interface ESMF_PhysGridSearchGeneralSpherical
+!
+!! !PRIVATE MEMBER FUNCTIONS:
+!         module procedure ESMF_PhysGridSearchGeneralSphericalPoint
+!         module procedure ESMF_PhysGridSearchGeneralSphericalList
+!
+!! !DESCRIPTION:
+!!     This interface provides a single entry point for methods that 
+!!     search a grid for point(s) using a general (cross-product) search
+!!     in spherical coordinates.
+!!
+!!EOP
+!      end interface 
+!------------------------------------------------------------------------------
+!!BOP
+!! !INTERFACE:
+!      interface ESMF_PhysGridSearchBboxCartesian
+!
+!! !PRIVATE MEMBER FUNCTIONS:
+!         module procedure ESMF_PhysGridSearchBboxCartesianPoint
+!         module procedure ESMF_PhysGridSearchBboxCartesianList
+!
+!! !DESCRIPTION:
+!!     This interface provides a single entry point for methods that 
+!!     search a grid for point(s) using a simple bounding box search
+!!     in Cartesian coordinates.
+!!
+!!EOP
+!      end interface 
 !==============================================================================
 
       contains
@@ -1248,6 +1298,629 @@
 !
       end subroutine ESMF_PhysGridPrint
 
+!------------------------------------------------------------------------------
+!!BOP
+!! !IROUTINE: ESMF_PhysGridSearchBboxSphericalPoint - Search grid for a point
+!
+!! !INTERFACE:
+!      subroutine ESMF_PhysGridSearchBboxSphericalPoint(dst_add, x, y, DEid, &
+!                                  phys_grid, dist_grid, rc)
+!
+!!
+!! !ARGUMENTS:
+!
+!      integer, dimension(?) ::
+!         dst_add      ! location in grid of grid cell containing search point
+!
+!      real (kind=?), intent(in) :: &
+!         x,y          ! x,y coordinates of search point 
+!
+!      integer, intent(in) :: &
+!         DEid         ! DE which owns the search point
+!
+!      type(ESMF_PhysGrid), intent(in) :: &
+!         phys_grid  ! phys grid to search for location of point
+!
+!      type(ESMF_DistGrid), intent(in) :: &
+!         dist_grid  ! dist grid associated with phys grid above
+!
+!      integer, intent(out), optional :: rc  ! return code
+!
+!!
+!! !DESCRIPTION:
+!!     This routine searches for the location in the grid of a grid cell 
+!!     containing the point given by the input x,y coordinates.  This 
+!!     instantiation uses a simple bounding box check to search the
+!!     grid and is therefore only applicable to grids where the logical
+!!     and physical axes are aligned and logically-rectangular.
+!!
+!!     The arguments are:
+!!     \begin{description}
+!!     \item[dst\_add]
+!!          Address of grid cell containing the search point.
+!!     \item[x,y]
+!!          Coordinates of search point.
+!!     \item[DEid]
+!!          id of DE that owns search point.
+!!     \item[phys\_grid]
+!!          ESMF PhysGrid to search for location.
+!!     \item[[dis\_grid]
+!!          ESMF DistGrid describing distribution of PhysGrid above.
+!!     \item[[rc]]
+!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!
+!!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+!!
+!!     broadcast the point to all DEs
+!!
+!      if (my_DE == DEid) then
+!         point(1) = x
+!         point(2) = y
+!      else
+!         point = 0
+!      endif
+!
+!      call ESMF_broadcast(point, DEid) 
+!
+!!
+!!     initialize destination address to zero
+!!
+!      dst_add = 0
+!
+!!
+!!     now search all the local DEs for this point
+!!
+!
+!      search_loop: do iDE=1,nlocal_DEs
+!
+!!
+!!        first check the bounding box for the entire DE
+!!
+!         
+!         extract local_min_x, local_min_y, local_max_x, local_max_y from
+!            phys_grid
+!
+!!
+!!        make sure these are all in the same longitude range
+!!        assuming degrees, but may need to check radians if
+!!        axis units are in radians.  also assumes longitude
+!!        is x axis.
+!!
+!         
+!         if (local_min_x - point(1) >  270.) local_min_x = local_min_x - 360.
+!         if (local_max_x - point(1) >  270.) local_max_x = local_max_x - 360.
+!         if (local_min_x - point(1) > -270.) local_min_x = local_min_x + 360.
+!         if (local_max_x - point(1) > -270.) local_max_x = local_max_x + 360.
+!
+!         if (point(1) < local_min_x .or. &
+!             point(1) > local_max_x .or. &
+!             point(2) < local_min_y .or. &
+!             point(2) > local_max_y) exit search_loop ! point not in this DE
+!
+!!
+!!        point may be somewhere in this DE, loop through the cells on the DE
+!!
+!
+!         get jb,je,ib,ie, grid corners, grid centers
+!
+!         do j=jb,je     !jb,je correspond to exclusive domain on this DE
+!         do i=ib,ie     !ib,ie ditto
+!
+!!
+!!           check bounding box of local grid cell
+!!
+!            local_min_x = minval(corner_x(:,i,j))
+!            local_max_x = maxval(corner_x(:,i,j))
+!            local_min_y = minval(corner_y(:,i,j))
+!            local_min_y = maxval(corner_y(:,i,j))
+!
+!            if (local_min_x - point(1) >  270.) local_min_x = local_min_x - 360.
+!            if (local_max_x - point(1) >  270.) local_max_x = local_max_x - 360.
+!            if (local_min_x - point(1) > -270.) local_min_x = local_min_x + 360.
+!            if (local_max_x - point(1) > -270.) local_max_x = local_max_x + 360.
+!
+!            if (point(1) >= local_min_x .and. &
+!                point(1) <= local_max_x .and. &
+!                point(2) >= local_min_y .and. &
+!                point(2) <= local_max_y) then ! point is in this cell
+!               found = 1         ! found flag
+!               owner_DE = my_DE  ! DE id for this DE
+!               dst_i = i         ! local address of this cell
+!               dst_j = j         ! local address of this cell
+!               exit search_loop
+!            endif
+!
+!         end do
+!         end do
+!      end do search_loop
+!
+!!
+!!     now do a global sum of found flag to see if search returned
+!!     a unique cell.  if not, return an error.
+!!
+!      ncells = global_sum(found)
+!      if (ncells > 1) then
+!         print *,'PhysGridSearch: more than one cell contains this point'
+!         rc = ESMF_FAILURE
+!      endif
+!
+!!
+!!     if cell is found, use a global_maxval to get the address to all DEs
+!!
+!
+!      if (ncells == 1) then
+!         dst_add(1) = global_maxval(owner_DE)
+!         dst_add(2) = global_maxval(dst_i)
+!         dst_add(3) = global_maxval(dst_j)
+!      endif
+!            
+!      set return code
+!
+!      end subroutine ESMF_PhysGridSearchBboxSphericalPoint
+!
+!------------------------------------------------------------------------------
+!!BOP
+!! !IROUTINE: ESMF_PhysGridSearchBboxCartesianPoint - Search grid for a point
+!
+!! !INTERFACE:
+!      subroutine ESMF_PhysGridSearchBboxCartesianPoint(dst_add, x, y, DEid, &
+!                                  phys_grid, dist_grid, rc)
+!
+!!
+!! !ARGUMENTS:
+!
+!      integer, dimension(?) ::
+!         dst_add      ! location in grid of grid cell containing search point
+!
+!      real (kind=?), intent(in) :: &
+!         x,y          ! x,y coordinates of search point 
+!
+!      integer, intent(in) :: &
+!         DEid         ! DE which owns the search point
+!
+!      type(ESMF_PhysGrid), intent(in) :: &
+!         phys_grid  ! phys grid to search for location of point
+!
+!      type(ESMF_DistGrid), intent(in) :: &
+!         dist_grid  ! dist grid associated with phys grid above
+!
+!      integer, intent(out), optional :: rc  ! return code
+!
+!!
+!! !DESCRIPTION:
+!!     This routine searches for the location in the grid of a grid cell 
+!!     containing the point given by the input x,y coordinates.  This 
+!!     instantiation uses a simple bounding box check to search the
+!!     grid and is therefore only applicable to grids where the logical
+!!     and physical axes are aligned and logically-rectangular.
+!!
+!!     The arguments are:
+!!     \begin{description}
+!!     \item[dst\_add]
+!!          Address of grid cell containing the search point.
+!!     \item[x,y]
+!!          Coordinates of search point.
+!!     \item[DEid]
+!!          id of DE that owns search point.
+!!     \item[phys\_grid]
+!!          ESMF PhysGrid to search for location.
+!!     \item[[dis\_grid]
+!!          ESMF DistGrid describing distribution of PhysGrid above.
+!!     \item[[rc]]
+!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!
+!!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+!!
+!!     broadcast the point to all DEs
+!!
+!      if (my_DE == DEid) then
+!         point(1) = x
+!         point(2) = y
+!      else
+!         point = 0
+!      endif
+!
+!      call ESMF_broadcast(point, DEid) 
+!
+!!
+!!     initialize destination address to zero
+!!
+!      dst_add = 0
+!
+!!
+!!     now search all the local DEs for this point
+!!
+!
+!      search_loop: do iDE=1,nlocal_DEs
+!
+!!
+!!        first check the bounding box for the entire DE
+!!
+!         
+!         extract local_min_x, local_min_y, local_max_x, local_max_y from
+!            phys_grid
+!
+!         if (point(1) < local_min_x .or. &
+!             point(1) > local_max_x .or. &
+!             point(2) < local_min_y .or. &
+!             point(2) > local_max_y) exit search_loop ! point not in this DE
+!
+!!
+!!        point may be somewhere in this DE, loop through the cells on the DE
+!!
+!
+!         get jb,je,ib,ie, grid corners, grid centers
+!
+!         do j=jb,je     !jb,je correspond to exclusive domain on this DE
+!         do i=ib,ie     !ib,ie ditto
+!
+!!
+!!           check bounding box of local grid cell
+!!
+!            local_min_x = minval(corner_x(:,i,j))
+!            local_max_x = maxval(corner_x(:,i,j))
+!            local_min_y = minval(corner_y(:,i,j))
+!            local_min_y = maxval(corner_y(:,i,j))
+!
+!            if (point(1) >= local_min_x .and. &
+!                point(1) <= local_max_x .and. &
+!                point(2) >= local_min_y .and. &
+!                point(2) <= local_max_y) then ! point is in this cell
+!               found = 1         ! found flag
+!               owner_DE = my_DE  ! DE id for this DE
+!               dst_i = i         ! local address of this cell
+!               dst_j = j         ! local address of this cell
+!               exit search_loop
+!            endif
+!
+!         end do
+!         end do
+!      end do search_loop
+!
+!!
+!!     now do a global sum of found flag to see if search returned
+!!     a unique cell.  if not, return an error.
+!!
+!      ncells = global_sum(found)
+!      if (ncells > 1) then
+!         print *,'PhysGridSearch: more than one cell contains this point'
+!         rc = ESMF_FAILURE
+!      endif
+!
+!!
+!!     if cell is found, use a global_maxval to get the address to all DEs
+!!
+!
+!      if (ncells == 1) then
+!         dst_add(1) = global_maxval(owner_DE)
+!         dst_add(2) = global_maxval(dst_i)
+!         dst_add(3) = global_maxval(dst_j)
+!      endif
+!            
+!      set return code
+!
+!      end subroutine ESMF_PhysGridSearchBboxCartesianPoint
+!
+!------------------------------------------------------------------------------
+!!BOP
+!! !IROUTINE: ESMF_PhysGridSearchGeneralSphericalPoint - Search grid for a point
+!
+!! !INTERFACE:
+!      subroutine ESMF_PhysGridSearchGeneralSphericalPoint(dst_add, x, y, DEid, &
+!                                  phys_grid, dist_grid, rc)
+!
+!!
+!! !ARGUMENTS:
+!
+!      integer, dimension(?) ::
+!         dst_add      ! location in grid of grid cell containing search point
+!
+!      real (kind=?), intent(in) :: &
+!         x,y          ! x,y coordinates of search point 
+!
+!      integer, intent(in) :: &
+!         DEid         ! DE which owns the search point
+!
+!      type(ESMF_PhysGrid), intent(in) :: &
+!         phys_grid  ! phys grid to search for location of point
+!
+!      type(ESMF_DistGrid), intent(in) :: &
+!         dist_grid  ! dist grid associated with phys grid above
+!
+!      integer, intent(out), optional :: rc  ! return code
+!
+!!
+!! !DESCRIPTION:
+!!     This routine searches for the location in the grid of a grid cell 
+!!     containing the point given by the input x,y coordinates.  This 
+!!     instantiation uses a general (cross-product) check to search the
+!!     grid and works for all cells that are non-convex.
+!!
+!!     The arguments are:
+!!     \begin{description}
+!!     \item[dst\_add]
+!!          Address of grid cell containing the search point.
+!!     \item[x,y]
+!!          Coordinates of search point.
+!!     \item[DEid]
+!!          id of DE that owns search point.
+!!     \item[phys\_grid]
+!!          ESMF PhysGrid to search for location.
+!!     \item[[dis\_grid]
+!!          ESMF DistGrid describing distribution of PhysGrid above.
+!!     \item[[rc]]
+!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!
+!!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+!!
+!!     broadcast the point to all DEs
+!!
+!      if (my_DE == DEid) then
+!         point(1) = x
+!         point(2) = y
+!      else
+!         point = 0
+!      endif
+!
+!      call ESMF_broadcast(point, DEid) 
+!
+!!
+!!     initialize destination address to zero
+!!
+!      dst_add = 0
+!
+!!
+!!     now search all the local DEs for this point
+!!
+!
+!      search_loop: do iDE=1,nlocal_DEs
+!
+!!
+!!        first check the bounding box for the entire DE
+!!
+!         
+!         extract local_min_x, local_min_y, local_max_x, local_max_y from
+!            phys_grid
+!
+!!
+!!        make sure these are all in the same longitude range
+!!        assuming degrees, but may need to check radians if
+!!        axis units are in radians.  also assumes longitude
+!!        is x axis.
+!!
+!         
+!         if (local_min_x - point(1) >  270.) local_min_x = local_min_x - 360.
+!         if (local_max_x - point(1) >  270.) local_max_x = local_max_x - 360.
+!         if (local_min_x - point(1) > -270.) local_min_x = local_min_x + 360.
+!         if (local_max_x - point(1) > -270.) local_max_x = local_max_x + 360.
+!
+!         if (point(1) < local_min_x .or. &
+!             point(1) > local_max_x .or. &
+!             point(2) < local_min_y .or. &
+!             point(2) > local_max_y) exit search_loop ! point not in this DE
+!
+!!
+!!        point may be somewhere in this DE, loop through the cells on the DE
+!!
+!
+!         get jb,je,ib,ie, grid corners, grid centers
+!
+!         grid_loop_j: do j=jb,je   !ib,ie,jb,je correspond to exclusive 
+!         do i=ib,ie                !domain on this DE
+!
+!!
+!!           check bounding box of local grid cell
+!!
+!            local_min_x = minval(corner_x(:,i,j))
+!            local_max_x = maxval(corner_x(:,i,j))
+!            local_min_y = minval(corner_y(:,i,j))
+!            local_min_y = maxval(corner_y(:,i,j))
+!
+!            if (local_min_x - point(1) >  270.) local_min_x = local_min_x - 360.
+!            if (local_max_x - point(1) >  270.) local_max_x = local_max_x - 360.
+!            if (local_min_x - point(1) > -270.) local_min_x = local_min_x + 360.
+!            if (local_max_x - point(1) > -270.) local_max_x = local_max_x + 360.
+!
+!            if (point(1) >= local_min_x .and. &
+!                point(1) <= local_max_x .and. &
+!                point(2) >= local_min_y .and. &
+!                point(2) <= local_max_y) then 
+!!
+!!              point may be in this cell - do more robust check
+!!
+!               cell_corner_x = corner_x(:,i,j)
+!
+!!              check for longitude range
+!
+!               where (cell_corner_x - point(1) >  270.) cell_corner_x = &
+!                                                        cell_corner_x - 360.
+!               where (cell_corner_x - point(1) > -270.) cell_corner_x = &
+!                                                        cell_corner_x + 360.
+!
+!               found = ESMF_PhysGridCrossProductCheck(point, cell_corner_x, & 
+!                                                             corner_y(:,i,j), rc)
+!               if (found == 1) then ! found point in this cell
+!                  owner_DE = my_DE  ! DE id for this DE
+!                  dst_i = i         ! local address of this cell
+!                  dst_j = j         ! local address of this cell
+!                  exit search_loop
+!               endif ! found check
+!            endif ! bbox check
+!
+!         end do
+!         end do
+!      end do search_loop
+!
+!!
+!!     now do a global sum of found flag to see if search returned
+!!     a unique cell.  if not, return an error.
+!!
+!      ncells = global_sum(found)
+!      if (ncells > 1) then
+!         print *,'PhysGridSearch: more than one cell contains this point'
+!         rc = ESMF_FAILURE
+!      endif
+!
+!!
+!!     if cell is found, use a global_maxval to get the address to all DEs
+!!
+!
+!      if (ncells == 1) then
+!         dst_add(1) = global_maxval(owner_DE)
+!         dst_add(2) = global_maxval(dst_i)
+!         dst_add(3) = global_maxval(dst_j)
+!      endif
+!            
+!      set return code
+!
+!      end subroutine ESMF_PhysGridSearchGeneralSphericalPoint
+!
+!------------------------------------------------------------------------------
+!!BOP
+!! !IROUTINE: ESMF_PhysGridCrossProductCheck - Checks whether cell contains point
+!
+!! !INTERFACE:
+!      function ESMF_PhysGridCrossProductCheck(point, corner_x, corner_y, rc)
+!
+!!
+!! !ARGUMENTS:
+!
+!      real (kind=?), dimension(2), intent(in) :: &
+!         point          ! x,y coordinates of search point 
+!
+!      real (kind=?), dimension(:), intent(in) :: &
+!         corner_x,       ! x coordinates of cell corners
+!         corner_y        ! y coordinates of cell corners 
+!
+!      integer, intent(out), optional :: rc  ! return code
+!
+!      integer :: &
+!         ESMF_PhysGridCrossProductCheck  ! result=1 if cell contains point
+!
+!!
+!! !DESCRIPTION:
+!!     This routine checks a cell defined by the corner coordinates
+!!     to see if it contains the input point.  It uses a cross product
+!!     test which is valid for all non-convex cells.
+!!
+!!     The arguments are:
+!!     \begin{description}
+!!     \item[point]
+!!          Coordinates of search point.
+!!     \item[corner\_x]
+!!          x-coordinate of grid cell corners.
+!!     \item[corner\_y]
+!!          y-coordinate of grid cell corners.
+!!     \item[ESMF\_PhysGridCrossProductCheck]
+!!          return value = 1 if cell contains point.
+!!     \item[[rc]]
+!!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!!     \end{description}
+!!
+!!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+!   integer      ::     &
+!      ncorn, next_n,   &! corner index
+!      num_corners       ! number of corners in each grid cell
+!
+!   real (r8) ::        &
+!      vec1_x, vec1_y,  &! components of the cell side vector
+!      vec2_x, vec2_y,  &! components of the vector from vertex to point
+!      cross_product,   &! cross product of two vectors
+!      ref_product,     &! the cross product for first non-zero value
+!      sign_test         ! test to see if cross products are same sign
+!
+!!
+!!     set default return value
+!!
+!      ESMF_PhysGridCrossProductCheck = 0
+!
+!!
+!!     perform the cross product for each cell side
+!!
+!      num_corners = size(corner_x)
+!
+!      corner_loop: do ncorn=1,num_corners
+!         next_n = MOD(ncorn,num_corners) + 1
+!
+!!
+!!        here we take the cross product of the vector making
+!!        up each cell side with the vector formed by the vertex
+!!        and search point.  if all the cross products are
+!!        the same sign, the point is contained in the cell.
+!!
+!
+!         vec1_x = corner_x(next_n) - corner_x(ncorn)
+!         vec1_y = corner_y(next_n) - corner_y(ncorn)
+!         vec2_x = point(1) - corner_x(ncorn)
+!         vec2_y = point(2) - corner_y(ncorn)
+!
+!!
+!!        if search point coincident with vertex
+!!        then cell contains the point
+!!
+!
+!         if (vec2_x == 0 .and. vec2_y == 0) then
+!            ESMF_PhysGridCrossProductCheck = 1
+!            exit corner_loop
+!         endif
+!
+!!
+!!        if cell side has zero length (degenerate vertices)
+!!         then skip the side and move on to the next
+!!
+!
+!         if (vec1_x == 0 .and. vec1_y == 0) cycle corner_loop
+!
+!!        compute cross product
+!
+!         cross_product = vec1_x*vec2_y - vec2_x*vec1_y
+!
+!!
+!!        if the cross product is zero, the point
+!!        lies exactly on the side and is contained in the cell
+!!
+!
+!         if (cross_product == zero) then
+!            ESMF_PhysGridCrossProductCheck = 1
+!            exit corner_loop
+!         endif
+!
+!!
+!!        if this is the first side, set a reference cross product
+!!        to the current value
+!!        otherwise, if this product is a different sign than
+!!        previous (reference) cross products, exit the loop
+!!
+!
+!         if (ref_product == zero) then
+!            ref_product = cross_product
+!            test_product = one
+!         else
+!            test_product = cross_product*ref_product
+!         endif
+!         if (test_product < zero) exit corner_loop ! x-prod has different sign
+!
+!      end do corner_loop
+!
+!!
+!!     if cross products all same sign this location contains the pt
+!!
+!      if (test_product > zero)  ESMF_PhysGridCrossProductCheck = 1
+!
+!
+!      end subroutine ESMF_PhysGridCrossProductCheck
+!
 !------------------------------------------------------------------------------
 
       end module ESMF_PhysGridMod
