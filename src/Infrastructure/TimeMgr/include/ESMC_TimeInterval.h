@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.15 2003/04/25 09:01:39 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.16 2003/04/28 23:09:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -80,6 +80,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
   private:
     ESMF_IKIND_I8 YY;      // for Calendar intervals:  number of years
     ESMF_IKIND_I8 MO;      // for Calendar intervals:  number of months
+    ESMF_IKIND_I8 D;       // for Calendar intervals:  number of days
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -91,7 +92,7 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // Init method to support the F90 optional arguments interface
     int ESMC_TimeIntervalInit(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
                               ESMF_IKIND_I8 *D, int *H, int *M,
-                              int *S, int *MS, int *US, int *NS,
+                              ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
                               double *d_, double *h_, double *m_, double *s_,
                               double *ms_, double *us_, double *ns_,
                               int *Sn, int *Sd);
@@ -115,14 +116,14 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // Get/Set methods to support the F90 optional arguments interface
     int ESMC_TimeIntervalGet(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
                              ESMF_IKIND_I8 *D, int *H, int *M,
-                             int *S, int *MS, int *US, int *NS,
+                             ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
                              double *d_, double *h_, double *m_, double *s_,
                              double *ms_, double *us_, double *ns_,
                              int *Sn, int *Sd) const;
 
     int ESMC_TimeIntervalSet(ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
                              ESMF_IKIND_I8 *D, int *H, int *M,
-                             int *S, int *MS, int *US, int *NS,
+                             ESMF_IKIND_I8 *S, int *MS, int *US, int *NS,
                              double *d_, double *h_, double *m_, double *s_,
                              double *ms_, double *us_, double *ns_,
                              int *Sn, int *Sd);
@@ -162,9 +163,11 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
 
     // for persistence/checkpointing
     int ESMC_TimeIntervalRead(ESMF_IKIND_I8 S, int Sn, int Sd,
-                              ESMF_IKIND_I8 YY, ESMF_IKIND_I8 MO);
+                              ESMF_IKIND_I8 YY, ESMF_IKIND_I8 MO,
+                              ESMF_IKIND_I8 D);
     int ESMC_TimeIntervalWrite(ESMF_IKIND_I8 *S, int *Sn, int *Sd,
-                               ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO) const;
+                               ESMF_IKIND_I8 *YY, ESMF_IKIND_I8 *MO,
+                               ESMF_IKIND_I8 *D) const;
 
     // internal validation
     int ESMC_TimeIntervalValidate(const char *options=0) const;
@@ -175,7 +178,8 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // native C++ constructors/destructors
     ESMC_TimeInterval(void);
     ESMC_TimeInterval(ESMF_IKIND_I8 S, int Sn, int Sd,
-                      ESMF_IKIND_I8 YY, ESMF_IKIND_I8 MO);
+                      ESMF_IKIND_I8 YY, ESMF_IKIND_I8 MO, ESMF_IKIND_I8 D);
+
     ~ESMC_TimeInterval(void);
 
  // < declare the rest of the public interface methods here >
