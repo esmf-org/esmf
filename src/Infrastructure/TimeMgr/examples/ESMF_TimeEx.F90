@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.22 2004/01/27 21:07:17 eschwab Exp $
+! $Id: ESMF_TimeEx.F90,v 1.23 2004/01/27 21:10:30 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -46,7 +46,7 @@
       integer :: dayOfYear, dayOfWeek, dayOfMonth
       real(ESMF_KIND_R8) :: dayOfYear_real
       type(ESMF_TimeInterval) :: dayOfYear_interval
-      character (len=ESMF_MAXSTR) :: tS
+      character (len=ESMF_MAXSTR) :: tString
 !\end{verbatim}
 !EOP
 
@@ -265,7 +265,7 @@
 !BOP
 !\begin{verbatim}
       ! get time in string format
-      call ESMF_TimeGet(time1, timeString=tS, rc=rc)
+      call ESMF_TimeGet(time1, timeString=tString, rc=rc)
 !\end{verbatim}
 !EOP
 
@@ -275,7 +275,7 @@
 
 !BOP
 !\begin{verbatim}
-      print *, "time1 in string format = ", tS
+      print *, "time1 in string format = ", tString
 
       ! get wall clock time
       call ESMF_TimeSet(wallClock, calendar=gregorianCalendar, rc=rc)
