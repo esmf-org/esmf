@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/12/08 17:53:11 nscollins Exp $
+# $Id: makefile,v 1.8 2004/12/21 00:02:17 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -13,10 +13,8 @@ FFLAGS    =
 SOURCEC	  = ESMC_Test.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = ESMF_Init.F90 ESMF.F90 ESMF_Test.F90
-# if you have .h include files in this dir, list them all on the line below.
-SOURCEH	  = ESMC_Test.h
 # list all .h files which should be copied to common include dir
-STOREH	  = 
+STOREH	  = ESMC_Test.h
 
 # leave these alone.
 OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
