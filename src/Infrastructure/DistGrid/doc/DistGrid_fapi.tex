@@ -32,7 +32,7 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: ESMF\_DistGrid.F90,  Date: Wed Jan 15 16:08:00 MST 2003
+\markboth{Left}{Source File: ESMF\_DistGrid.F90,  Date: Thu Jan 16 12:13:06 MST 2003
 }
 
  
@@ -72,10 +72,10 @@
        end type
  
   ------------------------------------------------------------------------------
-       ! ESMF_DecompAxis
-       ! Description of ESMF_DecompAxis
+       ! ESMF_Axis
+       ! Description of ESMF_Axis
  
-       type ESMF_DecompAxis
+       type ESMF_Axis
        sequence
        private
          integer :: start
@@ -90,8 +90,8 @@
        type ESMF_Decomp
        sequence
        private
-         type (ESMF_DecompAxis) :: DEdir1   ! axis decomposition in 1st dir
-         type (ESMF_DecompAxis) :: DEdir2   ! axis decomposition in 2nd dir
+         type (ESMF_Axis) :: DEdir1         ! axis decomposition in 1st dir
+         type (ESMF_Axis) :: DEdir2         ! axis decomposition in 2nd dir
          logical ::  periodic_dir1          ! periodic boundary in 1st dir
          logical ::  periodic_dir2          ! periodic boundary in 2nd dir
          integer :: num_masks               ! number of decomposition masks
@@ -122,10 +122,10 @@
          integer :: gstart   ! global index of starting count
                              ! currently as the constant that should be added
                              ! to local index  TODO: really an array?
-         type (ESMF_DecompAxis) :: n_dir1  ! local cell count in 1st dir, in
-                                           ! global index
-         type (ESMF_DecompAxis) :: n_dir2  ! local cell count in 2nd dir, in
-                                           ! global index
+         type (ESMF_Axis) :: n_dir1  ! local cell count in 1st dir, in
+                                     ! global index
+         type (ESMF_Axis) :: n_dir2  ! local cell count in 2nd dir, in
+                                     ! global index
        end type
  
   ------------------------------------------------------------------------------
@@ -174,7 +174,7 @@
   ------------------------------------------------------------------------------\end{verbatim}{\sf PUBLIC TYPES:}
 \begin{verbatim}       public ESMF_DistGridConfig
        public ESMF_MyDE
-       public ESMF_DecompAxis
+       public ESMF_Axis
        public ESMF_Decomp
        public ESMF_DistGrid
        public ESMF_DistGridType
@@ -487,7 +487,7 @@
       {\tt  ESMF\_DistGridConstruct}, does any additional cleanup before the
        original DistGrid object is freed.  Intended for internal ESMF
        use only; end-users use {\tt ESMF\_DistGridDestroy}, which calls
-       {\tt ESMF_DistGridDestruct}.  
+       {\tt ESMF\_DistGridDestruct}.  
   
        The arguments are:
        \begin{description}

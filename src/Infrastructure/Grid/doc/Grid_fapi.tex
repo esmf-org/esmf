@@ -32,7 +32,7 @@
 \def\tr{\mathop{\rm tr}}
 %-------------------------------------------------------------
 
-\markboth{Left}{Source File: ESMF\_Grid.F90,  Date: Wed Jan 15 15:07:53 MST 2003
+\markboth{Left}{Source File: ESMF\_Grid.F90,  Date: Thu Jan 16 12:11:35 MST 2003
 }
 
  
@@ -91,6 +91,7 @@
                                              ! coordinate system
          integer :: coord_order              ! enum for mapping of xyz 
                                              ! to ijk
+         integer :: coord_index              ! enum for global or local indexing
          integer :: num_physgrids            ! number of grid descriptors
                                              ! necessary to support
                                              ! staggering, vertical
@@ -100,6 +101,7 @@
                               ! to define horizontal, staggered and vertical grids
          type (ESMF_DistGrid) :: distgrid    ! decomposition and other
                                              ! logical space info for grid
+         type (???) :: search_structure
  
        end type
  
@@ -193,7 +195,13 @@
        ESMF_CoordOrder_YXZ             =  3, &! IJK maps to YXZ
        ESMF_CoordOrder_YZX             =  4, &! IJK maps to YZX
        ESMF_CoordOrder_ZXY             =  5, &! IJK maps to ZXY
-       ESMF_CoordOrder_ZYX             =  6   ! IJK maps to ZYX\end{verbatim}
+       ESMF_CoordOrder_ZYX             =  6   ! IJK maps to ZYX
+ 
+    integer, parameter, public ::            &! recognized coordinate indexings
+       ESMF_CoordIndex_Unknown         =  0, &! unknown or undefined coord indexing
+       ESMF_CoordIndex_Local           =  1, &! uses local indexing
+       ESMF_CoordIndex_Global          =  2   ! uses global indexing
+ \end{verbatim}
  
 %/////////////////////////////////////////////////////////////
  
@@ -984,10 +992,9 @@
  
 \mbox{}\hrulefill\ 
  
-\subsubsection{}
+\subsubsection{ESMF\_GridGetDE - Get DE information for a DistGrid}
 
 
-       ESMF_GridGetDE - Get DE information for a DistGrid
  
 \bigskip{\sf INTERFACE:}
 \begin{verbatim}       subroutine ESMF_GridGetDE(grid, MyDE, MyDEx, MyDEy, &
