@@ -1,4 +1,4 @@
-// $Id: ESMC_Cpl.h,v 1.1 2003/01/07 21:38:38 nscollins Exp $
+// $Id: ESMC_Cpl.h,v 1.2 2003/01/23 21:05:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
-#include <ESMC_Component.h> 
+#include <ESMC_Comp.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
