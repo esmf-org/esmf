@@ -1,4 +1,4 @@
-! $Id: ESMF_DateMod.F90,v 1.1 2003/11/24 18:39:59 jwolfe Exp $
+! $Id: ESMF_DateMod.F90,v 1.2 2003/11/24 18:50:32 jwolfe Exp $
 	module ESMF_DateMod
 !===============================================================================
 !BOP
@@ -60,9 +60,9 @@
 !
 ! !INTERFACE:
       interface ESMF_DateInit
-        module procedure ESMF_DateInitIS,
-     &                   ESMF_DateInitUndefined,
-     &                   ESMF_DateCopyInit
+        module procedure ESMF_DateInitIS, &
+                         ESMF_DateInitUndefined, &
+                         ESMF_DateCopyInit
       end interface
 
 ! !DESCRIPTION:
@@ -317,8 +317,7 @@
 
       integer stub
 
-      call ESMC_DateGetFltDayOfYear(date,
-     &	   ESMF_DateGetFltDayOfYear, stub)
+      call ESMC_DateGetFltDayOfYear(date, ESMF_DateGetFltDayOfYear, stub)
       if (present(rc)) rc = stub
 
       end function ESMF_DateGetFltDayOfYear
@@ -348,8 +347,7 @@
 
       integer stub
 
-      call ESMC_DateGetCalendarType(date,
-     &	   ESMF_DateGetCalendarType, stub)
+      call ESMC_DateGetCalendarType(date, ESMF_DateGetCalendarType, stub)
       if (present(rc)) rc = stub
 
       end function ESMF_DateGetCalendarType
@@ -497,8 +495,7 @@
 
       call ESMC_DateInitUndefined(ESMF_DateIncrementSec, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_DateIncrementSec(date, ESMF_DateIncrementSec, nsecs, 
-     &    stub)
+        call ESMC_DateIncrementSec(date, ESMF_DateIncrementSec, nsecs, stub)
       end if
       if (present(rc)) rc = stub
 
@@ -531,8 +528,7 @@
 
       call ESMC_DateInitUndefined(ESMF_DateIncrementDay, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_DateIncrementDay(date, ESMF_DateIncrementDay, ndays, 
-     &    stub)
+        call ESMC_DateIncrementDay(date, ESMF_DateIncrementDay, ndays, stub)
       end if
       if (present(rc)) rc = stub
 
@@ -565,8 +561,8 @@
 
       call ESMC_DateInitUndefined(ESMF_DateIncrementMonth, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_DateIncrementMonth(date, ESMF_DateIncrementMonth, 
-     &    nmonths, stub)
+        call ESMC_DateIncrementMonth(date, ESMF_DateIncrementMonth, nmonths, &
+                                     stub)
       end if
       if (present(rc)) rc = stub
 
@@ -599,8 +595,7 @@
 
       call ESMC_DateInitUndefined(ESMF_DateIncrementYear, stub)
       if (stub == ESMF_SUCCESS) then
-        call ESMC_DateIncrementYear(date,
-     &	ESMF_DateIncrementYear, nyears, stub)
+        call ESMC_DateIncrementYear(date, ESMF_DateIncrementYear, nyears, stub)
       end if
       if (present(rc)) rc = stub
 
