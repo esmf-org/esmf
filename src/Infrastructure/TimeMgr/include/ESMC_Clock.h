@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.25 2004/01/12 21:29:56 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.26 2004/01/15 20:59:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,8 +134,8 @@
                       ESMC_Time         *refTime=0,    // (TMG 3.1, 3.4.4)
                       ESMC_Time         *currTime=0, 
                       ESMC_Time         *prevTime=0, 
-                      ESMC_Time         *currSimTime=0, 
-                      ESMC_Time         *prevSimTime=0, 
+                      ESMC_TimeInterval *currSimTime=0, 
+                      ESMC_TimeInterval *prevSimTime=0, 
                       ESMF_KIND_I8      *advanceCount=0, 
                       int               *numAlarms=0);
 

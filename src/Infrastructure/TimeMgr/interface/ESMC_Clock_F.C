@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.19 2003/12/19 19:21:21 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.20 2004/01/15 21:00:18 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -105,8 +105,8 @@ extern "C" {
                                  ESMC_Time *refTime,
                                  ESMC_Time *currTime,
                                  ESMC_Time *prevTime,
-                                 ESMC_Time *currSimTime,
-                                 ESMC_Time *prevSimTime,
+                                 ESMC_TimeInterval *currSimTime,
+                                 ESMC_TimeInterval *prevSimTime,
                                  ESMF_KIND_I8 *advanceCount,
                                  int *numAlarms,
                                  int *status) {
