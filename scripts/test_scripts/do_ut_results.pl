@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.10 2005/02/09 17:20:02 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.11 2005/02/09 18:41:11 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -259,24 +259,25 @@ getopts("d:b:", \%options);
 		print @pass_list;
 	}
 	if (@crashed_list != ()){
-		print "\n\nThe following unit tests files failed to build, failed to execute or crashed during execution:\n\n";
+		print "\n\nThe following unit test files failed to build, failed to execute or crashed during execution:\n\n";
 		print @crashed_list;
 	}
 	if (@fail_list != ()){
-		print "\n\nThe following unit tests files had failed unit tests:\n\n";
+		print "\n\nThe following unit test files had failed unit tests:\n\n";
 		print @fail_list;
 	}
 
 
 	if (@fail_test_list != ()){
-		# Delete repeated lines in fail_list
+		# Delete repeated lines in fail_test_list
 		$sorted_fail_test_list = ();
 		foreach $file (@fail_test_list){
+			# if not in the list push it in
 			if (grep (/$file/, @sorted_fail_test_list) == 0) {
 				push (sorted_fail_test_list, $file);
 			}
 		}	
-		print "\n\nThe following unit tests fail:\n\n";
+		print "\n\nThe following individual unit tests fail:\n\n";
 		print @sorted_fail_test_list;
 	}
         if ($total_fail_count == $total_test_count) {
