@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.10 2003/03/13 16:58:54 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.11 2003/03/13 18:34:45 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.10 2003/03/13 16:58:54 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.11 2003/03/13 18:34:45 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -314,10 +314,10 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_RouteInitialize - initialize a a Route
+// !IROUTINE:  ESMC_RoutePrecompute - initialize a a Route
 //
 // !INTERFACE:
-      int ESMC_Route::ESMC_RouteInitialize(
+      int ESMC_Route::ESMC_RoutePrecompute(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -333,12 +333,6 @@
                                 //       (should be the same as the number
                                 //       of DE's in the second layout)
       int rank,                 // in  - rank of data in both Fields
-      int global_counts[],      // in  - total (global) number of elements
-                                //       per axis (array) for the Field to
-                                //       be communicated with
-      int decompids[],          // in  - decomposition identifier for each
-                                //       axis (array) for the Field to
-                                //       be communicated with
       ESMC_DELayout *layout1,   // in  - "my" layout 
       ESMC_DELayout *layout2) { // in  - layout to be communicated with
 //
@@ -364,19 +358,20 @@
       for (i=0; i<nx2; i++) {
         their_de = j*nx2 + i;
         // layout2->ESMC_DELayoutGetParentID(their_de, their_de_parent);
+        their_de_parent = their_de;     // temporarily
         for (k=0; k<rank; k++) {
           their_AI[k] = AI[their_de,k];
         }
         their_XP->ESMC_XPacketFromAxisIndex(their_AI, rank, their_XP);
         intersect_XP->ESMC_XPacketIntersect(my_XP, their_XP, intersect_XP);
-        // this->sendRT.ESMC_RTableSetEntry(their_de_parent, ????, intersect_XP);
-        // TODO: should the above be a case for send/recv
+        // TODO: translate from global to local
+        // sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
       }
     }
 
-    return ESMF_FAILURE;
+    return ESMF_SUCCESS;
 
- } // end ESMC_RouteInitialize
+ } // end ESMC_RoutePrecompute
 
 
 //-----------------------------------------------------------------------------
