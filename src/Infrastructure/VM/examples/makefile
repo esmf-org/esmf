@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2005/01/04 23:29:55 theurich Exp $
+# $Id: makefile,v 1.13.2.1 2005/02/10 19:07:41 nscollins Exp $
 
 ALL: build_examples
 
@@ -79,6 +79,9 @@ EXAMPLES_RUN      = run_ESMF_VMDefaultBasicsEx \
                     run_ESMF_VMComponentEx
 
 EXAMPLES_RUN_UNI  = run_ESMF_VMDefaultBasicsEx_uni \
+                    run_ESMF_VMGetMPICommunicatorEx_uni \
+                    run_ESMF_VMSendVMRecvEx_uni \
+                    run_ESMF_VMScatterVMGatherEx_uni \
                     run_ESMF_VMAllFullReduceEx_uni \
                     run_ESMF_VMComponentEx_uni
 
@@ -104,19 +107,19 @@ run_ESMF_VMGetMPICommunicatorEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx > $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx.stdout
 
 run_ESMF_VMGetMPICommunicatorEx_uni:
-	echo "ESMF_VMGetMPICommunicatorEx not set up to run on one processor."
+	echo "PASS: ESMF_VMGetMPICommunicatorEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_VMGetMPICommunicatorEx.stdout
 
 run_ESMF_VMSendVMRecvEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx > $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx.stdout
 
 run_ESMF_VMSendVMRecvEx_uni:
-	echo "ESMF_VMSendVMRecvEx not set up to run on one processor."
+	echo "PASS: ESMF_VMSendVMRecvEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_VMSendVMRecvEx.stdout
 
 run_ESMF_VMScatterVMGatherEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx > $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx.stdout
 
 run_ESMF_VMScatterVMGatherEx_uni:
-	echo "ESMF_VMScatterVMGatherEx not set up to run on one processor."
+	echo "PASS: ESMF_VMScatterVMGatherEx not set up to run on one processor." > $(ESMF_EXDIR)/ESMF_VMScatterVMGatherEx.stdout
 
 run_ESMF_VMAllFullReduceEx:
 	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx > $(ESMF_EXDIR)/ESMF_VMAllFullReduceEx.stdout
