@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.71 2004/04/28 23:11:53 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.72 2004/04/30 21:42:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.71 2004/04/28 23:11:53 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.72 2004/04/30 21:42:42 jwolfe Exp $'
 
 !==============================================================================
 
@@ -123,7 +123,7 @@
       subroutine ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &
                                    dstarray, dstgrid, dstdatamap, &
                                    parentDELayout, routehandle, regridmethod, &
-                                   srcmask, dstmask, rc)
+                                   normOpt, srcmask, dstmask, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), intent(in) :: srcarray
@@ -134,7 +134,8 @@
       type(ESMF_DataMap), intent(in) :: dstdatamap
       type(ESMF_DELayout), intent(in) :: parentDELayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in), optional :: regridmethod
+      integer, intent(in) :: regridmethod
+      integer, intent(in), optional :: normOpt
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
       integer, intent(out), optional :: rc
@@ -174,9 +175,11 @@
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
-!     \item [{[regridtype]}]
+!     \item [regridtype]
 !           Type of regridding to do.  A set of predefined types are
 !           supplied.
+!     \item [{[normOpt]}]
+!           Normalization option, only for specific regrid types.
 !     \item [{[srcmask]}]
 !           Optional {\tt ESMF\_Mask} identifying valid source data.
 !     \item [{[dstmask]}]
@@ -243,19 +246,6 @@
       select case(regridmethod)
 
       !-------------
-      case(ESMF_RegridMethod_FieldCopy) ! copy field
-         !*** no regrid type required
-         print *, "ERROR in ESMF_RegridCreate: ", &
-                  "Field copy not yet supported"
-         status = ESMF_FAILURE
-
-      !-------------
-      case(ESMF_RegridMethod_Redist)   ! redistribution of field
-         print *, "ERROR in ESMF_RegridCreate: ", &
-                  "Redistribution not yet supported"
-         status = ESMF_FAILURE
-
-      !-------------
       case(ESMF_RegridMethod_Bilinear) ! bilinear
           routehandle = ESMF_RegridConstructBilinear( &
                                               srcarray, srcgrid, srcdatamap, &
@@ -275,7 +265,7 @@
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
                                               parentDELayout, srcmask, dstmask, &
-                                              order=1, rc=status)
+                                              normOpt=normOpt, order=1, rc=status)
       !-------------
       case(ESMF_RegridMethod_Conserv2) ! 2nd-order conservative
       !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
@@ -888,7 +878,7 @@
       type(ESMF_DataMap), intent(in) :: dstdatamap
       type(ESMF_DELayout) :: parentDElayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in), optional :: regridtype
+      integer, intent(in) :: regridtype
       type(ESMF_Mask), intent(in), optional :: srcmask
       type(ESMF_Mask), intent(in), optional :: dstmask
       integer, intent(out), optional :: rc
@@ -920,7 +910,7 @@
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
-!     \item [{[regridtype]}]
+!     \item [regridtype]
 !           Type of regridding to do.  A set of predefined types are
 !           supplied.
 !     \item [{[srcmask]}]
@@ -960,7 +950,7 @@
         call ESMF_RegridCreate(srcarray, srcgrid, srcdatamap, &   
                                dstarray, dstgrid, dstdatamap, &
                                parentDELayout, routehandle, regridtype, &
-                               srcmask, dstmask, status)
+                               srcmask=srcmask, dstmask=dstmask, rc=status)
 
         ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
