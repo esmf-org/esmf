@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.21 2004/04/15 19:23:47 nscollins Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.22 2004/04/27 16:16:24 nscollins Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -25,16 +25,14 @@
     implicit none
     
     ! Local variables
-    integer :: nx, ny, i, j, ni, nj, rc
-    integer, dimension(2) :: delist
+    integer :: i, ni, rc
     integer :: row_to_reduce
-    integer :: timestep, rowlen, rowi, rstart, rend
-    integer :: result, len, de_id, ndes, rightvalue 
+    integer :: rowlen, rstart, rend
+    integer :: result, pet_id, npets, rightvalue 
     integer :: counts(2)
-    type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-    type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-    type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
-    integer :: status
+    type(ESMF_GridType) :: horz_gridtype
+    type(ESMF_GridStagger) :: horz_stagger
+    type(ESMF_CoordSystem) :: horz_coord_system
     real(ESMF_KIND_R8) :: min(2), max(2)
     integer(ESMF_KIND_I4), dimension(:), pointer :: idata, ldata, rowdata
     type(ESMF_AxisIndex), dimension(2) :: index
@@ -67,17 +65,17 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !
-    call ESMF_Initialize(rc=rc)
+
+    ! Initialize the framework and query for the default VM
+    call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
-    ! get the global VM
-    call ESMF_VMGetGlobal(vm, rc=rc)
+    ! Find out how many PETs we were started with
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Create a default 1 x N DELayout 
     delayout1 = ESMF_newDELayoutCreate(vm, rc=rc)
-    if (rc .ne. ESMF_SUCCESS) goto 10
-    call ESMF_newDELayoutGet(delayout1, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     cname = "System Test DELayoutRowReduce"
@@ -112,19 +110,19 @@
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
-                              name=gname, rc=status)
+                              name=gname, rc=rc)
 
-      print *, "Grid Create returned ", status,  "(0=SUCCESS, -1=FAILURE)"
+      print *, "Grid Create returned ", rc,  "(0=SUCCESS, -1=FAILURE)"
 
 
     ! figure out our local processor id
-    call ESMF_newDELayoutGet(delayout1, localDE=de_id, rc=rc)
+    call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
 
     ! Allocate and set initial data values.  These are different on each DE.
     call ESMF_GridGetDE(grid1, localCellCount=ni, &
                         horzRelloc=ESMF_CELL_CENTER, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
-    print *, "allocating", ni, " cells on DE", de_id
+    print *, "allocating", ni, " cells on PET", pet_id
     allocate(idata(ni))
     allocate(ldata(ni))
 
@@ -236,7 +234,7 @@
 
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
-    print *, "Row Reduction operation returned ", result, " on DE ", de_id
+    print *, "Row Reduction operation returned ", result, " on PET ", pet_id
     print *, "-----------------------------------------------------------------"
     print *, "-----------------------------------------------------------------"
 
@@ -267,13 +265,13 @@
 
 
     ! Only print on DE 0 for success, or any DE with an error
-    if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
+    if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Row Reduction value incorrect"
       write(testname, *) "System Test DELayoutRowReduce: Row Reduction"
 
       rightvalue = 0
-      if (ndes .eq. 1) rightvalue = 7585
-      if (ndes .eq. 2) rightvalue = 12205
+      if (npets .eq. 1) rightvalue = 7585
+      if (npets .eq. 2) rightvalue = 12205
       
       call ESMF_Test((result .eq. rightvalue) .and. (rc.eq.ESMF_SUCCESS), &
                         testname, failMsg, testresult, ESMF_SRCLINE)
