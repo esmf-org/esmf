@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.23 2003/04/23 21:39:31 cdeluca Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.24 2003/04/24 16:40:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -182,7 +182,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.23 2003/04/23 21:39:31 cdeluca Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.24 2003/04/24 16:40:05 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1190,7 +1190,7 @@
                            delta1*0.5*real(global_n1+global_n1-1)
             enddo
           enddo
-          physgrid%center_coord1 = ESMF_ArrayCreate(temp, ESMF_NO_COPY, rc)
+          physgrid%center_coord1 = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
           nullify(temp)
 !         deallocate(temp)
 !         call ESMF_ArrayPrint(physgrid%center_coord1, "foo", rc)
@@ -1206,7 +1206,7 @@
                            delta2*0.5*real(global_n2+global_n2-1)
             enddo
           enddo
-          physgrid%center_coord2 = ESMF_ArrayCreate(temp, ESMF_NO_COPY, rc)
+          physgrid%center_coord2 = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
           nullify(temp)
 !         deallocate(temp)
         case (ESMF_CellLoc_Corner_X)
