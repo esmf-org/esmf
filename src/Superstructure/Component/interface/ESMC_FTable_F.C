@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable_F.C,v 1.4 2003/04/24 17:12:56 nscollins Exp $
+// $Id: ESMC_FTable_F.C,v 1.5 2003/05/07 16:04:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,6 +48,7 @@ static void newtrim(char *c, int clen, int *phase, char **newc) {
      if ((phase != NULL) && (*phase > 0))  {
          pad = 8;
          hasphase++;
+         //printf("in newtrim, phase = %d\n", *phase);
      }
 
      ctmp = new char[clen+pad];
@@ -58,7 +59,7 @@ static void newtrim(char *c, int clen, int *phase, char **newc) {
    
      if (hasphase) {
          ctmpp = new char[strlen(ctmp) + pad];
-         sprintf(ctmp, "%s%03d", ctmp, *phase);
+         sprintf(ctmpp, "%s%03d", ctmp, *phase);
          delete[] ctmp;
          *newc = ctmpp;
      } else
