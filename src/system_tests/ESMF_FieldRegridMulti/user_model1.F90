@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.1 2004/02/17 15:57:39 nscollins Exp $
+! $Id: user_model1.F90,v 1.2 2004/02/17 17:08:03 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -228,7 +228,7 @@
         do j = 1,counts(3)
           do i = 1,counts(2)
              do k = 1,counts(1)
-                 idata(i,j,k) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                 idata(k,i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
                                  + 2.0*sin(coordY(i,j)/50.0*pi)
              enddo
           enddo
