@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.185 2004/07/22 22:41:39 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.186 2004/07/30 20:43:07 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.185 2004/07/22 22:41:39 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.186 2004/07/30 20:43:07 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -130,6 +130,24 @@
 !EOPI
       end interface
 !
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_GridGet - Grid Get routines
+!
+! !INTERFACE:
+      interface ESMF_GridGet
+
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_GridGetGeneral
+        module procedure ESMF_GridGetWithRelloc
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that retrieve
+!     a variety of information about an {\tt ESMF\_Grid}.
+
+!EOPI
+      end interface
+
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_GridGetAttribute  - Get Grid attributes
@@ -1208,24 +1226,195 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_GridGet"
+#define ESMF_METHOD "ESMF_GridGetGeneral"
 !BOP
-! !IROUTINE: ESMF_GridGet - Get a variety of information about a Grid
+! !IROUTINE: ESMF_GridGet - Get a variety of general information about a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGet(grid, horzrelloc, vertrelloc, &
-                              horzgridtype, vertgridtype, &
-                              horzstagger, vertstagger, &
-                              horzcoordsystem, vertcoordsystem, &
-                              coordorder, dimCount, minGlobalCoordPerDim, &
-                              maxGlobalCoordPerDim, globalCellCountPerDim, &
-                              globalStartPerDEPerDim, maxLocalCellCountPerDim, &
-                              cellCountPerDEPerDim, periodic, delayout, &
-                              name, rc)
+      ! Private name; call using ESMF_GridGet()
+      subroutine ESMF_GridGetGeneral(grid, &
+                                     horzgridtype, vertgridtype, &
+                                     horzstagger, vertstagger, &
+                                     horzcoordsystem, vertcoordsystem, &
+                                     coordorder, dimCount, &
+                                     minGlobalCoordPerDim, maxGlobalCoordPerDim, &
+                                     periodic, delayout, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      type(ESMF_RelLoc), intent(in), optional :: horzrelloc
+      type(ESMF_GridType),     intent(out), optional :: horzgridtype
+      type(ESMF_GridVertType), intent(out), optional :: vertgridtype
+      type(ESMF_GridHorzStagger), intent(out), optional :: horzstagger
+      type(ESMF_GridVertStagger), intent(out), optional :: vertstagger
+      type(ESMF_CoordSystem), intent(out), optional :: horzcoordsystem
+      type(ESMF_CoordSystem), intent(out), optional :: vertcoordsystem
+      type(ESMF_CoordOrder),  intent(out), optional :: coordorder
+      integer, intent(out), optional :: dimCount
+      real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
+                            minGlobalCoordPerDim
+      real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
+                            maxGlobalCoordPerDim
+      type(ESMF_Logical), intent(out), dimension(:), optional :: periodic
+      type(ESMF_DELayout), intent(out), optional :: delayout
+      character(len = *), intent(out), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     Gets general information about an {\tt ESMF\_Grid}, depending
+!     on a list of optional arguments.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          {\tt ESMF\_Grid} to be queried.
+!     \item[{[horzgridtype]}]
+!          {\tt ESMF\_GridType} specifier to denote horizontal grid type.
+!     \item[{[vertgridtype]}]
+!          {\tt ESMF\_GridVertType} specifier to denote vertical grid type.
+!     \item[{[horzstagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote horizontal grid stagger.
+!     \item[{[vertstagger]}]
+!          {\tt ESMF\_GridHorzStagger} specifier to denote vertical grid stagger.
+!     \item[{[horzcoordsystem]}]
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the horizontal grid.
+!     \item[{[vertcoordsystem]}]
+!          {\tt ESMF\_CoordSystem} which identifies an ESMF standard
+!          coordinate system (e.g. spherical, cartesian, pressure, etc.) for
+!          the vertical grid.
+!     \item[{[coordorder]}]
+!          {\tt ESMF\_CoordOrder} specifier to denote coordinate ordering.
+!     \item[{[dimCount]}]
+!          Number of dimensions represented by this {\tt grid}.
+!     \item[{[minGlobalCoordPerDim]}]
+!          Array of minimum global physical coordinates in each direction.
+!     \item[{[maxGlobalCoordPerDim]}]
+!          Array of maximum global physical coordinates in each direction.
+!     \item[{[periodic]}]
+!          Returns the periodicity along the coordinate axes - logical array.
+!     \item[{[name]}]
+!          {\tt ESMF\_Grid} name.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+! !REQUIREMENTS:
+!EOP
+
+      integer :: localrc                          ! local error status
+
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
+      ! Call GridGet routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      !  ESMF_GRID_STRUCTURE_UNKNOWN
+      case(0)
+        ! the only thing that can be retrieved from an empty grid is the name
+        if (present(name)) then
+          call ESMF_GetName(grid%ptr%base, name, localrc)
+          if (ESMF_LogMsgFoundError(localrc, &
+                                    ESMF_ERR_PASSTHRU, &
+                                    ESMF_CONTEXT, rc)) return
+        endif 
+        if (present(horzgridtype           ) .OR. &
+            present(vertgridtype           ) .OR. &
+            present(horzstagger            ) .OR. &
+            present(vertstagger            ) .OR. &
+            present(horzcoordsystem        ) .OR. &
+            present(vertcoordsystem        ) .OR. &
+            present(coordorder             ) .OR. &
+            present(dimCount               ) .OR. &
+            present(minGlobalCoordPerDim   ) .OR. &
+            present(maxGlobalCoordPerDim   ) .OR. &
+            present(periodic               ) .OR. &
+            present(delayout               )) then
+          if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, &
+                                    "Unknown grid structure", &
+                                    ESMF_CONTEXT, rc)) return
+        endif
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT
+      case(1)
+        call ESMF_LRGridGet(grid, &
+                            horzGridType=horzgridtype, &
+                            vertGridType=vertgridtype, &
+                            horzStagger=horzstagger, &
+                            vertStagger=vertstagger, &
+                            horzCoordSystem=horzcoordsystem, &
+                            vertCoordSystem=vertcoordsystem, &
+                            coordOrder=coordorder, dimCount=dimCount, &
+                            minGlobalCoordPerDim=minGlobalCoordPerDim, &
+                            maxGlobalCoordPerDim=maxGlobalCoordPerDim, &
+                            periodic=periodic, delayout=delayout, &
+                            name=name, rc=localrc)
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_LOGRECT_BLK
+      case(2)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Log Rect Block", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_UNSTRUCT
+      case(3)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure Unstructured", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      ! ESMF_GRID_STRUCTURE_USER
+      case(4)
+        if (ESMF_LogMsgFoundError(ESMF_RC_NOT_IMPL, &
+                                  "Grid structure User", &
+                                  ESMF_CONTEXT, rc)) return
+
+      !-------------
+      case default
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                  "Invalid Grid structure", &
+                                  ESMF_CONTEXT, rc)) return
+      end select
+
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! Set return values.
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetGeneral
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridGetWithRelloc"
+!BOP
+! !IROUTINE: ESMF_GridGet - Get a variety of relloc-specified information about a Grid
+
+! !INTERFACE:
+      ! Private name; call using ESMF_GridGet()
+      subroutine ESMF_GridGetWithRelloc(grid, horzrelloc, vertrelloc, &
+                                        horzgridtype, vertgridtype, &
+                                        horzstagger, vertstagger, &
+                                        horzcoordsystem, vertcoordsystem, &
+                                        coordorder, dimCount, &
+                                        minGlobalCoordPerDim, &
+                                        maxGlobalCoordPerDim, &
+                                        globalCellCountPerDim, &
+                                        globalStartPerDEPerDim, &
+                                        maxLocalCellCountPerDim, &
+                                        cellCountPerDEPerDim, periodic, &
+                                        delayout, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_RelLoc), intent(in) :: horzrelloc
       type(ESMF_RelLoc), intent(in), optional :: vertrelloc
       type(ESMF_GridType),     intent(out), optional :: horzgridtype
       type(ESMF_GridVertType), intent(out), optional :: vertgridtype
@@ -1249,14 +1438,14 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Gets information about an {\tt ESMF\_Grid}, depending
-!     on a list of optional arguments.
+!     Gets information about an {\tt ESMF\_Grid}, depending on user-supplied
+!     relative locations, and a list of optional arguments.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          {\tt ESMF\_Grid} to be queried.
-!     \item[{[horzrelloc]}]
+!     \item[horzrelloc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
 !          grid.
 !     \item[{[vertrelloc]}]
@@ -1393,7 +1582,7 @@
       ! Set return values.
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_GridGet
+      end subroutine ESMF_GridGetWithRelloc
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
