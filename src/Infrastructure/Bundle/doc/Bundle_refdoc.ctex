@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.9 2003/10/23 13:20:56 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.10 2003/10/23 14:43:52 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -63,13 +63,6 @@
 \input{Bundle_implnotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/Bundle/doc/Bundle_implnotes}
-#endif
-
-\subsection{Object Model}
-#ifdef STANDALONE
-\input{Bundle_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Bundle/doc/Bundle_obj}
 #endif
 
 %\subsection{Global Parameters}

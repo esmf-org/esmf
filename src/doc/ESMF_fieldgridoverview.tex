@@ -1,4 +1,6 @@
-% $Id: ESMF_fieldgridoverview.tex,v 1.2 2003/05/07 19:23:00 cdeluca Exp $
+% $Id: ESMF_fieldgridoverview.tex,v 1.3 2003/10/23 14:43:53 cdeluca Exp $
+
+\section{Overview of Infratructure Data Classes}
 
 {\tt Field} and {\tt Bundle} objects provide 
 data access and data handling methods
@@ -32,6 +34,7 @@ for setting and retrieving constituent fields, import and export
 data exchange during intercomponent communication,
 regridding, data I/O, and reordering of data in memory.
 
+
 \subsection{Programming Model}
 
 The following sections give a high level description of how
@@ -41,22 +44,6 @@ This is followed by a more detailed description of how
 those functions are encapsulated into internal ESMF 
 objects, followed by a detailed API (Application Programming
 Interface) listing.
-
-There will be both C++ and Fortran 90/95 interfaces to
-all Field and Bundle functions, but in the following section
-Fortran interfaces will be used in the examples.
-(The Field and Bundle code will be
-implemented in Fortran 90 with function wrappers in C++.
-See the \htmladdnormallink{{\it ESMF Implementation 
-Report}}{http://www.esmf.ucar.edu/esmf_docs/impl_rep} for more details.)
-
-Note: The interaction of Fields with Grid objects is very close
-and has a large influence on the Fields API.  The general
-subdivision of labor into Fields, Physical Grids, and
-Distributed Grids has been done, but the specific APIs for
-Grids have not been designed yet, so descriptions of 
-functionality which will be handled by Grid routines 
-will of necessity be less detailed than the Field routines.
 
 \subsection{Using Fields and Bundles}
 
@@ -521,4 +508,16 @@ grids, including mappings between Grids and nested Grids.
 
 \end{description}
 
+\subsection{Object Model}
+
+
+The following is a simplified UML diagram showing the relationships among
+ESMF Field, Grid and Bundle classes.  See Appendix A, {\it A Brief 
+Introduction to UML},
+for a translation table that lists the symbols in the diagram and their 
+meaning.
+
+\begin{center}
+\includegraphics{State_obj.eps}   
+\end{center}
 

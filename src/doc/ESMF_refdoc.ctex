@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.30 2003/10/23 12:34:21 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.31 2003/10/23 14:43:53 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -61,7 +61,7 @@
 
 \newpage
 %\section{API Overview}
-\input{ESMF_dataobj}
+\input{ESMF_api}
 
 \newpage
 \begin{htmlonly}
@@ -86,7 +86,7 @@
 \part{Infrastructure:  Fields and Grids}
 
 \newpage
-\section{Overview}
+
 \input{ESMF_fieldgridoverview.tex}
 
 #include "../Infrastructure/Field/doc/Field_refdoc.ctex"
