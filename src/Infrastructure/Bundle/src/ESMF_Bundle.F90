@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.17 2004/02/25 22:33:27 svasquez Exp $
+! $Id: ESMF_Bundle.F90,v 1.18 2004/02/25 22:38:41 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1576,7 +1576,7 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleDataDetach - Obtain direct data access to Packed data
+! !IROUTINE: ESMF_BundleDataDetach - Obtain read only data access to Packed data
 !
 ! !INTERFACE:
       subroutine ESMF_BundleDataDetachRO(bundle, databuffer, rc)
