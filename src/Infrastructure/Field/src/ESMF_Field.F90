@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.197 2004/12/17 18:01:28 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.198 2004/12/20 21:14:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -285,7 +285,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.197 2004/12/17 18:01:28 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.198 2004/12/20 21:14:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4980,6 +4980,7 @@
       type(ESMF_Grid) :: srcGrid, dstGrid
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       type(ESMF_RelLoc) :: horzRelLoc, vertRelLoc 
+      type(ESMF_VM) :: vm
 
       ! Initialize return code
       if (present(rc)) rc = ESMF_FAILURE
@@ -4995,6 +4996,7 @@
       !                                           if my_DE is part of a layout
       call ESMF_GridGet(stypep%grid, delayout=parentDElayout, rc=status)
       call ESMF_DELayoutGet(parentDElayout, localDE=my_DE, rc=status)
+      call ESMF_DELayoutGetVM(parentDElayout, vm, rc=status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -5073,8 +5075,9 @@
                                      vertRelLoc=vertRelLoc, &
                                      minLocalCoordPerDim=dst_min, &
                                      maxLocalCoordPerDim=dst_max, rc=status)
-        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, dst_min, dst_max, &
-                                       recvDomainList, rc=status)
+        call ESMF_GridBoxIntersectRecv(srcGrid, dstGrid, vm, dst_min, dst_max, &
+                                       recvDomainList, hasdstdata, hassrcdata, &
+                                       rc=status)
       endif
 
       if  (present(rc)) rc = ESMF_SUCCESS
