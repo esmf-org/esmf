@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.10 2004/01/07 22:29:11 jwolfe Exp $
+# $Id: makefile,v 1.11 2004/01/16 23:45:48 jwolfe Exp $
 
 # leave alone.
 ALL: lib 
@@ -12,7 +12,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = ESMF_Grid.F90 ESMF_GridTypes.F90
+SOURCEF	  = ESMF_GridTypes.F90 ESMF_LogRectGrid.F90 ESMF_Grid.F90
 # if you have .h include files in this dir, list them all on the line below.
 STOREH	  = ESMC_Grid.h
 
