@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.37 2004/03/24 18:31:08 cdeluca Exp $
+! $Id: ESMF_Bundle.F90,v 1.38 2004/05/07 22:01:39 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -2449,7 +2449,7 @@ end function
 !
 ! !ARGUMENTS:
       type(ESMF_Bundle), intent(in) :: bundle
-      character (len=*), intent(in) :: options
+      character (len=*), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
