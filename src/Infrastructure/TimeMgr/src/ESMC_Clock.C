@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.33 2003/09/11 00:05:05 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.34 2003/10/22 01:06:28 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,8 @@
  // higher level, 3rd party or system includes here
  #include <iostream.h>
  #include <string.h>
+ #include <ctype.h>
+ #include <ESMC_Alarm.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -29,8 +31,12 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.33 2003/09/11 00:05:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.34 2003/10/22 01:06:28 eschwab Exp $";
 //-------------------------------------------------------------------------
+
+// initialize static clock instance counter
+// TODO: inherit from ESMC_Base class
+int ESMC_Clock::count=0;
 
 //
 //-------------------------------------------------------------------------
@@ -42,45 +48,101 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockSetup - Initializes a Clock
+// !IROUTINE:  ESMC_ClockCreate - Allocates and Initializes a Clock object
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockSetup(
+      ESMC_Clock *ESMC_ClockCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_Alarm
+//
+// !ARGUMENTS:
+      int                nameLen,    // in
+      const char        *name,       // in
+      ESMC_TimeInterval *timeStep,   // in
+      ESMC_Time         *startTime,  // in
+      ESMC_Time         *stopTime,   // in
+      ESMC_Time         *refTime,    // in
+      int               *rc) {       // out - return code
+
+// !DESCRIPTION:
+//      Allocates and Initializes a {\tt ESMC\_Clock} with given values
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_Clock *clock;
+
+    try {
+      clock = new ESMC_Clock;
+    }
+    catch (...) {
+      // TODO:  call ESMF log/err handler
+      cerr << "ESMC_ClockCreate() memory allocation failed\n";
+      *rc = ESMF_FAILURE;
+      return(ESMC_NULL_POINTER);
+    }
+
+    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    if (name != ESMC_NULL_POINTER) {
+      if (nameLen < ESMF_MAXSTR) {
+        strncpy(clock->name, name, nameLen);
+        clock->name[nameLen] = '\0';  // null terminate
+      } else {
+        // TODO: error, delete and return null clock?
+        *rc = ESMF_FAILURE;
+        return(clock);
+      }
+    } else {
+      // create default name "ClockNNN"
+      sprintf(clock->name, "Clock%3.3d\0", clock->id);
+    }
+
+    if (timeStep  != ESMC_NULL_POINTER) clock->timeStep  = *timeStep;
+    if (startTime != ESMC_NULL_POINTER) clock->startTime = *startTime;
+    if (stopTime  != ESMC_NULL_POINTER) clock->stopTime  = *stopTime;
+
+    if (refTime   != ESMC_NULL_POINTER) clock->refTime   = *refTime;
+    else clock->refTime = clock->startTime;
+
+    clock->currTime = clock->startTime;
+    clock->prevTime = clock->currTime;
+
+    *rc = clock->ESMC_ClockValidate();
+    
+    return(clock);
+
+ } // end ESMC_ClockCreate
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockDestroy - free a Clock created with Create
+//
+// !INTERFACE:
+      int ESMC_ClockDestroy(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_TimeInterval *timeStep,   // in
-      ESMC_Time         *startTime,  // in
-      ESMC_Time         *stopTime,   // in
-      ESMC_Time         *refTime) {  // in
-
+      ESMC_Clock *clock) {  // in - ESMC_Clock to destroy
+//
 // !DESCRIPTION:
-//      Initializes a {\tt ESMC\_Clock} with given values
+//      ESMF routine which destroys a Clock object previously allocated
+//      via an {\tt ESMC\_ClockCreate} routine.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  
 
-    // TODO: ensure initialization if called via F90 interface;
-    //       cannot call constructor, because destructor is subsequently
-    //       called automatically, returning initialized values to garbage.
-    this->numAlarms    = 0;
-    this->advanceCount = 0;
+  if (clock != ESMC_NULL_POINTER) {
+    //clock->ESMC_ClockDestruct(); constructor calls it!
+    delete clock;
+    clock = ESMC_NULL_POINTER;
+    return(ESMF_SUCCESS);
+  } else {
+    return(ESMF_FAILURE);
+  }
 
-    if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
-    if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
-    if (stopTime  != ESMC_NULL_POINTER) this->stopTime  = *stopTime;
-
-    if (refTime   != ESMC_NULL_POINTER) this->refTime   = *refTime;
-    else this->refTime = this->startTime;
-
-    this->currTime = this->startTime;
-    this->prevTime = this->currTime;
-
-    return(ESMC_ClockValidate());
-
- } // end ESMC_ClockSetup
+ } // end ESMC_ClockDestroy
 
 //-------------------------------------------------------------------------
 //BOP
@@ -93,6 +155,8 @@
 //    int error return code
 //
 // !ARGUMENTS:
+      int                nameLen,       // in
+      const char        *name,          // in
       ESMC_TimeInterval *timeStep,       // in
       ESMC_Time         *startTime,      // in
       ESMC_Time         *stopTime,       // in
@@ -108,6 +172,18 @@
 
     // save current values to restore in case of failure;
     ESMC_Clock saveClock = *this;
+
+    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    if (name != ESMC_NULL_POINTER) {
+      if (nameLen < ESMF_MAXSTR) {
+        strncpy(this->name, name, nameLen); 
+        this->name[nameLen] = '\0';  // null terminate
+      } else {
+        // error, restore previous state and return ESMF_FAILURE
+        *this = saveClock; 
+        return(ESMF_FAILURE);
+      }
+    }
 
     if (timeStep  != ESMC_NULL_POINTER) this->timeStep  = *timeStep;
     if (startTime != ESMC_NULL_POINTER) this->startTime = *startTime;
@@ -141,6 +217,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
+      int                nameLen,        // in
+      int               *tempNameLen,    // out
+      char              *tempName,       // out
       ESMC_TimeInterval *timeStep,       // out
       ESMC_Time         *startTime,      // out
       ESMC_Time         *stopTime,       // out
@@ -157,6 +236,23 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    int rc = ESMF_SUCCESS;
+
+    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    if (tempName != ESMC_NULL_POINTER) {
+      if (strlen(this->name) < nameLen) {
+        // copy all of it
+        strcpy(tempName, this->name);
+      } else {
+        // TODO: copy what will fit and return ESMF_FAILURE ?
+        strncpy(tempName, this->name, nameLen-1);
+        tempName[nameLen] = '\0';  // null terminate
+        rc = ESMF_FAILURE;
+      }
+      // report how many characters were copied
+      *tempNameLen = strlen(tempName);
+    }
 
     if (timeStep  != ESMC_NULL_POINTER) *timeStep  = this->timeStep;
     if (startTime != ESMC_NULL_POINTER) *startTime = this->startTime;
@@ -177,39 +273,184 @@
     if (advanceCount != ESMC_NULL_POINTER) *advanceCount = this->advanceCount;
     if (numAlarms    != ESMC_NULL_POINTER) *numAlarms    = this->numAlarms;
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
  } // end ESMC_ClockGet
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ClockAddAlarm - add alarm to clock's alarm list
+// !IROUTINE:  ESMC_ClockAdvance - increment a clock's time
 //
 // !INTERFACE:
-      int ESMC_Clock::ESMC_ClockAddAlarm(
+      int ESMC_Clock::ESMC_ClockAdvance(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm *alarm) {   // in - alarm to add
+      ESMC_TimeInterval *timeStep,               // in  - optional new timestep
+      char              *ringingAlarmList1stElementPtr, // out - optional array
+                                                 //        of ringing alarms
+      char              *ringingAlarmList2ndElementPtr, // in - address of 2nd
+                                                 //        element to calculate
+                                                 //        F90 array element
+                                                 //        size
+      int               *sizeofRingingAlarmList, // in  - size of given array
+                                                 //       of ringing alarms
+      int               *numRingingAlarms) {     // out - number of ringing
+                                                 //       alarms
 //
 // !DESCRIPTION:
-//     Adds given alarm to a clock's alarm list
+//     Advances a clock's current time by timestep, then checks
+//     each of its alarms to see if its time to ring.
 //
 //EOP
-// !REQUIREMENTS:  TMG 4.1, 4.2
+// !REQUIREMENTS:  TMG 3.4.1
 
-    // validate inputs
-    if (numAlarms == MAX_ALARMS || alarm == ESMC_NULL_POINTER) {
-      return(ESMF_FAILURE);
+    int rc = ESMF_SUCCESS;
+
+    // if not first advance, save current time, then advance it
+    if (!firstAdvance) {
+      prevTime = currTime;
+      // use passed-in timestep if specified, otherwise use the clock's
+      currTime += (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
+    } else {
+      // current time equals start time, which is the first time step! So,
+      // don't actually advance the clock on the first call.
+      firstAdvance = false;
+    }
+    // count number of timesteps
+    advanceCount++;
+
+    // TODO: validate (range check) new time against its calendar ?
+
+    if (numRingingAlarms != ESMC_NULL_POINTER) *numRingingAlarms = 0;
+
+    // Calculate element size of F90 array of ESMC_Alarm pointers since we
+    // cannont depend on C++ element size to be the same as F90's across all
+    // platforms.  It is assumed that all F90 platforms allocate arrays
+    // contiguously and uniformly in memory, in either ascending or descending
+    // address order.
+    // TODO:  calculate once during ESMF_FrameworkInitialize() (runtime),
+    //        since this is a platform constant. compile-time constant ?
+    // see also ESMC_ClockGetAlarmList().
+
+    int f90ArrayElementSize = 0; 
+    if (ringingAlarmList1stElementPtr != ESMC_NULL_POINTER &&
+        ringingAlarmList2ndElementPtr != ESMC_NULL_POINTER) {
+        f90ArrayElementSize = (int)(ringingAlarmList2ndElementPtr -
+                                    ringingAlarmList1stElementPtr);
     }
 
-    alarmList[numAlarms++] = alarm;
+    // traverse alarm list (i) for ringing alarms (j)
+    for(int i=0, j=0; i<numAlarms; i++) {
+      int rc;
+      bool ringing;
+
+      // check each alarm to see if it's time to ring
+      ringing = alarmList[i]->ESMC_AlarmCheckRingTime(&rc);
+
+      // report ringing alarms if requested
+      if (ringing) {
+        // report number of ringing alarms
+        if (numRingingAlarms != ESMC_NULL_POINTER) (*numRingingAlarms)++;
+
+        // report ringing alarm list
+        if (ringingAlarmList1stElementPtr != ESMC_NULL_POINTER) {
+          if (j < *sizeofRingingAlarmList) {
+            // F90 equivalent: ringingAlarmList(j) = alarmList(i)
+            //                 j = j + 1
+            // calculate F90 array address for the j'th element ...
+            char *f90ArrayElementJ;
+            f90ArrayElementJ = ringingAlarmList1stElementPtr +
+                               (j++ * f90ArrayElementSize);
+            // ... then copy it in!
+            *((ESMC_Alarm**)f90ArrayElementJ) = alarmList[i];
+          } else rc = ESMF_FAILURE; // list overflow!
+        }
+      }
+    }
+
+    return(rc);
+
+ } // end ESMC_ClockAdvance
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockIsStopTime - check if Clock's stop time has been reached
+//
+// !INTERFACE:
+      bool ESMC_Clock::ESMC_ClockIsStopTime(
+//
+// !RETURN VALUE:
+//    bool is stop time or not
+//
+// !ARGUMENTS:
+      int  *rc) const {        // out - error return code
+//
+// !DESCRIPTION:
+//    checks if {\tt ESMC\_Clock}'s stop time has been reached.
+//
+//EOP
+// !REQUIREMENTS:
+
+    *rc = ESMF_SUCCESS;
+
+    // positive time step ?
+    if (stopTime > startTime) {
+      return(currTime >= stopTime);
+
+    // or negative time step ?
+    } else if (stopTime < startTime) {
+      return(currTime <= stopTime);
+
+    // or no time step? (stopTime == startTime)
+    } else return(currTime == stopTime);
+
+ } // end ESMC_ClockIsStopTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetNextTime - calculates a Clock's next time 
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetNextTime(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Time         *nextTime,       // out
+      ESMC_TimeInterval *timeStep) {     // in
+
+// !DESCRIPTION:
+//      Calculates what the next time of the {\tt ESMF\_Clock} will be, based
+//      on the clock's current timestep or an optionally passed-in timestep.
+
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // initialize result to clock's current time
+    //   (to copy calendar and timezone)
+    // TODO:  delete when ESM[F,C]_Time overridden "+" operator is ready, which
+    //        will do the copy of ESMC_Time's extra properties.
+    *nextTime = currTime;
+
+    if (!firstAdvance) {
+      if (timeStep != ESMC_NULL_POINTER) {
+        // use passed-in timeStep if specified
+        *nextTime = currTime + *timeStep;
+      } else {
+        // otherwise use clock's own timestep
+        *nextTime = currTime + this->timeStep;
+      }
+    }
+    // else nextTime is the current time, which is the start time!
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockAddAlarm
+ } // end ESMC_ClockGetNextTime
 
 //-------------------------------------------------------------------------
 //BOP
@@ -222,25 +463,190 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int          i,         // in  - the i'th alarm to get
-      ESMC_Alarm **alarm) {   // out - the i'th alarm
+      int          nameLen,   // in  - the length of the alarm name
+      char        *name,      // in  - the alarm "name" to get
+      ESMC_Alarm **alarm) {   // out - the alarm named "name"
 //
 // !DESCRIPTION:
-//     Retrieve's the clock's i'th alarm from the alarm list
+//     Retrieve's the clock's alarm named "name" from the alarm list
 //
 //EOP
-// !REQUIREMENTS:  TMG 4.1, 4.2
+// !REQUIREMENTS:  TMG x.x
 
-    // validate inputs
-    if (i < 1 || i > numAlarms || alarm == ESMC_NULL_POINTER) {
+    if (nameLen >= ESMF_MAXSTR) {
       return(ESMF_FAILURE);
     }
 
-    *alarm = alarmList[i-1];  
+    // TODO: use inherited methods from ESMC_Base
+    char alarmName[ESMF_MAXSTR];
+    strncpy(alarmName, name, nameLen);
+    alarmName[nameLen] = '\0';  // null terminate
+
+    // linear search for alarm name
+    for(int i=0; i<numAlarms; i++) {
+      if (strcmp(alarmName, alarmList[i]->name) == 0) {
+        // found, return alarm
+        *alarm = alarmList[i];
+        return(ESMF_SUCCESS);
+      }
+    }
+
+    // not found, return null ...
+    *alarm = ESMC_NULL_POINTER;
+    return(ESMF_FAILURE);
+
+ } // end ESMC_ClockGetAlarm
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetAlarmList - Get a list of alarms from a clock
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetAlarmList(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_AlarmListType type,                   // in - list type to get
+      char              *alarmList1stElementPtr, // out - array of alarms
+      char              *alarmList2ndElementPtr, // in  - address of 2nd
+                                                 //        element to calculate
+                                                 //        F90 array element
+                                                 //        size
+      int               *sizeofAlarmList,        // in  - size of given array
+                                                 //       of alarms
+      int               *numAlarms,              // out - number of alarms
+      ESMC_TimeInterval *timeStep) {             // in  - optional time step to
+                                                 //         use instead of the
+                                                 //         clock's (only use
+                                                 //         with alarm list type
+                                                 // ESMF_ALARMLIST_NEXTRINGING)
+//
+// !DESCRIPTION:
+//    Gets a {\tt ESMF_Clock}'s list of alarms.
+//
+//EOP
+// !REQUIREMENTS:  TMG 4.3, 4.8
+
+    int rc = ESMF_SUCCESS;
+
+    *numAlarms = 0;
+
+    // Calculate element size of F90 array of ESMC_Alarm pointers since we
+    // cannont depend on C++ element size to be the same as F90's across all
+    // platforms.  It is assumed that all F90 platforms allocate arrays
+    // contiguously and uniformly in memory, in either ascending or descending
+    // address order.
+    // TODO:  calculate once during ESMF_FrameworkInitialize() (runtime),
+    //        since this is a platform constant. compile-time constant ?
+    // see also ESMC_ClockAdvance().
+
+    int f90ArrayElementSize = 0; 
+    if (alarmList2ndElementPtr != ESMC_NULL_POINTER) {
+        f90ArrayElementSize = (int)(alarmList2ndElementPtr -
+                                    alarmList1stElementPtr);
+    }
+
+    // traverse clock's alarm list (i) for alarms to return in
+    //   requested list (j)
+    for(int i=0, j=0; i < this->numAlarms; i++) {
+      int rc;
+      bool returnAlarm;
+
+      // based on requested list type, check if this (i'th) alarm is
+      //   to be returned
+      switch (type)
+      {
+        case ESMF_ALARMLIST_ALL:
+          // return all alarms!
+          returnAlarm = true;
+          break;
+
+        case ESMF_ALARMLIST_RINGING:
+          // return alarm if it's ringing
+          returnAlarm = alarmList[i]->ESMC_AlarmIsRinging(&rc);
+          break;
+
+        case ESMF_ALARMLIST_NEXTRINGING:
+          // return alarm if it will ring upon the next clock time step
+          returnAlarm = alarmList[i]->ESMC_AlarmWillRingNext(timeStep, &rc);
+          break;
+
+        case ESMF_ALARMLIST_PREVRINGING:
+          // return alarm if it was ringing on the previous clock time step
+          returnAlarm = alarmList[i]->ESMC_AlarmWasPrevRinging(&rc);
+          break;
+
+        default :
+          // unknown alarm list type; return empty list
+          returnAlarm = false;
+          rc = ESMF_FAILURE;
+          break;
+      }
+
+      // copy alarm pointers to be returned into given F90 array
+      if (returnAlarm) {
+        // count and report number of returned alarms
+        (*numAlarms)++;
+
+        // copy if there's space in the given F90 array
+        if (j < *sizeofAlarmList) {
+          // F90/C++ equivalent: AlarmList(j) = this->alarmList[i]
+          //                 j = j + 1
+          // calculate F90 array address for the j'th element ...
+          char *f90ArrayElementJ;
+          f90ArrayElementJ = alarmList1stElementPtr +
+                                                (j++ * f90ArrayElementSize);
+          // ... then copy it in!
+          *((ESMC_Alarm**)f90ArrayElementJ) = alarmList[i];
+        } else rc = ESMF_FAILURE; // list overflow!
+      }
+    }
+    return(rc);
+
+ } // end ESMC_ClockGetAlarmList
+
+#if 0
+//
+// possible native C++ versions
+//
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetAlarmList - get a clock's alarm list
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetAlarmList(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Alarm ***alarmList,            // out - alarm list
+      int          *numAlarms) const {    // out - number of alarms in list
+//
+// !DESCRIPTION:
+//     Get a clock's alarm list and number of alarms
+//
+//EOP
+// !REQUIREMENTS:  TMG 4.3
+
+    // validate inputs
+    if (alarmList == ESMC_NULL_POINTER || numAlarms == ESMC_NULL_POINTER) {
+      return(ESMF_FAILURE);
+    }
+
+    // copy the list of alarm pointers
+    for(int i=0; i<this->numAlarms; i++) {
+      (*alarmList)[i] = this->alarmList[i];  
+    }
+
+    // return number of alarms
+    *numAlarms = this->numAlarms;
 
     return(ESMF_SUCCESS);
 
- } // end ESMC_ClockGetAlarm
+ } // end ESMC_ClockGetAlarmList
 
 //-------------------------------------------------------------------------
 //BOP
@@ -290,43 +696,6 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_Alarm ***alarmList,            // out - alarm list
-      int          *numAlarms) const {    // out - number of alarms in list
-//
-// !DESCRIPTION:
-//     Get a clock's alarm list and number of alarms
-//
-//EOP
-// !REQUIREMENTS:  TMG 4.3
-
-    // validate inputs
-    if (alarmList == ESMC_NULL_POINTER || numAlarms == ESMC_NULL_POINTER) {
-      return(ESMF_FAILURE);
-    }
-
-    // copy the list of alarm pointers
-    for(int i=0; i<this->numAlarms; i++) {
-      (*alarmList)[i] = this->alarmList[i];  
-    }
-
-    // return number of alarms
-    *numAlarms = this->numAlarms;
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_ClockGetAlarmList
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ClockGetAlarmList - get a clock's alarm list
-//
-// !INTERFACE:
-      int ESMC_Clock::ESMC_ClockGetAlarmList(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
       ESMC_Alarm **alarmList,            // out - alarm list
       int         *numAlarms) const {    // out - number of alarms in list
 //
@@ -352,113 +721,7 @@
     return(ESMF_SUCCESS);
 
  } // end ESMC_ClockAddAlarm
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ClockAdvance - increment a clock's time
-//
-// !INTERFACE:
-      int ESMC_Clock::ESMC_ClockAdvance(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_TimeInterval *timeStep,            // in  - optional new timestep
-      int               *numRingingAlarms) {  // out - number of ringing alarms
-//
-// !DESCRIPTION:
-//     Advances a clock's current time by timestep, then checks
-//     each of its alarms to see if its time to ring
-//
-//EOP
-// !REQUIREMENTS:  TMG 3.4.1
-
-    // save new time step if specified
-    if (timeStep != ESMC_NULL_POINTER) this->timeStep = *timeStep;
-
-    prevTime = currTime;         // save current time, then
-    currTime += this->timeStep;  // advance it!
-    advanceCount++;
-
-    // TODO: validate (range check) new time against its calendar ?
-
-    // TODO: call each alarm's CheckRingTime method;
-    //   compile and return a list of ringing alarms
-    //   ESMC_AlarmCheckRingTime(currTime, ...)
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_ClockAdvance
-
-#if 0
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ClockAdvance - increment a clock's time
-//
-// !INTERFACE:
-      int ESMC_Clock::ESMC_ClockAdvance(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Alarm *ringingList,            // out - list of ringing alarms
-      int        *numRingingAlarms) {     // out - number of ringing alarms
-//
-// !DESCRIPTION:
-//     Advances a clock's current time by timestep, then checks
-//     each of its alarms to see if its time to ring
-//
-//EOP
-// !REQUIREMENTS:  TMG 3.4.1
-
-    prevTime = currTime;   // save current time, then
-    currTime += timeStep;  // advance it!
-    advanceCount++;
-
-    // TODO: call each alarm's CheckRingTime method;
-    //   compile and return a list of ringing alarms
-    //   ESMC_AlarmCheckRingTime(currTime, ...)
-
-    return(ESMF_SUCCESS);
-
- } // end ESMC_ClockAdvance
 #endif
-
-//-------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ClockIsStopTime - check if Clock's stop time has been reached
-//
-// !INTERFACE:
-      bool ESMC_Clock::ESMC_ClockIsStopTime(
-//
-// !RETURN VALUE:
-//    bool is stop time or not
-//
-// !ARGUMENTS:
-      int  *rc) const {        // out - error return code
-//
-// !DESCRIPTION:
-//    checks if {\tt ESMC\_Clock}'s stop time has been reached.
-//
-//EOP
-// !REQUIREMENTS:
-
-    *rc = ESMF_SUCCESS;
-
-    // positive time step ?
-    if (stopTime > startTime) {
-      return(currTime >= stopTime);
-
-    // or negative time step ?
-    } else if (stopTime < startTime) {
-      return(currTime <= stopTime);
-
-    // or no time step? (stopTime == startTime)
-    } else return(currTime == stopTime);
-
- } // end ESMC_ClockIsStopTime
 
 //-------------------------------------------------------------------------
 //BOP
@@ -483,6 +746,30 @@
     return(currTime.ESMC_TimeSyncToRealTime());
 
  } // end ESMC_ClockSyncToRealTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_Clock(==) - Clock equality comparison
+// 
+// !INTERFACE:
+      bool ESMC_Clock::operator==(
+//   
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Clock &clock) const {   // in - ESMC_Clock to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt ESMC\_Clock} with
+//      given {\tt ESMC\_Clock}, return result
+//   
+//EOP
+// !REQUIREMENTS:
+
+    return(id == clock.id);
+
+}  // end ESMC_Clock::operator==
 
 //-------------------------------------------------------------------------
 //BOP
@@ -516,7 +803,8 @@
         stopTime  == ESMC_NULL_POINTER || refTime   == ESMC_NULL_POINTER ||
         currTime  == ESMC_NULL_POINTER || prevTime  == ESMC_NULL_POINTER ||
         alarmList == ESMC_NULL_POINTER) {
-      cout << "ESMC_Clock::ESMC_ClockReadRestart(): null pointer(s) passed in" << endl;
+      cout << "ESMC_Clock::ESMC_ClockReadRestart(): null pointer(s) passed in"
+           << endl;
       return(ESMF_FAILURE);
     }
     
@@ -651,70 +939,85 @@
     //       (currently mutually exclusive)
     if (options != ESMC_NULL_POINTER) {
 
-      if (strncmp(options, "timestep", 8) == 0) {
+      // make options case insensitive
+      // TODO: put this into function to share
+      char opts[ESMF_MAXSTR];
+      int i;
+      for(i=0; i<strlen(options) && i<ESMF_MAXSTR-1; i++) {
+        opts[i] = tolower(options[i]);
+      }
+      opts[i] = '\0';
+
+      if (strncmp(opts, "name", 4) == 0) {
+        cout << "name = " << name << endl;
+      }
+      else if (strncmp(opts, "timestep", 8) == 0) {
         cout << "timeStep = " << endl;
-        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+        // TODO:  timeStep.ESMC_TimeIntervalPrint(&opts(8)); ?
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           timeStep.ESMC_TimeIntervalPrint("string");
         } else {
           timeStep.ESMC_TimeIntervalPrint();
         }
       }
-      else if (strncmp(options, "starttime", 9) == 0) {
+      else if (strncmp(opts, "starttime", 9) == 0) {
         cout << "startTime = " << endl;
-        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           startTime.ESMC_TimePrint("string");
         } else {
           startTime.ESMC_TimePrint();
         }
       }
-      else if (strncmp(options, "stoptime", 8) == 0) {
+      else if (strncmp(opts, "stoptime", 8) == 0) {
         cout << "stopTime = " << endl;
-        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           stopTime.ESMC_TimePrint("string");
         } else {
           stopTime.ESMC_TimePrint();
         }
       }
-      else if (strncmp(options, "reftime", 7) == 0) {
+      else if (strncmp(opts, "reftime", 7) == 0) {
         cout << "refTime = " << endl;
-        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           refTime.ESMC_TimePrint("string");
         } else {
           refTime.ESMC_TimePrint();
         }
       }
-      else if (strncmp(options, "currtime", 8) == 0) {
+      else if (strncmp(opts, "currtime", 8) == 0) {
         cout << "currTime = " << endl;
-        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           currTime.ESMC_TimePrint("string");
         } else {
           currTime.ESMC_TimePrint();
         }
       }
-      else if (strncmp(options, "prevtime", 8) == 0) {
+      else if (strncmp(opts, "prevtime", 8) == 0) {
         cout << "prevTime = " << endl;
-        if (strstr(options, "string") != ESMC_NULL_POINTER) {
+        if (strstr(opts, "string") != ESMC_NULL_POINTER) {
           prevTime.ESMC_TimePrint("string");
         } else {
           prevTime.ESMC_TimePrint();
         }
       }
-      else if (strncmp(options, "advancecount", 12) == 0) {
+      else if (strncmp(opts, "advancecount", 12) == 0) {
         cout << "advanceCount = " << advanceCount << endl;
       }
-      else if (strncmp(options, "numalarms", 9) == 0) {
+      else if (strncmp(opts, "numalarms", 9) == 0) {
         cout << "numAlarms = " << numAlarms << endl;
       }
-      else if (strncmp(options, "alarmlist", 9) == 0) {
+      else if (strncmp(opts, "alarmlist", 9) == 0) {
         cout << "alarmList = " << endl;
         for (int i=0; i<numAlarms; i++) {
-          cout << alarmList[i]->ESMC_AlarmPrint();
+          cout << alarmList[i]->ESMC_AlarmPrint(&opts[9]);
         }
       }
 
-    } else {
-      // default:  print out all components
 
+    } else {
+      // default:  print out all properties
+
+      cout << "name = "      << name << endl;
       cout << "timeStep = "  << endl; timeStep.ESMC_TimeIntervalPrint(options);
       cout << "startTime = " << endl; startTime.ESMC_TimePrint(options);
       cout << "stopTime = "  << endl; stopTime.ESMC_TimePrint(options);
@@ -757,6 +1060,8 @@
 
     advanceCount = 0;
     numAlarms = 0;
+    id = ++count;  // TODO: inherit from ESMC_Base class
+    firstAdvance = true;
 
  } // end ESMC_Clock
 
@@ -784,3 +1089,38 @@
 //
 
  } // end ~ESMC_Clock
+
+//-------------------------------------------------------------------------
+// Private methods
+//-------------------------------------------------------------------------
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockAddAlarm - add alarm to clock's alarm list
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockAddAlarm(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMC_Alarm *alarm) {   // in - alarm to add
+//
+// !DESCRIPTION:
+//     Adds given alarm to a clock's alarm list. Used by ESMC_AlarmCreate.
+//
+//EOP
+// !REQUIREMENTS:  TMG 4.1, 4.2
+
+    // validate inputs
+    if (numAlarms == MAX_ALARMS || alarm == ESMC_NULL_POINTER) {
+      return(ESMF_FAILURE);
+    }
+
+    // append to list and count
+    alarmList[numAlarms++] = alarm;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_ClockAddAlarm

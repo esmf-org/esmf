@@ -1,5 +1,3 @@
-! $Id: ESMF_Clock.F90,v 1.31 2003/09/12 17:14:39 eschwab Exp $
-!
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
 ! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
@@ -35,60 +33,47 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      ! inherit from ESMF base class
-      use ESMF_BaseMod
-
       ! associated derived types
+      use ESMF_BaseMod
       use ESMF_TimeIntervalMod
       use ESMF_TimeMod
-      use ESMF_AlarmMod
+      use ESMF_AlarmTypeMod
+
+      ! type definition for this module
+      use ESMF_ClockTypeMod
 
       implicit none
-!
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
 !------------------------------------------------------------------------------
-!     ! ESMF_Clock
-!     
-!     ! F90 class type to match C++ Clock class in size only;
-!     !  all dereferencing within class is performed by C++ implementation
-
-!     ! Equivalent sequence and kind to C++:
-
-      type ESMF_Clock
-      sequence
-      private
-        type(ESMF_TimeInterval) :: timeStep
-        type(ESMF_Time)         :: startTime
-        type(ESMF_Time)         :: stopTime
-        type(ESMF_Time)         :: refTime
-        type(ESMF_Time)         :: currTime
-        type(ESMF_Time)         :: prevTime
-        integer(ESMF_KIND_I8)   :: advanceCount
-        integer                 :: numAlarms
-        integer                 :: pad  ! to satisfy alpha compiler
-        type(ESMF_Pointer), dimension(MAX_ALARMS) :: alarmList
-      end type
+!     ! ESMF_Clock definition in ESMF_ClockTypeMod to resolve mutual
+!     ! method dependency with ESMF_Alarm
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
+!     This type is defined in ESMF_ClockTypeMod and progagated up from here.
       public ESMF_Clock
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_ClockSetup
+      public ESMF_ClockCreate
+      public ESMF_ClockDestroy
       public ESMF_ClockSet
       public ESMF_ClockGet
-
-      public ESMF_ClockAddAlarm
-      public ESMF_ClockGetAlarm
-      public ESMF_ClockGetRingingAlarm
 
       public ESMF_ClockAdvance
       public ESMF_ClockIsStopTime
 
+      public ESMF_ClockGetNextTime
+
+      public ESMF_ClockGetAlarm
+      public ESMF_ClockGetAlarmList
+
       public ESMF_ClockSyncToRealTime
+
+      public operator(==)
 
 ! Required inherited and overridden ESMF_Base class methods
 
@@ -98,11 +83,34 @@
       public ESMF_ClockPrint
 !EOPI
 
+! !PRIVATE MEMBER FUNCTIONS:
+
+      private ESMF_ClockEQ
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.31 2003/09/12 17:14:39 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.32 2003/10/22 01:06:28 eschwab Exp $'
 
+!==============================================================================
+!
+! INTERFACE BLOCKS
+!
+!==============================================================================
+!BOP
+! !INTERFACE:
+      interface operator(==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_ClockEQ
+
+! !DESCRIPTION:
+!     This interface overloads the == operator for the
+!     {\tt ESMF\_Clock} class.
+!
+!EOP
+      end interface
+!
 !==============================================================================
 
       contains
@@ -113,14 +121,17 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ClockSetup - Setup a Clock
+! !IROUTINE: ESMF_ClockCreate - Create a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockSetup(clock, timeStep, startTime, stopTime, &
-                                 refTime, rc)
+      function ESMF_ClockCreate(name, timeStep, startTime, stopTime, &
+                                refTime, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Clock) :: ESMF_ClockCreate
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(inout)         :: clock
+      character (len=*),       intent(in),  optional :: name
       type(ESMF_TimeInterval), intent(in)            :: timeStep
       type(ESMF_Time),         intent(in)            :: startTime
       type(ESMF_Time),         intent(in),  optional :: stopTime
@@ -132,8 +143,10 @@
 !     
 !     The arguments are:
 !     \begin{description}
-!     \item[clock]
-!          The object instance to initialize.
+!     \item[{[name]}]     
+!          Optional name for the newly created clock.  If not specified,
+!          a default unique name will be generated: "ClockNNN" where NNN
+!          is a unique sequence number from 001 to 999.
 !     \item[timeStep]
 !          The {\tt ESMF\_Clock}'s time step interval.
 !     \item[startTime]
@@ -150,22 +163,61 @@
 ! !REQUIREMENTS:
 !     TMG3.1, TMG3.4.4
 
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+
+!     invoke C to C++ entry point to allocate and initialize new clock
+      call c_ESMC_ClockCreate(ESMF_ClockCreate, nameLen, name, timeStep, &
+                              startTime, stopTime, refTime, rc)
+
+      end function ESMF_ClockCreate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockDestroy
+!
+! !INTERFACE:
+      subroutine ESMF_ClockDestroy(clock, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Clock) :: clock
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!     Releases all resources associated with this {\tt ESMF\_Clock}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!       Destroy contents of this {\tt ESMF\_Clock}.
+!     \item[[rc]]
+!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
 !     invoke C to C++ entry point
-      call c_ESMC_ClockSetup(clock, timeStep, startTime, stopTime, &
-                             refTime, rc)
-    
-      end subroutine ESMF_ClockSetup
+      call c_ESMC_ClockDestroy(clock, rc)
+
+      end subroutine ESMF_ClockDestroy
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ClockSet - Set one or more properties of a Clock
 
 ! !INTERFACE:
-      subroutine ESMF_ClockSet(clock, timeStep, startTime, stopTime, &
+      subroutine ESMF_ClockSet(clock, name, timeStep, startTime, stopTime, &
                                refTime, currTime, advanceCount, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(inout)         :: clock
+      character (len=*),       intent(in),  optional :: name
       type(ESMF_TimeInterval), intent(in),  optional :: timeStep
       type(ESMF_Time),         intent(in),  optional :: startTime
       type(ESMF_Time),         intent(in),  optional :: stopTime
@@ -180,7 +232,11 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
-!          The object instance to initialize.
+!          The object instance to set.
+!     \item[{[name]}]
+!          Optional name for this clock.  If not specified, a default unique
+!          name will be generated: "ClockNNN" where NNN is a unique sequence
+!          number from 001 to 999.
 !     \item[{[timeStep]}]
 !          The {\tt ESMF\_Clock}'s time step interval.
 !     \item[{[startTime]}]
@@ -201,9 +257,17 @@
 ! !REQUIREMENTS:
 !     TMG3.1, TMG3.4.4
 
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+
 !     invoke C to C++ entry point
-      call c_ESMC_ClockSet(clock, timeStep, startTime, stopTime, &
-                           refTime, currTime, advanceCount, rc)
+      call c_ESMC_ClockSet(clock, nameLen, name, timeStep, startTime, &
+                           stopTime, refTime, currTime, advanceCount, rc)
     
       end subroutine ESMF_ClockSet
 
@@ -212,12 +276,14 @@
 ! !IROUTINE: ESMF_ClockGet - Get a Clock's properties
 
 ! !INTERFACE:
-      subroutine ESMF_ClockGet(clock, timeStep, startTime, stopTime, &
-                               refTime, currTime, prevTime, currSimTime, &
-                               prevSimTime, advanceCount, numAlarms, rc)
+      subroutine ESMF_ClockGet(clock, name, timeStep, startTime, stopTime, &
+                               refTime, currTime, prevTime, &
+                               currSimTime, prevSimTime, &
+                               advanceCount, numAlarms, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Clock),        intent(in)            :: clock
+      character (len=*),       intent(out), optional :: name
       type(ESMF_TimeInterval), intent(out), optional :: timeStep
       type(ESMF_Time),         intent(out), optional :: startTime
       type(ESMF_Time),         intent(out), optional :: stopTime
@@ -237,6 +303,8 @@
 !     \begin{description}
 !     \item[clock]
 !          The object instance to initialize.
+!     \item[{[name]}]
+!          The name of this clock.
 !     \item[{[timeStep]}]
 !          The {\tt ESMF\_Clock}'s time step interval.
 !     \item[{[startTime]}]
@@ -266,150 +334,67 @@
 ! !REQUIREMENTS:
 !     TMG3.1, TMG3.4.4
 
+      ! temp name for C++ to fill
+      character (len=ESMF_MAXSTR) :: tempName
+
+      ! initialize name lengths to zero for non-existent name
+      integer :: nameLen = 0
+      integer :: tempNameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len(name)
+      end if
+
 !     invoke C to C++ entry point
-      call c_ESMC_ClockGet(clock, timeStep, startTime, stopTime, &
-                           refTime, currTime, prevTime, currSimTime, &
-                           prevSimTime, advanceCount, numAlarms, rc)
+      call c_ESMC_ClockGet(clock, nameLen, tempNameLen, tempName, &
+                           timeStep, startTime, stopTime, &
+                           refTime, currTime, prevTime, &
+                           currSimTime, prevSimTime, &
+                           advanceCount, numAlarms, rc)
+
+      ! copy temp name back to given name to restore native F90 storage style
+      if (present(name)) then
+        name = tempName(1:tempNameLen)
+      endif
     
       end subroutine ESMF_ClockGet
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockAddAlarm - Add an Alarm to a Clock's Alarm list
-
-! !INTERFACE:
-      subroutine ESMF_ClockAddAlarm(clock, alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock), intent(inout)         :: clock
-      type(ESMF_Alarm), intent(in)            :: alarm
-      integer,          intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Adds an {\tt alarm} to the {\tt clock}'s {\tt ESMF\_Alarm} list.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to add an {\tt ESMF\_Alarm} to.
-!     \item[alarm]
-!          The {\tt ESMF\_Alarm} to add to the {\tt ESMF\_Clock}'s
-!          {\tt ESMF\_Alarm} list.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-!EOP
-! !REQUIREMENTS:
-!     TMG4.1, TMG4.2
-    
-!     invoke C to C++ entry point
-      call c_ESMC_ClockAddAlarm(clock, alarm, rc)
-    
-      end subroutine ESMF_ClockAddAlarm
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockGetAlarm - Get an Alarm in a Clock's Alarm list
-
-! !INTERFACE:
-      subroutine ESMF_ClockGetAlarm(clock, i, alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock),   intent(in)            :: clock
-      integer,            intent(in)            :: i
-      type(ESMF_Pointer), intent(out)           :: alarm
-      integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Gets the "i" th {\tt alarm} in the {\tt clock}'s
-!     {\tt ESMF\_Alarm} list.
-!   
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to get the {\tt ESMF\_Alarm} from.
-!     \item[i]
-!          The index into the {\tt ESMF\_Clock}'s {\tt ESMF\_Alarm} list.
-!     \item[alarm]
-!          Pointer to the desired alarm.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-!EOP
-! !REQUIREMENTS:
-!     TMG4.3
-
-!     invoke C to C++ entry point
-      call c_ESMC_ClockGetAlarm(clock, i, alarm, rc)
-    
-      end subroutine ESMF_ClockGetAlarm
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_ClockGetRingingAlarm - Get a ringing Alarm in a Clock's Alarm list
-
-! !INTERFACE:
-      subroutine ESMF_ClockGetRingingAlarm(clock, i, alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Clock),   intent(in)            :: clock
-      integer,            intent(in)            :: i
-      type(ESMF_Pointer), intent(out)           :: alarm
-      integer,            intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Gets the "i" th ringing {\tt alarm} in the {\tt clock}'s
-!     {\tt ESMF\_Alarm} list.
-!   
-!     The arguments are:
-!     \begin{description}
-!     \item[clock]
-!          The object instance to get the ringing {\tt ESMF\_Alarm} from.
-!     \item[i]
-!          Get the "i"th ringing {\tt ESMF\_Alarm}.
-!     \item[alarm]
-!          Pointer to the desired alarm.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!   
-!EOP
-! !REQUIREMENTS:
-!     TMG4.3
-
-!     invoke C to C++ entry point
-      call c_ESMC_ClockGetRingingAlarm(clock, i, alarm, rc)
-    
-      end subroutine ESMF_ClockGetRingingAlarm
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_ClockAdvance - Advance a Clock's current time by one time step
 
 ! !INTERFACE:
-      subroutine ESMF_ClockAdvance(clock, timeStep, numRingingAlarms, rc)
+      subroutine ESMF_ClockAdvance(clock, timeStep, ringingAlarmList, &
+                                   numRingingAlarms, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Clock),        intent(inout)         :: clock
-      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
-      integer,                 intent(out), optional :: numRingingAlarms
-      integer,                 intent(out), optional :: rc
+      type(ESMF_Clock),               intent(inout)         :: clock
+      type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
+      type(ESMF_Alarm), dimension(:), intent(out), optional :: ringingAlarmList
+      integer,                        intent(out), optional :: numRingingAlarms
+      integer,                        intent(out), optional :: rc
 !   
 ! !DESCRIPTION:
-!     Advances the {\tt clock}'s current time by one time step.  This
-!     method optionally returns the number of ringing {\tt ESMF\_Alarm}s.
+!     Advances the {\tt clock}'s current time by one time step:  either the
+!     {\tt ESMF_Clock}'s, or the passed-in timeStep (see below).  This
+!     method optionally returns a list and number of ringing {\tt ESMF\_Alarm}s.
+!     See also method ESMF_ClockGetRingingAlarms().
 !  
 !     The arguments are:
 !     \begin{description}
 !     \item[clock]
 !          The object instance to advance.
 !     \item[{[timeStep]}]
-!          Optional:  Saved as clock's new time step, then the advance is
-!          performed.  Supports applications with variable time steps.
+!          Optional:  Time step is performed with given timeStep, instead of
+!          the {\tt ESMF_Clock}'s.  Does not replace the {\tt ESMF_Clock}'s 
+!          timeStep; use ESMF_ClockSet(clock, timeStep, ...) for this purpose.
+!          Supports applications with variable time steps.
+!     \item[{[ringingAlarmList]}]
+!          Optional:  Returns the array of alarms that are ringing after the
+!          time step.
 !     \item[{[numRingingAlarms]}]
-!          The number of alarms ringing after the time step.
+!          Optional:  The number of alarms ringing after the time step.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -418,8 +403,32 @@
 ! !REQUIREMENTS:
 !     TMG3.4.1
 
-!     invoke C to C++ entry point
-      call c_ESMC_ClockAdvance(clock, timeStep, numRingingAlarms, rc)
+      ! initialize list size to zero for not-present list
+      integer :: sizeofRingingAlarmList = 0
+
+      ! get size of given ringing alarm list for C++ validation
+      if (present(ringingAlarmList)) then
+        sizeofRingingAlarmList = size(ringingAlarmList)
+      end if
+
+      ! invoke C to C++ entry point
+
+      if (present(ringingAlarmList) .and. sizeofRingingAlarmList > 1) then
+        ! pass address of 2nd element for C++ to calculate array step size
+        call c_ESMC_ClockAdvance(clock, timeStep, &
+                                 ringingAlarmList(1), ringingAlarmList(2), &
+                                 sizeofRingingAlarmList, numRingingAlarms, rc)
+      else if (sizeofRingingAlarmList == 1) then
+        ! array has only one element
+        call c_ESMC_ClockAdvance(clock, timeStep, &
+                                 ringingAlarmList(1), ESMF_NULL_POINTER, &
+                                 sizeofRingingAlarmList, numRingingAlarms, rc)
+      else
+        ! array is not present
+        call c_ESMC_ClockAdvance(clock, timeStep, &
+                                 ESMF_NULL_POINTER, ESMF_NULL_POINTER, &
+                                 sizeofRingingAlarmList, numRingingAlarms, rc)
+      endif
     
       end subroutine ESMF_ClockAdvance
 
@@ -459,6 +468,167 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_ClockGetNextTime - Calculate a Clock's next time
+
+! !INTERFACE:
+      subroutine ESMF_ClockGetNextTime(clock, nextTime, timeStep, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock),        intent(in)            :: clock
+      type(ESMF_Time),         intent(out)           :: nextTime
+      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
+      integer,                 intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Calculates what the next time of the {\tt ESMF\_Clock} will be, based on
+!     the clock's current timestep or an optionally passed-in timestep.
+!     
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance for which to get the next time.
+!     \item[nextTime]
+!          The resulting {\tt ESMF\_Clock}'s next time.
+!     \item[{[timeStep]}]
+!          The time step interval to use instead of the clock's.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+!EOP
+! !REQUIREMENTS:
+!     TMGx.x, CCSM
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockGetNextTime(clock, nextTime, timeStep, rc)
+
+      end subroutine ESMF_ClockGetNextTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetAlarm - Get an Alarm in a Clock's Alarm list
+
+! !INTERFACE:
+      subroutine ESMF_ClockGetAlarm(clock, name, alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock),  intent(in)            :: clock
+      character (len=*), intent(in)            :: name
+      type(ESMF_Alarm),  intent(out)           :: alarm
+      integer,           intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Gets the {\tt alarm} whose name is the value of name in the {\tt clock}'s
+!     {\tt ESMF\_Alarm} list.
+!   
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance to get the {\tt ESMF\_Alarm} from.
+!     \item[name]
+!          The name of the desired {\tt ESMF\_Alarm}.
+!     \item[alarm]
+!          The desired alarm.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!   
+!EOP
+! !REQUIREMENTS:
+!     TMGx.x
+
+      ! get length of given name for C++ validation
+      integer :: nameLen
+      nameLen = len_trim(name)
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockGetAlarm(clock, nameLen, name, alarm, rc)
+    
+      end subroutine ESMF_ClockGetAlarm
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ClockGetAlarmList - Get a list of alarms from a clock
+
+! !INTERFACE:
+      subroutine ESMF_ClockGetAlarmList(clock, alarmListType, &
+                                        alarmList, numAlarms, timeStep, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Clock),               intent(in)            :: clock
+      type(ESMF_AlarmListType),       intent(in)            :: alarmListType
+      type(ESMF_Alarm), dimension(:), intent(out)           :: alarmList
+      integer,                        intent(out)           :: numAlarms
+      type(ESMF_TimeInterval),        intent(in),  optional :: timeStep
+      integer,                        intent(out), optional :: rc
+!   
+! !DESCRIPTION:
+!     Gets a {\tt ESMF_Clock}'s list of alarms.
+!  
+!     The arguments are:
+!     \begin{description}
+!     \item[clock]
+!          The object instance from which to get an {\tt ESMF_Alarm} list.
+!     \item[alarmListType]
+!          The type of list to get:
+!            ESMF_ALARMLIST_ALL :
+!                Returns the {\tt ESMF_Clock}'s entire list of alarms.
+!
+!            ESMF_ALARMLIST_RINGING :
+!                Returns only those {\tt ESMF_Clock} alarms that are currently
+!                ringing.  See also method ESMF_ClockAdvance() for getting the
+!                list of ringing alarms subsequent to a time step.  See also
+!                method ESMF_AlarmIsRinging() for checking a single alarm.
+!
+!            ESMF_ALARMLIST_NEXTRINGING :
+!                Return only those alarms that will ring upon the next
+!                {\tt ESMF_Clock} time step.  Can optionally specify argument
+!                timeStep (see below) to use instead of the {\tt ESMF_Clock}'s.
+!                See also method ESMF_AlarmWillRingNext() for checking a
+!                single alarm.
+!
+!            ESMF_ALARMLIST_PREVRINGING :
+!                Return only those alarms that were ringing on the previous
+!                {\tt ESMF_Clock} time step.  See also method
+!                ESMF_AlarmWasPrevRinging() for checking a single alarm.
+!     \item[alarmList]
+!          The array of returned alarms. 
+!     \item[numAlarms]
+!          The number of {\tt ESMF_Alarm}s in the returned list.
+!     \item[{[timeStep]}]
+!          Optional time step to be used instead of the {\tt ESMF_Clock}'s.
+!          Only used with ESMF_ALARMLIST_NEXTRINGING alarmListType (see above);
+!          ignored if specified with other alarmListTypes.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!  
+!EOP
+! !REQUIREMENTS:
+!     TMG4.3, 4.8
+
+      ! get size of given alarm list for C++ validation
+      integer :: sizeofAlarmList
+      sizeofAlarmList = size(alarmList)
+
+      ! invoke C to C++ entry point
+
+      if (sizeofAlarmList > 1) then
+        ! pass address of 2nd element for C++ to calculate array step size
+        call c_ESMC_ClockGetAlarmList(clock, alarmListType, &
+                                      alarmList(1), alarmList(2), &
+                                      sizeofAlarmList, numAlarms, timeStep, rc)
+      else
+        ! array has only one element
+        call c_ESMC_ClockGetAlarmList(clock, alarmListType, &
+                                      alarmList(1), ESMF_NULL_POINTER, &
+                                      sizeofAlarmList, numAlarms, timeStep, rc)
+      endif
+    
+      end subroutine ESMF_ClockGetAlarmList
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_ClockSyncToRealTime - Set Clock's current time to wall clock time
 
 ! !INTERFACE:
@@ -487,6 +657,40 @@
       call c_ESMC_ClockSyncToRealTime(clock, rc)
     
       end subroutine ESMF_ClockSyncToRealTime
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_ClockEQ - Compare two Clocks for equality
+!
+! !INTERFACE:
+      function ESMF_ClockEQ(clock1, clock2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_ClockEQ
+
+! !ARGUMENTS:
+      type(ESMF_Clock), intent(in) :: clock1
+      type(ESMF_Clock), intent(in) :: clock2
+
+! !DESCRIPTION:
+!     Compare two clocks for equality; return true if equal, false otherwise.
+!     Maps to overloaded (==) operator interface function.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[clock1]
+!          The first {\tt ESMF\_Clock} to compare.
+!     \item[clock2]
+!          The second {\tt ESMF\_Clock} to compare.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!     invoke C to C++ entry point
+      call c_ESMC_ClockEQ(clock1, clock2, ESMF_ClockEQ)
+
+      end function ESMF_ClockEQ
 
 !------------------------------------------------------------------------------
 !
@@ -675,6 +879,7 @@
 !          {\tt ESMF\_Clock} to print out.
 !     \item[{[options]}]
 !          Print options. If none specified, prints all clock property values.\\
+!          "name"         - print the clock's name. \\
 !          "timestep"     - print the clock's time step. \\
 !          "starttime"    - print the clock's start time. \\
 !          "stoptime"     - print the clock's stop time. \\
