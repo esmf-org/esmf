@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.10 2003/04/25 20:10:15 shep_smith Exp $
+// $Id: ESMC_LogErr.h,v 1.11 2003/07/25 14:32:03 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,6 +28,9 @@
 //
 // !USES:
 
+
+#include <ESMC_Base.h>
+//#include <ESMC_LogErr.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,19 +41,6 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
 #include "ESMC_UtilityFunctions.h"
-
-
-extern "C" {
- void FTN(f_esmf_logopenfortran)(int *isOpen, int *unitNumber, 
-                                       char *nameLogFile, int);
- void FTN(f_esmf_logclosefortran)(int *unitNumber);
- void FTN(f_esmf_logprintint)(int *unitNumber, int *intData, int *flushSet);
- void FTN(f_esmf_logprintreal)(int *unitNumber,double *realData,int *flushSet);
- void FTN(f_esmf_logprintstring)(int *unitNumber, char *stringData,
-                              int *flushSet,int fortCharDescriptor);
- void FTN(f_esmf_logprintnewline)(int *unitNumber, int *flushSet);
-
-}
 
 class ESMC_Log {
   private:
@@ -63,50 +53,50 @@ class ESMC_Log {
     bool ESMC_LogNameValid(char name[], int FortIO);
 // !PRIVATE TYPES:
 
-    int oneLogErrFile;      // if log data written to one log file,
-                            // this is set to
-                            // true.  Otherwise set to false.
-			    // ESMC_OpenFile can override
-			    // this value
+    ESMC_Logical oneLogErrFile; // if log data written to one log file,
+                                // this is set to
+                                // true.  Otherwise set to false.
+			        // ESMC_OpenFile can override
+			        // this value
 
-    int standardOut;        //if log data written to standard out, this variable
-                            // is set to true. Otherwise set to false.
-			    // ESMC_OpenFile
-			    // can over-ride this value.
+    ESMC_Logical  standardOut;  // if log data written to standard out,
+                                // this variable
+                                // is set to true. Otherwise set to false.
+			        // ESMC_OpenFile
+			        // can over-ride this value.
 
-    int fortIsOpen;         // used to to a file with Fortran I/O libraries 
+    ESMC_Logical fortIsOpen;    // used to to a file with Fortran
+                                // I/O libraries 
     
-    int unitNumber;         // fortran unit number for log/err file when
-                            // ESMC\_LogWrite
-                            // is used  Can be overwritten by
-			    // ESMC_OpenFileFortran
+    int unitNumber;             // fortran unit number for log/err file when
+                                // ESMC\_LogGetUnit
+                                // is used  Can be overwritten by
+			        // ESMC_OpenFileFortran
 
 
-    int numFilePtr;         // index into global array of File pointers
-			    // for C++ I/O.
+    int numFilePtr;             // index into global array of File pointers
+			        // for C++ I/O.
 
 
-    int numFileFort;        // index into global array of unit numbers for 
-                            // Fortran I/O
+    int numFileFort;            // index into global array of unit numbers for 
+                                // Fortran I/O
 
-    int verbose;            // integer used to control which log
-                            // messages written out.
-                            // value can be over written by ESMC_Init
+    ESMC_Logical verbose;       // If set to ESMC_TF_TRUE, log
+                                // messages written out.
 
-    int flush;              // if true, all output is flushed
-			    // value can be overwritten by ESMC_INIT
+    ESMC_Logical flush;         // If true, all output is flushed
 
-    int haltOnWarn;          // Code will stop executing on
-                             // encountering a warning
+    ESMC_Logical haltOnWarn;    // Code will stop executing on
+                                // encountering a warning
 			    
-    int haltOnErr;           // Code will stop executing on
-                             // encountering an error
+    ESMC_Logical haltOnErr;     // Code will stop executing on
+                                // encountering an error
 
 
-    char nameLogErrFile[32]; // name of logfile.
-                             // Specified by user when LogInit called.  If
-			     // multiple files are written out,
-			     // PE rank is appended to name.
+    char nameLogErrFile[32];    // name of logfile.
+			        // If multiple files are written out,
+			        // PE rank is automatically
+				// appended to name.
   public:
 // !PUBLIC MEMBER FUNCTIONS (see ESMC\_LogErr.C for a description of these methods)
     void ESMC_LogInfo(char* fmt,...);   
@@ -114,19 +104,21 @@ class ESMC_Log {
     char charData[],char strData[][32],int intData[], double floatData[]);
     void ESMC_LogOpenCFile(int numLogFile,char name[]);
     void ESMC_LogOpenFortFile(int numLogFile, char name[]);
-    void ESMC_LogInit(int verbosity=ESMF_LOG_TRUE, int flush=ESMF_LOG_FALSE,
-	 int haltOnError=ESMF_LOG_TRUE, int haltOnWarning=ESMF_LOG_FALSE);
-    int ESMC_LogWrite();
+    int ESMC_LogGetUnit();
     void ESMC_LogCloseCFile();
     void ESMC_LogCloseFortFile();
-    void ESMC_LogFlush();
-    void ESMC_LogNotFlush();
-    void ESMC_LogVerbose();
-    void ESMC_LogNotVerbose();
-    void ESMC_LogHaltOnErr();
-    void ESMC_LogNotHaltOnErr();
-    void ESMC_LogHaltOnWarn();
-    void ESMC_LogNotHaltOnWarn();
+    inline void ESMC_LogSetFlush();
+    inline ESMC_Logical ESMC_LogGetFlush();
+    inline void ESMC_LogSetNotFlush();
+    inline void ESMC_LogSetVerbose();
+    inline ESMC_Logical ESMC_LogGetVerbose();
+    inline void ESMC_LogSetNotVerbose();
+    inline void ESMC_LogSetHaltOnErr();
+    inline ESMC_Logical ESMC_LogGetHaltOnErr();
+    inline void ESMC_LogSetNotHaltOnErr();
+    inline void ESMC_LogSetHaltOnWarn();
+    inline ESMC_Logical ESMC_LogGetHaltOnWarn();
+    inline void ESMC_LogSetNotHaltOnWarn();
     void ESMC_LogWarnMsg_(int errCode, int line, char file[],
                      char dir[], char msg[]);
     void ESMC_LogWarn_(int errCode, int line, char file[],
@@ -144,10 +136,10 @@ class ESMC_Log {
 //---------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogFlush() - set the flushSet variable.
+// !IROUTINE: ESMC_LogSetFlush() - set the flushSet variable.
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogFlush(
+inline void ESMC_Log::ESMC_LogSetFlush(
 
 // !ARGUMENTS
 //   none
@@ -159,18 +151,41 @@ inline void ESMC_Log::ESMC_LogFlush(
 // 
 //EOP
 {
-      flush=ESMF_LOG_TRUE;
+      flush=ESMF_TF_TRUE;
 }
+
+
+//---------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogGetFlush() - returns the flush variable 
+// !INTERFACE:
+
+inline ESMC_Logical ESMC_Log::ESMC_LogGetFlush(
+
+// !ARGUMENTS
+//   none
+
+   ) 
+
+// !DESCRIPTION: 
+// Returns the flush variable 
+// 
+//EOP
+{
+      return flush;
+}
+
 
 
 
 //---------------------------------------------------------------------------
 //BOP                
 //                   
-// !IROUTINE: ESMC_LogNotFlush() - output not flushed
+// !IROUTINE: ESMC_LogSetNotFlush() - output not flushed
 // !INTERFACE:       
 	     
-inline void ESMC_Log::ESMC_LogNotFlush(
+inline void ESMC_Log::ESMC_LogSetNotFlush(
 				  
 // !ARGUMENTS        
 //   none   
@@ -181,7 +196,7 @@ inline void ESMC_Log::ESMC_LogNotFlush(
 // Causes output not to be flushed.
 //EOP
 {                    
-   flush=ESMF_LOG_FALSE;
+   flush=ESMF_TF_FALSE;
 }               
 									
 
@@ -189,44 +204,65 @@ inline void ESMC_Log::ESMC_LogNotFlush(
 //----------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogVerbose - output verbose 
+// !IROUTINE: ESMC_LogSetVerbose - make output verbose 
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogVerbose(
+inline void ESMC_Log::ESMC_LogSetVerbose(
 
 // !ARGUMENTS
 //   none
   )
 
 // !DESCRIPTION:
-// If theVerbosity is set to ESMF\_LOG\_TRUE, messages are printed out. 
+// If theVerbosity is set to ESMF\_TF\_TRUE, messages are printed out. 
 // 
 //EOP
 {
-     verbose=ESMF_LOG_TRUE;
+     verbose=ESMF_TF_TRUE;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogGetVerbose - return verbose 
+//
+// !INTERFACE:
+
+inline ESMC_Logical ESMC_Log::ESMC_LogGetVerbose(
+
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// Returns  verbose value 
+// 
+//EOP
+{
+     return verbose;
 }
 
 
 //----------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogNotVerbose - output not verbose 
+// !IROUTINE: ESMC_LogSetNotVerbose - output not verbose 
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogNotVerbose(
+inline void ESMC_Log::ESMC_LogSetNotVerbose(
 
 // !ARGUMENTS
 //   none
   )
 
 // !DESCRIPTION:
-// If theVerbosity is set to ESMC\_LOG\_FALSE, no messages are printed out. 
+// If theVerbosity is set to ESMC\_TF\_FALSE, no messages are printed out. 
 // 
 //EOP
 {
-     verbose=ESMF_LOG_FALSE;
+     verbose=ESMF_TF_FALSE;
 }
 
 
@@ -234,92 +270,137 @@ inline void ESMC_Log::ESMC_LogNotVerbose(
 //----------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogHaltOnErr - code will stop on encountering an error  
+// !IROUTINE: ESMC_LogSetHaltOnErr - code will stop on encountering an error  
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogHaltOnErr(
+inline void ESMC_Log::ESMC_LogSetHaltOnErr(
 
 // !ARGUMENTS
 //   none
   )
 
 // !DESCRIPTION:
-// If haltOnErr is set to ESMC\_LOG\_TRUE, code will stop executing when
+// If haltOnErr is set to ESMC\_TF\_TRUE, code will stop executing when
 // encountering an error.
 // 
 //EOP
 {
-     haltOnErr=ESMF_LOG_TRUE;
+     haltOnErr=ESMF_TF_TRUE;
 }
 
 //----------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogNotHaltOnErr - code will not stop on encountering
+// !IROUTINE: ESMC_LogGetHaltOnErr - returns haltOnErr
+//
+// !INTERFACE:
+
+inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnErr(
+
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// Returns haltOnErr
+// 
+//EOP
+{
+     return haltOnErr;
+}
+
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetNotHaltOnErr - code will not stop on encountering
 // an error  
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogNotHaltOnErr(
+inline void ESMC_Log::ESMC_LogSetNotHaltOnErr(
 
 // !ARGUMENTS
 //   none
   )
 
 // !DESCRIPTION:
-// If haltOnErr is set to ESMC\_LOG\_FALSE, code will not stop executing when
+// If haltOnErr is set to ESMC\_TF\_FALSE, code will not stop executing when
 // encountering an error.
 // 
 //EOP
 {
-     haltOnErr=ESMF_LOG_FALSE;
+     haltOnErr=ESMF_TF_FALSE;
 }
 
 //----------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogHaltOnWarn - code will stop on encountering
+// !IROUTINE: ESMC_LogSetHaltOnWarn - code will stop on encountering
 // a warning
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogHaltOnWarn(
+inline void ESMC_Log::ESMC_LogSetHaltOnWarn(
 
 // !ARGUMENTS
 //   none
   )
 
 // !DESCRIPTION:
-// If haltOnWarn is set to ESMC\_LOG\_TRUE, code will stop executing when
+// If haltOnWarn is set to ESMC\_TF\_TRUE, code will stop executing when
 // encountering an error.
 // 
 //EOP
 {
-     haltOnWarn=ESMF_LOG_TRUE;
+     haltOnWarn=ESMF_TF_TRUE;
 }
 
 //----------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMC_LogNotHaltOnWarn - code will not stop on encountering
+// !IROUTINE: ESMC_LogGetHaltOnWarn - returns haltOnwarn value
 // a warning
 //
 // !INTERFACE:
 
-inline void ESMC_Log::ESMC_LogNotHaltOnWarn(
+inline ESMC_Logical ESMC_Log::ESMC_LogGetHaltOnWarn(
 
 // !ARGUMENTS
 //   none
   )
 
 // !DESCRIPTION:
-// If haltOnWarn is set to ESMC\_LOG\_FALSE, code will not stop executing when
+// Returns haltOnWarn
+// 
+//EOP
+{
+     return haltOnWarn;
+}
+
+//----------------------------------------------------------------------------
+//----------------------------------------------------------------------------
+//BOP
+//
+// !IROUTINE: ESMC_LogSetNotHaltOnWarn - code will not stop on encountering
+// a warning
+//
+// !INTERFACE:
+
+inline void ESMC_Log::ESMC_LogSetNotHaltOnWarn(
+
+// !ARGUMENTS
+//   none
+  )
+
+// !DESCRIPTION:
+// If haltOnWarn is set to ESMC\_Tf\_FALSE, code will not stop executing when
 // encountering an error.
 // 
 //EOP
 {
-     haltOnWarn=ESMF_LOG_FALSE;
+     haltOnWarn=ESMF_TF_FALSE;
 }
+
 
 #endif  //ESMC_LOG
