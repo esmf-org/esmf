@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/06/03 12:49:50 nscollins Exp $
+# $Id: makefile,v 1.4 2004/06/03 15:33:28 nscollins Exp $
 
 # makefile template for the examples directory.
 
@@ -16,7 +16,7 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/BundleDataMap/examples
 
-EXAMPLES_BUILD = ESMF_BundleDataMapEx
+EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMF_BundleDataMapEx
 
 # List the example run targets in EXAMPLES_RUN and
 # EXAMPLES_RUN_UNI.  All of the run targets should be defined
