@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.63 2003/08/15 22:54:53 jwolfe Exp $
+! $Id: ESMF_Field.F90,v 1.64 2003/08/21 19:58:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,6 +50,7 @@
       use ESMF_ArrayBaseMod
       use ESMF_ArrayExpandMod
       use ESMF_RouteMod
+      use ESMF_RHandleMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -94,7 +95,18 @@
       sequence
       private
         ! same size as data array
-        type (ESMF_Array), pointer :: maskvals => NULL() 
+        type (ESMF_LocalArray), pointer :: maskvals => NULL() 
+      end type
+
+!------------------------------------------------------------------------------
+!     ! ESMF_HaloDirection
+!  
+!     ! Object for specifiying halo directions (mostly a placeholder for now)
+
+      type ESMF_HaloDirection
+      sequence
+      private
+        integer :: edges
       end type
 
 !------------------------------------------------------------------------------
@@ -153,7 +165,7 @@
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
-      public ESMF_Field, ESMF_Mask, ESMF_Access
+      public ESMF_Field, ESMF_Mask, ESMF_Access, ESMF_HaloDirection
       public ESMF_FieldType            ! intended for internal lib use only
       public ESMF_DataAllocate, ESMF_NO_ALLOCATE, ESMF_DO_ALLOCATE
 
@@ -192,11 +204,12 @@
                                        !   DataMap is already present)
 
    ! These are the recommended entry points; the code itself is in Array:
-   public ESMF_FieldRedist   ! Redistribute existing arrays, matching grids
-   public ESMF_FieldRegrid   ! Regridding and interpolation, different grids
-   public ESMF_FieldHalo               ! Halo updates
-   public ESMF_FieldHaloPrecompute     ! Halo updates
-   public ESMF_FieldHaloRun            ! Halo updates
+                             ! Synchronize boundary data between decompositions
+   public ESMF_FieldHaloStore, ESMF_FieldHalo, ESMF_FieldHaloRelease 
+                             ! Redistribute existing arrays, matching grids
+   public ESMF_FieldRedistStore, ESMF_FieldRedist, ESMF_FieldRedistRelease 
+                             ! Regridding and interpolation, different grids
+   public ESMF_FieldRegridStore, ESMF_FieldRegrid, ESMF_FieldRegridRelease 
 
    public ESMF_FieldGather   ! Combine 1 decomposed field into 1 on 1 DE
    public ESMF_FieldAllGather! Combine 1 decomposed field into N copies on N DEs
@@ -229,7 +242,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.63 2003/08/15 22:54:53 jwolfe Exp $'
+      '$Id: ESMF_Field.F90,v 1.64 2003/08/21 19:58:16 nscollins Exp $'
 
 !==============================================================================
 !
@@ -391,8 +404,24 @@
       end interface
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldHalo - Temporary interface to ease transition
+!
+! !INTERFACE:
+      interface ESMF_FieldHalo
+   
+! !PRIVATE MEMBER FUNCTIONS:
+        module procedure ESMF_FieldHaloRun
+        module procedure ESMF_FieldHaloDeprecated
 
-
+! !DESCRIPTION:
+!     Temporary interface to east transition from old syntax to new.
+!     All new code should be using the {\tt ESMF\_FieldHaloRun} syntax.
+!    
+!EOP
+      end interface
+!
+!
 !
 !==============================================================================
 !
@@ -2104,7 +2133,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
       integer :: i, gridrank, datarank, thisdim, thislength
@@ -2121,7 +2150,7 @@
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = field%ftypep
+      ftypep => field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indicies and the grid indicies.
@@ -2239,7 +2268,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
       integer :: i, gridrank, datarank, thisdim, thislength
@@ -2256,7 +2285,7 @@
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = field%ftypep
+      ftypep => field%ftypep
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indicies and the grid indicies.
@@ -2446,10 +2475,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldHalo - Data Halo operation on a Field
+! !IROUTINE: ESMF_FieldHaloDeprecated - Data Halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHalo(field, async, rc)
+      subroutine ESMF_FieldHaloDeprecated(field, async, rc)
 !
 !
 ! !ARGUMENTS:
@@ -2458,6 +2487,12 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
+!  {\tt DEPRECATED!} - these args are for the previous version of Halo
+!   which did internal caching.  The next version of the software will
+!    have a Precompute/Store call and then FieldHalo will take a 
+!    handle and do the execution of a precomputed route.  This routine
+!    remains only until the new interfaces are working.
+!
 !     Perform a {\tt Halo} operation over the data
 !     in an {\tt ESMF\_Field}.  This routine updates the data 
 !     inside the {\tt ESMF\_Field} in place.
@@ -2607,21 +2642,23 @@
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldHalo
+      end subroutine ESMF_FieldHaloDeprecated
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldHaloPrecompute - Precompute a Data Halo operation on a Field
+! !IROUTINE: ESMF_FieldHaloStore - Precompute a Data Halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHaloPrecompute(field, route, async, rc)
+      subroutine ESMF_FieldHaloStore(field, routehandle, halodirection, & 
+                                     blocking, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
-      type(ESMF_Route), intent(inout) :: route
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_HaloDirection), intent(in), optional :: halodirection
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -2632,11 +2669,18 @@
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be halo'd.
-!     \item [{[async]}]
-!           Optional argument which specifies whether the operation should
-!           wait until complete before returning or return as soon
-!           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} containing index to precomputed 
+!           information for the Halo operation on this {\tt ESMF\_Field}.
+!           This handle must be supplied at run time to execute the Halo.
+!     \item [{halodirection]}]
+!           Optional argument to restrict halo direction to a subset of the
+!           possible halo directions.  If not specified, the halo is executed
+!           along all boundaries.
+!     \item [{blocking]}]
+!           Specify that the communications will be blocking, nonblocking,
+!           or that the option will be specified at run time.  If not 
+!           specified, the default is blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2647,7 +2691,7 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_FieldType), pointer :: ftypep     ! field type info
    
       ! Initialize return code   
       status = ESMF_FAILURE
@@ -2657,31 +2701,46 @@
         rc = ESMF_FAILURE
       endif     
 
-      ftypep = field%ftypep
+      ! Sanity checks for good field, and that it has an associated grid
+      ! and data before going down to the next level.
+      if (.not.associated(field%ftypep)) then
+        print *, "Invalid or Destroyed Field"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
 
-      call ESMF_ArrayHaloPrecompute(ftypep%localfield%localdata, ftypep%grid, &
-                                    route, ftypep%mapping, async, rc=status)
+      ftypep => field%ftypep
+
+      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        print *, "Field not ready"
+        if (present(rc)) rc = ESMF_FAILURE
+        return
+      endif
+
+
+      call ESMF_ArrayHaloStore(ftypep%localfield%localdata, ftypep%grid, &
+                               ftypep%mapping, routehandle, blocking, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHaloPrecompute: ArrayHaloPrecompute returned failure"
+        print *, "ERROR in FieldHaloStore: ArrayHaloStore returned failure"
         return
       endif 
 
       if(rcpresent) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_FieldHaloPrecompute
+      end subroutine ESMF_FieldHaloStore
 
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_FieldHaloRun - Execute a Data Halo operation on a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldHaloRun(field, route, async, rc)
+      subroutine ESMF_FieldHaloRun(field, routehandle, blocking, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(inout) :: field
-      type(ESMF_Route), intent(inout) :: route
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -2692,11 +2751,16 @@
 !     \begin{description}
 !     \item [field] 
 !           {\tt ESMF\_Field} containing data to be halo'd.
-!     \item [{[async]}]
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} containing index of precomputed information
+!           about this Halo.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
-!           If not present, default is to do synchronous communications.
+!           If not present, default is what was specified at Store time.
+!           If {\tt both} was specified at Store time, this defaults to  
+!           blocking.
 !     \item [{[rc]}] 
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !           
@@ -2719,9 +2783,10 @@
 
       ftypep = field%ftypep
 
-      call ESMF_ArrayHaloRun(ftypep%localfield%localdata, route, async, rc=status)
+      call ESMF_ArrayHalo(ftypep%localfield%localdata, routehandle, &
+                             blocking, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
-        print *, "ERROR in FieldHaloRun: ArrayHaloRun returned failure"
+        print *, "ERROR in FieldHalo: ArrayHalo returned failure"
         return
       endif 
 
@@ -2731,28 +2796,63 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldRegrid - Data Regrid operation on a Field
+! !IROUTINE: ESMF_FieldHaloRelease - Release resources associated w/ handle
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRegrid(srcfield, dstfield, parentlayout, &
-                                  regridtype, async, rc)
+      subroutine ESMF_FieldHaloRelease(routehandle, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Release all stored information about the Halo associated
+!     with this {\tt ESMF\_RouteHandle}.
+!
+!     \begin{description}
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} associated with this Field Halo.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+
+      call ESMF_RouteHandleDestroy(routehandle, rc)
+
+      end subroutine ESMF_FieldHaloRelease
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRegridStore - Data Regrid operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRegridStore(srcfield, dstfield, parentlayout, &
+                                       routehandle, regridtype, &
+                                       srcmask, dstmask, blocking, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcfield                 
       type(ESMF_Field), intent(inout) :: dstfield                 
       type(ESMF_DELayout), intent(in) :: parentlayout
-      character (len=*), intent(in), optional :: regridtype 
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(in), optional :: regridtype 
+      type(ESMF_Mask), intent(in), optional :: srcmask                 
+      type(ESMF_Mask), intent(in), optional :: dstmask                 
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt ESMF\_Regrid} operation over the data
+!     Precompute a {\tt ESMF\_Regrid} operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and 
 !     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
 !     {\tt ESMF\_DataMap} information in the destination field to
-!     control the transformation of data.  The array data in the 
-!     destination field is overwritten by this call.
+!     control the transformation of data.  The {\tt routehandle} is
+!     returned to identify the stored information, and must be supplied
+!     to the execution call to actually move the data.
 !
 !     \begin{description}
 !     \item [srcfield] 
@@ -2765,9 +2865,17 @@
 !           of the Coupler if the regridding is inter-component, but could 
 !           also be the individual layout for a component if the 
 !           regridding is intra-component.  
+!     \item [routehandle]
+!           Output from this call, identifies the precomputed work which
+!           will be executed when {\tt ESMF\_FieldRegrid} is called.
 !     \item [{[regridtype]}]
-!           String name of the type of regridding to do.
-!     \item [{[async]}]
+!           Type of regridding to do.  A set of predefined types are
+!           supplied.
+!     \item [{[srcmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!     \item [{[dstmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -2960,7 +3068,138 @@
 
       endif
 
-      ! Once table is full, execute the communications it represents.
+      call ESMF_RouteHandleSet(routehandle, route1=route, rc=status)
+
+      ! get rid of temporary arrays
+      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
+      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
+      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
+      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
+      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
+      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldRegridStore
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRegrid - Data Regrid operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRegrid(srcfield, dstfield, routehandle, &
+                                  srcmask, dstmask, blocking, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: srcfield                 
+      type(ESMF_Field), intent(inout) :: dstfield                 
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Mask), intent(in), optional :: srcmask                 
+      type(ESMF_Mask), intent(in), optional :: dstmask                 
+      type(ESMF_Async), intent(inout), optional :: blocking
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a {\tt ESMF\_Regrid} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine reads the source field and 
+!     leaves the data untouched.  It uses the {\tt ESMF\_Grid} and
+!     {\tt ESMF\_DataMap} information in the destination field to
+!     control the transformation of data.  The array data in the 
+!     destination field is overwritten by this call.
+!
+!     \begin{description}
+!     \item [srcfield] 
+!           {\tt ESMF\_Field} containing source data.
+!     \item [dstfield] 
+!           {\tt ESMF\_Field} containing destination grid and data map.
+!     \item [routehandle]
+!           Created by a call to {\tt ESMF\_FieldRegridStore}.
+!           Identifies the precomputed work which
+!           will be executed when {\tt ESMF\_FieldRegrid} is called.
+!     \item [{[srcmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid source data.
+!     \item [{[dstmask]}]
+!           Optional {\tt ESMF\_Mask} identifying valid destination data.
+!     \item [{[blocking]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communications.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: stypep, dtypep      ! field type info
+      type(ESMF_Route) :: route
+      type(ESMF_DELayout) :: srclayout, dstlayout, parentlayout
+      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
+      logical :: hassrcdata        ! does this DE contain localdata from src?
+      logical :: hasdstdata        ! does this DE contain localdata from dst?
+      integer :: my_src_DE, my_dst_DE, my_DE
+      type(ESMF_LocalArray) :: src_local_array, dst_local_array
+
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      stypep = srcfield%ftypep
+      dtypep = dstfield%ftypep
+
+      ! Our DE number in the parent layout
+      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
+
+      ! TODO: we need not only to know if this DE has data in the field,
+      !   but also the de id for both src & dest fields
+
+      ! This routine is called on every processor in the parent layout.
+      !  It is quite possible that the source and destination fields do
+      !  not completely cover every processor on that layout.  Make sure
+      !  we do not go lower than this on the processors which are uninvolved
+      !  in this communication.
+
+      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
+      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hassrcdata = .true.   ! temp for now
+      if (hassrcdata) then
+          ! don't ask for our de number if this de isn't part of the layout
+          call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
+      endif
+
+      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
+      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
+      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hasdstdata = .true.   ! temp for now
+      if (hasdstdata) then
+          ! don't ask for our de number if this de isn't part of the layout
+          call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
+      endif
+
+      ! if neither are true this DE cannot be involved in the communication
+      !  and it can just return now.
+      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
+          if (rcpresent) rc = ESMF_SUCCESS
+          return
+      endif
+
+
+      ! Fetch route from handle, and execute what it represents
+      call ESMF_RouteHandleGet(routehandle, route1=route, rc=status)
 
       ! There are 3 possible cases - src+dst, src only, dst only
       !  (if both are false then we've already returned.)
@@ -2982,16 +3221,6 @@
         return
       endif 
 
-      ! TODO: do not delete the route because we are caching it.
-      !call ESMF_RouteDestroy(route, rc)
-
-      ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
-      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -3000,21 +3229,54 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
+! !IROUTINE: ESMF_FieldRegridRelease - Release information for this handle
 
 ! !INTERFACE:
-      subroutine ESMF_FieldRedist(srcfield, dstfield, parentlayout, async, rc)
+      subroutine ESMF_FieldRegridRelease(routehandle, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Release all stored information about the Regridding associated
+!     with this {\tt ESMF\_RouteHandle}.
+!
+!     \begin{description}
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} associated with this Field Regridding.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      call ESMF_RouteHandleDestroy(routehandle, rc)
+
+      end subroutine ESMF_FieldRegridRelease
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRedistStore - Data Redistribution operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRedistStore(srcfield, dstfield, parentlayout, &
+                                       routehandle, blocking, rc)
 !
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcfield                 
       type(ESMF_Field), intent(inout) :: dstfield                 
       type(ESMF_DELayout), intent(in) :: parentlayout
-      type(ESMF_Async), intent(inout), optional :: async
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      type(ESMF_Async), intent(inout), optional :: blocking
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Perform a {\tt Redistribution} operation over the data
+!     Precompute a {\tt Redistribution} operation over the data
 !     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
 !     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
 !     from the destination field and updates the array data in the destination.
@@ -3035,7 +3297,10 @@
 !           of the Coupler if the redistribution is inter-component, 
 !           but could also be the individual layout for a component if the 
 !           redistribution is intra-component.  
-!     \item [{[async]}]
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} which will be used to execute the
+!           redistribution when {\tt ESMF\_FieldRedist} is called.
+!     \item [{[blocking]}]
 !           Optional argument which specifies whether the operation should
 !           wait until complete before returning or return as soon
 !           as the communication between {\tt DE}s has been scheduled.
@@ -3284,8 +3549,328 @@
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
+      end subroutine ESMF_FieldRedistStore
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRedist - Data Redistribution operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldRedist(srcfield, dstfield, parentlayout, async, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: srcfield                 
+      type(ESMF_Field), intent(inout) :: dstfield                 
+      type(ESMF_DELayout), intent(in) :: parentlayout
+      type(ESMF_Async), intent(inout), optional :: async
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Perform a {\tt Redistribution} operation over the data
+!     in a {\tt ESMF\_Field}.  This routine reads the source field and leaves 
+!     the data untouched.  It reads the {\t ESMF\_Grid} and {\tt ESMF\_DataMap}
+!     from the destination field and updates the array data in the destination.
+!     The {\tt ESMF\_Grid}s may have different decompositions (different
+!     {\tt ESMF\_DELayout}s) or different data maps, but the source and
+!     destination grids must describe the same set of coordinates.
+!     Unlike {\tt ESMF\_Regrid} this routine does not do interpolation,
+!     only data movement.
+!
+!     \begin{description}
+!     \item [srcfield] 
+!           {\tt ESMF\_Field} containing source data.
+!     \item [dstfield] 
+!           {\tt ESMF\_Field} containing destination grid.
+!     \item [parentlayout]
+!           {\tt ESMF\_Layout} which encompasses both {\tt ESMF\_Field}s, 
+!           most commonly the layout
+!           of the Coupler if the redistribution is inter-component, 
+!           but could also be the individual layout for a component if the 
+!           redistribution is intra-component.  
+!     \item [{[async]}]
+!           Optional argument which specifies whether the operation should
+!           wait until complete before returning or return as soon
+!           as the communication between {\tt DE}s has been scheduled.
+!           If not present, default is to do synchronous communication.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: stypep, dtypep      ! field type info
+      type(ESMF_Route) :: route
+      type(ESMF_DELayout) :: srclayout, dstlayout
+      type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
+      logical :: hassrcdata        ! does this DE contain localdata from src?
+      logical :: hasdstdata        ! does this DE contain localdata from dst?
+      logical :: hascachedroute    ! can we reuse an existing route?
+      integer :: i, gridrank, datarank, thisdim
+      integer :: nx, ny
+      integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
+                                         global_dimlengths
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
+      integer :: my_src_DE, my_dst_DE, my_DE
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
+      type(ESMF_LocalArray) :: src_local_array, dst_local_array
+      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
+      integer, dimension(:,:), allocatable :: src_global_start
+      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
+      integer, dimension(:,:), allocatable :: dst_global_start
+      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      integer :: AI_snd_count, AI_rcv_count
+
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      stypep = srcfield%ftypep
+      dtypep = dstfield%ftypep
+
+      ! Our DE number in the parent layout
+      call ESMF_DELayoutGetDEid(parentlayout, my_DE, status)
+
+      ! TODO: we need not only to know if this DE has data in the field,
+      !   but also the de id for both src & dest fields
+
+      ! This routine is called on every processor in the parent layout.
+      !  It is quite possible that the source and destination fields do
+      !  not completely cover every processor on that layout.  Make sure
+      !  we do not go lower than this on the processors which are uninvolved
+      !  in this communication.
+
+      ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
+      call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, srclayout, hasdata)
+      hassrcdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hassrcdata = .true.   ! temp for now
+      if (hassrcdata) then
+          ! don't ask for our de number if this de isn't part of the layout
+          call ESMF_DELayoutGetDEid(srclayout, my_src_DE, status)
+      endif
+
+      ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
+      call ESMF_GridGetDELayout(dtypep%grid, dstlayout, status)
+      call ESMF_DELayoutGetDEExists(parentlayout, my_DE, dstlayout, hasdata)
+      hasdstdata = (hasdata .eq. ESMF_TF_TRUE) 
+      hasdstdata = .true.   ! temp for now
+      if (hasdstdata) then
+          ! don't ask for our de number if this de isn't part of the layout
+          call ESMF_DELayoutGetDEid(dstlayout, my_dst_DE, status)
+      endif
+
+      ! if neither are true this DE cannot be involved in the communication
+      !  and it can just return now.
+      if ((.not. hassrcdata) .and. (.not. hasdstdata)) then
+          if (rcpresent) rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! if src field exists on this DE, query it for information
+      if (hassrcdata) then
+          ! Query the datamap and set info for grid so it knows how to
+          !  match up the array indicies and the grid indicies.
+          call ESMF_DataMapGet(stypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+          if(status .NE. ESMF_SUCCESS) then 
+            print *, "ERROR in FieldRedist: DataMapGet returned failure"
+            return
+          endif 
+
+          ! And get the Array sizes
+          call ESMF_ArrayGet(stypep%localfield%localdata, rank=datarank, &
+                                               counts=dimlengths, rc=status)
+          if(status .NE. ESMF_SUCCESS) then 
+             print *, "ERROR in FieldRedist: ArrayGet returned failure"
+             return
+          endif 
+      endif 
+
+      ! if dst field exists on this DE, query it for information
+      if (hasdstdata) then
+          ! Query the datamap and set info for grid so it knows how to
+          !  match up the array indicies and the grid indicies.
+          call ESMF_DataMapGet(dtypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+          if(status .NE. ESMF_SUCCESS) then 
+            print *, "ERROR in FieldRedist: DataMapGet returned failure"
+            return
+          endif 
+
+          ! And get the Array sizes
+          call ESMF_ArrayGet(dtypep%localfield%localdata, rank=datarank, &
+                                               counts=dimlengths, rc=status)
+          if(status .NE. ESMF_SUCCESS) then 
+             print *, "ERROR in FieldRedist: ArrayGet returned failure"
+             return
+          endif 
+      endif
+
+      ! set up things we need to find a cached route or precompute one
+      if (hassrcdata) then
+          call ESMF_DELayoutGetSize(srclayout, nx, ny);
+          AI_snd_count = nx * ny
+
+          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
+                            global_start=src_global_start, rc=status)
+
+          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
+                                           stypep%grid, src_AI_tot, &
+                                           src_AI_exc, rc=rc)
+          ! translate the AI's to global index
+          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_tot, &
+                                           globalAI2D=gl_src_AI_tot, rc=rc)
+          call ESMF_GridLocalToGlobalIndex(stypep%grid, localAI2D=src_AI_exc, &
+                                           globalAI2D=gl_src_AI_exc, rc=rc)
+      else
+          AI_snd_count = 0
+      endif
+      if (hasdstdata) then
+          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
+          AI_rcv_count = nx * ny
+
+          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
+                            global_start=dst_global_start, rc=status)
+
+          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
+                                           dtypep%grid, dst_AI_tot, &
+                                           dst_AI_exc, rc=rc)
+          ! translate the AI's to global index
+          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_tot, &
+                                           globalAI2D=gl_dst_AI_tot, rc=rc)
+          call ESMF_GridLocalToGlobalIndex(dtypep%grid, localAI2D=dst_AI_exc, &
+                                           globalAI2D=gl_dst_AI_exc, rc=rc)
+      else
+          AI_rcv_count = 0
+      endif
+          
+      ! periodic only matters for halo operations
+      do i=1, ESMF_MAXGRIDDIM
+        periodic(i) = ESMF_TF_FALSE
+      enddo
+
+      ! Does this same route already exist?  If so, then we can drop
+      ! down immediately to RouteRun.
+      call ESMF_RouteGetCached(datarank, &
+                               my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
+                               AI_rcv_count, dstlayout, &
+                               my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
+                               AI_snd_count, srclayout, periodic, &
+                               hascachedroute, route, rc=status)
+
+      if (.not. hascachedroute) then
+          ! Create the route object.  This needs to be the parent layout which
+          ! includes the DEs from both fields.
+          route = ESMF_RouteCreate(parentlayout, rc) 
+
+          call ESMF_RoutePrecomputeRedist(route, datarank, &
+                                    my_dst_DE, gl_dst_AI_exc, gl_dst_AI_tot, &
+                                    AI_rcv_count, dst_global_start, &
+                                    dst_global_count, dstlayout,  &
+                                    my_src_DE, gl_src_AI_exc, gl_src_AI_tot, &
+                                    AI_snd_count, src_global_start, &
+                                    src_global_count, srclayout, &
+                                    rc=status)
+
+      endif
+
+      ! Once table is full, execute the communications it represents.
+      ! TODO: fix code here
+
+      ! There are 3 possible cases - src+dst, src only, dst only
+      !  (if both are false then we've already returned.)
+      if ((hassrcdata) .and. (.not. hasdstdata)) then
+          src_local_array=stypep%localfield%localdata
+          call ESMF_RouteRun(route, srcarray=src_local_array, rc=status) 
+
+      else if ((.not. hassrcdata) .and. (hasdstdata)) then
+          dst_local_array=dtypep%localfield%localdata
+          call ESMF_RouteRun(route, dstarray=dst_local_array, rc=status)
+
+      else
+          src_local_array=stypep%localfield%localdata
+          dst_local_array=dtypep%localfield%localdata
+          call ESMF_RouteRun(route, src_local_array, dst_local_array, status)
+      endif
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldRedist: RouteRun returned failure"
+        return
+      endif 
+
+      ! TODO: do not delete the route because we are caching it.
+      !call ESMF_RouteDestroy(route, rc)
+
+      ! get rid of temporary arrays
+      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
+      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
+      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
+      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
+      if (associated(gl_src_AI_tot)) deallocate(gl_src_AI_tot, stat=status)
+      if (associated(gl_src_AI_exc)) deallocate(gl_src_AI_exc, stat=status)
+      if (associated(gl_dst_AI_tot)) deallocate(gl_dst_AI_tot, stat=status)
+      if (associated(gl_dst_AI_exc)) deallocate(gl_dst_AI_exc, stat=status)
+      if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
+      if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_FieldRedist
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldRedistRelease - Release resources associated w/ handle
+
+! !INTERFACE:
+      subroutine ESMF_FieldRedistRelease(routehandle, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_RouteHandle), intent(inout) :: routehandle
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Release all stored information about the Redist associated
+!     with this {\tt ESMF\_RouteHandle}.
+!
+!     \begin{description}
+!     \item [routehandle] 
+!           {\tt ESMF\_RouteHandle} associated with this Field Redist.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+
+      call ESMF_RouteHandleDestroy(routehandle, rc)
+
+      end subroutine ESMF_FieldRedistRelease
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
