@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.77 2004/10/26 22:58:44 theurich Exp $
+#  $Id: common.mk,v 1.78 2004/10/27 00:24:29 nscollins Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -77,11 +77,27 @@ ifndef ESMF_SITE
 export ESMF_SITE = default
 endif
 
+
+# Comment out the following flags if you want to allow VM to use Pthreads
+#FPPFLAGS       += $(FPP_PREFIX)-DVM_DONT_SPAWN_PTHREADS
+#CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
+
+# Comment in the following line if your MPI does not support MPI_Comm_c2f
+#CPPFLAGS       += -DVM_DONT_HAVE_MPI_COMM_C2F
+
+# Comment out the following lines if you want to include the IO code
+FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
+CPPFLAGS       += -DESMF_NO_IOCODE
+export ESMF_NO_IOCODE = true
+
+
 #-------------------------------------------------------------------------------
 #  Include site specific makefile fragment.
 #-------------------------------------------------------------------------------
+
 include $(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
+#-------------------------------------------------------------------------------
 
 # if PREC not already set, default to 64.  architectures which
 # have only one word size set this variable in their compiler/platform
@@ -126,18 +142,6 @@ endif
 # ESMF_LIB_INSTALL - Directory for install target to place libs.
 # ESMF_MOD_INSTALL - Directory for install target to place mod files.
 #-------------------------------------------------------------------------------
-
-# Comment out the following flags if you want to allow VM to use Pthreads
-#FPPFLAGS       += $(FPP_PREFIX)-DVM_DONT_SPAWN_PTHREADS
-#CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
-
-# Comment in the following line if your MPI does not support MPI_Comm_c2f
-#CPPFLAGS	+= -DVM_DONT_HAVE_MPI_COMM_C2F
-
-# Comment out the following lines if you want to include the IO code
-FPPFLAGS       += $(FPP_PREFIX)-DESMF_NO_IOCODE
-CPPFLAGS       += -DESMF_NO_IOCODE
-export ESMF_NO_IOCODE = true
 
 
 LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
