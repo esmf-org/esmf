@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.24 2005/02/01 00:38:59 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.25 2005/02/04 08:29:48 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,7 +55,7 @@
 #include "ESMC_VMKernel.h"
 
 // macros used within this source file
-#define VERBOSITY             (1)       // 0: off, 10: max
+#define VERBOSITY             (0)       // 0: off, 10: max
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
 #ifdef SIGRTMIN
 #define VM_SIG1               (SIGRTMIN)
@@ -111,8 +111,10 @@ int vmkt_create(vmkt_t *vmkt, void *(*vmkt_spawn)(void *), void *arg){
   pthread_mutex_lock(&(vmkt->mut_extra2));
   pthread_cond_init(&(vmkt->cond_extra2), NULL);
   int error = pthread_create(&(vmkt->tid), NULL, vmkt_spawn, arg);
-  if (!error) // only wait if the thread was successfully created
-    pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));
+  if (!error){ // only wait if the thread was successfully created
+    pthread_cond_wait(&(vmkt->cond0), &(vmkt->mut0));   // back-sync #1
+    pthread_cond_wait(&(vmkt->cond_extra2), &(vmkt->mut_extra2)); // back-s. #2
+  }
   return error;
 }
 
@@ -533,9 +535,19 @@ static void *vmk_spawn(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
-#if (VERBOSITY > 9)
-  printf("hello from within vmk_spawn, mypet=%d\n", sarg->mypet);
+#if (VERBOSITY > 5)
+  fprintf(stderr, "hello from within vmk_spawn, mypet=%d\n", sarg->mypet);
 #endif
+  // now use vmkt features to prepare for catch/release loop (back-sync)
+  // - part 1
+  vmkt_t *vmkt = &(sarg->vmkt);
+  pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
+  pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
+  pthread_mutex_unlock(&(vmkt->mut0));      // ... back-sync #1
+  // now we know that vmkt_create is past pthread_create()
+  // ... and we are between back-sync #1 and #2
+  pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
+  pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
   // obtain reference to the vm instance on heap
@@ -545,26 +557,24 @@ static void *vmk_spawn(void *arg){
     sarg->pid, sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
     sarg->pth_mutex2, sarg->pth_mutex, sarg->pth_finish_count,
     sarg->commarray, sarg->pref_intra_ssi);
-  // note: The VM above must be constructed _before_ back-sync'ing to
+  // note: The VM above must be constructed _before_ back-sync'ing #2 to
   //       vmkt_create in order to assure that the entries in the VM are valid!
   // now use vmkt features to prepare for catch/release loop (back-sync)
-  vmkt_t *vmkt = &(sarg->vmkt);
-  pthread_mutex_lock(&(vmkt->mut0));
-  pthread_mutex_lock(&(vmkt->mut1));
-  pthread_mutex_lock(&(vmkt->mut_extra1));
-  pthread_cond_signal(&(vmkt->cond0));
-  pthread_mutex_unlock(&(vmkt->mut0));  
+  // - part 2
+  pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
+  pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
+  pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
   volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr,"thread %d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr,"thread %d: %d was released, pid: %d\n", vmkt->tid,
       pthread_self(), getpid());
 #endif
@@ -582,7 +592,7 @@ static void *vmk_spawn(void *arg){
     
   // before pet terminates it must send a signal indicating that core is free
   for (int i=0; i<sarg->ncontributors[sarg->mypet]; i++){
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr, " send wake-up signal to : %d %d\n",
       sarg->contributors[sarg->mypet][i].pid, 
       sarg->contributors[sarg->mypet][i].blocker_tid);
@@ -613,18 +623,29 @@ static void *vmk_sigcatcher(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
   fprintf(stderr, "hello from within vmk_sigcatcher\n");
 #endif
   // need this for waking up blocker
   vmkt_t *blocker_vmkt;
-  // use vmkt features to prepare for catch/release loop
+  // now use vmkt features to prepare for catch/release loop (back-sync)
+  // - part 1
   vmkt_t *vmkt = &(sarg->vmkt_extra);
-  pthread_mutex_lock(&(vmkt->mut0));
-  pthread_mutex_lock(&(vmkt->mut1));
-  pthread_mutex_lock(&(vmkt->mut_extra1));
-  pthread_cond_signal(&(vmkt->cond0));
-  pthread_mutex_unlock(&(vmkt->mut0));  
+  pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
+  pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
+  pthread_mutex_unlock(&(vmkt->mut0));      // ... back-sync #1
+  // now we know that vmkt_create is past pthread_create()
+  // ... and we are between back-sync #1 and #2
+  pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
+  pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
+  // now use vmkt features to prepare for catch/release loop (back-sync)
+  // - part 2
+  pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
+  pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
+  pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
+#if (VERBOSITY > 5)
+  fprintf(stderr, "sigcatcher is past back-sync #2\n");  
+#endif  
   volatile int *f = &(vmkt->flag);
   // since LinuxThreads (pre NPTL) have the problem that each thread reports
   // its own PID instead the same for each thread, which would be the posix
@@ -632,29 +653,30 @@ static void *vmk_sigcatcher(void *arg){
   // other process.
   pid_t pid = getpid();
   vmkt->arg = (void *)&pid;
-  // next is to signal the parent thread that sigcatcher is done with getpid
-  pthread_mutex_lock(&(vmkt->mut_extra2));
-  pthread_cond_signal(&(vmkt->cond_extra2));
-  pthread_mutex_unlock(&(vmkt->mut_extra2));
   // more preparation
   sigset_t sigs_to_catch;
   sigemptyset(&sigs_to_catch);
   sigaddset(&sigs_to_catch, VM_SIG1);
   int caught;
-//  pthread_t thread_wake;
   MPI_Status mpi_s;
   ESMC_VMK vm;  // need a handle to access the MPI_Comm of default ESMC_VMK
-  
+  // next is to signal the parent thread that sigcatcher is done with getpid
+  pthread_mutex_lock(&(vmkt->mut_extra2));
+  pthread_cond_signal(&(vmkt->cond_extra2));
+  pthread_mutex_unlock(&(vmkt->mut_extra2));
+#if (VERBOSITY > 5)
+  fprintf(stderr, "sigcatcher is past extra2 sync after getpid()\n");  
+#endif  
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr,"vmk_sigcatcher: thread %d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr,"vmk_sigcatcher: thread %d: %d was released, pid:%d\n", vmkt->tid,
       pthread_self(), getpid());
 #endif
@@ -668,12 +690,13 @@ static void *vmk_sigcatcher(void *arg){
   // process, which is actually a blocker thread which then will wrap up and 
   // by that indicate that the resource has been made available again.
   // suspend thread until a signal arrives
-#if (VERBOSITY > 9)
-  printf("I am a sigcatcher for pid %d and am going to sleep...\n", getpid());
+#if (VERBOSITY > 5)
+  fprintf(stderr,"I am a sigcatcher for pid %d and am going to sleep...\n",
+    getpid());
 #endif
   sigwait(&sigs_to_catch, &caught);
-#if (VERBOSITY > 9)
-  printf("I am a sigcatcher for pid %d and signal: %d woke me up...\n",
+#if (VERBOSITY > 5)
+  fprintf(stderr, "I am a sigcatcher for pid %d and signal: %d woke me up...\n",
     getpid(), caught);
 #endif
   // this signal was received from a thread running under another process
@@ -683,10 +706,11 @@ static void *vmk_sigcatcher(void *arg){
   MPI_Recv(&blocker_vmkt, sizeof(vmkt_t *), MPI_BYTE, MPI_ANY_SOURCE, 
     VM_TID_MPI_TAG, vm.default_mpi_c, &mpi_s);
   // now wake up the correct blocker thread within this pid
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
 //  printf("It's the sigcatcher for pid %d again. I received the blocker tid\n"
 //    " and I'll wake up blocker thread with tid: %d\n", getpid(), thread_wake);
-  printf("It's the sigcatcher for pid %d again. I received the blocker &vmkt\n"
+  fprintf(stderr, "It's the sigcatcher for pid %d again. I received the blocker"
+    " &vmkt\n"
     " and I'll wake up blocker thread with &vmkt: %p\n", getpid(),
     blocker_vmkt);
 #endif
@@ -710,29 +734,40 @@ static void *vmk_block(void *arg){
   // vmkt's first level spawn function, includes the catch/release loop
   // typecast the argument into the type it really is:
   vmk_spawn_arg *sarg = (vmk_spawn_arg *)arg;
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
   fprintf(stderr, "hello from within vmk_block\n");
 #endif
+  // now use vmkt features to prepare for catch/release loop (back-sync)
+  // - part 1
+  vmkt_t *vmkt = &(sarg->vmkt);
+  pthread_mutex_lock(&(vmkt->mut0));        // back-sync #1 ...
+  pthread_cond_signal(&(vmkt->cond0));      // . back-sync #1 .
+  pthread_mutex_unlock(&(vmkt->mut0));      // ... back-sync #1
+  // now we know that vmkt_create is past pthread_create()
+  // ... and we are between back-sync #1 and #2
+  pthread_mutex_lock(&(vmkt->mut1));        // prepare this thread's mutex
+  pthread_mutex_lock(&(vmkt->mut_extra1));  // prepare this thread's mutex
   // fill in the tid for this thread
   sarg->pthid = sarg->vmkt.tid;
-  // use vmkt features to prepare for catch/release loop
-  vmkt_t *vmkt = &(sarg->vmkt);
-  pthread_mutex_lock(&(vmkt->mut0));
-  pthread_mutex_lock(&(vmkt->mut1));
-  pthread_mutex_lock(&(vmkt->mut_extra1));
-  pthread_cond_signal(&(vmkt->cond0));
-  pthread_mutex_unlock(&(vmkt->mut0));  
+  // now use vmkt features to prepare for catch/release loop (back-sync)
+  // - part 2
+  pthread_mutex_lock(&(vmkt->mut_extra2));    // back-sync #2 ...
+  pthread_cond_signal(&(vmkt->cond_extra2));  // . back-sync #2 .
+  pthread_mutex_unlock(&(vmkt->mut_extra2));  // ... back-sync #2
+#if (VERBOSITY > 5)
+  fprintf(stderr, "blocker is past back-sync #2\n");  
+#endif  
   volatile int *f = &(vmkt->flag);
   // now enter the catch/release loop
   for(;;){
     //sleep(2); // put this in the code to verify that earlier received signals
     // will be pending on a per thread basis...
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr,"vmk_block: thread %d: %d going to wait for release, pid: %d\n",
       vmkt->tid, pthread_self(), getpid());
 #endif
     pthread_cond_wait(&(vmkt->cond1), &(vmkt->mut1));
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
     fprintf(stderr,"vmk_block: thread %d: %d was released, pid:%d\n", vmkt->tid,
       pthread_self(), getpid());
 #endif
@@ -743,7 +778,7 @@ static void *vmk_block(void *arg){
   // This blocker thread is responsible for staying alive until resources,
   // i.e. cores, become available to the contributing pet. The contributing
   // pet is blocked (asynchonously) via pthread_cond_wait().
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
   fprintf(stderr, "I am a blocker for pid %d, my tid is %d and going to sleep...\n",
     getpid(), pthread_self());
 #endif
@@ -751,7 +786,7 @@ static void *vmk_block(void *arg){
   // suspend this thread until awoken by one of the sigcatcher threads  
   pthread_cond_wait(&(vmkt->cond_extra1), &(vmkt->mut_extra1));
 
-#if (VERBOSITY > 9)
+#if (VERBOSITY > 5)
 //  fprintf(stderr, "I am a blocker for pid %d, my tid is %d and\n"
 //    "woke up with signal: %d. I'll exit and therefore free block on my pet\n",
 //    getpid(), pthread_self(), caught);
@@ -915,6 +950,10 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
               // also spawn sigcatcher thread
               *rc = vmkt_create(&(sarg[0].vmkt_extra), vmk_sigcatcher, 
                 (void *)&sarg[0]);
+#if (VERBOSITY > 5)
+              fprintf(stderr, "parent thread is back from vmkt_create()s "
+                "for vmk_block and vmk_sigcatcher\n");
+#endif
               if (*rc) return NULL;  // could not create pthread -> bail out
               // fill in the info about mypet contibuting...
               new_contributors[new_petid][ncontrib_counter].blocker_tid =
@@ -933,18 +972,24 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
               // obtained with getpid() above, and thus won't break posix!
               // So we wait here until the sigcatcher thead is done getting its
               // PID and then overwrite the .pid member:
+#if (VERBOSITY > 5)
+              fprintf(stderr, "parent thread is going into wait on extra2:\n");
+#endif
               pthread_cond_wait(&(sarg[0].vmkt_extra.cond_extra2), 
                 &(sarg[0].vmkt_extra.mut_extra2));
+#if (VERBOSITY > 5)
+              fprintf(stderr, "parent thread is past wait on extra2\n");
+#endif
               new_contributors[new_petid][ncontrib_counter].pid = 
                 *(pid_t *)sarg[0].vmkt_extra.arg;
               // send contributor info over to this pet (i) that receives cores
-#if (VERBOSITY > 9)
-              printf("sending...\n");
+#if (VERBOSITY > 5)
+              fprintf(stderr, "sending...\n");
 #endif
               vmk_send(&new_contributors[new_petid][ncontrib_counter],
                 sizeof(contrib_id), i);
-#if (VERBOSITY > 9)
-              printf("send off contrib_id for later wake-up signal: \n"
+#if (VERBOSITY > 5)
+              fprintf(stderr, "send off contrib_id for later wake-up signal: \n"
                 " blocker_tid: %d\n mpi_pid: %d\n pid: %d\n tid: %d\n",
                 new_contributors[new_petid][ncontrib_counter].blocker_tid,
                 new_contributors[new_petid][ncontrib_counter].mpi_pid,
@@ -953,13 +998,13 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan *vmp,
 #endif
             }else if (mypet==i){
               // mypet is this pet (i)-> receiver of cores from _another_ pet k
-#if (VERBOSITY > 9)
-              printf("receiving...\n");
+#if (VERBOSITY > 5)
+              fprintf(stderr, "receiving...\n");
 #endif
               vmk_recv(&new_contributors[new_petid][ncontrib_counter],
                 sizeof(contrib_id), k);
-#if (VERBOSITY > 9)
-              printf("received contrib_id for later wake-up signal: \n"
+#if (VERBOSITY > 5)
+              fprintf(stderr, "received contrib_id for later wake-up signal: \n"
                 " blocker_tid: %d\n mpi_pid: %d\n pid: %d\n tid: %d\n",
                 new_contributors[new_petid][ncontrib_counter].blocker_tid,
                 new_contributors[new_petid][ncontrib_counter].mpi_pid,
