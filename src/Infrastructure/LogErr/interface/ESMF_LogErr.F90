@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.17 2003/07/24 16:20:01 shep_smith Exp $
+! $Id: ESMF_LogErr.F90,v 1.18 2003/07/24 19:54:08 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -111,7 +111,7 @@ end type ESMF_Log
 
 ! !PUBLIC Data Members
 
-   type(ESMF_Log), public :: ESMF_LOG_WORLD
+   type(ESMF_Log), public, save :: ESMF_LOG_WORLD
 
 !EOP
 !----------------------------------------------------------------------------
