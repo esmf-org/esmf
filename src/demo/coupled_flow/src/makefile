@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/10/22 23:09:38 jwolfe Exp $
+# $Id: makefile,v 1.3 2003/10/22 23:56:26 svasquez Exp $
 
 ALL: demo
 
@@ -39,7 +39,7 @@ CLOBBERDIRS =
 RUN_CoupledFlowApp:
 	-@rm -f testlog stdlog.* logfile.* 
 	@echo "Ready to run the ESMF Coupled Flow Demo Application.  This may take several minutes."
-	-${MPIRUN} -np 8 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/CoupledFlowApp >$(ESMC_TESTDIR)/CoupledFlowApp.stdout
 	@echo "ESMF Coupled Flow Demo Application complete.  Please look in " $(ESMC_TESTDIR)/CoupledFlowApp.stdout " for status results."
 	@echo "Look in " `pwd` " for output data files."
 
