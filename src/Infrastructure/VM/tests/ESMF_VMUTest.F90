@@ -1,4 +1,4 @@
-! $Id: ESMF_VMUTest.F90,v 1.12 2004/12/06 18:59:46 svasquez Exp $
+! $Id: ESMF_VMUTest.F90,v 1.13 2004/12/07 21:50:00 rfaincht Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMUTest.F90,v 1.12 2004/12/06 18:59:46 svasquez Exp $'
+      '$Id: ESMF_VMUTest.F90,v 1.13 2004/12/07 21:50:00 rfaincht Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,16 +52,20 @@
 !     !LOCAL VARIABLES:
       type(ESMF_VM):: vm
       integer:: localPet, npets
-      integer, allocatable:: array1(:), array3(:)
+      integer, allocatable:: array1(:), array3(:),array3_soln(:)
       integer, dimension (:, :), allocatable:: array2
       integer::  func_results, myresults
       integer:: nsize, i, j
+      integer:: isum
+      real:: fsum
 
       real(ESMF_KIND_R8), allocatable:: farray1(:)
+      real(ESMF_KIND_R8), allocatable:: farray3(:) , farray3_soln(:)
       real(ESMF_KIND_R8), dimension(:,:), allocatable:: farray2
       real(ESMF_KIND_R8):: float_results, my_float_results
 
       real(ESMF_KIND_R4), allocatable:: f4array1(:)
+      real(ESMF_KIND_R4), allocatable:: f4array3(:), f4array3_soln(:)
       real(ESMF_KIND_R4), dimension(:,:), allocatable:: f4array2
       real(ESMF_KIND_R4):: float4_results, my_float4_results
 
@@ -114,7 +118,14 @@
       allocate(array1(nsize))
       allocate(farray1(nsize))
       allocate(f4array1(nsize))
+
       allocate(array3(nsize))
+      allocate(farray3(nsize))
+      allocate(f4array3(nsize))
+
+      allocate(array3_soln(nsize))
+      allocate(farray3_soln(nsize))
+      allocate(f4array3_soln(nsize))
 
       ! prepare data array1, farray1, f4array1
       do i=1, nsize
@@ -138,22 +149,9 @@
 
       call test_AllFullReduce_sum
 
-      !------------------------------------------------------------------------
-      !EX_UTest
-      write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "VM All Reduce ESMF_SUM Test"
-      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, count=nsize, &
-      reduceflag=ESMF_SUM, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      !------------------------------------------------------------------------
-      !EX_UTest
-      myresults = SUM(array3)
-      write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
-      call ESMF_Test((func_results.eq.myresults), name, failMsg, result, ESMF_SRCLINE)
+      call test_allReduce_sum
 
-      !------------------------------------------------------------------------
 
       call test_AllFullReduce_min
 
@@ -406,6 +404,83 @@
 
 end subroutine test_AllFullReduce_max
 
+!=============================================================================
+subroutine test_AllReduce_sum
+
+      !Test with Integer arguments
+      !===========================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_SUM Test"
+      call ESMF_VMAllReduce(vm, sendData=array1, recvData=array3, count=nsize, &
+      reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      isum=0
+      do j=1,npets
+      end do
+      do i=1,nsize
+        array3_soln(i) = sum( array2(i,:) )
+        print *, localPet,'array3(',i,')=',array3(i), &
+                          'array3_soln(',i,')=',array3_soln(i)
+        isum=isum + abs( array3(i) - array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
+      call ESMF_Test((isum.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !Test with ESMF_KIND_R8  arguments
+      !=================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_SUM Test"
+      call ESMF_VMAllReduce(vm, sendData=farray1, recvData=farray3, count=nsize, &
+      reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fsum=0.
+      do i=1,nsize
+        farray3_soln(i) = sum( farray2(i,:) )
+        print *, localPet,'farray3(',i,')=',farray3(i), &
+                          'farray3_soln(',i,')=',farray3_soln(i)
+        fsum=fsum + abs( farray3(i) - farray3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
+      call ESMF_Test((fsum.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !Test with ESMF_KIND_R4  arguments
+      !=================================
+      !------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "VM All Reduce ESMF_SUM Test"
+      call ESMF_VMAllReduce(vm, sendData=f4array1, recvData=f4array3, count=nsize, &
+      reduceflag=ESMF_SUM, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+      !EX_UTest
+      fsum=0.
+      do i=1,nsize
+        f4array3_soln(i) = sum( f4array2(i,:) )
+        print *, localPet,'f4array3(',i,')=',f4array3(i), &
+                          'f4array3_soln(',i,')=',f4array3_soln(i)
+        fsum=fsum + abs( f4array3(i) - f4array3_soln(i) )
+      end do
+      write(failMsg, *) "Returned wrong results"
+      write(name, *) "Verify All Reduce ESMF_SUM Results Test"
+      call ESMF_Test((fsum.eq.0.), name, failMsg, result, ESMF_SRCLINE)
+
+
+
+end subroutine test_AllReduce_sum
 
 #endif
 
