@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar_F.C,v 1.24 2004/02/02 19:14:08 eschwab Exp $
+// $Id: ESMC_Calendar_F.C,v 1.25 2004/02/04 02:08:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,24 +38,25 @@ extern "C" {
        void FTN(c_esmc_calendarcreatenew)(ESMC_Calendar    **ptr,
                                           int               *nameLen,
                                           const char        *name,
-                                          ESMC_CalendarType *type, 
+                                          ESMC_CalendarType *calendarType, 
                                           int *status) {
           *ptr = ESMC_CalendarCreate(
-                            *nameLen,   // always present internal argument.
+                            *nameLen,      // always present internal argument.
 
                     ((void*) name   == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : name),
-                            *type,      // required
+                                              ESMC_NULL_POINTER : name),
+
+                            *calendarType, // required
 
                     ((void*) status == (void*)ESMC_BAD_POINTER ?
-                                                ESMC_NULL_POINTER : status) );
+                                              ESMC_NULL_POINTER : status) );
        }
 
        void FTN(c_esmc_calendarcreatecustom)(ESMC_Calendar **ptr,
                                     int          *nameLen,
                                     const char   *name,
-                                    int          *monthsPerYear,
                                     int          *daysPerMonth,
+                                    int          *monthsPerYear,
                                     ESMF_KIND_I4 *secondsPerDay,
                                     ESMF_KIND_I4 *daysPerYear,
                                     ESMF_KIND_I4 *daysPerYearDn,
@@ -65,10 +66,11 @@ extern "C" {
 
               ((void*) name           == (void*)ESMC_BAD_POINTER ?
                                                 ESMC_NULL_POINTER : name),
-                       monthsPerYear,    // always present internal argument.
-
               ((void*) daysPerMonth   == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : daysPerMonth),
+
+                       monthsPerYear,    // always present internal argument.
+
               ((void*) secondsPerDay  == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : secondsPerDay),
               ((void*) daysPerYear    == (void*)ESMC_BAD_POINTER ?
@@ -98,25 +100,39 @@ extern "C" {
        }
 
        void FTN(c_esmc_calendarsetnew)(ESMC_Calendar **ptr,
-                                       ESMC_CalendarType *type, 
+                                       int *nameLen,
+                                       const char *name,
+                                       ESMC_CalendarType *calendarType, 
                                        int *status) {
-           int rc = (*ptr)->ESMC_CalendarSet(*type);
+           int rc = (*ptr)->ESMC_CalendarSet(
+                         *nameLen,   // always present internal argument.
+
+                 ((void*) name         == (void*)ESMC_BAD_POINTER ?
+                                                 ESMC_NULL_POINTER : name),
+                 *calendarType);     // required
            if (status != ESMC_NULL_POINTER &&
                (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
        }
 
        void FTN(c_esmc_calendarsetcustom)(ESMC_Calendar **ptr,
-                                    int          *monthsPerYear,
+                                    int          *nameLen,
+                                    const char   *name,
                                     int          *daysPerMonth,
+                                    int          *monthsPerYear,
                                     ESMF_KIND_I4 *secondsPerDay,
                                     ESMF_KIND_I4 *daysPerYear,
                                     ESMF_KIND_I4 *daysPerYearDn,
                                     ESMF_KIND_I4 *daysPerYearDd, int *status) {
            int rc = (*ptr)->ESMC_CalendarSet(
-                       monthsPerYear,    // always present internal argument.
+                      *nameLen,          // always present internal argument.
 
+              ((void*) name           == (void*)ESMC_BAD_POINTER ?
+                                                ESMC_NULL_POINTER : name),
               ((void*) daysPerMonth   == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : daysPerMonth),
+
+                       monthsPerYear,    // always present internal argument.
+
               ((void*) secondsPerDay  == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : secondsPerDay),
               ((void*) daysPerYear    == (void*)ESMC_BAD_POINTER ?
@@ -130,23 +146,37 @@ extern "C" {
        }
 
        void FTN(c_esmc_calendarget)(ESMC_Calendar **ptr,
-                                    ESMC_CalendarType *type,
-                                    int          *monthsPerYear,
+                                    int *nameLen,
+                                    int *tempNameLen,
+                                    char *tempName,
+                                    ESMC_CalendarType *calendarType,
                                     int          *daysPerMonth,
+                                    int          *sizeofDaysPerMonth,
+                                    int          *monthsPerYear,
                                     ESMF_KIND_I4 *secondsPerDay,
                                     ESMF_KIND_I4 *secondsPerYear,
                                     ESMF_KIND_I4 *daysPerYear,
                                     ESMF_KIND_I4 *daysPerYearDn,
-                                    ESMF_KIND_I4 *daysPerYearDd, int *status) {
+                                    ESMF_KIND_I4 *daysPerYearDd,
+                                    int *status) {
            int rc = (*ptr)->ESMC_CalendarGet(
-              ((void*) type           == (void*)ESMC_BAD_POINTER ?
-                                          ESMC_NULL_POINTER : type),
-              ((void*) monthsPerYear  == (void*)ESMC_BAD_POINTER ?
-                                          ESMC_NULL_POINTER : monthsPerYear),
+                      *nameLen,      // always present internal argument.
+
+                       tempNameLen,  // always present internal argument.
+
+              ((void*) tempName       == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : tempName),
+              ((void*) calendarType   == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : calendarType),
               ((void*) daysPerMonth   == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : daysPerMonth),
+
+                       sizeofDaysPerMonth,  // always present internal argument
+
+              ((void*) monthsPerYear  == (void*)ESMC_BAD_POINTER ?
+                                          ESMC_NULL_POINTER : monthsPerYear),
               ((void*) secondsPerDay  == (void*)ESMC_BAD_POINTER ?
-                                          ESMC_NULL_POINTER : secondsPerDay),
+                                         ESMC_NULL_POINTER : secondsPerDay),
               ((void*) secondsPerYear == (void*)ESMC_BAD_POINTER ?
                                           ESMC_NULL_POINTER : secondsPerYear),
               ((void*) daysPerYear    == (void*)ESMC_BAD_POINTER ?
@@ -157,6 +187,18 @@ extern "C" {
                                           ESMC_NULL_POINTER : daysPerYearDd) );
            if (status != ESMC_NULL_POINTER &&
                (void*)status != (void*)ESMC_BAD_POINTER) *status = rc;
+       }
+
+       void FTN(c_esmc_calendareq)(ESMC_Calendar **calendar1,
+                                   ESMC_Calendar **calendar2,
+                                   int *esmf_calendarEQ) {
+           *esmf_calendarEQ = (int) (**calendar1 == **calendar2);
+       }
+
+       void FTN(c_esmc_calendartypeeq)(ESMC_CalendarType *calendarType1,
+                                       ESMC_CalendarType *calendarType2,
+                                       int *esmf_calendarTypeEQ) {
+           *esmf_calendarTypeEQ = (int) (*calendarType1 == *calendarType2);
        }
 
        void FTN(c_esmc_calendarreadrestart)(ESMC_Calendar **ptr, int *nameLen,

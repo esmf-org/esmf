@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.43 2004/02/02 19:14:07 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.44 2004/02/04 02:08:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.43 2004/02/02 19:14:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.44 2004/02/04 02:08:46 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -54,10 +54,10 @@ int ESMC_Calendar::count=0;
 //     pointer to newly allocated ESMC_Calendar
 //
 // !ARGUMENTS:
-      int                nameLen,    // in
-      const char        *name,       // in
-      ESMC_CalendarType  type,       // in
-      int               *rc) {       // out - return code
+      int                nameLen,      // in
+      const char        *name,         // in
+      ESMC_CalendarType  calendarType, // in
+      int               *rc) {         // out - return code
 
 // !DESCRIPTION:
 //      Allocates and Initializes a {\tt ESMC\_Calendar} with given type
@@ -80,7 +80,7 @@ int ESMC_Calendar::count=0;
       return(ESMC_NULL_POINTER);
     }
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
       if (nameLen < ESMF_MAXSTR) {
         strncpy(calendar->name, name, nameLen);
@@ -97,7 +97,10 @@ int ESMC_Calendar::count=0;
       sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
     }
 
-    if((returnCode = calendar->ESMC_CalendarSet(type)) != ESMF_SUCCESS) {
+    if((returnCode = calendar->ESMC_CalendarSet(strlen(calendar->name), 
+                                                calendar->name, 
+                                                calendarType))
+                                                         != ESMF_SUCCESS) {
       if (rc != ESMC_NULL_POINTER) {
         *rc = returnCode;
       }
@@ -126,8 +129,8 @@ int ESMC_Calendar::count=0;
 // !ARGUMENTS:
       int           nameLen,       // in
       const char   *name,          // in
-      int          *monthsPerYear, // in  
       int          *daysPerMonth,  // in
+      int          *monthsPerYear, // in  
       ESMF_KIND_I4 *secondsPerDay, // in
       ESMF_KIND_I4 *daysPerYear,   // in
       ESMF_KIND_I4 *daysPerYearDn, // in
@@ -155,7 +158,7 @@ int ESMC_Calendar::count=0;
       return(ESMC_NULL_POINTER);
     }
 
-    // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
+    // TODO: use inherited methods from ESMC_Base
     if (name != ESMC_NULL_POINTER) {
       if (nameLen < ESMF_MAXSTR) {
         strncpy(calendar->name, name, nameLen);
@@ -172,7 +175,9 @@ int ESMC_Calendar::count=0;
       sprintf(calendar->name, "Calendar%3.3d\0", calendar->id);
     }
 
-    returnCode = calendar->ESMC_CalendarSet(monthsPerYear, daysPerMonth,
+    returnCode = calendar->ESMC_CalendarSet(strlen(calendar->name),
+                                            calendar->name, 
+                                            daysPerMonth, monthsPerYear,
                                             secondsPerDay, daysPerYear,
                                             daysPerYearDn, daysPerYearDd);
     if (returnCode != ESMF_SUCCESS) {
@@ -277,7 +282,9 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType type) {   // in - set to be Calendar type
+      int               nameLen,         // in
+      const char       *name,            // in
+      ESMC_CalendarType calendarType) {  // in - set to be Calendar type
 //
 // !DESCRIPTION:
 //      Sets a {\tt EMSC\_Calendar} to be of a specific type
@@ -285,25 +292,28 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    // TODO: ensure initialization if called via F90 interface;
-    //       cannot call constructor, because destructor is subsequently
-    //       called automatically, returning initialized values to garbage.
+    int rc; // return code 
 
     // save current values to restore in case of failure;
     ESMC_Calendar saveCalendar = *this;
 
-    for (int i=0; i<MONTHS_PER_YEAR; i++) daysPerMonth[i] = 0;
-    secondsPerDay  = 0;
-    secondsPerYear = 0;
-    daysPerYear.d  = 0;
-    daysPerYear.dN = 0;
-    daysPerYear.dD = 1;
-    
-    int rc; // return code 
+    // TODO: use inherited methods from ESMC_Base
+    if (name != ESMC_NULL_POINTER) {
+      if (name != this->name) {  // skip if called internally via Create()
+        if (nameLen < ESMF_MAXSTR) {
+          strncpy(this->name, name, nameLen);
+          this->name[nameLen] = '\0';  // null terminate
+        } else {
+          // error, restore previous state and return ESMF_FAILURE
+          *this = saveCalendar;
+          return(ESMF_FAILURE);
+        }
+      }
+    }
 
-    this->type = type;
+    this->calendarType = calendarType;
 
-    switch (type)
+    switch (calendarType)
     {
         case ESMC_CAL_GREGORIAN:
         case ESMC_CAL_NOLEAP:
@@ -327,7 +337,7 @@ int ESMC_Calendar::count=0;
         case ESMC_CAL_JULIANDAY:
             // Days is the highest resolution of time, i.e. there is no
             //   concept of months or years ??
-            for (int i=0; i<MONTHS_PER_YEAR; i++) daysPerMonth[i] = 0;
+            for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 0;
             secondsPerDay  = SECONDS_PER_DAY;
             secondsPerYear = 0;
             daysPerYear.d  = 0;
@@ -338,7 +348,7 @@ int ESMC_Calendar::count=0;
 
         case ESMC_CAL_360DAY:
             // 12 months of 30 days each
-            for (int i=0; i<MONTHS_PER_YEAR; i++) daysPerMonth[i] = 30;
+            for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 30;
             secondsPerDay  = SECONDS_PER_DAY;
             secondsPerYear = SECONDS_PER_DAY * 360;
             daysPerYear.d  = 360;
@@ -349,7 +359,7 @@ int ESMC_Calendar::count=0;
 
         case ESMC_CAL_NOCALENDAR:
             // no calendar needed, convert base time up to days only
-            for (int i=0; i<MONTHS_PER_YEAR; i++) daysPerMonth[i] = 0;
+            for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 0;
             secondsPerDay  = 0;
             secondsPerYear = 0;
             daysPerYear.d  = 0;
@@ -378,7 +388,7 @@ int ESMC_Calendar::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarSet - custom calendar initializer
+// !IROUTINE:  ESMC_CalendarSet - Set up a custom calendar
 //
 // !INTERFACE:
       int ESMC_Calendar::ESMC_CalendarSet(
@@ -387,8 +397,10 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      int          *monthsPerYear,    // in
+      int           nameLen,          // in
+      const char   *name,             // in
       int          *daysPerMonth,     // in
+      int          *monthsPerYear,    // in
       ESMF_KIND_I4 *secondsPerDay,    // in
       ESMF_KIND_I4 *daysPerYear,      // in
       ESMF_KIND_I4 *daysPerYeardN,    // in
@@ -400,36 +412,51 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    // TODO: replace MONTHS_PER_YEAR with monthsPerYear
+    // save current values to restore in case of failure;
+    ESMC_Calendar saveCalendar = *this;
 
-    // TODO: ensure initialization if called via F90 interface;
-    //       cannot call constructor, because destructor is subsequently
-    //       called automatically, returning initialized values to garbage.
-    for (int i=0; i<MONTHS_PER_YEAR; i++) this->daysPerMonth[i] = 0;
-    this->secondsPerDay  = 0;
-    this->secondsPerYear = 0;
-    this->daysPerYear.d  = 0;
-    this->daysPerYear.dN = 0;
-    this->daysPerYear.dD = 1;
-    
-    this->type = ESMC_CAL_CUSTOM;
+    // TODO: use inherited methods from ESMC_Base
+    if (name != ESMC_NULL_POINTER) {
+      if (name != this->name) {  // skip if called internally via Create()
+        if (nameLen < ESMF_MAXSTR) {
+          strncpy(this->name, name, nameLen);
+          this->name[nameLen] = '\0';  // null terminate
+        } else {
+          // error, restore previous state and return ESMF_FAILURE
+          *this = saveCalendar;
+          return(ESMF_FAILURE);
+        }
+      }
+    }
+
+    this->calendarType = ESMC_CAL_CUSTOM;
+
+    // TODO: replace MONTHS_PER_YEAR with dynamic daysPerMonth[monthsPerYear]
+    if (monthsPerYear != ESMC_NULL_POINTER) {
+      if (*monthsPerYear <= MONTHS_PER_YEAR) {
+        this->monthsPerYear = *monthsPerYear;
+      } else {
+        // error, restore previous state and return ESMF_FAILURE
+        *this = saveCalendar;
+        return(ESMF_FAILURE);
+      }
+    }
 
     if (daysPerMonth != ESMC_NULL_POINTER) {
-      for(int i=0; i<MONTHS_PER_YEAR; i++)
+      for(int i=0; i<this->monthsPerYear; i++)
       { 
         this->daysPerMonth[i] = daysPerMonth[i];
       }
     }
 
-    // use passed in value if present, otherwise use default
-
-    this->secondsPerDay = (secondsPerDay != ESMC_NULL_POINTER) ?
-                                              *secondsPerDay : SECONDS_PER_DAY;
+    if (secondsPerDay != ESMC_NULL_POINTER) {
+      this->secondsPerDay = *secondsPerDay;
+    }
     if (daysPerYear != ESMC_NULL_POINTER) {
       this->daysPerYear.d = *daysPerYear;
     } else {
       this->daysPerYear.d = 0;
-      for(int i=0; i<MONTHS_PER_YEAR; i++)
+      for(int i=0; i<this->monthsPerYear; i++)
       { 
         this->daysPerYear.d += daysPerMonth[i];
       }
@@ -459,14 +486,18 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType *type,          // out - Calendar type
-      int          *monthsPerYear,      // out
-      int          *daysPerMonth,       // out
-      ESMF_KIND_I4 *secondsPerDay,      // out
-      ESMF_KIND_I4 *secondsPerYear,     // out
-      ESMF_KIND_I4 *daysPerYear,        // out
-      ESMF_KIND_I4 *daysPerYeardN,      // out
-      ESMF_KIND_I4 *daysPerYeardD) {    // out
+      int                nameLen,         // out
+      int               *tempNameLen,     // out
+      char              *tempName,        // out
+      ESMC_CalendarType *calendarType,    // out
+      int               *daysPerMonth,    // out
+      int               *sizeofDaysPerMonth, // in
+      int               *monthsPerYear,   // out
+      ESMF_KIND_I4      *secondsPerDay,   // out
+      ESMF_KIND_I4      *secondsPerYear,  // out
+      ESMF_KIND_I4      *daysPerYear,     // out
+      ESMF_KIND_I4      *daysPerYeardN,   // out
+      ESMF_KIND_I4      *daysPerYeardD) { // out
 // 
 // !DESCRIPTION:
 //      Gets a {\tt EMSC\_Calendar}'s properties
@@ -477,26 +508,30 @@ int ESMC_Calendar::count=0;
     // TODO: replace MONTHS_PER_YEAR with monthsPerYear
 
     // must have at least one non-null pointer
-    if (type           == ESMC_NULL_POINTER &&
-        monthsPerYear  == ESMC_NULL_POINTER && 
+    if (calendarType   == ESMC_NULL_POINTER &&
         daysPerMonth   == ESMC_NULL_POINTER && 
+        monthsPerYear  == ESMC_NULL_POINTER && 
         secondsPerDay  == ESMC_NULL_POINTER &&
         secondsPerYear == ESMC_NULL_POINTER &&
         daysPerYear    == ESMC_NULL_POINTER &&
         daysPerYeardN  == ESMC_NULL_POINTER &&
         daysPerYeardD  == ESMC_NULL_POINTER) {
-        cout << "ESMC_Calendar::ESMC_CalendarSet():  no valid "
+        cout << "ESMC_Calendar::ESMC_CalendarGet():  no valid "
              << "pointer passed in.";
       return (ESMF_FAILURE);
     }
 
-    if (type != ESMC_NULL_POINTER) {
-      *type = this->type;
+    if (calendarType != ESMC_NULL_POINTER) {
+      *calendarType = this->calendarType;
     }
     if (daysPerMonth != ESMC_NULL_POINTER) {
-      for (int i=0; i<MONTHS_PER_YEAR; i++) {
+      if (*sizeofDaysPerMonth < this->monthsPerYear) return(ESMF_FAILURE);
+      for (int i=0; i<this->monthsPerYear; i++) {
         daysPerMonth[i] = this->daysPerMonth[i];
       }
+    }
+    if (monthsPerYear != ESMC_NULL_POINTER) {
+      *monthsPerYear = this->monthsPerYear;
     }
     if (secondsPerDay != ESMC_NULL_POINTER) {
       *secondsPerDay = this->secondsPerDay;
@@ -550,7 +585,7 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
-    switch (this->type)
+    switch (this->calendarType)
     {
         // convert Gregorian Date => Time
         case ESMC_CAL_GREGORIAN:
@@ -671,7 +706,7 @@ int ESMC_Calendar::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    switch (this->type)
+    switch (this->calendarType)
     {
         // convert Time => Gregorian Date
         case ESMC_CAL_GREGORIAN:
@@ -892,6 +927,30 @@ int ESMC_Calendar::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
+// !IROUTINE:  ESMC_Calendar(==) - Calendar equality comparison
+//
+// !INTERFACE:
+      bool ESMC_Calendar::operator==(
+//
+// !RETURN VALUE:
+//    bool result
+//
+// !ARGUMENTS:
+      const ESMC_Calendar &calendar) const {   // in - ESMC_Calendar to compare
+//
+// !DESCRIPTION:
+//      Compare for equality the current object's (this) {\tt ESMC\_Calendar}
+//      with given {\tt ESMC\_Calendar}, return result
+//
+//EOP
+// !REQUIREMENTS:
+
+    return(calendarType == calendar.calendarType);
+
+}  // end ESMC_Calendar::operator==
+
+//-------------------------------------------------------------------------
+//BOP
 // !IROUTINE:  ESMC_CalendarReadRestart - restore contents of a Calendar 
 //
 // !INTERFACE:
@@ -967,8 +1026,8 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS: 
 
-    if (this->type < ESMC_CAL_GREGORIAN ||
-        this->type > ESMC_CAL_NOCALENDAR) return(ESMF_FAILURE);
+    if (this->calendarType < ESMC_CAL_GREGORIAN ||
+        this->calendarType > ESMC_CAL_NOCALENDAR) return(ESMF_FAILURE);
 
     return(ESMF_SUCCESS);
 
@@ -994,10 +1053,12 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS: 
 
     cout << "Calendar -------------------------------" << endl;
-    cout << "type = " << type << endl;
+    cout << "name = "      << name << endl;
+    cout << "calendarType = " << calendarType << endl;
     cout << "daysPerMonth = " << endl;
-    for (int i=0; i<MONTHS_PER_YEAR; i++) cout << daysPerMonth[i] << " ";
+    for (int i=0; i<this->monthsPerYear; i++) cout << daysPerMonth[i] << " ";
     cout << endl;
+    cout << "monthsPerYear = "  << monthsPerYear  << endl;
     cout << "secondsPerDay = "  << secondsPerDay  << endl;
     cout << "secondsPerYear = " << secondsPerYear << endl;
     cout << "daysPerYear = "    << daysPerYear.d  << endl;
@@ -1031,9 +1092,11 @@ int ESMC_Calendar::count=0;
     name[0] = '\0';
     id = ++count;  // TODO: inherit from ESMC_Base class
 
-    type           = ESMC_CAL_NOCALENDAR;
-    monthsPerYear  = 0;
-    // TODO: daysPerMonth   = ESMC_NULL_POINTER;
+    calendarType   = ESMC_CAL_NOCALENDAR;
+    // TODO: make daysPerMonth[] dynamically allocatable with monthsPerYear
+    //       daysPerMonth = ESMC_NULL_POINTER;
+    monthsPerYear  = MONTHS_PER_YEAR;
+    for (int i=0; i<monthsPerYear; i++) daysPerMonth[i] = 0;
     secondsPerDay  = SECONDS_PER_DAY;
     secondsPerYear = 0;
     daysPerYear.d  = 0;
@@ -1053,7 +1116,8 @@ int ESMC_Calendar::count=0;
 //    none
 //
 // !ARGUMENTS:
-      ESMC_CalendarType type) {  // in
+      const char       *name,            // in
+      ESMC_CalendarType calendarType) {  // in
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_TimeInstant} to be of a specific type via
@@ -1063,7 +1127,7 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS: 
 
     ESMC_Calendar();  // invoke default constructor
-    ESMC_CalendarSet(type);
+    ESMC_CalendarSet(strlen(name), name, calendarType);
 
 }   // end ESMC_Calendar
 
@@ -1078,8 +1142,9 @@ int ESMC_Calendar::count=0;
 //    none
 //
 // !ARGUMENTS:
-      int          *monthsPerYear,     // in
+      const char   *name,              // in
       int          *daysPerMonth,      // in
+      int          *monthsPerYear,     // in
       ESMF_KIND_I4 *secondsPerDay,     // in
       ESMF_KIND_I4 *daysPerYear,       // in
       ESMF_KIND_I4 *daysPerYeardN,     // in
@@ -1093,7 +1158,8 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS: 
 
     ESMC_Calendar();  // invoke default constructor
-    ESMC_CalendarSet(monthsPerYear, daysPerMonth, secondsPerDay, 
+    ESMC_CalendarSet(strlen(name), name, 
+                     daysPerMonth, monthsPerYear, secondsPerDay, 
                      daysPerYear, daysPerYeardN, daysPerYeardD);
 }  // end ESMC_Calendar
 
@@ -1117,6 +1183,8 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
     *this = calendar;
+    // id = ++count;  // TODO: unique copy ? review operator==
+                      //       also, inherit from ESMC_Base class
 
  } // end ESMC_Calendar
 

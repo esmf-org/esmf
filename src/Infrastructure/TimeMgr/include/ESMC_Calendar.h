@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.31 2004/02/02 19:14:07 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.32 2004/02/04 02:08:46 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,11 +105,11 @@ class ESMC_Calendar {
   private:   // corresponds to F90 module 'type ESMF_Calendar' members
 
     char              name[ESMF_MAXSTR];  // name of calendar
-    ESMC_CalendarType type;               // Calendar type
+    ESMC_CalendarType calendarType;       // Calendar type
 
+    int daysPerMonth[MONTHS_PER_YEAR];
     int monthsPerYear;
 // TODO: make dynamically allocatable with monthsPerYear
-    int daysPerMonth[MONTHS_PER_YEAR];
     ESMF_KIND_I4 secondsPerDay;
     ESMF_KIND_I4 secondsPerYear;
     struct daysPerYear_s
@@ -132,25 +132,33 @@ class ESMC_Calendar {
   public:
 
     // set built-in calendar type
-    int ESMC_CalendarSet(ESMC_CalendarType type);
+    int ESMC_CalendarSet(int               nameLen,
+                         const char       *name,    // TODO: default (=0)
+                         ESMC_CalendarType calendarType);
 
     // set custom calendar type
-    int ESMC_CalendarSet(int          *monthsPerYear=0,
+    int ESMC_CalendarSet(int           nameLen,      
+                         const char   *name=0,
                          int          *daysPerMonth=0,
+                         int          *monthsPerYear=0,
                          ESMF_KIND_I4 *secondsPerDay=0,
                          ESMF_KIND_I4 *daysPerYear=0,
                          ESMF_KIND_I4 *daysPerYearDn=0,
                          ESMF_KIND_I4 *daysPerYearDd=0);
 
     // get properties of any calendar type
-    int ESMC_CalendarGet(ESMC_CalendarType *type=0,
-                         int              *monthsPerYear=0,
-                         int              *daysPerMonth=0,
-                         ESMF_KIND_I4     *secondsPerDay=0,
-                         ESMF_KIND_I4     *secondsPerYear=0,
-                         ESMF_KIND_I4     *daysPerYear=0,
-                         ESMF_KIND_I4     *daysPerYeardN=0,
-                         ESMF_KIND_I4     *daysPerYeardD=0);
+    int ESMC_CalendarGet(int                nameLen,
+                         int               *tempNameLen,
+                         char              *tempName=0,
+                         ESMC_CalendarType *calendarType=0,
+                         int               *daysPerMonth=0,
+                         int               *sizeofDaysPerMonth=0,
+                         int               *monthsPerYear=0,
+                         ESMF_KIND_I4      *secondsPerDay=0,
+                         ESMF_KIND_I4      *secondsPerYear=0,
+                         ESMF_KIND_I4      *daysPerYear=0,
+                         ESMF_KIND_I4      *daysPerYeardN=0,
+                         ESMF_KIND_I4      *daysPerYeardD=0);
 
     // Calendar doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -164,6 +172,8 @@ class ESMC_Calendar {
                              int *mm=0, int *dd=0,
                              ESMF_KIND_I4 *d=0, ESMF_KIND_I8 *d_i8=0,
                              ESMF_KIND_R8 *d_r8=0) const;
+
+    bool operator==(const ESMC_Calendar &) const;
 
     // TODO:  add method to convert calendar interval to core time ?
 
@@ -185,9 +195,9 @@ class ESMC_Calendar {
 
     // native C++ constructors/destructors
     ESMC_Calendar(void);
-    ESMC_Calendar(const ESMC_Calendar &calendar);
-    ESMC_Calendar(ESMC_CalendarType type);
-    ESMC_Calendar(int *monthsPerYear, int *daysPerMonth,
+    ESMC_Calendar(const ESMC_Calendar &calendar);  // copy constructor
+    ESMC_Calendar(const char *name, ESMC_CalendarType calendarType);
+    ESMC_Calendar(const char *name, int *daysPerMonth, int *monthsPerYear,
                   ESMF_KIND_I4 *secondsPerDay, ESMF_KIND_I4 *daysPerYear,
                   ESMF_KIND_I4 *daysPerYeardN, ESMF_KIND_I4 *daysPerYearDd);
     ~ESMC_Calendar(void);
@@ -234,15 +244,15 @@ class ESMC_Calendar {
     // friend function to allocate and initialize calendar from heap
     ESMC_Calendar *ESMC_CalendarCreate(int               nameLen,
                                        const char       *name=0,
-                                       ESMC_CalendarType type=
+                                       ESMC_CalendarType calendarType=
                                                            ESMC_CAL_NOCALENDAR,
                                        int*              rc=0);
 
     // friend function to allocate and initialize custom calendar from heap
     ESMC_Calendar *ESMC_CalendarCreate(int           nameLen,
                                        const char   *name=0,
-                                       int          *monthsPerYear=0,
                                        int          *daysPerMonth=0,
+                                       int          *monthsPerYear=0,
                                        ESMF_KIND_I4 *secondsPerDay=0,
                                        ESMF_KIND_I4 *daysPerYear=0,
                                        ESMF_KIND_I4 *daysPerYearDn=0,
