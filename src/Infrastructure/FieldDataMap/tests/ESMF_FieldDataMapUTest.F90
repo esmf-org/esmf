@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMapUTest.F90,v 1.5 2004/06/14 21:53:07 svasquez Exp $
+! $Id: ESMF_FieldDataMapUTest.F90,v 1.6 2004/06/17 16:53:26 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldDataMapUTest.F90,v 1.5 2004/06/14 21:53:07 svasquez Exp $'
+      '$Id: ESMF_FieldDataMapUTest.F90,v 1.6 2004/06/17 16:53:26 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -156,10 +156,9 @@
       write(name, *) "Print FieldDataMap Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-
-
-
 #endif
+
+      call ESMF_Finalize(rc)
 
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
