@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.10 2003/04/24 20:56:54 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.11 2003/05/02 14:10:19 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -699,6 +699,7 @@
  @\
         ! Decide if we need to do: make a new allocation, copy existing data @\
         if (.not. present(f90ptr)) then @\
+           nullify(newp) @\
            willalloc = .true. @\
            willcopy = .false. @\
            do_dealloc = ESMF_TF_TRUE @\
@@ -709,6 +710,7 @@
                willcopy = .false. @\
                do_dealloc = ESMF_TF_TRUE @\
            else if (docopy .eq. ESMF_DATA_COPY) then @\
+               nullify(newp) @\
                willalloc = .true. @\
                willcopy = .true. @\
                do_dealloc = ESMF_TF_TRUE @\
@@ -723,7 +725,7 @@
         if (willalloc) then @\
             allocate(newp ( mlen ), stat=status) @\
             if (status .ne. 0) then     ! f90 status, not ESMF @\
-              print *, "Array do_copy allocate error" @\
+              print *, "Array space allocate error" @\
               return @\
             endif @\
         endif @\
