@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.4 2004/05/26 18:30:39 nscollins Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.5 2004/05/26 18:45:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.4 2004/05/26 18:30:39 nscollins Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.5 2004/05/26 18:45:50 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -130,8 +130,8 @@
       interface ESMF_FieldDataMapSetDefault
 
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_FieldDataMapSetDefaultIndex
-       module procedure ESMF_FieldDataMapSetDefaultExplicit
+       module procedure ESMF_FieldDataMapSetDefIndex
+       module procedure ESMF_FieldDataMapSetDefExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_FieldDataMap}
@@ -162,7 +162,7 @@
 
 ! !INTERFACE:
       ! Private name: scCall using ESMF_FieldDataMapSetDefault()
-      subroutine ESMF_FieldDataMapSetDefaultIndex(datamap, dataIorder, counts, &
+      subroutine ESMF_FieldDataMapSetDefIndex(datamap, dataIorder, counts, &
                                        horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
@@ -243,13 +243,13 @@
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_FieldDataMapSetDefaultIndex
+        end subroutine ESMF_FieldDataMapSetDefIndex
 
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_FieldDataMapSetDefaultExplicit(datamap, dataRank, dataIndices, &
+      subroutine ESMF_FieldDataMapSetDefExplicit(datamap, dataRank, dataIndices, &
                                           counts, horzRelloc, vertRelloc, rc)
 !
 ! !ARGUMENTS:
@@ -329,7 +329,7 @@
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_FieldDataMapSetDefaultExplicit
+        end subroutine ESMF_FieldDataMapSetDefExplicit
 
 
 !------------------------------------------------------------------------------
