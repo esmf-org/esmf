@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.58 2003/06/30 21:45:33 rstaufer Exp $
+! $Id: ESMF_Grid.F90,v 1.59 2003/07/09 17:30:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.58 2003/06/30 21:45:33 rstaufer Exp $'
+      '$Id: ESMF_Grid.F90,v 1.59 2003/07/09 17:30:43 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1522,23 +1522,16 @@
 ! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, MyDE, &
-                                lcelltot_count, lcellexc_count, &
-                                gcelltot_start, gcellexc_start, &
-                                lcelltot_index, lcellexc_index, &
-                                rc)
+      subroutine ESMF_GridGetDE(grid, MyDE, lcelltot_count, gcelltot_start, &
+                                lcelltot_index, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: lcelltot_count
-      integer, intent(inout), optional :: lcellexc_count
       integer, intent(inout), optional :: gcelltot_start
-      integer, intent(inout), optional :: gcellexc_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
                         optional :: lcelltot_index
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
-                        optional :: lcellexc_index
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1552,12 +1545,8 @@
 !          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[lcelltot\_count]}]
 !          Local (on this {\tt ESMF\_DE}) number of total cells.
-!     \item[{[lcellexc\_count]}]
-!          Local (on this {\tt ESMF\_DE}) number of exclusive cells.
 !     \item[{[gcelltot\_start]}]
 !          Global index of starting count for total cells.
-!     \item[{[gcellexc\_start]}]
-!          Global index of starting count for exclusive cells.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -1577,9 +1566,7 @@
 !     call DistGrid method to retrieve information otherwise not available
 !     to the application level
       call ESMF_DistGridGetDE(grid%ptr%distgrid%ptr, MyDE, &
-                              lcelltot_count, lcellexc_count, &
-                              gcelltot_start,  gcellexc_start, &
-                              lcelltot_index, lcellexc_index, &
+                              lcelltot_count, gcelltot_start, lcelltot_index, &
                               status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridGetDE: distgrid get de"
