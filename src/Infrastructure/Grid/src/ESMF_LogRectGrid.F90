@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.100 2004/10/19 21:58:05 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.101 2004/10/29 17:16:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.100 2004/10/19 21:58:05 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.101 2004/10/29 17:16:48 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8023,6 +8023,8 @@
       do j = 1,numDE1
         start = minval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
         stop  = maxval(coord1(i1+1:i1+1+countsPerDEDim1(j)))
+        if (j.ne.1     ) start = minval(coord1(i1+0:i1+1+countsPerDEDim1(j)))
+        if (j.ne.numDE1) stop  = maxval(coord1(i1+1:i1+2+countsPerDEDim1(j)))
         if (countsPerDEDim1(j).eq.0) then
           start = -huge
           stop  = -huge
@@ -8045,6 +8047,8 @@
       do j = 1,numDE2
         start = minval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
         stop  = maxval(coord2(i1+1:i1+1+countsPerDEDim2(j)))
+        if (j.ne.1     ) start = minval(coord2(i1+0:i1+1+countsPerDEDim2(j)))
+        if (j.ne.numDE2) stop  = maxval(coord2(i1+1:i1+2+countsPerDEDim2(j)))
         if (countsPerDEDim2(j).eq.0) then
           start = -huge
           stop  = -huge
