@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.11 2003/04/07 16:19:53 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.12 2003/04/08 20:03:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.11 2003/04/07 16:19:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.12 2003/04/08 20:03:48 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -209,6 +209,10 @@
 //     representation. Conversions based on UTC: time zone offset done by
 //     client
 //
+//     The Gregorian <-> Julian conversion algorithm is from Henry F. Fliegel
+//     and Thomas C. Van Flandern, in Communications of the ACM,
+//     CACM, volume 11, number 10, October 1968, p. 657.
+//
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
@@ -220,20 +224,22 @@
             int temp;
             int jdays;
 
-            // convert date portion of Time instant into time portion of
-            //  Time instant
-            // Convert to Julian first
-            // Gregorian date (YR, MM, DD) => Julian day (D)
+            // convert Gregorian date to Julian days
+            // Gregorian date (YR, MM, DD) => Julian days (jdays)
             temp = (MM-14)/12;
-            jdays = (1461 * (YR + 4800 + temp)) / 4 + (367 * (MM - 2 - 12 *
-                    temp ))/12 - (3 * ( (YR + 4900 + temp)/100))/4 + DD - 32075;
-            T->S = jdays * SecondsPerDay;
+            jdays = (1461 * (YR + 4800 + temp)) / 4 +
+                    (367 * (MM - 2 - 12 * temp ))/12 -
+                    (3 * ( (YR + 4900 + temp)/100))/4 + DD - 32075;
+
+            // convert Julian days to basetime seconds (>= 64 bit)
+            T->S = (ESMF_IKIND_I8) jdays * (ESMF_IKIND_I8) SecondsPerDay;
             break;
         }
         // convert Julian Date => Time
         case ESMC_CAL_JULIAN:
         {
-            T->S = D * SecondsPerDay;
+            // convert Julian days to basetime seconds (>= 64 bit)
+            T->S = (ESMF_IKIND_I8) D * (ESMF_IKIND_I8) SecondsPerDay;
             break;
         }
         default:
@@ -263,12 +269,12 @@
 //     calendar-specific date. Conversions based on UTC: time zone offset
 //     done by client
 //
+//     The Gregorian <-> Julian conversion algorithm is from Henry F. Fliegel
+//     and Thomas C. Van Flandern, in Communications of the ACM,
+//     CACM, volume 11, number 10, October 1968, p. 657.
+//
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
-
-    ESMF_IKIND_I8 TimeS;
-
-    TimeS = T->S;
 
     switch (Type)
     {
@@ -278,12 +284,16 @@
             int tempi, tempj, templ, tempn;
             int jdays;
 
-            // convert time portion of Time instant into date portion of
-            //     Time instant
+            // Convert basetime portion of Time into date
             // Julian day (D) => Gregorian date (YR, MM, DD)
             // The calculation below fails for jday >= 536,802,343.
             //    (4*templ = 2^31)
-            jdays = TimeS / SecondsPerDay;    // convert to Julian first
+
+            // convert basetime seconds to Julian days
+            jdays = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+
+            // convert Julian days to Gregorian date
+            // Julian days (jdays) => Gregorian date (YR, MM, DD)
             templ = jdays + 68569;
             tempn = ( 4 * templ ) / 146097;
             templ = templ - ( 146097 * tempn + 3 ) / 4;
@@ -294,12 +304,14 @@
             templ = tempj / 11;
             *MM = tempj + 2 - ( 12 * templ );
             *YR = 100 * ( tempn - 49 ) + tempi + templ;
+
             break;
         }
         // convert Time => Julian Date
         case ESMC_CAL_JULIAN:
         {
-            *D = TimeS / SecondsPerDay;
+            // convert basetime seconds to Julian days
+            *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
             break;
         }
         default:
