@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.56 2005/01/26 19:41:02 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.57 2005/01/28 22:47:11 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,6 +156,7 @@ module ESMF_VMMod
 ! - ESMF-private methods:
   public ESMF_VMInitialize
   public ESMF_VMFinalize
+  public ESMF_VMAbort
   public ESMF_VMShutdown
   public ESMF_VMPlanConstruct
   public ESMF_VMPlanDestruct
@@ -173,7 +174,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.56 2005/01/26 19:41:02 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.57 2005/01/28 22:47:11 theurich Exp $'
 
 !==============================================================================
 
@@ -3884,6 +3885,49 @@ module ESMF_VMMod
     if (present(rc)) rc = localrc
 
   end subroutine ESMF_VMFinalize
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAbort()"
+!BOPI
+! !IROUTINE: ESMF_VMAbort - Abort Global VM
+
+! !INTERFACE:
+  subroutine ESMF_VMAbort(rc)
+!
+! !ARGUMENTS:
+    integer, intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!   Abort Global VM
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAbort(localrc)
+    
+    ! Use LogErr to handle return code
+    !if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+    !  ESMF_CONTEXT, rcToReturn=rc)) return
+
+    ! Cannot use LogErr here because LogErr finalizes _before_ VM
+    if (present(rc)) rc = localrc
+
+  end subroutine ESMF_VMAbort
 !------------------------------------------------------------------------------
 
 

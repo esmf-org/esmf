@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.22 2005/01/28 22:10:08 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.23 2005/01/28 22:47:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -302,6 +302,15 @@ void ESMC_VMK::vmk_finalize(void){
   MPI_Finalized(&finalized);
   if (!finalized)
     MPI_Finalize();
+}
+
+
+void ESMC_VMK::vmk_abort(void){
+  // abort default (all MPI) virtual machine
+  int finalized;
+  MPI_Finalized(&finalized);
+  if (!finalized)
+    MPI_Abort(MPI_COMM_WORLD, 0);
 }
 
 

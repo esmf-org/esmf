@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.30 2005/01/28 22:11:32 theurich Exp $
+// $Id: ESMC_VM.C,v 1.31 2005/01/28 22:47:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.30 2005/01/28 22:11:32 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.31 2005/01/28 22:47:11 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -418,6 +418,32 @@ void ESMC_VMFinalize(
 //EOP
 //-----------------------------------------------------------------------------
   GlobalVM->vmk_finalize();
+  matchArray_count = 0;
+  *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMAbort
+//
+// !INTERFACE:
+void ESMC_VMAbort(
+//
+// !RETURN VALUE:
+//    void
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Abort the global virtual machine referenced by GlobalVM
+//
+//EOP
+//-----------------------------------------------------------------------------
+  GlobalVM->vmk_abort();
   matchArray_count = 0;
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
 }

@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.31 2005/01/13 21:52:19 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.32 2005/01/28 22:47:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -259,6 +259,16 @@ extern "C" {
 #define ESMC_METHOD "c_esmc_vmfinalize()"
     int localrc;
     ESMC_VMFinalize(&localrc);
+    //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
+    // Cannot use LogErr here because LogErr finalizes _before_ VM
+    *rc = localrc;
+  }
+
+  void FTN(c_esmc_vmabort)(int *rc){
+#undef  ESMC_METHOD
+#define ESMC_METHOD "c_esmc_vmabort()"
+    int localrc;
+    ESMC_VMAbort(&localrc);
     //ESMC_LogDefault.ESMC_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc);
     // Cannot use LogErr here because LogErr finalizes _before_ VM
     *rc = localrc;

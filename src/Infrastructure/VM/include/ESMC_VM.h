@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.22 2005/01/28 22:11:32 theurich Exp $
+// $Id: ESMC_VM.h,v 1.23 2005/01/28 22:47:10 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,6 +95,7 @@ ESMC_VM *ESMC_VMGetCurrent(int *rc);  // Return pointer to VM of current context
 ESMC_VMId *ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
 ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
 void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global ESMC_VMK
+void     ESMC_VMAbort(int *rc);       // Abort and clean up global ESMC_VMK
 
 // class definition
 class ESMC_VMPlan : public ESMC_VMKPlan {   // inherits from ESMC_VMKPlan class

@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.10 2005/01/28 22:10:07 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.11 2005/01/28 22:47:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -153,6 +153,8 @@ class ESMC_VMK{
       // initialize the physical machine and a default (all MPI) virtual machine
     void vmk_finalize(void);
       // finalize default (all MPI) virtual machine
+    void vmk_abort(void);
+      // abort default (all MPI) virtual machine
 
     void vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid, 
       int *pid, int *tid, int *ncpet, int **cid, MPI_Group mpi_g, 

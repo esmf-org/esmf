@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.23 2005/01/14 18:53:51 eschwab Exp $
+! $Id: ESMF_Init.F90,v 1.24 2005/01/28 22:47:12 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,7 +68,7 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_Initialize, ESMF_Finalize
+      public ESMF_Initialize, ESMF_Finalize, ESMF_Abort
 
       ! should be private to framework - needed by other modules
       public ESMF_FrameworkInternalInit   
@@ -367,14 +367,90 @@
           return
       endif
 
-      ! Where MPI is shut down, files closed, etc.
-      !call ESMF_MachineFinalize()
-
       already_final = .true.
 
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_Finalize
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_Abort"
+!BOP
+! !IROUTINE:  ESMF_Abort - Best attempt to clean up and abort ESMF application
+!
+! !INTERFACE:
+      subroutine ESMF_Abort(rc)
+!
+! !ARGUMENTS:
+      integer, intent(out), optional :: rc     
+
+!
+! !DESCRIPTION:
+!     Abort the ESMF.  Used to abort the ESMF as cleanly as possible if any of 
+!     the PETs encounters a fatal situation. Best attempt is made to flush 
+!     buffers, close open connections, and release internal resources cleanly.
+!
+!     The argument is:
+!     \begin{description}
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+
+      logical :: rcpresent                        ! Return code present   
+      integer :: status
+      logical, save :: already_final = .false.    ! Static, maintains state.
+
+      ! Initialize return code
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      if (already_final) then
+          if (rcpresent) rc = ESMF_SUCCESS
+          return
+      endif
+
+      ! Close the Config file  
+      ! TODO: write this routine and remove the status= line
+      ! call ESMF_ConfigFinalize(status)
+      status = ESMF_SUCCESS
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing config file"
+          return
+      endif
+
+      ! Delete any internal built-in time manager calendars
+      call ESMF_CalendarFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing the time manager calendars"
+          return
+      endif
+
+      ! Shut down the log file
+      call ESMF_LogFinalize(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error finalizing log file"
+          return
+      endif
+
+      ! Abort the VM
+      call ESMF_VMAbort(status)
+      if (status .ne. ESMF_SUCCESS) then
+          print *, "Error aborting VM"
+          return
+      endif
+
+      already_final = .true.
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_Abort
 
 
       end module ESMF_InitMod
