@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.39 2004/10/05 22:48:19 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.40 2004/11/22 17:02:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -523,7 +523,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.39 2004/10/05 22:48:19 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.40 2004/11/22 17:02:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1201,6 +1201,13 @@
           exit
         endif
       enddo
+
+      ! print error if the relloc is not found
+      if (.not. localrc) then
+         if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+                                   "relloc not valid", &
+                                   ESMF_CONTEXT, rc)) return
+      endif
 
       if (present(rc)) rc = localrc
 
