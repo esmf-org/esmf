@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.28 2004/06/17 15:40:32 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.29 2004/06/17 16:04:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,6 +29,8 @@
 
 #ifdef ESMC_DATA_ADDR_NEEDS_INDIR
 #define XD *
+#else
+#define XD
 #endif
 
 //------------------------------------------------------------------------------
