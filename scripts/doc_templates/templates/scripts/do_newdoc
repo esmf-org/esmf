@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newdoc,v 1.9 2002/10/24 17:06:21 eschwab Exp $
+# $Id: do_newdoc,v 1.10 2003/01/07 19:39:29 nscollins Exp $
 #
 #===============================================================================
 # do_newdoc
@@ -98,7 +98,7 @@ endif
       if(!(-r $newdir/$1_syn.tex)) cp $DOCT_DIR/comp_syn.tex $newdir/$1_syn.tex
       if(!(-r $newdir/$1_alg.tex)) cp $DOCT_DIR/comp_alg.tex $newdir/$1_alg.tex
       if(!(-r $newdir/$1_req.tex)) cp $DOCT_DIR/comp_req.tex $newdir/$1_req.tex
-      if(!(-r $newdir/$1_arch.tex)) cp $DOCT_DIR/comp_arch.tex $newdir/$1_arch.tex
+      if(!(-r $newdir/$1_obj.tex)) cp $DOCT_DIR/comp_obj.tex $newdir/$1_obj.tex
       if(!(-r $newdir/class_desc.tex)) cp $DOCT_DIR/class_desc.tex $newdir
       if(!(-r $newdir/class_design.tex)) cp $DOCT_DIR/class_design.tex $newdir
       if(!(-r $newdir/class_def.tex)) cp $DOCT_DIR/class_def.tex $newdir
