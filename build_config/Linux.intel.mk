@@ -1,4 +1,4 @@
-# $Id: Linux.intel.mk,v 1.2 2003/09/09 19:39:24 nscollins Exp $ 
+# $Id: Linux.intel.mk,v 1.3 2003/09/09 21:17:43 nscollins Exp $ 
 
 ESMF_PREC = 32
 
@@ -128,4 +128,10 @@ PARCH		   = linux_intel
 	${RM} $*.o
 
 #############
+
+#
+# Set shared dependent on build_shared to build .so lib.
+#
+shared:
+
 

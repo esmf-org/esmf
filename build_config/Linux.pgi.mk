@@ -1,8 +1,24 @@
-# $Id: Linux.pgi.mk,v 1.2 2003/09/09 19:39:24 nscollins Exp $ 
+# $Id: Linux.pgi.mk,v 1.3 2003/09/09 21:17:43 nscollins Exp $ 
 #
 ESMF_PREC = 32
 
-#     See the file build/base_variables.defs for a complete explanation of all these fields
+#############
+
+
+# Location of MPI (Message Passing Interface) software
+
+#ESMC_MPIRUN      = 
+MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
+MPI_LIB        = -lmpiuni
+MPI_INCLUDE    = -I${MPI_HOME}
+MPIRUN         =  ${MPI_HOME}/mpirun
+
+# MP_LIB is for openMP
+MP_LIB          = -lpgmp
+# For pthreads (or omp)
+THREAD_LIB      = -lpthread
+
+#############
 #
 AR		   = ar
 AR_FLAGS	   = cr
@@ -120,17 +136,9 @@ PARCH		   = linux
 	${RM} $*.o
 
 #############
+#
+# Set shared dependent on build_shared to build .so lib.
+#
+shared:
 
 
-# Location of MPI (Message Passing Interface) software
-
-#ESMC_MPIRUN      = 
-MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/mpiuni
-MPI_LIB        = -lmpiuni
-MPI_INCLUDE    = -I${MPI_HOME}
-MPIRUN         =  ${MPI_HOME}/mpirun
-
-# MP_LIB is for openMP
-MP_LIB          = -lpgmp
-# For pthreads (or omp)
-THREAD_LIB      = -lpthread
