@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.35 2005/02/15 21:46:00 theurich Exp $
+// $Id: ESMC_VM.C,v 1.36 2005/02/23 05:08:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
 
 // include higher level, 3rd party or system headers
-#include <pthread.h>
+#include "ESMF_Pthread.h"
 
 // include ESMF headers
 #include "ESMC_Start.h"
@@ -47,7 +47,7 @@
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
-static const char *const version = "$Id: ESMC_VM.C,v 1.35 2005/02/15 21:46:00 theurich Exp $";
+static const char *const version = "$Id: ESMC_VM.C,v 1.36 2005/02/23 05:08:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -732,13 +732,15 @@ ESMC_VM *ESMC_VMGetCurrent(
 //-----------------------------------------------------------------------------
   *rc = ESMF_FAILURE; // assume failure
   pthread_t mytid = pthread_self();
-  int i;
-  for (i=0; i<matchArray_count; i++)
-    if (matchArray_tid[i] == mytid) break;
-  if (i == matchArray_count){
-    ESMC_LogDefault.ESMC_LogWrite("could not determine current VM",
-      ESMC_LOG_ERROR);
-    return NULL;  // bail out
+  int i = matchIndex;
+  if (matchArray_tid[i] != mytid){
+    for (i=0; i<matchArray_count; i++)
+      if (matchArray_tid[i] == mytid) break;
+    if (i == matchArray_count){
+      ESMC_LogDefault.ESMC_LogWrite("could not determine current VM",
+        ESMC_LOG_ERROR);
+      return NULL;  // bail out
+    }
   }
   // found a match
   *rc = ESMF_SUCCESS;

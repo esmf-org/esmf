@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.14 2005/02/11 16:19:35 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.15 2005/02/23 05:07:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 #ifndef ESMC_VMKERNEL_H
 #define ESMC_VMKERNEL_H
 
-#include <pthread.h>
+#include "ESMF_Pthread.h"
 #include <mpi.h>
 
 // reduction operations
@@ -261,7 +261,7 @@ class ESMC_VMKPlan{
     void vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, int nplist);  
       // set up a ESMC_VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
-    void vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, int nplist,
+    int vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, int nplist,
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
       // set up a ESMC_VMKPlan that will max. number of thread-pets up to max
       // but only allow PETs listed in plist to participate
@@ -277,7 +277,7 @@ class ESMC_VMKPlan{
       // instantiations and claim all cores of pets that don't make it through,
       // up to max cores per pet but only allow PETs listed in plist to
       // participate
-    void vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist, int nplist,
+    int vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist, int nplist,
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
       // set up a ESMC_VMKPlan that will only have single threaded pet
       // instantiations and claim all cores of pets that don't make it through,
@@ -293,7 +293,7 @@ class ESMC_VMKPlan{
       // set up a ESMC_VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in
       // plist
-    void vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, int nplist,
+    int vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, int nplist,
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
       // set up a ESMC_VMKPlan that will have pets with the maximum number of
       // cores available, but not more than max and only use PETs listed in

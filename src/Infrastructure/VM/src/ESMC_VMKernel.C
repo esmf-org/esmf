@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.27 2005/02/12 00:20:20 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.28 2005/02/23 05:06:07 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,7 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
-#include <pthread.h>
+#include "ESMF_Pthread.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1539,11 +1539,7 @@ int ESMC_VMK::vmk_pid(int i){
 ESMC_VMKPlan::ESMC_VMKPlan(void){
   // native constructor
   nothreadflag = 1; // by default use non-threaded VMs
-#ifdef NO_LIBPTHREAD
-  parentVMflag = 1; // pthread library not available
-#else
   parentVMflag = 0; // default is to create a new VM for every child
-#endif
   // invalidate the arrays
   spawnflag = NULL;
   contribute = NULL;
@@ -1709,7 +1705,7 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, 
+int ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist, 
   int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -1719,6 +1715,10 @@ void ESMC_VMKPlan::vmkplan_maxthreads(ESMC_VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxthreads(vm, max, plist, nplist);
+#ifdef ESMF_NO_PTHREADS
+  if (!nothreadflag) return 1; // indicate error
+#endif
+  return 0;
 }
 
 
@@ -1797,7 +1797,7 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
+int ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
   int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -1807,6 +1807,10 @@ void ESMC_VMKPlan::vmkplan_minthreads(ESMC_VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_minthreads(vm, max, plist, nplist);
+#ifdef ESMF_NO_PTHREADS
+  if (!nothreadflag) return 1; // indicate error
+#endif
+  return 0;
 }
 
 
@@ -1889,7 +1893,7 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
 }
 
 
-void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, 
+int ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist, 
   int nplist, int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi){
   // set the communication preferences
   if (pref_intra_process >= 0)
@@ -1899,6 +1903,10 @@ void ESMC_VMKPlan::vmkplan_maxcores(ESMC_VMK &vm, int max, int *plist,
   if (pref_inter_ssi >= 0)
     this->pref_inter_ssi = pref_inter_ssi;
   vmkplan_maxcores(vm, max, plist, nplist);
+#ifdef ESMF_NO_PTHREADS
+  if (!nothreadflag) return 1; // indicate error
+#endif
+  return 0;
 }
 
 
