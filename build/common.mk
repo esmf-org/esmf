@@ -1,8 +1,4 @@
-<<<<<<< common.mk
-#  $Id: common.mk,v 1.58 2004/07/06 19:27:22 svasquez Exp $
-=======
-#  $Id: common.mk,v 1.58 2004/07/06 19:27:22 svasquez Exp $
->>>>>>> 1.56.2.3
+#  $Id: common.mk,v 1.59 2004/07/06 19:54:44 svasquez Exp $
 #===============================================================================
 #   common.mk
 #
@@ -1134,21 +1130,21 @@ include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE
 #
 testexamples_1: ${TESTEXAMPLES_1}
 vtestexamples_1:
-        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
 testexamples_2: ${TESTEXAMPLES_2}
 testexamples_3: ${TESTEXAMPLES_3}
 vtestexamples_3:
-        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
 testexamples_4: ${TESTEXAMPLES_4}
 vtestexamples_4:
-        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
 testexamples_5: ${TESTEXAMPLES_5}
 testexamples_6: ${TESTEXAMPLES_6}
 testexamples_7: ${TESTEXAMPLES_7}
 testexamples_8: ${TESTEXAMPLES_8}
 testexamples_9: ${TESTEXAMPLES_9}
 vtestexamples_9:
-        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
+	dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
 testexamples_10: ${TESTEXAMPLES_10}
 testexamples_11: ${TESTEXAMPLES_11}
 testexamples_12: ${TESTEXAMPLES_12}
