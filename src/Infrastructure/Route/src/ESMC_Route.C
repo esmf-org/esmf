@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.104 2004/11/05 00:24:44 theurich Exp $
+// $Id: ESMC_Route.C,v 1.105 2004/11/05 05:54:30 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.104 2004/11/05 00:24:44 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.105 2004/11/05 05:54:30 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -151,25 +151,27 @@ static int maxroutes = 10;
 // !REQUIREMENTS:  
 
     static int rseqnum = 1;
-    int myde, rc;
-    int decount;         // total number of DE/PEs in src + dst layouts
+    int rc;
+    int npets;          // total number of PETs in this VM
+    int mypet;          // pet id of this pet
 
-    this->delayout = delayout;
-    delayout->ESMC_DELayoutGet(&decount, NULL, NULL, NULL, 0, &myde,
-                                NULL, NULL, NULL, 0);
+    delayout->ESMC_DELayoutGetVM(&vm);
+    npets = vm->vmk_npets();
+    mypet = vm->vmk_mypet();
+    
         
     routeid = rseqnum++;
-    sendRT = ESMC_RTableCreate(myde, decount, &rc);
+    sendRT = ESMC_RTableCreate(mypet, npets, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
 
-    recvRT = ESMC_RTableCreate(myde, decount, &rc);
+    recvRT = ESMC_RTableCreate(mypet, npets, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
 
     recvitems = 0;
 
-    ct = ESMC_CommTableCreate(myde, decount, &rc);
+    ct = ESMC_CommTableCreate(mypet, npets, &rc);
     if (rc == ESMF_FAILURE)
        return rc;
 
@@ -695,7 +697,7 @@ static int maxroutes = 10;
     int i, j, k, l, m;
     int ixs, ixr;
     int ccount, xscount, xrcount, xmcount;
-    int mydeid, theirdeid;
+    int mypet, theirpet;
     int needed;
     ESMC_XPacket *sendxp, *recvxp;
     int srank, rrank, mrank;
@@ -714,11 +716,7 @@ static int maxroutes = 10;
     char *srcptr, *rcvptr;
     int nbytes;
 
-    ESMC_VM *vm;
-    delayout->ESMC_DELayoutGetVM(&vm);  // get the VM for this DELayout
-    
-    rc = delayout->ESMC_DELayoutGet(NULL, NULL, NULL, NULL, 0, &mydeid,
-                                       NULL, NULL, NULL, 0);
+    mypet = vm->vmk_mypet();
     rc = ct->ESMC_CommTableGetCount(&ccount);
     
     //printf("ESMC_RouteRun: %p, %p\n", srcaddr, dstaddr);
@@ -731,17 +729,17 @@ static int maxroutes = 10;
     for (i=0; i<ccount; i++) {
 
         // find out who the next id is 
-        rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
+        rc = ct->ESMC_CommTableGetPartner(i, &theirpet, &needed);
         if (!needed) {
-  //       printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
+  //       printf("RouteRun: comm partner %d not needed, looping\n", theirpet);
             continue;
         } else {
-  //       printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
+  //       printf("RouteRun: comm partner %d needed %d\n", theirpet, needed);
         }
        
         // find total number of xpackets
-	rc = recvRT->ESMC_RTableGetCount(theirdeid, &xrcount);
-	rc = sendRT->ESMC_RTableGetCount(theirdeid, &xscount);
+	rc = recvRT->ESMC_RTableGetCount(theirpet, &xrcount);
+	rc = sendRT->ESMC_RTableGetCount(theirpet, &xscount);
 
         xmcount = MAX(xrcount, xscount);
         for (m=0, ixs=0, ixr=0; m < xmcount; m++, ixs++, ixr++){
@@ -754,7 +752,7 @@ static int maxroutes = 10;
                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
             }
             if (ixs < xscount) {
-                rc = sendRT->ESMC_RTableGetEntry(theirdeid, ixs, &sendxp);
+                rc = sendRT->ESMC_RTableGetEntry(theirpet, ixs, &sendxp);
                 rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
                                              sstride, srep_count);
   //              printf("RouteRun: sendxp\n");
@@ -777,7 +775,7 @@ static int maxroutes = 10;
                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
             }
             if (ixr < xrcount) {
-                rc = recvRT->ESMC_RTableGetEntry(theirdeid, ixr, &recvxp);
+                rc = recvRT->ESMC_RTableGetEntry(theirpet, ixr, &recvxp);
                 rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
                                              rstride, rrep_count);
   //               printf("RouteRun: recvxp\n");
@@ -865,13 +863,13 @@ static int maxroutes = 10;
              }
            }
 
-           if(mydeid == theirdeid)
+           if(mypet == theirpet)
 	      rcvbuf = srcbufstart;
 	   else
               //delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
               // (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes,               //  mydeid, theirdeid, ESMF_TRUE);
-              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirdeid,
-                rcvbufstart, rcvtcount*nbytes, theirdeid);
+              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirpet,
+                rcvbufstart, rcvtcount*nbytes, theirpet);
 
            // copy out of the recv buffer
 	   if(rcvtcount > 0) {
@@ -1107,8 +1105,8 @@ static int maxroutes = 10;
 
 
     // add this route to the cache table
-        ESMC_RouteAddCache(rank, my_DE, AI_exc, AI_tot, AI_count, delayout, 
-                           my_DE, AI_exc, AI_tot, AI_count, delayout, 
+        ESMC_RouteAddCache(rank, my_DE, AI_exc, AI_tot, AI_count, NULL, 
+                           my_DE, AI_exc, AI_tot, AI_count, NULL, 
                            periodic);
 
     return rc;
@@ -1185,7 +1183,7 @@ static int maxroutes = 10;
     int myGlobalStart[ESMF_MAXDIM];
     int i, k, rc;
     int didsomething;
-    int theirDE, theirDEParent, theirDECount;
+    int theirDE, theirMatchingPET, theirDECount;
 
     // set this here, because if neither send or recv are > 0 then we
     // do nothing here.
@@ -1217,14 +1215,14 @@ static int maxroutes = 10;
       for (i=0; i<theirDECount; i++) {
           theirDE = i;
 
-          // get the parent DE identifier for this DE in the rcv layout
-          dstdeLayout->ESMC_DELayoutGetDEMatchDE(theirDE, *delayout, NULL,
-                                                  &theirDEParent, 1);
-  //        printf("Match1: %d, %d\n", theirDE, theirDEParent);
-          //theirDEParent = theirDE;     // temporarily
-          if (theirDEParent != theirDE) 
+          // get the parent PET identifier for this DE in the rcv layout
+          dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
+                                                  &theirMatchingPET, 1);
+  //        printf("Match1: %d, %d\n", theirDE, theirMatchingPET);
+          //theirMatchingPET = theirDE;     // temporarily
+          if (theirMatchingPET != theirDE) 
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
-                  << theirDEParent << endl;
+                  << theirMatchingPET << endl;
 
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
@@ -1250,8 +1248,8 @@ static int maxroutes = 10;
                                                 rank, myGlobalStart);
 
           // load the intersecting XPacket into the sending RTable
-          sendRT->ESMC_RTableSetEntry(theirDEParent, &intersectXP);
-          ct->ESMC_CommTableSetPartner(theirDEParent);
+          sendRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
+          ct->ESMC_CommTableSetPartner(theirMatchingPET);
  
           // free XPs allocated by XPacketFromAxisIndex() routine above
           delete [] theirXP;
@@ -1283,13 +1281,13 @@ static int maxroutes = 10;
           theirDE = i;
 
           // get the parent DE identifier for this DE in the src layout
-          dstdeLayout->ESMC_DELayoutGetDEMatchDE(theirDE, *delayout, NULL,
-                                                  &theirDEParent, 1);
-  //        printf("Match2: %d, %d\n", theirDE, theirDEParent);
-          //theirDEParent = theirDE;     // temporarily
-          if (theirDEParent != theirDE) 
+          dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
+                                                  &theirMatchingPET, 1);
+  //        printf("Match2: %d, %d\n", theirDE, theirMatchingPET);
+          //theirMatchingPET = theirDE;     // temporarily
+          if (theirMatchingPET != theirDE) 
 	     cout << "theirDE = " << theirDE << ", parentDE = " 
-                  << theirDEParent << endl;
+                  << theirMatchingPET << endl;
 
           // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
@@ -1315,8 +1313,8 @@ static int maxroutes = 10;
                                                 rank, myGlobalStart);
 
           // load the intersecting XPacket into the receiving RTable
-          recvRT->ESMC_RTableSetEntry(theirDEParent, &intersectXP);
-          ct->ESMC_CommTableSetPartner(theirDEParent);
+          recvRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
+          ct->ESMC_CommTableSetPartner(theirMatchingPET);
         }
 
         // free the dst myXP
@@ -1405,7 +1403,7 @@ static int maxroutes = 10;
     int my_XPcount, their_XPcount;
     int i, k, rc;
     int didsomething;
-    int their_de, their_de_parent, their_decount;
+    int their_de, their_matching_pet, their_decount;
 
     // set this here, because if neither send or recv are > 0 then we
     // do nothing here.
@@ -1440,14 +1438,14 @@ static int maxroutes = 10;
       for (i=0; i<their_decount; i++) {
           their_de = i;
 
-          // get the parent DE identifier for this DE in the rcv layout
-          delayout_rcv->ESMC_DELayoutGetDEMatchDE(their_de, *delayout, NULL,
-                                                   &their_de_parent, 1);
- //         printf("Match1: %d, %d\n", their_de, their_de_parent);
-          //their_de_parent = their_de;     // temporarily
-          if (their_de_parent != their_de) 
+          // get the parent PET identifier for this DE in the rcv layout
+          delayout_rcv->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
+                                                   &their_matching_pet, 1);
+ //         printf("Match1: %d, %d\n", their_de, their_matching_pet);
+          //their_matching_pet = their_de;     // temporarily
+          if (their_matching_pet != their_de) 
 	     cout << "their_de = " << their_de << ", parent_de = " 
-                  << their_de_parent << endl;
+                  << their_matching_pet << endl;
 
           // get "their" AI out of the AI_rcv array
           for (k=0; k<rank; k++) {
@@ -1475,8 +1473,8 @@ static int maxroutes = 10;
                                                  rank, my_global_start);
 
           // load the intersecting XPacket into the sending RTable
-          sendRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
-          ct->ESMC_CommTableSetPartner(their_de_parent);
+          sendRT->ESMC_RTableSetEntry(their_matching_pet, &intersect_XP);
+          ct->ESMC_CommTableSetPartner(their_matching_pet);
         }
 
         // free the src my_XP before computing the rcv my_XP
@@ -1506,14 +1504,14 @@ static int maxroutes = 10;
       for (i=0; i<their_decount; i++) {
           their_de = i;
 
-          // get the parent DE identifier for this DE in the snd layout
-          delayout_snd->ESMC_DELayoutGetDEMatchDE(their_de, *delayout, NULL,
-                                                   &their_de_parent, 1);
-  //        printf("Match2: %d, %d\n", their_de, their_de_parent);
-          //their_de_parent = their_de;     // temporarily
-          if (their_de_parent != their_de) 
+          // get the parent PET identifier for this DE in the snd layout
+          delayout_snd->ESMC_DELayoutGetDEMatchPET(their_de, *vm, NULL,
+                                                   &their_matching_pet, 1);
+  //        printf("Match2: %d, %d\n", their_de, their_matching_pet);
+          //their_matching_pet = their_de;     // temporarily
+          if (their_matching_pet != their_de) 
 	     cout << "their_de = " << their_de << ", parent_de = " 
-                  << their_de_parent << endl;
+                  << their_matching_pet << endl;
 
           // get "their" AI out of the AI_snd array
           for (k=0; k<rank; k++) {
@@ -1541,8 +1539,8 @@ static int maxroutes = 10;
                                                  rank, my_global_start);
 
           // load the intersecting XPacket into the receiving RTable
-          recvRT->ESMC_RTableSetEntry(their_de_parent, &intersect_XP);
-          ct->ESMC_CommTableSetPartner(their_de_parent);
+          recvRT->ESMC_RTableSetEntry(their_matching_pet, &intersect_XP);
+          ct->ESMC_CommTableSetPartner(their_matching_pet);
 
           // free XPs allocated by XPacketFromAxisIndex() routine above
           delete [] their_XP;
@@ -1675,8 +1673,8 @@ static int maxroutes = 10;
     //ESMC_RoutePrint("");
  
     // add this route to the cache table
-    ESMC_RouteAddCache(rank, myDE, NULL, NULL, 0, delayout,
-                             myDE, NULL, NULL, 0, delayout, NULL);
+    ESMC_RouteAddCache(rank, myDE, NULL, NULL, 0, NULL,
+                             myDE, NULL, NULL, 0, NULL, NULL);
 
     return rc;
 

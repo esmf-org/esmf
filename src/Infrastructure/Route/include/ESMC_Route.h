@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.39 2004/10/05 22:57:01 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.40 2004/11/05 05:54:17 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,8 @@
    private:
      // name in base class
      int routeid;           // unique id, used later for cacheing
-     ESMC_DELayout *delayout; // layout which includes all src + dst de's
+     ESMC_VM *vm;           // vm on which this route runs
+                            // must include VASs of all src + dst de's
      ESMC_RTable *sendRT;   // send route table
      ESMC_RTable *recvRT;   // receive route table
      int recvitems;         // if >0, numitems needed in the destination array
