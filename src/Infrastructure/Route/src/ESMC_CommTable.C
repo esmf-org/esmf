@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.19 2003/05/01 16:24:05 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.20 2003/07/02 16:49:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,11 +33,11 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.19 2003/05/01 16:24:05 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.20 2003/07/02 16:49:56 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
-//-----------------------------------------------------------------------------
+
 //-----------------------------------------------------------------------------
 //
 // This section includes all the CommTable routines
@@ -129,15 +129,13 @@
 //
 //EOP
 // !REQUIREMENTS:  
-    int i, *ip;
+    int i, *ip, rc;
 
     myid = mydeid;
+    decount = partnercount;
     commcount = partnercount;
     commpartner = new int[commcount];
     commneeded = new int[commcount];
-
-    for(i=0; i<commcount; i++) 
-        commneeded[i] = 0;
 
     switch(partnercount) {
       case 1:
@@ -205,35 +203,15 @@
               commpartner[i] = ids[mydeid][i];
         }
         break;
-      case 16:
-        {
-        int ids[16][16] = {{  1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14,15, 0},
-                           {  0,15,14,13,12,11,10, 9, 8, 7, 6, 5, 4, 3, 2, 1},
-                           { 15, 0,13,14,11,12, 9,10, 7, 8, 5, 6, 3, 4, 1, 2},
-                           { 14,13, 0,15,10, 9,12,11, 6, 5, 8, 7, 2, 1, 4, 3},
-                           { 13,14,15, 0, 9,10,11,12, 5, 6, 7, 8, 1, 2, 3, 4},
-                           { 12,11,10, 9, 0,15,14,13, 4, 3, 2, 1, 8, 7, 6, 5},
-                           { 11,12, 9,10,15, 0,13,14, 3, 4, 1, 2, 7, 8, 5, 6},
-                           { 10, 9,12,11,14,13, 0,15, 2, 1, 4, 3, 6, 5, 8, 7},
-                           {  9,10,11,12,13,14,15, 0, 1, 2, 3, 4, 5, 6, 7, 8},
-                           {  8, 7, 6, 5, 4, 3, 2, 1, 0,15,14,13,12,11,10, 9},
-                           {  7, 8, 5, 6, 3, 4, 1, 2,15, 0,13,14,11,12, 9,10},
-                           {  6, 5, 8, 7, 2, 1, 4, 3,14,13, 0,15,10, 9,12,11},
-                           {  5, 6, 7, 8, 1, 2, 3, 4,13,14,15, 0, 9,10,11,12},
-                           {  4, 3, 2, 1, 8, 7, 6, 5,12,11,10, 9, 0,15,14,13},
-                           {  3, 4, 1, 2, 7, 8, 5, 6,11,12, 9,10,15, 0,13,14},
-                           {  2, 1, 4, 3, 6, 5, 8, 7,10, 9,12,11,14,13, 0,15} };
-
-          for (i=0; i<partnercount; i++)
-              commpartner[i] = ids[mydeid][i];
-        }
-        break;
       default:
-        printf("ERROR!! no code for PE count of %d\n", partnercount);
-        for (i=0; i<partnercount; i++)
-            commpartner[i] = -1;
-        return ESMF_FAILURE;
+        rc = ESMC_CommTableFill();
+        if (rc != ESMF_SUCCESS)
+            return rc;
+        break;
     }
+
+    for(i=0; i<commcount; i++) 
+        commneeded[i] = 0;
 
     return ESMF_SUCCESS;
 
@@ -320,8 +298,9 @@
     if (entry < 0 || entry >= commcount) {
         *partner = -1;
         *needed = 0;
-        return ESMF_FAILURE;
-    }
+        return ESMF_SUCCESS;
+    } 
+
     *partner = commpartner[entry];
     *needed = commneeded[entry];
     
@@ -417,7 +396,7 @@
 
     int i;
 
-    printf(" myid=%d, commcount=%d\n", myid, commcount);
+    printf(" myid=%d, decount=%d, commcount=%d\n", myid, decount, commcount);
     for (i=0; i<commcount; i++) {
         printf(" %2d: partner=%2d, needed=%1d\n", 
                    i, commpartner[i], commneeded[i]);
@@ -427,6 +406,81 @@
 
  } // end ESMC_CommTablePrint
 
+//-----------------------------------------------------------------------------
+
+static void 
+fill(int max, int size, int xpos, int ypos, int base, int *results)
+{
+    int nsize;
+
+    if (size > 2) {
+        nsize = size / 2;
+        fill(max, nsize, xpos, ypos, base, results);
+        fill(max, nsize, xpos+nsize, ypos, base+nsize, results);
+        fill(max, nsize, xpos, ypos+nsize, base+nsize, results);
+        fill(max, nsize, xpos+nsize, ypos+nsize, base, results);
+    } else {
+        results[xpos * max + ypos] = base;
+        results[(xpos+1) * max + ypos] = base+1;
+        results[xpos * max + (ypos+1)] = base+1;
+        results[(xpos+1) * max + (ypos+1)] = base;
+    }
+
+    return;
+}
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_CommTableFill - private routine for computing comm patterns
+//
+// !INTERFACE:
+    int ESMC_CommTable::ESMC_CommTableFill(
+//
+// !RETURN VALUE:
+//    integer return code
+//
+// !ARGUMENTS:
+         void) {
+//
+// !DESCRIPTION:
+//   Generate the order for the communication patterns for each DE in
+//    a group.
+//
+//EOPI
+    int i, npow2;
+    int *results;
+
+    npow2 = 1;
+    while (npow2 < decount)
+        npow2 *= 2;
+
+    // update base object now to this pow of 2
+    commcount = npow2;
+    delete [] commpartner;
+    commpartner = new int[npow2];
+    delete [] commneeded;
+    commneeded = new int[npow2];
+
+    // this is the table for all procs
+    results = new int[npow2*npow2];
+
+    // call the recursive routine to fill the table
+    fill(npow2, npow2, 0, 0, 0, results);
+
+    // copy appropriate line back for this deid
+    for (i=0; i<npow2; i++) {
+        if (results[myid * npow2 + i] < decount)
+            commpartner[i] = results[myid * npow2 + i];
+        else
+            commpartner[i] = -1;
+    }
+
+    delete [] results;
+    return ESMF_SUCCESS;
+
+ } // end ESMC_CommTableFill
+
+//-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_CommTable - native C++ constructor
@@ -445,6 +499,7 @@
 //EOP
 // !REQUIREMENTS:
 
+    decount = 0;
     commcount = 0;
     commpartner = NULL;
     commneeded = NULL;
