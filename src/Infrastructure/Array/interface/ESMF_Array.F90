@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.14 2004/06/21 22:51:59 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.15 2004/07/22 14:43:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.14 2004/06/21 22:51:59 cdeluca Exp $'
+      '$Id: ESMF_Array.F90,v 1.15 2004/07/22 14:43:38 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -708,7 +708,7 @@ end subroutine
 !EOPI
 
         integer :: status
-        integer :: i, dlength
+        integer :: dlength
 
         ! call c routine to do work
         dlength = size(decompids)
