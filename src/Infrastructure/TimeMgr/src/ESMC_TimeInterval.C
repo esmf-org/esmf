@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.66 2004/07/02 20:18:36 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.67 2004/07/20 23:10:01 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.66 2004/07/02 20:18:36 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.67 2004/07/20 23:10:01 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -407,8 +407,10 @@
             // TODO: use TimeInterval operators (/) and (-) when ready ?
 
             // get years using startTime/endTime, if available
-            if (tiToConvert.startTime.ESMC_TimeValidate() == ESMF_SUCCESS ||
-                tiToConvert.endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+            if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
+                  == ESMF_SUCCESS ||
+                tiToConvert.endTime.ESMC_TimeValidate("initialized")
+                  == ESMF_SUCCESS) {
               ESMC_TimeInterval oneYear(0, 0, 1, 1);
               ESMC_Time iTime = tiToConvert.startTime + oneYear;
               years = 0;
@@ -515,8 +517,10 @@
           // TODO: use TimeInterval operators (/) and (-) when ready ?
 
           // get months using startTime, if available
-          if (tiToConvert.startTime.ESMC_TimeValidate() == ESMF_SUCCESS ||
-              tiToConvert.endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+          if (tiToConvert.startTime.ESMC_TimeValidate("initialized")
+                == ESMF_SUCCESS ||
+              tiToConvert.endTime.ESMC_TimeValidate("initialized")
+                == ESMF_SUCCESS) {
             ESMC_TimeInterval oneMonth(0, 0, 1, 0, 1);
             ESMC_Time iTime = tiToConvert.startTime + oneMonth;
             months = 0;
@@ -2901,7 +2905,7 @@
       case ESMC_CAL_GREGORIAN:
       case ESMC_CAL_NOLEAP:
         // use startTime to reduce yy,mm,d to seconds
-        if (startTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+        if (startTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           endTime = startTime + *this;
           ESMC_TimeInterval ti = endTime - startTime;
           s = ti.s;
@@ -2912,7 +2916,7 @@
           yy = mm = d = 0;  // yy, mm, d all reduced to base seconds
 
         // use endTime to reduce yy,mm,d to seconds
-        } else if (endTime.ESMC_TimeValidate() == ESMF_SUCCESS) {
+        } else if (endTime.ESMC_TimeValidate("initialized") == ESMF_SUCCESS) {
           startTime = endTime - *this;
           ESMC_TimeInterval ti = endTime - startTime;
           s = ti.s;
