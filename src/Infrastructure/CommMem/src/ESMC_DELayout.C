@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.32 2003/06/17 17:59:28 rstaufer Exp $
+// $Id: ESMC_DELayout.C,v 1.33 2003/07/10 23:01:46 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.32 2003/06/17 17:59:28 rstaufer Exp $";
+           "$Id: ESMC_DELayout.C,v 1.33 2003/07/10 23:01:46 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1762,33 +1762,32 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   this->ESMC_DELayoutGetDEPosition( &x, &y);
   // loop to set AxisIndex array
   for (int i=0; i<size_gcount; i++, AIPtr++) {
-    AIPtr->decomp = decompids[i];
+    // AIPtr->decomp = decompids[i];   jw
     // check if decomp is out of bounds
     if ((decompids[i] < 0) || (decompids[i] > 2)) {
       return(ESMF_FAILURE);
     }
     // if decomp is 0, no decomposition of the axis
     if (decompids[i] == 0) {
-      AIPtr->l = 0;
-      AIPtr->r = global_counts[i]-1;
-      AIPtr->max = global_counts[i];
-      AIPtr->gstart = 0;
+      AIPtr->min = 0;
+      AIPtr->max = global_counts[i]-1;
+      AIPtr->stride = global_counts[i]; // jw?
     }
     // if decomp is 1, use nxDELayout
     if (decompids[i] == 1) {
       int n1 = (global_counts[i]+length[0]-1)/length[0]; // round to nearest
-      AIPtr->l = 0;
-      AIPtr->r = n1-1;
-      AIPtr->max = global_counts[i];
-      AIPtr->gstart = x*n1;
+      AIPtr->min = 0;
+      AIPtr->max = n1-1;
+      AIPtr->stride = global_counts[i];    // jw?
+ //     AIPtr->gstart = x*n1;
     }
     // if decomp is 2, use nyDELayout
     if (decompids[i] == 2) {
       int n2 = (global_counts[i]+length[1]-1)/length[1]; // round to nearest
-      AIPtr->l = 0;
-      AIPtr->r = n2-1;
-      AIPtr->max = global_counts[i];
-      AIPtr->gstart = y*n2;
+      AIPtr->min = 0;
+      AIPtr->max = n2-1;
+      AIPtr->stride = global_counts[i];   // jw?
+  //    AIPtr->gstart = y*n2;
     }
   }
    
@@ -1850,9 +1849,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[1];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].max;
-          rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
-          rsize_tot[i] = AIPtr2[i].r - AIPtr2[i].l + 1;
+          rmax[i] = AIPtr[i].stride;  // jw?  needs to be the global length
+          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
+          rsize_tot[i] = AIPtr2[i].max - AIPtr2[i].min + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
             rbcount++;
@@ -1878,8 +1877,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
         for (int j=0; j<rsize[rbreak[0]]; j++) {
-          j_tot = j + AIPtr[ranky].l;
-          sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].l];
+          j_tot = j + AIPtr[ranky].min;
+          sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].min];
           sendcount = rsize[rankx];
           recvbuf = &GlobalArray[j*rmax[rankx]];
           for (int kx=0; kx<nx; kx++) {
@@ -1908,8 +1907,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[2];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].max;
-          rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
+          rmax[i] = AIPtr[i].stride;   // jw? same
+          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
             rbcount++;
@@ -2028,9 +2027,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[1];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].max;
-          rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
-          rsize_tot[i] = AIPtr2[i].r - AIPtr2[i].l + 1;
+          rmax[i] = AIPtr[i].stride;  // jw?
+          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
+          rsize_tot[i] = AIPtr2[i].max - AIPtr2[i].min + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
             rbcount++;
@@ -2056,8 +2055,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int* recvcounts = new int[nde];
         int* displs = new int[nde];
         for (int j=0; j<rsize[rbreak[0]]; j++) {
-          j_tot = j + AIPtr[ranky].l;
-          sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].l];
+          j_tot = j + AIPtr[ranky].min;
+          sendbuf = &DistArray[j_tot*rsize_tot[rankx] + AIPtr[rankx].min];
           sendcount = rsize[rankx];
           recvbuf = &GlobalArray[j*rmax[rankx]];
           for (int kx=0; kx<nx; kx++) {
@@ -2086,8 +2085,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
         int rbreak[2];
         int rbcount = 0;
         for (i=0; i<size_decomp; i++) {
-          rmax[i] = AIPtr[i].max;
-          rsize[i] = AIPtr[i].r - AIPtr[i].l + 1;
+          rmax[i] = AIPtr[i].stride;   // jw?
+          rsize[i] = AIPtr[i].max - AIPtr[i].min + 1;
           if (decompids[i] == 0) {
             rbreak[rbcount]=i;
             rbcount++;
