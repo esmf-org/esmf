@@ -818,7 +818,7 @@
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetFloat_array( cf, array, label, nsize, &
+    subroutine ESMF_ConfigGetFloat_array( cf, array, nsize, label,  &
                                           default, rc )
       
       implicit none
@@ -941,7 +941,7 @@
 !
 ! !INTERFACE:
 
-    subroutine ESMF_ConfigGetInt_array( cf, array, label, nsize, &
+    subroutine ESMF_ConfigGetInt_array( cf, array, nsize, label,  &
                                           default, rc )
       
       implicit none

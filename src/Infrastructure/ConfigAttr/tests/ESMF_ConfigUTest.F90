@@ -23,10 +23,11 @@
 
     program ESMF_Config_Test
 
+      use  ESMF_DELayoutMod
       use ESMF_ConfigMod
-      use  ESMF_temp   
+!!!      use  ESMF_temp   
 
-      type(ESMF_Layout) :: layout  
+      type(ESMF_DELayout) :: layout  
       type (ESMF_Config) cf 
       
       character(len=255) :: fname
@@ -50,19 +51,20 @@
 ! Initialization:
 !----------------
 
-      cf = ESMF_ConfigCreate( layout, rc )
-      call ESMF_ConfigLoadFile( cf, fname, rc, unique )
+      cf = ESMF_ConfigCreate( rc )
+      call ESMF_ConfigLoadFile( cf, fname, rc = rc)
 
-      if ( .NOT. unique ) then
-         print *,' File contains multiple copies of a label' 
-      end if
+!!      if ( .NOT. unique ) then
+!!         print *,' File contains multiple copies of a label' 
+!!      end if
 
 ! Retrieval of single parameters
 !--------------------------------
 
-      nDE = ESMF_ConfigGetInt ( cf, rc, label ='Number_of_DEs:', default=7 )
-      tau = ESMF_ConfigGetFloat ( cf, rc, &
-           label ='Relaxation_time_scale_in_days:')
+      nDE = ESMF_ConfigGetInt ( cf, label ='Number_of_DEs:', default=7, &
+           rc = rc )
+      tau = ESMF_ConfigGetFloat ( cf, &
+           label ='Relaxation_time_scale_in_days:', rc = rc)
       answer = ESMF_ConfigGetChar ( cf, 'Do_you_want_quality_control:', &
                                     rc = rc )
       call ESMF_ConfigGetString ( cf, fname ,'restart_file_name:', rc = rc )
@@ -77,14 +79,15 @@
 ! ----------------------------------------------------
 
       call ESMF_ConfigFindLabel ( cf, 'u-wind-error:', rc ) ! identifies label
-      call ESMF_ConfigGetString ( cf, u_dataType, rc )      ! first token
-      nu = ESMF_ConfigGetInt ( cf, rc )                     ! seconf token
-      sigU(1:nu) = ESMF_ConfigGetFloat ( cf, rc, size=nu )  ! tokens 3 thru 8 
+      call ESMF_ConfigGetString ( cf, u_dataType, rc =rc )  ! first token
+      nu = ESMF_ConfigGetInt ( cf, rc = rc )                ! seconf token
+      call ESMF_ConfigGetFloat ( cf,  array=sigU, nsize=nu,  rc=rc )  
+                                                            ! tokens 3 thru 8 
 
       call ESMF_ConfigFindLabel ( cf, 'v-wind-error:', rc )
-      call ESMF_ConfigGetString ( cf, v_dataType, rc )
-      nv = ESMF_ConfigGetInt ( cf, rc )
-      sigV = ESMF_ConfigGetFloat ( cf, rc, size=nv )
+      call ESMF_ConfigGetString ( cf, v_dataType, rc = rc )
+      nv = ESMF_ConfigGetInt ( cf, rc = rc )
+      call ESMF_ConfigGetFloat ( cf, sigV, nsize=nv, rc=rc )
   
 ! NOTE: Order is not relevant; first label found is returned
 
@@ -95,17 +98,17 @@
 
       call ESMF_ConfigFindLabel ( cf, 'ObsErr*QSCAT::', rc ) ! identify label
 
-      call ESMF_ConfigNextLine ( cf, rc )                ! move down 1 line
-      call ESMF_ConfigGetString ( cf, u_dataType, rc )   ! first token
-      nu = ESMF_ConfigGetInt ( cf, rc )                  ! second token
-      sigU = ESMF_ConfigGetFloat ( cf, rc, size=6 )      ! tokens 3 thru 8 
+      call ESMF_ConfigNextLine ( cf, rc=rc )               ! move down 1 line
+      call ESMF_ConfigGetString ( cf, u_dataType, rc=rc )  ! first token
+      nu = ESMF_ConfigGetInt ( cf, rc=rc )                 ! second token
+      call ESMF_ConfigGetFloat ( cf, sigU, nsize=6, rc=rc ) ! tokens 3 thru 8 
 
 !      Similarly for v
 
-      call ESMF_ConfigNextLine ( cf, rc )
-      call ESMF_ConfigGetString ( cf, v_dataType, rc )
-      nv = ESMF_ConfigGetInt ( cf, rc )
-      sigV = ESMF_ConfigGetFloat ( cf, rc, size=6 )
+      call ESMF_ConfigNextLine ( cf, rc=rc )
+      call ESMF_ConfigGetString ( cf, v_dataType, rc=rc )
+      nv = ESMF_ConfigGetInt ( cf, rc=rc )
+      call ESMF_ConfigGetFloat ( cf, sigV, nsize=6,rc=rc )
 
 
 
@@ -121,25 +124,27 @@
 
       end = .false.
       line = 0
-      do while ( (line < MAXLEV) . and. (rc == 0) )
-        call ESMF_ConfigNextLine( cf, rc, end )
+      do
+        call ESMF_ConfigNextLine( cf, end, rc )
         if (.NOT. end ) then
            line = line + 1 
 
 !               Retrieve pressure level
 !               -----------------------
-           plev(line) = ESMF_ConfigGetFloat ( cf, rc )
+           plev(line) = ESMF_ConfigGetFloat ( cf, rc=rc )
            if (rc /= 0) exit
            
 !               Looping over columns
 !               --------------------
            column = 0
            do while ((column < MAXLEV) .and. ( rc == 0) )
-              temp = ESMF_ConfigGetFloat ( cf, rc)
+              temp = ESMF_ConfigGetFloat ( cf, rc=rc)
               if (rc == 0) then 
                  column = column + 1
                  vCorr(line,column) = temp 
               end if
+!!              if (line >= MAXLEV) exit
+!!              if (rc /= 0) exit
            end do
            if (rc == EOL) rc = 0
                 
