@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.16 2004/02/11 23:40:38 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.17 2004/02/12 21:11:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.16 2004/02/11 23:40:38 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.17 2004/02/12 21:11:48 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1168,7 +1168,7 @@
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord2
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: coord3
-      real(ESMF_KIND_R8), dimension(numDims), intent(in), optional :: &
+      real(ESMF_KIND_R8), dimension(:), intent(in), optional :: &
                                                          minGlobalCoordPerDim
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta1
       real(ESMF_KIND_R8), dimension(:), intent(in), optional :: delta2
@@ -1179,11 +1179,11 @@
       type(ESMF_GridStagger), intent(in), optional :: vertStagger
       type(ESMF_CoordSystem), intent(in), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(in), optional :: vertCoordSystem
-      character (len=*), dimension(numDims), intent(in), optional :: dimNames
-      character (len=*), dimension(numDims), intent(in), optional :: dimUnits
+      character (len=*), dimension(:), intent(in), optional :: dimNames
+      character (len=*), dimension(:), intent(in), optional :: dimUnits
       type(ESMF_CoordOrder), intent(in), optional :: coordOrder
       type(ESMF_CoordIndex), intent(in), optional :: coordIndex
-      type(ESMF_Logical), dimension(numDims), intent(in), optional :: periodic
+      type(ESMF_Logical), dimension(:), intent(in), optional :: periodic
       character (len = *), intent(in), optional :: name
       integer, intent(out), optional :: rc
 !
@@ -1534,11 +1534,11 @@
         dimUnits(i) = grid%dimUnits(i)
       enddo
       if (associated(coords)) then
-        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_REF, status)
+        call ESMF_LocalArrayGetData(coords(1), coord1, ESMF_DATA_COPY, status)
         if (numDims.ge.2) &
-          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_REF, status)
+          call ESMF_LocalArrayGetData(coords(2), coord2, ESMF_DATA_COPY, status)
         if (numDims.ge.3) &
-          call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_REF, status)
+          call ESMF_LocalArrayGetData(coords(3), coord3, ESMF_DATA_COPY, status)
       else              ! assume uniform grid, so no coords stored
         allocate(coord1(counts(1)+1))
         coord1(1) = min(1)
