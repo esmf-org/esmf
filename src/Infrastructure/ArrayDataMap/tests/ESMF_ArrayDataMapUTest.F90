@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMapUTest.F90,v 1.2 2004/06/13 03:54:32 svasquez Exp $
+! $Id: ESMF_ArrayDataMapUTest.F90,v 1.3 2004/06/14 18:07:12 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ArrayDataMapUTest.F90,v 1.2 2004/06/13 03:54:32 svasquez Exp $'
+      '$Id: ESMF_ArrayDataMapUTest.F90,v 1.3 2004/06/14 18:07:12 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -115,14 +115,12 @@
 
 
       !-------------------------------------------------------------------------------
-      !This code crashes
-      ! Bug report 969243 opened
+      !EX_UTest
       ! Test ArrayDataMap Print
-      !call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Print ArrayDataMap Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-
+      call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Print ArrayDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
       !-------------------------------------------------------------------------------
@@ -155,13 +153,12 @@
 
 
       !-------------------------------------------------------------------------------
-      !This code crashes
-      ! Bug report 969243 opened
+      !EX_UTest
       ! Test ArrayDataMap Print
-      !call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Print ArrayDataMap Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_ArrayDataMapPrint(ArrayDataMap, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Print ArrayDataMap Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
 
