@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.18 2003/04/28 23:20:17 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.19 2003/04/29 23:06:12 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.18 2003/04/28 23:20:17 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.19 2003/04/29 23:06:12 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -121,10 +121,8 @@
     // TODO: validate inputs (individual and combos), set basetime values
     //       e.g. integer and float specifiers are mutually exclusive
 
-    ESMC_TimeIntervalSet(YY, MO, D, H, M, S, MS, US, NS,
-                         d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd);
-
-    return(ESMF_SUCCESS);
+    return(ESMC_TimeIntervalSet(YY, MO, D, H, M, S, MS, US, NS,
+                                d_, h_, m_, s_, ms_, us_, ns_, Sn, Sd));
 
  }  // end ESMC_TimeIntervalInit
 
@@ -285,10 +283,8 @@
     }
 
     // use base class to get sub-day values
-    ESMC_BaseTimeGet(secPerDay, H, M, S, MS, US, NS,
-                     h_, m_, s_, ms_, us_, ns_, Sn, Sd);
-
-    return(ESMF_SUCCESS);
+    return(ESMC_BaseTimeGet(secPerDay, H, M, S, MS, US, NS,
+                            h_, m_, s_, ms_, us_, ns_, Sn, Sd));
 
  }  // end ESMC_TimeIntervalGet
 
@@ -362,9 +358,8 @@
     }
 
     // use base class set for sub-day values
-    ESMC_BaseTimeSet(H, M, S, MS, US, NS, h_, m_, s_, ms_, us_, ns_, Sn, Sd);
-
-    return(ESMF_SUCCESS);
+    return(ESMC_BaseTimeSet(H, M, S, MS, US, NS,
+                            h_, m_, s_, ms_, us_, ns_, Sn, Sd));
 
  }  // end ESMC_TimeIntervalSet
 
