@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.68 2004/03/04 16:29:05 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.69 2004/03/05 17:42:11 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.68 2004/03/04 16:29:05 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.69 2004/03/05 17:42:11 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -299,44 +299,32 @@ end function
 !
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[compp]
 !    Component internal structure to be filled in.
-!
 !   \item[ctype]
 !    Component type, where types include: ESMF\_APPCOMP, ESMF\_GRIDCOMP,
 !    ESMF\_CPLCOMP.
-!
 !   \item[{[name]}]
 !    Component name.
-!
 !   \item[{[layout]}]
 !    Component layout.
-!
 !   \item[{[mtype]}]
 !    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
 !    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
-!
 !   \item[{[dirpath]}]
 !    Directory where component-specfic configuration or data files
 !    are located.
-!
 !   \item[{[configfile]}]
 !    File containing configuration information, either absolute filename
 !    or relative to {\tt dirpath}.
-!
 !   \item[{[config]}]
 !    Already created {\tt config} object.
-!
 !   \item[{[grid]}]
 !    Default {\tt grid} for a Gridded {\tt Component}.
-!
 !   \item[{[clock]}]
 !    Private {\tt clock} for this {\tt Component}.
-!
 !   \item[{[rc]}] 
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOPI
@@ -507,13 +495,10 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[compp]
 !      Component internal structure to be freed.
-!
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -594,19 +579,17 @@ end function
 !
 !   \item[compp]
 !    Component to call Initialization routine for.
-!
-!   \item[{[importstate]}]  Import data for initialization.
-!
-!   \item[{[exportstate]}]  Export data for initialization.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[importstate]}]  
+!    Import data for initialization.
+!   \item[{[exportstate]}]  
+!    Export data for initialization.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase init, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOPI
@@ -724,20 +707,17 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[compp]
 !    Component to call WriteRestart routine for.
-!
-!   \item[{[iospec]}]  Controls for how the component's data will be written.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase checkpoint, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[iospec]}]  
+!     Controls for how the component's data will be written.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase checkpoint, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOPI
@@ -818,20 +798,17 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[compp]
 !    Component to call ReadRestart routine for.
-!
-!   \item[{[iospec]}]  Controls for how the component's data will be read back.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase restore, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[iospec]}]  
+!    Controls for how the component's data will be read back.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!     If multiple-phase restore, which phase number this is.
+!     Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !   \end{description}
 !
 !EOPI
@@ -915,19 +892,17 @@ end function
 !    
 !  The arguments are:
 !  \begin{description}
-!
 !   \item[compp]
 !    Component to call Finalize routine for.
-!
-!   \item[{[importstate]}]  Import data for finalize.
-!
-!   \item[{[exportstate]}]  Export data for finalize.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase finalize, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHAS} for non-multiples.
-!
+!   \item[{[importstate]}]  
+!    Import data for finalize.
+!   \item[{[exportstate]}]  
+!    Export data for finalize.
+!   \item[{[clock]}]  
+!    External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase finalize, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHAS} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1022,16 +997,15 @@ end function
 !
 !   \item[compp]
 !    Component to call Run routine for.
-!
-!   \item[{[importstate]}]  Import data for run.
-!
-!   \item[{[exportstate]}]  Export data for run.
-!
-!   \item[{[clock]}]  External clock for passing in time information.
-!
-!   \item[{[phase]}]  If multiple-phase run, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
-!
+!   \item[{[importstate]}]  
+!     Import data for run.
+!   \item[{[exportstate]}]  
+!     Export data for run.
+!   \item[{[clock]}]  
+!     External clock for passing in time information.
+!   \item[{[phase]}]  
+!    If multiple-phase run, which phase number this is.
+!    Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1634,16 +1608,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[compp] 
 !          component object
-!
 !     \item[{[max]}] 
 !          Maximum threading level
-!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1696,16 +1666,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[compp] 
 !          component object
-!
 !     \item[{[max]}] 
 !          Maximum threading level
-!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1758,16 +1724,12 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[compp] 
 !          component object
-!
 !     \item[{[max]}] 
 !          Maximum threading level
-!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
@@ -1815,13 +1777,10 @@ end function
 !
 !     The arguments are:
 !     \begin{description}
-!
 !     \item[compp] 
 !          component object
-!
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
 !     \end{description}
 !
 !EOPI
