@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest69527.F90,v 1.17 2003/07/24 00:16:47 nscollins Exp $
+! $Id: ESMF_SysTest69527.F90,v 1.18 2003/07/31 23:02:46 jwolfe Exp $
 !
 ! System test code #69527
 
@@ -100,13 +100,13 @@
       gname = "test grid 1"
 
       grid1 = ESMF_GridCreate(counts=counts, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
-                             layout=layout1, &
-                             horz_gridtype=horz_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             name=gname, rc=status)
+                              x_min=x_min, x_max=x_max, &
+                              y_min=y_min, y_max=y_max, &
+                              layout=layout1, &
+                              horz_gridtype=horz_gridtype, &
+                              horz_stagger=horz_stagger, &
+                              horz_coord_system=horz_coord_system, &
+                              name=gname, rc=status)
 
       print *, "Grid Create returned ", status
 
