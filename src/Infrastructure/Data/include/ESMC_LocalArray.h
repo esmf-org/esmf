@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.4 2003/07/15 18:12:54 jwolfe Exp $
+// $Id: ESMC_LocalArray.h,v 1.5 2003/07/18 02:53:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,6 @@
 // 
 // !USES:
 #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-#include <ESMC_DELayout.h>  //
  //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 
