@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.7 2003/03/13 22:56:13 cdeluca Exp $
+// $Id: ESMC_Machine.C,v 1.8 2003/04/08 23:05:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,6 +37,7 @@
 //#include <iostream> // TODO: use when namespaces consistently implemented
 //using std::cout;
  #include <ESMC.h>
+ #include <mpi.h>     // TODO: temp - use MPI rank to id procs, NOT RIGHT
 
  // associated class definition file
  #include <ESMC_Machine.h>
@@ -44,8 +45,13 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Machine.C,v 1.7 2003/03/13 22:56:13 cdeluca Exp $";
+ static const char *const version = 
+                 "$Id: ESMC_Machine.C,v 1.8 2003/04/08 23:05:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
+
+//
+//  Single public machine object, available to be queried by anyone.
+ESMC_Machine Machine;
 
 //
 //-----------------------------------------------------------------------------
@@ -54,6 +60,61 @@
 // This section includes all the Machine routines
 //
 //
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineInitialize
+//
+// !INTERFACE:
+      int ESMC_MachineInitialize(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//     Should query machine for configuration, characteristics.
+//     TODO: this is hardcoded now and needs to be fixed.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    // initialize machine to defaults
+    //  TODO: query actual hardware - don't send in hardcoded values
+    return Machine.ESMC_MachineInit(256, 1024, 4, true, true, true, 
+                                     1, 200, 2, 100);
+
+
+ } // end ESMC_MachineInitialize
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineFinalize
+//
+// !INTERFACE:
+      int ESMC_MachineFinalize(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+//
+// !DESCRIPTION:
+//     Place to shut down any needed resources.
+//     TODO: This is currently NOT called.  We need to find a place
+//      to put the call to this code.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    //  TODO: shut down any necessary resources
+
+    //  TODO: This is currently NOT called.  We need to find a place
+    //   to put the call to this code.
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_MachineFinalize
+
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -95,6 +156,9 @@
   shMemBandwidth = shmemband;
   distMemLatency = distmemlat;
   distMemBandwidth = distmemband;
+
+  ESMC_MachineSetCpuID();
+  ESMC_MachineSetNodeID();
 
   return(ESMF_SUCCESS);
 
@@ -306,7 +370,55 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_MachineGetCpuID - get the machine-specific Cpu ID
+// !IROUTINE:  ESMC_MachineSetCpuID - get the machine-specific CPU ID
+//
+// !INTERFACE:
+      int ESMC_Machine::ESMC_MachineSetCpuID(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//     Discover the CPU ID of the calling process/thread.  For non-alpha
+//     platforms, this is using the MPI rank which is not the same thing,
+//     but will have to do for now.  TODO: fix this.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int initialized, numProcs;
+
+#ifdef alpha
+    long curr_cpu;
+    int start = 0;
+
+    // get cpu id we're on now (transient & relative, e.g. 0-3 on halem)
+    getsysinfo(GSI_CURRENT_CPU, (char *)&curr_cpu, sizeof(long), &start);
+    //cout << "curr_cpu = " << curr_cpu << "\n";
+    CpuID = (int) curr_cpu;
+#endif
+ 
+
+    MPI_Initialized(&initialized);
+    if (!initialized) {
+      MPI_Init(0, NULL);
+    } else {
+      // log error
+    }
+
+    // TODO: MPI overrides given nProcs ?
+    MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
+
+    // get my unique DE process group ID
+    MPI_Comm_rank(MPI_COMM_WORLD, &CpuID);  
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_MachineSetCpuID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineGetCpuID - get the machine-specific CPU ID
 //
 // !INTERFACE:
       int ESMC_Machine::ESMC_MachineGetCpuID(
@@ -315,27 +427,53 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int *cpuid) const {     // out - Cpu ID
+      int *cpuid) const {     // out - CPU ID
 //
 // !DESCRIPTION:
-//     Returns the Cpu ID of the calling process/thread
+//     Returns the CPU ID of the calling process/thread
+//
+//EOP
+// !REQUIREMENTS:  
+
+    *cpuid = CpuID;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_MachineGetCpuID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_MachineSetNodeID - Set the machine-specific Node ID
+//
+// !INTERFACE:
+      int ESMC_Machine::ESMC_MachineSetNodeID(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !DESCRIPTION:
+//     Sets the Node ID of the calling process/thread
 //
 //EOP
 // !REQUIREMENTS:  
 
 #ifdef alpha
-  long curr_cpu;
-  int start = 0;
+  char hname[32];
 
-  // get cpu id we're on now (transient & relative, e.g. 0-3 on halem)
-  getsysinfo(GSI_CURRENT_CPU, (char *)&curr_cpu, sizeof(long), &start);
-//cout << "curr_cpu = " << curr_cpu << "\n";
-  *cpuid = (int) curr_cpu;
+  // get node id we're on (absolute, e.g. 0-347 on halem)
+  gethostname(hname, 128);
+//cout << "hostname = " << hname << "\n";
+  NodeID = atol(strpbrk(hname, "0123456789"));
 #endif
  
+  // TODO:  HACK, HACK, HACK.  This should really query the node
+  //  but for now use MPI rank, which is how the cpu id is currently
+  //  being hacked around.
+  NodeID = CpuID;
+
   return(ESMF_SUCCESS);
 
- } // end ESMC_MachineGet<Value>
+ } // end ESMC_MachineGetNodeID
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -356,22 +494,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-#ifdef alpha
-  char hname[32];
-
-  // get node id we're on (absolute, e.g. 0-347 on halem)
-  gethostname(hname, 128);
-//cout << "hostname = " << hname << "\n";
-  *nodeid = atol(strpbrk(hname, "0123456789"));
-#endif
+    *nodeid = NodeID;
  
-  return(ESMF_SUCCESS);
+    return(ESMF_SUCCESS);
 
  } // end ESMC_MachineGetNodeID
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_MachineGetNodeCpuMax - get the max Cpus per Node
+// !IROUTINE:  ESMC_MachineGetNodeCpuMax - get the max CPUs per Node
 //
 // !INTERFACE:
       int ESMC_Machine::ESMC_MachineGetNodeCpuMax(

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.20 2003/04/05 00:08:03 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.21 2003/04/08 23:05:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,11 +36,15 @@
 
 #define ESMF_MPI_TAG 1
 
+ // single place to turn on and off debug messages; when real error & logging
+ // is available replace this.
+static int verbose = 1;
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.20 2003/04/05 00:08:03 nscollins Exp $";
+ static const char *const version = 
+           "$Id: ESMC_DELayout.C,v 1.21 2003/04/08 23:05:28 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -314,7 +318,7 @@
   // TODO: currently, this works only in the default case of all MPI DEs: no
   //  threads
   //
-  int i;
+  int i, myEsmfID;
   MPI_Group mpigroup;
 
   // Initialize comm, PE, DE, Machine
@@ -328,58 +332,8 @@
   comm.ESMC_CommGetNumDEs(&nDEs);
     //cout << "comm group size = " << nDEs << "\n";
 
-  // Get our PE ids
-  int mypeid=0, mycpuid=0, mynodeid=0;
-  myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
-  myPE.ESMC_PEGetCpuID(&mycpuid);
-  myPE.ESMC_PEGetNodeID(&mynodeid);
-    //cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
-       //<< mynodeid << "\n";
-
-  // prepare send buffer with our PE ids
-  //  TODO: ?? use MPI derived type to send whole PE object rather
-  //           than 3 ints. Then use resulting receive buffer as PE list array,
-  //           thereby avoiding a copy operation.
-  int sendbuf[3];
-  sendbuf[0] = mypeid;
-  sendbuf[1] = mycpuid;
-  sendbuf[2] = mynodeid;
-
-  // temporary global buffer used to perform all gather
-  int *gbuf=0;
-  try {
-    gbuf = new int[nDEs * 3 * sizeof(int)];
-  }
-  catch(...) {
-//  catch(bad_alloc) {  // TODO: use when IBM supports it (blackforest doesn't)
-    // TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() gbuf memory allocation failed\n";
-    return(ESMF_FAILURE);
-  }
-
-  // share/gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMC_INT);
-  //cout << "DELayoutCreate(): exited ESMC_CommAllGather" << endl;
-
-  // create PE List from gathered IDs
-  // create a PE list object entirely on the heap
-  int rc;
-  peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs
-                                         //   for now
-  for(i=0; i<nDEs; i++) {
-    // populate PE list with gathered ids
-    peList->ESMC_PEListInit(i, gbuf[i*3], gbuf[i*3+1], gbuf[i*3+2]);
-  }
-
-  // done with gbuf, delete it
-  delete gbuf;
-
-  // sort PE list by fastest communication neighbors (node) to
-  //   prep assignment to layout
-  //   TODO: other sort criteria (different node types) ?
-  //peList->ESMC_PEListPrint();
-  peList->ESMC_PEListSort();
-  //peList->ESMC_PEListPrint();
+  // Construct the sorted PE list object.  When this returns, peList is valid.
+  ESMC_DELayoutSetPEList();
 
   // construct 1D array of ESMC_DE's
   try {
@@ -412,6 +366,9 @@
     // then assign it to this DE
     layout[i][0][0].ESMC_DESetPE(pe);
 
+    // assign local ESMF id in DE struct from 0 to nDEs - 1
+    layout[i][0][0].ESMC_DESetESMFID(i);
+
     //layout[i][0][0].ESMC_DEPrint();
   }
 
@@ -424,8 +381,12 @@
   for (i=0; i<ESMF_MAXDECOMPDIM; i++)
       this->commType[i] = ESMC_COMMTYPE_SHR;
 
-    //cout << "ESMC_DELayoutConstruct() successful\n";
-  this->ESMC_DELayoutPrint();
+  if (verbose) {
+    cout << "ESMC_DELayoutConstruct() successful\n";
+    cout << "Create default 1xN Layout:" << endl;
+    ESMC_DELayoutPrint();
+  }
+
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutConstruct
@@ -518,9 +479,9 @@
   // consists of unique DE ids that are pre-sorted
   // by fastest communication affinity (e.g. node, thread, process)
   //
-  int ni, nj;  // loop limits
-  int i, j;    // i outer loop, j inner loop (fastest)
-  int *x, *y;  // layout coordinates to loop through
+  int ni, nj, nk;  // loop limits
+  int i, j, k;     // i outer loop, j inner loop (fastest)
+  int *x, *y, *z;  // layout coordinates to loop through
 
   // TODO: Wire this correctly for communication types
   commHint = ESMC_XFAST;
@@ -529,12 +490,19 @@
   {
     case ESMC_XFAST:
     case ESMC_NOHINT:
-      ni = length[1];  y = &i; // 2nd fastest (outer loop)
-      nj = length[0];  x = &j; // fastest (inner loop)
+      ni = length[2];  z = &i; // 3rd fastest (for outer loop)
+      nj = length[1];  y = &j; // 2nd fastest (for middle loop)
+      nk = length[0];  x = &k; // fastest (for inner loop)
       break;
     case ESMC_YFAST:
-      ni = length[0]; x = &i; // 2nd fastest (outer loop)
-      nj = length[1]; y = &j; // fastest (inner loop)
+      ni = length[2]; z = &i;
+      nj = length[0]; x = &j;
+      nk = length[1]; y = &k;
+      break;
+    case ESMC_ZFAST:
+      ni = length[1]; y = &i;
+      nj = length[0]; x = &j;
+      nk = length[2]; z = &k;
       break;
     default:
       break;
@@ -544,25 +512,32 @@
 
   ESMC_DE de;
   ESMC_PE *pe;
-  int PEix=0;
+  int index=0;
   for (i=0; i<ni; i++) {
     for(j=0; j<nj; j++) {
+      for(k=0; k<nk; k++) {
 
         //cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
         //cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
 
-        // parent DE CAN be reused by subsequent DELayoutCreate calls
-        rc = parent->ESMC_DELayoutGetDE((i*nj+j), 0, 0, &de);
-        //cout << "ESMC_DELayoutGetDE(" << i*nj+j << ") called, rc = "
-             //<< rc << endl;
+        // parent DE cannot be reused by subsequent DELayoutCreate calls
+        rc = parent->ESMC_DELayoutGetDE(de_indices[index], 0, 0, &de);
+        //cout << "index = " << index << ", ESMC_DELayoutGetDE(" 
+        //     << de_indices[index] << ") called, rc = " << rc << endl;
+
         
         if (rc == ESMF_SUCCESS) {
           // assign DE in given parent layout to this DE in layout
-          layout[*x][*y][0] = de;
+          // this makes a copy of the contents so we can now change it
+          // to have the right id's for the new layout
+          layout[*x][*y][*z] = de;
 
           // copy PE sub-list from parent layout; determine from DE list
           de.ESMC_DEGetPE(&pe);
-          peList->ESMC_PEListSetPE(PEix++, pe);
+          peList->ESMC_PEListSetPE(index, pe);
+
+          layout[*x][*y][*z].ESMC_DESetESMFID(index);
+          index++;
         }
         else {
           // TODO: log err
@@ -570,11 +545,16 @@
                   " returned ESMF_FAILURE" << endl;
           return(ESMF_FAILURE);
         }
+      }
     }
   }
   //peList->ESMC_PEListPrint();
 
-  //cout << "ESMC_DELayoutConstruct() successful\n";
+  if (verbose) {
+    cout << "ESMC_DELayoutConstruct() successful\n";
+    cout << "Create Layout from Parent:" << endl;
+    ESMC_DELayoutPrint();
+  }
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutConstruct
@@ -607,7 +587,7 @@
 // !REQUIREMENTS:  
 
   int nx, ny, nz;
-  int i, j;
+  int i, j, k;
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -630,8 +610,11 @@
   // now all the lengths and commtypes are initialized, regardless of
   // what ndim is.
 
+  // create the corresponding PE list
+  ESMC_DELayoutSetPEList();
+
   //
-  // construct 2D array of ESMC_DE's
+  // construct 3D array of ESMC_DE's
   //
 
   this->ndim=ndim;
@@ -639,9 +622,8 @@
   ny=length[1];
   nz=length[2];
 
-  // TODO: from here down, it's hardcoded for 2d only
+  // TODO: this loop is now ok for 3D, but further down it's only 2D
   try {
-    // construct 2D array of ESMC_DE's
 
     // first, create array of (nx) pointers to ESMC_DE pointers
     layout = new ESMC_DE**[nx];
@@ -657,7 +639,7 @@
     }
   }
   catch(...) {
-// TODO:  call ESMF log/err handler
+    // TODO:  call ESMF log/err handler
     cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);
   }
@@ -672,19 +654,28 @@
   // Assume given DE list consists of unique DE ids that are pre-sorted
   // by fastest communication affinity (e.g. node, thread, process)
   //
-  int ni, nj;  // loop limits
-               // i outer loop, j inner loop (fastest)
-  int *x, *y;  // layout coordinates to loop through
+  // TODO: this part is 2D only
+  //
+  int ni, nj, nk;  // loop limits
+                   // i outer loop, j inner loop (fastest)
+  int *x, *y, *z;  // layout coordinates to loop through
   switch (commHint)
   {
     case ESMC_XFAST:
     case ESMC_NOHINT:
-      ni = length[1];  y = &i; // 2nd fastest (outer loop)
-      nj = length[0];  x = &j; // fastest (inner loop)
+      ni = length[2];  z = &i; // 3rd fastest (for outer loop)
+      nj = length[1];  y = &j; // 2nd fastest (for middle loop)
+      nk = length[0];  x = &k; // fastest (for inner loop)
       break;
     case ESMC_YFAST:
-      ni = length[0]; x = &i; // 2nd fastest (outer loop)
-      nj = length[1]; y = &j; // fastest (inner loop)
+      ni = length[2]; z = &i;
+      nj = length[0]; x = &j;
+      nk = length[1]; y = &k;
+      break;
+    case ESMC_ZFAST:
+      ni = length[1]; y = &i;
+      nj = length[0]; x = &j;
+      nk = length[2]; z = &k;
       break;
     default:
       break;
@@ -693,17 +684,31 @@
 //cout << "ESMC_DELayoutConstruct() ni, nj " << ni << ", " << nj << endl;
 
   int DEix=0;
+  int PEix=0;
+  ESMC_PE *pe;
   for (i=0; i<ni; i++) {
     for(j=0; j<nj; j++) {
+      for(k=0; k<nk; k++) {
         // assign DE in given list to this DE in layout
 //cout << "ESMC_DELayoutConstruct(): " << i << ", " << j  << "\n";
 //cout << "ESMC_DELayoutConstruct(): " << *x<< ", " << *y << "\n";
-        layout[*x][*y][0].ESMC_DESetESMFID(delist[DEix++]);
-        //layout[*x][*y][0].ESMC_DESetPEID(delist[DEix++]);
+        layout[*x][*y][*z].ESMC_DESetESMFID(delist[DEix++]);
+
+        // TODO: this is new code.  it should be well tested. 
+        peList->ESMC_PEListGetPE(PEix++, &pe);
+        layout[*x][*y][*z].ESMC_DESetPE(pe);
+
+        // TODO: and what was this?  it was commented out.
+        //layout[*x][*y][*z].ESMC_DESetPEID(delist[DEix++]);
+      }
     }
   }
 
-//cout << "ESMC_DELayoutConstruct() successful\n";
+  if (verbose) {
+    cout << "ESMC_DELayoutConstruct() successful\n";
+    cout << "Create Layout from delist:" << endl;
+    ESMC_DELayoutPrint();
+  }
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutConstruct
@@ -763,7 +768,7 @@
 // TODO: ?? use exception handling when universally supported (pgCC doesn't)
 #if 1
   try {
-    // construct 2D array of ESMC_DE's
+    // construct 3D array of ESMC_DE's
 
     // first, create array of (length[0]) pointers to ESMC_DE pointers
     layout = new ESMC_DE**[length[0]];
@@ -785,34 +790,6 @@
   }
 #endif
 
-#if 0
-// use this section if exception handling not supported
-// TODO:  IBM (blackforest) doesn't support "new (nothrow)"
-  // first, create array of (length[0]) pointers to ESMC_DE pointers
-  if((layout = new (nothrow) ESMC_DE**[length[0]]) == 0) {
-// TODO:  call ESMF log/err handler
-    cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-    return(ESMF_FAILURE);
-  
-
-  // then allocate an array of (length[1]) ESMC_DE pointers for each x pointer
-  for (i=0; i<length[0]; i++) {
-    if ((layout[i] = new (nothrow) ESMC_DE*[length[1]]) == 0) {
-  // TODO:  call ESMF log/err handler
-      cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-      return(ESMF_FAILURE);
-    }
-
-    // finally allocate an array of (length[2]) ESMC_DE's for each y pointer
-    for (int j=0; j<length[1]; j++) {
-      if ((layout[i][j] = new (nothrow) ESMC_DE[length[2]]) == 0) {
-    // TODO:  call ESMF log/err handler
-        cerr << "ESMC_DELayoutConstruct() memory allocation failed\n";
-        return(ESMF_FAILURE);
-      }
-    }
-  }
-#endif
 
   // TODO: ?? make commHint lookup table & share with Print()
 
@@ -862,7 +839,11 @@
     }
   }
 
-//cout << "ESMC_DELayoutConstruct() successful\n";
+  if (verbose) {
+    cout << "ESMC_DELayoutConstruct() successful\n";
+    cout << "Create Layout from pelist:" << endl;
+    ESMC_DELayoutPrint();
+  }
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutConstruct
@@ -918,6 +899,85 @@
 
  } // end ESMC_DELayoutDestruct
 
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_DELayoutSetPEList - Create a PE list
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutSetPEList(void) {
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//      Do an MPI communication to create a PE list for all PEs
+//      involved in this layout.
+//
+//EOPI
+
+  int nDEs;
+
+  comm.ESMC_CommGetNumDEs(&nDEs);
+
+  // Get our PE ids
+  int mypeid=0, mycpuid=0, mynodeid=0;
+  myPE.ESMC_PEGetEsmfID(&mypeid);   // (mypeid != myDEid) anymore...
+  myPE.ESMC_PEGetCpuID(&mycpuid);
+  myPE.ESMC_PEGetNodeID(&mynodeid);
+  //cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
+  //     << mynodeid << "\n";
+
+  // prepare send buffer with our PE ids
+  //  TODO: ?? use MPI derived type to send whole PE object rather
+  //           than 3 ints. Then use resulting receive buffer as PE list array,
+  //           thereby avoiding a copy operation.
+  int sendbuf[3];
+  sendbuf[0] = mypeid;
+  sendbuf[1] = mycpuid;
+  sendbuf[2] = mynodeid;
+
+  // temporary global buffer used to perform all gather
+  int *gbuf=0;
+  try {
+    gbuf = new int[nDEs * 3 * sizeof(int)];
+  }
+  catch(...) {
+    // TODO:  call ESMF log/err handler
+    cerr << "ESMC_DELayoutConstruct() gbuf memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+
+  // share/gather all PE IDs from all DEs
+  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMC_INT);
+  //cout << "DELayoutCreate(): exited ESMC_CommAllGather" << endl;
+
+  // create PE List from gathered IDs
+  // create a PE list object entirely on the heap
+  int rc;
+  peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs
+                                         //   for now
+  for(int i=0; i<nDEs; i++) {
+    // populate PE list with gathered ids
+    peList->ESMC_PEListInit(i, gbuf[i*3], gbuf[i*3+1], gbuf[i*3+2]);
+  }
+
+  // done with gbuf, delete it
+  delete gbuf;
+
+  // sort PE list by fastest communication neighbors (node) to
+  //   prep assignment to layout
+  //   TODO: other sort criteria (different node types) ?
+  //peList->ESMC_PEListPrint();
+  peList->ESMC_PEListSort();
+  //peList->ESMC_PEListPrint();
+
+  return ESMF_SUCCESS;
+}
+
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_DELayoutInit - initializes a DELayout object
@@ -950,18 +1010,19 @@
   //
   int argc = 0;    // TODO pass into DELayoutCreate ?
   char **argv = 0; // TODO pass into DELayoutCreate ?
-  int myDEid=0;
+  int myEsmfID;
 
   myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: auto determine proc or thread,
                                      //       or get from config file ?
   comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
 
   // initialize machine to defaults TODO:
-  Mach.ESMC_MachineInit(256, 1024, 4, true, true, true, 1, 200, 2, 100);
-  myPE.ESMC_PEInit(&Mach);        // gets cpu, node ids from machine
+  //Mach.ESMC_MachineInit(256, 1024, 4, true, true, true, 1, 200, 2, 100);
+  myPE.ESMC_PEInit(&Machine);        // gets cpu, node ids from machine
 
-  myDE.ESMC_DEGetESMFID(&myDEid);
-  myPE.ESMC_PESetEsmfID(myDEid);  // assume 1-to-1 DE-to-PE for now TODO: ?
+  Machine.ESMC_MachineGetCpuID(&myEsmfID);
+  myPE.ESMC_PESetEsmfID(myEsmfID);  
+
 //cout << "myDEid = " << myDEid << "\n";
 
 #if 0
@@ -1290,11 +1351,238 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  
 
-  myDE.ESMC_DEGetESMFID(deid);
+  int peid, testid;
 
-  return(ESMF_SUCCESS);
+  myPE.ESMC_PEGetEsmfID(&peid);
+
+  // linear search for DE TODO: compute once on initialization ?
+  for (int i=0; i<length[0]; i++) {
+    for (int j=0; j<length[1]; j++) {
+      for (int k=0; k<length[2]; k++) {
+        layout[i][j][k].PE->ESMC_PEGetEsmfID(&testid); // PE number, unique
+        if (peid == testid) {
+          // found -- return this id
+          layout[i][j][k].ESMC_DEGetESMFID(deid);
+          return(ESMF_SUCCESS);
+        }
+      }
+    }
+  }
+
+  // old code.  DE id is no longer same as pe id
+  // TODO: make myDE point directly to proper layout item.
+  //myDE.ESMC_DEGetESMFID(deid);
+
+  //cout << "id not found" << endl;
+  return(ESMF_FAILURE);
 
  } // end ESMC_DELayoutGetDEID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetParentDEID - get corresponding Parent DE ID
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetParentDEID(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int childdeid,          // in - DE ID in child layout
+      ESMC_DELayout *parent,  // in - Parent layout which child was created from
+      int *parentdeid) const { // out - DE ID in parent layout
+//
+// !DESCRIPTION:
+//    Method applied to a Child layout.
+//    Input is a DE ID from the Child layout, plus the Parent layout from
+//    which this child was created.  Returns the corresponding DE ID number
+//    in the Parent's layout for the given Child ID.
+//EOP
+// !REQUIREMENTS:  
+
+  return this->ESMC_DELayoutGetSameDEID(childdeid, parent, parentdeid);
+
+ } // end ESMC_DELayoutGetParentDEID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetChildDEID - get corresponding Child DE ID
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetChildDEID(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int parentdeid,        // in - DE ID in parent layout
+      ESMC_DELayout *child,  // in - Child layout created from this Parent
+      int *childdeid) const {  // out - DE ID in child layout 
+//
+// !DESCRIPTION:
+//    Method applied to a Parent layout.
+//    Input is a DE ID from the Parent layout, plus a Child layout created
+//    from this parent.  Returns the corresponding DE ID number
+//    in the Child's layout for the given Parent ID.
+//EOP
+// !REQUIREMENTS:  
+
+  int esmfid;
+
+  return this->ESMC_DELayoutGetSameDEID(parentdeid, child, childdeid);
+
+ } // end ESMC_DELayoutGetChildDEID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetDEExists - does a DE exist in other layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetDEExists(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int deid,               // in - DE ID in "this" layout
+      ESMC_DELayout *other,   // in - Other layout - must be parent/child
+      bool *exists) const {   // out - true/false
+//
+// !DESCRIPTION:
+//    Method applied to a layout which has a child or parent relationship
+//    with the "other" layout.   deid is relative to the "this" layout,
+//    boolean return is whether the same deid is valid in the other layout.
+//EOP
+// !REQUIREMENTS:  
+  
+  int rc, dummy;
+
+  rc = this->ESMC_DELayoutGetSameDEID(deid, other, &dummy);
+  if (rc == ESMF_FAILURE) 
+      *exists = true;
+  else
+      *exists = false;
+
+  return ESMF_SUCCESS;
+
+ } // end ESMC_DELayoutGetDEExists
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  ESMC_DELayoutGetSameDEID - return same DE ID from another layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetSameDEID(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int srcid,               // in - DE ID in this layout 
+      ESMC_DELayout *other,    // in - parent or child layout of 'this'
+      int *otherid) const {    // out - DE ID in other layout
+//
+// !DESCRIPTION:
+//    Common code for either GetParent or GetChild DEID.  This is a
+//    private method - go through the other interfaces for external access.
+//EOP
+// !REQUIREMENTS:  
+
+  int esmfid, newid;
+  int i, j, k;
+
+  // TODO: this may not always work.  the DE ESMF id's in the layout are not
+  // yet always set, and sometimes the PE id's aren't set.  it needs lots of
+  // testing...
+  for(i=0; i<length[0]; i++) {
+    for (j=0; j<length[1]; j++) {
+      for (k=0; k<length[2]; k++) {
+        // TODO:  right now, the DE information in the layout is empty
+        //  except for the PE pointer.  All DE information is kept in myDE
+        //  locally each proc.  the init code needs another allgather to
+        //  spread the de info to each layout array.   right now the layout
+        //  array has the right shape but is basically empty except for
+        //  the PE info.
+
+        layout[i][j][k].ESMC_DEGetESMFID(&newid);      // DE number, 0 based
+        if (newid == srcid) {
+            layout[i][j][k].PE->ESMC_PEGetEsmfID(&esmfid); // PE number, unique
+            // have to break out of 3 loops; this is simplest way.
+            // also bypasses the 'not found' code.
+            goto found;
+        }
+            
+        //  
+      }
+    }
+  }
+
+ //printf("DE ID %d not found in layout\n", srcid);
+ return ESMF_FAILURE;
+
+ found:
+  // Now find corresponding DE in second layout which matches this
+  // same esmfid.
+  for(i=0; i<other->length[0]; i++) {
+    for (j=0; j<other->length[1]; j++) {
+      for (k=0; k<other->length[2]; k++) {
+        other->layout[i][j][k].PE->ESMC_PEGetEsmfID(&newid);  // PE number
+        if (esmfid == newid) {
+           other->layout[i][j][k].ESMC_DEGetESMFID(otherid);  // DE number
+           goto done;
+        }
+      }
+    }
+  }
+ //printf("PE ID %d not found in other layout\n", esmfid);
+ return ESMF_FAILURE;
+
+ done:
+  return(ESMF_SUCCESS);
+
+ } // end ESMC_DELayoutGetSameDEID
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutGetXXX - is current PE part of given layout
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutGetXXX(void) const { 
+
+//
+// !RETURN VALUE:
+//    int error return code 
+//
+
+// !DESCRIPTION:
+//   If current PE is part of this given layout, returns ESMF_SUCCESS.
+//   If not, returns ESMF_FAILURE for no without printing an error message.
+
+//EOP
+// !REQUIREMENTS:  
+
+  int peid, testid;
+
+  myPE.ESMC_PEGetEsmfID(&peid);
+
+  // linear search for DE TODO: compute once on initialization ?
+  for (int i=0; i<length[0]; i++) {
+    for (int j=0; j<length[1]; j++) {
+      for (int k=0; k<length[2]; k++) {
+        layout[i][j][k].PE->ESMC_PEGetEsmfID(&testid); // PE number, unique
+        if (peid == testid) {
+          //cout << "pe found" << endl;
+          return(ESMF_SUCCESS);
+        }
+      }
+    }
+  }
+
+  //cout << "pe not found" << endl;
+  return(ESMF_FAILURE);
+
+ } // end ESMC_DELayoutGetXXX
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -1867,7 +2155,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 //EOP
 
-  //cout << "nxDELayout, nyDELayout, nzDELayout = " << length[0] << "," << length[1] << "," << length[2] << endl;
+  cout << "DELayout ndim=" << ndim << " nx,ny,nz=" << length[0] << "," << length[1] << "," << length[2] << endl;
   //cout << "commHint = " << commHint << "\n";
 
   int i,j,k;
@@ -1883,22 +2171,23 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       ni = length[2]; z = &i; // outer loop
       nj = length[1]; y = &j; // middle loop
       nk = length[0]; x = &k; // inner loop
-      //cout << "i=z, j=y, k=x \n";
+      cout << "No hint or X fast, i=z, j=y, k=x;";
       break;
     case (ESMC_YFAST):
       ni = length[2]; z = &i;
       nj = length[0]; x = &j;
       nk = length[1]; y = &k;
-      //cout << "i=z, j=x, k=y \n";
+      cout << "Y fast, i=z, j=x, k=y;";
       break;
     case (ESMC_ZFAST):
       ni = length[1]; y = &i;
       nj = length[0]; x = &j;
       nk = length[2]; z = &k;
-      //cout << "i=y, j=x, k=z \n";
+      cout << "Z fast i=y, j=x, k=z;";
       break;
   }
 
+  cout <<  "  ni,nj,nk = " <<  ni << "," << nj << "," << nk << endl;
   for(i=0; i<ni; i++) {
     for (j=0; j<nj; j++) {
       for (k=0; k<nk; k++) {
@@ -1908,7 +2197,12 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       }
     }
   }
+  cout << "myDE: ";
+  myDE.ESMC_DEPrint();
+  cout << "myPE: ";
+  myPE.ESMC_PEPrint();
 
+  cout << "end of DELayout Print" << endl;
   return(ESMF_SUCCESS);
 
  } // end ESMC_DELayoutPrint

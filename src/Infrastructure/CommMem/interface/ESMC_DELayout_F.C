@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.15 2003/04/07 16:54:12 nscollins Exp $
+// $Id: ESMC_DELayout_F.C,v 1.16 2003/04/08 23:05:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,11 +39,11 @@ extern "C" {
            *ptr = ESMC_DELayoutCreate(status);
        }
 
-       void FTN(c_esmc_delayoutcreatefparent)(ESMC_DELayout **ptr, ESMC_DELayout *parent,
+       void FTN(c_esmc_delayoutcreatefparent)(ESMC_DELayout **ptr, ESMC_DELayout **parent,
 					      int *parent_offsets, int *de_indices,
 					      int *ndim, int *lengths, ESMC_CommType 
 					      *commtypes, int *status) {
-  	   *ptr = ESMC_DELayoutCreate(parent, parent_offsets, de_indices, *ndim, lengths, 
+  	   *ptr = ESMC_DELayoutCreate(*parent, parent_offsets, de_indices, *ndim, lengths, 
 				      commtypes, status);
        }
 
@@ -75,6 +75,24 @@ extern "C" {
        void FTN(c_esmc_delayoutgetdeid)(ESMC_DELayout **ptr, int *id,
                                         int *status) {
            *status = (*ptr)->ESMC_DELayoutGetDEID(id);
+       }
+
+       void FTN(c_esmc_delayoutgetparentdeid)(ESMC_DELayout **child, int *cid, 
+                                            ESMC_DELayout **parent, int *pid,
+                                            int *status) {
+           *status = (*child)->ESMC_DELayoutGetParentDEID(*cid, *parent, pid);
+       }
+
+       void FTN(c_esmc_delayoutgetchilddeid)(ESMC_DELayout **parent, int *pid, 
+                                            ESMC_DELayout **child, int *cid,
+                                            int *status) {
+           *status = (*parent)->ESMC_DELayoutGetParentDEID(*pid, *child, cid);
+       }
+
+       void FTN(c_esmc_delayoutgetdeexists)(ESMC_DELayout **ptr, int *deid, 
+                                            ESMC_DELayout **other, bool *exists,
+                                            int *status) {
+           *status = (*ptr)->ESMC_DELayoutGetDEExists(*deid, *other, exists);
        }
 
        void FTN(c_esmc_delayoutsetaxisindex)(ESMC_DELayout **ptr,

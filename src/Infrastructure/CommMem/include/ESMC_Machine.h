@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.h,v 1.5 2003/03/13 22:56:12 cdeluca Exp $
+// $Id: ESMC_Machine.h,v 1.6 2003/04/08 23:05:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,6 +50,8 @@
 // class ESMC_MachineConfig;
  class ESMC_Machine;
 
+ extern ESMC_Machine Machine;
+
 // !PRIVATE TYPES:
 
  // class configuration type
@@ -75,6 +77,9 @@
      int shMemBandwidth;   // bandwidth of shared memory (MB/s)
      int distMemLatency;   // latency of distributed memory (microsec)
      int distMemBandwidth; // bandwidth of distributed memory (MB/s)
+
+     int CpuID;            // hardware id per CPU
+     int NodeID;           // id for a node
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -128,9 +133,11 @@
 
   // get cpu id
   int ESMC_MachineGetCpuID(int *cpuid) const;
+  int ESMC_MachineSetCpuID(void);
 
   // get node id
   int ESMC_MachineGetNodeID(int *nodeid) const;
+  int ESMC_MachineSetNodeID(void);
 
   // get max cpus on a node
   int ESMC_MachineGetNodeCpuMax(int *maxcpus) const;
@@ -145,5 +152,9 @@
 //-----------------------------------------------------------------------------
 
  };   // end class ESMC_Machine
+
+// works on the single public Machine instance.
+int ESMC_MachineInitialize(void);
+int ESMC_MachineFinalize(void);
 
  #endif  // ESMC_Machine_H

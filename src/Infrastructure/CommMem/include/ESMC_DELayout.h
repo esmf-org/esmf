@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.14 2003/04/05 00:00:14 nscollins Exp $
+// $Id: ESMC_DELayout.h,v 1.15 2003/04/08 23:05:27 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -103,7 +103,6 @@ typedef int ESMC_CommType;
 //  other than deleting the memory for the object/derived type itself.
 
   public:
- // the following methods apply to deep classes only
     int ESMC_DELayoutConstruct(void);
     int ESMC_DELayoutConstruct(ESMC_DELayout *parent, int *parent_offsets,
 			       int *de_indices, int ndim, int *lengths,
@@ -119,12 +118,19 @@ typedef int ESMC_CommType;
  // accessor methods for class members
 //    int ESMC_DELayoutGet<Value>(<value type> *value) const;
 //    int ESMC_DELayoutSet<Value>(<value type>  value);
+    int ESMC_DELayoutSetPEList(void);
     int ESMC_DELayoutGetNumDEs(int *ndes) const;
     int ESMC_DELayoutGetSize(int *nx, int *ny) const;
     int ESMC_DELayoutGetSize(int *nx, int *ny, int *nz) const;
     int ESMC_DELayoutGetDEPosition(ESMC_DE *de, int *x, int *y, int *z) const;
     int ESMC_DELayoutGetDEPosition(int *x, int *y) const;
     int ESMC_DELayoutGetDEID(int *deid) const;
+    int ESMC_DELayoutGetParentDEID(int childdeid, ESMC_DELayout *parent, 
+                                                        int *parentdeid) const;
+    int ESMC_DELayoutGetChildDEID(int parentdeid, ESMC_DELayout *child, 
+                                                        int *childdeid) const;
+    int ESMC_DELayoutGetDEExists(int deid, ESMC_DELayout *other, bool *exists) const;
+    int ESMC_DELayoutGetXXX(void) const;
     int ESMC_DELayoutGetDE(int x, int y, int z, ESMC_DE *de) const;
 
     int ESMC_DELayoutGetDEExclusive(ESMC_DE *de) const;    
@@ -165,6 +171,10 @@ typedef int ESMC_CommType;
 //
   private: 
 //
+
+    int ESMC_DELayoutGetSameDEID(int srcid, ESMC_DELayout *other, int *otherid) 
+                                                                         const;
+
  // < declare private interface methods here >
 //
 //EOP

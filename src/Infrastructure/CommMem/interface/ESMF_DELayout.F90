@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.13 2003/04/07 16:54:15 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.14 2003/04/08 23:05:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,7 +87,9 @@
       !public ESMF_DELayoutGet
       public ESMF_DELayoutGetSize
       public ESMF_DELayoutGetDEPosition
-      public ESMF_DELayoutGetDEid
+      public ESMF_DELayoutGetDEID
+      public ESMF_DELayoutGetParentDEID, ESMF_DELayoutGetChildDEID
+      public ESMF_DELayoutGetDEExists
       public ESMF_DELayoutGetNumDEs
       public ESMF_DELayoutSetAxisIndex
       public ESMF_DELayoutGatherArrayI
@@ -108,7 +110,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.13 2003/04/07 16:54:15 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.14 2003/04/08 23:05:28 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -209,8 +211,8 @@
 ! !IROUTINE: ESMF_DELayoutCreateFromParent - Create DELayout from a given layout
 
 ! !INTERFACE:
-      function ESMF_DELayoutCreateFromParent(parent, ndim, lengths, rc)
-                                   ! commtypes, parent_offsets, de_indices, rc)
+      function ESMF_DELayoutCreateFromParent(parent, ndim, lengths, &
+                                    commtypes, parent_offsets, de_indices, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_DELayout) :: ESMF_DELayoutCreateFromParent
@@ -219,9 +221,9 @@
       type(ESMF_DELayout), intent(inout) :: parent  ! to allocate DEs from
       integer, intent(in) :: ndim                   ! number of dimensions
       integer, intent(in) :: lengths(:)             ! number of des in each dim
-      !integer, intent(in) :: commtypes(:)           ! comm types in each dim
-      !integer, intent(in), optional :: parent_offsets(:) ! offsets from parent 
-      !integer, intent(in), optional :: de_indices(:)  ! parent de indices 
+      integer, intent(in) :: commtypes(:)           ! comm types in each dim
+      integer, intent(in), optional :: parent_offsets(:) ! offsets from parent 
+      integer, intent(in), optional :: de_indices(:)  ! parent de indices 
       integer, intent(out), optional :: rc          ! return code
 !
 ! !DESCRIPTION:
@@ -265,10 +267,6 @@
       type (ESMF_DELayout) :: layout   ! opaque pointer to new C++ DELayout
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
-
-      integer :: commtypes(2)           ! comm types in each dim
-      integer :: parent_offsets(2)      ! offsets from parent 
-      integer :: de_indices(2)          ! parent de indices 
 
 !     Initialize the pointer to null.
       layout%this = ESMF_NULL_POINTER
@@ -686,8 +684,7 @@
       integer, intent(out), optional :: rc             
 !
 ! !DESCRIPTION:
-!     Returns information about the {\tt DELayout}.  For queries where the caller
-!     only wants a single value, specify the argument by name.
+!     Returns DE index id where the current execution is running.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -707,7 +704,7 @@
 !     Routine which interfaces to the C++ routine.
       call c_ESMC_DELayoutGetDEID(layout, id, status)
       if (status .ne. ESMF_SUCCESS) then
-        print *, "ESMF_DELayoutGetDEID error"
+        !print *, "ESMF_DELayoutGetDEID error"
         return
       endif
 
@@ -715,6 +712,138 @@
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DELayoutGetDEID
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_DELayoutGetParentDEID(child, childid, parent, parentid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout), intent(in) :: child
+      integer, intent(in) :: childid
+      type(ESMF_DELayout), intent(in) :: parent
+      integer, intent(out) :: parentid
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!     Takes a layout which was created as a child of a parent layout, and an
+!     DE index id in that layout.  Also takes the parent layout, and returns
+!     the corresponding parent DE index id for the same PE.
+!
+!EOP
+! !REQUIREMENTS:
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetParentDEID(child, childid, parent, parentid, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetParentDEID error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DELayoutGetParentDEID
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_DELayoutGetChildDEID(parent, parentid, child, childid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout), intent(in) :: parent
+      integer, intent(in) :: parentid
+      type(ESMF_DELayout), intent(in) :: child
+      integer, intent(out) :: childid
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!     Takes a layout which was created as a child of a parent layout, and an
+!     DE index id in that layout.  Also takes the parent layout, and returns
+!     the corresponding parent DE index id for the same PE.
+!
+!EOP
+! !REQUIREMENTS:
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetChildDEID(parent, parentid, child, childid, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetChildDEID error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DELayoutGetChildDEID
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_DELayoutGetDEExists(layout, deid, other, exists, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout), intent(in) :: layout
+      integer, intent(in) :: deid
+      type(ESMF_DELayout), intent(in) :: other
+      logical, intent(out) :: exists
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!     Takes a layout and a DE index id in that layout, plus another layout
+!     which is either this layout's parent or child, and returns the logical
+!     value to say whether this DE is contained in the other layout.
+!
+!EOP
+! !REQUIREMENTS:
+
+!     Local variables.
+      integer :: status                ! Error status
+      logical :: rcpresent             ! Return code present
+
+!     Initialize return code; assume failure until success is certain.
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+!     Routine which interfaces to the C++ routine.
+      call c_ESMC_DELayoutGetDEExists(layout, deid, other, exists, status)
+      if (status .ne. ESMF_SUCCESS) then
+        print *, "ESMF_DELayoutGetDEExists error"
+        return
+      endif
+
+!     set return code if user specified it
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DELayoutGetDEExists
 
 !------------------------------------------------------------------------------
 !BOP
