@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.9 2004/04/23 13:41:06 theurich Exp $
+// $Id: ESMC_FTable.C,v 1.10 2004/04/23 14:12:56 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,7 +48,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.9 2004/04/23 13:41:06 theurich Exp $";
+           "$Id: ESMC_FTable.C,v 1.10 2004/04/23 14:12:56 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -631,7 +631,7 @@
             break;
           }
           case FT_COMP1STAT: {
-            C1SFuncVM vf;
+            C1SFunc vf;
 //printf("calling out of case FT_COMP1STAT VM\n");
             int rrc;
             void *comp;
@@ -647,9 +647,9 @@
             FTN(f_esmf_compreplicate)((ESMC_Comp *)comp, 
               (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
             // Callback: prepare prototype, call, store return code
-            vf = (C1SFuncVM)funcs[i].funcptr;
+            vf = (C1SFunc)funcs[i].funcptr;
             (*vf)(comp, funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
             // Delete the heap copy of the component object for this thread
             FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
@@ -684,7 +684,7 @@
             break;
           }
           case FT_COMPSLIST: {
-            CSLFuncVM vf;
+            CSLFunc vf;
 //printf("calling out of case FT_COMPSLIST VM\n");
             int rrc;
             void *comp;
@@ -700,9 +700,9 @@
             FTN(f_esmf_compreplicate)((ESMC_Comp *)comp, 
               (ESMC_Comp *)funcs[i].funcarg[0], vm, &rrc);
             // Callback: prepare prototype, call, store return code
-            vf = (CSLFuncVM)funcs[i].funcptr;
+            vf = (CSLFunc)funcs[i].funcptr;
             (*vf)(comp, funcs[i].funcarg[1],
-                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3], vm);
+                  funcs[i].funcarg[2], (int *)funcs[i].funcarg[3]);
             *rc = *(int *)(funcs[i].funcarg[3]);
             // Delete the heap copy of the component object for this thread
             FTN(f_esmf_compdelete)((ESMC_Comp *)comp, &rrc);
