@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.58 2004/01/07 00:04:30 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.59 2004/01/07 18:31:23 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -300,12 +300,12 @@
       !   YZ          = PhysGrid is a YZ (or meridional) slice out of 3-d space
 
       type (ESMF_PhysGridOrientation), parameter, public :: &! grid direction
-         ESMF_PhysGridOrientation_Unknown     = ESMF_PhysGridOrientation( 0), &
-         ESMF_PhysGridOrientation_Horizontal  = ESMF_PhysGridOrientation( 1), &
-         ESMF_PhysGridOrientation_Vertical    = ESMF_PhysGridOrientation( 2), &
-         ESMF_PhysGridOrientation_3D          = ESMF_PhysGridOrientation( 3), &
-         ESMF_PhysGridOrientation_XZ          = ESMF_PhysGridOrientation( 4), &
-         ESMF_PhysGridOrientation_YZ          = ESMF_PhysGridOrientation( 5)
+         ESMF_PhysGridOrient_Unknown     = ESMF_PhysGridOrientation( 0), &
+         ESMF_PhysGridOrient_Horizontal  = ESMF_PhysGridOrientation( 1), &
+         ESMF_PhysGridOrient_Vertical    = ESMF_PhysGridOrientation( 2), &
+         ESMF_PhysGridOrient_3D          = ESMF_PhysGridOrientation( 3), &
+         ESMF_PhysGridOrient_XZ          = ESMF_PhysGridOrientation( 4), &
+         ESMF_PhysGridOrient_YZ          = ESMF_PhysGridOrientation( 5)
 
       ! Supported ESMF PhysGrid Region Types
       !   Unknown     = unknown or undefined region type
@@ -334,7 +334,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.58 2004/01/07 00:04:30 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.59 2004/01/07 18:31:23 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -418,7 +418,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridMaskKindEqual
          module procedure ESMF_RegionKindEqual
-         module procedure ESMF_PhysGridOrientationEqual
+         module procedure ESMF_PhysGridOrientEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the equality operator for the specific
@@ -436,7 +436,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridMaskKindNotEqual
          module procedure ESMF_RegionKindNotEqual
-         module procedure ESMF_PhysGridOrientationNotEqual
+         module procedure ESMF_PhysGridOrientNotEqual
 
 ! !DESCRIPTION:
 !     This interface overloads the inequality operator for the specific
@@ -545,7 +545,7 @@
       if (present(orientation)) then
          physgrid%orientation = orientation
       else
-         physgrid%orientation = ESMF_PhysGridOrientation_Unknown
+         physgrid%orientation = ESMF_PhysGridOrient_Unknown
       endif
       
       if (present(name)) then
@@ -2880,13 +2880,13 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridOrientationEqual - equality of PhysGrid orientation
+! !IROUTINE: ESMF_PhysGridOrientEqual - equality of PhysGrid orientation
 !
 ! !INTERFACE:
-      function ESMF_PhysGridOrientationEqual(Orientation1, Orientation2)
+      function ESMF_PhysGridOrientEqual(Orientation1, Orientation2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_PhysGridOrientationEqual
+      logical :: ESMF_PhysGridOrientEqual
 
 ! !ARGUMENTS:
 
@@ -2907,20 +2907,20 @@
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_PhysGridOrientationEqual = (Orientation1%orientation == &
-                                       Orientation2%orientation)
+      ESMF_PhysGridOrientEqual = (Orientation1%orientation == &
+                                  Orientation2%orientation)
 
-      end function ESMF_PhysGridOrientationEqual
+      end function ESMF_PhysGridOrientEqual
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_PhysGridOrientationNotEqual - non-equality of PhysGrid orientations
+! !IROUTINE: ESMF_PhysGridOrientNotEqual - non-equality of PhysGrid orientations
 !
 ! !INTERFACE:
-      function ESMF_PhysGridOrientationNotEqual(Orientation1, Orientation2)
+      function ESMF_PhysGridOrientNotEqual(Orientation1, Orientation2)
 
 ! !RETURN VALUE:
-      logical :: ESMF_PhysGridOrientationNotEqual
+      logical :: ESMF_PhysGridOrientNotEqual
 
 ! !ARGUMENTS:
 
@@ -2941,10 +2941,10 @@
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_PhysGridOrientationNotEqual = (Orientation1%orientation /= &
-                                          Orientation2%orientation)
+      ESMF_PhysGridOrientNotEqual = (Orientation1%orientation /= &
+                                     Orientation2%orientation)
 
-      end function ESMF_PhysGridOrientationNotEqual
+      end function ESMF_PhysGridOrientNotEqual
 
 !------------------------------------------------------------------------------
 
