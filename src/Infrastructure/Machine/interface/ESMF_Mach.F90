@@ -1,4 +1,4 @@
-! $Id: ESMF_Mach.F90,v 1.2 2003/09/19 22:13:45 cdeluca Exp $
+! $Id: ESMF_Mach.F90,v 1.3 2003/10/15 23:16:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Mach.F90,v 1.2 2003/09/19 22:13:45 cdeluca Exp $'
+      '$Id: ESMF_Mach.F90,v 1.3 2003/10/15 23:16:32 nscollins Exp $'
 
 !==============================================================================
 
@@ -128,6 +128,21 @@
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
+
+#if ESMF_MPICH
+      ! SYSTEM DEPENDENT CODE SECTION
+      ! Try a fix to get around problems starting up mpich programs -
+      ! if main is in F90 it is hard to get at the arg list, and we
+      ! are calling MPI_Init() from C++ in the machine code below.
+      ! for now, call MPI_Init() from the F90 side and see if that can
+      ! be linked.  the C++ init call is protected - it checks to see if
+      ! mpi has been initialized before it calls again, so it should
+      ! just return w/o complaint.  in theory.
+
+      call MPI_Init(status)
+
+      ! END SECTION
+#endif
 
       ! Routine which interfaces to the C++ creation routine.
       call c_ESMC_MachineInitialize(status)

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/04/24 14:13:20 nscollins Exp $
+# $Id: makefile,v 1.2 2003/10/15 23:16:32 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -6,8 +6,8 @@ ALL: lib
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
 #  from the upper level makefile if possible.
-CFLAGS    = ${MPI_INCLUDE}
-FFLAGS    =
+CFLAGS    += ${MPI_INCLUDE}
+FFLAGS    += ${MPI_INCLUDE}
 
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = ESMC_Mach_F.C
