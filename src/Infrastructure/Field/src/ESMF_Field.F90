@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.128 2004/03/18 22:23:57 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.129 2004/03/18 22:52:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.128 2004/03/18 22:23:57 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.129 2004/03/18 22:52:28 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2872,10 +2872,10 @@
       endif
 
       ! TODO: do we allow this?  if so, do we just destroy the old array?
-      if (ftypep%datastatus .eq. ESMF_STATE_READY) then
-          print *, "ESMF_FieldSetData: data already associated with field"
-          return
-      endif
+      !if (ftypep%datastatus .eq. ESMF_STATE_READY) then
+      !    print *, "ESMF_FieldSetData: data already associated with field"
+      !    return
+      !endif
 
       ftypep%localfield%localdata = array
       ftypep%datastatus = ESMF_STATE_READY
