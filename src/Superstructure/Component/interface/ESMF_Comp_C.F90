@@ -1,4 +1,4 @@
-!  $Id: ESMF_Comp_C.F90,v 1.12 2004/03/18 21:49:29 cdeluca Exp $
+!  $Id: ESMF_Comp_C.F90,v 1.13 2004/03/19 23:27:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Comp_C.F90,v 1.12 2004/03/18 21:49:29 cdeluca Exp $'
+!      '$Id: ESMF_Comp_C.F90,v 1.13 2004/03/19 23:27:19 jwolfe Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -113,7 +113,7 @@
        integer :: rc     
 
        call ESMF_GridCompInitialize(comp, importState, exportState, &
-                                    clock, phase, rc)
+                                    clock, phase, rc=rc)
 
    end subroutine f_esmf_gridcompinitialize
 
@@ -131,7 +131,7 @@
        integer :: rc     
 
        call ESMF_GridCompRun(comp, importState, exportState, &
-                             clock, phase, rc)
+                             clock, phase, rc=rc)
 
    end subroutine f_esmf_gridcomprun
 
@@ -149,7 +149,7 @@
        integer :: rc     
 
        call ESMF_GridCompFinalize(comp, importState, exportState, &
-                                  clock, phase, rc)
+                                  clock, phase, rc=rc)
 
    end subroutine f_esmf_gridcompfinalize
  
