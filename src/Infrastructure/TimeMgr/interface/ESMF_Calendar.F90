@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.33 2003/10/30 20:08:12 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.34 2003/11/05 01:52:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -134,7 +134,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.33 2003/10/30 20:08:12 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.34 2003/11/05 01:52:28 eschwab Exp $'
 
 !==============================================================================
 
@@ -157,10 +157,11 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes or sets {\tt calendar} to the given {\tt ESMF\_CalendarType}.  
+!     Initializes or sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
 !     Valid values for {\tt type} are:  {\tt ESMF\_CAL\_GREGORIAN}, 
-!     {\tt ESMF\_CAL\_JULIANDAY},
-!     {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GENERIC}.
+!     {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
+!     {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GENERIC}, and
+!     {\tt ESMF\_CAL\_NOCALENDAR}.
 !
 !     The arguments are:
 !     \begin{description}
