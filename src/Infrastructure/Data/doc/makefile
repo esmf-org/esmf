@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.7 2003/03/25 00:17:56 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.8 2003/04/04 22:42:16 flanigan Exp $ 
+ALL: alldoc
 
 CFLAGS    =
 FFLAGS    =
@@ -41,48 +41,23 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+#
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpful.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
+
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi 
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi  *.ORIG
 CLOBBERDIRS =
 
 
-# Dvi files
-${ESMC_DOCDIR}/Data_desdoc.dvi:
-	${DO_LATEX} Data des
-	mv -f Data_desdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Data_reqdoc.dvi:
-	${DO_LATEX} Data req
-	mv -f Data_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Data_refdoc.dvi:
-	${DO_LATEX} Data ref
-	mv -f Data_refdoc.dvi ${ESMC_DOCDIR}
-
-
-# Pdf files
-${ESMC_DOCDIR}/Data_desdoc.pdf: ${ESMC_DOCDIR}/Data_desdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Data_desdoc.dvi ${ESMC_DOCDIR}/Data_desdoc.pdf
-
-${ESMC_DOCDIR}/Data_reqdoc.pdf: ${ESMC_DOCDIR}/Data_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Data_reqdoc.dvi ${ESMC_DOCDIR}/Data_reqdoc.pdf
-
-${ESMC_DOCDIR}/Data_refdoc.pdf: ${ESMC_DOCDIR}/Data_refdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Data_refdoc.dvi ${ESMC_DOCDIR}/Data_refdoc.pdf
-
-# Html Files
-${ESMC_DOCDIR}/Data_desdoc: 
-	${DO_L2H} Data des
-	mv -f Data_desdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Data_reqdoc: 
-	${DO_L2H} Data req
-	mv -f Data_reqdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Data_refdoc: 
-	${DO_L2H} Data ref
-	mv -f Data_refdoc ${ESMC_DOCDIR}

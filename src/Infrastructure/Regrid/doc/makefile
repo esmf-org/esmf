@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.7 2003/04/01 21:54:24 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.8 2003/04/04 22:42:22 flanigan Exp $ 
+ALL: alldoc
 
 CFLAGS    =
 FFLAGS    =
@@ -39,48 +39,23 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+#
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpful.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
+
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Regrid_desdoc Regrid_reqdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Regrid_desdoc.tex Regrid_reqdoc.tex
+CLEANDIRS   = Regrid_desdoc Regrid_reqdoc Regrid_refdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Regrid_desdoc.tex Regrid_reqdoc.tex Regrid_refdoc.tex
 CLOBBERDIRS =
 
 
-# Dvi files
-${ESMC_DOCDIR}/Regrid_desdoc.dvi:
-	${DO_LATEX} Regrid des
-	mv -f Regrid_desdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Regrid_reqdoc.dvi:
-	${DO_LATEX} Regrid req
-	mv -f Regrid_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Regrid_refdoc.dvi:
-	${DO_LATEX} Regrid ref
-	mv -f Regrid_refdoc.dvi ${ESMC_DOCDIR}
-
-
-# Pdf files
-${ESMC_DOCDIR}/Regrid_desdoc.pdf: ${ESMC_DOCDIR}/Regrid_desdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Regrid_desdoc.dvi ${ESMC_DOCDIR}/Regrid_desdoc.pdf
-
-${ESMC_DOCDIR}/Regrid_reqdoc.pdf: ${ESMC_DOCDIR}/Regrid_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Regrid_reqdoc.dvi ${ESMC_DOCDIR}/Regrid_reqdoc.pdf
-
-${ESMC_DOCDIR}/Regrid_refdoc.pdf: ${ESMC_DOCDIR}/Regrid_refdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Regrid_refdoc.dvi ${ESMC_DOCDIR}/Regrid_refdoc.pdf
-
-# Html Files
-${ESMC_DOCDIR}/Regrid_desdoc: 
-	${DO_L2H} Regrid des
-	mv -f Regrid_desdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Regrid_reqdoc: 
-	${DO_L2H} Regrid req
-	mv -f Regrid_reqdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Regrid_refdoc: 
-	${DO_L2H} Regrid ref
-	mv -f Regrid_refdoc ${ESMC_DOCDIR}

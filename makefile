@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.20 2003/04/03 22:42:56 nscollins Exp $
+# $Id: makefile,v 1.21 2003/04/04 22:42:14 flanigan Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -212,36 +212,6 @@ install:
 	cp ${ESMC_MODDIR}/*.mod ${ESMF_MOD_INSTALL} ; \
 	fi
 
-
-alldoc: chkdir_doc 
-	-@echo "Building All Documentation"
-	-@echo "========================================="
-	-@${OMAKE} tex dvi pdf html
-
-
-dvi: chkdir_doc tex
-	-@echo "Building dvi files"
-	-@echo "========================================="
-	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=builddvi  tree 
-
-pdf: chkdir_doc tex
-	-@echo "Building dvi files"
-	-@echo "========================================="
-	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=buildpdf  tree 
-
-# tex: chkdir_doc
-# 	-@echo "Building .F => .tex files"
-# 	-@echo "========================================="
-# 	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-# 	   ACTION=buildtex  tree 
-
-html: chkdir_doc tex
-	-@echo "Building html files"
-	-@echo "========================================="
-	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=buildhtml  tree 
 
 
 #

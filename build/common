@@ -1,4 +1,4 @@
-# $Id: common,v 1.29 2003/04/04 18:20:07 svasquez Exp $ 
+# $Id: common,v 1.30 2003/04/04 22:42:15 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -47,29 +47,6 @@ storeh:
 	    cp -f ${ESMF_TOP_DIR}/${LOCDIR}/../include/$$hfile ${ESMF_TOP_DIR}/src/include ; \
 	  fi ; \
 	done
-
-buildtex: chkdir_doc ${TEXFILES}
-
-builddvi: chkdir_doc ${DVIFILES}
-
-buildpdf: chkdir_doc ${PDFFILES}
-
-buildhtml:chkdir_doc ${HTMLFILES}
-
-localpdf: chkdir_doc
-	cd ..;  ${OMAKE} buildtex
-	${OMAKE} buildpdf
-
-localdvi: chkdir_doc
-	cd ..;  ${OMAKE} buildtex
-	${OMAKE} builddvi
-
-localhtml: chkdir_doc
-	cd ..;  ${OMAKE} buildtex
-	${OMAKE} buildhtml
-
-localdoc: chkdir_doc localpdf localdvi localhtml
-
 
 # Builds library
 vpathlib:
@@ -296,15 +273,53 @@ alltree: ${ACTION}
 .SUFFIXES: .f .f90 .F .F90 ${SUFFIXES} .C .cc .cpp .r .rm .so
 
 
-#
-#  tex targets
-#
-tree_tex: $(TEXFILES_TO_MAKE)
 
+#
+#  doc targets.
+#
+
+########## all doc formats ##########
+alldoc: chkdir_doc 
+	-@echo "Building All Documentation"
+	-@echo "========================================="
+	-@${OMAKE} tex dvi pdf html
+
+##########  Tex ##########
 tex:
 	-@echo "Building .tex files"
 	-@echo "========================================="
 	$(MAKE) BOPT=$(BOPT) ACTION=tree_tex tree
+
+tree_tex: $(TEXFILES_TO_MAKE)
+
+##########  dvi ##########
+dvi: chkdir_doc tex
+	-@echo "Building .dvi files"
+	-@echo "========================================="
+	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+	   ACTION=tree_dvi  tree 
+
+tree_dvi: chkdir_doc ${DVIFILES}
+
+##########  pdf ##########
+pdf: chkdir_doc tex
+	-@echo "Building .pdf files"
+	-@echo "========================================="
+	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+	   ACTION=tree_pdf  tree 
+
+tree_pdf: chkdir_doc ${PDFFILES}
+
+##########  html ##########
+html: chkdir_doc tex
+	-@echo "Building .html files"
+	-@echo "========================================="
+	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
+	   ACTION=tree_html tree 
+
+tree_html:chkdir_doc ${HTMLFILES}
+
+
 
 #
 # Pattern rules for making Tex files using 
@@ -365,15 +380,15 @@ tex:
 #
 #  dvi
 #
-$(ESMC_DOCDIR)/%_desdoc.dvi : %_desdoc.ctex 
+$(ESMC_DOCDIR)/%_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
 	$(DO_LATEX) $* des
 	mv -f $(@F) $(ESMC_DOCDIR)
 
-$(ESMC_DOCDIR)/%_refdoc.dvi : %_refdoc.ctex
+$(ESMC_DOCDIR)/%_refdoc.dvi : %_refdoc.ctex $(REFDOC_DEP_FILES)
 	$(DO_LATEX) $* ref
 	mv -f $(@F) $(ESMC_DOCDIR)
 
-$(ESMC_DOCDIR)/%_reqdoc.dvi : %_reqdoc.ctex
+$(ESMC_DOCDIR)/%_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	$(DO_LATEX) $* req
 	mv -f $(@F) $(ESMC_DOCDIR)
 
@@ -382,15 +397,15 @@ ${ESMC_DOCDIR}/%.pdf: ${ESMC_DOCDIR}/%.dvi
 	dvipdf $< $@
 
 # Html Files
-$(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex 
+$(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
 	${DO_L2H} $* des
 	mv -f $(@F) $(ESMC_DOCDIR)
 
-$(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex 
+$(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
 	${DO_L2H} $* ref
 	mv -f $(@F) $(ESMC_DOCDIR)
 
-$(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex 
+$(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 	${DO_L2H} $* req
 	mv -f $(@F) $(ESMC_DOCDIR)
 

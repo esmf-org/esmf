@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.7 2003/04/01 21:54:21 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.8 2003/04/04 22:42:17 flanigan Exp $ 
+ALL: alldoc
 
 CFLAGS    =
 FFLAGS    =
@@ -39,48 +39,22 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+#
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpful.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
+
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = DistGrid_reqdoc DistGrid_desdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi DistGrid_desdoc.tex DistGrid_reqdoc.tex
+CLEANDIRS   = DistGrid_reqdoc DistGrid_desdoc DistGrid_refdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi DistGrid_desdoc.tex DistGrid_reqdoc.tex DistGrid_refdoc.tex
 CLOBBERDIRS =
 
-
-# Dvi files
-${ESMC_DOCDIR}/DistGrid_desdoc.dvi:
-	${DO_LATEX} DistGrid des
-	mv -f DistGrid_desdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/DistGrid_reqdoc.dvi:
-	${DO_LATEX} DistGrid req
-	mv -f DistGrid_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/DistGrid_refdoc.dvi:
-	${DO_LATEX} DistGrid ref
-	mv -f DistGrid_refdoc.dvi ${ESMC_DOCDIR}
-
-
-# Pdf files
-${ESMC_DOCDIR}/DistGrid_desdoc.pdf: ${ESMC_DOCDIR}/DistGrid_desdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/DistGrid_desdoc.dvi ${ESMC_DOCDIR}/DistGrid_desdoc.pdf
-
-${ESMC_DOCDIR}/DistGrid_reqdoc.pdf: ${ESMC_DOCDIR}/DistGrid_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/DistGrid_reqdoc.dvi ${ESMC_DOCDIR}/DistGrid_reqdoc.pdf
-
-${ESMC_DOCDIR}/DistGrid_refdoc.pdf: ${ESMC_DOCDIR}/DistGrid_refdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/DistGrid_refdoc.dvi ${ESMC_DOCDIR}/DistGrid_refdoc.pdf
-
-# Html Files
-${ESMC_DOCDIR}/DistGrid_desdoc: 
-	${DO_L2H} DistGrid des
-	mv -f DistGrid_desdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/DistGrid_reqdoc: 
-	${DO_L2H} DistGrid req
-	mv -f DistGrid_reqdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/DistGrid_refdoc: 
-	${DO_L2H} DistGrid ref
-	mv -f DistGrid_refdoc ${ESMC_DOCDIR}

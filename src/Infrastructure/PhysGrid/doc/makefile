@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.9 2003/03/31 20:44:51 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.10 2003/04/04 22:42:22 flanigan Exp $ 
+ALL: alldoc
 
 CFLAGS    =
 FFLAGS    =
@@ -13,15 +13,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/PhysGrid/doc
 
-DVIFILES  = \
-		${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi \
+DVIFILES  = 	${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi \
 		${ESMC_DOCDIR}/PhysGrid_desdoc.dvi \
 		${ESMC_DOCDIR}/PhysGrid_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
-HTMLFILES = \
-		${ESMC_DOCDIR}/PhysGrid_reqdoc \
+HTMLFILES = 	${ESMC_DOCDIR}/PhysGrid_reqdoc \
 		${ESMC_DOCDIR}/PhysGrid_desdoc \
 		${ESMC_DOCDIR}/PhysGrid_refdoc
 
@@ -41,55 +39,22 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+#
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpful.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
 include $(ESMF_DIR)/makefile
-
-desdoc : $(ESMC_DOCDIR)/PhysGrid_desdoc.pdf
-refdoc : $(ESMC_DOCDIR)/PhysGrid_refdoc.pdf
-
 
 DIRS	  = 
 
 CLEANDIRS   = PhysGrid_reqdoc PhysGrid_desdoc PhySGrid_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex PhysGrid_desdoc.tex PhysGrid_refdoc.tex
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG PhysGrid_desdoc.tex PhysGrid_reqdoc.tex PhysGrid_refdoc.tex
 CLOBBERDIRS =
 
 
-# Dvi files
-${ESMC_DOCDIR}/PhysGrid_desdoc.dvi:
-	${DO_LATEX} PhysGrid des
-	mv -f PhysGrid_desdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi:
-	${DO_LATEX} PhysGrid req
-	mv -f PhysGrid_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/PhysGrid_refdoc.dvi:
-	${DO_LATEX} PhysGrid ref
-	mv -f PhysGrid_refdoc.dvi ${ESMC_DOCDIR}
-
-
-# Pdf files
-${ESMC_DOCDIR}/PhysGrid_desdoc.pdf: ${ESMC_DOCDIR}/PhysGrid_desdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/PhysGrid_desdoc.dvi ${ESMC_DOCDIR}/PhysGrid_desdoc.pdf
-
-${ESMC_DOCDIR}/PhysGrid_reqdoc.pdf: ${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/PhysGrid_reqdoc.dvi ${ESMC_DOCDIR}/PhysGrid_reqdoc.pdf
-
-${ESMC_DOCDIR}/PhysGrid_refdoc.pdf: ${ESMC_DOCDIR}/PhysGrid_refdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/PhysGrid_refdoc.dvi ${ESMC_DOCDIR}/PhysGrid_refdoc.pdf
-
-# Html Files
-${ESMC_DOCDIR}/PhysGrid_desdoc: 
-	-rm -rf $(ESMF_DOCDIR)/PhysGrid_desdoc
-	${DO_L2H} PhysGrid des
-	mv -f PhysGrid_desdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/PhysGrid_reqdoc: 
-	-rm -rf $(ESMF_DOCDIR)/PhysGrid_reqdoc
-	${DO_L2H} PhysGrid req
-	mv -f PhysGrid_reqdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/PhysGrid_refdoc: 
-	-rm -rf $(ESMF_DOCDIR)/PhysGrid_refdoc
-	${DO_L2H} PhysGrid ref
-	mv -f PhysGrid_refdoc ${ESMC_DOCDIR}

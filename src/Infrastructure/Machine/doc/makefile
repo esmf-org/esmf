@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.6 2003/03/25 00:18:17 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.7 2003/04/04 22:42:21 flanigan Exp $ 
+ALL: alldoc
 
 CFLAGS    =
 FFLAGS    =
@@ -13,18 +13,14 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/Machine/doc
 
-DVIFILES  = \
-		${ESMC_DOCDIR}/Machine_desdoc.dvi \
-		${ESMC_DOCDIR}/Machine_refdoc.dvi
-
+DVIFILES  = 	${ESMC_DOCDIR}/Machine_refdoc.dvi \
+		${ESMC_DOCDIR}/Machine_desdoc.dvi
 #		${ESMC_DOCDIR}/Machine_reqdoc.dvi 
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
-HTMLFILES = \
-		${ESMC_DOCDIR}/Machine_desdoc \
-		${ESMC_DOCDIR}/Machine_refdoc
-
+HTMLFILES = 	${ESMC_DOCDIR}/Machine_refdoc \
+		${ESMC_DOCDIR}/Machine_desdoc
 #		${ESMC_DOCDIR}/Machine_reqdoc 
 
 #
@@ -43,49 +39,23 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+#
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpful.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
+
 include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Machine_desdoc Machine_refdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi 
+CLEANDIRS   = Machine_desdoc Machine_refdoc Machine_reqdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Machine_desdoc.tex Machine_refdoc.tex Machine_reqdoc.tex
 CLOBBERDIRS =
 
 
-
-# Dvi files
-${ESMC_DOCDIR}/Machine_desdoc.dvi:
-	${DO_LATEX} Machine des
-	mv -f Machine_desdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Machine_reqdoc.dvi:
-	${DO_LATEX} Machine req
-	mv -f Machine_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Machine_refdoc.dvi:
-	${DO_LATEX} Machine ref
-	mv -f Machine_refdoc.dvi ${ESMC_DOCDIR}
-
-
-# Pdf files
-${ESMC_DOCDIR}/Machine_desdoc.pdf: ${ESMC_DOCDIR}/Machine_desdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Machine_desdoc.dvi ${ESMC_DOCDIR}/Machine_desdoc.pdf
-
-${ESMC_DOCDIR}/Machine_reqdoc.pdf: ${ESMC_DOCDIR}/Machine_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Machine_reqdoc.dvi ${ESMC_DOCDIR}/Machine_reqdoc.pdf
-
-${ESMC_DOCDIR}/Machine_refdoc.pdf: ${ESMC_DOCDIR}/Machine_refdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/Machine_refdoc.dvi ${ESMC_DOCDIR}/Machine_refdoc.pdf
-
-# Html Files
-${ESMC_DOCDIR}/Machine_desdoc: 
-	${DO_L2H} Machine des
-	mv -f Machine_desdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Machine_reqdoc: 
-	${DO_L2H} Machine req
-	mv -f Machine_reqdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/Machine_refdoc: 
-	${DO_L2H} Machine ref
-	mv -f Machine_refdoc ${ESMC_DOCDIR}

@@ -1,5 +1,4 @@
-# $Id: makefile,v 1.8 2003/04/01 23:46:43 nscollins Exp $
-
+# $Id: makefile,v 1.9 2003/04/04 22:42:24 flanigan Exp $
 
 # this needs to be the path of this directory relative to the
 # top level esmf directory.

@@ -1,6 +1,6 @@
 
 
-All: tex
+All: alldoc
 
 LOCDIR = src/Infrastructure/Base/doc
 
@@ -27,11 +27,21 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpfull.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
+
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
 CLEANDIRS   = Base_reqdoc Base_desdoc Base_refdoc 
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Base_reqdoc.tex Base_desdoc.tex Base_refdoc.tex 
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG Base_reqdoc.tex Base_desdoc.tex Base_refdoc.tex 
 CLOBBERDIRS =
 

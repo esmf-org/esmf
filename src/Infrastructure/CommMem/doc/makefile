@@ -1,5 +1,5 @@
-# $Id: makefile,v 1.9 2003/04/03 23:15:03 flanigan Exp $ 
-ALL: lib 
+# $Id: makefile,v 1.10 2003/04/04 22:42:16 flanigan Exp $ 
+ALL: alldoc
 
 CFLAGS    =
 FFLAGS    =
@@ -12,15 +12,13 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/CommMem/doc
 
-DVIFILES  = \
-		${ESMC_DOCDIR}/CommMem_reqdoc.dvi \
+DVIFILES  = 	${ESMC_DOCDIR}/CommMem_reqdoc.dvi \
 		${ESMC_DOCDIR}/CommMem_desdoc.dvi \
 		${ESMC_DOCDIR}/CommMem_refdoc.dvi
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 
-HTMLFILES = \
-		${ESMC_DOCDIR}/CommMem_reqdoc \
+HTMLFILES = 	${ESMC_DOCDIR}/CommMem_reqdoc \
 		${ESMC_DOCDIR}/CommMem_desdoc \
 		${ESMC_DOCDIR}/CommMem_refdoc
 
@@ -40,48 +38,22 @@ TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../exa
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f))))
 TEXFILES_TO_MAKE += $(addsuffix _fapi.tex, $(basename $(notdir $(wildcard ../examples/*.f90))))
 
+#
+# Files that a doc depends on.  Do not list the the ctex file !  
+# The ctex file is listed in the rule found in the build/common file.
+# These lists almost certainly will not be an exhastive list of 
+# all of the dependent files, but even a partial listing  will be helpful.
+#
+REQDOC_DEP_FILES = 
+DESDOC_DEP_FILES = $(TEXFILES_TO_MAKE) 
+REFDOC_DEP_FILES = $(TEXFILES_TO_MAKE)
+
+
 include $(ESMF_DIR)/makefile
 
 DIRS = 
 
 CLEANDIRS   = 
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi CommMem_desdoc.tex CommMem_reqdoc.tex CommMem_refdoc.tex
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi *.ORIG CommMem_desdoc.tex CommMem_reqdoc.tex CommMem_refdoc.tex
 CLOBBERDIRS =
-
-# Dvi files
-${ESMC_DOCDIR}/CommMem_desdoc.dvi:
-	${DO_LATEX} CommMem des
-	mv -f CommMem_desdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/CommMem_reqdoc.dvi:
-	${DO_LATEX} CommMem req
-	mv -f CommMem_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/CommMem_refdoc.dvi:
-	${DO_LATEX} CommMem ref
-	mv -f CommMem_refdoc.dvi ${ESMC_DOCDIR}
-
-
-# Pdf files
-${ESMC_DOCDIR}/CommMem_desdoc.pdf: ${ESMC_DOCDIR}/CommMem_desdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/CommMem_desdoc.dvi ${ESMC_DOCDIR}/CommMem_desdoc.pdf
-
-${ESMC_DOCDIR}/CommMem_reqdoc.pdf: ${ESMC_DOCDIR}/CommMem_reqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/CommMem_reqdoc.dvi ${ESMC_DOCDIR}/CommMem_reqdoc.pdf
-
-${ESMC_DOCDIR}/CommMem_refdoc.pdf: ${ESMC_DOCDIR}/CommMem_refdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/CommMem_refdoc.dvi ${ESMC_DOCDIR}/CommMem_refdoc.pdf
-
-# Html Files
-${ESMC_DOCDIR}/CommMem_desdoc: 
-	${DO_L2H} CommMem des
-	mv -f CommMem_desdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/CommMem_reqdoc: 
-	${DO_L2H} CommMem req
-	mv -f CommMem_reqdoc ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/CommMem_refdoc: 
-	${DO_L2H} CommMem ref
-	mv -f CommMem_refdoc ${ESMC_DOCDIR}
 
