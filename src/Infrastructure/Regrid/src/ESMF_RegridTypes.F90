@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.58 2004/08/14 22:38:32 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.59 2004/08/17 21:47:19 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.58 2004/08/14 22:38:32 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.59 2004/08/17 21:47:19 svasquez Exp $'
 
 !==============================================================================
 !
@@ -749,7 +749,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_RegridGet"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridGet - Get an attribute of a Regrid
 
 ! !INTERFACE:
