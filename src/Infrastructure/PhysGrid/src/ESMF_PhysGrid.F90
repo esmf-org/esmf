@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.86 2004/11/19 23:51:09 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.87 2004/11/23 00:39:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -323,7 +323,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.86 2004/11/19 23:51:09 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.87 2004/11/23 00:39:16 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2083,7 +2083,8 @@
 ! !IROUTINE: ESMF_PhysGridSrchMyDERowCol - Search grid on this DE for a row or column
 
 ! !INTERFACE:
-      subroutine ESMF_PhysGridSearchMyDERowCol(physgrid, dstAdd, point, option, rc)
+      subroutine ESMF_PhysGridSearchMyDERowCol(physgrid, dstAdd, point, option, &
+                                               total, rc)
 
 !
 ! !ARGUMENTS:
@@ -2091,6 +2092,7 @@
       integer, dimension(2) :: dstAdd
       real(kind=ESMF_KIND_R8), dimension(2), intent(in) :: point
       character(3), intent(in) :: option
+      logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -2119,6 +2121,7 @@
 
       ! local variables
       integer :: i, ib, ie, j, jb, je
+      logical :: totalUse
       real(ESMF_KIND_R8) ::  cellMinX,  cellMaxX,  cellMinY,  cellMaxY
       real(ESMF_KIND_R8) :: localMinX, localMaxX, localMinY, localMaxY
       real(ESMF_KIND_R8), dimension(:,:,:), pointer :: cornerX, cornerY
@@ -2130,8 +2133,14 @@
       if (option.ne.'min' .AND. option.ne.'max') then
       endif
  
-      ! initialize destination address to zero
+      ! set default values for optional arguments
+      totalUse = .false.
+      if (present(total)) totalUse = total
+
+      ! initialize destination address to zero for max option and something large
+      ! for min
       dstAdd = 0
+      if (option.eq.'min') dstAdd = 12345678
 
       call ESMF_ArrayGetData(physgrid%ptr%regions%vertices(1), cornerX, &
                              ESMF_DATA_REF, rc)
@@ -2144,42 +2153,67 @@
       localMinY = minval(cornerY)
       localMaxY = maxval(cornerY)
 
-      ! first check the bounding box for myDE
-      if (point(1) < localMinX .OR. &
-          point(1) > localMaxX .OR. &
-          point(2) < localMinY .OR. &
-          point(2) > localMaxY) return ! point not in this DE
-
-      ! point may be somewhere in this DE, loop through the cells on the DE
-
       ! get jb,je,ib,ie for the grid corners
-      ib = 2
-      ie = size(cornerX,2) - 1
-      jb = 2
-      je = size(cornerY,3) - 1
+      ib = 1
+      ie = size(cornerX,2)
+      jb = 1
+      je = size(cornerY,3)
 
-      do j   = jb,je     !jb,je correspond to exclusive domain on this DE
-        do i = ib,ie     !ib,ie ditto
+      if (option.eq.'min') then
+        if (point(1).lt.localMinX .AND. point(1).lt.localMaxX) dstAdd(1) = ib
+        if (point(2).lt.localMinY .AND. point(2).lt.localMaxY) dstAdd(2) = jb
+      endif
+      if (option.eq.'max') then
+        if (point(1).gt.localMaxX .AND. point(1).gt.localMinX) dstAdd(1) = ie
+        if (point(2).gt.localMaxY .AND. point(2).gt.localMinY) dstAdd(2) = je
+      endif
 
-          ! check bounding box of local grid cell
-          cellMinX = minval(cornerX(:,i,j))
-          cellMaxX = maxval(cornerX(:,i,j))
-          cellMinY = minval(cornerY(:,i,j))
-          cellMinY = maxval(cornerY(:,i,j))
+      ! first check the bounding box for myDE to see if both values are
+      ! out of bounds
+      if ((point(1) < localMinX  .OR. &
+           point(1) > localMaxX) .AND. &
+          (point(2) < localMinY .OR. &
+           point(2) > localMaxY)) then ! neither of the values is here
+        continue
+      else
+        ! point may be somewhere in this DE, loop through the cells on the DE
+        do j   = jb,je     !jb,je correspond to exclusive domain on this DE
+          do i = ib,ie     !ib,ie ditto
 
-          ! check against i-direction first
-          if (point(1).ge.cellMinX .AND. point(1).le.cellMaxX) then
-            if (option.eq.'min' .AND. i.lt.dstAdd(1)) dstAdd(1) = i
-            if (option.eq.'max' .AND. i.gt.dstAdd(1)) dstAdd(1) = i
-          endif
-          ! and j-direction separately
-          if (point(2).ge.cellMinY .AND. point(2).le.cellMaxY) then
-            if (option.eq.'min' .AND. j.lt.dstAdd(2)) dstAdd(2) = j
-            if (option.eq.'max' .AND. j.gt.dstAdd(2)) dstAdd(2) = j
-          endif
+            ! check bounding box of local grid cell
+            cellMinX = minval(cornerX(:,i,j))
+            cellMaxX = maxval(cornerX(:,i,j))
+            cellMinY = minval(cornerY(:,i,j))
+            cellMaxY = maxval(cornerY(:,i,j))
 
+            ! check against i-direction first
+            if (point(1).ge.cellMinX .AND. point(1).le.cellMaxX) then
+              if (option.eq.'min' .AND. i.lt.dstAdd(1)) dstAdd(1) = i
+              if (option.eq.'max' .AND. i.gt.dstAdd(1)) dstAdd(1) = i
+            endif
+            ! and j-direction separately
+            if (point(2).ge.cellMinY .AND. point(2).le.cellMaxY) then
+              if (option.eq.'min' .AND. j.lt.dstAdd(2)) dstAdd(2) = j
+              if (option.eq.'max' .AND. j.gt.dstAdd(2)) dstAdd(2) = j
+            endif
+
+          enddo
         enddo
-      enddo
+      endif
+
+      ! if total, modify the results slightly for internal grid halo width
+      if (totalUse) then
+        if (dstAdd(1).eq.ie) then
+          dstAdd(1) = dstAdd(1) + 2
+        elseif (dstAdd(1).gt.ib .AND. dstAdd(1).lt.ie) then
+          if (option.eq.'max') dstAdd(1) = dstAdd(1) + 2
+        endif
+        if (dstAdd(2).eq.je) then
+          dstAdd(2) = dstAdd(2) + 2
+        elseif (dstAdd(2).gt.jb .AND. dstAdd(2).lt.je) then
+          if (option.eq.'max') dstAdd(2) = dstAdd(2) + 2
+        endif
+      endif
 
       ! set return code
       if (present(rc)) rc = ESMF_SUCCESS
