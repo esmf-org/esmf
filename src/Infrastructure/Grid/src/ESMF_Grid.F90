@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.76 2003/08/05 23:06:18 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.77 2003/08/07 18:21:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -207,7 +207,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.76 2003/08/05 23:06:18 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.77 2003/08/07 18:21:32 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -571,6 +571,7 @@
 ! !INTERFACE:
       function ESMF_GridCreateInternalSpecd(countsPerDE1, countsPerDE2, &
                                             min, delta1, delta2, layout, &
+                                            dim_names, dim_units, &
                                             horz_gridtype, vert_gridtype, &
                                             horz_stagger, vert_stagger, &
                                             horz_coord_system, vert_coord_system, &
@@ -582,10 +583,12 @@
 ! !ARGUMENTS:
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
-      real, dimension(ESMF_MAXGRIDDIM), intent(in) :: min
+      real, dimension(:), intent(in) :: min
       real, dimension(:), intent(in) :: delta1
       real, dimension(:), intent(in) :: delta2
       type (ESMF_DELayout), intent(in) :: layout
+      character (len=*), dimension(:), intent(in), optional :: dim_names
+      character (len=*), dimension(:), intent(in), optional :: dim_units
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -614,6 +617,10 @@
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[layout]}]
 !          {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[dim\_names]}]
+!          Array of dimension names.
+!     \item[{[dim\_units]}]
+!          Array of dimension units.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
 !     \item[{[vert\_gridtype]}]
@@ -660,6 +667,7 @@
 !     Call construction method to allocate and initialize grid internals.
       call ESMF_GridConstruct(grid, countsPerDE1, countsPerDE2, &
                               min, delta1, delta2, layout, &
+                              dim_names, dim_units, &
                               horz_gridtype, vert_gridtype, &
                               horz_stagger, vert_stagger, &
                               horz_coord_system, vert_coord_system, &
@@ -1254,6 +1262,7 @@
       subroutine ESMF_GridConstructInternalSpecd(grid, countsPerDE1, &
                                                  countsPerDE2, min, delta1, &
                                                  delta2, layout, &
+                                                 dim_names, dim_units, &
                                                  horz_gridtype, vert_gridtype, &
                                                  horz_stagger, vert_stagger, &
                                                  horz_coord_system, &
@@ -1264,10 +1273,12 @@
       type(ESMF_GridType) :: grid
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
-      real, dimension(ESMF_MAXGRIDDIM), intent(in) :: min
+      real, dimension(:), intent(in) :: min
       real, dimension(:), intent(in) :: delta1
       real, dimension(:), intent(in) :: delta2
       type (ESMF_DELayout), intent(in) :: layout
+      character (len=*), dimension(:), intent(in), optional :: dim_names
+      character (len=*), dimension(:), intent(in), optional :: dim_units
       integer, intent(in), optional :: horz_gridtype
       integer, intent(in), optional :: vert_gridtype
       integer, intent(in), optional :: horz_stagger
@@ -1301,6 +1312,10 @@
 !          Array of physical increments between nodes in the second direction.
 !     \item[{[layout]}]
 !         {\tt ESMF\_DELayout} of {\tt ESMF\_DE}'s.
+!     \item[{[dim\_names]}]
+!          Array of dimension names.
+!     \item[{[dim\_units]}]
+!          Array of dimension units.
 !     \item[{[horz\_gridtype]}]
 !          Integer specifier to denote horizontal gridtype.
 !     \item[{[vert\_gridtype]}]
@@ -1361,17 +1376,10 @@
 !     Create main physgrid
       physgrid_name = 'base'
       call ESMF_GridAddPhysGrid(grid, physgrid_id, min, delta1, delta2, &
-                                countsPerDE1, countsPerDE2, physgrid_name, &
-                                status)
+                                countsPerDE1, countsPerDE2, dim_names, &
+                                dim_units, physgrid_name, status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridConstructInternalSpecd: Add physgrid"
-        return
-      endif
-
-!     Call SetCoord to create physical coordinates of subgrid
-      call ESMF_GridSetCoord(grid, physgrid_id, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridConstructInternalSpecd: Grid set coord compute"
         return
       endif
 
@@ -1649,21 +1657,24 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridAddPhysGridSpecd - Add a PhysGrid to a Grid
+! !IROUTINE: ESMF_GridAddPhysGridSpecd - Add a specified PhysGrid to a Grid
 
 ! !INTERFACE:
       subroutine ESMF_GridAddPhysGridSpecd(grid, physgrid_id, min, delta1, &
                                            delta2, countsPerDE1, countsPerDE2, &
-                                           physgrid_name, rc)
+                                           dim_names, dim_units, physgrid_name, &
+                                           rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
       integer, intent(out) :: physgrid_id
-      real, dimension(ESMF_MAXGRIDDIM), intent(in), optional :: min
+      real, dimension(:), intent(in), optional :: min
       real, dimension(:), intent(in) :: delta1
       real, dimension(:), intent(in) :: delta2
       integer, dimension(:), intent(in) :: countsPerDE1
       integer, dimension(:), intent(in) :: countsPerDE2
+      character (len=*), dimension(:), intent(in), optional :: dim_names
+      character (len=*), dimension(:), intent(in), optional :: dim_units
       character (len=*), intent(in), optional :: physgrid_name
       integer, intent(out), optional :: rc
 !
@@ -1688,6 +1699,10 @@
 !          Array of number of grid increments per DE in the x-direction.
 !     \item[{[countsPerDE2]}]
 !          Array of number of grid increments per DE in the y-direction.
+!     \item[{[dim\_names]}]
+!          Array of dimension names.
+!     \item[{[dim\_units]}]
+!          Array of dimension units.
 !     \item [{[physgrid\_name]}]
 !          {\tt ESMF\_PhysGrid} name.
 !     \item[{[rc]}]
@@ -1699,8 +1714,9 @@
 
       integer :: status=ESMF_SUCCESS          ! Error status
       logical :: rcpresent=.FALSE.            ! Return code present
-      integer :: i, myDE(2), counts(2)
-      real :: global_min(2)
+      integer :: i, j, myDE(2), counts(2), local_start(2)
+      real :: local_min(2), local_max(2), global_min(2), global_max(2)
+      real, dimension(:), allocatable :: delta1_local, delta2_local
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: gridp
       type(ESMF_PhysGrid), dimension(:), allocatable, target :: temp_pgrids
@@ -1742,9 +1758,20 @@
       endif
       physgrid_id = grid%num_physgrids 
 
-      global_min(1)=min(1)
-      global_min(2)=min(2)
+      ! Now set up the current physgrid.  First calculate global_mins and
+      ! global_maxs
+      global_min(1) = min(1)
+      global_min(2) = min(2)
+      global_max(1) = min(1)
+      global_max(2) = min(2)
+      do i = 1,size(delta1)
+        global_max(1) = global_max(1) + delta1(i)
+      enddo
+      do i = 1,size(delta2)
+        global_max(2) = global_max(2) + delta2(i)
+      enddo
 
+      ! figure out the position of myDE to get local counts
       gridp%ptr = grid
       call ESMF_GridGetDELayout(gridp, layout, status)
       if(status .NE. ESMF_SUCCESS) then
@@ -1756,10 +1783,55 @@
         print *, "ERROR in ESMF_GridAddPhysGridSpecd: delayout get position"
         return
       endif
+      counts(1) = countsPerDE1(myDE(1))
+      counts(2) = countsPerDE2(myDE(2))
 
-      temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, delta1=delta1, &
-                                 delta2=delta2, global_min=global_min, &
-                                 counts=counts, name=physgrid_name, rc=status)
+      ! allocate and load local deltas
+      allocate(delta1_local(counts(1)))
+      allocate(delta2_local(counts(2)))
+      local_min(1) = global_min(1)
+      local_min(2) = global_min(2)
+      local_start(1) = 0
+      local_start(2) = 0
+      if(myDE(1).ge.2) then
+        do j = 1,myDE(1)-1
+          do i = 1,countsPerDE1(j)
+            local_min(1) = local_min(1) + delta1(i+local_start(1))
+          enddo
+          local_start(1) = local_start(1) + countsPerDE1(j)
+        enddo
+      endif
+      if(myDE(2).ge.2) then
+        do j = 1,myDE(2)-1
+          do i = 1,countsPerDE2(j)
+            local_min(2) = local_min(2) + delta2(i+local_start(2))
+          enddo
+          local_start(2) = local_start(2) + countsPerDE2(j)
+        enddo
+      endif
+      local_max(1) = local_min(1)
+      local_max(2) = local_min(2)
+      do i = 1,counts(1)
+        delta1_local(i) = delta1(i+local_start(1))
+        local_max(1) = local_max(1) + delta1(i+local_start(1))
+      enddo
+      do i = 1,counts(2)
+        delta2_local(i) = delta2(i+local_start(2))
+        local_max(2) = local_max(2) + delta2(i+local_start(2))
+      enddo
+
+      temp_pgrids(physgrid_id) = ESMF_PhysGridCreate(dim_num=2, &
+                                                     delta1=delta1_local, &
+                                                     delta2=delta2_local, &
+                                                     local_min=local_min, &
+                                                     local_max=local_max, &
+                                                     global_min=global_min, &
+                                                     global_max=global_max, &
+                                                     counts=counts, &
+                                                     dim_names=dim_names, &
+                                                     dim_units=dim_units, &
+                                                     name=physgrid_name, &
+                                                     rc=status)
       grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
