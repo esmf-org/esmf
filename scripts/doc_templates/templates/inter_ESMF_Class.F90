@@ -1,4 +1,4 @@
-! $Id: inter_ESMF_Class.F90,v 1.3 2003/01/10 15:15:01 nscollins Exp $
+! $Id: inter_ESMF_Class.F90,v 1.4 2003/02/03 22:46:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: inter_ESMF_Class.F90,v 1.3 2003/01/10 15:15:01 nscollins Exp $'
+      '$Id: inter_ESMF_Class.F90,v 1.4 2003/02/03 22:46:09 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -106,7 +106,7 @@
 !    Description of xxx.
 !  \item[yyy]
 !    Description of yyy.
-!  \item[[zzz]]
+!  \item[{[zzz]}]
 !    Description of optional arg zzz.
 !  \item[rc]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -152,7 +152,7 @@ end interface
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -208,7 +208,7 @@ end interface
 !  The arguments are:
 !  \begin{description}
 !
-!   \item[[rc]]
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -263,7 +263,7 @@ end interface
 !     \item[<class>]
 !       Destroy contents of this {\tt <Class>}.
 !
-!     \item[[rc]]
+!     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !     \end{description}

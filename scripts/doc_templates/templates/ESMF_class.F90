@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.13 2003/02/03 15:29:52 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.14 2003/02/03 22:46:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.13 2003/02/03 15:29:52 nscollins Exp $'
+      '$Id: ESMF_class.F90,v 1.14 2003/02/03 22:46:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -163,9 +163,9 @@
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
+!     \item[{[arg3]}] 
 !          Argument 3.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -196,7 +196,7 @@
 !     \begin{description}
 !     \item[<class>] 
 !          The class to be destroyed.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -238,9 +238,9 @@
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
+!     \item[{[arg3]}] 
 !          Argument 3.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -274,7 +274,7 @@
 !     \begin{description}
 !     \item[<class>] 
 !          The class to be destructed.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -315,9 +315,9 @@
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
+!     \item[{[arg3]}] 
 !          Argument 3.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
@@ -350,7 +350,7 @@
 !          Class to be queried.
 !     \item[config]
 !          Configuration information.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -384,7 +384,7 @@
 !          Class to be configured.
 !     \item[config]
 !          Configuration information.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -419,7 +419,7 @@
 !          Class to be queried.
 !     \item[value]
 !          Value to be retrieved.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -454,7 +454,7 @@
 !          Class to be modified.
 !     \item[value]
 !          Value to be set.         
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -485,9 +485,9 @@
 !     \begin{description}
 !     \item[<class>] 
 !          Class to be queried.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Validation options.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
@@ -518,10 +518,10 @@
 !     \begin{description}
 !     \item[<class>] 
 !          Class to be queried.
-!     \item[[opt]]
+!     \item[{[opt]}]
 !          Print ptions that control the type of information and level of 
 !          detail.
-!     \item[[rc]] 
+!     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
