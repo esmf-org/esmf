@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.32 2004/09/24 22:19:30 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.33 2004/10/14 19:54:19 cpboulder Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -288,7 +288,7 @@ end subroutine ESMF_LogFinalize
 	integer, intent(out),optional		:: rc
 
 ! !DESCRIPTION:
-!      This subroutine flushes a log associated with an {\tt ESMF\_Log}.
+!      This subroutine flushes th {\tt log}.
 !
 !      The arguments are:
 !      \begin{description}
@@ -755,11 +755,11 @@ end function ESMF_LogMsgFoundError
 	
 
 ! !DESCRIPTION:
-!      This function returns a logical true for ESMF return codes that indicate
-!      an error.  A predefined error message will added to the {\tt ESMF\_Log} 
-!      along with
-!      a user added {\tt msg}, {\tt line}, {\tt file} and {\tt method}.  
-!      Additionally, {\tt rcToReturn} will be set to {\tt rcToCheck}.
+!      This subroutine sets the {\tt rcToReturn} value to {\tt rcValue} if
+!      {\tt rcToReturn} is present and writes this error code to the {\tt ESMF\_Log}
+!      if an error is generated.  A predefined error message will added to the 
+!      {\tt ESMF\_Log} along with a user added {\tt msg}, {\tt line}, {\tt file}
+!      and {\tt method}.  
 !
 !      The arguments are:
 !      \begin{description}
@@ -776,7 +776,7 @@ end function ESMF_LogMsgFoundError
 !      \item [{[method]}]
 !            User-provided method string.
 !      \item [{[rcToReturn]}]
-!            If specified, copy the {\tt rcToCheck} value to {\tt rc}.
+!            If specified, copy the {\tt rcValue} value to {\tt rcToreturn}.
 !            This is not the return code for this function; it allows
 !            the calling code to do an assignment of the error code
 !            at the same time it is testing the value.
