@@ -1,4 +1,4 @@
-! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.3 2004/11/19 18:39:20 svasquez Exp $
+! $Id: ESMF_VMScatterVMGatherUTest.F90,v 1.4 2004/11/19 22:17:20 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.3 2004/11/19 18:39:20 svasquez Exp $'
+      '$Id: ESMF_VMScatterVMGatherUTest.F90,v 1.4 2004/11/19 22:17:20 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -97,32 +97,32 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Verify array1 data before scatter/gather
+      ! Verify array1 data before scatter
       write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array1 data before scatter/gather Test"
+      write(name, *) "Verifying array1 data before scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nlen
 	if (array1(i)/=(localPet * 100 + i)) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, 'contents before scatter/gather:'
+      print *, 'contents before scatter:'
       do i=1, nlen
         print *, localPet,' array1: ', array1(i)
       enddo
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Verify array2 data before scatter/gather
+      ! Verify array2 data before scatter
       write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array2 data before scatter/gather Test"
+      write(name, *) "Verifying array2 data before scatter Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
 	if (array2(i)/=0) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, 'contents before scatter/gather:'
+      print *, 'contents before scatter:'
       do i=1, nsize
         print *, localPet,' array2: ', array2(i)
       enddo
@@ -138,6 +138,39 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
+      ! Verify array1 data after scatter
+      write(failMsg, *) "Wrong data."
+      write(name, *) "Verifying array1 data after scatter Test"
+      rc = ESMF_SUCCESS
+      do i=1, nlen
+	if (array1(i)/=(localPet * 100 + i)) rc = ESMF_FAILURE
+      enddo
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'contents after scatter:'
+      do i=1, nlen
+        print *, localPet,' array1: ', array1(i)
+      enddo
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
+      ! Verify array2 data after scatter
+      write(failMsg, *) "Wrong data."
+      write(name, *) "Verifying array2 data after scatter Test"
+      rc = ESMF_SUCCESS
+      do i=1, nsize
+	if (array2(i)/=(scatterRoot * 100 + i + 2 * localPet)) rc = ESMF_FAILURE
+      enddo
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      print *, 'contents after scatter:'
+      do i=1, nsize
+        print *, localPet,' array2: ', array2(i)
+      enddo
+
+
+      !------------------------------------------------------------------------
+      !NEX_UTest_Multi_Proc_Only
       ! Gather from gatherRoot
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Gather Test"
@@ -147,9 +180,9 @@
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Verify array1 data after scatter/gather
+      ! Verify array1 data after gather
       write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array1 data after scatter/gather Test"
+      write(name, *) "Verifying array1 data after gather Test"
       rc = ESMF_SUCCESS
       if (localPet==gatherRoot) then
       	do i=1, nlen
@@ -162,23 +195,23 @@
       endif
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, 'contents after scatter/gather:'
+      print *, 'contents after gather:'
       do i=1, nlen
         print *, localPet,' array1: ', array1(i)
       enddo
 
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
-      ! Verify array2 data after scatter/gather
+      ! Verify array2 data after gather
       write(failMsg, *) "Wrong data."
-      write(name, *) "Verifying array2 data after scatter/gather Test"
+      write(name, *) "Verifying array2 data after gather Test"
       rc = ESMF_SUCCESS
       do i=1, nsize
 	if (array2(i)/=(scatterRoot * 100 + i + 2 * localPet)) rc = ESMF_FAILURE
       enddo
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, 'contents after scatter/gather:'
+      print *, 'contents after gather:'
       do i=1, nsize
         print *, localPet,' array2: ', array2(i)
       enddo
