@@ -1,0 +1,65 @@
+% $Id: CommMem_background.tex,v 1.3 2004/04/28 23:10:54 cdeluca Exp $
+
+\section{Background}
+
+The communication and memory kernels ({\bf \shortname}) elements of ESMF 
+will provide a set of services to shield the upper levels of ESMF from certain
+system level functions. The {\bf \shortname} services serve to help
+manage the complexity of targeting a wide range of platforms.
+System specific code specializations will largely be confined 
+to the {\bf \shortname} layer.
+Two particular areas are addressed by {\bf \shortname}
+
+\paragraph {\bf Basic communication primitives} These are the building blocks for 
+both the data communication between and within components and for any
+control messages that components may need to exchange. Within {\bf
+  \shortname} these can bind to different system level libraries (for
+example MPI, IPC, mmap, shmem etc..) and include built-in,
+low-overhead self-profiling capabilities.  Isolating the basic
+communication functions of ESMF abstracts the communication primitives
+to allow highly optimized code, targeted to specific platforms and to
+specific framework functions, to be easily inserted into ESMF. The
+{\bf \shortname} layer allows specialized forms of performance
+critical primitives to be employed without impacting application code
+or upper layers of ESMF code.  Channeling communication and ESMF
+memory allocation through a single layer with built-in monitoring is
+also designed to support detailed, application-level monitoring and
+provide for partially or fully automated tuning.
+
+
+\paragraph {\bf Basic memory management} Both user visible and internal
+ESMF entities require memory resources. Within {\bf CMK} reservation,
+ monitoring and release mechanisms will be provided for securing managing
+memory resources. As with the communication primitives, the
+ESMF memory primitives will include built-in, low-overhead self-profiling 
+capabilities.
+
+
+\subsection{Location}
+
+The {\bf CMK} set of services is part of the ESMF infrastructure-utilities 
+layer. Many ESMF higher level facilities will use {\bf \shortname} facilities.
+The {\bf \shortname} services should rarely be directly called from user-level
+component code.
+
+
+\subsection{Scope}
+
+The {\bf CMK} services will be limited to potentially performance
+critical functions within ESMF and are intended to be used by internal
+ESMF code. In the case of communication this includes messaging
+associated with the ESMF {\bf Distributed Grid} {\it Halo} and {\it
+  Transpose} operations. In the case of memory resources this includes
+providing memory for ESMF {\bf Infrastructure - Fields and Grids} {\it
+  field}, {\it field bundle}, {\it physical grid} and {\it distributed
+  grid} data structures and objects.  The {\bf \shortname} facility is
+not concerned with ESMF {\it partition} based parallelism as this does
+not involve any communication between components or among data
+domains.
+
+User code containing its own message-passing primitives or shared
+memory directives may co-exist with ESMF, but use of this layer
+is recommended for fully realizing the benefits of ESMF.
+
+\subsection{Related Material}
+

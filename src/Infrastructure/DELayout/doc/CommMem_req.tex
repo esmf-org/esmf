@@ -1,0 +1,845 @@
+% $Id: CommMem_req.tex,v 1.3 2004/04/28 23:10:54 cdeluca Exp $
+
+%===============================================================================
+% Requirements may be itemized under a main topic:
+%===============================================================================
+%===============================================================================
+
+\req{Machine model}
+For the most part, we consider the machine representation an implementation issue,
+and the user will not explicitly create or destroy the machine model.
+However, there are some queries specific to the machine model that a user may 
+require or find useful.
+
+\sreq{Query homogeneous platform attributes}
+
+Primitives for determining key attributes of the computational
+platform are required.
+These include
+\begin{itemize}
+\item Processor, memory and communication groupings across the machine;
+\item Shared and distributed memory profiles (rated latency and
+  bandwidth for different pipes, size of available memory pools);
+\item Availability of low-level APIs.
+\end{itemize}
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit tests. \\
+\end{reqlist}
+
+\sreq{Query heterogeneous platform attributes}
+
+Platform attributes for multiple platforms must be available for
+heterogeneous applications.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:} MIT \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit tests. \\
+\end{reqlist}
+
+\sreq{Query PE attributes}
+
+Primitives for determining key PE attributes are required.
+These include
+\begin{itemize}
+\item Identifier of the PE.
+\item Identifiers of the memory and communication groupings to which a 
+PE belongs.
+\item Identifiers of the physical resources (CPU, memory, storage) associated with a PE.
+\item Identifiers of the virtual attributes associated with a PE e.g. coordinate in a layout.
+\end{itemize}
+
+In order to determine what resources to use to communicate between data domains 
+the communication kernel needs to know information about the PE associated with the
+data domains. The binding of data domains to PE's and memory is driven by the application
+component and its included components. The communication kernel needs to determine 
+what bindings were made.
+
+\ssreq{Query PE ID} 
+Each PE within an application shall have a
+retrievable unique identifier.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  CCSM-CPL, POP, CICE, PSAS, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\ssreq{Query memory node ID}                         
+
+Each block of PEs with equal flat access to a block of 
+memory has a retrievable ID shared by those PEs. 
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  CCSM-CPL, POP, CICE, PSAS, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\ssreq{Query addressable node ID}
+A set of PEs capable of addressing the same block of physical
+memory (e.g., via message passing) has a retrievable ID shared
+by those PEs.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), GFDL(desired)             \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\ssreq{Query processing node ID}
+A set of PEs to which an operating system scheduler is capable 
+of assigning a single job has a retrievable ID shared by those
+PEs.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), GFDL(desired) \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:}  Where the OS does not permit this identification, default
+  to PE ID.
+\end{reqlist}
+
+\sreq{Query other machine attributes}
+System communication, memory, and I/O attributes will be retrievable.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT(desired) \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\req{PE list}
+
+\sreq{Creation}
+
+\ssreq{Create from PE IDs}
+It shall be possible to create a PE list based on a user-specified set
+of PE IDs.
+
+\begin{reqlist}
+{\bf Priority:} 1\\
+{\bf Source:}  CCSM-CPL, PSAS, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test. \\ 
+{\bf Notes:}  For example, ``Component requests PEs 0...31.''
+\end{reqlist}
+
+\ssreq{Create from length specification}
+It shall be possible to create a PE list of a user-specified length.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  CCSM-CPL, POP, CICE, PSAS, MIT, GFDL \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test.\\ 
+{\bf Notes:}  For example, ``Component requests N PEs.'' Exception if N too
+  large.
+\end{reqlist}
+
+\ssreq{Create list using only free PEs}
+It shall be possible to create a PE list of a user-specified length
+on which no other components have been scheduled.
+
+\begin{reqlist}
+  {\bf Priority:} 3 \\
+  {\bf Source:}  CCSM-CPL (desired), PSAS (desired), MIT(desired), GFDL(desired)  \\
+  {\bf Status:} Approved-2. \\
+  {\bf Verification:} Unit test.\\
+  {\bf Notes:} For example, ``Component requests N free PEs.''
+  Exception if N too large.  Overlap with Components.
+\end{reqlist}
+
+\ssreq{Create based on memory node affinity}
+
+It shall be possible to create PE lists based on memory node affinity.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT(desired), GFDL(desired) \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\ 
+{\bf Notes:}  For example, ``component requests N PEs sharing an memory 
+node''. Throw exception if length is greater than number of PEs on the memory node. 
+Other affinities may be required e.g. scratch space, memory, same CPU,
+particular numerical library etc.....
+\end{reqlist}
+
+\ssreq{Create based on addressable node affinity}
+
+It is possible to create PE lists based on addressable node affinity.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT(desired), GFDL(desired) \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\ 
+{\bf Notes:}  For example, ``component requests N PEs sharing an 
+addressable node''. Throw exception if length is greater than number
+of PEs on the addressable node.
+\end{reqlist}
+
+\ssreq{Create based on processing node affinity}
+
+It shall be possible to create PE lists based on processing node affinity.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT(desired), GFDL(desired) \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\ 
+{\bf Notes:}  For example, ``component requests N PEs sharing a processing
+node''.  Throw exception if length is greater than number of PEs on 
+the processing node.  Overlap with Components.
+\end{reqlist}
+
+\ssreq{Create based on component affinity}
+
+It shall be possible to create PE lists based on component affinity. This is
+to assign components which are closely linked to be assigned
+``nearby'' computational elements.
+
+\begin{reqlist}
+{\bf Priority:}  2 \\
+{\bf Source:}  CCSM-CPL (desired), POP (desired), CICE (desired), PSAS (desired),
+MIT(important - it could be hard to meet the 10\% degradation milestone without
+this control somewhere), GFDL \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test. \\ 
+{\bf Notes:}  For example, ``atmospheric physics component would like 
+to be scheduled next to atmospheric dynamics''.  Overlap with Components.
+\end{reqlist}
+
+\ssreq{Create a compact PE list}
+
+It is possible to request a PE list of given length whose associated
+memory extent is optimally compact.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT(desired), GFDL(desired) \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test?\\ 
+{\bf Notes:}  For example, ``give me N PEs distributed on the fewest possible
+  memory nodes''. Other attributes could be optimized in deciding layout.
+A general graph and edge optimizer could be used.  Overlap with Components.
+\end{reqlist}
+
+\ssreq{Create a subset of a PE list}
+
+It is possible to request a PE list subset of an existing PE list.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  CCSM-CPL (desired), PSAS (desired), MIT, GFDL \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test.\\ 
+{\bf Notes:}  ``Of the 80p assigned to ocean+atmosphere, I'd like 32
+  for the atmosphere''.  Overlap with Components.
+\end{reqlist}
+
+\ssreq{Create a complementary PE lists}
+
+It is possible to request a complementary subset of an existing spawned
+PE list with respect to its parent.
+
+\begin{reqlist}
+{\bf Priority:}  2 \\
+{\bf Source:}  CCSM-CPL (desired), MIT, GFDL \\
+{\bf Status:} Approved-2. \\
+{\bf Verification:} Unit test.\\ 
+{\bf Notes:}  ``...and the other 48 for the ocean''.
+  Required for concurrent scheduling.  Overlap with Components.
+\end{reqlist}
+
+\sreq{Deletion}
+It shall be possible to delete a PE list.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  \\
+{\bf Status:} Approved-1. \\
+{\bf Verification:} Unit test.\\ 
+\end{reqlist}
+
+\sreq{Modify PE list request}
+
+It is possible for a component to make any of the above requests at
+any time.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT(desired), GFDL(desired) \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test. \\
+{\bf Notes:} overlap with Components.
+\end{reqlist}
+
+\req{DELayout}
+
+\sreq{Create layout from PE list}
+The ESMF will compute and store a layout given a PE list, number of dimensions, 
+and and optional hints about the communication patterns (such as the 
+relative frequency of communication for different dimensions).
+\begin{reqlist}
+  {\bf Priority:} 1 \\
+  {\bf Source:}  MIT \\
+  {\bf Status:}  \\
+  {\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\sreq{Create layout from distributed grid}
+The ESMF will compute and store a layout given one or more 
+distributed grids or other high-level ESMF objects and optional 
+hints about communication patterns (such as the relative 
+frequency of communication for different dimensions).
+\begin{reqlist}
+  {\bf Priority:} 1 \\
+  {\bf Source:}  MIT \\
+  {\bf Status:}  \\
+  {\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\sreq{Automatic binding of tasks to resources}
+Support for automated compute resource binding of tasks should
+  be provided.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  CCSM-CPL (desired), MIT (desired), NSIPP, GFDL \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} System test.\\ 
+{\bf Notes:}  Automated binding could be based on estimates and follow
+  certain optimality rules that are based of both knowledge of compute
+  resources and of the distribution of grids over tasks within
+  multiple, interacting components.  Alternatively automated binding
+  could be based on runtime measurement.  Overlap with Components.
+\end{reqlist}
+
+\sreq{Mapped memory region for data sharing}.
+
+It shall be possible to request a region of shared address space to support
+cross-component communication.
+
+\begin{reqlist}
+  {\bf Priority:} 1 \\
+  {\bf Source:}  MIT \\
+  {\bf Status:}  \\
+  {\bf Verification:} Unit tests, EVA tests \\
+  {\bf Notes:} The optimal ``memory strategy'' might include hints on
+  whether to allocate memory from a pool shared between PEs. The
+  optimal communication design might include optimal assignment of
+  domains to PEs, advocating the use of shared memory where
+  appropriate, and a pre-computed and stored buffering pattern where
+  message-passing is indicated.  
+\end{reqlist}
+
+\sreq{Delete layout}
+It shall be possible to delete a layout, freeing the resources that 
+are associated with it.
+
+\begin{reqlist}
+  {\bf Priority:} 1 \\
+  {\bf Source:}  MIT \\
+  {\bf Status:}  \\
+  {\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\req{Communication and Memory Kernel Setup}
+
+Setup functions are run during the initialization phase of an ESMF
+application and its components. They are not required to be scalable
+or coded for optimal performance. They may require knowledge of (or
+the ability to parse) higher-level constructs.
+
+\sreq{Setup communication map for a remapping}
+
+Given a remapping between distributed grids, the ESMF setup
+phase will compute and store an optimal memory strategy and
+communication pattern. Domains may be reassigned for the individual
+distributed grids at this stage to optimize the layouts for remapping.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\sreq{Setup communication map for grid collectives}
+
+Collective operations (e.g global reductions, global gather, global
+barrier) have been defined for a distributed grid. Different
+buffering and communication strategies may have to be used for
+default, performance-critical, and bit-reproducible versions of these
+routines.
+
+\ssreq{Setup performance-critical collectives}
+
+Given a distributed grid, the ESMF setup
+phase will compute and store a communication map for
+performance-critical grid collectives.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\ssreq{Setup bit-reproducible collectives}
+
+Given a distributed grid, the ESMF setup
+phase will compute and store a communication map for
+bit-reproducible grid collectives.
+
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\sreq{Setup performance profiling}
+
+Communication and memory operations are all instrumented for profiling. 
+The setup phase will include mechanisms for
+turning on and off the available options for profiling, and assigning
+a reporting mechanism (e.g., write to stdout).
+
+\begin{reqlist}
+{\bf Priority:} Priority 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests \\
+\end{reqlist}
+
+\req{Communication primitives}
+
+\sreq{Point-to-point primitives}
+
+\ssreq{Non-blocking send}
+A performance-critical non-blocking send operation to a specified
+target is required.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL. \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:}  May end up being implemented as private method to for performance
+optimization.
+\end{reqlist}
+
+\ssreq{Non-blocking receive}
+A performance-critical non-blocking receive operation from a specified
+source is required.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL. \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Non-blocking receive from unspecific source}
+A performance-critical non-blocking receive operation from an unspecified
+source is required.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL. \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Multiple outstanding messages}
+Both send and receive phases must be capable of tolerating multiple
+outstanding messages between source-target pairs, up to some specified
+queue limit.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL. \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\ssreq{Wait}
+A performance-critical wait operation for a specified message must be present.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL. \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Wait all}
+A performance-critical wait operation for all outstanding messages must be present.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL. \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test. 
+\end{reqlist}
+
+\ssreq{Barrier}
+A point-to-point barrier operation is required.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT, maybe GFDL \\
+{\bf Status:}  \\
+{\bf Verification:} Unit test.
+\end{reqlist}
+
+\sreq{Collective primitives}
+
+\ssreq{All-to-all}
+A general, non-blocking all-to-all collective communication operation
+shall be the basic ESMF message-passing pathway.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\ssreq{Multiple outstanding messages}
+
+Both send and receive phases must be capable of tolerating multiple
+outstanding messages between source-target pairs, up to some specified
+queue limit.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT, GFDL, CCSM, DAO \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\ssreq{Collective wait}
+
+There shall be a wait operation for the basic ESMF collective
+communication pathway to ensure all outstanding \emph{local} messages
+are completed.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT, GFDL, CCSM, DAO \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\ssreq{Broadcast}
+
+A performance-critical broadcast operation is required.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT, GFDL, CCSM, DAO, NSIPP, POP \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\ssreq{Sum}
+A performance-critical sum operation is required.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT, GDFL, CCSM, DAO, NSIPP, POP \\
+{\bf Status:}  \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\ssreq{Barrier}
+A global barrier operation is required to be provided by ESMF.
+Priority:  1
+Status:  Approved-1
+Notes:  Use in performance-critical code sections is not recommended.
+
+\ssreq{Min-max}
+Priority:  1
+Status:  Approved-1
+Notes:  Other global reduction operations are not required to be 
+performance-critical.
+
+\ssreq{All gather}
+A performance-critical operation in which every process receives the result 
+is required.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\ssreq{Scatter}
+A performance-critical scatter operation is required.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit tests, EVA tests 
+\end{reqlist}
+
+\sreq{Instrumenting communications for performance profiling}
+
+All the communication operations listed above will be instrumented by
+ESMF for performance using very lightweight mechanisms. Various times
+will be recorded at runtime, and results collated in a post-execution
+phase. Final output will show statistics across PEs, as well as
+optionally on a per-message basis (though for climate runs the
+internal storage required for this may be prohibitive).
+
+\ssreq{Time spent in communication primitives}
+\ssreq{Time spent in collectives}
+\ssreq{Time spent waiting for message completion}
+\ssreq{Message lengths}
+\ssreq{Internal buffer usage}
+\ssreq{Use of underlying APIs}
+\ssreq{Time spent at global barriers}
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit tests, EVA tests 
+{\bf Notes:} Good candidate for deferral.
+\end{reqlist}
+
+\ssreq{Calipers}
+
+It shall be possible during the setup phase to set caliper points
+around a code section.  The number of
+caliper pairs is limited to a pre-specifed value.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit tests, EVA tests \\
+{\bf Notes:} Good candidate for deferral.
+\end{reqlist}
+
+\sreq{Implementation libraries}
+
+\ssreq{Default implementation}
+
+The default implementation for message-passing shall be MPI 1.2 and for
+shared memory OpenMP 1.0.  Other bindings will be made available on
+platforms where they show advantages in terms of performance, or code
+clarity at little cost. The implementation priorities for non-default
+bindings will in general be lower (later). ESMF is not required to run
+in parallel on platforms which support neither MPI 1.2 nor OpenMP 1.0.
+
+The requirement for other implementations is really asking for a certain
+implementation. Arguably the requirement could be stated as ``ESMF
+performance and resource utilization on a system which has shmem
+pointers available must be competitive to an approach that binds ESMF
+communication directly to shmem pointers reads and writes (with
+appropriate memory instructions inserted to reconcile memory
+inconsistency).''
+Notes:  When Open-MP2 is available that will be supported.
+
+\ssreq{System V IPC}
+
+The System V IPC library for message passing shall be optionally
+available on appropriate platforms.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  MIT, NSIPP \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Need input from MIT and others.
+\end{reqlist}
+
+\ssreq{SHMEM}
+
+The SHMEM library for message passing shall be optionally
+available on appropriate platforms.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  GFDL, NSIPP \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit test. \\
+{\bf Notes:} Implementation use/avoid strided shmem? 
+\end{reqlist}
+
+\ssreq{Posix threads}
+
+Posix bindings for message passing shall be optionally
+available on appropriate platforms.  This implementation
+is not guaranteed to work with other shared memory mechanisms.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\ssreq{MPI 2.0}
+
+MPI 2.0 bindings for message passing shall be optionally
+available on appropriate platforms.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  Desired by DAO \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\ssreq{Extensibility}
+
+Extensibility to allow bindings of performance-critical communication
+primitives to other underlying libraries.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\sreq{Interoperability}
+
+\sreq{Default implementation}
+
+\ssreq{OpenMP and MPI}
+We guarantee that the default implementation will interoperate correctly
+with codes in which users have inserted their own MPI calls or OpenMP 
+calls, or both.  
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-1 \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\ssreq{Shmem}
+The default implementation will work with shmem.
+
+\begin{reqlist}
+{\bf Priority:} 2 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Approved-2 \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\ssreq{Other libraries}
+The default implementation shall interoperate with other communication
+libraries, such as System V.
+
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\sreq{Other ESMF communication library implementations}
+Other ESMF communication library implementations shall ineroperate with codes
+in which users have inserted call from the library used for the ESMF implementation.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  MIT \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\req{Memory management}
+
+For various operations being implemented for ESMF, there is need to
+control where memory is allocated (e.g heap, stack, shared arena,
+etc). For this reason we will define some apparatus for managing
+ESMF memory which will have the required attributes for optimal
+use of ESMF primitives.  
+
+\sreq{Provide ESMF heap memory}
+
+It shall be possible during the setup phase to declare the size of the
+ESMF memory pool that is anticipated for use. Subsequent requests for
+ESMF memory will operate out of this pool without needing system
+calls.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:}  \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\sreq{Provide ESMF stack memory}
+
+It shall be possible during the setup phase to declare the size of the
+ESMF memory pool that is anticipated for use. Subsequent requests for
+ESMF memory will operate out of this pool without needing system
+calls.
+\begin{reqlist}
+{\bf Priority:} 3 \\
+{\bf Source:} GFDL \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\sreq{Native memory bindings}
+Objects whose memory was allocated using language-native allocation
+methods (e.g fortran \texttt{allocate}, C \texttt{malloc}) are not
+required to deliver the same performance as with ESMF memory.
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:} GFDL \\
+{\bf Status:} Proposed. \\
+{\bf Verification:} Unit test. \\ 
+\end{reqlist}
+
+\req{Heart-beat}
+
+Support and adherence to a heart-beat function is required.
+
+\begin{reqlist}
+  {\bf Priority:} 1 \\
+  {\bf Source:}  MIT \\
+  {\bf Status:}  \\
+  {\bf Verification:} Unit tests, EVA tests \\
+  {\bf Notes:} Some mechanism should be available to detect the
+  failure or dead-lock of one or more communication end-points. This
+  can be queried at the application level. When this happens the ESMF
+  application should either take a recovery action or shutdown. 
+  This should include appropriate freeing of system resources 
+  reserved for {\bf \shortname} purposes.
+  Need input from Chris -- may be tricky to implement. 
+\end{reqlist}
+
+\req{High performance adjoints for communication methods}
+
+The available communication primitives shall not preclude high-performance 
+adjoints for distributed grid methods.
+
+\begin{reqlist}
+  {\bf Priority:} 1 \\
+  {\bf Source:}  MIT \\
+  {\bf Status:}  \\
+  {\bf Verification:} Unit tests. \\
+\end{reqlist}
+
+
+
+
+
+
+
+
+
+
