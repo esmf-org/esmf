@@ -1,0 +1,46 @@
+\subsection{ESMF Machine Model and Programming Model}
+
+The ESMF machine model is a generic interface to the critical features of 
+computing platforms.  The machine model can return information
+such as a list of processors on the same node, the number of processors
+per node, whether the architecture supports multiple executables 
+running on the same processor, etc.  As the ESMF develops, it will be useful
+to extend the machine model to include information on typical system
+latencies and bandwidths, cache sizes, and other information that 
+might be useful for system-aided load balancing and problem mapping.
+
+The ESMF programming model describes the level at which features of the 
+computing environment will be exposed, and the abstractions used to 
+simplify interfaces.  It must support the 
+efficient utilization of system resources such as   
+computing hardware, OS, and standard library or vendor-supplied 
+software (e.g., MPI or other message-passing software, Posix threads, OMP),
+and must present a reasonably simple interface to the application 
+developer.
+
+ESMF abstracts the compute elements over which data and tasks may be
+distributed into decomposition elements, or DEs, which
+are essentially threads.  For MPP architectures in which there
+is tyically one thread per process, the DE degenerates to a process.
+Depending on the hardware system, ESMF threads will be to a limited 
+extent compatible with user-defined threads.  The user will have 
+the option to enable ESMF threading or not.  In the latter case, the
+DE again degenerates to a process.
+
+DEs are organized into topologies, such as a 2-D grid, by the layout 
+object.  A user can define their own layouts, or layouts can be 
+constructed automatically in the process of creating a distributed 
+grid.
+
+The user can request system resources either through a processor
+ID list, or by defining a layout.
+
+More information on the ESMF machine model and programming model
+is available in Section~\ref{sec:machine} and in the {\it ESMF
+Implementation Report}.
+
+
+
+
+
+
