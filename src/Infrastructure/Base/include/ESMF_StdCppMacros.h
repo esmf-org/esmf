@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StdCppMacros.h,v 1.3 2004/04/14 20:48:41 nscollins Exp $
+! $Id: ESMF_StdCppMacros.h,v 1.4 2004/06/18 21:51:35 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,12 +81,12 @@
 #define RNG7 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6),lb(7):ub(7)
 
 #define LOC1 lb(1)
-#define LOC2 lb(1),lb(1)
-#define LOC3 lb(1),lb(1),lb(1)
-#define LOC4 lb(1),lb(1),lb(1),lb(1)
-#define LOC5 lb(1),lb(1),lb(1),lb(1),lb(1)
-#define LOC6 lb(1),lb(1),lb(1),lb(1),lb(1),lb(1)
-#define LOC7 lb(1),lb(1),lb(1),lb(1),lb(1),lb(1),lb(1)
+#define LOC2 lb(1),lb(2)
+#define LOC3 lb(1),lb(2),lb(3)
+#define LOC4 lb(1),lb(2),lb(3),lb(4)
+#define LOC5 lb(1),lb(2),lb(3),lb(4),lb(5)
+#define LOC6 lb(1),lb(2),lb(3),lb(4),lb(5),lb(6)
+#define LOC7 lb(1),lb(2),lb(3),lb(4),lb(5),lb(6),lb(7)
 
 
 #if 0
