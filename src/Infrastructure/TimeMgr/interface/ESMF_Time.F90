@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.6 2003/03/24 17:41:38 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.7 2003/03/24 21:25:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.6 2003/03/24 17:41:38 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.7 2003/03/24 21:25:11 eschwab Exp $'
 
 !==============================================================================
 
@@ -1027,13 +1027,17 @@
       integer :: Sn, Sd
       integer :: rc
 
+      ! TODO remove when ESMF_TimeInc fully defined
+      type(ESMF_Time) :: temp
+      ESMF_TimeInc = temp
+
       ! get time from timeinterval (really need C++ "friend" feature TODO ?? )
-      call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
-      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
+!      call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
+!      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeSum(time%basetime, basetime, &
-                              ESMF_TimeInc%basetime)
+!      call c_ESMC_BaseTimeSum(time%basetime, basetime, &
+!                              ESMF_TimeInc%basetime)
 
 !      call c_ESMC_BaseTimeSum(time%basetime, timeinterval%basetime, &
 !                               ESMF_TimeInc%basetime)
@@ -1079,13 +1083,17 @@
       integer :: Sn, Sd
       integer :: rc
 
+      ! TODO remove when ESMF_TimeDec fully defined
+      type(ESMF_Time) :: temp
+      ESMF_TimeDec = temp
+
 !     ! get time from timeinterval (really need C++ "friend" feature TODO ?? )
-      call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
-      call c_ESMC_TimeInit(basetime, S, Sn, Sd, rc)
+!      call c_ESMC_TimeIntervalGet_S_nd(timeinterval, S, Sn, Sd, rc)
+!      call c_ESMC_TimeInit(basetime, S, Sn, Sd, rc)
 
 !     ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeDiff(time%basetime, basetime, &
-                               ESMF_TimeDec%basetime)
+!      call c_ESMC_BaseTimeDiff(time%basetime, basetime, &
+!                               ESMF_TimeDec%basetime)
 
 !       call c_ESMC_BaseTimeDiff(time%basetime, timeinterval%basetime, &
 !                                ESMF_TimeDec%basetime)
@@ -1127,8 +1135,12 @@
 !EOP
       integer :: rc
 
+      ! TODO remove when ESMF_TimeDiff fully defined
+      type(ESMF_TimeInterval) :: temp
+      ESMF_TimeDiff = temp
+
       ! silence compiler for now  TODO
-      call c_ESMC_BaseTimeDummy(ESMF_TimeDiff, rc)
+!      call c_ESMC_BaseTimeDummy(ESMF_TimeDiff, rc)
 
 !     ! call ESMC_BaseTime base class function
 !      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, &
