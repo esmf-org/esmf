@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.4 2003/09/08 17:37:15 flanigan Exp $
+#  $Id: common.mk,v 1.5 2003/09/09 17:25:09 flanigan Exp $
 #
 #  common.mk
 #
@@ -312,7 +312,27 @@ libfast: chk_dir ${SOURCEC} ${SOURCEF}
 	fi
 
 
-# Clean clobber targets
+# Clean and clobber targets.
+#  
+# The clean and clobber targets are controlled by the settings of the
+# variables CLEANFILES, CLEANDIRS and CLOBBERDIRS.  These variables
+# are set in the local makefiles.
+# 
+#    CLEANFILES lists the files that should be removed during a clean.
+# 
+#    CLEANDIRS lists the directories that should be removed during a
+#    clean.
+#
+#    CLOBBERDIRS lists the directories that should be removed during a
+#    clobber.
+#
+# The clean and clobber targets recursively call make with the tree
+# target.  The current directory and directories below will be cleaned
+# or clobbered.  The clobber target first calls gmake with the clean target
+# before the clobber actions are taken.
+# 
+#  
+#
 clean:
 	$(MAKE) ACTION=tree_clean tree
 
@@ -677,14 +697,14 @@ build_shared:
 alldoc: chkdir_doc 
 	-@echo "Building All Documentation"
 	-@echo "========================================="
-	-@${OMAKE} tex dvi pdf html
+	-@$(MAKE) tex dvi pdf html
 	-@echo "Build alldoc completed."
 
 ##########  Tex ##########
 tex:
 	-@echo "Building .tex files"
 	-@echo "========================================="
-	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_tex tree
+	$(MAKE) ACTION=tree_tex tree
 
 tree_tex: $(TEXFILES_TO_MAKE)
 
@@ -692,8 +712,7 @@ tree_tex: $(TEXFILES_TO_MAKE)
 dvi: chkdir_doc tex
 	-@echo "Building .dvi files"
 	-@echo "========================================="
-	-@${OMAKE} ESMF_BOPT=${ESMF_BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=tree_dvi  tree 
+	-@${OMAKE} ACTION=tree_dvi  tree 
 
 tree_dvi: chkdir_doc ${DVIFILES}
 
@@ -701,8 +720,7 @@ tree_dvi: chkdir_doc ${DVIFILES}
 pdf: chkdir_doc tex
 	-@echo "Building .pdf files"
 	-@echo "========================================="
-	-@${OMAKE} ESMF_BOPT=${ESMF_BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=tree_pdf  tree 
+	-@${OMAKE} ACTION=tree_pdf  tree 
 
 tree_pdf: chkdir_doc ${PDFFILES}
 
@@ -710,8 +728,7 @@ tree_pdf: chkdir_doc ${PDFFILES}
 html: chkdir_doc tex
 	-@echo "Building .html files"
 	-@echo "========================================="
-	-@${OMAKE} ESMF_BOPT=${ESMF_BOPT} ESMF_ARCH=${ESMF_ARCH} \
-	   ACTION=tree_html tree 
+	-@${OMAKE} ACTION=tree_html tree 
 
 tree_html:chkdir_doc ${HTMLFILES}
 
@@ -788,38 +805,55 @@ tree_html:chkdir_doc ${HTMLFILES}
 
 
 #
-# Pattern run for making dvi, pdf and html
-# A little braindead yes, but this is 
-# makefile land you know....
+# Pattern rules for making dvi, pdf and html
+#
+
+# The variable TEXINPUTS_VALUE can be set in the makefiles of the
+# source code tree to list the directory paths of the .tex and
+# graphics files included by .tex sources files.  The paths listed in
+# TEXINPUTS_VALUE should be colon separated.  If TEXINPUTS_VALUE is
+# set, then the first path should a period for the local directory.  A
+# colon should trail the last path listed. If TEXINPUTS_VALUE is not
+# set, then only files in the local directory will be found by the
+# \input and \includegraphics LaTeX commands.
+#
+# Example:  TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/TimeMgr/doc/:"
 #
 
 #
 #  dvi
 #
 %_desdoc.dvi : %_desdoc.ctex $(DESDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* des
 
 %_refdoc.dvi : %_refdoc.ctex $(REFDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* ref
 
 %_reqdoc.dvi : %_reqdoc.ctex $(REQDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	$(DO_LATEX) $* req
 
 
 # Pdf files
 $(ESMC_DOCDIR)/%.pdf: %.dvi
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	dvipdf $< $@
 
 # Html Files
 $(ESMC_DOCDIR)/%_desdoc: %_desdoc.ctex $(DESDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_L2H} $* des
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 $(ESMC_DOCDIR)/%_refdoc: %_refdoc.ctex $(REFDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_L2H} $* ref
 	mv -f $(@F) $(ESMC_DOCDIR)
 
 $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
+	export TEXINPUTS=$(TEXINPUTS_VALUE) ;\
 	${DO_L2H} $* req
 	mv -f $(@F) $(ESMC_DOCDIR)
 
