@@ -62,85 +62,29 @@
 %\input{../Infrastructure/TimeMgr/doc/TimeMgr_param}
 %#endif
 
-% --------------
-% BaseTime Class
-% --------------
+% -------------------------
+% Time Manager Introduction
+% -------------------------
 
-%\section{Base Time Class}
-
-%\subsection{Description}
-%#ifdef STANDALONE
-%\input{BaseTime_desc}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_desc}
-%#endif
-
-%\subsection{Usage}
-%#ifdef STANDALONE
-%\input{BaseTime_usage}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_usage}
-%#endif
-
-%\subsubsection{Class Definition}
-%#ifdef STANDALONE
-%\input{BaseTime_def}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_def}
-%#endif
-
-%\subsubsection{Restrictions}
-%#ifdef STANDALONE
-%\input{BaseTime_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_rest}
-%#endif
-
-
-%\subsection{Use and Examples}
-%#ifdef STANDALONE
-%\input{BaseTime_fex}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_fex}
-%#endif
-
-%\subsection{Parameters and Definitions}
-%#ifdef STANDALONE
-%\input{BaseTime_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_fparam}
-%#endif
-
-%\subsection{Class API}
-%#ifdef STANDALONE
-%\input{ESMC_BaseTime_ccapi}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/ESMF_BaseTime_fapi}
-%#endif
-
-%\section{BaseTime Class C++ Interface}
-
-%\subsection{Use and Examples}
+\section{Time Manager Utility}
 #ifdef STANDALONE
-%\input{BaseTime_ccex}
+\input{TimeMgr_desc}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_ccex}
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_desc}
 #endif
 
-%\subsection{Parameters and Definitions}
+%\subsection{Usage Notes}
 #ifdef STANDALONE
-%\input{BaseTime_ccparam}
+\input{TimeMgr_usaggenotes}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_ccparam}
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_usagenotes}
 #endif
 
-%\subsection{Class API}
+%\subsection{Implementation Notes}
 #ifdef STANDALONE
-%\input{ESMC_BaseTime_chapi}
-%\input{BaseTime_ccapi}
+\input{TimeMgr_implnotes}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/ESMC_BaseTime_chapi}
-%\input{../Infrastructure/TimeMgr/doc/BaseTime_ccapi}
+\input{../Infrastructure/TimeMgr/doc/TimeMgr_implnotes}
 #endif
 
 % -------------------
@@ -169,13 +113,6 @@
 %#elif defined(CONSTITUENT)
 %\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
 %#endif
-
-%\subsection{Implementation Note}
-#ifdef STANDALONE
-\input{TimeMgr_inote_BaseTime.tex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeMgr_inote_BaseTime.tex}
-#endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE

@@ -1,0 +1,109 @@
+% $Id: TimeMgr_desc.tex,v 1.1 2003/08/12 02:47:48 cdeluca Exp $
+
+The ESMF Time Manager utility includes software for time and date 
+representation and calculations, model time advancement, and the 
+identification of unique and periodic events.  Since components
+in multi-component applications are often time-synchronized, the 
+Time Manager's standard calendars and consistent time representation 
+promote component interoperability.  
+
+Key features include:
+\begin{itemize}
+\item Drift-free timekeeping through purely integer internal time 
+representation. 
+\item Support for rational fraction time representation.
+\item Support for many calendar types, including user-customized calendars.
+\item Support for both concurrent and sequential modes of component execution.
+\item Support for varying and negative time steps.
+\end{itemize}
+
+\subsection{Time Manager Classes}
+There are five ESMF classes that represent time concepts:
+\begin{itemize}
+\item {\bf Calendar}  Standard calendars (such as Gregorian 
+and 360-day) and user-specified calendars are supported.  
+Calendars may be queried for quantities such as seconds per day, 
+days per month, and days per year.  A Calendar can be 
+used to keep track of the date as a Gridded Component advances 
+in time. 
+\item {\bf Time} A Time represents a time instant, such as 
+November 28, 1964, at 7:31pm EST.  The Time class can be used 
+to represent the start and stop time of a time integration.
+\item {\bf TimeInterval} TimeIntervals represent a period 
+of time, such as 300 milliseconds.  Time steps can be represented 
+using TimeIntervals.  
+\item {\bf Clock} Clocks collect the parameters and 
+methods used for model time advancement into a convenient 
+package.  A Clock can be queried for quantities such
+as start time, stop time, current time, and time step.  Clock
+methods include incrementing the current time, and determining
+if it is time to stop.  
+\item {\bf Alarm} Alarms identify unique or periodic events
+by ``ringing'' - returning a true value - at specified times.  
+For example, an Alarm might be set to ring on the day of the 
+year when leaves start falling from the trees in a climate model.
+\end{itemize}
+
+In the remainder of this section, we briefly summarizes the 
+functionality that the Time Manager classes provide.  Detailed 
+descriptions and examples of use precede the API for each class.
+
+\subsection{Calendar}
+An ESMF Calendar can be queried for seconds per day, days per month 
+and days per year.  This flexible definition allows Calendars to be 
+defined for planetary bodies other than Earth.  The set of supported 
+calendars includes:
+\begin{itemize}
+\item {\bf Gregorian} The standard Gregorian calendar.
+\item {\bf no-leap} The Gregorian calendar with no leap years.
+\item {\bf Julian} The standard Julian calendar.
+\item {\bf 360-day} A 30-day-per-month, 12-month-per-year calendar
+\item {\bf no calendar} Tracks only timesteps.
+\end{itemize}
+The Time Manager also allows you to specify your own {\tt Calendar}.
+See Section~\ref{sec:Calendar} for more details on supported calendars, 
+and how to create a custom ESMF Calendar.
+
+\subsection{Time Instants and Time Intervals}
+Since climate modeling, numerical weather prediction and other 
+Earth and space applications have widely varying time scales and require 
+different sorts of calendars, the Time Manager must provide a wide range 
+of time specifiers, spanning nanoseconds to years.  
+
+Time intervals and time instants are the computational building blocks of the
+Time Manager library.  Time intervals, which are time periods independent 
+of a calendar, support operations such as add, subtract, compare size, 
+reset value, copy value, and subdivide by a scalar.  Time instants, which 
+are moments in time associated with specific calendars, can be incremented 
+or decremented by time intervals, compared to see which of two time instants 
+is later, differenced to obtain the interval between two time instants, 
+copied, reset, and manipulated in other useful ways.  Time instants support 
+a host of different queries, both for values of individual time instant 
+components such as year, month, day, and second, and for derived values such 
+as day of year, middle of current month and Julian day.  It is also possible 
+to retrieve the value of the hardware realtime clock in the form of a time 
+instant.  See Sections~\ref{sec:Time} and {sec:TimeInterval}, respectively,
+for use and examples of Times and TimeIntervals.
+
+\subsection{Clocks and Alarms}
+Although it is possible to repeatedly step a Time forward by a 
+TimeInterval using arithmetic on these basic types, it is useful to 
+identify a higher-level concept to represent this function.  We refer to 
+this capability as a Clock, and include in its required features the 
+ability to store reference times such as the start and stop time 
+instants of a model run, to check when time advancement should cease, 
+and to query the value of quantities such as the previous and current 
+time instants.  The Time Manager includes a class with methods that 
+return a true value when a periodic or unique event has taken place; 
+we refer to these as Alarms.  Applications may require temporary 
+or multiple Clocks and Alarms.  
+
+
+
+
+
+
+
+
+
+

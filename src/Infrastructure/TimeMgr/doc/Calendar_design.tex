@@ -1,4 +1,4 @@
-% $Id: Calendar_design.tex,v 1.2 2003/02/11 18:58:54 eschwab Exp $
+% $Id: Calendar_design.tex,v 1.3 2003/08/12 02:47:48 cdeluca Exp $
 
 The {\tt Calendar} class encapsulates the definition of all required
 calendar types. For each calendar type, it contains the number of months
@@ -10,7 +10,7 @@ planetary body, not just Earth.
 The {\tt Calendar} class defines two methods for converting in both
 directions between the core {\tt BaseTime} class representation and a
 calendar date.  Calculations of time intervals (deltas) between
-timeiinstants is done by the base class {\tt BaseTime} in the core units
+time instants is done by the base class {\tt BaseTime} in the core units
 of seconds and fractional seconds.  Thus,  a calendar is only needed for
 converting core time to calendar time and vice versa.
 

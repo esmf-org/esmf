@@ -1,11 +1,8 @@
-% $Id: TimeMgr_inote_BaseTime.tex,v 1.1 2003/07/24 15:50:50 cdeluca Exp $
+% $Id: TimeMgr_implnotes.tex,v 1.1 2003/08/12 02:47:48 cdeluca Exp $
 
-\begin{tabular}{|p{6in}|}
-\hline
-\vspace{.05in}
-{\it Implementation Notes:\newline
-Basing {\tt TimeIntervals} and {\tt Times} on the same internal representation} \\
-\vspace{.05in}
+\subsection{Implementation Notes}
+
+{\bf Base {\tt TimeIntervals} and {\tt Times} on the same internal representation.} 
 It is useful to allow both {\tt TimeIntervals} and {\tt Times} to 
 inherit from a single class, {\tt BaseTime}.  In C++, this can be
 implemented by using inheritance.  In F90, it can be implemented
@@ -63,9 +60,8 @@ Methods or possibly a separate class can be included to handle fractional
 arithmetic. 
 
 For ease in calendar conversions, a time value of zero (both whole and
-numerator) can correspond to the Julian date of zero. \\
-\hline
-\end{tabular}
+numerator) can correspond to the Julian date of zero. 
+
 
 
 
