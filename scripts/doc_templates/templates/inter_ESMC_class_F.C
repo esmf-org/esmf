@@ -1,4 +1,4 @@
-// $Id: inter_ESMC_class_F.C,v 1.1 2003/03/03 22:15:59 nscollins Exp $
+// $Id: inter_ESMC_class_F.C,v 1.2 2003/03/11 22:50:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,12 +53,12 @@ extern "C" {
 
        // for either shallow or deep classes, the following are needed. 
        void FTN(c_esmc_<class>getconfig)(ESMC_<Class> **ptr, 
-                                         ESMC_<Class>Config *config, int *status} {
+                                         ESMC_<Class>Config *config, int *status) {
            *status = (*ptr)->ESMC_<Class>GetConfig(&config);
        }
 
        void FTN(c_esmc_<class>setconfig)(ESMC_<Class> **ptr, 
-                                         ESMC_<Class>Config *config, int *status} {
+                                         ESMC_<Class>Config *config, int *status) {
            *status = (*ptr)->ESMC_<Class>SetConfig(config);
        }
 

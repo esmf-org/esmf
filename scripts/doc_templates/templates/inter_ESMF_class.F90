@@ -1,4 +1,4 @@
-! $Id: inter_ESMF_class.F90,v 1.1 2003/03/03 22:16:00 nscollins Exp $
+! $Id: inter_ESMF_class.F90,v 1.2 2003/03/11 22:50:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,8 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include <ESMF_<Comp>.h>
+#include "ESMF.h"
+#include "ESMF_<Comp>.h"
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_<Class>Mod - One line general statement about this class
@@ -110,7 +111,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: inter_ESMF_class.F90,v 1.1 2003/03/03 22:16:00 nscollins Exp $'
+      '$Id: inter_ESMF_class.F90,v 1.2 2003/03/11 22:50:44 nscollins Exp $'
 
 !==============================================================================
 !
@@ -216,7 +217,7 @@
       subroutine ESMF_<Class>Destroy(<class>, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>   
+      type(ESMF_<Class>), intent(inout) :: <class>   
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
@@ -235,7 +236,6 @@
 ! !REQUIREMENTS: 
 
         ! local variables
-        type (ESMF_<Class>) :: <class>     ! new C++ <Class>
         integer :: status                  ! local error status
         logical :: rcpresent               ! did user specify rc?
 
@@ -257,7 +257,7 @@
         endif
 
         ! nullify pointer
-        <class%this = ESMF_NULL_POINTER
+        <class>%this = ESMF_NULL_POINTER
 
         if (rcpresent) rc = ESMF_SUCCESS
 
@@ -272,7 +272,7 @@
       subroutine ESMF_<Class>Init(<class>, arg1, arg2, arg3, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_<Class>), intent(in) :: <class>   
+      type(ESMF_<Class>), intent(inout) :: <class>   
       integer, intent(in) :: arg1                       
       integer, intent(in) :: arg2                       
       character (len = *), intent(in), optional :: arg3 
@@ -504,11 +504,12 @@
 ! !IROUTINE: ESMF_<Class>Set - Set values in a <Class>
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Set(<Class>, value, rc)
+      subroutine ESMF_<Class>Set(<Class>, value1, value2, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>
-      integer, intent(in) :: value
+      integer, intent(in), optional :: value1
+      integer, intent(in), optional :: value2
       integer, intent(out), optional :: rc            
 
 !
@@ -569,11 +570,11 @@
 ! !IROUTINE: ESMF_<Class>Validate - Check internal consistency of a <Class>
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Validate(<class>, opt, rc)
+      subroutine ESMF_<Class>Validate(<class>, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>       
-      character (len=*), intent(in), optional :: opt    
+      character (len=*), intent(in), optional :: options    
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
@@ -583,7 +584,7 @@
 !     \begin{description}
 !     \item[<class>] 
 !          Class to be queried.
-!     \item[{[opt]}]
+!     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -627,11 +628,11 @@
 ! !IROUTINE: ESMF_<Class>Print - Print the contents of a <Class>
 
 ! !INTERFACE:
-      subroutine ESMF_<Class>Print(<class>, opt, rc)
+      subroutine ESMF_<Class>Print(<class>, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_<Class>), intent(in) :: <class>      
-      character (len=*), intent(in) :: opt      
+      character (len=*), intent(in), optional :: options      
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -641,8 +642,8 @@
 !     \begin{description}
 !     \item[<class>] 
 !          Class to be queried.
-!     \item[{[opt]}]
-!          Print ptions that control the type of information and level of 
+!     \item[{[options]}]
+!          Print options that control the type of information and level of 
 !          detail.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
