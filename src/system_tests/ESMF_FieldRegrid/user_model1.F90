@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2003/10/20 23:46:50 jwolfe Exp $
+! $Id: user_model1.F90,v 1.5 2004/01/30 00:29:50 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -101,8 +101,8 @@
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
         integer :: ni, nj, de_id
-        integer :: horz_gridtype, vert_gridtype
-        integer :: horz_stagger, vert_stagger
+        type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+        type(ESMF_GridStagger) :: horz_stagger, vert_stagger
         type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
         integer :: status, myde
 
@@ -118,15 +118,17 @@
         max(1) = 60.0
         min(2) = 0.0
         max(2) = 50.0
-        horz_gridtype = ESMF_GridType_XY
+        horz_gridkind = ESMF_GridKind_XY
         horz_stagger = ESMF_GridStagger_A
         horz_coord_system = ESMF_CoordSystem_Cartesian
 
-        grid1 = ESMF_GridCreate(2, counts=counts, min=min, max=max, &
+        grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                                minGlobalCoordPerDim=min, &
+                                maxGlobalCoordPerDim=max, &
                                 layout=layout, &
-                                horz_gridtype=horz_gridtype, &
-                                horz_stagger=horz_stagger, &
-                                horz_coord_system=horz_coord_system, &
+                                horzGridKind=horz_gridkind, &
+                                horzStagger=horz_stagger, &
+                                horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
@@ -205,7 +207,7 @@
         allocate(coordArray(2))
         call ESMF_FieldGetRelLoc(humidity, relloc, status)
         call ESMF_FieldGetGrid(humidity, grid, rc=status)
-        call ESMF_GridGetDE(grid, local_axis_length=counts, rc=status)
+        call ESMF_GridGetDE(grid, localCellCountPerDim=counts, rc=status)
         call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
                                 rc=status)
         call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)

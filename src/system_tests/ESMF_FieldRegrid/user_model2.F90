@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2003/11/07 18:39:51 jwolfe Exp $
+! $Id: user_model2.F90,v 1.6 2004/01/30 00:29:50 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -93,7 +93,8 @@
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
       integer :: de_id
-      integer :: horz_gridtype, horz_stagger
+      type(ESMF_GridKind) :: horz_gridkind
+      type(ESMF_GridStagger) :: horz_stagger
       type(ESMF_CoordSystem) :: horz_coord_system
       integer :: status, myde
 
@@ -116,17 +117,20 @@
                   1.0, 1.0, 1.0, 1.1, 1.2, 1.3, 1.3, 1.3, 1.4, 1.4, &
                   1.4, 1.4, 1.4, 1.4, 1.4, 1.3, 1.3, 1.3, 1.2, 1.2, &
                   1.1, 1.0, 1.0, 0.9, 0.8, 0.7, 0.6, 0.6, 0.5, 0.5 /)
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_D
+
+      horz_gridkind = ESMF_GridKind_XY
+      horz_stagger = ESMF_GridStagger_D_NE
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
-      grid1 = ESMF_GridCreate(2, countsPerDE1=countsPerDE1, &
-                              countsPerDE2=countsPerDE2, &
-                              min=min, delta1=delta1, delta2=delta2, &
+      grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
+                              countsPerDEDim1=countsPerDE1, &
+                              countsPerDEDim2=countsPerDE2, &
+                              minGlobalCoordPerDim=min, &
+                              delta1=delta1, delta2=delta2, &
                               layout=layout, &
-                              horz_gridtype=horz_gridtype, &
-                              horz_stagger=horz_stagger, &
-                              horz_coord_system=horz_coord_system, &
+                              horzGridKind=horz_gridkind, &
+                              horzStagger=horz_stagger, &
+                              horzCoordSystem=horz_coord_system, &
                               name="source grid", rc=status)
 
       ! Figure out our local processor id
@@ -273,7 +277,7 @@
       allocate(coordArray(2))
       call ESMF_FieldGetRelLoc(humidity, relloc, status)
       call ESMF_FieldGetGrid(humidity, grid, rc=status)
-      call ESMF_GridGetDE(grid, myDE=myDE, local_axis_length=counts, &
+      call ESMF_GridGetDE(grid, myDE=myDE, localCellCountPerDim=counts, &
                           rc=status)
       call ESMF_GridGetCoord(grid, relloc=relloc, centerCoord=coordArray, &
                               rc=status)
