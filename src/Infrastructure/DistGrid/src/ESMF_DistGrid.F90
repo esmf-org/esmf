@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.35 2003/03/17 21:34:12 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.36 2003/03/17 22:36:09 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -155,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.35 2003/03/17 21:34:12 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.36 2003/03/17 22:36:09 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1466,7 +1466,7 @@
       endif
 
 !     get information from distgrid derived type
-      AI = distgrid%lcellexc_index
+      AI => distgrid%lcellexc_index
 
       if(rcpresent) rc = ESMF_SUCCESS
 
