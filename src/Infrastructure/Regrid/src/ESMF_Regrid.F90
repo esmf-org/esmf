@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.74 2004/05/14 20:01:11 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.75 2004/05/17 22:33:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.74 2004/05/14 20:01:11 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.75 2004/05/17 22:33:00 jwolfe Exp $'
 
 !==============================================================================
 
@@ -101,7 +101,7 @@
 ! This section includes some of the Regrid Create methods.
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_RegridCreate - Precomputes Regrid data
 
 ! !INTERFACE:
@@ -136,10 +136,6 @@
 !     handle can be used on any data which matches the data arrays, grid,
 !     and datamaps supplied here, so one does not have to generate multiple
 !     routehandles for similar data values.
-!
-!     TODO: Do we need the parent layout here at this level?  I believe not,
-!     because for exclusive processor sets the higher level code should
-!     have created proxy grid objects which then are both on the same layout.
 !
 !     The arguments are:
 !     \begin{description}
@@ -193,7 +189,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       ! TODO: the interfaces have changed - this will no longer be called
       !  with fields, but with the grid, datamap, and array which are either
