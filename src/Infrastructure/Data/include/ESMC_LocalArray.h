@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.7 2003/07/23 17:01:59 jwolfe Exp $
+// $Id: ESMC_LocalArray.h,v 1.8 2003/08/04 20:26:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,10 +114,6 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
                                    // potentially these could be needed... 
- // void *first_element;           // memory address of the first element
-    struct ESMC_AxisIndex ai_local[ESMF_MAXDIM]; // limits for whole array
-    struct ESMC_AxisIndex ai_comp[ESMF_MAXDIM];  // for computational region
-    struct ESMC_AxisIndex ai_excl[ESMF_MAXDIM];  // never is sent or received
     
 // !PUBLIC MEMBER FUNCTIONS:
 //
