@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.26 2004/07/27 15:58:29 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.27 2004/08/26 21:27:14 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -44,10 +44,13 @@
     ! individual test failure message
     character(ESMF_MAXSTR) :: failMsg
     character(ESMF_MAXSTR) :: name
-    integer :: result = 0
+    integer :: result = 0, npets
+    type(ESMF_VM):: vm
 
     
-    call ESMF_Initialize()
+    call ESMF_Initialize(vm=vm, rc=rc)
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    print *, "NUMBER_OF_PROCESSORS ", npets
 
 !-------------------------------------------------------------------------------
 !   ! Test 1:
