@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.32 2004/06/07 09:24:50 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.33 2004/06/09 08:48:49 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.32 2004/06/07 09:24:50 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.33 2004/06/09 08:48:49 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1016,6 +1016,7 @@
     bool opt_all = false;   // print all data
     bool opt_exc = false;   // print only exclusive region (needs halo len)
     bool opt_byline = false;  // print a row/line
+    char msgbuf[ESMF_MAXSTR];
 
     if (options) {
         if (strstr(options, "full")) opt_all = true;
@@ -1028,14 +1029,22 @@
         beforeskip = '\n';
     }
 
-    printf("ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
-    printf("            rank = %d, type = %d, kind = %d, ", 
+    sprintf(msgbuf,"ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+
+    sprintf(msgbuf,"            rank = %d, type = %d, kind = %d, ", 
                              this->rank, this->type, this->kind);
-    printf("base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
-    printf("            ");
-    for (i=0; i<this->rank; i++) 
-        printf("dim[%d] = %d  ", i, this->counts[i]);
-    printf("\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf,"base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    sprintf(msgbuf,"            ");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    for (i=0; i<this->rank; i++) {
+        sprintf(msgbuf,"dim[%d] = %d  ", i, this->counts[i]);
+        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+    }
+    sprintf(msgbuf,"\n");
+    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
     
     // TODO: make this look at one of the option letters to see if user
     //   wants data printed.
@@ -1045,48 +1054,64 @@
           case ESMF_R4:
             switch (this->rank) {
               case 1:
-                printf("  Real, *4, Dim 1, Data values:\n");
+                sprintf(msgbuf,"  Real, *4, Dim 1, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 tcount = imax;
                 for (i=0; i<tcount; i++) {
                     if (!opt_byline)
-                        printf("(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
+                        sprintf(msgbuf,"(%2d) =  %lg\n", i+1, *((float *)(this->base_addr) + i));
                     else
-                        printf("%lg ", *((float *)(this->base_addr) + i));
+                        sprintf(msgbuf,"%lg ", *((float *)(this->base_addr) + i));
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
-                       printf("%c skipping to end ...\n", beforeskip);
+                       sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                        i = tcount - 11;
                     }
                 }
-                if (opt_byline) printf("\n");
+                if (opt_byline) {
+                    sprintf(msgbuf,"\n");
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                } 
                 break;
               case 2:
-                printf("  Real, *4, Dim 2, Data values:\n");
+                sprintf(msgbuf,"  Real, *4, Dim 2, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 tcount = imax * jmax;
                 rcount = 0;
                 for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
+                            sprintf(msgbuf,"(%2d,%2d) =  %lg\n", i+1, j+1, 
                                    *((float *)(this->base_addr) + i + j*imax) );
                         else
-                            printf("%lg ",  
+                            sprintf(msgbuf,"%lg ",  
                                    *((float *)(this->base_addr) + i + j*imax) );
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            j = (tcount-11) / imax;
                            i = (tcount-11) % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                 }
                 break;
               case 3:
-                printf("  Real, *4, Dim 3, Data values:\n");
+                sprintf(msgbuf,"  Real, *4, Dim 3, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 kmax = this->counts[2];
@@ -1094,80 +1119,105 @@
                 rcount = 0; 
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d,%2d) =  %g\n", 
+                            sprintf(msgbuf,"(%2d,%2d,%2d) =  %g\n", 
                                    i+1, j+1, k+1,
                                    *((float *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
-                             printf("%g ", *((float *)(this->base_addr) + 
+                             sprintf(msgbuf,"%g ", *((float *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
                            int krem;
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            k = (tcount-11) / (imax*jmax);
                            krem = (tcount-11) % (imax*jmax);
                            j = krem / imax;
                            i = krem % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                   }
                 }
                 break;
               default:
-                printf("no code to handle real rank %d yet\n", this->rank);
+                sprintf(msgbuf,"no code to handle real rank %d yet\n", this->rank);
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 break;    
             }
             break;
           case ESMF_R8:
             switch (this->rank) {
               case 1:
-                printf("  Real, *8, Dim 1, Data values:\n");
+                sprintf(msgbuf,"  Real, *8, Dim 1, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 tcount = imax;
                 for (i=0; i<tcount; i++) {
                     if (!opt_byline)
-                        printf("(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
+                        sprintf(msgbuf,"(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
                     else
-                        printf("%lg ", *((double *)(this->base_addr) + i));
+                        sprintf(msgbuf,"%lg ", *((double *)(this->base_addr) + i));
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
-                       printf("%c skipping to end ...\n", beforeskip);
+                       sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                        i = tcount - 11;
                     }
                 }
-                if (opt_byline) printf("\n");
+                if (opt_byline) {
+                    sprintf(msgbuf,"\n");
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                } 
                 break;
               case 2:
-                printf("  Real, Dim 2, Data values:\n");
+                sprintf(msgbuf,"  Real, Dim 2, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 tcount = imax * jmax;
                 rcount = 0;
                 for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
+                            sprintf(msgbuf,"(%2d,%2d) =  %lg\n", i+1, j+1, 
                                    *((double *)(this->base_addr) + i + j*imax) );
                         else
-                            printf("%lg ",  
+                            sprintf(msgbuf,"%lg ",  
                                    *((double *)(this->base_addr) + i + j*imax) );
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            j = (tcount-11) / imax;
                            i = (tcount-11) % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                 }
                 break;
               case 3:
-                printf("  Real, Dim 3, Data values:\n");
+                sprintf(msgbuf,"  Real, Dim 3, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 kmax = this->counts[2];
@@ -1175,32 +1225,41 @@
                 rcount = 0; 
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d,%2d) =  %lg\n", 
+                            sprintf(msgbuf,"(%2d,%2d,%2d) =  %lg\n", 
                                    i+1, j+1, k+1,
                                    *((double *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
-                             printf("%lg ", *((double *)(this->base_addr) + 
+                             sprintf(msgbuf,"%lg ", *((double *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
                            int krem;
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            k = (tcount-11) / (imax*jmax);
                            krem = (tcount-11) % (imax*jmax);
                            j = krem / imax;
                            i = krem % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                   }
                 }
                 break;
               default:
-                printf("no code to handle real rank %d yet\n", this->rank);
+                sprintf(msgbuf,"no code to handle real rank %d yet\n", this->rank);
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 break;    
             }
             break;
@@ -1213,49 +1272,65 @@
               case 1:
                 imax = this->counts[0];
                 tcount = imax;
-                printf("  Integer, *4, Dim 1, Data values:\n");
+                sprintf(msgbuf,"  Integer, *4, Dim 1, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
-                        printf("(%2d) =  %d\n", i+1, 
+                        sprintf(msgbuf,"(%2d) =  %d\n", i+1, 
                                *((int *)(this->base_addr) + i));
                     else
-                        printf("%d ",
+                        sprintf(msgbuf,"%d ",
                                *((int *)(this->base_addr) + i));
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
-                       printf("%c skipping to end ...\n", beforeskip);
+                       sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                        i = tcount - 11;
                     }
                 }
-                if (opt_byline) printf("\n");
+                if (opt_byline) {
+                    sprintf(msgbuf,"\n");
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                } 
                 break;
               case 2:
-                printf("  Integer, *4, Dim 2, Data values:\n");
+                sprintf(msgbuf,"  Integer, *4, Dim 2, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 tcount = imax * jmax;
                 rcount = 0; 
                 for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d) =  %d\n", 
+                            sprintf(msgbuf,"(%2d,%2d) =  %d\n", 
                                     i+1, j+1, 
                                  *((int *)(this->base_addr) + i + j*imax) );
                         else
-                            printf("%d ", 
+                            sprintf(msgbuf,"%d ", 
                                  *((int *)(this->base_addr) + i + j*imax) );
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            j = (tcount-11) / imax;
                            i = (tcount-11) % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                 }
                 break;
               case 3:
-                printf("  Integer, *4, Dim 3, Data values:\n");
+                sprintf(msgbuf,"  Integer, *4, Dim 3, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 kmax = this->counts[2];
@@ -1263,33 +1338,42 @@
                 rcount = 0; 
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d,%2d) =  %d\n", 
+                            sprintf(msgbuf,"(%2d,%2d,%2d) =  %d\n", 
                                    i+1, j+1, k+1,
                                    *((int *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
-                            printf("%d ", 
+                            sprintf(msgbuf,"%d ", 
                                    *((int *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
                            int krem;
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            k = (tcount-11) / (imax*jmax);
                            krem = (tcount-11) % (imax*jmax);
                            j = krem / imax;
                            i = krem % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                   }
                 }
                 break;
               default:
-                printf("no code to handle integer rank %d yet\n", this->rank);
+                sprintf(msgbuf,"no code to handle integer rank %d yet\n", this->rank);
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 break;    
             }
             break;
@@ -1298,49 +1382,65 @@
               case 1:
                 imax = this->counts[0];
                 tcount = imax;
-                printf("  Integer, *8, Dim 1, Data values:\n");
+                sprintf(msgbuf,"  Integer, *8, Dim 1, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 for (i=0; i<imax; i++) {
                     if (!opt_byline)
-                        printf("(%2d) =  %ld\n", i+1, 
+                        sprintf(msgbuf,"(%2d) =  %ld\n", i+1, 
                                *((long *)(this->base_addr) + i));
                     else
-                        printf("%ld ",
+                        sprintf(msgbuf,"%ld ",
                                *((long *)(this->base_addr) + i));
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                     if (!opt_all && (tcount > 22) && ((i+1)==10)) {
-                       printf("%c skipping to end ...\n", beforeskip);
+                       sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                       ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                        i = tcount - 11;
                     }
                 }
-                if (opt_byline) printf("\n");
+                if (opt_byline) {
+                    sprintf(msgbuf,"\n");
+                    ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                } 
                 break;
               case 2:
-                printf("  Integer, *8, Dim 2, Data values:\n");
+                sprintf(msgbuf,"  Integer, *8, Dim 2, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 tcount = imax * jmax;
                 rcount = 0; 
                 for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d) = ", j+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d) = ", j+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d) =  %ld\n", 
+                            sprintf(msgbuf,"(%2d,%2d) =  %ld\n", 
                                     i+1, j+1, 
                                  *((long *)(this->base_addr) + i + j*imax) );
                         else
-                            printf("%ld ", 
+                            sprintf(msgbuf,"%ld ", 
                                  *((long *)(this->base_addr) + i + j*imax) );
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            j = (tcount-11) / imax;
                            i = (tcount-11) % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                 }
                 break;
               case 3:
-                printf("  Integer, *8, Dim 3, Data values:\n");
+                sprintf(msgbuf,"  Integer, *8, Dim 3, Data values:\n");
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 imax = this->counts[0];
                 jmax = this->counts[1];
                 kmax = this->counts[2];
@@ -1348,42 +1448,52 @@
                 rcount = 0; 
                 for (k=0; k<kmax; k++) {
                   for (j=0; j<jmax; j++) {
-                    if (opt_byline) printf("(*,%2d,%2d) = ", j+1, k+1);
+                    if (opt_byline) {
+                        sprintf(msgbuf,"(*,%2d,%2d) = ", j+1, k+1);
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    }
                     for (i=0; i<imax; i++) {
                         if (!opt_byline)
-                            printf("(%2d,%2d,%2d) =  %ld\n", 
+                            sprintf(msgbuf,"(%2d,%2d,%2d) =  %ld\n", 
                                    i+1, j+1, k+1,
                                    *((long *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
                         else
-                            printf("%ld ", 
+                            sprintf(msgbuf,"%ld ", 
                                    *((long *)(this->base_addr) + 
                                    i + j*imax + k*jmax*imax));
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                         rcount++;
                         if (!opt_all && (tcount > 22) && (rcount==10)) {
                            int krem;
-                           printf("%c skipping to end ...\n", beforeskip);
+                           sprintf(msgbuf,"%c skipping to end ...\n", beforeskip);
+                           ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                            k = (tcount-11) / (imax*jmax);
                            krem = (tcount-11) % (imax*jmax);
                            j = krem / imax;
                            i = krem % imax;
                         }
                     }
-                    if (opt_byline) printf("\n");
+                    if (opt_byline) {
+                        sprintf(msgbuf,"\n");
+                        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+                    } 
                   }
                 }
                 break;
               default:
-                printf("no code to handle integer rank %d yet\n", this->rank);
+                sprintf(msgbuf,"no code to handle integer rank %d yet\n", this->rank);
+                ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
                 break;    
             }
             break;
         }
         break;
       default:
-            printf("no code to handle data type %d yet\n", this->type);
+        sprintf(msgbuf,"no code to handle data type %d yet\n", this->type);
+        ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
-      break;
+        break;
     }
 
     rc = ESMF_SUCCESS;
@@ -1421,14 +1531,17 @@
     int imax, jmax, kmax, lmax, mmax;
     int tcount, rcount;
     FILE *ffile = NULL;
+    char msgbuf[ESMF_MAXSTR];
 
     if ((filename == NULL) || (filename[0] == '-')) {
         ffile = stdout;
     } else {
         ffile = fopen(filename, "w");
         if (ffile == NULL) {
-            printf("error opening file '%s'\n", filename);
-            return ESMF_FAILURE;
+            sprintf(msgbuf, "error opening file '%s'\n", filename);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_FILE_OPEN,
+                                                  msgbuf, &rc);
+            return rc;
         }
     }
 
