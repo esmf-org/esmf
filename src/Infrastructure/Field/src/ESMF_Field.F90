@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.13 2003/04/14 22:53:10 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.14 2003/04/17 20:19:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -189,6 +189,7 @@
    public ESMF_FieldReduce             ! Global reduction operations
    !public ESMF_FieldTranspose         ! Transpose operation
    public ESMF_FieldHalo               ! Halo updates
+   public ESMF_FieldAllGather          ! Construct N copies of the data array
    public ESMF_FieldRegrid             ! Regridding and interpolation
    public ESMF_FieldRoute              ! Redistribute existing array data
 
@@ -209,7 +210,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.13 2003/04/14 22:53:10 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.14 2003/04/17 20:19:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1987,6 +1988,109 @@ end interface
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_FieldReduce
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAllGather - Data AllGather operation on a Field
+
+! !INTERFACE:
+      subroutine ESMF_FieldAllGather(field, array, rc)
+!
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field                 
+      type(ESMF_Array), intent(out) :: array
+      integer, intent(out), optional :: rc               
+!
+! !DESCRIPTION:
+!     Call {\tt Grid} routines to perform a AllGather operation over the data
+!     in a {\tt Field}.  If the Field is decomposed over N DEs, this routine
+!     returns a copy of the entire collected data Array on each of the N DEs.
+!
+!     \begin{description}
+!     \item [field] 
+!           Field containing data to be gathered.
+!     \item [array] 
+!           Newly created array containing the collected data.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!           
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_FieldType) :: ftypep              ! field type info
+      type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
+      integer :: i, gridrank, datarank, thisdim
+      integer :: dimorder(ESMF_MAXDIM)   
+      integer :: dimlengths(ESMF_MAXDIM)   
+   
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent = .TRUE. 
+        rc = ESMF_FAILURE
+      endif     
+
+      ftypep = field%ftypep
+
+      ! Query the datamap and set info for grid so it knows how to
+      !  match up the array indicies and the grid indicies.
+      call ESMF_DataMapGet(ftypep%mapping, gridrank=gridrank, &
+                                               dimlist=dimorder, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldAllGather: DataMapGet returned failure"
+        return
+      endif 
+
+      ! And get the Array sizes
+      call ESMF_ArrayGet(ftypep%localfield%localdata, rank=datarank, &
+                                               lengths=dimlengths, rc=status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldAllGather: ArrayGet returned failure"
+        return
+      endif 
+
+      ! Set the axis info on the array to pass thru to DistGrid
+      do i=1, gridrank
+          thisdim = dimorder(i)
+          if (thisdim .eq. 0) cycle
+     
+          ! TODO: this needs to be hidden behind a method to get & set
+          axis(i)%l = 0
+          axis(i)%r = dimlengths(thisdim)
+          axis(i)%max = dimlengths(thisdim)
+          axis(i)%decomp = thisdim
+          axis(i)%gstart = 0
+     
+      enddo
+
+      ! Attach this info to the array
+      call ESMF_ArraySetAxisIndex(ftypep%localfield%localdata, axis, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldAllGather: ArraySetAxisIndex returned failure"
+        return
+      endif 
+
+      ! Call Grid method to perform actual work
+      call ESMF_GridAllGather(field%ftypep%grid, &
+                              field%ftypep%localfield%localdata, &
+                              array, status)
+      if(status .NE. ESMF_SUCCESS) then 
+        print *, "ERROR in FieldAllGather: Grid AllGather returned failure"
+        return
+      endif 
+
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAllGather
+
 
 
 !------------------------------------------------------------------------------
