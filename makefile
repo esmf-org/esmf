@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.5 2001/11/28 19:57:25 dneckels Exp $
+# $Id: makefile,v 1.6 2001/12/11 17:16:07 dneckels Exp $
 #===============================================================================
 #                            makefile
 # 
-# This is the primary makefile for building Modeling Framework (MF) utilities.  
+# This is the primary makefile for building Modeling Framework (ESMF) utilities.  
 #===============================================================================
 
 
@@ -18,12 +18,12 @@ build_libs:
 	
 
 #-------------------------------------------------------------------------------
-# Basic targets to build MF libraries.
+# Basic targets to build ESMF libraries.
 #-------------------------------------------------------------------------------
 all       : info info_h chkalice_dir build_libs
 
 #-------------------------------------------------------------------------------
-# Prints information about the system and version of MF being compiled
+# Prints information about the system and version of ESMF being compiled
 #-------------------------------------------------------------------------------
 info:
 	-@echo "=========================================="
@@ -41,15 +41,15 @@ info:
 	  echo "Fortran Compiler version:" ; ${C_FCV} ; fi
 	-@grep ESMC_VERSION_NUMBER include/ESMC_Version.h | ${SED} "s/........//"
 	-@echo "-----------------------------------------"
-	-@echo "Using MF flags: ${ALICEFLAGS} ${PCONF}"
+	-@echo "Using ESMF flags: ${ALICEFLAGS} ${PCONF}"
 	-@echo "-----------------------------------------"
 	-@echo "Using configuration flags:"
 	-@grep "define " build/${ESMF_ARCH}/conf.h
 	-@echo "-----------------------------------------"
 	-@echo "Using include paths: ${ESMC_INCLUDE}"
 	-@echo "-----------------------------------------"
-	-@echo "Using MF directory: ${ESMF_DIR}"
-	-@echo "Using MF arch: ${ESMF_ARCH}"
+	-@echo "Using ESMF directory: ${ESMF_DIR}"
+	-@echo "Using ESMF arch: ${ESMF_ARCH}"
 	-@echo "------------------------------------------"
 	-@echo "Using C linker: ${CLINKER}"
 	-@echo "Using Fortran linker: ${FLINKER}"
@@ -73,14 +73,14 @@ info_h:
 	-@if [  "${C_FCV}" -a "${C_FCV}" != "unknown" ] ; then \
 	  echo  "Fortran Compiler version:" >> MINFO ; ${C_FCV} >> MINFO 2>&1 ; fi
 	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using MF flags: ${ALICEFLAGS} ${PCONF}" >> MINFO
+	-@echo  "Using ESMF flags: ${ALICEFLAGS} ${PCONF}" >> MINFO
 	-@echo  "-----------------------------------------" >> MINFO
 	-@echo  "Using configuration flags:" >> MINFO
 	-@echo  "-----------------------------------------" >> MINFO
 	-@echo  "Using include paths: ${ESMC_INCLUDE}" >> MINFO
 	-@echo  "-----------------------------------------" >> MINFO
-	-@echo  "Using MF directory: ${ESMF_DIR}" >> MINFO
-	-@echo  "Using MF arch: ${ESMF_ARCH}" >> MINFO
+	-@echo  "Using ESMF directory: ${ESMF_DIR}" >> MINFO
+	-@echo  "Using ESMF arch: ${ESMF_ARCH}" >> MINFO
 	-@echo  "------------------------------------------" >> MINFO
 	-@echo  "Using C linker: ${CLINKER}" >> MINFO
 	-@echo  "Using Fortran linker: ${FLINKER}" >> MINFO
@@ -119,7 +119,7 @@ build_fortran:
 	-@echo "Completed compiling Fortran source"
 	-@echo "========================================="
 
-# Builds MF test examples for a given BOPT and architecture
+# Builds ESMF test examples for a given BOPT and architecture
 test_cuni: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run Uniprocessor C test examples"
 	-@echo "Due to different numerical round-off on certain"
@@ -130,7 +130,7 @@ test_cuni: info chkopts chkdir_tests
 	-@echo "Completed compiling and running C test examples"
 	-@echo "========================================="
 
-# Builds MF test examples for a given BOPT and architecture
+# Builds ESMF test examples for a given BOPT and architecture
 test_c: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run C test examples"
 	-@echo "Due to different numerical round-off on certain"
@@ -141,7 +141,7 @@ test_c: info chkopts chkdir_tests
 	-@echo "Completed compiling and running C test examples"
 	-@echo "========================================="
 
-# Builds MF test examples for a given BOPT and architecture
+# Builds ESMF test examples for a given BOPT and architecture
 test_f90uni: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run Uniprocessor F90 test examples"
 	-@echo "========================================="
@@ -154,7 +154,7 @@ test_f90uni: info chkopts chkdir_tests
 	-@echo "Completed compiling and running F90 test examples"
 	-@echo "========================================="
 
-# Builds MF test examples for a given BOPT and architecture
+# Builds ESMF test examples for a given BOPT and architecture
 test_f90: info chkopts chkdir_tests
 	-@echo "Beginning to compile and run F90 test examples"
 	-@echo "========================================="
@@ -171,13 +171,13 @@ test_f90: info chkopts chkdir_tests
 ranlib:
 	${RANLIB} ${PDIR}/*.a
 
-# Deletes MF libraries
+# Deletes ESMF libraries
 deletelibs: chkopts_basic
 	-${RM} -f ${PDIR}/*
 
 # ------------------------------------------------------------------
-# All remaining actions are intended for MF developers only.
-# MF users should not generally need to use these commands.
+# All remaining actions are intended for ESMF developers only.
+# ESMF users should not generally need to use these commands.
 
 
 BUILDFILES = build/common* build/*/base build/*/base_variables build/*/base.site \
@@ -231,41 +231,3 @@ clean: chkopts
 clobber: chkopts clean
 	@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} \
 	   ACTION=clobber_recursive  tree 
-	
-
-
-
-# Deletes man pages (HTML version)
-deletemanualpages:
-	${RM} -f ${ESMF_DIR}/docs/manualpages/*/*.html \
-                 ${ESMF_DIR}/docs/manualpages/manualpages.cit 
-
-# Deletes man pages (LaTeX version)
-deletelatexpages:
-	${RM} -f ${ESMF_DIR}/docs/tex/rsum/*sum*.tex
-
-# Builds all versions of the man pages
-allmanpages: allmanualpages alllatexpages
-allmanualpages: deletemanualpages
-	-${OMAKE} ACTION=manualpages_buildcite ttree
-	-${OMAKE} ACTION=manualpages ttree
-	-maint/wwwindex.py ${ESMF_DIR}
-	-maint/examplesindex.tcl
-	-maint/htmlkeywords.tcl
-
-alllatexpages: deletelatexpages
-	-${OMAKE} ACTION=latexpages ttree
-
-# Builds Fortran stub files
-allfortranstubs:
-	-@include/foldinclude/generateincludes
-	-@${RM} -f src/fortran/auto/*.c
-	-${OMAKE} ACTION=fortranstubs ttree
-	-@cd src/fortran/auto; ${OMAKE} -f makefile fixfortran
-
-allci: 
-	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} ACTION=ci  alltree 
-
-allco: 
-	-@${OMAKE} BOPT=${BOPT} ESMF_ARCH=${ESMF_ARCH} ACTION=co  alltree 
-
