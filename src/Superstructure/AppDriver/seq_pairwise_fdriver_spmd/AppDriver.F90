@@ -92,7 +92,7 @@
     !                             default=30, rc = rc )
     !
     i_max = 20
-    y_max = 40  
+    j_max = 40  
     x_min = 0.0
     y_min = 0.0
     x_max = 180.0
