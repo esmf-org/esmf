@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.11 2004/01/29 04:44:35 eschwab Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.12 2004/01/30 23:15:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.11 2004/01/29 04:44:35 eschwab Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.12 2004/01/30 23:15:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -249,13 +249,15 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
-      call ESMF_CalendarSetCustom(customCalendar, daysPerMonth=days_per_month, &
+      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+                                        daysPerMonth=days_per_month, &
 					secondsPerDay=86400, &
 					daysPerYear=360, &
 					daysPerYearDn=1, &
 					daysPerYearDd=1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarDestroy(customCalendar, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -287,13 +289,15 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with overflow Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      call ESMF_CalendarSetCustom(customCalendar, daysPerMonth=dayspermonth, &
+      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+                                        daysPerMonth=dayspermonth, &
 					secondsPerDay=86400, &
 					daysPerYear=100000000, &
 					daysPerYearDn=1, &
 					daysPerYearDd=1, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarDestroy(customCalendar, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -322,13 +326,15 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with negative number seconds Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      call ESMF_CalendarSetCustom(customCalendar, daysPerMonth=dayspermonth, &
+      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+                                        daysPerMonth=dayspermonth, &
 					secondsPerDay=-400, &
 					daysPerYear=1, &
 					daysPerYearDn=1, &
 					daysPerYearDd=0, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarDestroy(customCalendar, rc)
 
       ! ----------------------------------------------------------------------------
 
@@ -358,13 +364,15 @@
       ! initialize fourth calendar to be custom type
       write(name, *) "Initialize Custom Type with nonsense numbers Calendar Test"
       write(failMsg, *) " Should not return ESMF_SUCCESS"
-      call ESMF_CalendarSetCustom(customCalendar, daysPerMonth=dayspermonth, &
+      customCalendar = ESMF_CalendarCreateCustom("CustomCalendar", &
+                                        daysPerMonth=dayspermonth, &
 					secondsPerDay=86400, &
 					daysPerYear=1, &
 					daysPerYearDn=1, &
 					daysPerYearDd=0, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_CalendarDestroy(customCalendar, rc)
 
       ! ----------------------------------------------------------------------------
 
