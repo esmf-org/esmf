@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.34 2004/04/19 20:26:12 jwolfe Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.35 2004/04/27 20:36:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.34 2004/04/19 20:26:12 jwolfe Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.35 2004/04/27 20:36:24 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -96,8 +96,6 @@
       quart = nDEs / 4
 
       ! Make a Nx4 and Nx2 layout
-      !delist = (/ (i, i=0, ndes-1) /)
-      !layout1 = ESMF_DELayoutCreate(delist, 2, (/ quart, 4 /), (/ 0, 0 /), rc)
       layout1 = ESMF_newDELayoutCreate(vm, (/ quart, 4 /), rc=rc)
       if (rc .eq. ESMF_FAILURE) then
         print *, "cannot create 1x4 layout"
@@ -105,7 +103,6 @@
       endif
       print *, "Layout 1:"
       call ESMF_newDELayoutPrint(layout1, "", rc)
-      !layout2 = ESMF_DELayoutCreate(delist, 2, (/ half, 2 /), (/ 0, 0 /), rc)
       layout2 = ESMF_newDELayoutCreate(vm, (/ half, 2 /), rc=rc)
       if (rc .eq. ESMF_FAILURE) then
         print *, "cannot create 2x2 layout"
@@ -151,13 +148,14 @@
 !     call 
       ! Second grid
       gname = "test grid 2"
+      horz_stagger = ESMF_GridStagger_D_NE
       grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
-                              delayout=layout1, &
+                              delayout=layout2, &
                               name=gname, rc=status)
       write(failMsg, *) ""
       write(name, *) "Creating a destination Test Grid"
@@ -192,6 +190,7 @@
 
       !NEX_UTest
       ! Verifing that a Field can be created with a Grid and Array
+      call ESMF_DataMapInit(dm, ESMF_INDEX_IJ)
       f1 = ESMF_FieldCreate(grid1, arr1, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
