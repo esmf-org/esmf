@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.10 2004/03/18 22:23:59 nscollins Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.11 2004/03/23 17:58:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.10 2004/03/18 22:23:59 nscollins Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.11 2004/03/23 17:58:16 jwolfe Exp $'
 
 !==============================================================================
 
@@ -244,12 +244,14 @@
       route = ESMF_RegridRouteConstruct(3, srcGrid, dstGrid, &
                                         recvDomainList, &
                                         srcDataMap=srcDataMap, &
+                                        dstDataMap=dstDataMap, &
                                         total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
 !      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, &
 !                                            recvDomainListTot, &
 !                                            srcDataMap=srcDataMap, &
+!                                            dstDataMap=dstDataMap, &
 !                                            total=.true., rc=status)
 
       ! Now use temporary route to gather necessary coordinates
