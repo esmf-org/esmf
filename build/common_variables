@@ -1,4 +1,4 @@
-# $Id: common_variables,v 1.31 2003/05/29 22:16:24 flanigan Exp $ 
+# $Id: common_variables,v 1.32 2003/06/06 22:36:11 jwolfe Exp $ 
 #
 # LIBNAME       - library name
 # SOURCE        - source files
@@ -52,13 +52,13 @@ DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts//test_scripts/do_ut_results
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
+		  ${LOCAL_INCLUDE} \
 		  -I$(ESMF_BUILD)/src/include \
 		  -I$(ESMF_TOP_DIR)/src/include \
 		  -I/usr/local/include \
 		  -I${ESMF_BUILD_DIR}/${ESMF_ARCH} \
 		  -I${ESMF_TOP_DIR}/include \
 		  -I${ESMC_MODDIR} \
-		  ${LOCAL_INCLUDE} \
 		  -I${ESMF_TOP_DIR}/src/timing \
 		  -I$(ESMF_INCDIR) -I$(ESMF_MODDIR) 
 
