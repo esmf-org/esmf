@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.59 2004/08/17 21:47:19 svasquez Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.60 2004/10/05 22:53:02 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -225,7 +225,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.59 2004/08/17 21:47:19 svasquez Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.60 2004/10/05 22:53:02 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -500,8 +500,8 @@
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(dimCount, srcGrid, dstGrid, &
                                          recvDomainList, parentDELayout, &
-                                         srcDatamap, srcArray, &
-                                         dstDatamap, dstArray, &
+                                         srcDatamap, srcArray, hasSrcData, &
+                                         dstDatamap, dstArray, hasDstData, &
                                          reorder, total, rc)
 !
 ! !RETURN VALUE:
@@ -509,18 +509,20 @@
 !
 ! !ARGUMENTS:
 
-      integer, intent(in) :: dimCount
-      type(ESMF_Grid), intent(in) :: srcGrid
-      type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_DomainList), intent(inout) :: recvDomainList
-      type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_FieldDataMap), intent(in) :: srcDatamap
-      type(ESMF_Array), intent(in), optional :: srcArray
-      type(ESMF_FieldDataMap), intent(in), optional :: dstDatamap
-      type(ESMF_Array), intent(in), optional :: dstArray
-      logical, intent(in), optional :: reorder
-      logical, intent(in), optional :: total
-      integer, intent(out), optional :: rc
+      integer,                 intent(in   ) :: dimCount
+      type(ESMF_Grid),         intent(in   ) :: srcGrid
+      type(ESMF_Grid),         intent(in   ) :: dstGrid
+      type(ESMF_DomainList),   intent(inout) :: recvDomainList
+      type(ESMF_DELayout),     intent(in   ) :: parentDELayout
+      type(ESMF_FieldDataMap), intent(in   ) :: srcDatamap
+      type(ESMF_Array),        intent(in   ), optional :: srcArray
+      logical,                 intent(in   ), optional :: hasSrcData
+      type(ESMF_FieldDataMap), intent(in   ), optional :: dstDatamap
+      type(ESMF_Array),        intent(in   ), optional :: dstArray
+      logical,                 intent(in   ), optional :: hasDstData
+      logical,                 intent(in   ), optional :: reorder
+      logical,                 intent(in   ), optional :: total
+      integer,                 intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Adds an address pair and regrid weight to an existing regrid.
@@ -538,7 +540,7 @@
       integer :: localrc
       integer :: myDE, gridrank, nDEs, theirDE, i, j, haloWidth
       integer, dimension(:), allocatable :: dimOrder, lbounds
-      logical :: totalUse
+      logical :: totalUse, hasSrcDataUse, hasDstDataUse
       real(ESMF_KIND_R8) :: count
       real(ESMF_KIND_R8), dimension(:), allocatable :: dstMin, dstMax
       real(ESMF_KIND_R8), dimension(:), allocatable :: srcMin, srcMax
@@ -556,6 +558,12 @@
 !     use optional arguments if present
       totalUse = .false.
       if (present(total)) totalUse = total
+      hasSrcDataUse = .false.
+      if (present(srcArray))   hasSrcDataUse = .true.
+      if (present(hasSrcData)) hasSrcDataUse = hasSrcData
+      hasDstDataUse = .false.
+      if (present(dstArray))   hasDstDataUse = .true.
+      if (present(hasDstData)) hasDstDataUse = hasDstData
 
       call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
@@ -573,61 +581,77 @@
       if (ESMF_LogMsgFoundAllocError(localrc, "myAI", &
                                      ESMF_CONTEXT, rc)) return
 
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalAI(srcGrid, myAI, horzRelLoc, &
-                                 reorder=reorder, total=totalUse, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      if (hasSrcDataUse) then
+        call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
+        call ESMF_GridGetDELocalAI(srcGrid, myAI, horzRelLoc, &
+                                   reorder=reorder, total=totalUse, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      ! From each grid get the bounding box information on this DE
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
-      allocate(srcMin(gridrank), &
-               srcMax(gridrank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "src arrays", &
-                                     ESMF_CONTEXT, rc)) return
+        ! From each grid get the bounding box information on this DE
+        call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
+        allocate(srcMin(gridrank), &
+                 srcMax(gridrank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "src arrays", &
+                                       ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
-      allocate(dstMin(gridrank), &
-               dstMax(gridrank), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
-                                     ESMF_CONTEXT, rc)) return
+        call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
+                                     minLocalCoordPerDim=srcMin, &
+                                     maxLocalCoordPerDim=srcMax, &
+                                     reorder=.false., rc=localrc)
+      endif
 
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalInfo(srcGrid, horzRelLoc=horzRelLoc, &
-                                   minLocalCoordPerDim=srcMin, &
-                                   maxLocalCoordPerDim=srcMax, &
-                                   reorder=.false., rc=localrc)
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=localrc)
-      call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=horzRelLoc, &
-                                   minLocalCoordPerDim=dstMin, &
-                                   maxLocalCoordPerDim=dstMax, &
-                                   reorder=.false., rc=localrc)
+      if (hasDstDataUse) then
+        call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
+        allocate(dstMin(gridrank), &
+                 dstMax(gridrank), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dst arrays", &
+                                       ESMF_CONTEXT, rc)) return
+
+        call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=localrc)
+        call ESMF_GridGetDELocalInfo(dstGrid, horzRelLoc=horzRelLoc, &
+                                     minLocalCoordPerDim=dstMin, &
+                                     maxLocalCoordPerDim=dstMax, &
+                                     reorder=.false., rc=localrc)
+      endif
 
       ! calculate intersections
-      call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                     myAI, sendDomainList, localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      if (hasSrcDataUse) then
+        call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
+                                       myAI, sendDomainList, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        deallocate(srcMin, &
+                   srcMax, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
-      call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainList, total=totalUse, rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+      if (hasDstDataUse) then
+        call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
+                                       recvDomainList, total=totalUse, rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+        deallocate(dstMin, &
+                   dstMax, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       ! Modify DomainLists for Array AI's and to add ranks larger than Grid dimensions
       ! TODO: move this to its own subroutine?
-      if (present(srcArray)) then ! TODO: fill in
-      ! sendDomainList first
-        allocate(     myArrayAI(dimCount), &
-                 myArrayLocalAI(dimCount), &
-                        lbounds(dimCount), &
-                       dimOrder(dimCount), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
-                                       ESMF_CONTEXT, rc)) return
+      allocate(     myArrayAI(dimCount), &
+               myArrayLocalAI(dimCount), &
+                      lbounds(dimCount), &
+                     dimOrder(dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "dimCount arrays", &
+                                     ESMF_CONTEXT, rc)) return
 
+      ! sendDomainList first
+      if (hasSrcData .AND. present(srcArray)) then
         if (totalUse) then
           call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=localrc)
         else
@@ -635,7 +659,7 @@
         endif
         call ESMF_ArrayGet(srcArray, haloWidth=haloWidth, lbounds=lbounds, rc=localrc)
         call ESMF_FieldDataMapGet(srcDataMap, dataIndexList=dimOrder, rc=localrc)
-        do i = 1,sendDomainList%num_domains
+        do i   = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
             myAI(j) = sendDomainList%domains(i)%ai(j)
           enddo
@@ -667,8 +691,10 @@
             sendDomainList%total_points = sendDomainList%total_points*count
           endif
         enddo
+      endif
 
       ! recvDomainList next
+      if (hasDstDataUse .AND. present(dstArray)) then
         call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
         allocate(     allAI(nDEs,dimCount), &
                  allLocalAI(nDEs,dimCount), stat=localrc)
@@ -706,21 +732,24 @@
             recvDomainList%total_points = recvDomainList%total_points*count
           endif
         enddo
-
-        deallocate(      dimOrder, &
-                          lbounds, &
-                        myArrayAI, &
-                   myArrayLocalAI, &
-                            allAI, &
-                       allLocalAI, stat=localrc)
+        deallocate(     allAI, &
+                   allLocalAI, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                        ESMF_CONTEXT, rc)) return
       endif
 
+      deallocate(      dimOrder, &
+                        lbounds, &
+                      myArrayAI, &
+                 myArrayLocalAI, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+
       ! Create Route
       route = ESMF_RouteCreate(parentDELayout, localrc)
-      call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, sendDomainList, &
-                                       recvDomainList, localrc)
+      call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, &
+                                       sendDomainList, recvDomainList, &
+                                       hasSrcData, hasDstData, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -732,11 +761,7 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Clean up
-      deallocate(  myAI, &
-                 srcMin, &
-                 srcMax, &
-                 dstMin, &
-                 dstMax, stat=localrc)
+      deallocate(  myAI, stat=localrc)
       if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                      ESMF_CONTEXT, rc)) return
 

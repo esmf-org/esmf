@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.40 2004/08/19 17:24:27 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.41 2004/10/05 22:52:00 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.40 2004/08/19 17:24:27 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.41 2004/10/05 22:52:00 jwolfe Exp $'
 
 !==============================================================================
 
@@ -92,8 +92,8 @@
 ! !IROUTINE: ESMF_RegridConstructConserv - Constructs conservative Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructConserv(srcArray, srcGrid, srcDataMap, &
-                                           dstArray, dstGrid, dstDataMap, &
+      function ESMF_RegridConstructConserv(srcArray, srcGrid, srcDataMap, hasSrcData, &
+                                           dstArray, dstGrid, dstDataMap, hasDstData, &
                                            parentDELayout, srcMask, dstMask, &
                                            regridnorm, order, rc)
 !
@@ -104,9 +104,11 @@
       type(ESMF_Array),        intent(in ) :: srcArray
       type(ESMF_Grid),         intent(in ) :: srcGrid
       type(ESMF_FieldDataMap), intent(in ) :: srcDataMap
+      logical,                 intent(in ) :: hasSrcData
       type(ESMF_Array),        intent(in ) :: dstArray
       type(ESMF_Grid),         intent(in ) :: dstGrid
       type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
+      logical,                 intent(in ) :: hasDstData
       type(ESMF_DELayout),     intent(in ) :: parentDELayout
       type(ESMF_Mask),         intent(in ), optional :: srcMask
       type(ESMF_Mask),         intent(in ), optional :: dstMask
@@ -178,8 +180,6 @@
            srcGatheredMask         !
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: &
            srcLocalMask            !
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
       logical, dimension(:), pointer :: &
            srcUserMask, dstUserMask
       real(ESMF_KIND_R8), dimension(:), pointer :: &
@@ -249,9 +249,9 @@
                                 ESMF_CONTEXT, rc)) return
 
       ! Set optional parameters if present - otherwise set defaults
-      orderUse    = 1
-      if (present(order)) orderUse = order
-      regridNormUse  = ESMF_REGRID_NORM_FRACAREA
+      orderUse      = 1
+      regridNormUse = ESMF_REGRID_NORM_FRACAREA
+      if (present(order     )) orderUse      = order
       if (present(regridnorm)) regridNormUse = regridnorm
 
       ! Set regrid method and array pointers       TODO: add name
@@ -287,27 +287,29 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      allocate(dstLocalCoordArray (2), &
-               dstLocalCornerArray(2), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dst local arrays", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasDstData) then
+        allocate(dstLocalCoordArray (2), &
+                 dstLocalCornerArray(2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dst local arrays", &
+                                       ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
-                             centerCoord=dstLocalCoordArray, &
-                             cornerCoord=dstLocalCornerArray, &
-                             reorder=.false., rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
+                               centerCoord=dstLocalCoordArray, &
+                               cornerCoord=dstLocalCornerArray, &
+                               reorder=.false., rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(dstLocalCornerArray(1), dstLocalCornerX, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(dstLocalCornerArray(2), dstLocalCornerY, &
-                             ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(dstLocalCornerArray(1), dstLocalCornerX, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(dstLocalCornerArray(2), dstLocalCornerY, &
+                               ESMF_DATA_REF, localrc)
+      endif
 
       ! get source grid info
       call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
@@ -328,69 +330,74 @@
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      allocate(srcLocalCoordArray (2), &
-               srcLocalCornerArray(2), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "src local arrays", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasSrcData) then
+        allocate(srcLocalCoordArray (2), &
+                 srcLocalCornerArray(2), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "src local arrays", &
+                                       ESMF_CONTEXT, rc)) return
 
-      call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
-                             centerCoord=srcLocalCoordArray, &
-                             cornerCoord=srcLocalCornerArray, &
-                             reorder=.false., rc=localrc)
-      if (ESMF_LogMsgFoundError(localrc, &
-                                ESMF_ERR_PASSTHRU, &
-                                ESMF_CONTEXT, rc)) return
+        call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
+                               centerCoord=srcLocalCoordArray, &
+                               cornerCoord=srcLocalCornerArray, &
+                               reorder=.false., rc=localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
-      call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(srcLocalCornerArray(1), srcLocalCornerX, &
-                             ESMF_DATA_REF, localrc)
-      call ESMF_ArrayGetData(srcLocalCornerArray(2), srcLocalCornerY, &
-                             ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(srcLocalCornerArray(1), srcLocalCornerX, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_ArrayGetData(srcLocalCornerArray(2), srcLocalCornerY, &
+                               ESMF_DATA_REF, localrc)
+        call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
+                                  rc=localrc)
+        call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
+                               localrc)
+      endif
 
-      call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
-                                rc=localrc)
-      call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
-                             localrc)
-
-      hassrcdata = .true.   ! temp for now
-      hasdstdata = .true.   ! temp for now
-
-   ! Calculate two separate Routes:
-   !    the first will be used in the code to gather the data for running
-   !              the regrid, saved in routehandle
-   !    the second sends and receives cell coordinate information and
-   !              is used internal to this routine to get coordinate 
-   !              information locally to calculate the regrid weights
+      ! Calculate two separate Routes:
+      !    the first will be used in the code to gather the data for running
+      !              the regrid, saved in routehandle
+      !    the second sends and receives cell coordinate information and
+      !              is used internal to this routine to get coordinate 
+      !              information locally to calculate the regrid weights
 
       call ESMF_ArrayGet(srcArray, rank=datarank, rc=localrc)
       route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
                          recvDomainList, parentDELayout, &
                          srcArray=srcArray, srcDataMap=srcDataMap, &
                          dstArray=dstArray, dstDataMap=dstDataMap, &
+                         hasSrcData=hasSrcData, hasDstData=hasDstData, &
                          total=.false., rc=localrc)
       call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
 
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
                              recvDomainList, parentDELayout, &
-                             srcDataMap=srcDataMap, &
-                             dstDataMap=dstDataMap, &
+                             srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
+                             hasSrcData=hasSrcData, hasDstData=hasDstData, &
                              reorder=.false., total=.false., &
                              rc=localrc)
 
       ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
-      nC = size(srcLocalCornerX,1)
-      call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
-      allocate(srcGatheredCoordX (   aSize), &
-               srcGatheredCoordY (   aSize), &
-               srcGatheredMask   (   aSize), &
-               srcGatheredCornerX(nC,aSize), &
-               srcGatheredCornerY(nC,aSize), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
-                                     ESMF_CONTEXT, rc)) return
+      if (hasSrcData) nC = size(srcLocalCornerX,1)
+      if (hasDstData) nC = size(dstLocalCornerX,1)
+                                   !TODO: number if corners for the destination
+                                   !      grid is OK for now, but should be a
+                                   !      call to the source grid eventually
+      if (hasDstData) then
+        call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
+        allocate(srcGatheredCoordX (   aSize), &
+                 srcGatheredCoordY (   aSize), &
+                 srcGatheredMask   (   aSize), &
+                 srcGatheredCornerX(nC,aSize), &
+                 srcGatheredCornerY(nC,aSize), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "src gathered arrays", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
 
       ! Execute Route now to gather grid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
@@ -400,11 +407,15 @@
                                     srcGatheredCoordY, localrc)
       ! TODO: move this loop to a Route routine?
       do i = 1,nC
-        temp2d => srcLocalCornerX(i,:,:)
-        temp1d => srcGatheredCornerX(i,:)
+        nullify(temp1d)
+        nullify(temp2d)
+        if (hasDstData) temp1d => srcGatheredCornerX(i,:)
+        if (hasSrcData) temp2d => srcLocalCornerX(i,:,:)
         call ESMF_RouteRunF90PtrR821D(tempRoute, temp2d, temp1d, localrc)
-        temp2d => srcLocalCornerY(i,:,:)
-        temp1d => srcGatheredCornerY(i,:)
+        nullify(temp1d)
+        nullify(temp2d)
+        if (hasDstData) temp1d => srcGatheredCornerY(i,:)
+        if (hasSrcData) temp2d => srcLocalCornerY(i,:,:)
         call ESMF_RouteRunF90PtrR821D(tempRoute, temp2d, temp1d, localrc)
       enddo
       call ESMF_RouteRunF90PtrI421D(tempRoute, srcLocalMask, &
@@ -415,169 +426,215 @@
       ! TODO: the *6 is to guarantee the max allocation possible is enough
       !  for conservative interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
-      aSize = ((dstCounts(1)*dstCounts(2)) + 1) * 6
-      ! Create a Transform Values object
-      tv = ESMF_TransformValuesCreate(aSize, rc)
+      if (hasDstData) then
+        aSize = ((dstCounts(1)*dstCounts(2)) + 1) * 6
+        ! Create a Transform Values object
+        tv = ESMF_TransformValuesCreate(aSize, rc)
 
-      ! set up user masks for search    ! TODO: combine user and grid masks
-      if (present(dstMask)) then
-  !      dstUserMask = dstMask
-      else
-        allocate(dstUserMask(dstCounts(1)*dstCounts(2)), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "dstUsermask", &
-                                       ESMF_CONTEXT, rc)) return
-        dstUserMask = .TRUE.
-      endif
-      if (present(srcMask)) then
-  !      srcUserMask = srcMask
-      else
-        call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
-        allocate(srcUserMask(aSize), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "srcUsermask", &
-                                       ESMF_CONTEXT, rc)) return
-        srcUserMask = .TRUE.
-      endif
+        ! set up user masks for search    ! TODO: combine user and grid masks
+        if (present(dstMask)) then
+  !        dstUserMask = dstMask
+        else
+          allocate(dstUserMask(dstCounts(1)*dstCounts(2)), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "dstUsermask", &
+                                         ESMF_CONTEXT, rc)) return
+          dstUserMask = .TRUE.
+        endif
+        if (present(srcMask)) then
+  !        srcUserMask = srcMask
+        else
+          call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
+          allocate(srcUserMask(aSize), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "srcUsermask", &
+                                         ESMF_CONTEXT, rc)) return
+          srcUserMask = .TRUE.
+        endif
      
-      ! allocate various local dst grid arrays
-      allocate(dstArea    (dstCounts(1),dstCounts(2)), &
-               dstUsrArea (dstCounts(1),dstCounts(2)), &
-               dstFracArea(dstCounts(1),dstCounts(2)), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "dst area arrays", &
-                                     ESMF_CONTEXT, rc)) return
-
-    !  dstUsrArea  (:) = ?       ! should come from user
-
-      ! For spherical coordinates, convert all coordinates to radians
-      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
-        dstLocalCoordX  =  dstLocalCoordX*pi/180.0d0
-        dstLocalCoordY  =  dstLocalCoordY*pi/180.0d0
-        dstLocalCornerX = dstLocalCornerX*pi/180.0d0
-        dstLocalCornerY = dstLocalCornerY*pi/180.0d0
-      endif
-
-      ! These are computed later - initialize to zero
-      dstArea    (:,:) = 0.0d0
-      dstFracArea(:,:) = 0.0d0
-
-      if (order > 1) then
-        allocate(dstCentroidX(dstCounts(1),dstCounts(2)), &
-                 dstCentroidY(dstCounts(1),dstCounts(2)), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "dst centroid arrays", &
+        ! allocate various local dst grid arrays
+        allocate(dstArea    (dstCounts(1),dstCounts(2)), &
+                 dstUsrArea (dstCounts(1),dstCounts(2)), &
+                 dstFracArea(dstCounts(1),dstCounts(2)), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "dst area arrays", &
                                        ESMF_CONTEXT, rc)) return
-        dstCentroidX(:,:) = 0.0d0
-        dstCentroidY(:,:) = 0.0d0
-      endif
-      allocate(srcArea    (aSize), &
-               srcUsrArea (aSize), &
-               srcFracArea(aSize), stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "src area arrays", &
-                                     ESMF_CONTEXT, rc)) return
 
-   !   srcUsrArea  (:) = ?
+    !    dstUsrArea  (:) = ?       ! should come from user
 
-      ! For spherical coordinates, convert all coordinates to radians
-      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
-        srcGatheredCoordX  =  srcGatheredCoordX*pi/180.0d0
-        srcGatheredCoordY  =  srcGatheredCoordY*pi/180.0d0
-        srcGatheredCornerX = srcGatheredCornerX*pi/180.0d0
-        srcGatheredCornerY = srcGatheredCornerY*pi/180.0d0
-      endif
+        ! For spherical coordinates, convert all coordinates to radians
+        if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+          dstLocalCoordX  =  dstLocalCoordX*pi/180.0d0
+          dstLocalCoordY  =  dstLocalCoordY*pi/180.0d0
+          dstLocalCornerX = dstLocalCornerX*pi/180.0d0
+          dstLocalCornerY = dstLocalCornerY*pi/180.0d0
+        endif
 
-      ! These are computed later - initialize to zero here
-      srcArea    (:) = 0.0d0
-      srcFracArea(:) = 0.0d0
+        ! These are computed later - initialize to zero
+        dstArea    (:,:) = 0.0d0
+        dstFracArea(:,:) = 0.0d0
 
-      if (order > 1) then
-        allocate(srcCentroidX(aSize), &
-                 srcCentroidY(aSize), stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "src centroid arrays", &
+        if (order > 1) then
+          allocate(dstCentroidX(dstCounts(1),dstCounts(2)), &
+                   dstCentroidY(dstCounts(1),dstCounts(2)), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "dst centroid arrays", &
+                                         ESMF_CONTEXT, rc)) return
+          dstCentroidX(:,:) = 0.0d0
+          dstCentroidY(:,:) = 0.0d0
+        endif
+        allocate(srcArea    (aSize), &
+                 srcUsrArea (aSize), &
+                 srcFracArea(aSize), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "src area arrays", &
                                        ESMF_CONTEXT, rc)) return
-        srcCentroidX(:) = 0.0d0
-        srcCentroidY(:) = 0.0d0
-      endif
 
-      ! Loop through domains for the search routine
-      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
-      numSrcCorners = size(srcLocalCornerX,1)   ! TODO: should be from a Grid call
-      numDstCorners = size(dstLocalCornerX,1)
+   !     srcUsrArea  (:) = ?
 
-      if (order .eq. 1) then
-        call ESMF_RegridConservSearch(tv, orderUse, coordSystem, &
-                                      aSize, numSrcCorners, &
-                                      dstCounts(1), dstCounts(2), &
-                                      numDstCorners, &
-                                      srcOrder, dstOrder, &
-                                      dstLocalCoordX, dstLocalCoordY, &
-                                      dstArea, dstUsrArea, dstFracArea, &
-                                      dstUserMask, &
-                                      dstLocalCornerX, dstLocalCornerY, &
-                                      srcGatheredCoordX, srcGatheredCoordY, &
-                                      srcArea, srcUsrArea, srcFracArea, &
-                                      srcUserMask, &
-                                      srcGatheredCornerX, srcGatheredCornerY, &
-                                      rc=localrc)
-        call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
-                                      aSize, dstCounts(1), dstCounts(2), &
-                                      srcOrder, dstOrder, &
-                                      dstArea, dstUsrArea, dstFracArea, &
-                                      srcArea, srcUsrArea, srcFracArea, &
-                                      rc=localrc)
-      else
-        call ESMF_RegridConservSearch(tv, orderUse, coordSystem, &
-                                      aSize, numSrcCorners, &
-                                      dstCounts(1), dstCounts(2), &
-                                      numDstCorners, &
-                                      srcOrder, dstOrder, &
-                                      dstLocalCoordX, dstLocalCoordY, &
-                                      dstArea, dstUsrArea, dstFracArea, &
-                                      dstUserMask, &
-                                      dstLocalCornerX, dstLocalCornerY, &
-                                      srcGatheredCoordX, srcGatheredCoordY, &
-                                      srcArea, srcUsrArea, srcFracArea, &
-                                      srcUserMask, &
-                                      srcGatheredCornerX, srcGatheredCornerY, &
-                                      dstCentroidX, dstCentroidY, &
-                                      srcCentroidX, srcCentroidY, localrc)
-        call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
-                                      aSize, dstCounts(1), dstCounts(2), &
-                                      srcOrder, dstOrder, &
-                                      dstArea, dstUsrArea, dstFracArea, &
-                                      srcArea, srcUsrArea, srcFracArea, &
-                                      dstCentroidX, dstCentroidY, &
-                                      srcCentroidX, srcCentroidY, localrc)
-      endif
+        ! For spherical coordinates, convert all coordinates to radians
+        if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
+          srcGatheredCoordX  =  srcGatheredCoordX*pi/180.0d0
+          srcGatheredCoordY  =  srcGatheredCoordY*pi/180.0d0
+          srcGatheredCornerX = srcGatheredCornerX*pi/180.0d0
+          srcGatheredCornerY = srcGatheredCornerY*pi/180.0d0
+        endif
+
+        ! These are computed later - initialize to zero here
+        srcArea    (:) = 0.0d0
+        srcFracArea(:) = 0.0d0
+
+        if (order > 1) then
+          allocate(srcCentroidX(aSize), &
+                   srcCentroidY(aSize), stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "src centroid arrays", &
+                                         ESMF_CONTEXT, rc)) return
+          srcCentroidX(:) = 0.0d0
+          srcCentroidY(:) = 0.0d0
+        endif
+
+        ! Loop through domains for the search routine
+        call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
+ !       numSrcCorners = size(srcLocalCornerX,1)   ! TODO: should be from a Grid call
+        numSrcCorners = size(dstLocalCornerX,1)   ! TODO: should be from a Grid call
+        numDstCorners = size(dstLocalCornerX,1)
+
+        if (order .eq. 1) then
+          call ESMF_RegridConservSearch(tv, orderUse, coordSystem, &
+                                        aSize, numSrcCorners, &
+                                        dstCounts(1), dstCounts(2), &
+                                        numDstCorners, &
+                                        srcOrder, dstOrder, &
+                                        dstLocalCoordX, dstLocalCoordY, &
+                                        dstArea, dstUsrArea, dstFracArea, &
+                                        dstUserMask, &
+                                        dstLocalCornerX, dstLocalCornerY, &
+                                        srcGatheredCoordX, srcGatheredCoordY, &
+                                        srcArea, srcUsrArea, srcFracArea, &
+                                        srcUserMask, &
+                                        srcGatheredCornerX, srcGatheredCornerY, &
+                                        rc=localrc)
+          call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
+                                        aSize, dstCounts(1), dstCounts(2), &
+                                        srcOrder, dstOrder, &
+                                        dstArea, dstUsrArea, dstFracArea, &
+                                        srcArea, srcUsrArea, srcFracArea, &
+                                        rc=localrc)
+        else
+          call ESMF_RegridConservSearch(tv, orderUse, coordSystem, &
+                                        aSize, numSrcCorners, &
+                                        dstCounts(1), dstCounts(2), &
+                                        numDstCorners, &
+                                        srcOrder, dstOrder, &
+                                        dstLocalCoordX, dstLocalCoordY, &
+                                        dstArea, dstUsrArea, dstFracArea, &
+                                        dstUserMask, &
+                                        dstLocalCornerX, dstLocalCornerY, &
+                                        srcGatheredCoordX, srcGatheredCoordY, &
+                                        srcArea, srcUsrArea, srcFracArea, &
+                                        srcUserMask, &
+                                        srcGatheredCornerX, srcGatheredCornerY, &
+                                        dstCentroidX, dstCentroidY, &
+                                        srcCentroidX, srcCentroidY, localrc)
+          call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
+                                        aSize, dstCounts(1), dstCounts(2), &
+                                        srcOrder, dstOrder, &
+                                        dstArea, dstUsrArea, dstFracArea, &
+                                        srcArea, srcUsrArea, srcFracArea, &
+                                        dstCentroidX, dstCentroidY, &
+                                        srcCentroidX, srcCentroidY, localrc)
+        endif
+
+      endif   ! hasDstData
 
       ! Set the routehandle
       call ESMF_RouteHandleSet(rh, tdata=tv, rc=localrc)
 
       ! Clean up some allocatables and return
       call ESMF_RouteDestroy(tempRoute, localrc)
-      deallocate(            dstArea, &
-                          dstUsrArea, &
-                         dstFracArea, &
-                             srcArea, &
-                          srcUsrArea, &
-                         srcFracArea, &
-                   srcGatheredCoordX, &
-                   srcGatheredCoordY, &
-                     srcGatheredMask, &
-                  srcGatheredCornerX, &
-                  srcGatheredCornerY, &
-                  dstLocalCoordArray, &
-                  srcLocalCoordArray, &
-                 dstLocalCornerArray, &
-                 srcLocalCornerArray, &
-                         dstUserMask, &
-                         srcUserMask, stat=localrc)
-      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
-                                     ESMF_CONTEXT, rc)) return
-      if (order > 1) then
-        deallocate(dstCentroidX, &
-                   dstCentroidY, &
-                   srcCentroidX, &
-                   srcCentroidY, stat=localrc)
-        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate second order arrays", &
+      if (hasSrcData) then
+        deallocate( srcLocalCoordArray, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
                                        ESMF_CONTEXT, rc)) return
+        deallocate(srcLocalCornerArray, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+      endif
+      if (hasDstData) then
+        deallocate(            dstArea, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(         dstUsrArea, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(        dstFracArea, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(            srcArea, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(         srcUsrArea, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(        srcFracArea, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(  srcGatheredCoordX, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(  srcGatheredCoordY, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(    srcGatheredMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate( srcGatheredCornerX, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate( srcGatheredCornerY, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate( dstLocalCoordArray, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(dstLocalCornerArray, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(        dstUserMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(        srcUserMask, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                       ESMF_CONTEXT, rc)) return
+        if (order > 1) then
+          deallocate(     dstCentroidX, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                         ESMF_CONTEXT, rc)) return
+          deallocate(     dstCentroidY, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                         ESMF_CONTEXT, rc)) return
+          deallocate(     srcCentroidX, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                         ESMF_CONTEXT, rc)) return
+          deallocate(     srcCentroidY, stat=localrc)
+          if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                         ESMF_CONTEXT, rc)) return
+        endif
       endif
       
       ESMF_RegridConstructConserv = rh

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.26 2004/08/14 22:35:52 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.27 2004/10/05 22:52:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.26 2004/08/14 22:35:52 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.27 2004/10/05 22:52:31 jwolfe Exp $'
 
 !==============================================================================
 
@@ -80,24 +80,26 @@
 ! !IROUTINE: ESMF_RegridConstructLinear - Constructs linear Regrid structure 
 
 ! !INTERFACE:
-      function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, &
-                                          dstArray, dstGrid, dstDataMap, &
+      function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
+                                          dstArray, dstGrid, dstDataMap, hasDstData, &
                                           parentDELayout, srcMask, dstMask, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructLinear
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcArray
-      type(ESMF_Grid), intent(in) :: srcGrid
-      type(ESMF_FieldDataMap), intent(in) :: srcDataMap
-      type(ESMF_Array), intent(in) :: dstArray
-      type(ESMF_Grid), intent(in) :: dstGrid
-      type(ESMF_FieldDataMap), intent(in) :: dstDataMap
-      type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_Mask), intent(in), optional :: srcMask
-      type(ESMF_Mask), intent(in), optional :: dstMask
-      integer, intent(out), optional :: rc
+      type(ESMF_Array),        intent(in ) :: srcArray
+      type(ESMF_Grid),         intent(in ) :: srcGrid
+      type(ESMF_FieldDataMap), intent(in ) :: srcDataMap
+      logical,                 intent(in ) :: hasSrcData
+      type(ESMF_Array),        intent(in ) :: dstArray
+      type(ESMF_Grid),         intent(in ) :: dstGrid
+      type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
+      logical,                 intent(in ) :: hasDstData
+      type(ESMF_DELayout),     intent(in ) :: parentDELayout
+      type(ESMF_Mask),         intent(in ), optional :: srcMask
+      type(ESMF_Mask),         intent(in ), optional :: dstMask
+      integer,                 intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source field and destination field (and their attached
@@ -129,8 +131,6 @@
 !EOPI
 
       integer :: localrc                          ! Error status
-      logical :: hassrcdata        ! does this DE contain localdata from src?
-      logical :: hasdstdata        ! does this DE contain localdata from dst?
       integer :: start, stop, startComp, stopComp
       integer :: srcSizeZ, srcSizeZComp, size
       integer :: i, num_domains, dstCounts(3), srcCounts(3)
@@ -228,9 +228,6 @@
                                 rc=localrc)
       call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
                              localrc)
-
-      hassrcdata = .true.   ! temp for now
-      hasdstdata = .true.   ! temp for now
 
    ! Calculate two separate Routes:
    !    the first will be used in the code to gather the data for running
