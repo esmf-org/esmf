@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.5 2004/03/08 16:03:25 nscollins Exp $
+! $Id: user_model2.F90,v 1.6 2004/03/16 23:28:17 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -139,7 +139,7 @@
       call ESMF_DELayoutGetDEID(layout, de_id, rc)
 
       ! Set up a 3D real array
-      call ESMF_ArraySpecInit(arrayspec, rank=3, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
                               kind=ESMF_R8)
 
       ! Create a datamap

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.6 2004/03/09 23:55:26 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.7 2004/03/16 23:28:17 cdeluca Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -121,7 +121,7 @@
     horzGridKind    = ESMF_GridKind_XY
     horzStagger     = ESMF_GridStagger_A
     horzCoordSystem = ESMF_CoordSystem_Cartesian
-    call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+    call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                             kind=ESMF_R8)
 
     decompids1(1) = 1

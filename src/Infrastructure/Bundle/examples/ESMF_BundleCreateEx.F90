@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.11 2004/03/11 17:56:51 jwolfe Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.12 2004/03/16 23:28:16 cdeluca Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -57,7 +57,7 @@
                 horzCoordSystem=ESMF_CoordSystem_Cartesian, &
                 layout=delayout, rc=rc)
 
-    call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R8, rc)
     field(1) = ESMF_FieldCreate(grid, arrayspec, &
                                 horzRelloc=ESMF_CELL_CENTER, &
                                 name="pressure", rc=rc)

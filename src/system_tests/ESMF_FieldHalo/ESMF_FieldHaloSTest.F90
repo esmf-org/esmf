@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.11 2004/03/08 16:03:25 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.12 2004/03/16 23:28:17 cdeluca Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -283,7 +283,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Create an arrayspec for a 2-D array 
-      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
+      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_INTEGER, &
                               kind=ESMF_I4)
 
       ! Create a Field using the Grid and ArraySpec created above

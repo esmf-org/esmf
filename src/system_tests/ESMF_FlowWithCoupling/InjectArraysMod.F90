@@ -1,4 +1,4 @@
-! $Id: InjectArraysMod.F90,v 1.4 2004/03/15 17:54:45 nscollins Exp $
+! $Id: InjectArraysMod.F90,v 1.5 2004/03/16 23:28:17 cdeluca Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@
 ! create fields and get pointers to data
 !
       haloWidth = 1
-      call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
+      call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                               kind=ESMF_R4)
 
       field_sie  = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &

@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.cpp,v 1.1 2004/03/16 21:01:09 nscollins Exp $
+! $Id: ESMF_LocalArray.cpp,v 1.2 2004/03/16 23:28:16 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -161,7 +161,7 @@ AllTypesMacro(LocalArrayType)
       public ESMF_LocalArrayCreate
       public ESMF_LocalArrayDestroy
  
-      public ESMF_ArraySpecInit
+      public ESMF_ArraySpecSet
       public ESMF_ArraySpecGet
 
       public ESMF_LocalArraySetData, ESMF_LocalArrayGetData
@@ -188,7 +188,7 @@ AllTypesMacro(LocalArrayType)
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.cpp,v 1.1 2004/03/16 21:01:09 nscollins Exp $'
+      '$Id: ESMF_LocalArray.cpp,v 1.2 2004/03/16 23:28:16 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -1088,7 +1088,7 @@ DeclarationMacro(LocalArrayDeallocate)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-     subroutine ESMF_ArraySpecInit(arrayspec, rank, type, kind, rc)
+     subroutine ESMF_ArraySpecSet(arrayspec, rank, type, kind, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1141,7 +1141,7 @@ DeclarationMacro(LocalArrayDeallocate)
         if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
           arrayspec%rank = rank
         else
-          print *, "ERROR in ESMF_ArraySpecInit: bad rank"
+          print *, "ERROR in ESMF_ArraySpecSet: bad rank"
           ! something to trigger on next time that this is bad
           arrayspec%rank = 0   
           return
@@ -1154,7 +1154,7 @@ DeclarationMacro(LocalArrayDeallocate)
 
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArraySpecInit
+        end subroutine ESMF_ArraySpecSet
 
 
 

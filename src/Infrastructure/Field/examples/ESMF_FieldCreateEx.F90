@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.17 2004/03/08 16:03:23 nscollins Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.18 2004/03/16 23:28:16 cdeluca Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -78,7 +78,7 @@
 !   !  The user creates an ArraySpec that describes the data and the
 !   !  Field create call allocates the appropriate memory for it. 
 
-    call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc)
 !EOC
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 !BOC

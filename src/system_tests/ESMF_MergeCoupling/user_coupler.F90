@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.1 2004/03/11 00:05:28 nscollins Exp $
+! $Id: user_coupler.F90,v 1.2 2004/03/16 23:28:17 cdeluca Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -99,7 +99,7 @@
         call ESMF_FieldGet(humidity1, grid=grid1, datamap=datamap1, &
                            array=array1, rc=rc)
         call ESMF_ArrayGet(array1, rank=rank1, type=dt1, kind=dk1, rc=rc)
-        call ESMF_ArraySpecInit(arrayspec1, rank1, dt1, dk1, rc)
+        call ESMF_ArraySpecSet(arrayspec1, rank1, dt1, dk1, rc)
  
         humidityM = ESMF_FieldCreate(grid=grid1, arrayspec=arrayspec1, &
                                      datamap=datamap1, rc=rc)

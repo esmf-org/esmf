@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.6 2004/02/11 22:11:29 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.7 2004/03/16 23:28:16 cdeluca Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -616,7 +616,7 @@
     arank = 2
     write(failMsg, *) "Did not return ESMF_SUCCESS" 
     write(name, *) "Initializing an Array Spec of rank 2 Test"
-    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
     ! set all counts to 1 first, then alter the ones you want to change
@@ -656,7 +656,7 @@
     arank = 10
     write(failMsg, *) "Did not return ESMF_FAILURE"
     write(name, *) "Initializing an Array Spec of rank 10 Test"
-    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
     !EX_UTest
@@ -669,7 +669,7 @@
     arank = 5
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 5 Test"
-    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
@@ -685,7 +685,7 @@
     arank = 4
     write(failMsg, *) "Did not return ESMF_SUCCESS"
     write(name, *) "Initializing an Array Spec of rank 4 Test"
-    call ESMF_ArraySpecInit(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
+    call ESMF_ArraySpecSet(arrayspec, arank, ESMF_DATA_REAL, ESMF_R4, rc)
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 
