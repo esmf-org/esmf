@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.14 2003/04/25 22:06:43 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.15 2003/04/25 22:26:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_CommTable.C,v 1.14 2003/04/25 22:06:43 nscollins Exp $";
+            "$Id: ESMC_CommTable.C,v 1.15 2003/04/25 22:26:05 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -142,9 +142,9 @@
     switch(partnercount) {
       case 4:
         { int ids[4][4] = { { 1,2,3,0 },
-                          { 0,3,4,1 }, 
-                          { 3,0,1,2 },
-                          { 2,1,0,3 } };
+                            { 0,3,2,1 }, 
+                            { 3,0,1,2 },
+                            { 2,1,0,3 } };
 
           for (i=0; i<partnercount; i++)
               commpartner[i] = ids[mydeid][i];
