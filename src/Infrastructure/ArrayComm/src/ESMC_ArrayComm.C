@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.1 2003/10/07 22:29:46 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.2 2003/12/08 18:32:43 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -365,6 +365,8 @@
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
+      int localAxisLengths[],    // in  - length of each axis for each DE
+      int size_axislengths,      // in  - size of axislengths array
       int global_dimlengths[],   // in  - array of global dimensions
       ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
 //
