@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.13 2004/10/28 22:11:30 nscollins Exp $
+#  $Id: build_rules.mk,v 1.14 2004/12/14 15:31:17 theurich Exp $
 #
 #  OSF1.default.default.mk
 #
@@ -106,7 +106,7 @@ G_COPTFLAGS		= -g -assume gfullpath -pthread
 G_FOPTFLAGS		= -g -assume gfullpath 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS		= -O3 -w -pthread
-O_FOPTFLAGS		= -O3 -w
+O_FOPTFLAGS		= -O3 -w -omp
 #
 # C++ compiler 
 #
