@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.2 2003/10/20 22:39:43 nscollins Exp $
+#  $Id: build_rules.mk,v 1.3 2003/11/24 18:14:31 jwolfe Exp $
 #
 #  Darwin.nag.default.mk
 #
@@ -111,7 +111,7 @@ C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = ${C_CC}
-C_FLINKER	   = ${C_FC)
+C_FLINKER	   = ${C_FC}
 C_CCV		   = ${C_CC} --version
 C_FCV              = ${C_FC} -V 
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
