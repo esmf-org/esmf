@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.15 2003/04/22 15:51:56 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.16 2003/04/22 16:16:10 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.15 2003/04/22 15:51:56 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.16 2003/04/22 16:16:10 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -262,6 +262,7 @@
                       name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
 
+
       ! Set time to lower bound of Fliegel algoritm
       write(name, *) "Test lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_SUCCESS."
@@ -343,28 +344,39 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
       ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
       write(name, *) "Calendar Print Test"
       call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       write(name, *) "Time Interval Print Test"
       call ESMF_TimeIntervalPrint(timeStep, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       write(name, *) "Start Time Print Test"
       call ESMF_TimePrint(startTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       write(name, *) "Stop Time Print Test"
       call ESMF_TimePrint(stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
       write(name, *) "Clock Print Test"
       call ESMF_ClockPrint(clock, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
+      ! ----------------------------------------------------------------------------
       write(name, *) "ClockIsStopTime Test"
       bool = ESMF_ClockIsStopTime(clock, rc)
       !call ESMF_Test(((rc.eq.ESMF_SUCCESS) .and.(bool.eq."F")), &
