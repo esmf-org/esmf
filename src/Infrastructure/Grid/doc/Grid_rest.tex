@@ -1,18 +1,118 @@
-% $Id: Grid_rest.tex,v 1.5 2004/06/15 23:23:53 cdeluca Exp $
+% $Id: Grid_rest.tex,v 1.6 2004/06/22 20:54:17 jwolfe Exp $
 
 %\subsubsection{Restrictions and Future Work}
 
 \begin{enumerate}
 
-\item {\bf Support is limited to 2D, logically rectangular grids.} 
-Currently the only interfaces supported are for two-dimensional, 
+\item {\bf Support is limited to 3D, logically rectangular grids.} 
+Currently the only interfaces supported are for three-dimensional, 
 logically rectangular grids. 
 
 \item {\bf Support is limited to 2D grid distributions.} The 
 decomposition of grids is limited to two dimensions.
 
-\item {\bf No Grid read method.} Currently it is not possible to 
-create a Grid by reading in a specification from a file.
+\item {\bf Future Grid Create methods.}  Currently grids can only
+be created by internal generation.  In the future, the following
+create methods will be added:
+ \begin{description}
+    \item [ESMF\_GridCreateCopy]
+          Create a new Grid by copying another Grid
+    \item [ESMF\_GridCreateCutout]
+          Create a new Grid as a subset of an existing Grid
+    \item [ESMF\_GridCreateDiffRes]
+          Create a new Grid by coarsening or refining an existing Grid
+    \item [ESMF\_GridCreateExchange]
+          Create a new Grid from the intersection of two existing grids
+    \item [ESMF\_GridCreateRead]
+          Create a new Grid by reading in from a file
+ \end{description}
+
+\item {\bf Future Grid types.}  The following grids will
+be supported, although only some will have internal generation 
+methods:
+ \begin{description}
+    \item [ESMF\_GRID\_TYPE\_LATLON\_GAUSS]
+          Latitude/Longitude grid with gaussian-spaced latitudes
+    \item [ESMF\_GRID\_TYPE\_LATLON\_MERC]
+          Latitude/Longitude grid with Mercator-spaced latitudes
+    \item [ESMF\_GRID\_TYPE\_REDUCED]
+          Latitude/Longitude grid where the number of longitudinal points is a
+          function of the latitude
+    \item [ESMF\_GRID\_TYPE\_DIPOLE]
+          Displaced-pole dipole grid
+    \item [ESMF\_GRID\_TYPE\_TRIPOLE]
+          Tripolar grids
+    \item [ESMF\_GRID\_TYPE\_DATASTREAM]
+          Data stream - set of locations
+    \item [ESMF\_GRID\_TYPE\_PHYSFOURIER]
+          Mixed Fourier Space/Physcal Space grid
+    \item [ESMF\_GRID\_TYPE\_SPHER\_SPECT]
+          Spectral space for spherical harmonics
+    \item [ESMF\_GRID\_TYPE\_CART\_SPECT]
+          Spectral space for cartesian coordinates
+    \item [ESMF\_GRID\_TYPE\_GEODESIC]
+          Spherical geodesic grid
+    \item [ESMF\_GRID\_TYPE\_CUBEDSPHERE]
+          Cubed sphere grid
+    \item [ESMF\_GRID\_TYPE\_EXCHANGE]
+          Intersection of two grids, which is itself a grid
+ \end{description}
+
+\item {\bf Future coordinate system support.}  Support for the following
+coordinate systems will be added:
+ \begin{description}
+    \item [ESMF\_COORD\_SYSTEM\_USER]
+          User-defined coordinate system
+    \item [ESMF\_COORD\_SYSTEM\_CYLINDRICAL]
+          Cylindrical coordinates
+    \item [ESMF\_COORD\_SYSTEM\_LATFOURIER]
+          Mixed latitude/Fourier spectral space
+    \item [ESMF\_COORD\_SYSTEM\_SPECTRAL]
+          Wavenumber space
+    \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
+          Lagrangian coordinates
+ \end{description}
+
+\item {\bf Future horizontal Grid staggerings.}  Support for the following
+horizontal staggerings will be added:
+ \begin{description}
+    \item [ESMF\_GRID\_HORZ\_STAGGER\_E]
+          Arakawa E
+    \item [ESMF\_GRID\_HORZ\_STAGGER\_Z]
+          C grid equivalent for geodesic grid
+ \end{description}
+
+\item {\bf Future vertical Grid types.}  Support for the following
+vertical grids will be added:
+ \begin{description}
+    \item [ESMF\_COORD\_SYSTEM\_DEPTH]
+          Vertical z coordinate depth (0 at top surface)
+    \item [ESMF\_COORD\_SYSTEM\_PRESSURE]
+          Vertical pressure coordinate
+    \item [ESMF\_COORD\_SYSTEM\_SIGMA]
+          Vertical sigma coordinate
+    \item [ESMF\_COORD\_SYSTEM\_THETA]
+          Vertical theta coordinate
+    \item [ESMF\_COORD\_SYSTEM\_ETA]
+          Vertical eta coordinate
+    \item [ESMF\_COORD\_SYSTEM\_ISOPYCNAL]
+          Vertical density coordinate
+    \item [ESMF\_COORD\_SYSTEM\_HYBRID]
+          Hybrid vertical coordinates
+    \item [ESMF\_COORD\_SYSTEM\_LAGRANGIAN]
+          Lagrangian coordinates
+ \end{description}
+
+\item {\bf Future Grid masks.}  Grid masks will be implemented, including
+support for the following mask types:
+ \begin{description}
+    \item [ESMF\_GRID\_MASKTYPE\_LOGICAL]
+          Logical mask
+    \item [ESMF\_GRID\_MASKTYPE\_MULT]
+          Multiplicative mask
+    \item [ESMF\_GRID\_MASKTYPE\_REGION\_ID]
+          Integer assigning unique ID to each point
+ \end{description}
 
 \end{enumerate}
 
