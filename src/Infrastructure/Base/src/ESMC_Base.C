@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.50 2004/12/30 20:11:21 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.51 2004/12/31 19:57:12 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,16 +31,16 @@
 #include "ESMC_Start.h"
 #include "ESMC_Base.h"
 #include "ESMC_LogErr.h"
-#include "ESMC_VM.h"
+//#include "ESMC_VM.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.50 2004/12/30 20:11:21 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.51 2004/12/31 19:57:12 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
-static int globalCount = 0;
+static int globalCount = 0;   //TODO: this should be a counter per VM context
 
 // define constants once to avoid duplicate instantiations
 ESMC_ObjectID ESMC_ID_BASE = {1, "ESMF_Base"};
@@ -3614,13 +3614,13 @@ extern "C" {
 //   default initialization 
 //
 //EOPI
-  int vmid, rc;
+  int rc;
   
   // get the vmID and fold that into the object ID
-  vmid = ESMC_VMGetCurrentID(&rc);
-  int vmid2 = vmid;
-  //printf("gjt in ESMC_Base constructor: current vmID: %X, %X\n", vmid, (vmid2 << 24));
-  ID = ++globalCount | (vmid << 24);
+//  vmID = ESMC_VMGetCurrentID(&rc);
+//  ESMC_VMIdPrint((ESMC_VMId *)vmID);
+//  ID = ++globalCount | (vmid << 24);
+  ID = ++globalCount;
   refCount = 1;
   strcpy(className, "global");
   sprintf(baseName, "%s%3d", "unnamed", ID);
@@ -3654,13 +3654,13 @@ extern "C" {
 //   of attributes to make space for.
 //
 //EOPI
-  int vmid, rc;
+  int rc;
   
   // get the vmID and fold that into the object ID
-  vmid = ESMC_VMGetCurrentID(&rc);
-  int vmid2 = vmid;
-  //printf("gjt in ESMC_Base constructor: current vmID: %X, %X\n", vmid, (vmid2 << 24));
-  ID = ++globalCount | (vmid << 24);
+//  vmID = ESMC_VMGetCurrentID(&rc);
+//  ESMC_VMIdPrint((ESMC_VMId *)vmID);
+//  ID = ++globalCount | (vmid << 24);
+  ID = ++globalCount;
   refCount = 1;
   strcpy(className, superclass ? superclass : "global");
   if (name && (name[0]!='\0')) 
