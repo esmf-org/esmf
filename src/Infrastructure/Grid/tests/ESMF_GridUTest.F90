@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.15 2003/07/29 16:26:49 jwolfe Exp $
+! $Id: ESMF_GridUTest.F90,v 1.16 2003/08/28 22:55:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.15 2003/07/29 16:26:49 jwolfe Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.16 2003/08/28 22:55:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -82,7 +82,7 @@
       real :: x_min, x_max, y_min, y_max
       type(ESMF_Grid) :: grid, grid1, grid2
       type(ESMF_GridType) :: grid_type
-      type(ESMF_DELayout) :: layout
+      type(ESMF_DELayout) :: layout, layout2
 
 
 !--------------------------------------------------------------------------------
@@ -137,11 +137,72 @@
       !NEX_UTest
 
 
-      write(failMsg, *) ""
+      write(failMsg, *) "Returned ESMF_FAILURE"
       write(name, *) "Creating a Grid Test"
       call ESMF_Test((status.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+
+
+      ! Printing a Grid
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
+      ! THe following code is commented out because it crashes.
+      ! Bug report 796975 has been filed
+      ! grid = ESMF_GridCreate(counts=counts, &
+      !                      x_min=x_min, x_max=x_max, &
+      !                      y_min=y_min, y_max=y_max, &
+      !                      layout=layout2, &
+      !                      horz_gridtype=horz_gridtype, &
+      !                      vert_gridtype=vert_gridtype, &
+      !                      horz_stagger=horz_stagger, &
+      !                      vert_stagger=vert_stagger, &
+      !                      horz_coord_system=horz_coord_system, &
+      !                      vert_coord_system=vert_coord_system, &
+      !                      name=name, rc=status)
+
+
+
+      !write(failMsg, *) "Returned ESMF_SUCCESS"
+      !write(name, *) "Creating a Grid with a non created layout Test"
+      !call ESMF_Test((status.eq.ESMF_SUCCESS), &
+      !                name, failMsg, result, ESMF_SRCLINE)
+      x_min = 7.0
+      x_max = -10.0
+      y_min = 5.0
+      y_max = 1.0
+
+     grid = ESMF_GridCreate(counts=counts, &
+                            x_min=x_min, x_max=x_max, &
+                            y_min=y_min, y_max=y_max, &
+                            layout=layout, &
+                            horz_gridtype=horz_gridtype, &
+                            vert_gridtype=vert_gridtype, &
+                            horz_stagger=horz_stagger, &
+                            vert_stagger=vert_stagger, &
+                            horz_coord_system=horz_coord_system, &
+                            vert_coord_system=vert_coord_system, &
+                            name=name, rc=status)
+
+      !NEX_UTest
+
+
+      write(failMsg, *) "Returned ESMF_FAILURE"
+      write(name, *) "Creating a Grid  with negative x_max Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      !NEX_UTest
+
+      ! Printing a Grid
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 #ifdef ESMF_EXHAUSTIVE
 
