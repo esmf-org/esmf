@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.1 2003/04/24 14:13:20 nscollins Exp $
+// $Id: ESMC_Machine.C,v 1.2 2003/07/02 23:34:38 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,9 +17,9 @@
 // The code in this file implements the C++ Machine methods declared
 // in the companion file ESMC_Machine.h
 //
-// The ESMF Machine class stores information about the architecture and
+// The ESMF {\tt ESMC\_Machine} class stores information about the architecture and
 // operating environment of a platform in a generic way.  Only one 
-// Machine is created per application.
+// {\tt ESMC\_Machine} is created per application.
 //
 //-----------------------------------------------------------------------------
 //
@@ -46,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-                 "$Id: ESMC_Machine.C,v 1.1 2003/04/24 14:13:20 nscollins Exp $";
+                 "$Id: ESMC_Machine.C,v 1.2 2003/07/02 23:34:38 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -72,7 +72,7 @@ ESMC_Machine Machine;
 //
 //
 // !DESCRIPTION:
-//     Should query machine for configuration, characteristics.
+//     Should query {\tt ESMC\_Machine} for configuration, characteristics.
 //     TODO: this is hardcoded now and needs to be fixed.
 //
 //EOP
@@ -142,7 +142,7 @@ ESMC_Machine Machine;
       
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes Machine values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_Machine} values; it does not
 //      allocate any resources. 
 //
 //EOP
@@ -183,7 +183,7 @@ ESMC_Machine Machine;
       ESMC_MachineConfig *config) const {  // out - resources
 //
 // !DESCRIPTION:
-//    Returns the set of resources the Machine object was configured with.
+//    Returns the set of resources the {\tt ESMC\_Machine} object was configured with.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -208,7 +208,7 @@ ESMC_Machine Machine;
       const ESMC_MachineConfig *config) {     // in - resources
 //
 // !DESCRIPTION:
-//    Configures the Machine object with set of resources given.
+//    Configures the {\tt ESMC\_Machine} object with set of resources given.
 //
 //EOP
 // !REQUIREMENTS:  
@@ -233,7 +233,7 @@ ESMC_Machine Machine;
       <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of Machine member <Value>.
+//     Returns the value of {\tt ESMC\_Machine} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -259,7 +259,7 @@ ESMC_Machine Machine;
       <value type> value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the Machine member <Value> with the given value.
+//     Sets the {\tt ESMC\_Machine} member <Value> with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -286,8 +286,8 @@ ESMC_Machine Machine;
       void) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a Machine is internally consistent.
-//      Returns error code if problems are found.  ESMC\_Base class method.
+//      Validates that a {\tt ESMC\_Machine} is internally consistent.
+//      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -311,8 +311,8 @@ ESMC_Machine Machine;
       void) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a Machine.  The options control the
-//      type of information and level of detail.  ESMC\_Base class method.
+//      Print information about a {\tt ESMC\_Machine}.  The options control the
+//      type of information and level of detail.  {\tt ESMC\_Base} class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
