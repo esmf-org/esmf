@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.24 2005/02/01 00:38:45 theurich Exp $
+// $Id: ESMC_VM.h,v 1.25 2005/02/03 22:00:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,8 +39,7 @@
 ///EOP
 //-------------------------------------------------------------------------
 
-#include <ESMC_Base.h>  
-#include <ESMC_VMKernel.h>   // inherit from ESMC_VMK class
+#include <ESMC_VMKernel.h>    // inherit from ESMC_VMK class
 
 
 typedef struct{
@@ -48,15 +47,19 @@ typedef struct{
   int localID;    // local ID of the VM within VAS context
 }ESMC_VMId;
 
-ESMC_Logical ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2);
-int ESMC_VMIdCopy(ESMC_VMId *vmIDdst, ESMC_VMId *vmIDsrc);
-void ESMC_VMIdPrint(ESMC_VMId *vmID);
+#include <ESMC_Base.h>        // cannot move Base.h before def. of ESMC_VMId 
+
+// external ESMC_VMId methods:
 ESMC_VMId ESMC_VMIdCreate(int *rc);      // allocates memory for vmKey member
 void ESMC_VMIdDestroy(ESMC_VMId *vmID, int *rc); // frees memory for vmKey memb
-    
+void ESMC_VMIdPrint(ESMC_VMId *vmID);
+ESMC_Logical ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2);
+int ESMC_VMIdCopy(ESMC_VMId *vmIDdst, ESMC_VMId *vmIDsrc);
+
 
 class ESMC_VM;
 class ESMF_VMPlan;
+
 
 // class definition
 class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
@@ -85,18 +88,19 @@ class ESMC_VM : public ESMC_VMK {   // inherits from ESMC_VMK class
       int *petMatchCount,           // out - number of matching PETs in vmMatch
       int *petMatchList,            // out - list of matching PETs in vmMatch
       int len_petMatchList);        // in  - size of petMatchList
-    void ESMC_VMSendVMId(ESMC_VMId *vmid, int dest);
-    void ESMC_VMRecvVMId(ESMC_VMId *vmid, int source);
+    int ESMC_VMSendVMId(ESMC_VMId *vmid, int dest);
+    int ESMC_VMRecvVMId(ESMC_VMId *vmid, int source);
 };// end class ESMC_VM
 
 // external ESMC_VM methods:
+void     ESMC_VMGetArgs(int *argc, char ***argv, int *rc);  // Command line args
 ESMC_VM *ESMC_VMGetGlobal(int *rc);   // Return pointer to global VM
 ESMC_VM *ESMC_VMGetCurrent(int *rc);  // Return pointer to VM of current context
 ESMC_VMId *ESMC_VMGetCurrentID(int *rc);// Return ID of the current VM context.
-void     ESMC_VMGetArgs(int *argc, char ***argv, int *rc);  // Command line args
 ESMC_VM *ESMC_VMInitialize(int *rc);  // Initialize global ESMC_VMK
 void     ESMC_VMFinalize(int *rc);    // Shut down and clean up global ESMC_VMK
 void     ESMC_VMAbort(int *rc);       // Abort and clean up global ESMC_VMK
+    
 
 // class definition
 class ESMC_VMPlan : public ESMC_VMKPlan {   // inherits from ESMC_VMKPlan class

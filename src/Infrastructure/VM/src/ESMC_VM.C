@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.32 2005/02/01 00:38:59 theurich Exp $
+// $Id: ESMC_VM.C,v 1.33 2005/02/03 22:00:21 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,33 +16,38 @@
 //
 // The code in this file implements the methods of two C++ classes 
 // {\tt ESMC\_VM} and {\tt ESMC\_VMPlan} which are defined in the companion 
-// file {\tt ESMC\_VM.C}.
+// file {\tt ESMC\_VM.h}.
 //
-// Currently class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
+// Class {\tt ESMC\_VM} is derived from base class {\tt ESMC_VMK}
 // and class {\tt ESMC\_VMPlan} is derived from base class {\tt ESMC_VMKPlan}.
-// There are only very few new features that the derived classes add to their
-// base classes, thus most of the implementing code is located in 
-// {\tt ESMC_VMKernel.C}.
+// Both base classes are defined in {\tt ESMC_VMKernel.h} and implemented in
+// source file {\tt ESMC_VMKernel.C}.
+// There a couple of new features that the derived classes add to their
+// base classes. This is the content of this source file. Furthermore, this
+// source file contains the implementation of a global association list for VMs
+// used in ESMF.
 //
 //-----------------------------------------------------------------------------
 
-// insert any higher level, 3rd party or system includes here
+// include higher level, 3rd party or system headers
 #include <pthread.h>
 
-#include <ESMC_Start.h>
-#include <ESMC_Base.h>  
+// include ESMF headers
+#include "ESMC_Start.h"
+#include "ESMC_Base.h" 
 
-// associated class definition file
-#include <ESMC_VM.h>
+// include associated class definition
+#include "ESMC_VM.h"
 
 // LogErr
-#include "ESMC_LogErr.h"                  // for LogErr
-#include "ESMF_LogMacros.inc"             // for LogErr
+#include "ESMC_LogErr.h"
+#include "ESMF_LogMacros.inc"
+
 
 //-----------------------------------------------------------------------------
- // leave the following line as-is; it will insert the cvs ident string
- // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.32 2005/02/01 00:38:59 theurich Exp $";
+// leave the following line as-is; it will insert the cvs ident string
+// into the object file for tracking purposes.
+static const char *const version = "$Id: ESMC_VM.C,v 1.33 2005/02/03 22:00:21 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -55,22 +60,21 @@ static ESMC_VM *GlobalVM = NULL;
 
 //-----------------------------------------------------------------------------
 // Module arrays to hold association between tid <-> vm <-> vmID
-#define ESMC_VM_MAXTIDS 1000
+#define ESMC_VM_MAXTIDS 1000    // maximum number of entries in association list
 static pthread_t matchArray_tid[ESMC_VM_MAXTIDS];
 static ESMC_VM *matchArray_vm[ESMC_VM_MAXTIDS];
 static ESMC_VMId matchArray_vmID[ESMC_VM_MAXTIDS];
 static int vmKeyWidth = 0;        // in units of 8-bit chars
 static int vmKeyOff = 0;          // extra bits in last char
-static int matchArray_count = 0;
+static int matchArray_count = 0;  // number of valid entries in association list
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
 //
-// This section includes all the VM routines
+// static module functions
 //
 //-----------------------------------------------------------------------------
-
 
 static ESMC_Logical ESMC_VMKeyCompare(char *vmKey1, char *vmKey2){
   int i;
@@ -81,7 +85,217 @@ static ESMC_Logical ESMC_VMKeyCompare(char *vmKey1, char *vmKey2){
 }
 
 
+//-----------------------------------------------------------------------------
+//
+// external VMId functions
+//
+//-----------------------------------------------------------------------------
 
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMIdCreate()"
+//BOP
+// !IROUTINE:  ESMC_VMIdCreate
+//
+// !INTERFACE:
+ESMC_VMId ESMC_VMIdCreate(
+//
+// !RETURN VALUE:
+//    Created {\tt ESMC\_VMId} object.
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//    Allocate memory for a new {\tt ESMC\_VMId} object and reset members.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  // allocates memory for vmKey member
+  ESMC_VMId vmID;    // temporary stack variable
+  vmID.vmKey = new char[vmKeyWidth];
+  for (int i=0; i<vmKeyWidth; i++)
+    vmID.vmKey[i] = 0x00;  // zero out all bits
+  vmID.localID = 0;   // reset
+  *rc = ESMF_SUCCESS;
+  return vmID;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMIdDestroy()"
+//BOP
+// !IROUTINE:  ESMC_VMIdDestroy
+//
+// !INTERFACE:
+void ESMC_VMIdDestroy(
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+//
+  ESMC_VMId *vmID, 
+  int *rc
+  ){
+//
+// !DESCRIPTION:
+//    Free memory for a previously created {\tt ESMC\_VMId} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE;         // assume failure
+  if (vmID==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
+    return; // bail out
+  }
+  if (vmID->vmKey==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmID->vmKey", ESMC_LOG_ERROR);
+    return; // bail out
+  }
+  // frees memory for vmKey member
+  if (vmID->vmKey){
+    delete [] vmID->vmKey;
+    vmID->vmKey = NULL;
+  }
+  *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMIdCompare()"
+//BOP
+// !IROUTINE:  ESMC_VMIdCompare
+//
+// !INTERFACE:
+ESMC_Logical ESMC_VMIdCompare(
+//
+// !RETURN VALUE:
+//    {\tt ESMC\_Logical} indicating result of comparison. 
+//
+// !ARGUMENTS:
+//
+  ESMC_VMId *vmID1, 
+  ESMC_VMId *vmID2
+  ){
+//
+// !DESCRIPTION:
+//    Compare two {\tt ESMC\_VMId} objects.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (vmID1==NULL || vmID2==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
+    return ESMF_FALSE;    // bail out
+  }
+  if (vmID1->localID != vmID2->localID) return ESMF_FALSE;
+  return ESMC_VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMIdCopy()"
+//BOP
+// !IROUTINE:  ESMC_VMIdCopy
+//
+// !INTERFACE:
+int ESMC_VMIdCopy(
+//
+// !RETURN VALUE:
+//    Error code. 
+//
+// !ARGUMENTS:
+//
+  ESMC_VMId *vmIDdst, 
+  ESMC_VMId *vmIDsrc
+  ){
+//
+// !DESCRIPTION:
+//    Copy {\tt ESMC\_VMId} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (vmIDdst==NULL || vmIDsrc==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmIDs", ESMC_LOG_ERROR);
+    return ESMF_FAILURE;    // bail out
+  }
+  for (int i=0; i<vmKeyWidth; i++)
+    vmIDdst->vmKey[i] = vmIDsrc->vmKey[i];
+  vmIDdst->localID = vmIDsrc->localID;
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMIdPrint()"
+//BOP
+// !IROUTINE:  ESMC_VMIdPrint
+//
+// !INTERFACE:
+void ESMC_VMIdPrint(
+//
+// !RETURN VALUE:
+//    
+//
+// !ARGUMENTS:
+//
+  ESMC_VMId *vmID
+  ){
+//
+// !DESCRIPTION:
+//    Print an {\tt ESMC\_VMId} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  printf("ESMC_VMIdPrint:\n");
+  if (vmID==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
+    return; // bail out
+  }
+  printf("vmID located at: %p\n", vmID);
+  if (vmID->vmKey==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmID->vmKey", ESMC_LOG_ERROR);
+    return; // bail out
+  }
+  printf("  vmKey=0x");
+  int bitmap=0;
+  int k=0;
+  for (int i=0; i<vmKeyWidth; i++){
+    bitmap |= vmID->vmKey[i];
+    bitmap = bitmap << 8;
+    ++k;
+    if (k==4){
+      printf("%X", bitmap);
+      bitmap=0;
+      k=0;
+    }
+  }
+  if (k!=0){
+    bitmap = bitmap << (3-k)*8;
+    printf("%X\n", bitmap);
+  }
+  printf("  localID: %d\n", vmID->localID);
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// public ESMC_VM methods
+//
+//-----------------------------------------------------------------------------
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
@@ -98,7 +312,7 @@ void *ESMC_VM::ESMC_VMStartup(
 // !ARGUMENTS:
 //
   class ESMC_VMPlan *vmp,         // plan for this child VM
-  void *(fctp)(void *, void *),   // fnction pointer to 1st stage callback
+  void *(fctp)(void *, void *),   // function pointer to 1st stage callback
   void *cargo,                    // pointer to cargo structure for in/out data
   int *rc){                       // error return code
 //
@@ -109,7 +323,10 @@ void *ESMC_VM::ESMC_VMStartup(
 //-----------------------------------------------------------------------------
   // startup the VM
   void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL, rc);
-  if (*rc) *rc=ESMF_FAILURE;  // translate error into ESMF_FAILURE
+  // translate error code
+  if (*rc) *rc=ESMF_FAILURE;
+  else *rc=ESMF_SUCCESS;
+  // use LogErr to handle error
   if (ESMC_LogDefault.ESMC_LogMsgFoundError(*rc, " - VMKernel could not "
     "create additional pthreads! Please check stack limit.", rc))
     return NULL;  // bail out if pthreads could not be created
@@ -151,6 +368,8 @@ void *ESMC_VM::ESMC_VMStartup(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGet()"
 //BOP
 // !IROUTINE:  ESMC_VMGet
 //
@@ -169,7 +388,7 @@ int ESMC_VM::ESMC_VMGet(
   ESMC_Logical *okOpenMpFlag){  // out - flag whether user-level OpenMP o.k.
 //
 // !DESCRIPTION:
-//   Get internal information about the specified {\tt ESMC\_VM} object.
+//   Get internal information about the {\tt ESMC\_VM} object.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -188,12 +407,14 @@ int ESMC_VM::ESMC_VMGet(
   }
   if (okOpenMpFlag != ESMC_NULL_POINTER)
     *okOpenMpFlag = ESMF_TRUE;    // TODO: Determine this at compile time...
-  return ESMF_SUCCESS;            // TODO: Do some real error handling here...
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetPETLocalInfo()"
 //BOP
 // !IROUTINE:  ESMC_VMGetPETLocalInfo
 //
@@ -212,8 +433,8 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
   int *threadId){     // out - thread id for specified PET
 //
 // !DESCRIPTION:
-//   Get internal information about the specified PET within the specified
-//   {\tt ESMF\_VM} object.
+//   Get internal information about the specified PET within the {\tt ESMF\_VM}
+//   object.
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -225,7 +446,7 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
     *threadCount = this->vmk_nthreads(pet);
   if (threadId != ESMC_NULL_POINTER)
     *threadId = this->vmk_tid(pet);
-  return ESMF_SUCCESS;            // TODO: Do some real error handling here...
+  return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
@@ -240,7 +461,7 @@ int ESMC_VM::ESMC_VMGetPETLocalInfo(
 int ESMC_VM::ESMC_VMGetPETMatchPET(
 //
 // !RETURN VALUE:
-//    int error return code
+//    Error return code
 //
 // !ARGUMENTS:
 //
@@ -252,10 +473,14 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
   ){              
 //
 // !DESCRIPTION:
-//    Match pet in the current VM object against the PETs in the 
+//    Match PET in the current VM object against the PETs in the 
 //    provided vmMatch VM. Return number of matched PETs and a list of the
-//    matching pet id's that operate in the same virtual address space as
-//    the specified pet.
+//    matching PET id's that operate in the same virtual address space as
+//    the specified PET.
+//    Returns ESMF_FAILURE if {\tt petMatchList} was provided (i.e. not equal
+//    to {\tt ESMC_NULL_POINTER) but {\tt len_petMatchList} < number of matching
+//    PETs found. Otherwise returns ESMF_SUCCESS (even if no matching PETs were
+//    found!).
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -273,17 +498,136 @@ int ESMC_VM::ESMC_VMGetPETMatchPET(
   // same virtual address space as pet in the current VM
   if (petMatchCount != ESMC_NULL_POINTER)
     *petMatchCount = j;
-  if (len_petMatchList >= j)
-    for (int i=0; i<j; i++)
-      petMatchList[i] = tempMatchList[i];
+  if (petMatchList != ESMC_NULL_POINTER){
+    if (len_petMatchList >= j)
+      for (int i=0; i<j; i++)
+        petMatchList[i] = tempMatchList[i];
+    else{
+      ESMC_LogDefault.ESMC_LogWrite("provided petMatchList too small",
+        ESMC_LOG_ERROR);
+      return ESMF_FAILURE;
+    }
+  }
   delete [] tempMatchList;
   return ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
 
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMSendVMId()"
+//BOP
+// !IROUTINE:  ESMC_VMSendVMId
+//
+// !INTERFACE:
+int ESMC_VM::ESMC_VMSendVMId(
+//
+// !RETURN VALUE:
+//    Error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VMId *vmID,              // in  - ESMC_VMId to be send
+  int dest                      // in  - destination PET
+  ){
+//
+// !DESCRIPTION:
+//    Send {\tt ESMC\_VMId} to another PET.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (vmID==ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
+    return ESMF_FAILURE;
+  }
+  vmk_send(vmID->vmKey, vmKeyWidth, dest);
+  vmk_send(&(vmID->localID), sizeof(int), dest);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMRecvVMId()"
+//BOP
+// !IROUTINE:  ESMC_VMRecvVMId
+//
+// !INTERFACE:
+int ESMC_VM::ESMC_VMRecvVMId(
+//
+// !RETURN VALUE:
+//    Error return code
+//
+// !ARGUMENTS:
+//
+  ESMC_VMId *vmID,              // out - ESMC_VMId to be received
+  int source                    // in  - source PET
+  ){
+//
+// !DESCRIPTION:
+//    Receive {\tt ESMC\_VMId} from another PET.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  if (vmID==ESMC_NULL_POINTER){
+    ESMC_LogDefault.ESMC_LogWrite("invalid vmID", ESMC_LOG_ERROR);
+    return ESMF_FAILURE;
+  }
+  vmk_recv(vmID->vmKey, vmKeyWidth, source);
+  vmk_recv(&(vmID->localID), sizeof(int), source);
+  return ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//
+// external VM functions
+//
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetArgs()"
+//BOP
+// !IROUTINE:  ESMC_VMGetArgs - Get command line arguments
+//
+// !INTERFACE:
+void ESMC_VMGetArgs(
+//
+// !RETURN VALUE:
+//    Get command line arguments
+//
+// !ARGUMENTS:
+//
+  int *argc,      // count of command line arguments
+  char ***argv,   // command line argument strings
+  int *rc){       // return code
+//
+// !DESCRIPTION:
+//   Get the command line arguments
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
+    return; // bail out
+  }
+  *argc = GlobalVM->argc;
+  *argv = GlobalVM->argv;
+  // success
+  *rc = ESMF_SUCCESS;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetGlobal()"
 //BOP
 // !IROUTINE:  ESMC_VMGetGlobal - Get Global VM
 //
@@ -304,6 +648,11 @@ ESMC_VM *ESMC_VMGetGlobal(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
+    return NULL; // bail out
+  }
   *rc = ESMF_SUCCESS;
   return GlobalVM;
 }
@@ -311,6 +660,8 @@ ESMC_VM *ESMC_VMGetGlobal(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetCurrent()"
 //BOP
 // !IROUTINE:  ESMC_VMGetCurrent - Get Current VM
 //
@@ -334,8 +685,11 @@ ESMC_VM *ESMC_VMGetCurrent(
   int i;
   for (i=0; i<matchArray_count; i++)
     if (matchArray_tid[i] == mytid) break;
-  if (i == matchArray_count)
-    return NULL;
+  if (i == matchArray_count){
+    ESMC_LogDefault.ESMC_LogWrite("could not determine current VM",
+      ESMC_LOG_ERROR);
+    return NULL;  // bail out
+  }
   // found a match
   *rc = ESMF_SUCCESS;
   return matchArray_vm[i];
@@ -344,6 +698,46 @@ ESMC_VM *ESMC_VMGetCurrent(
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMGetCurrentID()"
+//BOP
+// !IROUTINE:  ESMC_VMGetCurrentID - Get ID of current VM
+//
+// !INTERFACE:
+ESMC_VMId *ESMC_VMGetCurrentID(
+//
+// !RETURN VALUE:
+//    ID of current VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the ID of the current {\tt ESMC\_VM} object.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  pthread_t mytid = pthread_self();
+  int i;
+  for (i=0; i<matchArray_count; i++)
+    if (matchArray_tid[i] == mytid) break;
+  if (i == matchArray_count){
+    ESMC_LogDefault.ESMC_LogWrite("could not determine current VMId",
+      ESMC_LOG_ERROR);
+    return NULL;  // bail out
+  }
+  // found a match
+  *rc = ESMF_SUCCESS;
+  return &matchArray_vmID[i];
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMInitialize()"
 //BOP
 // !IROUTINE:  ESMC_VMInitialize
 //
@@ -363,9 +757,14 @@ ESMC_VM *ESMC_VMInitialize(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE;         // assume failure
   GlobalVM = new ESMC_VM;
-  GlobalVM->vmk_init();      // set up default ESMC_VMK (all MPI)
-  *rc = ESMF_SUCCESS;        // TODO: Do some real error handling here...
+  GlobalVM->vmk_init();       // set up default ESMC_VMK (all MPI)
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("vmk_init returned invalid GlobalVM",
+      ESMC_LOG_ERROR);
+    return NULL; // bail out
+  }
   
   matchArray_count = 0;       // reset
   matchArray_tid[matchArray_count]  = pthread_self();
@@ -393,12 +792,16 @@ ESMC_VM *ESMC_VMInitialize(
                              // call - it freezes or crashes or ignores input.
   GlobalVM->vmk_barrier();   // so for now, wait for everyone to init.
 
+  *rc = ESMF_SUCCESS;         // success at last
+
   return GlobalVM;
 }
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMInitialize()"
 //BOP
 // !IROUTINE:  ESMC_VMFinalize
 //
@@ -417,14 +820,21 @@ void ESMC_VMFinalize(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE;         // assume failure
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
+    return; // bail out
+  }
   GlobalVM->vmk_finalize();
   matchArray_count = 0;
-  *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
+  *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_VMAbort()"
 //BOP
 // !IROUTINE:  ESMC_VMAbort
 //
@@ -443,162 +853,13 @@ void ESMC_VMAbort(
 //
 //EOP
 //-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE;         // assume failure
+  if (GlobalVM==NULL){
+    ESMC_LogDefault.ESMC_LogWrite("invalid GlobalVM", ESMC_LOG_ERROR);
+    return; // bail out
+  }
   GlobalVM->vmk_abort();
   matchArray_count = 0;
-  *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
-}
-//-----------------------------------------------------------------------------
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGetArgs - Get command line arguments
-//
-// !INTERFACE:
-void ESMC_VMGetArgs(
-//
-// !RETURN VALUE:
-//    Get command line arguments
-//
-// !ARGUMENTS:
-//
-  int *argc,      // count of command line arguments
-  char ***argv,   // command line argument strings
-  int *rc){       // return code
-//
-// !DESCRIPTION:
-//   Get the command line arguments
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
-  *argc = GlobalVM->argc;
-  *argv = GlobalVM->argv;
-  // success
   *rc = ESMF_SUCCESS;
 }
 //-----------------------------------------------------------------------------
-
-
-
-
-// - - brand new stuff for ESMC_VMId - -
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_VMGetCurrentID - Get ID of current VM
-//
-// !INTERFACE:
-ESMC_VMId *ESMC_VMGetCurrentID(
-//
-// !RETURN VALUE:
-//    ID of current VM
-//
-// !ARGUMENTS:
-//
-  int *rc){   // return code
-//
-// !DESCRIPTION:
-//   Get the ID of the current {\tt ESMC\_VM} object.
-//
-//EOP
-//-----------------------------------------------------------------------------
-  *rc = ESMF_FAILURE; // assume failure
-  pthread_t mytid = pthread_self();
-  int i;
-  for (i=0; i<matchArray_count; i++)
-    if (matchArray_tid[i] == mytid) break;
-  if (i == matchArray_count)
-    return NULL;
-  // found a match
-  *rc = ESMF_SUCCESS;
-  return &matchArray_vmID[i];
-}
-//-----------------------------------------------------------------------------
-
-
-ESMC_Logical ESMC_VMIdCompare(ESMC_VMId *vmID1, ESMC_VMId *vmID2){
-  if (vmID1==NULL || vmID2==NULL) return ESMF_FALSE;
-  if (vmID1->localID != vmID2->localID) return ESMF_FALSE;
-  return ESMC_VMKeyCompare(vmID1->vmKey, vmID2->vmKey);
-}
-
-
-int ESMC_VMIdCopy(ESMC_VMId *vmIDdst, ESMC_VMId *vmIDsrc){
-  if (vmIDdst==NULL || vmIDsrc==NULL) return ESMF_FAILURE;
-  for (int i=0; i<vmKeyWidth; i++)
-    vmIDdst->vmKey[i] = vmIDsrc->vmKey[i];
-  vmIDdst->localID = vmIDsrc->localID;
-  return ESMF_SUCCESS;
-}
-
-
-void ESMC_VMIdPrint(ESMC_VMId *vmID){
-  printf("ESMC_VMIdPrint:\n");
-  if (vmID==NULL){
-    printf("this is not a valid VMId!\n");
-    return;
-  }
-  printf("vmID located at: %p\n", vmID);
-  if (vmID->vmKey==NULL){
-    printf("this VMId does not contain a valid vmKey!\n");
-    return;
-  }
-  printf("  vmKey=0x");
-  int bitmap=0;
-  int k=0;
-  for (int i=0; i<vmKeyWidth; i++){
-    bitmap |= vmID->vmKey[i];
-    bitmap = bitmap << 8;
-    ++k;
-    if (k==4){
-      printf("%X", bitmap);
-      bitmap=0;
-      k=0;
-    }
-  }
-  if (k!=0){
-    bitmap = bitmap << (3-k)*8;
-    printf("%X\n", bitmap);
-  }
-  printf("  localID: %d\n", vmID->localID);
-  
-}
-
-
-ESMC_VMId ESMC_VMIdCreate(int *rc){
-  // allocates memory for vmKey member
-  ESMC_VMId vmID;    // temporary stack variable
-  vmID.vmKey = new char[vmKeyWidth];
-  for (int i=0; i<vmKeyWidth; i++)
-    vmID.vmKey[i] = 0x00;  // zero out all bits
-  vmID.localID = 0;   // reset
-  *rc = ESMF_SUCCESS;
-  return vmID;
-}
-
-
-void ESMC_VMIdDestroy(ESMC_VMId *vmID, int *rc){
-  // frees memory for vmKey member
-  if (vmID->vmKey){
-    delete [] vmID->vmKey;
-    vmID->vmKey = NULL;
-  }
-  *rc = ESMF_SUCCESS;
-}
-
-
-
-void ESMC_VM::ESMC_VMSendVMId(ESMC_VMId *vmID, int dest){
-  vmk_send(vmID->vmKey, vmKeyWidth, dest);
-  vmk_send(&(vmID->localID), sizeof(int), dest);
-}
-
-void ESMC_VM::ESMC_VMRecvVMId(ESMC_VMId *vmID, int source){
-  vmk_recv(vmID->vmKey, vmKeyWidth, source);
-  vmk_recv(&(vmID->localID), sizeof(int), source);
-}
-
-
-
