@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.55 2004/06/23 13:29:14 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.56 2004/09/21 18:02:32 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,7 +78,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.55 2004/06/23 13:29:14 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.56 2004/09/21 18:02:32 jwolfe Exp $'
 !
 !==============================================================================
 !
@@ -365,8 +365,8 @@
 
     ! call c routine to gather
     call c_ESMC_ArrayGather(array, delayout, decompids, size_decomp, &
-                            globalCellDim, localMaxDimCount, rootDE, &
-                            gatheredArray, status)
+                            localAxisLengths, globalCellDim, localMaxDimCount, &
+                            rootDE, gatheredArray, status)
 #if 0
         call c_ESMC_ArrayAllGather(array, delayout, decompids, datarank, &
                                    localAxisLengths, globalCellDim, &
@@ -374,8 +374,8 @@
 #endif
 
     if (ESMF_LogMsgFoundError(status, &
-                                  ESMF_ERR_PASSTHRU, &
-                                  ESMF_CONTEXT, rc)) return
+                              ESMF_ERR_PASSTHRU, &
+                              ESMF_CONTEXT, rc)) return
 
     ! Clean up
     deallocate(localAxisLengths)
