@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $
+// $Id: ESMC_CommTable.C,v 1.3 2003/03/11 14:19:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CommTable.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_CommTable.C,v 1.3 2003/03/11 14:19:54 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,9 +52,7 @@
 //     pointer to newly allocated ESMC_CommTable
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3     // in
+      int paircount,            // in
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -117,9 +115,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      int paircount) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -167,35 +163,6 @@
 
  } // end ESMC_CommTableDestruct
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CommTableInit - initializes a CommTable object
-//
-// !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
-//      ESMF routine which only initializes CommTable values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_CommTableCreate.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_CommTableInit
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -252,13 +219,13 @@
 // !IROUTINE:  ESMC_CommTableGet<Value> - get <Value> for a CommTable
 //
 // !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableGet<Value>(
+     // int ESMC_CommTable::ESMC_CommTableGet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> *value) const {     // out - value
+    //  <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
 //     Returns the value of CommTable member <Value>.
@@ -271,20 +238,20 @@
 //  code goes here
 //
 
- } // end ESMC_CommTableGet<Value>
+ // } // end ESMC_CommTableGet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_CommTableSet<Value> - set <Value> for a CommTable
 //
 // !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableSet<Value>(
+   //   int ESMC_CommTable::ESMC_CommTableSet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> value) {     // in - value
+    //  <value type> value) {     // in - value
 //
 // !DESCRIPTION:
 //     Sets the CommTable member <Value> with the given value.
@@ -297,7 +264,7 @@
 //  code goes here
 //
 
- } // end ESMC_CommTableSet<Value>
+// } // end ESMC_CommTableSet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -363,9 +330,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      int paircount) {
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization

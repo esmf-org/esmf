@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/05 20:58:57 nscollins Exp $
+# $Id: makefile,v 1.3 2003/03/11 14:19:56 nscollins Exp $
 
 ALL:  tests
 
@@ -17,18 +17,27 @@ LOCDIR	  = src/Infrastructure/Route/tests
 
 TESTEXAMPLES_3  = \
 	ESMF_XPacketTest RUN_ESMF_XPacketTest ESMF_XPacketTest.rm \
+	ESMF_RTableTest RUN_ESMF_RTableTest ESMF_RTableTest.rm \
+	ESMF_CommTableTest RUN_ESMF_CommTableTest ESMF_CommTableTest.rm \
 	ESMC_RouteTest RUN_ESMC_RouteTest ESMC_RouteTest.rm
 
 TESTEXAMPLES_9  = \
 	ESMF_XPacketTest RUN_ESMF_XPacketTestUNI ESMF_XPacketTest.rm \
+	ESMF_RTableTest RUN_ESMF_RTableTestUNI ESMF_RTableTest.rm \
+	ESMF_CommTableTest RUN_ESMF_CommTableTestUNI ESMF_CommTableTest.rm \
 	ESMC_RouteTest RUN_ESMC_RouteTestUNI ESMC_RouteTest.rm
 
-EXAMPLESF       = ESMF_XPacketTest.F90 ESMF_Route.F90
-EXAMPLESC       = ESMC_XPacketTest.C ESMC_Route.F90
+EXAMPLESF       = ESMF_XPacketTest.F90 ESMF_RTableTest.F90 \
+                  ESMF_CommTableTest.F90 ESMF_RouteTest.F90
+EXAMPLESC       = ESMC_XPacketTest.C ESMC_RTableTest.C \
+                  ESMC_CommTableTest.C ESMC_RouteTest.F90
 
 include ${ESMF_DIR}/makefile
 
-tests test: ESMF_XPacketTest ESMC_XPacketTest ESMF_RouteTest ESMC_RouteTest
+tests test: ESMF_XPacketTest ESMC_XPacketTest \
+            ESMF_RTableTest ESMC_RTableTest \
+            ESMF_CommTableTest ESMC_CommTableTest \
+            ESMF_RouteTest ESMC_RouteTest
 
 ESMF_RouteCreateDir:
 	mkdir -p ${ESMC_TESTDIR}

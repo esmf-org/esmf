@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.h,v 1.2 2003/03/05 17:42:09 nscollins Exp $
+! $Id: ESMF_Route.h,v 1.3 2003/03/11 14:19:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,6 @@
 !
 !------------------------------------------------------------------------------
 !
-
 
 ! 
 !------------------------------------------------------------------------------

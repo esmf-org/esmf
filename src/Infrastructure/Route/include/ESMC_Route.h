@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.4 2003/03/11 03:01:03 cdeluca Exp $
+// $Id: ESMC_Route.h,v 1.5 2003/03/11 14:19:48 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_Route - one line general statement about this class
+// !CLASS:  ESMC_Route - Top level Route object
 //
 // !DESCRIPTION:
 //
@@ -41,9 +41,10 @@
 //-----------------------------------------------------------------------------
 // 
 // !USES:
- #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
+ #include <ESMC_Base.h>        // all classes inherit from the ESMC Base class.
+ #include <ESMC_XPacket.h>
+ #include <ESMC_RTable.h>
+ #include <ESMC_CommTable.h>
 
 // !PUBLIC TYPES:
  class ESMC_RouteConfig;
@@ -61,8 +62,10 @@
  class ESMC_Route : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
- //  < insert class members here >  corresponds to type ESMF_Route members
- //                                 in F90 modules
+     // name in base class
+     int routeid;
+     ESMC_RTable *rt;
+     ESMC_CommTable *ct;
 
 // !PUBLIC MEMBER FUNCTIONS:
 //

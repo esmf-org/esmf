@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $
+// $Id: ESMC_RTable.C,v 1.3 2003/03/11 14:19:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.3 2003/03/11 14:19:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,9 +52,7 @@
 //     pointer to newly allocated ESMC_RTable
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3     // in
+      int pecount, 
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
@@ -117,11 +115,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
+      int pecount) { 
+// 
+// !DESCRIPTION: 
 //      ESMF routine which fills in the contents of an already
 //      allocated RTable object.  May need to do additional allocations
 //      as needed.  Must call the corresponding ESMC_RTableDestruct
@@ -166,36 +162,6 @@
 //
 
  } // end ESMC_RTableDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_RTableInit - initializes a RTable object
-//
-// !INTERFACE:
-      int ESMC_RTable::ESMC_RTableInit(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
-//
-// !DESCRIPTION:
-//      ESMF routine which only initializes RTable values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_RTableCreate.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_RTableInit
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -252,13 +218,13 @@
 // !IROUTINE:  ESMC_RTableGet<Value> - get <Value> for a RTable
 //
 // !INTERFACE:
-      int ESMC_RTable::ESMC_RTableGet<Value>(
+    //  int ESMC_RTable::ESMC_RTableGet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> *value) const {     // out - value
+    //  <value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
 //     Returns the value of RTable member <Value>.
@@ -271,20 +237,20 @@
 //  code goes here
 //
 
- } // end ESMC_RTableGet<Value>
+// } // end ESMC_RTableGet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_RTableSet<Value> - set <Value> for a RTable
 //
 // !INTERFACE:
-      int ESMC_RTable::ESMC_RTableSet<Value>(
+ //     int ESMC_RTable::ESMC_RTableSet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      <value type> value) {     // in - value
+  //    <value type> value) {     // in - value
 //
 // !DESCRIPTION:
 //     Sets the RTable member <Value> with the given value.
@@ -297,7 +263,7 @@
 //  code goes here
 //
 
- } // end ESMC_RTableSet<Value>
+// } // end ESMC_RTableSet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -363,9 +329,7 @@
 //    none
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      int pecount) {
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization

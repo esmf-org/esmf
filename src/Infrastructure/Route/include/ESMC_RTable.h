@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.2 2003/03/11 03:01:02 cdeluca Exp $
+// $Id: ESMC_RTable.h,v 1.3 2003/03/11 14:19:48 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,11 +25,11 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Route.h> 
+ #include <ESMC_XPacket.h>
 
 //-----------------------------------------------------------------------------
 //BOP
-// !CLASS:  ESMC_RTable - one line general statement about this class
+// !CLASS:  ESMC_RTable - Route table contains lists of data exchanges to make
 //
 // !DESCRIPTION:
 //
@@ -43,8 +43,7 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
+ #include <ESMC_XPacket.h> 
 
 // !PUBLIC TYPES:
  class ESMC_RTableConfig;
@@ -62,51 +61,46 @@
  class ESMC_RTable : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
- //  < insert class members here >  corresponds to type ESMF_RTable members
- //                                 in F90 modules
-
+     int entrycount;
+     int my_peid;
+     struct rtableentry {
+        int dest_peid;
+        int xpcount;
+        ESMC_XPacket *xp;
+     } *entry;
+ 
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
-//  whether this is a deep class (the class/derived type has pointers to
-//  other memory which must be allocated/deallocated) or a shallow class
-//  (the class/derived type is self-contained) and needs no destroy methods
-//  other than deleting the memory for the object/derived type itself.
 
   public:
  // the following methods apply to deep classes only
  // ESMC_RTableCreate and ESMC_RTableDestroy are declared below,
  // outside the ESMC_RTable declaration
-    int ESMC_RTableConstruct(args);          // internal only, deep class
+    int ESMC_RTableConstruct(int pecount);   // internal only, deep class
     int ESMC_RTableDestruct(void);           // internal only, deep class
-
- // or
- // the following method applies to a shallow class
-    int ESMC_RTableInit(args);         // shallow class only
 
  // optional configuration methods
     int ESMC_RTableGetConfig(ESMC_RTableConfig *config) const;
     int ESMC_RTableSetConfig(const ESMC_RTableConfig *config);
 
  // accessor methods for class members
-    int ESMC_RTableGet<Value>(<value type> *value) const;
-    int ESMC_RTableSet<Value>(<value type>  value);
+    //int ESMC_RTableGet<Value>(<value type> *value) const;
+    //int ESMC_RTableSet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RTableValidate(const char *options) const;
     int ESMC_RTablePrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_RTable(args);
-	~ESMC_RTable(args);
+	ESMC_RTable(int pecount);
+	~ESMC_RTable(void);
   
- // < declare the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
+
 //
- // < declare private interface methods here >
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -120,7 +114,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_RTable object.
 
- ESMC_RTable *ESMC_RTableCreate(args, int *rc);// interface only, deep class
+ ESMC_RTable *ESMC_RTableCreate(int pecount, int *rc);// interface only, deep class
  int ESMC_RTableDestroy(ESMC_RTable *rtable); // interface only, deep class
 
  #endif  // ESMC_RTable_H

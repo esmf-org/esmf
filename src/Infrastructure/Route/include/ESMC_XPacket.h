@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.5 2003/03/11 01:48:02 cdeluca Exp $
+// $Id: ESMC_XPacket.h,v 1.6 2003/03/11 14:19:49 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,6 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Route.h> 
  #include <ESMC_Array.h>
 
 //-----------------------------------------------------------------------------
@@ -46,8 +45,6 @@
 // 
 // !USES:
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
- //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
-                        // composites, associates, friends)
 
 // !PUBLIC TYPES:
  class ESMC_XPacketConfig;
@@ -65,27 +62,22 @@
  class ESMC_XPacket : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
-     int destid;             // one XPacket per destination?
-     int chunkcount;
-      
-     // linked list of these, one per chunk:
-     void *base_addr;        // this one I'm still not sure of
-     int rank;               // do you think each xpacket should have
-                             // chunks with different rank?  it almost
-                             // infers different data being moved, instead
-                             // of parts of the same array, but maybe that's
-                             // reasonable and more general
+     // one of these per memory transfer
+     void *base_addr;
+
+     int rank;
+     int left;
+     int right;
+     int strides[ESMF_MAXDIM];
+     int num[ESMF_MAXDIM];
+     int destpeid;
+// or
 //   ESMC_MemAxis tuple;     the memaxis stuff, based on rank
      
      ESMC_XPacket *nextp;
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
-// pick one or the other of the init/create sections depending on
-//  whether this is a deep class (the class/derived type has pointers to
-//  other memory which must be allocated/deallocated) or a shallow class
-//  (the class/derived type is self-contained) and needs no destroy methods
-//  other than deleting the memory for the object/derived type itself.
 
   public:
  // the following methods apply to deep classes only
