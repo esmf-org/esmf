@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.8 2003/09/12 18:05:56 flanigan Exp $
+#  $Id: common.mk,v 1.9 2003/09/17 17:05:40 svasquez Exp $
 #
 #  common.mk
 #
@@ -57,7 +57,7 @@ LDIR		= $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_LIBDIR     = $(ESMF_BUILD)/lib/lib$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_MODDIR     = $(ESMF_BUILD)/mod/mod${ESMF_BOPT}/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_TESTDIR    = $(ESMF_BUILD)/test/test$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
-ESMF_EXDIR      = .
+ESMF_EXDIR      = $(ESMF_BUILD)/examples/examples$(ESMF_BOPT)/$(ESMF_ARCH).$(ESMF_PREC).$(ESMF_SITE)
 ESMF_INCDIR     = $(ESMF_BUILD)/src/include
 
 # Building in the moddir solves problems about trying to copy module files
@@ -240,6 +240,9 @@ chkdir_include:
 	-@if [ ! -d $(ESMF_BUILD)/src/include ]; then \
 	  echo Making directory $(ESMF_BUILD)/src/include for test output; mkdir -p $(ESMF_BUILD)/src/include ; fi
 
+chkdir_examples:
+	-@if [ ! -d ${ESMF_EXDIR} ]; then \
+	  echo Making directory ${ESMF_EXDIR} for examples output; mkdir -p ${ESMF_EXDIR} ; fi
 
 
 #-------------------------------------------------------------------------------
@@ -550,7 +553,7 @@ tree_run_tests_uni: $(TESTS_RUN_UNI)
 #
 # examples
 #
-examples: chkopts build_libs
+examples: chkopts chkdir_examples build_libs
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples tree
 
 tree_examples: tree_build_examples tree_run_examples
@@ -558,7 +561,7 @@ tree_examples: tree_build_examples tree_run_examples
 #
 # examples_uni
 #
-examples_uni: chkopts 
+examples_uni: chkopts chkdir_examples  
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_examples_uni tree
 
 
@@ -567,12 +570,12 @@ tree_examples_uni: tree_build_examples tree_run_examples_uni
 #
 # build_examples
 #
-build_examples: chkopts 
+build_examples: chkopts chkdir_examples
 	-$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_examples tree
 
 tree_build_examples: $(EXAMPLES_BUILD) 
 
-$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o 
+$(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o $(EXAMPLES_DEPEND) 
 	-$(SL_F_LINKER) -o $@ $^ -lesmf  ${F90CXXLIBS} \
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
