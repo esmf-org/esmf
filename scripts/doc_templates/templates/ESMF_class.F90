@@ -1,4 +1,4 @@
-! $Id: ESMF_class.F90,v 1.14 2003/02/03 22:46:09 nscollins Exp $
+! $Id: ESMF_class.F90,v 1.15 2003/02/04 18:56:07 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,21 +80,21 @@
 !  other than deleting the memory for the object/derived type itself.
 
 ! the following routines apply to deep classes only
-    public ESMF_<Class>Create                 ! interface only, deep class
-    public ESMF_<Class>Destroy                ! interface only, deep class
-    public ESMF_<Class>Construct              ! internal only, deep class
-    public ESMF_<Class>Destruct               ! internal only, deep class
+      public ESMF_<Class>Create                 ! interface only, deep class
+      public ESMF_<Class>Destroy                ! interface only, deep class
+      public ESMF_<Class>Construct              ! internal only, deep class
+      public ESMF_<Class>Destruct               ! internal only, deep class
 
 ! the following routine applies to a shallow class
-    public ESMF_<Class>Init                   ! shallow class
+      public ESMF_<Class>Init                   ! shallow class
 
-    public ESMF_<Class>GetConfig
-    public ESMF_<Class>SetConfig
-    public ESMF_<Class>GetValue               ! Get<Value>
-    public ESMF_<Class>SetValue               ! Set<Value>
+      public ESMF_<Class>GetConfig
+      public ESMF_<Class>SetConfig
+      public ESMF_<Class>GetValue               ! Get<Value>
+      public ESMF_<Class>SetValue               ! Set<Value>
  
-    public ESMF_<Class>Validate
-    public ESMF_<Class>Print
+      public ESMF_<Class>Validate
+      public ESMF_<Class>Print
  
 ! < list the rest of the public interfaces here >
 !
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_class.F90,v 1.14 2003/02/03 22:46:09 nscollins Exp $'
+      '$Id: ESMF_class.F90,v 1.15 2003/02/04 18:56:07 eschwab Exp $'
 
 !==============================================================================
 !
@@ -116,7 +116,7 @@
       interface ESMF_<Class>Create 
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_<Class>CreateNew
+      module procedure ESMF_<Class>CreateNew
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for <Class> create
@@ -127,7 +127,7 @@
 !
 !------------------------------------------------------------------------------
 
-!    < add other interfaces here>
+!     < add other interfaces here>
 
 !==============================================================================
 
@@ -139,7 +139,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_<Class>CreateNew - Create a new <Class>
+! !IROUTINE: ESMF_<Class>CreateNew - Create a new <Class>
 
 ! !INTERFACE:
       function ESMF_<Class>CreateNew(arg1, arg2, arg3, rc)
@@ -167,7 +167,7 @@
 !          Argument 3.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  AAAn.n.n
@@ -254,7 +254,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_<Class>Destruct - Free any <Class> memory allocated internally
+! !IROUTINE: ESMF_<Class>Destruct - Free any <Class> memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Destruct(<class>, rc)
@@ -265,7 +265,7 @@
 !
 ! !DESCRIPTION:
 !     ESMF routine which deallocates any space allocated by
-!    {\tt  ESMF\_<Class>Construct}, does any additional cleanup before the
+!     {\tt  ESMF\_<Class>Construct}, does any additional cleanup before the
 !     original <Class> object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_<Class>Destroy}, which calls
 !     {\tt ESMF_<Class>Destruct}.  
@@ -319,7 +319,7 @@
 !          Argument 3.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
+!     \end{description}
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -331,7 +331,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_<Class>GetConfig - Get configuration information from a <Class>
+! !IROUTINE: ESMF_<Class>GetConfig - Get configuration information from a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>GetConfig(<class>, config, rc)
@@ -501,7 +501,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_<Class>Print - Print the contents of a <Class>
+! !IROUTINE: ESMF_<Class>Print - Print the contents of a <Class>
 
 ! !INTERFACE:
       subroutine ESMF_<Class>Print(<class>, opt, rc)
