@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.39 2003/11/10 19:20:21 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.40 2003/11/10 20:58:19 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -70,7 +70,7 @@
                            ! 12 months, 30 days each
                                ESMF_CAL_360DAY =     ESMF_CalendarType(4), & 
                            ! user defined
-                               ESMF_CAL_GENERIC =    ESMF_CalendarType(5), &
+                               ESMF_CAL_CUSTOM =     ESMF_CalendarType(5), &
                            ! track base time seconds only
                                ESMF_CAL_NOCALENDAR = ESMF_CalendarType(6)
 
@@ -116,13 +116,13 @@
       public MONTHS_PER_YEAR
       public ESMF_CalendarType
       public ESMF_CAL_GREGORIAN, ESMF_CAL_JULIANDAY,  ESMF_CAL_NOLEAP, &
-             ESMF_CAL_360DAY,    ESMF_CAL_GENERIC,    ESMF_CAL_NOCALENDAR
+             ESMF_CAL_360DAY,    ESMF_CAL_CUSTOM,     ESMF_CAL_NOCALENDAR
       public ESMF_Calendar
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
       public ESMF_CalendarSet
-      public ESMF_CalendarSetGeneric
+      public ESMF_CalendarSetCustom
       public ESMF_CalendarGet
 
 ! Required inherited and overridden ESMF_Base class methods
@@ -136,7 +136,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.39 2003/11/10 19:20:21 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.40 2003/11/10 20:58:19 eschwab Exp $'
 
 !==============================================================================
 
@@ -162,7 +162,7 @@
 !     Initializes or sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
 !     Valid values for {\tt type} are:  {\tt ESMF\_CAL\_GREGORIAN}, 
 !     {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
-!     {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_GENERIC}, and
+!     {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
 !     {\tt ESMF\_CAL\_NOCALENDAR}.
 !
 !     The arguments are:
@@ -186,13 +186,13 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSetGeneric - Initialize or set a custom Calendar
+! !IROUTINE: ESMF_CalendarSetCustom - Initialize or set a custom Calendar
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarSetGeneric(calendar, daysPerMonth, &
-                                         secondsPerDay, &
-                                         daysPerYear, daysPerYearDn, &
-                                         daysPerYearDd, rc)
+      subroutine ESMF_CalendarSetCustom(calendar, daysPerMonth, &
+                                        secondsPerDay, &
+                                        daysPerYear, daysPerYearDn, &
+                                        daysPerYearDd, rc)
 ! !ARGUMENTS:
       type(ESMF_Calendar),   intent(inout)         :: calendar
       integer, dimension(:), intent(in),  optional :: daysPerMonth
@@ -246,11 +246,11 @@
       end if
 
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarSetGeneric(calendar, monthsPerYear, daysPerMonth, &
-                                     secondsPerDay, daysPerYear, &
-                                     daysPerYearDn, daysPerYearDd, rc)
+      call c_ESMC_CalendarSetCustom(calendar, monthsPerYear, daysPerMonth, &
+                                    secondsPerDay, daysPerYear, &
+                                    daysPerYearDn, daysPerYearDd, rc)
     
-      end subroutine ESMF_CalendarSetGeneric
+      end subroutine ESMF_CalendarSetCustom
     
 !------------------------------------------------------------------------------
 !BOP

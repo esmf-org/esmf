@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.22 2003/11/06 17:47:18 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.23 2003/11/10 20:58:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //
 // The {\tt Calendar} class encapsulates the knowledge (attributes and
 // behavior) of all required calendar types:  Gregorian, Julian, no-leap,
-//  360-day, generic, and no-calendar.
+//  360-day, custom, and no-calendar.
 //
 // The {\tt Calendar} class encapsulates the definition of all required
 // calendar types. For each calendar type, it contains the number of months
@@ -83,7 +83,7 @@ enum ESMC_CalendarType {ESMC_CAL_GREGORIAN=1,
                         ESMC_CAL_NOLEAP,      // like Gregorian, except
                                               //   Feb always has 28 days
                         ESMC_CAL_360DAY,      // 12 months, 30 days each
-                        ESMC_CAL_GENERIC,     // user defined
+                        ESMC_CAL_CUSTOM,      // user defined
                         ESMC_CAL_NOCALENDAR}; // track base time seconds
                                               //   only
                         // Note: add new calendars between ESMC_CAL_GREGORIAN
@@ -126,12 +126,12 @@ class ESMC_Calendar {
 // persistence in times/clocks.
 
     int ESMC_CalendarSet(ESMC_CalendarType type);
-    int ESMC_CalendarSetGeneric(int          *monthsPerYear=0,
-                                int          *daysPerMonth=0,
-                                ESMF_KIND_I4 *secondsPerDay=0,
-                                ESMF_KIND_I4 *daysPerYear=0,
-                                ESMF_KIND_I4 *daysPerYearDn=0,
-                                ESMF_KIND_I4 *daysPerYearDd=0);
+    int ESMC_CalendarSetCustom(int          *monthsPerYear=0,
+                               int          *daysPerMonth=0,
+                               ESMF_KIND_I4 *secondsPerDay=0,
+                               ESMF_KIND_I4 *daysPerYear=0,
+                               ESMF_KIND_I4 *daysPerYearDn=0,
+                               ESMF_KIND_I4 *daysPerYearDd=0);
     int ESMC_CalendarGet(ESMC_CalendarType *type=0,
                          int              *monthsPerYear=0,
                          int              *daysPerMonth=0,

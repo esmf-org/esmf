@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.34 2003/10/22 01:17:18 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.35 2003/11/10 20:58:19 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.34 2003/10/22 01:17:18 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.35 2003/11/10 20:58:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -132,9 +132,9 @@
             rc = ESMF_SUCCESS;
             break;
 
-        case ESMC_CAL_GENERIC:
+        case ESMC_CAL_CUSTOM:
             // user defined; need more info; user must call
-            //   SetGeneric() instead
+            //   SetCustom() instead
             // restore original calendar
             *this = saveCalendar;
             rc = ESMF_FAILURE;
@@ -152,10 +152,10 @@
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarSetGeneric - generic calendar initializer
+// !IROUTINE:  ESMC_CalendarSetCustom - custom calendar initializer
 //
 // !INTERFACE:
-      int ESMC_Calendar::ESMC_CalendarSetGeneric(
+      int ESMC_Calendar::ESMC_CalendarSetCustom(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -186,7 +186,7 @@
     this->daysPerYear.dN = 0;
     this->daysPerYear.dD = 1;
     
-    this->type = ESMC_CAL_GENERIC;
+    this->type = ESMC_CAL_CUSTOM;
 
     if (daysPerMonth != ESMC_NULL_POINTER) {
       for(int i=0; i<MONTHS_PER_YEAR; i++)
@@ -220,7 +220,7 @@
 
     return(ESMF_SUCCESS);
 
-}  // end ESMC_CalendarSetGeneric
+}  // end ESMC_CalendarSetCustom
 
 //-------------------------------------------------------------------------
 //BOP
@@ -896,13 +896,13 @@
 //
 // !DESCRIPTION:
 //      Initializes a {\tt ESMC\_Time} to be of a custom user-defined type
-//      via {\tt ESMC\_CalendarSetGeneric}
+//      via {\tt ESMC\_CalendarSetCustom}
 //
 //EOP
 // !REQUIREMENTS: 
 
-    ESMC_CalendarSetGeneric(monthsPerYear, daysPerMonth, secondsPerDay, 
-                            daysPerYear, daysPerYeardN, daysPerYeardD);
+    ESMC_CalendarSetCustom(monthsPerYear, daysPerMonth, secondsPerDay, 
+                           daysPerYear, daysPerYeardN, daysPerYeardD);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------

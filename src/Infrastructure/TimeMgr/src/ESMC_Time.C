@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.45 2003/09/11 00:05:06 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.46 2003/11/10 20:58:19 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -927,7 +927,7 @@
           break;
 
         case ESMC_CAL_NOCALENDAR:
-        case ESMC_CAL_GENERIC:
+        case ESMC_CAL_CUSTOM:
         default:
           return(ESMF_FAILURE);
           break;
