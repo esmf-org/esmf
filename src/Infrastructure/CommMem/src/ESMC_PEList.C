@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.11 2003/06/17 21:24:38 rstaufer Exp $
+// $Id: ESMC_PEList.C,v 1.12 2003/06/17 22:06:23 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.11 2003/06/17 21:24:38 rstaufer Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.12 2003/06/17 22:06:23 rstaufer Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -64,7 +64,7 @@
       int *rc) {            // out - return code
 //
 // !DESCRIPTION:
-//      Create a new PEList from ... Allocates memory for a new PEList
+//      Create a new {\tt ESMC\_PEList} from ... Allocates memory for a new {\tt ESMC\_PEList}
 //      object and uses the internal routine {\tt ESMC\_PEListContruct} to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use {\tt ESMC\_PEListInit}.
@@ -104,7 +104,7 @@
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Create a new PEList from ... Allocates memory for a new PEList
+//      Create a new {\tt ESMC\_PEList} from ... Allocates memory for a new {\tt ESMC\_PEList}
 //      object and uses the internal routine {\tt ESMC\_PEListContruct} to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use {\tt ESMC\_PEListInit}.
@@ -164,7 +164,7 @@
       ESMC_PEList *pelist) {    // PE list to destroy
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a {\ttbPEList} object previously allocated
+//      ESMF routine which destroys a {\tt ESMC\_PEList} object previously allocated
 //      via an {\tt ESMC\_PEListCreate} routine.  Define for deep classes only.
 //
 //EOP
