@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.28 2004/06/23 16:57:19 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.29 2004/07/01 20:02:15 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1559,8 +1559,8 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(timestep, integer)
+      ! Testing the x operator
+      ! resultTime = ESMF_TimeIntervalOperator(x)(timestep, integer)
       write(name, *) "No Calendar multiplication of a Time interval Test 1"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -1574,8 +1574,8 @@
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
-      ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(integer, timestep)
+      ! Testing the x operator
+      ! resultTime = ESMF_TimeIntervalOperator(x)(integer, timestep)
       write(name, *) "No Calendar multiplication of a Time interval Test 2"
       write(failMsg, *) " Did not return (yy=9, mm=-15, d=90, h=20, m=37, s=15) or ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-5, d=30, h=7, m=-8, s=25, rc=rc)
@@ -2013,7 +2013,7 @@
 
       !EX_UTest
       ! Testing the * operator
-      ! resultTime = ESMF_TimeIntervalOperator(*)(timestep, integer)
+      ! resultTime = ESMF_TimeIntervalOperator(x)(timestep, integer)
       write(failMsg, *) "The time steps is not correct."
       write(name, *) "TimeInterval * operator Test"
       timeStep = timeStep2 * 86400    
