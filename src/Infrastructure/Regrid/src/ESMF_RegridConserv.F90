@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.23 2004/05/06 23:16:29 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.24 2004/05/07 16:07:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -65,19 +65,13 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC DATA MEMBERS:
-
-      integer, parameter, public ::      &! options for normalization
-         ESMF_RegridNormOptUnknown  = 0, &! unknown or undefined normalization
-         ESMF_RegridNormOptNone     = 1, &
-         ESMF_RegridNormOptDstArea  = 2, &
-         ESMF_RegridNormOptDstFrac  = 3
 !
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.23 2004/05/06 23:16:29 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.24 2004/05/07 16:07:33 jwolfe Exp $'
 
 !==============================================================================
 
