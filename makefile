@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.53 2004/10/29 17:38:13 nscollins Exp $
+# $Id: makefile,v 1.54 2004/11/15 18:03:40 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -145,4 +145,27 @@ install:
 	cp -fp $(ESMF_BUILD)/src/include/*.h ${ESMF_H_INSTALL} ; \
 	fi
 
+
+# ------------------------------------------------------------------
+# add dummy rules here to avoid gnumake trying to remake the actual
+# makefiles themselves; this might not be much of an overhead but 
+# since we call make so many times recursively and it does the makefile
+# remake rule check on each invocation of make, it effectively renders
+# gmake -d (debug mode) almost unreadable.  this cuts the remake rule
+# output down immensely.  nsc 05nov04
+
+GNUmakefile:
+	@echo ;
+
+makefile:
+	@echo ;
+
+$(ESMF_TOP_DIR)/makefile:
+	@echo ;
+
+$(ESMF_TOP_DIR)/build/common.mk:
+	@echo ;
+
+$(ESMF_TOP_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk:
+	@echo ;
 
