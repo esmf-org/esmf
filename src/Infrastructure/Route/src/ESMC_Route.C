@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.74 2003/10/22 13:41:18 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.75 2003/10/22 19:54:47 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.74 2003/10/22 13:41:18 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.75 2003/10/22 19:54:47 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -765,6 +765,8 @@ static int maxroutes = 10;
               // jw   rcvcount = recvxp ? rcontig_length-roffset+1 : 0;
                     srccount = sendxp ? scontig_length : 0;
                     rcvcount = recvxp ? rcontig_length : 0;
+                    if (l>=srep_count[j]) srccount=0;
+                    if (l>=rrep_count[j]) rcvcount=0;
 
                     // Debug:
                     if ((srccount == 0) && (rcvcount == 0)) 
