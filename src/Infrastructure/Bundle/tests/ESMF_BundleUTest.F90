@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleUTest.F90,v 1.18 2004/06/07 23:03:39 svasquez Exp $
+! $Id: ESMF_BundleUTest.F90,v 1.19 2004/06/09 21:25:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_BundleUTest.F90,v 1.18 2004/06/07 23:03:39 svasquez Exp $'
+      '$Id: ESMF_BundleUTest.F90,v 1.19 2004/06/09 21:25:08 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -107,6 +107,7 @@
 #ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
       ! This test crashes the test, it is commented out
+      ! Bug report 969870 opened.
       ! Verify getting the name of an uninitialized Bundle is handled properly.
       !call ESMF_BundleGet(bundle1, name=bname1, rc=rc)
       !write(failMsg, *) "Subroutine should have returned ESMF_FAILURE"
@@ -116,8 +117,9 @@
      
 
       ! This test crashes the test, it is commented out
+      ! Bug report 969874 opened
       !  Verify the Field count query from an uninitialized Bundle is handled
-      !call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc);
+      !call ESMF_BundleGet(bundle1, fieldCount=fieldcount, rc=rc)
       !write(failMsg, *) ""
       !write(name, *) "Getting Field count from an uninitialized Bundle Test"
       !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
@@ -128,6 +130,8 @@
       ! I/O specification, and an identifier that specifies whether the bundle 
       ! is to be packed (contiguous data) or loose (noncontiguous data). 
       !  Create several empty Fields and add them to a new Bundle.
+      ! Commented out because it crashes
+      ! Bug Report 969881 opened.
       !fields(1) = ESMF_FieldCreateNoData(name="pressure", rc=rc)
       !fields(2) = ESMF_FieldCreateNoData(name="temperature", rc=rc)
       !fields(3) = ESMF_FieldCreateNoData(name="heat flux", rc=rc)
@@ -138,6 +142,8 @@
       !------------------------------------------------------------------------
 
       ! Test Requirement FLD2.1.1 Creating a Bundle with ESMF_PACKED_DATA option
+      ! Commented out because it crashes
+      ! Bug Report 969881 opened.
       !bundle1 = ESMF_BundleCreate(3, fields, ESMF_PACKED_DATA, &
 				!name="atmosphere data", rc=rc)
       !write(name, *) "Creating Bundle with ESMF_PACKED_DATA Req. FLD2.1.1"
@@ -145,6 +151,8 @@
       !------------------------------------------------------------------------
 
 
+      ! Commented out because it crashes
+      ! Bug Report 969887 opened.
       !call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       !write(failMsg, *) "Add uninitialized Field to uncreated Bundle failed"
       !write(name, *) "Adding an uninitialized Field to an uncreated Bundle Test"
@@ -186,6 +194,8 @@
       !------------------------------------------------------------------------
 
       ! Add a field to an empty Bundle
+      ! Commented out because it crashes
+      ! bug report 969887 opened
       !call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       !write(failMsg, *) ""
       !write(name, *) "Adding a field to an Empty Bundle"
@@ -213,6 +223,8 @@
 
 
       !  Verify that a Field can be added to an empty Bundle
+      ! Commented out because simplefield has not been initialized
+      ! uncomment when bug 969887 is resolved
       !call ESMF_BundleAddField(bundle2, simplefield, rc=rc);
       !write(failMsg, *) ""
       !write(name, *) "Adding a Field to an Empty Bundle Test"
@@ -229,6 +241,8 @@
 
 
       !  Test Requirement FLD2.5.7 Return Grid
+      ! Commented out because there is no grid in the Bundle
+      ! uncomment when bug 969887 is resolved
       !call ESMF_BundleGet(bundle2, grid=grid2, rc=rc);
       !write(failMsg, *) ""
       !write(name, *) "Getting a Grid from a Bundle Test Req. FLD2.5.7"
@@ -241,6 +255,8 @@
       !bundle3 = ESMF_BundleCreate(name="northern hemisphere", rc=rc);
    
       !  Verify that multiple Fields can be added to a Bundle 
+      ! Commented out because it crashes
+      ! Bug Report 969881 opened.
       !call ESMF_BundleAddField(bundle3, 3, fields, rc);
       !write(failMsg, *) ""
       !write(name, *) "Adding multiple Fields to a Bundle Test"
