@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.58 2005/03/29 19:18:43 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.59 2005/04/05 23:52:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,6 +143,7 @@ module ESMF_VMMod
   public ESMF_VMGetCurrent
   public ESMF_VMGetCurrentID
   public ESMF_VMGetPETLocalInfo
+  public ESMF_VMGetVMId
   public ESMF_VMPrint
   public ESMF_VMRecv
   public ESMF_VMRecvVMId
@@ -174,7 +175,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.58 2005/03/29 19:18:43 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.59 2005/04/05 23:52:53 theurich Exp $'
 
 !==============================================================================
 
@@ -1818,6 +1819,50 @@ module ESMF_VMMod
       ESMF_CONTEXT, rcToReturn=rc)) return
 
   end subroutine ESMF_VMGetCurrentID
+!------------------------------------------------------------------------------
+
+
+! -------------------------- ESMF-private method ------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMGetVMId - Get VMId
+
+! !INTERFACE:
+  subroutine ESMF_VMGetVMId(vm, vmId, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),   intent(in)             :: vm
+    type(ESMF_VMId), intent(out)            :: vmId
+    integer,         intent(out), optional  :: rc           
+!
+! !DESCRIPTION:
+!   Get the {\tt ESMF\_VMId} of the {\tt ESMF}
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!     Queried {\tt ESMF\_VM} object.
+!   \item[vmId] 
+!     Upon return this holds the {\tt ESMF\_VMId} of the current context.
+!   \item[{[rc]}] 
+!     Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMGetVMId(vm, vmId, localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, &
+      ESMF_CONTEXT, rcToReturn=rc)) return
+
+  end subroutine ESMF_VMGetVMId
 !------------------------------------------------------------------------------
 
 
