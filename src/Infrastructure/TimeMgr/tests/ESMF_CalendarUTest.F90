@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarUTest.F90,v 1.3 2003/09/23 23:05:17 svasquez Exp $
+! $Id: ESMF_CalendarUTest.F90,v 1.4 2003/09/24 22:57:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarUTest.F90,v 1.3 2003/09/23 23:05:17 svasquez Exp $'
+      '$Id: ESMF_CalendarUTest.F90,v 1.4 2003/09/24 22:57:44 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -46,7 +46,7 @@
       ! individual test result code
       integer :: rc, H, MM, DD, YR, days, totalDays, secs, testResults
       integer(ESMF_KIND_I8) :: year
-      integer(ESMF_KIND_I4) :: julianDay
+      integer(ESMF_KIND_I8) :: julianDay, advanceCounts
 
       ! individual test name
       character(ESMF_MAXSTR) :: name
@@ -66,9 +66,11 @@
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianDayCalendar, no_leapCalendar, esmf_360dayCalendar
+      type(ESMF_Calendar) :: genericCalendar
       type(ESMF_CalendarType) :: cal_type
 
-
+      ! instantiate Time Intervals
+      type(ESMF_TimeInterval) :: timeStep
 !--------------------------------------------------------------------------------
 !     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
 !     always run. When the environment variable, EXHAUSTIVE, is set to ON then
@@ -83,6 +85,20 @@
       ! initialize ESMF framework
       call ESMF_FrameworkInitialize(rc)
 
+#ifdef ESMF_EXHAUSTIVE
+      !EX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Un-initialized Calendar Print Test"
+      call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+#endif
+      ! ----------------------------------------------------------------------------
+
+
       !NEX_UTest
       ! initialize one calendar to be Gregorian type
       write(name, *) "Initialize Gregorian Type Calendar Test"
@@ -94,6 +110,18 @@
       ! ----------------------------------------------------------------------------
 
       !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized Gregorian Calendar Print Test"
+      call ESMF_CalendarPrint(gregorianCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
       ! initialize secand calendar to be Julian Day type
       write(name, *) "Initialize Julian Day Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
@@ -103,12 +131,33 @@
 
       ! ----------------------------------------------------------------------------
 
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized Julian Day Calendar Print Test"
+      call ESMF_CalendarPrint(julianDayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 
       !NEX_UTest
       ! initialize third calendar to be No Leap type
       write(name, *) "Initialize No Leap Year Type Calendar Test"
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       call ESMF_CalendarSet(no_leapCalendar, ESMF_CAL_NOLEAP, rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized No Leap Calendar Print Test"
+      call ESMF_CalendarPrint(no_leapCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
@@ -122,6 +171,44 @@
       call ESMF_CalendarSet(esmf_360dayCalendar, ESMF_CAL_360DAY, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized 360 Day  Calendar Print Test"
+      call ESMF_CalendarPrint(esmf_360dayCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !NEX_UTest
+      ! initialize fourth calendar to be generic type
+      !write(name, *) "Initialize Generic Type Calendar Test"
+      !write(failMsg, *) " Did not return ESMF_SUCCESS"
+      !call ESMF_CalendarSetGeneric(genericCalendar, daysPerMonth=30, &
+!					secondsPerDay=86400, &
+!					daysPerYear=360, &
+!					daysPerYearDn=1, &
+!					daysPerYearDd=1, rc=rc)
+!      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+!                      name, failMsg, result, ESMF_SRCLINE)
+
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      ! print out initialized variables
+      ! Test that print subroutine returns ESMF_SUCESS
+      write(failMsg, *) " Should return ESMF_SUCCESS"
+      write(name, *) "Initialized Generic Type Calendar Print Test"
+      call ESMF_CalendarPrint(genericCalendar, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 
       ! ----------------------------------------------------------------------------
 
@@ -237,11 +324,11 @@
       ! ----------------------------------------------------------------------------
       !EX_UTest
       ! Test Setting the Start Time for the Julian Day Calencar
-      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(failMsg, *) " Should return ESMF_SUCCESS"
       write(name, *) "Set Start Time at lower limit minus 1 day of Julian Day Calendar Test"
-      call ESMF_TimeSet(startTime, yr=-32046, &
+      call ESMF_TimeSet(startTime, d=-32046, &
                                    calendar=julianDayCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
@@ -260,7 +347,8 @@
       ! Test Setting the Stop Time for the Julian Day Calencar
       write(failMsg, *) " Did not return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit of Julian Day Calendar Test"
-      call ESMF_TimeSet(stopTime, d=julianDay, &
+      julianDay=100000000000000_ESMF_KIND_I8
+      call ESMF_TimeSet(stopTime, d_i8=julianDay, &
                                    calendar=julianDayCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
@@ -280,12 +368,12 @@
 
       !EX_UTest
       ! Test Setting the Stop Time for the Julian Day Calencar
-      write(failMsg, *) " Should not return ESMF_SUCCESS"
+      write(failMsg, *) " Should return ESMF_SUCCESS"
       write(name, *) "Set Stop Time at upper limit plus 1 day of Julian Day Calendar Test"
-      julianDay=100000000000001_ESMF_KIND_I4
-      call ESMF_TimeSet(stopTime, d=julianDay,  &
+      julianDay=100000000000001_ESMF_KIND_I8
+      call ESMF_TimeSet(stopTime, d_i8=julianDay,  &
                                    calendar=julianDayCalendar, rc=rc)
-      call ESMF_Test((rc.eq.ESMF_FAILURE), & 
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), & 
                       name, failMsg, result, ESMF_SRCLINE)
       
       ! ----------------------------------------------------------------------------
@@ -297,6 +385,177 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
        
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+                                        calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Gregorian Cal. Start Time init with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+                                calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Gregorian Cal. Stop Time init with year = 100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      days=1
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+      write(name, *) "Set Time Interval Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !NEX_UTest
+      write(failMsg, *) " Returned ESMF_FAILURE"
+      write(name, *) "Clock Initialization with Gregorian CalendarTest"
+      call ESMF_ClockSetup(clock_gregorian, timeStep, startTime, stopTime, rc=rc)
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      totalDays=0
+      ! time step from start time to stop time
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_TimePrint(stopTime, rc=rc)
+      do while (.not.ESMF_ClockIsStopTime(clock_gregorian, rc))
+        call ESMF_ClockAdvance(clock_gregorian, timeStep=timeStep, rc=rc)
+        totalDays=totalDays+days
+      end do
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      print *, " Total days = ", totalDays
+      write(failMsg, *) "Results Total days = ", totalDays
+      write(name, *) "Total days 73049 from -100 to +100 years in Gregorian Cal. Test"
+      call ESMF_Test((totalDays.eq.73049), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+                                        calendar=no_leapCalendar, rc=rc)
+      write(name, *) "No Leap Cal. Start Time init with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+                                calendar=no_leapCalendar, rc=rc)
+      write(name, *) "No Leap Cal. Stop Time init with year = 100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_ClockSetup(clock_no_leap, timeStep, startTime, stopTime, rc=rc)
+      write(name, *) "Clock initialization with above settings Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      totalDays=0
+      days=1
+      call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_TimePrint(stopTime, rc=rc)
+      ! time step from start time to stop time
+      do while (.not.ESMF_ClockIsStopTime(clock_no_leap, rc))
+        call ESMF_ClockAdvance(clock_no_leap, timeStep=timeStep, rc=rc)
+        totalDays=totalDays+days
+      end do
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      print *, " Total days = ", totalDays
+      write(failMsg, *) "Results Total days = ", totalDays
+      write(name, *) "Total days 73000 from -100 to +100 years in No Leap Cal. Test"
+      call ESMF_Test((totalDays.eq.73000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+                                        calendar=esmf_360dayCalendar, rc=rc)
+      write(name, *) "360 Day Cal. Start Time init with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(stopTime, yr=100, mm=1, dd=1, &
+                                calendar=esmf_360dayCalendar, rc=rc)
+      write(name, *) "360 Day Cal. Stop Time init with year = 100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_ClockSetup(clock_360day, timeStep, startTime, stopTime, rc=rc)
+      write(name, *) "Clock initialization with above settings Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      totalDays=0
+      days=1
+      call ESMF_TimeIntervalSet(timeStep, d=days, rc=rc)
+      call ESMF_TimePrint(startTime, rc=rc)
+      call ESMF_TimePrint(stopTime, rc=rc)
+      ! time step from start time to stop time
+      do while (.not.ESMF_ClockIsStopTime(clock_360day, rc))
+        call ESMF_ClockAdvance(clock_360day, timeStep=timeStep, rc=rc)
+        totalDays=totalDays+days
+      end do
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      print *, " Total days = ", totalDays
+      write(failMsg, *) "Results Total days = ", totalDays
+      write(name, *) "Total days 72000 from -100 to +100 years in 360 Day Cal. Test"
+      call ESMF_Test((totalDays.eq.72000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Results Total Counts = ", advanceCounts
+      write(name, *) "Total Counts 72000 from -100 to +100 years in 360 Day Cal. Test"
+      call ESMF_ClockGet(clock_360day, advanceCount=advanceCounts, rc=rc)
+      call ESMF_Test((advanceCounts.eq.72000), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
 
 
 
