@@ -23,13 +23,14 @@
     
 !   ! Local variables
     integer :: i_max, j_max
-    integer :: nDE_i, nDE_j
+    integer :: delist(4)
     integer :: horz_gridtype, vert_gridtype
     integer :: horz_stagger, vert_stagger
     integer :: horz_coord_system, vert_coord_system
     integer :: status
     real :: x_min, x_max, y_min, y_max
     type(ESMF_Grid) :: grid
+    type(ESMF_DELayout) :: layout
     character (len = ESMF_MAXSTR) :: name
         
 !-------------------------------------------------------------------------
@@ -40,8 +41,6 @@
 
       i_max = 10
       j_max = 12
-      nDE_i = 2
-      nDE_j = 2
       horz_gridtype = ESMF_GridType_XY
       vert_gridtype = ESMF_GridType_Unknown
       horz_stagger = ESMF_GridStagger_A
@@ -54,8 +53,12 @@
       y_max = 12.0
       name = "test grid 1"
  
+      ! Create a 2 x 2 layout for the Grid
+      delist = (/ 0, 1, 2, 3 /)
+      layout = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0 /), rc=status)
+
       grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             nDE_i=nDE_i, nDE_j=nDE_j, &
+                             layout=layout, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &
                              horz_stagger=horz_stagger, &

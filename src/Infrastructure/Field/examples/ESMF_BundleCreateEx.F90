@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.2 2003/04/04 16:22:58 nscollins Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.3 2003/05/27 23:01:19 jwolfe Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -55,7 +55,7 @@
 !   !  Create an empty Bundle and then add a single field to it.
 
 
-    simplefield = ESMF_FieldCreate(grid, arrayspec, ESMF_CELL_CENTER, &
+    simplefield = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                                     name="rh", rc=rc)
 
     bundle2 = ESMF_BundleCreate(name="time step 1", rc=rc);

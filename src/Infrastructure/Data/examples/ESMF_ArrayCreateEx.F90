@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.7 2003/01/09 21:00:39 nscollins Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.8 2003/05/27 23:00:44 jwolfe Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -44,13 +44,13 @@
     enddo
     print *, "intptr data = ", intptr
 
-    array1 = ESMF_ArrayCreate(intptr, ESMF_NO_COPY, rc)
+    array1 = ESMF_ArrayCreate(intptr, ESMF_DATA_REF, rc)
     print *, "array 1 create returned"
 
     call ESMF_ArrayPrint(array1, "foo", rc)
     print *, "array 1 print returned"
 
-    call ESMF_ArrayGetData(array1, intptr2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array1, intptr2, ESMF_DATA_REF, rc)
     print *, "array 1 getdata returned"
     print *, "intptr2 data = ", intptr2
 
@@ -74,13 +74,13 @@
     enddo
     print *, "realptr data = ", realptr
 
-    array2 = ESMF_ArrayCreate(realptr, ESMF_NO_COPY, rc)
+    array2 = ESMF_ArrayCreate(realptr, ESMF_DATA_REF, rc)
     print *, "array 2 create returned"
 
     call ESMF_ArrayPrint(array2, "foo", rc)
     print *, "array 2 print returned"
 
-    call ESMF_ArrayGetData(array2, realptr2, ESMF_NO_COPY, rc)
+    call ESMF_ArrayGetData(array2, realptr2, ESMF_DATA_REF, rc)
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2
 

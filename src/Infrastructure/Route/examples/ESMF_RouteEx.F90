@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.2 2003/04/04 16:24:29 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.3 2003/05/27 23:02:51 jwolfe Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -46,7 +46,7 @@
     grid = ESMF_GridCreate(name="atmgrid", rc=rc)
 
     allocate(f90ptr1(10,20))
-    arraya = ESMF_ArrayCreate(f90ptr1, ESMF_NO_COPY, rc=rc)  
+    arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
     call ESMF_ArrayPrint(arraya, rc=rc)
 
     field1 = ESMF_FieldCreate(grid, arraya, &
@@ -64,7 +64,7 @@
 
 !   !   arrayspec = ESMF_ArraySpecCreate()
 
-    field2 = ESMF_FieldCreate(grid, arrayspec, ESMF_CELL_CENTER, &
+    field2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
 
     print *, "Field example 2 returned"
@@ -80,7 +80,7 @@
     call ESMF_FieldDetachData(field1, array=arraya, rc=rc)
 
     allocate(f90ptr2(30,15))
-    arrayb = ESMF_ArrayCreate(f90ptr2, ESMF_NO_COPY, rc=rc)  
+    arrayb = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 
     call ESMF_FieldAttachData(field1, array=arrayb, rc=rc)
 
