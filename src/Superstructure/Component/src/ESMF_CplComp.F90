@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.46 2004/08/13 21:54:34 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.47 2004/08/17 21:02:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -90,7 +90,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.46 2004/08/13 21:54:34 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.47 2004/08/17 21:02:25 svasquez Exp $'
 
 !==============================================================================
 !
@@ -891,7 +891,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompReadRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
 !
 ! !INTERFACE:
@@ -944,7 +944,7 @@
 !   \end{description}
 !
 !EOP
-
+	! Changed BOP to BOPI until implemented.
         call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, &
                                   blockingflag, rc)
 
@@ -1275,7 +1275,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_CplCompWriteRestart"
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
 
 ! !INTERFACE:
@@ -1325,7 +1325,7 @@
 !   \end{description}
 !
 !EOP
-
+	! Changed BOP to BOPI until implemented.
         call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, &
                                    blockingflag, rc)
 
