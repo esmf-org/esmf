@@ -1,4 +1,4 @@
-! $Id: ESMF_Test.F90,v 1.8 2004/10/27 22:02:55 eschwab Exp $
+! $Id: ESMF_Test.F90,v 1.9 2004/11/08 22:09:05 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -42,7 +42,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Test.F90,v 1.8 2004/10/27 22:02:55 eschwab Exp $'
+      '$Id: ESMF_Test.F90,v 1.9 2004/11/08 22:09:05 svasquez Exp $'
 
 !==============================================================================
 
@@ -124,7 +124,7 @@
       call ESMF_LogWrite("Beginning Test", ESMF_LOG_INFO, line, file)
       if (present(unit)) write(unit, *) msg
 
-      write(msg, *) "NUMBER OF PROCESSORS", numPETs
+      write(msg, *) "NUMBER_OF_PROCESSORS", numPETs
       print *, msg
       call ESMF_LogWrite(msg, ESMF_LOG_INFO)
       if (present(unit)) write(unit, *) msg
