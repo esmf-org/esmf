@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.15 2003/03/06 21:53:50 flanigan Exp $
+# $Id: makefile,v 1.16 2003/03/14 23:02:24 nscollins Exp $
 #===============================================================================
 #                            makefile
 # 
@@ -20,7 +20,7 @@ ESMF_BUILD_DIR = $(ESMF_DIR)/build
 BOPT = g
 
 DIRS = src
-CLEANDIRS = lib mod test${BOPT}
+CLEANDIRS = lib mod test
 
 include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base
 
