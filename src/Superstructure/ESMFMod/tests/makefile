@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/05/14 22:34:28 slswift Exp $
+# $Id: makefile,v 1.4 2004/06/11 19:06:08 svasquez Exp $
 
 ALL:  build_tests
 
@@ -40,11 +40,11 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ESMFModUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ESMFModUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
 
 RUN_ESMF_ESMFModUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ESMFModUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ESMFModUTest > $(ESMC_TESTDIR)/ESMF_ESMFModUTest.stdout
 
 ESMF_ESMFModUTest.rm:
 	echo "ESMF_ESMFModTest.rm target called here."
@@ -55,15 +55,15 @@ ESMF_ESMFModUTest.rm:
 #
 $(ESMC_TESTDIR)/ESMC_ESMFModUTest: chkopts ESMC_ESMFModUTest.o
 	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_ESMFModUTest ESMC_ESMFModUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMC_ESMFModUTest.o
+	-${RM} ESMC_ESMFModUTest.o
 
 RUN_ESMC_ESMFModUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ESMFModUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
 
 RUN_ESMC_ESMFModUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ESMFModUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ESMFModUTest > $(ESMC_TESTDIR)/ESMC_ESMFModUTest.stdout
 
 ESMC_ESMFModUTest.rm:
 	echo "ESMC_ESMFModTest.rm target called here."

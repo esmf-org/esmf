@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/05/14 22:34:24 slswift Exp $
+# $Id: makefile,v 1.3 2004/06/11 18:45:04 svasquez Exp $
 
 ALL:  build_tests
 
@@ -40,11 +40,11 @@ CLOBBERDIRS =
 #
 RUN_ESMF_ArrayDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
 
 RUN_ESMF_ArrayDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayDataMapUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMF_ArrayDataMapUTest.stdout
 
 ESMF_ArrayDataMapUTest.rm:
 	echo "ESMF_ArrayDataMapTest.rm target called here."
@@ -59,11 +59,11 @@ $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest: chkopts ESMC_ArrayDataMapUTest.o
 
 RUN_ESMC_ArrayDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
 
 RUN_ESMC_ArrayDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ArrayDataMapUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest > $(ESMC_TESTDIR)/ESMC_ArrayDataMapUTest.stdout
 
 ESMC_ArrayDataMapUTest.rm:
 	echo "ESMC_ArrayDataMapTest.rm target called here."

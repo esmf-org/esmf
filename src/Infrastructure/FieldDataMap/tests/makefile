@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/05/14 22:34:25 slswift Exp $
+# $Id: makefile,v 1.3 2004/06/11 19:02:22 svasquez Exp $
 
 ALL:  build_tests
 
@@ -40,11 +40,11 @@ CLOBBERDIRS =
 #
 RUN_ESMF_FieldDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldDataMapUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest.stdout
 
 RUN_ESMF_FieldDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_FieldDataMapUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMF_FieldDataMapUTest.stdout
 
 ESMF_FieldDataMapUTest.rm:
 	echo "ESMF_FieldDataMapTest.rm target called here."
@@ -55,15 +55,15 @@ ESMF_FieldDataMapUTest.rm:
 #
 $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest: chkopts ESMC_FieldDataMapUTest.o
 	-${CXXF90LD} -o $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest ESMC_FieldDataMapUTest.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} ${NETCDF_LIB} $(SL_LINKOPTS)
-	${RM} ESMC_FieldDataMapUTest.o
+	-${RM} ESMC_FieldDataMapUTest.o
 
 RUN_ESMC_FieldDataMapUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldDataMapUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest.stdout
 
 RUN_ESMC_FieldDataMapUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_FieldDataMapUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest > $(ESMC_TESTDIR)/ESMC_FieldDataMapUTest.stdout
 
 ESMC_FieldDataMapUTest.rm:
 	echo "ESMC_FieldDataMapTest.rm target called here."

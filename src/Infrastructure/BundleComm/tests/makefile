@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/05/14 22:34:24 slswift Exp $
+# $Id: makefile,v 1.5 2004/06/11 18:51:11 svasquez Exp $
 
 ALL:  build_tests
 
@@ -40,11 +40,11 @@ CLOBBERDIRS =
 #
 RUN_ESMF_<Class>UTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
 
 RUN_ESMF_<Class>UTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_<Class>UTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_<Class>UTest > $(ESMC_TESTDIR)/ESMF_<Class>UTest.stdout
 
 ESMF_<Class>UTest.rm:
 	echo "ESMF_<Class>Test.rm target called here."
@@ -59,11 +59,11 @@ $(ESMC_TESTDIR)/ESMC_<Class>UTest: chkopts ESMC_<Class>UTest.o
 
 RUN_ESMC_<Class>UTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
 RUN_ESMC_<Class>UTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_<Class>UTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_<Class>UTest > $(ESMC_TESTDIR)/ESMC_<Class>UTest.stdout
 
 ESMC_<Class>UTest.rm:
 	echo "ESMC_<Class>Test.rm target called here."

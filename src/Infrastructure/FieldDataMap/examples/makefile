@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/06/03 15:34:11 nscollins Exp $
+# $Id: makefile,v 1.4 2004/06/11 19:00:43 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -36,8 +36,8 @@ CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
 
 run_ESMF_FieldDataMapEx:
-	${MPIRUN} -np 4 ESMF_FieldDataMapEx > ESMF_FieldDataMapEx.stdout
+	-${MPIRUN} -np 4 ESMF_FieldDataMapEx > ESMF_FieldDataMapEx.stdout
 
 run_ESMF_FieldDataMapEx_uni:
-	${MPIRUN} -np 1 ESMF_FieldDataMapEx > ESMF_FieldDataMapEx.stdout
+	-${MPIRUN} -np 1 ESMF_FieldDataMapEx > ESMF_FieldDataMapEx.stdout
 

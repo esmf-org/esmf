@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/05/14 22:34:27 slswift Exp $
+# $Id: makefile,v 1.4 2004/06/11 19:04:44 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -37,11 +37,11 @@ ESMF_BaseEx: ESMF_BaseEx.o  chkopts
 
 RUN_ESMF_BaseEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseEx.tmps
-	${MPIRUN} -np 4 ESMF_BaseEx > ESMF_BaseEx.stdout
+	-${MPIRUN} -np 4 ESMF_BaseEx > ESMF_BaseEx.stdout
 
 RUN_ESMF_BaseExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BaseEx.tmps
-	${MPIRUN} -np 1 ESMF_BaseEx > ESMF_BaseEx.stdout
+	-${MPIRUN} -np 1 ESMF_BaseEx > ESMF_BaseEx.stdout
 
 ESMF_BaseEx.rm:
 	echo "ESMF_BaseEx.rm target called here."
