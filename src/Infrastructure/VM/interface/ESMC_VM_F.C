@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.11 2004/05/21 08:27:51 nscollins Exp $
+// $Id: ESMC_VM_F.C,v 1.12 2004/05/21 15:07:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,6 +101,31 @@ extern "C" {
   void FTN(c_esmc_vmgather)(ESMC_VM **vm, void *input, void *output, int *size, 
     int *root, int *rc){
     (*vm)->vmachine_gather(input, output, *size, *root);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmallreduce)(ESMC_VM **vm, void *input, void *output, 
+    int *count, ESMC_DataKind *dtk, ESMC_newOp *op, int *rc){
+    // start assuming local success
+    int localrc = ESMF_SUCCESS;
+    // need to type cast or transform dtk and op into vmachine types
+    vmType vmt;
+    switch (*dtk){
+    case ESMF_I4:
+      vmt = vmI4;
+      break;
+    case ESMF_R4:
+      vmt = vmR4;
+      break;
+    case ESMF_R8:
+      vmt = vmR8;
+      break;
+    default:
+      localrc = ESMF_FAILURE;
+    }
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(localrc,"Unknown data type.", rc))
+      return;
+    (*vm)->vmachine_allreduce(input, output, *count, vmt, (vmOp)(*op));
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 

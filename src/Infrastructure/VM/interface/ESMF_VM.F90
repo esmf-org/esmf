@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.19 2004/05/21 02:55:39 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.20 2004/05/21 15:07:08 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,6 +126,7 @@ module ESMF_VMMod
   public ESMF_VMRecv
   public ESMF_VMScatter
   public ESMF_VMGather
+  public ESMF_VMAllReduce
   public ESMF_VMBarrier
   public ESMF_VMThreadBarrier
   ! For ESMF internal use only
@@ -146,7 +147,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.19 2004/05/21 02:55:39 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.20 2004/05/21 15:07:08 theurich Exp $'
 
 !==============================================================================
 
@@ -215,7 +216,7 @@ module ESMF_VMMod
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_VMGather-- Generic interface
+! !IROUTINE: ESMF_VMGather -- Generic interface
 
 ! !INTERFACE:
       interface ESMF_VMGather
@@ -225,6 +226,25 @@ module ESMF_VMMod
       module procedure ESMF_VMGatherI4
       module procedure ESMF_VMGatherR4
       module procedure ESMF_VMGatherR8
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_VMGather} functions.   
+!EOPI 
+      end interface
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE: ESMF_VMAllReduce -- Generic interface
+
+! !INTERFACE:
+      interface ESMF_VMAllReduce
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+      module procedure ESMF_VMAllReduceI4
+      module procedure ESMF_VMAllReduceR4
+      module procedure ESMF_VMAllReduceR8
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -473,12 +493,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendI4(vm, message, count, dst, blockingFlag, &
+  subroutine ESMF_VMSendI4(vm, srcData, count, dst, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: message(:)  
+    integer(ESMF_KIND_I4),    intent(in)              :: srcData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -493,8 +513,8 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[message] 
-!        Contigous data array.
+!   \item[srcData] 
+!        Contigous source data array.
 !   \item[count] 
 !        Number of elements to be send.
 !   \item[dst] 
@@ -525,7 +545,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSend(vm, message, size, dst, localrc)
+    call c_ESMC_VMSend(vm, srcData, size, dst, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -543,12 +563,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR4(vm, message, count, dst, blockingFlag, &
+  subroutine ESMF_VMSendR4(vm, srcData, count, dst, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: message(:)  
+    real(ESMF_KIND_R4),       intent(in)              :: srcData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -563,8 +583,8 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[message] 
-!        Contigous data array.
+!   \item[srcData] 
+!        Contigous source data array.
 !   \item[count] 
 !        Number of elements to be send.
 !   \item[dst] 
@@ -595,7 +615,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSend(vm, message, size, dst, localrc)
+    call c_ESMC_VMSend(vm, srcData, size, dst, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -613,12 +633,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR8(vm, message, count, dst, blockingFlag, &
+  subroutine ESMF_VMSendR8(vm, srcData, count, dst, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: message(:)  
+    real(ESMF_KIND_R8),       intent(in)              :: srcData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: dst
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -633,8 +653,8 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[message] 
-!        Contigous data array.
+!   \item[srcData] 
+!        Contigous source data array.
 !   \item[count] 
 !        Number of elements to be send.
 !   \item[dst] 
@@ -665,7 +685,7 @@ module ESMF_VMMod
 
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMSend(vm, message, size, dst, localrc)
+    call c_ESMC_VMSend(vm, srcData, size, dst, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -683,12 +703,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvI4(vm, message, count, src, blockingFlag, &
+  subroutine ESMF_VMRecvI4(vm, dstData, count, src, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: message(:)  
+    integer(ESMF_KIND_I4),    intent(in)              :: dstData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -703,8 +723,8 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[message] 
-!        Contigous data array.
+!   \item[dstData] 
+!        Contigous destination data array.
 !   \item[count] 
 !        Number of elements to be received.
 !   \item[src] 
@@ -735,7 +755,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMRecv(vm, message, size, src, localrc)
+    call c_ESMC_VMRecv(vm, dstData, size, src, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -753,12 +773,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR4(vm, message, count, src, blockingFlag, &
+  subroutine ESMF_VMRecvR4(vm, dstData, count, src, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: message(:)  
+    real(ESMF_KIND_R4),       intent(in)              :: dstData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -773,8 +793,8 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[message] 
-!        Contigous data array.
+!   \item[dstData] 
+!        Contigous destination data array.
 !   \item[count] 
 !        Number of elements to be received.
 !   \item[src] 
@@ -805,7 +825,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMRecv(vm, message, size, src, localrc)
+    call c_ESMC_VMRecv(vm, dstData, size, src, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -823,12 +843,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR8(vm, message, count, src, blockingFlag, &
+  subroutine ESMF_VMRecvR8(vm, dstData, count, src, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: message(:)  
+    real(ESMF_KIND_R8),       intent(in)              :: dstData(:)  
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: src
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -843,8 +863,8 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[message] 
-!        Contigous data array.
+!   \item[dstData] 
+!        Contigous destination data array.
 !   \item[count] 
 !        Number of elements to be received.
 !   \item[src] 
@@ -875,7 +895,7 @@ module ESMF_VMMod
 
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMRecv(vm, message, size, src, localrc)
+    call c_ESMC_VMRecv(vm, dstData, size, src, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -893,13 +913,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterI4(vm, input, output, count, root, blockingFlag, &
+  subroutine ESMF_VMScatterI4(vm, srcData, dstData, count, root, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: input(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: output(:)
+    integer(ESMF_KIND_I4),    intent(in)              :: srcData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: dstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -915,12 +935,12 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[input] 
-!        Contigous array of input data. Only the array specified by the 
+!   \item[srcData] 
+!        Contigous array of source data. Only the source array specified by the 
 !        {\tt root} PET will be used by this method.
-!   \item[output] 
-!        Contigous array of output data. All PETs must specify a valid output
-!        array.
+!   \item[dstData] 
+!        Contigous array of destination data. All PETs must specify a valid
+!        destination array.
 !   \item[count] 
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
@@ -951,7 +971,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMScatter(vm, input, output, size, root, localrc)
+    call c_ESMC_VMScatter(vm, srcData, dstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -969,13 +989,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterR4(vm, input, output, count, root, blockingFlag, &
+  subroutine ESMF_VMScatterR4(vm, srcData, dstData, count, root, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: input(:)
-    real(ESMF_KIND_R4),       intent(out)             :: output(:)
+    real(ESMF_KIND_R4),       intent(in)              :: srcData(:)
+    real(ESMF_KIND_R4),       intent(out)             :: dstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -992,12 +1012,12 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[input] 
-!        Contigous array of input data. Only the array specified by the 
+!   \item[srcData] 
+!        Contigous array of source data. Only the source array specified by the 
 !        {\tt root} PET will be used by this method.
-!   \item[output] 
-!        Contigous array of output data. All PETs must specify a valid output
-!        array.
+!   \item[dstData] 
+!        Contigous array of destination data. All PETs must specify a valid
+!        destination array.
 !   \item[count] 
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
@@ -1028,7 +1048,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMScatter(vm, input, output, size, root, localrc)
+    call c_ESMC_VMScatter(vm, srcData, dstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -1046,13 +1066,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterR8(vm, input, output, count, root, blockingFlag, &
+  subroutine ESMF_VMScatterR8(vm, srcData, dstData, count, root, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: input(:)
-    real(ESMF_KIND_R8),       intent(out)             :: output(:)
+    real(ESMF_KIND_R8),       intent(in)              :: srcData(:)
+    real(ESMF_KIND_R8),       intent(out)             :: dstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -1069,12 +1089,12 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[input] 
-!        Contigous array of input data. Only the array specified by the 
+!   \item[srcData] 
+!        Contigous array of source data. Only the source array specified by the 
 !        {\tt root} PET will be used by this method.
-!   \item[output] 
-!        Contigous array of output data. All PETs must specify a valid output
-!        array.
+!   \item[dstData] 
+!        Contigous array of destination data. All PETs must specify a valid
+!        destination array.
 !   \item[count] 
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
@@ -1105,7 +1125,7 @@ module ESMF_VMMod
 
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMScatter(vm, input, output, size, root, localrc)
+    call c_ESMC_VMScatter(vm, srcData, dstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -1123,13 +1143,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherI4(vm, input, output, count, root, blockingFlag, &
+  subroutine ESMF_VMGatherI4(vm, srcData, dstData, count, root, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    integer(ESMF_KIND_I4),    intent(in)              :: input(:)
-    integer(ESMF_KIND_I4),    intent(out)             :: output(:)
+    integer(ESMF_KIND_I4),    intent(in)              :: srcData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: dstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -1145,12 +1165,12 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[input] 
-!        Contigous array of input data. All PETs must specify a valid output
+!   \item[srcData] 
+!        Contigous array of source data. All PETs must specify a valid source
 !        array.
-!   \item[output] 
-!        Contigous array of output data. Only the array specified by the 
-!        {\tt root} PET will be used by this method.
+!   \item[dstData] 
+!        Contigous array of destination data. Only the destination array
+!        specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
@@ -1181,7 +1201,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGather(vm, input, output, size, root, localrc)
+    call c_ESMC_VMGather(vm, srcData, dstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -1199,13 +1219,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherR4(vm, input, output, count, root, blockingFlag, &
+  subroutine ESMF_VMGatherR4(vm, srcData, dstData, count, root, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R4),       intent(in)              :: input(:)
-    real(ESMF_KIND_R4),       intent(out)             :: output(:)
+    real(ESMF_KIND_R4),       intent(in)              :: srcData(:)
+    real(ESMF_KIND_R4),       intent(out)             :: dstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -1221,12 +1241,12 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[input] 
-!        Contigous array of input data. All PETs must specify a valid output
+!   \item[srcData] 
+!        Contigous array of source data. All PETs must specify a valid source
 !        array.
-!   \item[output] 
-!        Contigous array of output data. Only the array specified by the 
-!        {\tt root} PET will be used by this method.
+!   \item[dstData] 
+!        Contigous array of destination data. Only the destination array
+!        specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
@@ -1257,7 +1277,7 @@ module ESMF_VMMod
 
     size = count * 4 ! 4 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGather(vm, input, output, size, root, localrc)
+    call c_ESMC_VMGather(vm, srcData, dstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
@@ -1275,13 +1295,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherR8(vm, input, output, count, root, blockingFlag, &
+  subroutine ESMF_VMGatherR8(vm, srcData, dstData, count, root, blockingFlag, &
     commHandle, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),            intent(in)              :: vm
-    real(ESMF_KIND_R8),       intent(in)              :: input(:)
-    real(ESMF_KIND_R8),       intent(out)             :: output(:)
+    real(ESMF_KIND_R8),       intent(in)              :: srcData(:)
+    real(ESMF_KIND_R8),       intent(out)             :: dstData(:)
     integer,                  intent(in)              :: count
     integer,                  intent(in)              :: root
     type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
@@ -1297,12 +1317,12 @@ module ESMF_VMMod
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[input] 
-!        Contigous array of input data. All PETs must specify a valid output
+!   \item[srcData] 
+!        Contigous array of source data. All PETs must specify a valid source
 !        array.
-!   \item[output] 
-!        Contigous array of output data. Only the array specified by the 
-!        {\tt root} PET will be used by this method.
+!   \item[dstData] 
+!        Contigous array of destination data. Only the destination array
+!        specified by the {\tt root} PET will be used by this method.
 !   \item[count] 
 !        Number of elements to be send from {\tt root} to each of the PETs.
 !   \item[root] 
@@ -1333,13 +1353,244 @@ module ESMF_VMMod
 
     size = count * 8 ! 8 bytes
     ! Call into the C++ interface, which will sort out optional arguments.
-    call c_ESMC_VMGather(vm, input, output, size, root, localrc)
+    call c_ESMC_VMGather(vm, srcData, dstData, size, root, localrc)
 
     ! Use LogErr to handle return code
     if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
       rcToReturn=rc)) return
 
   end subroutine ESMF_VMGatherR8
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceI4()"
+!BOP
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte integers
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceI4(vm, srcData, dstData, count, operation, &
+    blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    integer(ESMF_KIND_I4),    intent(in)              :: srcData(:)
+    integer(ESMF_KIND_I4),    intent(out)             :: dstData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_newOp),         intent(in)              :: operation
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
+!   on contigous data of kind {\tt ESMF\_KIND\_I4} across the {\tt ESMF\_VM}
+!   object performing the specified operation.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[srcData] 
+!        Contigous array of source data. All PETs must specify a valid source
+!        array.
+!   \item[dstData] 
+!        Contigous array of destination data. All PETs must specify a valid
+!        destination array.
+!   \item[count] 
+!        Number of elements in srcData on each of the PETs.
+!   \item[operation] 
+!        Reduction operation.
+!   \item[{[blockingFlag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commHandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingFlag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, srcData, dstData, count, ESMF_I4, operation, &
+      localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllReduceI4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceR4()"
+!BOP
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 4-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceR4(vm, srcData, dstData, count, operation, &
+    blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R4),       intent(in)              :: srcData(:)
+    real(ESMF_KIND_R4),       intent(out)             :: dstData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_newOp),         intent(in)              :: operation
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
+!   on contigous data of kind {\tt ESMF\_KIND\_R4} across the {\tt ESMF\_VM}
+!   object performing the specified operation.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[srcData] 
+!        Contigous array of source data. All PETs must specify a valid source
+!        array.
+!   \item[dstData] 
+!        Contigous array of destination data. All PETs must specify a valid
+!        destination array.
+!   \item[count] 
+!        Number of elements in srcData on each of the PETs.
+!   \item[operation] 
+!        Reduction operation.
+!   \item[{[blockingFlag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commHandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingFlag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, srcData, dstData, count, ESMF_R4, operation, &
+      localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllReduceR4
+!------------------------------------------------------------------------------
+
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_VMAllReduceR8()"
+!BOP
+! !IROUTINE: ESMF_VMAllReduce - AllReduce 8-byte reals
+
+! !INTERFACE:
+  ! Private name; call using ESMF_VMAllReduce()
+  subroutine ESMF_VMAllReduceR8(vm, srcData, dstData, count, operation, &
+    blockingFlag, commHandle, rc)
+!
+! !ARGUMENTS:
+    type(ESMF_VM),            intent(in)              :: vm
+    real(ESMF_KIND_R8),       intent(in)              :: srcData(:)
+    real(ESMF_KIND_R8),       intent(out)             :: dstData(:)
+    integer,                  intent(in)              :: count
+    type(ESMF_newOp),         intent(in)              :: operation
+    type(ESMF_BlockingFlag),  intent(in),   optional  :: blockingFlag
+    type(ESMF_CommHandle),    intent(out),  optional  :: commHandle
+    integer,                  intent(out),  optional  :: rc
+!         
+!
+! !DESCRIPTION:
+!   Collective {\tt ESMF\_VM} communication call that performs an AllReduce 
+!   on contigous data of kind {\tt ESMF\_KIND\_R8} across the {\tt ESMF\_VM}
+!   object performing the specified operation.
+!
+!   The arguments are:
+!   \begin{description}
+!   \item[vm] 
+!        {\tt ESMF\_VM} object.
+!   \item[srcData] 
+!        Contigous array of source data. All PETs must specify a valid source
+!        array.
+!   \item[dstData] 
+!        Contigous array of destination data. All PETs must specify a valid
+!        destination array.
+!   \item[count] 
+!        Number of elements in srcData on each of the PETs.
+!   \item[operation] 
+!        Reduction operation.
+!   \item[{[blockingFlag]}] 
+!        Flag indicating whether this call behaves blocking or non-blocking:
+!        \begin{description}
+!        \item[{\tt ESMF\_BLOCKING}]
+!             Block until local operation has completed. 
+!        \item[{\tt ESMF\_NONBLOCKING}]
+!             Return immediately without blocking.
+!        \end{description}
+!   \item[{[commHandle]}]
+!        A communication handle will be returned in case of a non-blocking
+!        request (see argument {\tt blockingFlag}).
+!   \item[{[rc]}] 
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+!EOP
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+!------------------------------------------------------------------------------
+    integer :: localrc                        ! local return code
+    integer :: size
+
+    ! Assume failure until success
+    if (present(rc)) rc = ESMF_FAILURE
+
+    ! Call into the C++ interface, which will sort out optional arguments.
+    call c_ESMC_VMAllReduce(vm, srcData, dstData, count, ESMF_R8, operation, &
+      localrc)
+
+    ! Use LogErr to handle return code
+    if (ESMF_LogMsgFoundError(rcToCheck=localrc, msg=ESMF_ERR_PASSTHRU, &
+      rcToReturn=rc)) return
+
+  end subroutine ESMF_VMAllReduceR8
 !------------------------------------------------------------------------------
 
 
