@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.h,v 1.1 2004/02/24 20:37:38 theurich Exp $
+// $Id: ESMC_VM.h,v 1.2 2004/02/26 20:43:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,13 +25,13 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file defines two C++ classes {\tt ESMC_VM} and 
-// {\tt ESMC_VMPlan}, their members and method signatures (prototypes).
+// The code in this file defines two C++ classes {\tt ESMC\_VM} and 
+// {\tt ESMC\_VMPlan}, their members and method signatures (prototypes).
 // The companion file {\tt ESMC\_VM.C} contains the full code (bodies) 
 // for the methods.
 //
-// Currently class {\tt ESMC_VM} is derived from base class {\tt vmachine}
-// and class {\tt ESMC_VMPlan} is derived from base class {\tt vmplan}. There
+// Currently class {\tt ESMC\_VM} is derived from base class {\tt vmachine}
+// and class {\tt ESMC\_VMPlan} is derived from base class {\tt vmplan}. There
 // are only very few new features that the derived classes add to their base
 // classes, thus most of the implementing code is located in {vmachine.C}.
 //
