@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.55 2004/06/11 20:16:23 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.56 2004/06/11 20:24:53 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.55 2004/06/11 20:16:23 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.56 2004/06/11 20:24:53 eschwab Exp $'
 
 !==============================================================================
 !
@@ -727,19 +727,19 @@
 !          "ringBegin"    - print time when the alarm actually begins to ring.\\
 !          "ringDuration" - print how long this alarm is to remain ringing. \\
 !          "ringing"                - print the alarm's current ringing state.\\
-!          "ringingOnPrevTimeStep"  - print whether the alarm was ringing \\
-!                                     immediately after the previous clock \\
-!                                     time step.
+!          "ringingOnPrevTimeStep"  - print whether the alarm was ringing 
+!                                     immediately after the previous clock
+!                                     time step. \\
 !          "ringInterval" - print the alarm's periodic ring interval. \\
 !          "ringTime"     - print the alarm's next time to ring. \\
-!          "ringTimeStepCount" - print how long this alarm is to remain \\
-!                                ringing, in terms of a number of clock time \\
+!          "ringTimeStepCount" - print how long this alarm is to remain
+!                                ringing, in terms of a number of clock time
 !                                steps. \\
 !          "refTime"      - print the alarm's interval reference (base) time. \\
-!          "sticky"       - print whether the alarm must be turned off \\
+!          "sticky"       - print whether the alarm must be turned off
 !                           manually. \\
 !          "stopTime"     - print when alarm intervals end. \\
-!          "timeStepRingingCount"   - print the number of time steps the \\
+!          "timeStepRingingCount"   - print the number of time steps the
 !                                     alarm has been ringing thus far. \\
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
