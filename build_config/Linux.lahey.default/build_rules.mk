@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2004/06/07 17:06:58 slswift Exp $
+# $Id: build_rules.mk,v 1.12 2004/06/17 14:30:40 nscollins Exp $
 #
 # Linux.lahey.default.mk
 #
@@ -104,7 +104,7 @@ C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = gcc
 C_FLINKER	   = lf95
 C_CCV		   = ${C_CC} --version
-C_FCV              = lf95
+C_FCV              = lf95 --version
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc -lf2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
