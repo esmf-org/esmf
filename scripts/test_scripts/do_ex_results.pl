@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.15 2005/02/15 20:29:25 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.16 2005/02/15 21:48:27 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -125,29 +125,7 @@ getopts("d:b:", \%options);
 		}
 		# Calculate fail_count
 		$fail_count = $ex_count - $pass_count;
-		print "\n\n";
-		if ($pass_count == $ex_count) {
-                        if ($fail_count == 1) {
-                                print "There is $ex_count example, it passed.\n";
-                        }
-                        else {
-                                print "There are $ex_count examples, they all passed.\n";
-                        }
-
-		}
-		elsif ($fail_count == $ex_count) {
-                        if ($fail_count == 1) {
-                                print "There is $ex_count example, it failed.\n";
-                        }
-                        else {
-                                print "There are $ex_count examples, they all failed.\n";
-                        }
-
-		}
-		else {
-			print "There are $ex_count examples, $pass_count passed and $fail_count failed.\n";
-		}
-		print "\n\n";
+		$example_count = $ex_count;
                 if ($pass_count != 0) {
                         #Strip the names of failed examples
                         foreach (@pass_tests) {
@@ -159,6 +137,7 @@ getopts("d:b:", \%options);
                         foreach $file ( @pass_tests) {
                                 push @pass_ex_files, grep (/$file/, @act_ex_files);
                         }
+                        print "\n\n";
                 	if ($pass_count == 1) {
                         	print "The following example passed:\n";
 			}
@@ -226,6 +205,8 @@ getopts("d:b:", \%options);
 		print "\n\nThe stdout files for the examples can be found at:\n";
 		print "$EX_DIR\n\n";
 	
+		print "$example_count examples, $pass_count passed and $fail_count failed.\n";
+		print "\n\n";
 
 
 			
