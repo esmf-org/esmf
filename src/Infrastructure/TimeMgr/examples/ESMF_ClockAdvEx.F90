@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockAdvEx.F90,v 1.22 2004/01/29 04:44:34 eschwab Exp $
+! $Id: ESMF_ClockAdvEx.F90,v 1.23 2004/01/30 01:31:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@
 !\begin{verbatim}
       ! initialize the clock with the above values
       clock = ESMF_ClockCreate("Clock A", timeStep, startTime, stopTime, &
-                               refTime, rc)
+                               refTime=refTime, rc=rc)
 !\end{verbatim}
 !EOP
 
