@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.16 2003/12/19 19:14:51 eschwab Exp $
+% $Id: TimeMgr_desc.tex,v 1.17 2003/12/19 22:00:22 eschwab Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -77,15 +77,13 @@ calendars, and how to create a customized ESMF Calendar.
 \subsection{Time Instants and Time Intervals}
 
 TimeIntervals and Time instants (simply called Times) are the computational 
-building blocks of the Time Manager utility.  TimeIntervals, which are 
-time periods independent of a calendar, support operations such as add, 
-subtract, compare size, 
-reset value, copy value, and subdivide by a scalar.  Times, which 
-are moments in time associated with specific Calendars, can be incremented 
-or decremented by TimeIntervals, compared to determine which of two Times 
-is later, differenced to obtain the TimeInterval between two Times, 
-copied, reset, and manipulated in other useful ways.  Times support a 
-host of different queries, both for values of individual Time 
+building blocks of the Time Manager utility.  TimeIntervals support operations
+such as add, subtract, compare size, reset value, copy value, and subdivide
+by a scalar.  Times, which are moments in time associated with specific
+Calendars, can be incremented or decremented by TimeIntervals, compared to
+determine which of two Times is later, differenced to obtain the TimeInterval
+between two Times, copied, reset, and manipulated in other useful ways.
+Times support a host of different queries, both for values of individual Time 
 components such as year, month, day, and second, and for derived values such 
 as day of year, middle of current month and Julian day.  It is also possible 
 to retrieve the value of the hardware realtime clock in the form of a 
