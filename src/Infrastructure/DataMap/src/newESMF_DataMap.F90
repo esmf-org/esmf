@@ -1,4 +1,4 @@
-! $Id: newESMF_DataMap.F90,v 1.1 2004/02/17 20:12:30 nscollins Exp $
+a $Id: newESMF_DataMap.F90,v 1.2 2004/02/25 18:31:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: newESMF_DataMap.F90,v 1.1 2004/02/17 20:12:30 nscollins Exp $'
+             '$Id: newESMF_DataMap.F90,v 1.2 2004/02/25 18:31:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -353,11 +353,13 @@ end function
 !     \begin{description} 
 !     \item [datamap]
 !           An {\tt ESMF\_DataMap} object.
+!
 !     \item [dataIorder] 
 !           An {\tt ESMF_IndexOrder} object which describes one of several
 !           predefined Index Orders.  There is another version of the Init
 !           call which allows a more general form of the indexing; this is
 !           a convenience routine for the most common cases.
+!
 !     \item [{[counts]}]
 !           If the {\tt ESMF\_Array} object is a higher rank than the
 !           {\tt ESMF\_Grid}, the additional dimensions may each have an 
@@ -368,11 +370,15 @@ end function
 !           can be obtained from the {\tt ESMF\_Array} and this argument
 !           is unneeded.  If the ranks of the grid and array are the same, 
 !           this is also unneeded.
+!
 !     \item [{[horizRelloc]}]
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
+!
 !     \item [{[vertRelloc]}]
 !           Relative location of data per grid cell/vertex in the vertical grid.
+!
+!	\end{description}
 !
 !EOPI
 ! !REQUIREMENTS: internal
@@ -499,6 +505,39 @@ end function
 ! !DESCRIPTION:
 !      ESMF routine to initialize the contents of a {\tt ESMF\_DataMap} type.
 !
+!     \begin{description}
+!     \item [datamap]
+!           An {\tt ESMF\_DataMap} object.
+!           
+!     \item [dataRank] 
+!	    The number of the array dimensions.
+!
+!     \item [dataIndices] 
+!	    TODO: Add description           
+!           
+!     \item [{[counts]}]
+!           If the {\tt ESMF\_Array} object is a higher rank than the
+!           {\tt ESMF\_Grid}, the additional dimensions may each have an
+!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_DataMap}
+!           and create the appropriately sized {\tt ESMF\_Array} for each
+!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!           can be obtained from the {\tt ESMF\_Array} and this argument
+!           is unneeded.  If the ranks of the grid and array are the same,
+!           this is also unneeded.
+!
+!     \item [{[horizRelloc]}]
+!           Relative location of data per grid cell/vertex in the horizontal
+!           grid.
+!
+!     \item [{[vertRelloc]}]
+!           Relative location of data per grid cell/vertex in the vertical grid.
+
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !EOPI
 ! !REQUIREMENTS: internal
 
@@ -562,6 +601,16 @@ end function
 !      ESMF routine to set the contents of a {\tt ESMF\_DataMap} type
 !      to an uninitialized value.
 !
+!     \begin{description}
+!     \item [datamap]
+!           An {\tt ESMF\_DataMap} object.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
+!
 !EOP
 ! !REQUIREMENTS: internal
 
@@ -595,6 +644,44 @@ end function
 !
 ! !DESCRIPTION:
 !   Return info about the current {\tt ESMF\_DataMap} described by this object.
+!
+!       
+!     \begin{description}
+!     \item [datamap]
+!           An {\tt ESMF\_DataMap} object.
+!
+!     \item [{[datarank]}]
+!	    The number of array dimensions.
+!           
+!     \item [{[dataIorder]}] 
+!           An {\tt ESMF_IndexOrder} object which describes one of several
+!           predefined Index Orders.  There is another version of the Init
+!           call which allows a more general form of the indexing; this is
+!           a convenience routine for the most common cases.
+!
+!     \item [{[counts]}]
+!           If the {\tt ESMF\_Array} object is a higher rank than the
+!           {\tt ESMF\_Grid}, the additional dimensions may each have an
+!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_DataMap}
+!           and create the appropriately sized {\tt ESMF\_Array} for each
+!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!           can be obtained from the {\tt ESMF\_Array} and this argument
+!           is unneeded.  If the ranks of the grid and array are the same,
+!           this is also unneeded.
+!       
+!     \item [{[horizRelloc]}]
+!           Relative location of data per grid cell/vertex in the horizontal
+!           grid.
+!
+!     \item [{[vertRelloc]}]
+!           Relative location of data per grid cell/vertex in the vertical grid.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS: 
@@ -660,6 +747,44 @@ end function
 ! !DESCRIPTION:
 !   Set info about the given {\tt ESMF\_DataMap}.
 !
+!
+!     \begin{description}
+!     \item [datamap]
+!           An {\tt ESMF\_DataMap} object.
+!
+!     \item [{[datarank]}]
+!           The number of array dimensions.
+!
+!     \item [{[dataIorder]}]
+!           An {\tt ESMF_IndexOrder} object which describes one of several
+!           predefined Index Orders.  There is another version of the Init
+!           call which allows a more general form of the indexing; this is
+!           a convenience routine for the most common cases.
+!
+!     \item [{[counts]}]
+!           If the {\tt ESMF\_Array} object is a higher rank than the
+!           {\tt ESMF\_Grid}, the additional dimensions may each have an
+!           item count defined here.  This allows an {\tt ESMF\_FieldCreate()}
+!           call to take an {\tt ESMF\_ArraySpec} and an {\tt ESMF\_DataMap}
+!           and create the appropriately sized {\tt ESMF\_Array} for each
+!           {\tt DE}.  If the {\tt ESMF\_Array} is created first, the counts
+!           can be obtained from the {\tt ESMF\_Array} and this argument
+!           is unneeded.  If the ranks of the grid and array are the same,
+!           this is also unneeded.
+!
+!     \item [{[horizRelloc]}]
+!           Relative location of data per grid cell/vertex in the horizontal
+!           grid.
+!
+!     \item [{[vertRelloc]}]
+!           Relative location of data per grid cell/vertex in the vertical grid.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
+!
 !EOP
 ! !REQUIREMENTS: 
  
@@ -721,15 +846,28 @@ end function
       subroutine ESMF_DataMapWriteRestart(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DataMap), intent(in) :: datamap                ! datamap to save
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to save all data to disk as quickly as possible.  
 !      (see Read/Write for other options).  Internally this routine uses the
 !      same I/O interface as Read/Write, but the default options are to
 !      select the fastest way to save data to disk.
+!
+!     \begin{description}
+!     \item [datamap]
+!           {\tt ESMF\_DataMap} object to save.
+!
+!     \item [{[iospec]}]
+!           File specification.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS: FLD1.6.8
@@ -761,6 +899,19 @@ end function
 !      all data associated with a {\tt ESMF\_DataMap} 
 !      from the last call to WriteRestart.
 !
+!
+!     \begin{description}
+!     \item [name]
+!           Name of data to reinitialize.
+!
+!     \item [{[iospec]}]
+!           File specification.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !EOP
 ! !REQUIREMENTS: FLD1.6.8
 
@@ -779,14 +930,28 @@ end function
       subroutine ESMF_DataMapWrite(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DataMap), intent(in) :: datamap          ! datamap to save
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      type(ESMF_DataMap), intent(in) :: datamap
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
 !      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
 !      options specified in the IOSpec derived type. 
+!
+!
+!     \begin{description}
+!     \item [datamap]
+!           {\tt ESMF\_DataMap} object to save.
+!
+!     \item [{[iospec]}]
+!           File specification.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !
 !
 !EOP
@@ -817,6 +982,19 @@ end function
 !      Used to read data from persistent storage in a variety of formats.
 !
 !
+!     \begin{description}
+!     \item [name]
+!           Name of data to read.
+!
+!     \item [{[iospec]}]
+!           File specification.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
+!
 !EOP
 ! !REQUIREMENTS: (which req number is this?)
 
@@ -840,6 +1018,19 @@ end function
 !
 ! !DESCRIPTION:
 !      Routine to validate the internal state of a {\tt ESMF\_DataMap}.
+!
+!
+!     \begin{description}
+!     \item [datamap]
+!           {\tt ESMF\_DataMap} object to validate.
+!
+!     \item [{[options]}]
+!           Validation options.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
 !
 !EOP
 ! !REQUIREMENTS:  FLD4.1
@@ -881,6 +1072,18 @@ end function
 !
 ! !DESCRIPTION:
 !      Routine to print information about a {\tt ESMF\_DataMap}.
+!
+!     \begin{description}
+!     \item [datamap]
+!           {\tt ESMF\_DataMap} object to print.
+!       
+!     \item [{[options]}]
+!           Print options.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
@@ -936,12 +1139,26 @@ end function
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_RelLoc), intent(in) :: relloc           ! turn into string
-      character (len = *), intent(out) :: string        ! where to return it
-      integer, intent(out), optional :: rc              ! return code
+      type(ESMF_RelLoc), intent(in) :: relloc
+      character (len = *), intent(out) :: string
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Routine to turn a relloc into a string.
+!
+!
+!     \begin{description}
+!     \item [relloc]
+!           The {\tt ESMF\_RelLoc} object to be turned into a string.
+!           
+!     \item [string]
+!          Return string.
+!           
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -972,12 +1189,25 @@ end function
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_InterleaveType), intent(in) :: interleave   ! turn into string
-      character (len = *), intent(out) :: string        ! where to return it
-      integer, intent(out), optional :: rc              ! return code
+      type(ESMF_InterleaveType), intent(in) :: interleave
+      character (len = *), intent(out) :: string
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Routine to turn an interleave into a string.
+!
+!     \begin{description}
+!     \item [interleave]
+!           The {\tt ESMF\_InterleaveType} object to be turned into a string.
+!           
+!     \item [string]
+!          Return string.
+!           
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
+!
 !
 !EOP
 ! !REQUIREMENTS:
@@ -1004,6 +1234,18 @@ end function
 !
 ! !DESCRIPTION:
 !      Routine to turn an indexorder into a string.
+!
+!     \begin{description}
+!     \item [indexorder]
+!           The {\tt ESMF\_IndexOrder} object to be turned into a string.
+!
+!     \item [string]
+!          Return string.
+!
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+!       \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
