@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.48 2004/12/22 00:28:08 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.49 2005/02/28 16:39:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.48 2004/12/22 00:28:08 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.49 2005/02/28 16:39:54 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -157,6 +157,326 @@
 
 //-----------------------------------------------------------------------------
 #undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketSetEmpty"
+//BOPI
+// !IROUTINE:  ESMC_XPacketSetEmpty - Initialize an XPacket with zero values
+//
+// !INTERFACE:
+      int ESMC_XPacket :: ESMC_XPacketSetEmpty() {
+//
+// !RETURN VALUE:
+//     integer return code
+//
+//
+// !DESCRIPTION:
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC_XPacket.h)
+//
+//EOPI
+// !REQUIREMENTS:  AAAn.n.n
+
+    rank          = 0;
+    offset        = 0;
+    contig_length = 0;
+    for(int i=0; i<ESMF_MAXDIM; i++) {
+       rep_count[i] = 0;
+       stride[i]    = 0;
+    }
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketSetEmpty
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketGetEmpty"
+//BOPI
+// !IROUTINE:  ESMC_XPacketGetEmpty - Set values which match an empty XP
+//
+// !INTERFACE:
+      int ESMC_XPacketGetEmpty(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int *nrank,             // in/out, single int
+      int *noffset,           // out, single int
+      int *ncontig_length,    // out, single int
+      int *nstride,           // out, array of rank ints
+      int *nrep_count) {      // out, array of rank ints
+//
+// !DESCRIPTION:
+//     Returns the values of what an empty XPacket would return.
+//     nrank must come in with the max rank valid for the
+//     strides and rep_counts. 
+//
+//EOPI
+// !REQUIREMENTS:  
+
+    int i;
+
+    for (i=0; i<*nrank; i++) {
+      nstride[i] = 0;
+      nrep_count[i] = 0;
+    }
+
+    // after using nrank, set it to 0 (and all the rest)
+    *nrank = 0;
+    *noffset = 0;
+    *ncontig_length = 0;
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketGetEmpty
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketMakeBuffer"
+//BOPI
+// !IROUTINE:  ESMC_XPacketMakeBuffer - make a buffer for data described by XPs
+//
+// !INTERFACE:
+      int ESMC_XPacketMakeBuffer(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int xpCount,                   // in  - count of xp's to pack
+      ESMC_XPacket **xpList,         // in  - list of xp's to pack
+      int VMType,                    // in  - datatype
+      int nbytes,                    // in  - number of bytes per item
+      char **buffer,                 // out - new buf, must be del'd by caller 
+      int *bufferSize) {             // out - size of the buffer
+//
+// !DESCRIPTION:
+//      Makes a buffer with the space required to hold data from a list of XPs.
+//
+//EOPI
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+    int i, j;
+    int xpDataSize;
+    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
+    char msgbuf[ESMF_MAXSTR];
+
+    // initialize the buffer size to 0
+    *bufferSize = 0;
+
+    // handle the case where there are no XPs
+    if ((xpCount == 0) || (xpList == NULL)) {
+        *buffer = NULL;
+        return ESMF_SUCCESS;
+    }
+
+    // loop over the number of XPs, adding the size of the data to the buffer size
+    for (i=0; i<xpCount; i++) {
+      rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
+                                      stride, repCount);
+
+      xpDataSize = contigLength;
+      for (j=0; j<rank-1; j++) {
+        xpDataSize *= repCount[j];
+      }
+      *bufferSize += xpDataSize;
+    }
+
+    *bufferSize *= nbytes;
+
+    // allocate the buffer
+    if (*bufferSize > 0) {
+      *buffer = new char[*bufferSize];
+    } else {
+      *buffer = NULL;
+    }
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_XPacketMakeBuffer
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketPackBuffer"
+//BOPI
+// !IROUTINE:  ESMC_XPacketPackBuffer - pack a buffer with data described by XPs
+//
+// !INTERFACE:
+      int ESMC_XPacketPackBuffer(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int xpCount,                   // in  - count of xp's to pack
+      ESMC_XPacket **xpList,         // in  - list of xp's to pack
+      int VMType,                    // in  - datatype
+      int nbytes,                    // in  - number of bytes per item
+      void *dataAddr,                // in  - address of the data to be packed
+      char *buffer) {                // in  - buffer to pack into
+//
+// !DESCRIPTION:
+//    Packs an already allocated buffer with data described by one or more XPs.
+//
+//EOPI
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+    int i, j, k;
+    int xpItemCount, itemCount;
+    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
+    char *dataPtr;
+    char msgbuf[ESMF_MAXSTR];
+
+    // make it a no-op to ask to pack an empty xp list
+    if ((xpCount == 0) || (xpList == NULL))
+        return ESMF_SUCCESS;
+
+    // loop over the XPs, packing the data into the buffer
+    for (i=0; i<xpCount; i++) {
+      rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
+                                      stride, repCount);
+
+      // check the number of data items to be packed from this XP -- mostly
+      // making sure it's not 0
+      xpItemCount = xpList[i] ? contigLength : 0;
+      for (j=0; j<rank-1; j++) {
+        xpItemCount *= repCount[j];
+      }
+
+      // copy into the buffer
+      if (xpItemCount > 0) {
+        switch (rank) {
+          case 2:
+            itemCount = offset;
+            for (j=0; j<repCount[0] ; j++, itemCount += stride[0]) {
+
+              dataPtr = (char *)dataAddr + (itemCount*nbytes);
+              memcpy(buffer, dataPtr, contigLength*nbytes);
+              buffer += contigLength*nbytes;
+            }
+            break;
+          case 3:
+            for (k=0; k<repCount[1]; k++, offset += stride[1]) {
+              itemCount = offset;
+              for (j=0; j<repCount[0]; j++, itemCount += stride[0]) {
+
+                dataPtr = (char *)dataAddr + (itemCount*nbytes);
+                memcpy(buffer, dataPtr, contigLength*nbytes);
+                buffer += contigLength*nbytes;
+              }
+            }
+            break;
+          default:
+            sprintf(msgbuf, "no code to handle rank %d yet\n", rank);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                                                  msgbuf, &rc);
+            return (rc);
+        }   // rank switch
+      }     // check for non-zero data items from this XP
+    }       // loop over XPs
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_XPacketPackBuffer
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_XPacketUnpackBuffer"
+//BOPI
+// !IROUTINE:  ESMC_XPacketUnpackBuffer - unpack a buffer with data described by XPs
+//
+// !INTERFACE:
+      int ESMC_XPacketUnpackBuffer(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int xpCount,                   // in  - count of xp's to unpack
+      ESMC_XPacket **xpList,         // in  - list of xp's to unpack
+      int VMType,                    // in  - datatype
+      int nbytes,                    // in  - number of bytes per item
+      char *buffer,                  // in  - raw buffer to unpack
+      void *dataAddr) {              // in  - base addr of array to be unpacked into
+//
+// !DESCRIPTION:
+//    Unpacks an already filled buffer into a data array described by one 
+//    or more XPs.
+//
+//EOPI
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    int rc = ESMF_FAILURE;
+    int i, j, k;
+    int xpItemCount, itemCount;
+    int rank, offset, contigLength, stride[ESMF_MAXDIM], repCount[ESMF_MAXDIM];
+    char *dataPtr;
+    char msgbuf[ESMF_MAXSTR];
+
+    // make it a no-op to unpack an empty XP list
+    if ((xpCount == 0) || (xpList == NULL))
+        return ESMF_SUCCESS;
+
+    // loop over the XPs, unpacking the data from the buffer into the data array
+    for (i=0; i<xpCount; i++) {
+      rc = xpList[i]->ESMC_XPacketGet(&rank, &offset, &contigLength,
+                                      stride, repCount);
+
+      // check the number of data items to be packed from this XP -- mostly
+      // making sure it's not 0
+      xpItemCount = xpList[i] ? contigLength : 0;
+      for (j=0; j<rank-1; j++) {
+        xpItemCount *= repCount[j];
+      }
+
+      // copy into the data array
+      if (xpItemCount > 0) {
+        switch (rank) {
+          case 2:
+            itemCount = offset;
+            for (j=0; j<repCount[0] ; j++, itemCount += stride[0]) {
+
+              dataPtr = (char *)dataAddr + (itemCount*nbytes);
+              memcpy(dataPtr, buffer, contigLength*nbytes);
+              buffer += contigLength*nbytes;
+            }
+            break;
+          case 3:
+            for (k=0; k<repCount[1]; k++, offset += stride[1]) {
+              itemCount = offset;
+              for (j=0; j<repCount[0]; j++, itemCount += stride[0]) {
+
+                dataPtr = (char *)dataAddr + (itemCount*nbytes);
+                memcpy(dataPtr, buffer, contigLength*nbytes);
+                buffer += contigLength*nbytes;
+              }
+            }
+            break;
+          default:
+            sprintf(msgbuf, "no code to handle rank %d yet\n", rank);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE,
+                                                  msgbuf, &rc);
+            return (rc);
+        }   // rank switch
+      }     // check for non-zero data items from this XP
+    }       // loop over XPs
+
+    rc = ESMF_SUCCESS;
+    return rc;
+
+ } // end ESMC_XPacketUnpackBuffer
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
 #define ESMC_METHOD "ESMC_XPacketIntersect"
 //BOP
 // !IROUTINE:  ESMC_XPacketIntersect - intersection of two XPackets
@@ -187,6 +507,8 @@
     if (xpacket1->rank != xpacket2->rank) {
       return ESMF_FAILURE;
     }
+    // set offset, contig_length, and rep_counts to zero as default
+    this->ESMC_XPacketSetEmpty();
     this->rank = xpacket1->rank;
 
     // debug
@@ -202,15 +524,6 @@
           return ESMF_FAILURE;
         }
         this->stride[i] = xpacket1->stride[i];
-      }
-    }
-
-    // set offset, contig_length, and rep_counts to zero as default
-    this->offset = 0;
-    this->contig_length = 0;
-    if (this->rank > 0) { 
-      for (i=0; i<xpacket1->rank-1; i++) {
-        this->rep_count[i] = 0;
       }
     }
 
