@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.24 2004/06/15 15:33:20 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.25 2004/06/16 21:58:21 svasquez Exp $
 !
 ! Example code for a main Application program. 
 
@@ -243,11 +243,21 @@
     type(ESMF_GridComp) :: gcomp1, gcomp2
     type(ESMF_CplComp) :: cpl
         
+!EOC
+    integer :: finalrc
+!   !Set finalrc to success
+    finalrc = ESMF_SUCCESS
+
+!BOC
 !-------------------------------------------------------------------------
 !   ! Initialize the Framework, and get the default VM
     call ESMF_Initialize(vm=vm, rc=rc)
     if (rc .ne. ESMF_SUCCESS) then
         print *, "failed to initialize ESMF Framework"
+!EOC
+	print *, "FAIL: ESMF_FieldCreateEx.F90"
+
+!BOC
         stop
     endif
 
@@ -261,20 +271,31 @@
 
     cname = "Top Level Atmosphere Model Component"
     top = ESMF_GridCompCreate(cname, configFile="setup.rc", rc=rc)  
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     cname1 = "Atmosphere Physics"
     gcomp1 = ESMF_GridCompCreate(cname1, ESMF_ATM, rc=rc)  
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! This single user-supplied subroutine must be a public entry point 
     !  and can renamed with the 'use localname => modulename' syntax if
     !  the name is not unique.
     call ESMF_GridCompSetServices(gcomp1, PHYS_SetServices, rc)
-
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     ! (see below for what the SetServices routine will need to do.)
 
     print *, "Comp Create returned, name = ", trim(cname1)
 
     cname2 = "Atmosphere Dynamics"
-    gcomp2 = ESMF_GridCompCreate(cname2, ESMF_ATM, rc=rc)
+    gcomp2 = ESMF_GridCompCreate(cname2, ESMF_ATM, rc=rc)  
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc)
@@ -283,9 +304,15 @@
 
     cname = "Atmosphere Coupler"
     cpl = ESMF_CplCompCreate(cname, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! This single user-supplied subroutine must be a public entry point.
     call ESMF_CplCompSetServices(cpl, CPLR_SetServices, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -293,42 +320,81 @@
     !  between components.
 
     states(1) = ESMF_StateCreate(cname1, ESMF_STATE_EXPORT, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     states(2) = ESMF_StateCreate(cname2, ESMF_STATE_IMPORT, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     ! See the TimeMgr document for the details on the actual code needed
     !  to set up a clock.
     ! initialize calendar to be Gregorian type
     gregorianCalendar = ESMF_CalendarCreate("Gregorian", ESMF_CAL_GREGORIAN, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! initialize time interval to 6 hours
     call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! initialize start time to 5/1/2003
     call ESMF_TimeSet(startTime, yy=2003, mm=5, dd=1, &
                       calendar=gregorianCalendar, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! initialize stop time to 5/2/2003
     call ESMF_TimeSet(stopTime, yy=2003, mm=5, dd=2, &
                       calendar=gregorianCalendar, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
 
     ! initialize the clock with the above values
     tclock = ESMF_ClockCreate("top clock", timeStep, startTime, stopTime, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
      
     ! Call each Init routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
     call ESMF_GridCompInitialize(gcomp1, exportState=states(1), clock=tclock, &
                                  rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_GridCompInitialize(gcomp2, importState=states(2), clock=tclock, &
                                  rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_CplCompInitialize(cpl, states(1), states(2), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     print *, "Comp Initialize complete"
 
     ! Main run loop.
     finished = .false.
     do while (.not. finished)
         call ESMF_GridCompRun(gcomp1, exportState=states(1), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
         call ESMF_CplCompRun(cpl, importState=states(1), &
                                   exportState=states(2), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
         call ESMF_GridCompRun(gcomp2, importState=states(2), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
         call ESMF_ClockAdvance(tclock, timestep)
         ! query clock for current time
         if (ESMF_ClockIsStopTime(tclock)) finished = .true.
@@ -339,21 +405,54 @@
     ! Call each Finalize routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
     call ESMF_GridCompFinalize(gcomp1, exportState=states(1), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_GridCompFinalize(gcomp2, importState=states(2), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_CplCompFinalize(cpl, states(1), states(2), clock=tclock, rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     print *, "Comp Finalize complete"
 
     ! Destroy components.
     call ESMF_ClockDestroy(tclock, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_CalendarDestroy(gregorianCalendar, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_GridCompDestroy(gcomp1, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_GridCompDestroy(gcomp2, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     call ESMF_CplCompDestroy(cpl, rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+!BOC
     print *, "Comp Destroy returned"
 
     print *, "Application Example 1 finished"
 
     call ESMF_Finalize(rc=rc)
+!EOC
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+    if (finalrc.EQ.ESMF_SUCCESS) then
+        print *, "PASS: ESMF_AppMainEx.F90"
+    else
+        print *, "FAIL: ESMF_AppMainEx.F90"
+    end if
+
+!BOC
 
     end program ESMF_AppMainEx
 !   ! End of main program
