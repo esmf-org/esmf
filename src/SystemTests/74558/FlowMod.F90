@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.1 2003/04/04 18:28:24 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.2 2003/04/04 21:38:21 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -107,6 +107,10 @@
 !
         i_max = 40
         j_max = 20
+        x_min = 0.0
+        x_max = 20.0
+        y_min = 0.0
+        y_max = 5.0
         horz_gridtype = ESMF_GridType_XY
         vert_gridtype = ESMF_GridType_Unknown
         horz_stagger = ESMF_GridStagger_A
@@ -114,12 +118,10 @@
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
         halo_width = 1
-        x_min = 0.0
-        x_max = 20.0
-        y_min = 0.0
-        y_max = 5.0
 
         grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+                               x_min=x_min, x_max=x_max, &
+                               y_min=y_min, y_max=y_max, &
                                layout=layout, &
                                horz_gridtype=horz_gridtype, &
                                vert_gridtype=vert_gridtype, &
@@ -128,8 +130,6 @@
                                horz_coord_system=horz_coord_system, &
                                vert_coord_system=vert_coord_system, &
                                halo_width=halo_width, &
-                               x_min=x_min, x_max=x_max, &
-                               y_min=y_min, y_max=y_max, &
                                name="source grid", rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
@@ -650,6 +650,10 @@
       do j = jmin_t, jmax_t
         do i = imin_t, imax_t
           p(i,j) = (gamma-1.0)*rho(i,j)*sie(i,j)
+        enddo
+      enddo
+      do j = jmin, jmax
+        do i = imin, imax
           q(i,j) = q0*rho(i,j)*uin*sqrt(dx**2+dy**2)*((u(i-1,j)-u(i,j))/dx &
                                                      +(v(i,j-1)-v(i,j))/dy)
           q(i,j) = max(q(i,j), 0.0)
