@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2004/09/16 20:49:50 theurich Exp $
+# $Id: build_rules.mk,v 1.12 2004/10/28 22:11:28 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -205,9 +205,12 @@ GCOMP_FOPTFLAGS	   = -g
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS	   = -O3 -OPT:Olimit=6500
 OCOMP_FOPTFLAGS	   = -O3
-##################################################################################
+###############################################################################
 
 PARCH		   = IRIX
+
+# set this to libesmf to build a shared library
+SL_LIBS_TO_MAKE =
 
 SL_SUFFIX   = so
 SL_LIBOPTS  = $(SL_ABIOPTS) -rpath $(ESMF_LIBDIR) -shared
@@ -215,35 +218,5 @@ SL_LINKOPTS =
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf 
-
-##### end common section
 
 
-###################
-#
-shared: build_shared
-
-#
-# Notes:
-#
-# -lpthread is required by AMS package. It should follow -lmpi, hence, is specified
-# in the variable SYS_LIB. If libpthread.so is not avilable on this machine, you can
-# comment out this line.
-#
-# -trapuv initializes memory with NaNs, so that uninitialized errors are caught.
-
-# For IRIX version less than 6.2, 
-#         replace "-OPT:Olimit=5000" with "-OPT:fprop_limit=5000"
-
-#	IF your O2K has ip25 processor, please change
-#       ip27 to ip25
-#
-#COPTFLAGS  = -OPT:Olimit=6000 -Ofast=ip27
-#FOPTFLAGS  = -Ofast=ip27 -IPA:cprop=OFF -OPT:IEEE_arithmetic=1
-#
-# Some examples crash (ts/ex/tests/ex1f) with the cprop optimization
-#
-# For IRIX Release less than,6.2 the above should probably be replaced by
-# FC_LIB         = -lsun -lF77 -lU77 -lI77 -lisam
-# FC_LIB         = -lF77 -lU77 -lI77 -lisam

@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2004/10/26 19:08:15 nscollins Exp $
+#  $Id: build_rules.mk,v 1.9 2004/10/28 22:11:28 nscollins Exp $
 #
 #  Darwin.xlf.default.mk
 #
@@ -244,6 +244,7 @@ C_CXXSOLIBS		= -L. $(CXX_LIB_PATH) -lm -lxlf90_r -libmc++ -lstdc++
 
 PARCH			= mac_osx
 
+SL_LIBS_TO_MAKE =
 
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
@@ -251,20 +252,11 @@ SL_LINKOPTS =
 SL_LIB_LINKER = $(CXX_CC) -L$(ESMF_LIBDIR)
 SL_F_LINKER = $(F90CXXLD) 
 SL_C_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf 
 
 # SL_SUFFIX   =
 # SL_LIBOPTS  =
 # SL_LINKOPTS =
 # SL_F_LINKER = $(F90CXXLD) 
 # SL_C_LINKER = $(CXXF90LD) 
-
-
-#############
-#
-# Set shared dependent on build_shared to build .so lib.
-#
-#shared: build_shared
-shared:
 
 

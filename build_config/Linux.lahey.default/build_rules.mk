@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12 2004/06/17 14:30:40 nscollins Exp $
+# $Id: build_rules.mk,v 1.13 2004/10/28 22:11:29 nscollins Exp $
 #
 # Linux.lahey.default.mk
 #
@@ -164,23 +164,12 @@ OCOMP_FOPTFLAGS	   = -O
 
 PARCH		   = linux_lf95
 
+SL_LIBS_TO_MAKE = libesmf 
+
 SL_SUFFIX   = so
 SL_LIBOPTS  = -shared
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
 SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR) -Wl,-rpath /usr/local/lf9560/lib
 SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
-SL_LIBS_TO_MAKE = libesmf 
 
-############################################################
-#
-# Set shared dependent on build_shared to build .so lib.
-#
-shared: build_shared
-
-
-#
-# Notes:
-#
-#  -ldl is the dynamic link library that allows one to use dlopen() etc
-#

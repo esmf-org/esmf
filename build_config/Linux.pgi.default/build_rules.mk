@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.11 2004/06/07 17:07:02 slswift Exp $
+# $Id: build_rules.mk,v 1.12 2004/10/28 22:11:30 nscollins Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -157,19 +157,13 @@ OCOMP_FOPTFLAGS	   = -O
 
 PARCH		   = linux_pgi
 
+SL_LIBS_TO_MAKE = 
+
 SL_SUFFIX   =
 SL_LIBOPTS  =
 SL_LINKOPTS =
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE = libesmf 
-
-
-#############
-#
-# Set shared dependent on build_shared to build .so lib.
-#
-shared:
 
 

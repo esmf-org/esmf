@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.1 2004/10/21 15:23:21 svasquez Exp $
+# $Id: build_rules.mk,v 1.2 2004/10/28 22:11:31 nscollins Exp $
 # 
 # Unicos.default.default.mk
 #
@@ -137,20 +137,17 @@ OCOMP_FOPTFLAGS	   =
 
 PARCH		   = Unicos
 
+SL_LIBS_TO_MAKE =
+
 SL_SUFFIX   = so
 SL_LIBOPTS  =
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)
 SL_LIB_LINKER = $(CXXF90LD)
-SL_LIBS_TO_MAKE =
 
 ##### end common section
 
-
-###################
-#
-shared: 
 
 # common.mk overrides
 

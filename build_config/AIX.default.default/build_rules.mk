@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.16 2004/06/07 17:06:32 slswift Exp $
+#  $Id: build_rules.mk,v 1.17 2004/10/28 22:11:26 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -222,21 +222,13 @@ OCOMP_COPTFLAGS		= $(COM_ALL_OPT_FLAGS)
 OCOMP_FOPTFLAGS		= $(COM_OPT_FLAG) $(COM_WARN_FLAG)
 #
 
+SL_LIBS_TO_MAKE = libesmf
 
 SL_SUFFIX   = so
 SL_LIBOPTS  = -G -qmkshrobj $(C_F90CXXLIBS) $(MPI_LIB)
 SL_LINKOPTS = -brtl
 SL_F_LINKER = $(F90CXXLD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
 SL_C_LINKER = $(CXXF90LD) -bmaxdata:0x80000000 -bmaxstack:0x1000000 -bloadmap:loadmap.txt
-SL_LIBS_TO_MAKE = libesmf
 
 # end of common settings
-
-#############
-#
-# Set shared dependent on build_shared to build .so lib.
-#
-shared: build_shared
-
-
 
