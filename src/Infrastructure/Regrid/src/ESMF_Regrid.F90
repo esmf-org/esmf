@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.89 2004/12/07 23:29:20 jwolfe Exp $
+! $Id: ESMF_Regrid.F90,v 1.90 2004/12/22 20:54:48 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.89 2004/12/07 23:29:20 jwolfe Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.90 2004/12/22 20:54:48 jwolfe Exp $'
 
 !==============================================================================
 
@@ -249,6 +249,10 @@
       !-------------
       ! ESMF_REGRID_METHOD_CONSERV2
       case(4)
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                   "Second-order conservative method not yet supported", &
+                   ESMF_CONTEXT, rc)
+        return
       !   routehandle = ESMF_RegridConstructConserv(srcArray, dstArray, &
       !                                        regridName, order=2, rc=localrc)
 
@@ -263,6 +267,10 @@
       !-------------
       ! ESMF_REGRID_METHOD_NEAR_NBR
       case(6)
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                   "Nearest neighbor method not yet supported", &
+                   ESMF_CONTEXT, rc)
+        return
       !   routehandle = ESMF_RegridConstructNearNbr(srcArray, dstArray, &
       !                                        regridName, rc=localrc)
 
@@ -448,7 +456,7 @@
                          counts=counts, rc=localrc)
       gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
       srcLocalArray = srcarray
-      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, localrc)
+      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
 
       allocate(dstDimOrder(rank), &
                srcDimOrder(rank), stat=localrc)
@@ -730,7 +738,7 @@
       gatheredArray = ESMF_LocalArrayCreate(1, type, kind, asize, rc=localrc)
       srcLocalArray = srcArray
 
-      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, localrc)
+      call ESMF_RouteRun(rh, srcLocalArray, gatheredArray, rc=localrc)
 
       allocate(dstDimOrder(rank), &
                srcDimOrder(rank), stat=localrc)
