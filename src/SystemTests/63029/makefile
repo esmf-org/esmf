@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/02/26 01:18:02 nscollins Exp $ 
+# $Id: makefile,v 1.2 2003/02/26 01:30:04 nscollins Exp $ 
 
 ALL:  test
 
@@ -29,8 +29,10 @@ test:	ESMF_SysTest63029
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
+# model has to be built first
+ESMF_SysTest63029.o: user_model.o
 
-ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.F90 chkopts
+ESMF_SysTest63029: ESMF_SysTest63029.o  user_model.o chkopts
 	-${F90CXXLD} -o ESMF_SysTest63029 ESMF_SysTest63029.o user_model.o \
 	    -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
 	${RM} ESMF_SysTest63029.o
@@ -45,5 +47,6 @@ RUN_ESMF_SysTest63029UNI:
 
 ESMF_SysTest63029.rm:
 	echo "ESMF_SysTest63029.rm target called here."
+
 
 
