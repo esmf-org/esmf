@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.38 2003/12/19 19:20:22 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.39 2004/01/12 21:29:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.38 2003/12/19 19:20:22 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.39 2004/01/12 21:29:56 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -313,16 +313,12 @@ int ESMC_Clock::count=0;
 
     int rc = ESMF_SUCCESS;
 
-    // if not first advance, save current time, then advance it
-    if (!firstAdvance) {
-      prevTime = currTime;
-      // use passed-in timestep if specified, otherwise use the clock's
-      currTime += (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
-    } else {
-      // current time equals start time, which is the first time step! So,
-      // don't actually advance the clock on the first call.
-      firstAdvance = false;
-    }
+    // save current time, then advance it
+    prevTime = currTime;
+
+    // use passed-in timestep if specified, otherwise use the clock's
+    currTime += (timeStep != ESMC_NULL_POINTER) ? *timeStep : this->timeStep;
+
     // count number of timesteps
     advanceCount++;
 
@@ -443,16 +439,13 @@ int ESMC_Clock::count=0;
     //        will do the copy of ESMC_Time's extra properties.
     *nextTime = currTime;
 
-    if (!firstAdvance) {
-      if (timeStep != ESMC_NULL_POINTER) {
-        // use passed-in timeStep if specified
-        *nextTime = currTime + *timeStep;
-      } else {
-        // otherwise use clock's own timestep
-        *nextTime = currTime + this->timeStep;
-      }
+    if (timeStep != ESMC_NULL_POINTER) {
+      // use passed-in timeStep if specified
+      *nextTime = currTime + *timeStep;
+    } else {
+      // otherwise use clock's own timestep
+      *nextTime = currTime + this->timeStep;
     }
-    // else nextTime is the current time, which is the start time!
 
     return(ESMF_SUCCESS);
 
@@ -1019,7 +1012,6 @@ int ESMC_Clock::count=0;
     advanceCount = 0;
     numAlarms = 0;
     id = ++count;  // TODO: inherit from ESMC_Base class
-    firstAdvance = true;
 
  } // end ESMC_Clock
 
@@ -1072,6 +1064,8 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  TMG 4.1, 4.2
 
+    int rc = ESMF_SUCCESS;
+
     // validate inputs
     if (numAlarms == MAX_ALARMS || alarm == ESMC_NULL_POINTER) {
       return(ESMF_FAILURE);
@@ -1080,6 +1074,9 @@ int ESMC_Clock::count=0;
     // append to list and count
     alarmList[numAlarms++] = alarm;
 
-    return(ESMF_SUCCESS);
+    // check new alarm to see if it's time to ring
+    alarm->ESMC_AlarmCheckRingTime(&rc);
+
+    return(rc);
 
  } // end ESMC_ClockAddAlarm

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.24 2003/12/19 19:19:08 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.25 2004/01/12 21:29:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,10 +104,6 @@
     static int        count;      // number of clocks created. Thread-safe
                                   //   because int is atomic.
                                   //    TODO: inherit from ESMC_Base class
-
-    bool firstAdvance;  // Flag denoting whether the clock is in its initial
-                        // state.  Used by ClockAdvance(), GetNextTime(),
-                        // and GetAlarmList(ESMF_ALARMLIST_NEXTRINGING, ...)
 
 //    pthread_mutex_t clockMutex; // TODO: (TMG 7.5)
 
