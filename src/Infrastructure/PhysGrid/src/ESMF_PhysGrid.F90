@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.26 2003/05/22 21:21:54 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.27 2003/05/27 17:35:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -178,7 +178,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.26 2003/05/22 21:21:54 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.27 2003/05/27 17:35:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1299,6 +1299,8 @@
       integer :: l1, l2
       logical :: rcpresent=.FALSE.                ! Return code present
       real(selected_real_kind(6,45)), dimension(:,:,:), pointer :: temp
+      type(ESMF_Array), target :: array_temp
+      
 
 !     Initialize return code
       if(present(rc)) then
@@ -1331,7 +1333,8 @@
                            delta1*0.5*real(global_n1+global_n1-1)
             enddo
           enddo
-          physgrid%center_coord = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
+          physgrid%center_coord => array_temp 
 !         nullify(temp)
 !         deallocate(temp)    ! TODO: figure out how to load one array
         case (ESMF_CellLoc_Center_Y)
@@ -1343,7 +1346,8 @@
                            delta2*0.5*real(global_n2+global_n2-1)
             enddo
           enddo
-          physgrid%center_coord = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
+          array_temp = ESMF_ArrayCreate(temp, ESMF_DATA_REF, rc)
+          physgrid%center_coord => array_temp 
           nullify(temp)
 !         deallocate(temp)
         case (ESMF_CellLoc_Corner_X)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.51 2003/05/22 21:21:34 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.52 2003/05/27 17:34:42 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.51 2003/05/22 21:21:34 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.52 2003/05/27 17:34:42 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1318,6 +1318,11 @@
         allocate(grid%physgrids(1), stat=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridAddPhysGrid: physgrids allocate"
+          return
+        endif
+        allocate(temp_pgrids(grid%num_physgrids), stat=status)
+        if(status .NE. ESMF_SUCCESS) then
+          print *, "ERROR in ESMF_GridAddPhysGrid: temp_pgrids allocate"
           return
         endif
       else
