@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.50 2005/01/12 06:55:37 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.51 2005/01/12 07:15:37 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,7 +158,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.50 2005/01/12 06:55:37 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.51 2005/01/12 07:15:37 theurich Exp $'
 
 !==============================================================================
 
@@ -939,19 +939,17 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
-!   data array of kind {\tt ESMF\_KIND\_I4} from PET {\tt root} to all PETs
-!   of the {\tt ESMF\_VM} object (including {\tt root}).
+!   data array of kind {\tt ESMF\_KIND\_I4} from PET {\tt root} to all 
+!   other PETs of the {\tt ESMF\_VM} object.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!   \item[bcstData]
+!        Contigous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        is to be broadcasted to all other PETs. On all other PETs 
+!        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
@@ -1026,20 +1024,18 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
-!   data array of kind {\tt ESMF\_KIND\_R4} from PET {\tt root} to all PETs
-!   of the {\tt ESMF\_VM} object (including {\tt root}).
+!   data array of kind {\tt ESMF\_KIND\_R4} from PET {\tt root} to all
+!   other PETs of the {\tt ESMF\_VM} object.
 !
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!   \item[bcstData]
+!        Contigous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        is to be broadcasted to all other PETs. On all other PETs 
+!        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
@@ -1114,20 +1110,18 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
-!   data array of kind {\tt ESMF\_KIND\_R8} from PET {\tt root} to all PETs
-!   of the {\tt ESMF\_VM} object (including {\tt root}).
+!   data array of kind {\tt ESMF\_KIND\_R8} from PET {\tt root} to all
+!   other PETs of the {\tt ESMF\_VM} object.
 !
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!   \item[bcstData]
+!        Contigous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        is to be broadcasted to all other PETs. On all other PETs 
+!        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
@@ -1202,19 +1196,17 @@ module ESMF_VMMod
 !
 ! !DESCRIPTION:
 !   Collective {\tt ESMF\_VM} communication call that broadcasts a contigous 
-!   data array of kind {\tt ESMF\_Logical} from PET {\tt root} to all PETs
-!   of the {\tt ESMF\_VM} object (including {\tt root}).
+!   data array of kind {\tt ESMF\_Logical} from PET {\tt root} to all
+!   other PETs of the {\tt ESMF\_VM} object.
 !
 !   The arguments are:
 !   \begin{description}
 !   \item[vm] 
 !        {\tt ESMF\_VM} object.
-!   \item[sendData]
-!        Contigous data arry holding data to be send. Only the {\tt sendData}
-!        array specified by the {\tt root} PET will be used by this method.
-!   \item[recvData] 
-!        Contigous data array for data to be received. All PETs must specify a
-!        valid destination array.
+!   \item[bcstData]
+!        Contigous data arry. On {\tt root} PET {\tt bcstData} holds data that
+!        is to be broadcasted to all other PETs. On all other PETs 
+!        {\tt bcstData} is used to receive the broadcasted data.
 !   \item[count] 
 !        Number of elements in sendData and recvData. Must be the same on all
 !        PETs.
