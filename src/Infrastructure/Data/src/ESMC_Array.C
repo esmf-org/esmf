@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.16 2003/01/23 20:27:30 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.17 2003/01/23 22:18:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.16 2003/01/23 20:27:30 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.17 2003/01/23 22:18:30 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -667,3 +667,24 @@ extern "C" {
 //
 
  } // end ~ESMC_Array
+
+
+// these are functions, but not class methods.
+ESMC_Array *ESMC_ArrayCreate(int rank, enum ESMC_DataType dt,
+                             enum ESMC_DataKind dk, void *base,
+                             int *offsets, int *lengths, int *strides, int *rc);
+int ESMC_ArrayDestroy(ESMC_Array *array);
+ESMC_Array *ESMC_ArrayCreate_F(int rank, enum ESMC_DataType dt,
+                               enum ESMC_DataKind dk, void *base,
+                               int *offsets, int *lengths, int *strides,
+                               struct c_F90ptr *f90ptr, int *rc);
+
+// these are class methods
+void ESMC_Array::ESMC_ArraySetF90Ptr(struct c_F90ptr *p) {
+       memcpy((void *)(&this->f90dopev), (void *)p, sizeof(struct c_F90ptr));
+}
+void ESMC_Array::ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) {
+       memcpy((void *)p, (void *)(&this->f90dopev), sizeof(struct c_F90ptr));
+}
+
+
