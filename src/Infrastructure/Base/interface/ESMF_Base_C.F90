@@ -1,4 +1,4 @@
-!  $Id: ESMF_Base_C.F90,v 1.1 2003/10/21 23:14:24 nscollins Exp $
+!  $Id: ESMF_Base_C.F90,v 1.2 2003/10/22 03:37:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_Base_C.F90,v 1.1 2003/10/21 23:14:24 nscollins Exp $'
+!      '$Id: ESMF_Base_C.F90,v 1.2 2003/10/22 03:37:13 nscollins Exp $'
 !==============================================================================
 
 !------------------------------------------------------------------------------
@@ -52,13 +52,13 @@
 
    end subroutine f_esmf_domainlistgetde
 
-   subroutine f_esmf_domainlistgetai(this, dnum, ainum, AI, rc);
+   subroutine f_esmf_domainlistgetai(domlist, dnum, ainum, AI, rc);
        use ESMF_BaseMod    ! ESMF base class
 
        type(ESMF_DomainList), pointer :: domlist
-       type(ESMF_AxisIndex) :: AI
        integer :: dnum     
        integer :: ainum
+       type(ESMF_AxisIndex) :: AI
        integer :: rc     
 
        AI = domlist%domains(dnum)%ai(ainum)
