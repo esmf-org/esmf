@@ -103,34 +103,36 @@
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Superstructure/Coupler/doc/Coupler_refdoc.ctex"
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
-%\end{htmlonly}
-%\part{Infrastructure Fields and Grids: Fields}
+#include "../Superstructure/Component/doc/Component_refdoc.ctex"
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+\newpage
+\begin{htmlonly}
+\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Fields}
+\end{htmlonly}
+\part{Infrastructure Fields and Grids: Fields}
 
-%#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
+\setcounter{section}{0}
+\renewcommand{\thesection}{\shortname\arabic{section}}
+\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-%\newpage
-%\begin{htmlonly}
-%\addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
-%\end{htmlonly}
-%\part{Infrastructure Fields and Grids: Physical Grids}
-%\label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
+#include "../Infrastructure/Field/doc/Field_refdoc.ctex"
 
-%\setcounter{section}{0}
-%\renewcommand{\thesection}{\shortname\arabic{section}}
-%\renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
-%\renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+%% \Newpage
+%% \begin{htmlonly}
+%% \addcontentsline{toc}{part}{Infrastructure Fields and Grids: Physical Grids}
+%% \end{htmlonly}
+%% \part{Infrastructure Fields and Grids: Physical Grids}
+%% \label{part:Infrastructure_Fields_and_Grids:_Physical_Grids}
 
-%#include "../Infrastructure/PhysGrid/doc/PhysGrid_desdoc.ctex"
+%% \setcounter{section}{0}
+%% \renewcommand{\thesection}{\shortname\arabic{section}}
+%% \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
+%% \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
+
+%% #include "../Infrastructure/PhysGrid/doc/PhysGrid_refdoc.ctex"
+
 
 %\newpage
 %\begin{htmlonly}

@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.3 2003/03/21 03:46:34 flanigan Exp $
+% $Id: Field_refdoc.ctex,v 1.4 2003/03/25 23:13:39 flanigan Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -47,12 +47,18 @@
 \input{../Infrastructure/Field/doc/Field_prog}
 #endif
 
-\section{Object Model}
-#ifdef STANDALONE
-\input{Field_obj}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/Field/doc/Field_obj}
-#endif
+%
+% Field_obj.tex wants to include the graphics  file
+% fieldclassNH.eps.  In processing in CONSTITUENT
+% mode, this file can not be found.
+%
+%
+%% \section{Object Model}
+%% #ifdef STANDALONE
+%% \input{Field_obj}
+%% #elif defined(CONSTITUENT)
+%% \input{../Infrastructure/Field/doc/Field_obj}
+%% #endif
 
 % %\section{Global Parameters and Definitions}
 % #ifdef STANDALONE

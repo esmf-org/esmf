@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.12 2003/03/25 00:18:31 flanigan Exp $ 
+# $Id: makefile,v 1.13 2003/03/25 23:13:41 flanigan Exp $ 
 
-all: alldocs
+all: alldoc
 
 ALL:  lib
 CFLAGS    =
@@ -15,20 +15,19 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/Component/doc
 
-DVIFILES  = \
-		Component_desdoc.dvi 
-#		Component_reqdoc.dvi \
-#		Component_refdoc.dvi
+DVIFILES  =     $(ESMC_DOCDIR)/Component_desdoc.dvi \
+                $(ESMC_DOCDIR)/Component_refdoc.dvi
+#		$(ESMC_DOCDIR)/Component_reqdoc.dvi \
+
 
 PDFFILES  = $(addsuffix .pdf, $(basename $(DVIFILES)))
 PSFILES  = $(addsuffix .ps, $(basename $(DVIFILES)))
 
-HTMLFILES = \
-		Component_desdoc 
-#		Component_reqdoc \
-#		Component_refdoc
+HTMLFILES =     $(ESMC_DOCDIR)/Component_desdoc \
+                $(ESMC_DOCDIR)/Component_refdoc
+#		$(ESMC_DOCDIR)/Component_reqdoc \
 
-alldocs: ${DVIFILES} ${PDFFILES} ${HTMLFILES} ${PSFILES}
+
 
 # TODO: this should be a very long list of all files which are
 #  part of the design doc.
@@ -71,70 +70,71 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   = Component_desdoc
-CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Component_desdoc.tex
+CLEANDIRS   = Component_desdoc Component_refdoc
+CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi Component_desdoc.tex Component_refdoc.tex
 CLOBBERDIRS =
 
 
 # Dvi files
-Component_desdoc.dvi: Component_desdoc.ctex fsrc ccsrc
-	${DO_LATEX} Component des
+$(ESMC_DOCDIR)/Component_desdoc.dvi: Component_desdoc.ctex $(TEXFILES_TO_MAKE)
+	${DO_LATEX} Component des 
+	mv -f Component_desdoc.dvi $(ESMC_DOCDIR)
 
-Component_reqdoc.dvi:
-	${DO_LATEX} Component req
+$(ESMC_DOCDIR)/Component_reqdoc.dvi:
+	${DO_LATEX} Component req 
+	mv -f Component_reqdoc.dvi $(ESMC_DOCDIR)
 
-Component_refdoc.dvi:
-	${DO_LATEX} Component ref
+$(ESMC_DOCDIR)/Component_refdoc.dvi: $(TEXFILES_TO_MAKE)
+	${DO_LATEX} Component ref 
+	mv -f Component_refdoc.dvi $(ESMC_DOCDIR)
 
 
 # Pdf files
-Component_desdoc.pdf: Component_desdoc.dvi
-	dvipdf Component_desdoc.dvi Component_desdoc.pdf
-	mv -f Component_desdoc.pdf ${ESMC_DOCDIR}
+$(ESMC_DOCDIR)/Component_desdoc.pdf: $(ESMC_DOCDIR)/Component_desdoc.dvi
+	dvipdf $(ESMC_DOCDIR)/Component_desdoc.dvi $(ESMC_DOCDIR)/Component_desdoc.pdf
 
-Component_reqdoc.pdf: Component_reqdoc.dvi
-	dvipdf Component_reqdoc.dvi Component_reqdoc.pdf
-	mv -f Component_reqdoc.pdf ${ESMC_DOCDIR}
 
-Component_refdoc.pdf: Component_refdoc.dvi
-	dvipdf Component_refdoc.dvi Component_refdoc.pdf
-	mv -f Component_refdoc.pdf ${ESMC_DOCDIR}
+$(ESMC_DOCDIR)/Component_reqdoc.pdf: $(ESMC_DOCDIR)/Component_reqdoc.dvi
+	dvipdf $(ESMC_DOCDIR)/Component_reqdoc.dvi $(ESMC_DOCDIR)/Component_reqdoc.pdf
+
+
+$(ESMC_DOCDIR)/Component_refdoc.pdf: $(ESMC_DOCDIR)/Component_refdoc.dvi
+	dvipdf $(ESMC_DOCDIR)/Component_refdoc.dvi $(ESMC_DOCDIR)/Component_refdoc.pdf
+
 
 # PS files
-Component_desdoc.ps: Component_desdoc.dvi
-	dvips -o Component_desdoc.ps Component_desdoc.dvi
-	mv -f Component_desdoc.ps ${ESMC_DOCDIR}
+# Component_desdoc.ps: Component_desdoc.dvi
+# 	dvips -o Component_desdoc.ps Component_desdoc.dvi
+# 	mv -f Component_desdoc.ps ${ESMC_DOCDIR}
 
-Component_reqdoc.ps: Component_reqdoc.dvi
-	dvips -o Component_reqdoc.ps Component_reqdoc.dvi
-	mv -f Component_reqdoc.ps ${ESMC_DOCDIR}
+# Component_reqdoc.ps: Component_reqdoc.dvi
+# 	dvips -o Component_reqdoc.ps Component_reqdoc.dvi
+# 	mv -f Component_reqdoc.ps ${ESMC_DOCDIR}
 
-Component_refdoc.ps: Component_refdoc.dvi
-	dvips -o Component_refdoc.ps Component_refdoc.dvi
-	mv -f Component_refdoc.ps ${ESMC_DOCDIR}
+# Component_refdoc.ps: Component_refdoc.dvi
+# 	dvips -o Component_refdoc.ps Component_refdoc.dvi
+# 	mv -f Component_refdoc.ps ${ESMC_DOCDIR}
 
 # Html Files
-# the original rules have a problem - if the dir already exists the mv -f
-# will fail.  (also, i didn't have a doc dir and no rule created it the
-# first time - but that's another problem.)  i put in the following
-# hack which tries to remove the old dir first and then move the new dir.
-Component_desdoc: 
+$(ESMC_DOCDIR)/Component_desdoc: 
 	${DO_L2H} Component des
 	rm -fr ${ESMC_DOCDIR}/Component_desdoc
 	mv -f Component_desdoc ${ESMC_DOCDIR}
 
-Component_reqdoc: 
+$(ESMC_DOCDIR)/Component_reqdoc: 
 	${DO_L2H} Component req
+	rm -fr ${ESMC_DOCDIR}/Component_reqdoc
 	mv -f Component_reqdoc ${ESMC_DOCDIR}
 
-Component_refdoc: 
+$(ESMC_DOCDIR)/Component_refdoc: 
 	${DO_L2H} Component ref
+	rm -fr ${ESMC_DOCDIR}/Component_refdoc
 	mv -f Component_refdoc ${ESMC_DOCDIR}
 
 
 
 ## stuff i added locally
-fsrc:
+#fsrc:
 # 	do_fprotex compex ../examples/ESMF_CompEx.F90
 # 	do_fprotex comp ../src/ESMF_Comp.F90
 # 	do_fprotex stateex ../examples/ESMF_StateEx.F90
@@ -146,7 +146,7 @@ fsrc:
 # 	do_fprotex cplex ../examples/ESMF_CplEx.F90
 # 	do_fprotex gcompex ../examples/ESMF_GCompEx.F90
 
-ccsrc:
+#ccsrc:
 # 	do_ccprotex compex ../examples/ESMC_CompEx.C
 # 	do_ccprotex comp ../interface/ESMC_Comp.C
 # 	do_ccprotex stateex ../examples/ESMC_StateEx.C
