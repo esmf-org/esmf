@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2004/02/11 21:54:55 nscollins Exp $
+# $Id: makefile,v 1.5 2004/03/16 21:01:09 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -37,26 +37,10 @@ endif
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = ESMF_LocalArray.F90
 CLOBBERDIRS =
 
-# rule for making ESMF_LocalArray.F90 from ESMF_LocalArray_F90.cpp:
-# either use the F90 with cpp only, or gcc and ignore the
-# warnings about the fortran syntax, depending what is possible on each
-# architecture.  this needs to run on each arch.  nsc 10feb03
-#
-# The rules below work on the mac with gcc and absoft fortran.
-# The -P option prevents putting #line directives in the output, and
-# -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
-# translating @s into newlines to separate multiline macros, and
-# also translate ^ into # so that other include files are ready to
-# be processed by the second runthru of the preprocessor during the 
-# actual compile. (These lines are: ^include "fred" in the
-# original source to shield them from the first preprocess pass.)
-#
-#ESMF_LocalArray.F90: ESMF_LocalArray_F90.cpp
-#	gcc -E -P ESMF_LocalArray_F90.cpp | tr "@^" "\n#" > ESMF_LocalArray.F90
-#
+ESMF_LocalArray.F90: ESMF_LocalArray.cpp ESMF_LocalArrayMacros.h
 
 
 
