@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.47 2003/05/02 22:05:25 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.48 2003/05/07 16:35:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -119,7 +119,6 @@
          type(ESMF_Base) :: base                  ! base class
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
-         integer :: spacing                       ! dummy for memory layout
          type(ESMF_DELayout) :: layout            ! component layout
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
@@ -180,7 +179,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.47 2003/05/02 22:05:25 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.48 2003/05/07 16:35:10 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -365,7 +364,13 @@ end function
 
         ! name of a specific config file.  open it and store the config object.
         if (present(configfile)) then
-          !compp%config = ESMF_ConfigCreate(configfile, status)
+          compp%configfile = configfile
+          compp%config = ESMF_ConfigCreate(status)
+          call ESMF_ConfigLoadFile(compp%config, configfile, rc=status)
+          ! TODO: rationalize return codes from config with ESMF codes
+          if (status .ne. 0) then
+              print *, "ERROR: loading config file, name: ", trim(configfile)
+          endif
         else
           !compp%config = 0
         endif
