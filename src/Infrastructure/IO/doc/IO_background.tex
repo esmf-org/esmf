@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.11 2002/05/09 22:44:17 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.12 2002/05/10 20:36:39 lzaslavsky Exp $
 
 
 Earth system modeling applications require efficient and robust tools
@@ -48,15 +48,13 @@ unstructured land-surface grids, and ungridded observational networks.
 Fields within a model component are frequently defined on the same
 physical grid and are decomposed in memory in an identical fashion;
 that is, they share a distributed grid. They form a {\em bundle of
-fields} defined on the same distributed grid. 
-
-The gridded data are supported by three ESMF elements: {\em PhysGrid} element 
+fields} defined on the same distributed grid. The gridded data are
+supported by three ESMF elements: {\em PhysGrid} element 
 for phyical grids, {\em DistGrid} element for distributed grids, and 
 {\em Fields} class for fields (\cite{ESMF-PhysGrid-Req},
 \cite{ESMF-DistGrid-Req}, \cite{ESMF-Field-Req}). 
 
 ESMF I/O will support the following three models of data: 
-
 \begin{description}
 \item[\bf Regular Gridded Data] The data of this kind are defined on a
 logically rectangular grid. Multi-dimensional arrays can be used for
@@ -86,20 +84,20 @@ the object, and often either accompanies the object or is embedded in the
 file header. As such, metadata can be very useful as the basis for 
 information storage and retrieval systems, as well as for utilization of the 
 data within Earth Science models.
-
 The information about the object provided by metadata allows to optimize  
 resource allocation and organization of storage and retriaval of data. In 
 parallel computing, such a knowledge may be especially important. 
 
 If metadata are provided, the files may be either {\em self-described} or
 {\em co-described}, depending on the fashion how metadata are allocated.
-
-A {\em self-described} file contains in its header all metadata necessary to 
-provide a unique interpretation of the file content assuming certain 
-conventions.  A {\em co-described} file is accompanied by a metadata file. The
+\begin{description}
+\item[\bf A self-described file] contains in its header all metadata 
+necessary to provide a unique interpretation of the file content
+assuming certain conventions.  
+\item[\bf A co-described file] is accompanied by a metadata file. The
 metadata file provides a unique interpretation of the data file content
 under certain conventions. 
-
+\end{description}
 It is assumed the metadata can be rapidly read by a corresponding API without 
 reading an entire content of the data file. Some data files may contain 
 complete description of their content, but the way data are represented might 
@@ -114,14 +112,14 @@ dataset.
 
 We assume that the NetCDF conventions for climate and forecast metadata, 
 ``CF conventions'', will serve as a a basis for ESMF metadata conventions.
-NetCDF is an array-oriented data format and a library for gridded data 
-\cite{NetCDF3_UsersGuide_C}. NetCDF Climate-Forecast Metadata Conventions
-\cite{NetCDF_CF_v1_beta3} narrow NetCDF definitions, allowing a unique and 
-complete description of gridded data used in geoscience. 
-
-CF conventions specify standard dimensions, such as date or time ({\t t}), 
-height or depth ({\it z}), latitude ({\it y}), and longitude ({\it x}), and 
-specify standard units for these dimensions and other quantities. 
+ NetCDF Climate-Forecast Metadata Conventions
+\cite{NetCDF_CF_v1_beta3} narrow definitions of NetCDF, an
+array-oriented data format and a library for gridded data 
+\cite{NetCDF3_UsersGuide_C} to allow a unique and complete description
+of gridded data used in geoscience. CF conventions specify standard 
+dimensions, such as date or time ({\t t}), height or depth ({\it z}), 
+latitude ({\it y}), and longitude ({\it x}), and specify standard
+units for these dimensions and other quantities. 
 
 %%% Leonid %%%
 %%% We expect ESMF metadata conventions to be defined as extensions to
@@ -178,10 +176,7 @@ through the Internet.
 \item[\bf HDF] The Hierarchical Data Format (HDF) project provides
 interface,  software and file formats for scientific data management. 
 The HDF software includes I/O libraries and tools for analyzing,
-visualizing, and converting scientific data. Because of hierarchical nature 
-of data representation, the HDF interface and API may provide structural ways 
-to represent data on structured and unstructured grids, as well as 
-observational data. 
+visualizing, and converting scientific data. 
 
 HDF is developed and supported at the National Center for Supercomputing 
 Applications, University of Illinois at Urbana-Champaign. There are two 
@@ -189,14 +184,29 @@ different HDF formats, HDF (4.x and previous releases) and HDF5. These
 formats are completely different and {\it not} compatible.  See
 \cite{HDF4_tutorials}, \cite{HDF5_tutorial}.
 
+HDF Scientific Data Sets API allows to efficiently operate with
+multi-dimensional arrays. Although HDF SDS itself does not provide a way
+to represent high-level abstractions for data on unstructured grids
+and observational data sets, HDF-based applications, such as HDF-EOS
+do so in HDF-EOS Point Point Structure.
+
+
+%%Because of hierarchical nature of data representation, the HDF
+%%interface and API may provide structural ways 
+%%to represent data on structured and unstructured grids, as well as 
+%%observational data. 
+
+
 \item[\bf HDF-EOS]  The Hierarchical Data Format - Earth Observing
 System (HDF-EOS) is the scientific data format standard selected by
 NASA as the baseline standard for the Earth Observing System (EOS). HDF-EOS
 is an extension of HDF and uses HDF library calls as its underlying
 basis. Version 4.1r1 of HDF is used. The library and tools are written
 in C language and a Fortran interface is provided. See \cite{HDF-EOS}.
-As well as HDF, it can be used for different data models within ESMF. Its 
-Point Format covers unstructured grid and observational data.
+
+HDF-EOS can be used for different data models within ESMF. Regular
+gridded data are supported by HDF-EOS Grid Structures, while HDF-EOS  
+Point Structure covers unstructured grid and observational data.
 
 % \item[\bf GRIB] GRid in Binary (GRIB) format is a gridded data
 % standard from the World Meteorological Organization. NCEP uses GRIB
@@ -218,14 +228,14 @@ allow the creation of files which conform to the NCEP standard usage.
 
 
 \item[\bf IEEE Binary Streams]
-The most important way for a machine to represent data is to use a
-native binary data representation. There are  two choices of ordering of 
+A natural way for a machine to represent data is to use a native binary data 
+representation. There are  two choices of ordering of 
 bytes (so-called {\it Big Endian} and {\it Little Endian}), and a lot of
 ambiguity in representing floating point data. The latter, however, is
 specified, if IEEE Floating Point Standard 754 is satisfied 
 (\cite{IEEE-Floating-Point}, \cite{Kahan-IEEE-754}). It is
 desirable to be able to use efficient native representation,
-accompanied by XML metadata file \cite{XML-W3C}. 
+accompanied by a metadata file that could be created using XML \cite{XML-W3C}. 
 
 \item[\bf BUFR] Binary Universal Form of Represantation of the meteorological 
 data (BUFR) is a self-descriptive format is a format for observational data 
@@ -256,11 +266,14 @@ data management systems are beyond the scope of the basic ESMF I/O.
 
 The future development of ESMF IO facility will require further
 optimization with an expected increase in IO amount over the next few
-years. Increase in amount of satellitte data will result in the
-increase of time spent to input observational data, as well as
-efficient processing of data in data assimilation. On the
-other hand, a customer's desire to download simulation results more 
-frequently leads to significant increase in the amount of gridded data IO.
+years. Two major factors contrubuting to the increase in I/O intensity are:
+\begin{description}
+\item[-] Enhancement in model resolution;
+\item[-] Increase in I/O frequency.
+\end{description}
+We also expect significant increase in amount of of satellitte data, although 
+amount of I/O related to observational data is incomparable with amount of 
+gridded I/O which drives our performance analysis. 
 
 There are two aspects of  parallel IO:
 
