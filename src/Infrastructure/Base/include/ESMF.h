@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF.h,v 1.5 2004/05/19 11:29:28 nscollins Exp $
+$Id: ESMF.h,v 1.6 2004/05/20 11:41:59 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,21 +9,34 @@ Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 NASA Goddard Space Flight Center.
 Licensed under the GPL.
 
-main include file which includes all others
+Central F90 include file which includes other files.
 #endif
 
 #if 0
 Most of the previous contents of this file have been moved into the
-base class fortan file, so the definitions of parameters will compile
-into the base module.  But for macros needed by the framework, or
-compile time defines, can be here.  THIS FILE WILL NOT BE INCLUDED BY
-USER CODE, SO WE CANNOT WRITE USER EXAMPLE CODE THAT DEPENDS ON ANYTHING
-INCLUDED HERE.  Our tests are an exception, since they need the test
-macros in order to provide uniform error messages and exit codes.
+base class fortran module. User code gets access to parameter definitions,
+derived types, and interfaces by using the ESMF_Mod module in their code.
+Macros useful to the framework, or system-dependent compile time defines
+can go here.  THIS FILE CANNOT CONTAIN ANYTHING THAT IS REQUIRED BY USER 
+CODE BECAUSE WE AGREED TO NOT FORCE F90 USER SOURCE TO BE PREPROCESSED.  
+
+All ESMF source code does get preprocessed and user code has the option.  
+So this should only include optional things which are of benefit to ESMF
+source or are value-add to user-code but not critical.  
+
+No ESMF examples should include ESMF.h, but ESMF unit and systems test
+do need to include ESMF.h so they can use the test macros for
+uniform error messages and exit codes.
 #endif
+
+#ifndef ESMF_H
+#define ESMF_H
 
 #include "ESMF_Macros.inc"
 #include "ESMF_Conf.inc"
 #include "ESMF_Version.inc"
+#include "ESMF_LogConstants.inc"
+#include "ESMF_LogMacros.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
+#endif
