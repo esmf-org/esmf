@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.8 2004/08/13 21:29:08 nscollins Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.9 2004/08/16 20:59:18 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.8 2004/08/13 21:29:08 nscollins Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.9 2004/08/16 20:59:18 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -146,13 +146,18 @@ InterfaceMacro(FieldCreateEPtr)
 !           {\tt ESMF\_ALLOC}.
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
-!           grid.
+!           grid.  
+!           If specified here, takes precedence over the same setting
+!           in the {\tt datamap} argument.
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
+!           If specified here, takes precedence over the same setting
+!           in the {\tt datamap} argument.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
@@ -248,8 +253,12 @@ InterfaceMacro(FieldCreateEPtr)
 !     \item [{[horzRelloc]}] 
 !           Relative location of data per grid cell/vertex in the horizontal
 !           grid.
+!           If specified here, takes precedence over the same setting
+!           in the {\tt datamap} argument.
 !     \item [{[vertRelloc]}] 
 !           Relative location of data per grid cell/vertex in the vertical grid.
+!           If specified here, takes precedence over the same setting
+!           in the {\tt datamap} argument.
 !     \item [{[haloWidth]}] 
 !           Maximum halo depth along all edges.  Default is 0.
 !           This input is currently ignored; the halo depth is taken
@@ -259,7 +268,8 @@ InterfaceMacro(FieldCreateEPtr)
 !           future versions of the system; the halo region will only need
 !           to be added to axes which correspond to {\tt ESMF\_Grid} axes.
 !     \item [{[datamap]}]
-!           Describes the mapping of data to the {\tt ESMF\_Grid}.
+!           An {\tt ESMF\_FieldDataMap} which describes the mapping of 
+!           data to the {\tt ESMF\_Grid}.
 !     \item [{[name]}] 
 !           {\tt Field} name. 
 !     \item [{[iospec]}] 
