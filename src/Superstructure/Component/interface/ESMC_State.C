@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.5 2003/02/19 18:50:49 nscollins Exp $
+// $Id: ESMC_State.C,v 1.6 2003/03/10 05:14:22 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.5 2003/02/19 18:50:49 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.6 2003/03/10 05:14:22 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -65,7 +65,7 @@
 //
 // !DESCRIPTION:
 //      Create a new State from ... Allocates memory for a new State
-//      object and uses the internal routine ESMC\_StateContruct to
+//      object and uses the internal routine ESMC\_StateConstruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC\_StateInit.
 //      There can be multiple overloaded methods with the same name, but

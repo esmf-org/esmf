@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.2 2003/03/10 04:16:23 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.3 2003/03/10 05:14:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.2 2003/03/10 04:16:23 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.3 2003/03/10 05:14:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -67,7 +67,7 @@
 //
 // !DESCRIPTION:
 //      Allocates memory for a new DELayout
-//      object and uses the internal routine ESMC\_DELayoutContruct to
+//      object and uses the internal routine ESMC\_DELayoutConstruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
@@ -111,7 +111,7 @@
 //
 // !DESCRIPTION:
 //      Allocates memory for a new DELayout
-//      object and uses the internal routine ESMC\_DELayoutContruct to
+//      object and uses the internal routine ESMC\_DELayoutConstruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //

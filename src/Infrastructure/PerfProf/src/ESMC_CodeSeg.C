@@ -1,4 +1,4 @@
-// $Id: ESMC_CodeSeg.C,v 1.1 2002/11/14 18:14:36 cdeluca Exp $
+// $Id: ESMC_CodeSeg.C,v 1.2 2003/03/10 05:14:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CodeSeg.C,v 1.1 2002/11/14 18:14:36 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_CodeSeg.C,v 1.2 2003/03/10 05:14:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -59,7 +59,7 @@
 //
 // !DESCRIPTION:
 //      Create a new CodeSeg from ... Allocates memory for a new CodeSeg
-//      object and uses the internal routine ESMC_CodeSegContruct to
+//      object and uses the internal routine ESMC_CodeSegConstruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC_CodeSegInit.
 //      There can be multiple overloaded methods with the same name, but

@@ -1,4 +1,4 @@
-// $Id: ESMC_class.C,v 1.15 2003/02/10 17:52:26 nscollins Exp $
+// $Id: ESMC_class.C,v 1.16 2003/03/10 05:14:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_class.C,v 1.15 2003/02/10 17:52:26 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_class.C,v 1.16 2003/03/10 05:14:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -59,7 +59,7 @@
 //
 // !DESCRIPTION:
 //      Create a new <Class> from ... Allocates memory for a new <Class>
-//      object and uses the internal routine ESMC_<Class>Contruct to
+//      object and uses the internal routine ESMC_<Class>Construct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC_<Class>Init.
 //      There can be multiple overloaded methods with the same name, but

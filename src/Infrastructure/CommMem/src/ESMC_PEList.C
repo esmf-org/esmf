@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.6 2003/02/05 22:08:56 eschwab Exp $
+// $Id: ESMC_PEList.C,v 1.7 2003/03/10 05:14:21 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.6 2003/02/05 22:08:56 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.7 2003/03/10 05:14:21 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -65,7 +65,7 @@
 //
 // !DESCRIPTION:
 //      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListContruct to
+//      object and uses the internal routine ESMC\_PEListConstruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC\_PEListInit.
 //      There can be multiple overloaded methods with the same name, but
@@ -105,7 +105,7 @@
 //
 // !DESCRIPTION:
 //      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListContruct to
+//      object and uses the internal routine ESMC\_PEListConstruct to
 //      initialize it.  Define for deep classes only, for shallow classes only
 //      define and use ESMC\_PEListInit.
 //      There can be multiple overloaded methods with the same name, but

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx.F90,v 1.2 2003/03/10 04:16:22 cdeluca Exp $
+! $Id: ESMF_DELayout_FEx.F90,v 1.3 2003/03/10 05:14:21 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,7 +14,7 @@
 !
 ! !DESCRIPTION:
 !
-! Excercises the DELayout F90 to C++ interface.
+! Exercises the DELayout F90 to C++ interface.
 ! pre-test for System Test #62501: Uses data from Test 62501: row 5
 !
 ! on halem, run with

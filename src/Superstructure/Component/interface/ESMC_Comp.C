@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.8 2003/03/10 03:23:12 cdeluca Exp $
+// $Id: ESMC_Comp.C,v 1.9 2003/03/10 05:14:22 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.8 2003/03/10 03:23:12 cdeluca Exp $";
+           "$Id: ESMC_Comp.C,v 1.9 2003/03/10 05:14:22 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -76,7 +76,7 @@
 //
 // !DESCRIPTION:
 //      Create a new Component.  Allocates memory for a new Component
-//      object and uses the internal routine ESMC\_CompContruct to
+//      object and uses the internal routine ESMC\_CompConstruct to
 //      initialize it. 
 //
 //      Note: this is a class helper function, not a class method
