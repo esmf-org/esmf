@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.13 2004/10/29 14:38:02 nscollins Exp $
+# $Id: build_rules.mk,v 1.14 2004/10/29 17:45:35 nscollins Exp $
 # 
 # IRIX64.default.default.mk
 #
@@ -210,7 +210,7 @@ OCOMP_FOPTFLAGS	   = -O3
 PARCH		   = IRIX
 
 # set this to libesmf to build a shared library
-SL_LIBS_TO_MAKE =
+SL_LIBS_TO_MAKE = libesmf
 
 SL_SUFFIX   = so
 SL_LIBOPTS  = $(SL_ABIOPTS) -rpath $(ESMF_LIBDIR) -shared
