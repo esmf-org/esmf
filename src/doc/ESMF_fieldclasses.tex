@@ -157,7 +157,8 @@ of interleaving data from multiple fields into a single {\tt Data Array} for
 more efficient memory access patterns.  The {\tt Bundle} class provides methods 
 for querying information about the underlying grid, for requesting the 
 packing of data, the reordering of that packed data, and detaching and 
-attaching the data.
+attaching the data. The following sections give brief descriptions of the
+objects in the ESMF fields and grids infrastructure layer. More detailed descriptions for each object will be made available in per class documentation.
 
 \subsubsection{Field (ESMF\_Field)}
 \label{sec:field} 
@@ -219,15 +220,8 @@ multiprocessor system.  The {\tt Grid} class provides methods to the
 {\tt Field} and {\tt Bundle} classes for obtaining coordinate, indexing, and 
 decomposition information. The grid class will be extensible 
 to allow specialization to different categories of grid, whilst maintaining
-some common interface abstractions. The specialization strategy is illustrated
-in figure \ref{fig:GridStyleDiagram}.
-
-\begin{figure}
-\caption[{Grid Specialization}]{The generic grid class will be extensible to
-encompass a wide variety of current and future grids.}
-\label{fig:GridStyleDiagram}
-\scalebox{0.70}{\includegraphics{GridStyleDiagram.eps}}
-\end{figure}
+some common interface abstractions. The implementation strategy to enable this
+will be described in the class design documentation for {\tt Grid}, {\tt Physical Grid} and {\tt Distributed Grid}.
 
 \subsubsection{Physical Grid (ESMF\_PhysGrid)}
 \label{sec:physgrid} 

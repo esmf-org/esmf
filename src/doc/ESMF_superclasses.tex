@@ -292,10 +292,12 @@ return to the start of the run loop for subsequent iteration.
 \subsection{Class Descriptions}
 
 The following are brief descriptions of the objects involved in the
-ESMF superstructure. The relationship between the key component types (ESMF\_Comp, ESMF\_App, ESMF\_GComp and ESMF\_Cpl)
+ESMF superstructure. The relationship between the key component classes
+({\tt Application Component}, {\tt Gridded Component}, {\tt Coupler Component} and the generic ESMF Component)
 is shown in the 
-class diagram figure \ref{fig:ESMFComponentDiagram}, which shows the position of these component 
-types within an application.
+class diagram figure \ref{fig:ESMFComponentDiagram}, which shows the relationships between these component 
+types within an application. More detailed descriptions of each class 
+in the ESMF superstructure layer can be found in individual class documentation.
 
 \begin{figure}
 \caption[{Component Classes}]{The relationship between basic component categories in ESMF.} 
@@ -351,7 +353,7 @@ A {\tt State} is a description of a set of data that a
 have a {\tt type} attribute that can have values of {\tt ESMF\_IMPORT} or
 {\tt ESMF\_EXPORT}.  A {\tt State} may be acted on by a {\tt Transform} object.
 As shown in figure \ref{fig:ESMFStateDiagram} and ESMF\_State object contains 
-one or more fields or bundles. All components can use states to encapsulate 
+one or more fields or bundles. Components use states to encapsulate 
 data that they export or import. The relationship between states and 
 components is shown in figure \ref{fig:ESMFSystemDiagram}.
 
