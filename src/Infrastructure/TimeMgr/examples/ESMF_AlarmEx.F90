@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmEx.F90,v 1.12 2004/02/13 17:51:00 svasquez Exp $
+! $Id: ESMF_AlarmEx.F90,v 1.13 2004/02/13 20:20:13 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -16,7 +16,6 @@
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
 !BOC
-!\begin{verbatim}
 ! !PROGRAM: ESMF_AlarmEx - Alarm examples
 !
 ! !DESCRIPTION:
@@ -50,21 +49,18 @@
       ! name, loop counters, result code
       character (len=ESMF_MAXSTR) :: name
       integer :: i, j, rc
-!\end{verbatim}
 !EOC
 
       integer :: finalrc
       finalrc = ESMF_SUCCESS
 
 !BOC
-!\begin{verbatim}
 !
 !  Setup clock
 !
       ! initialize calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -72,10 +68,8 @@
       end if
 
 !BOC
-!\begin{verbatim}
       ! initialize time interval to 1 day
       call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -83,11 +77,9 @@
       end if
 
 !BOC
-!\begin{verbatim}
       ! initialize start time to 9/1/2003
       call ESMF_TimeSet(startTime, yy=2003, mm=9, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -95,11 +87,9 @@
       end if
 
 !BOC
-!\begin{verbatim}
       ! initialize stop time to 9/30/2003
       call ESMF_TimeSet(stopTime, yy=2003, mm=9, dd=30, &
                         calendar=gregorianCalendar, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -107,13 +97,11 @@
       end if
 
 !BOC
-!\begin{verbatim}
       !
       ! initialize the clock with the above values
       !
       clock = ESMF_ClockCreate("The Clock", timeStep, startTime, stopTime, &
                                rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -121,9 +109,7 @@
       end if
 
 !BOC
-!\begin{verbatim}
       call ESMF_ClockPrint(clock, "name", rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -131,7 +117,6 @@
       end if
 
 !BOC
-!\begin{verbatim}
 !
 !  Setup alarms
 !
@@ -141,7 +126,6 @@
       !
       call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=15, &
                         calendar=gregorianCalendar, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -149,10 +133,8 @@
       end if
 
 !BOC
-!\begin{verbatim}
       name = "Example alarm 1"
       alarm(1) = ESMF_AlarmCreate(name, clock, ringTime=alarmTime, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -160,10 +142,8 @@
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "alarm(1) = "
       call ESMF_AlarmPrint(alarm(1), rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -171,14 +151,12 @@
       end if
 
 !BOC
-!\begin{verbatim}
       !
       ! Initialize second alarm to ring on a 1 week interval from 9/1/2003 and
       ! associate it with the clock
       !
       call ESMF_TimeSet(alarmTime, yy=2003, mm=9, dd=1, &
                         calendar=gregorianCalendar, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -186,9 +164,7 @@
       end if
 
 !BOC
-!\begin{verbatim}
       call ESMF_TimeIntervalSet(alarmInterval, d=7, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -196,12 +172,10 @@
       end if
 
 !BOC
-!\begin{verbatim}
       alarm(2) = ESMF_AlarmCreate(clock=clock, ringTime=alarmTime, &
                                   ringInterval=alarmInterval, rc=rc)
 print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -209,52 +183,42 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "alarm(2) = "
       call ESMF_AlarmPrint(alarm(2), rc=rc)
 
-!\end{verbatim}
 !EOC
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
 !BOC
-!\begin{verbatim}
       clockCopy = ESMF_ClockCreate(clock, rc)
-!\end{verbatim}
 !EOC
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "Original clock = "
       call ESMF_ClockPrint(clock, "name", rc=rc)
-!\end{verbatim}
 !EOC
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "Clock copy = "
       call ESMF_ClockPrint(clockCopy, "name", rc=rc)
-!\end{verbatim}
 !EOC
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
 !BOC
-!\begin{verbatim}
       !
       ! See if alarms are associated with clock
       !
       call ESMF_ClockGetAlarm(clock, "Alarm002", tempAlarm, rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -262,11 +226,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "alarm fetched from clock = "
 
       call ESMF_AlarmPrint(tempAlarm, "name", rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -274,9 +236,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       end if
 
 !BOC
-!\begin{verbatim}
       call ESMF_ClockGetAlarm(clock, "Example alarm 1", tempAlarm, rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -284,11 +244,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "alarm fetched from clock = "
 
       call ESMF_AlarmPrint(tempAlarm, "name", rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -296,10 +254,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       end if
 
 !BOC
-!\begin{verbatim}
       call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_ALL, &
                                   alarmList, nAlarms, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -307,13 +263,11 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
       end if
 
 !BOC
-!\begin{verbatim}
       print *, "alarm list fetched from clock = "
 
       do i = 1, nAlarms
 
         call ESMF_AlarmPrint(alarmList(i), "name", rc=rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -321,7 +275,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
       end do
 
 #if 1
@@ -339,7 +292,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         !                            ringingAlarm, ringingAlarmCount, rc=rc)
         call ESMF_ClockAdvance(clock, ringingAlarmList=ringingAlarm, &
                                ringingAlarmCount=ringingAlarmCount, rc=rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -347,9 +299,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
         call ESMF_ClockPrint(clock, "currTime string", rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -357,10 +307,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
         ! get what the clock's next time would be after one timestep
         call ESMF_ClockGetNextTime(clock, nextTime, rc=rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -368,10 +316,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
         print *, "clock next time after one timestep = "
         call ESMF_TimePrint(nextTime, "string", rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -379,11 +325,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
         ! get what the clock's next time would be after a timestep equal to 10
         ! clock timesteps
         call ESMF_ClockGetNextTime(clock, nextTime, 10*timeStep, rc=rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -391,11 +335,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
         print *, &
          "clock next time after one big timestep equal to 10 clock timesteps = "
         call ESMF_TimePrint(nextTime, "string", rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -403,7 +345,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC
-!\begin{verbatim}
         if (ringingAlarmCount > 0) then
           print *, "number of ringing alarms = ", ringingAlarmCount
         endif
@@ -412,7 +353,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         do i = 1, ringingAlarmCount
 
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
-!\end{verbatim}
 !EOC
 
           if (rc.NE.ESMF_SUCCESS) then
@@ -420,12 +360,10 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           end if
 
 !BOC
-!\begin{verbatim}
 
           ! identify ringing alarm relative to clock's list
           do j = 1, NUMALARMS
             if (ringingAlarm(i) == alarm(j)) then
-!\end{verbatim}
 !EOC
 
             if (rc.NE.ESMF_SUCCESS) then
@@ -433,9 +371,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
             end if
 
 !BOC
-!\begin{verbatim}
               call ESMF_AlarmGet(alarm(j), name=name, rc=rc)
-!\end{verbatim}
 !EOC
 
               if (rc.NE.ESMF_SUCCESS) then
@@ -443,13 +379,11 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
               end if
 
 !BOC
-!\begin{verbatim}
               print *, trim(name), ", Alarm #", j, &
                                    " in clock's list is ringing!"
               if (j == 2) then
                 ! get what alarm(2)'s next ring time will be
                 call ESMF_AlarmGet(alarm(2), ringTime=ringTime, rc=rc)
-!\end{verbatim}
 !EOC
 
                  if (rc.NE.ESMF_SUCCESS) then
@@ -457,10 +391,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                  end if
 
 !BOC
-!\begin{verbatim}
                 print *, "alarm(2)'s next ring time = "
                 call ESMF_TimePrint(ringTime, "string", rc)
-!\end{verbatim}
 !EOC
 
                 if (rc.NE.ESMF_SUCCESS) then
@@ -468,7 +400,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
                 end if
 
 !BOC 
-!\begin{verbatim}
 
               endif
 
@@ -478,7 +409,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           ! after processing alarm, turn off interval alarm to
           ! prepare for next ring time
           call ESMF_AlarmRingerOff(ringingAlarm(i), rc)
-!\end{verbatim}
 !EOC
 
           if (rc.NE.ESMF_SUCCESS) then
@@ -486,7 +416,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
            end if
 
 !BOC 
-!\begin{verbatim}
 
         end do
 
@@ -494,18 +423,15 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_PREVRINGING, &
                                     ringingAlarm, ringingAlarmCount, rc=rc)
 
-!\end{verbatim}
 !EOC
         if (rc.NE.ESMF_SUCCESS) then
             finalrc = ESMF_FAILURE
         end if
 
 !BOC 
-!\begin{verbatim}
         do i = 1, ringingAlarmCount
           print *, "Previously ringing alarm = "
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
-!\end{verbatim}
 !EOC
 
           if (rc.NE.ESMF_SUCCESS) then
@@ -513,13 +439,11 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           end if
 
 !BOC 
-!\begin{verbatim}
         end do
 
         ! get next ringing alarms
         call ESMF_ClockGetAlarmList(clock, ESMF_ALARMLIST_NEXTRINGING, &
                                     ringingAlarm, ringingAlarmCount, rc=rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -527,11 +451,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC 
-!\begin{verbatim}
         do i = 1, ringingAlarmCount
           print *, "Next ringing alarm = "
           call ESMF_AlarmPrint(ringingAlarm(i), "name", rc=rc)
-!\end{verbatim}
 !EOC
 
           if (rc.NE.ESMF_SUCCESS) then
@@ -539,7 +461,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           end if
 
 !BOC 
-!\begin{verbatim}
         end do
 
       end do
@@ -553,7 +474,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 !
       ! time step clock from start time to stop time
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
-!\end{verbatim}
 !EOC
 
           if (rc.NE.ESMF_SUCCESS) then
@@ -561,11 +481,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
           end if
 
 !BOC 
-!\begin{verbatim}
         ! perform time step 
         call ESMF_ClockAdvance(clock, ringingAlarmCount=ringingAlarmCount, &
                                rc=rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -573,9 +491,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC 
-!\begin{verbatim}
         call ESMF_ClockPrint(clock, "currTime string", rc)
-!\end{verbatim}
 !EOC
 
         if (rc.NE.ESMF_SUCCESS) then
@@ -583,12 +499,10 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
         end if
 
 !BOC 
-!\begin{verbatim}
         ! check if alarms are ringing
         if (ringingAlarmCount > 0) then
           print *, "number of ringing alarms = ", ringingAlarmCount
           if (ESMF_AlarmIsRinging(alarm(1), rc)) then
-!\end{verbatim}
 !EOC
 
             if (rc.NE.ESMF_SUCCESS) then
@@ -596,10 +510,8 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
              end if
 
 !BOC 
-!\begin{verbatim}
             print *, "Alarm(1) is ringing!"
             call ESMF_AlarmRingerOff(Alarm(1), rc)
-!\end{verbatim}
 !EOC
 
             if (rc.NE.ESMF_SUCCESS) then
@@ -607,11 +519,9 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
              end if
 
 !BOC 
-!\begin{verbatim}
           end if
 
           if (ESMF_AlarmIsRinging(alarm(2), rc)) then
-!\end{verbatim}
 !EOC
 
             if (rc.NE.ESMF_SUCCESS) then
@@ -619,19 +529,16 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
             end if
 
 !BOC 
-!\begin{verbatim}
 
             print *, "Alarm(2) is ringing!"
             call ESMF_AlarmRingerOff(Alarm(2), rc)
 
-!\end{verbatim}
 !EOC
             if (rc.NE.ESMF_SUCCESS) then
                 finalrc = ESMF_FAILURE
             end if
 
 !BOC 
-!\begin{verbatim}
           end if
         end if
 
@@ -640,7 +547,6 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
 
       ! destroy clock and alarms
       call ESMF_AlarmDestroy(alarm(1), rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -648,9 +554,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
        end if
 
 !BOC 
-!\begin{verbatim}
       call ESMF_AlarmDestroy(alarm(2), rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -658,9 +562,7 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
        end if
 
 !BOC 
-!\begin{verbatim}
       call ESMF_ClockDestroy(clock, rc=rc)
-!\end{verbatim}
 !EOC
 
       if (rc.NE.ESMF_SUCCESS) then
@@ -676,7 +578,5 @@ print *, "ESMF_AlarmCreate() alarm2 rc = ", rc
      call ESMF_CalendarDestroy(gregorianCalendar, rc)
 
 !BOC 
-!\begin{verbatim}
       end program ESMF_AlarmEx
-!\end{verbatim}
 !EOC
