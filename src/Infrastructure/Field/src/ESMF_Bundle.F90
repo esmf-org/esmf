@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.10 2003/06/19 19:00:13 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.11 2003/06/26 17:57:39 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,8 +24,8 @@
 !
 ! !DESCRIPTION:
 ! The code in this file implements the {\tt ESMF\_Bundle} class, which 
-! represents a set of {\tt Fields} discretized on the same {\tt Grid}.
-! {\tt Bundle}s offer the option to pack the data from the {\tt Field}s
+! represents a set of {\tt ESMF\_Fields} discretized on the same {\tt ESMF\_Grid}.
+! {\tt ESMF\_Bundle}s offer the option to pack the data from the {\tt ESMF\_Field}s
 ! they contain into a single buffer. 
 !
 !  This type is implemented in Fortran 90 and a corresponding
@@ -189,7 +189,7 @@
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of BundleCreate functions.
+!  types of {\tt ESMF\_BundleCreate} functions.
 !EOP
       end interface
 
@@ -206,7 +206,7 @@
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of BundleConstruct functions.
+!  types of {\tt ESMF\_BundleConstruct} functions.
 !EOPI
       end interface
 
@@ -223,7 +223,7 @@
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of BundleGetField functions.
+!  types of {\tt ESMF\_BundleGetField} functions.
 !EOP
       end interface
 
@@ -240,7 +240,7 @@
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
-!  types of BundleAddField functions.
+!  types of {\tt ESMF\_BundleAddField} functions.
 !EOP
       end interface
 
@@ -306,28 +306,28 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Create a {\tt Bundle} from a list of existing
-!     gridded {\tt Fields}.  Optionally create a packed
-!     {\tt Array} which collects all {\tt Field} data into
-!     a single contiguous memory buffer.  All {\tt Field}s
-!     must share a common {\tt Grid}.  Return a new {\tt Bundle}.
+!     Create a {\tt ESMF\_Bundle} from a list of existing
+!     gridded {\tt ESMF\_Fields}.  Optionally create a packed
+!     {\tt ESMF\_Array} which collects all {\tt ESMF\_Field} data into
+!     a single contiguous memory buffer.  All {\tt ESMF\_Field}s
+!     must share a common {\tt ESMF\_Grid}.  Return a new {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [fieldcount]
-!           Number of fields to be added to the {\tt Bundle}.
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
-!           {\tt Field}s in the following argument.
+!           {\tt ESMF\_Field}s in the following argument.
 !     \item [fields]
-!           Array of existing {\tt Field}s.  The first {\tt fieldcount}
-!           items will be added to the {\tt Bundle}.
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt ESMF\_Fieldcount}
+!           items will be added to the {\tt ESMF\_Bundle}.
 !     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt Field}
-!           data in individual {\tt Array}s will be collected
-!           into a single data {\tt Array} for the entire {\tt Bundle}.
+!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
+!           data in individual {\tt ESMF\_Array}s will be collected
+!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
 !           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
 !     \item [{[name]}]
-!           {\tt Bundle} name.  A default name will be generated if
+!           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
 !     \item [{[iospec]}]
 !           I/O specification.
@@ -398,12 +398,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Create an empty {\tt Bundle}.
+!     Create an empty {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [{[name]}]
-!           {\tt Bundle} name.  A default name will be generated if
+!           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
 !     \item [{[iospec]}]
 !           I/O specification.
@@ -468,7 +468,7 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with the {\tt Bundle}.
+!     Releases all resources associated with the {\tt ESMF\_Bundle}.
 !
 !     \begin{description}
 !     \item [bundle]
@@ -545,8 +545,8 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs a {\tt Bundle} from a list of existing
-!     gridded {\tt Fields}.  This routine requires an existing
+!     Constructs a {\tt ESMF\_Bundle} from a list of existing
+!     gridded {\tt ESMF\_Fields}.  This routine requires an existing
 !     {\tt ESMF\_Bundle} type as an input and fills in
 !     the internals.  {\tt ESMF\_BundleCreateNew()} does
 !     the allocation of an {\tt ESMF\_Bundle} type first and then
@@ -555,21 +555,21 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [btype]
-!           Pointer to a {\tt Bundle} object.
+!           Pointer to a {\tt ESMF\_Bundle} object.
 !     \item [fieldcount]
-!           Number of fields to be added to the {\tt Bundle}.
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of
-!           {\tt Field}s in the following argument.
+!           {\tt ESMF\_Field}s in the following argument.
 !     \item [fields]
-!           Array of existing {\tt Field}s.  The first {\tt fieldcount}
-!           items will be added to the {\tt Bundle}.
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldcount}
+!           items will be added to the {\tt ESMF\_Bundle}.
 !     \item [{[packflag]}]
-!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt Field}
-!           data in individual {\tt Array}s will be collected
-!           into a single data {\tt Array} for the entire {\tt Bundle}.
+!           If set to {\tt ESMF\_PACK\_FIELD\_DATA}, the {\tt ESMF\_Field}
+!           data in individual {\tt ESMF\_Array}s will be collected
+!           into a single data {\tt ESMF\_Array} for the entire {\tt ESMF\_Bundle}.
 !           The default is {\tt ESMF\_NO\_PACKED\_DATA}.
 !     \item [{[name]}]
-!           {\tt Bundle} name.  A default name will be generated if
+!           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
 !     \item [{[iospec]}]
 !           I/O specification.
@@ -628,15 +628,15 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Constructs the internals of a {\tt Bundle}, given an existing
+!     Constructs the internals of a {\tt ESMF\_Bundle}, given an existing
 !     {\tt ESMF\_Bundle} type as an input.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [btype]
-!           An existing {\tt Bundle} to be initialized.
+!           An existing {\tt ESMF\_Bundle} to be initialized.
 !     \item [{[name]}]
-!           {\tt Bundle} name.  A default name will be generated if
+!           {\tt ESMF\_Bundle} name.  A default name will be generated if
 !           one is not specified.
 !     \item [{[iospec]}]
 !           I/O specification.
@@ -701,11 +701,11 @@ end function
 
 !
 ! !DESCRIPTION:
-!     Releases all resources except the {\tt Bundle} itself.
+!     Releases all resources except the {\tt ESMF\_Bundle} itself.
 !
 !     \begin{description}
 !     \item [btype]
-!           Pointer to a {\tt Bundle} object.
+!           Pointer to a {\tt ESMF\_Bundle} object.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -757,16 +757,16 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Return a {\tt Field} from a {\tt Bundle} by name.
+!      Return a {\tt ESMF\_Field} from a {\tt ESMF\_Bundle} by name.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           {\tt Bundle} to query for {\tt Field}.
+!           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
 !     \item [name]
-!           {\tt Field} name.
+!           {\tt ESMF\_Field} name.
 !     \item [field]
-!           Returned {\tt Field}.
+!           Returned {\tt ESMF\_Field}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -852,16 +852,16 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Return a {\tt Field} from a {\tt Bundle} by index number.
+!      Return a {\tt ESMF\_Field} from a {\tt ESMF\_Bundle} by index number.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           {\tt Bundle} to query for {\tt Field}.
+!           {\tt ESMF\_Bundle} to query for {\tt ESMF\_Field}.
 !     \item [index]
-!           {\tt Field} index number; first {\tt Field} index is 1.
+!           {\tt ESMF\_Field} index number; first {\tt ESMF\_Field} index is 1.
 !     \item [field]
-!           Returned {\tt Field}.
+!           Returned {\tt ESMF\_Field}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -933,7 +933,7 @@ end function
       integer, intent(out), optional :: rc             ! return code
 !
 ! !DESCRIPTION:
-!      Return pointers to all fields in a bundle.
+!      Return pointers to all fields in a {\tt ESMF\_Bundle}.
 !
 ! !REQUIREMENTS:  FLD2.5.6
 !EOP
@@ -957,8 +957,8 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Add a single Field reference to an existing Bundle.  The Field must have the
-!      same Grid as the rest of the Fields in the Bundle.   If the Bundle has
+!      Add a single Field reference to an existing {\tt ESMF\_Bundle}.  The Field must have the
+!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
 !      packed data, this will mean copying the data to add this field.
 ! 
 ! !REQUIREMENTS:  FLD2.5.2
@@ -1002,21 +1002,21 @@ end function
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add a Field reference to an existing Bundle.  The Field must have the
-!      same Grid as the rest of the Fields in the Bundle.   If the Bundle has
+!      Add a {\tt ESMF\_Field} reference to an existing {\tt ESMF\_Bundle}.  The {\tt ESMF\_Field} must have the
+!      same {\tt ESMF\_Grid} as the rest of the {\tt ESMF\_Fields} in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
 !      packed data, this will mean copying the data to add this field.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           {\tt Bundle} to add {\tt Field}s into.
+!           {\tt ESMF\_Bundle} to add {\tt ESMF\_Field}s into.
 !     \item [fieldcount]
-!           Number of fields to be added to the {\tt Bundle}.
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
-!           {\tt Field}s in the following argument.
+!           {\tt ESMF\_Field}s in the following argument.
 !     \item [fields]
-!           Array of existing {\tt Field}s.  The first {\tt fieldcount}
-!           items will be added to the {\tt Bundle}.
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldcount}
+!           items will be added to the {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1061,21 +1061,21 @@ end function
       integer, intent(out), optional :: rc          
 !
 ! !DESCRIPTION:
-!      Add a Field reference to an existing Bundle.  The Field must have the
-!      same Grid as the rest of the Fields in the Bundle.   If the Bundle has
+!      Add a Field reference to an existing {\tt ESMF\_Bundl}.  The {\tt ESMF\_Field} must have the
+!      same Grid as the rest of the {\tt ESMF\_Fields} in the {\tt ESMF\_Bundle}.   If the {\tt ESMF\_Bundle} has
 !      packed data, this will mean copying the data to add this field.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [btype]
-!           {\tt BundleType} to add {\tt Field}s into.
+!           {\tt ESMF\_BundleType} to add {\tt ESMF\_Field}s into.
 !     \item [fieldcount]
-!           Number of fields to be added to the {\tt Bundle}.
+!           Number of fields to be added to the {\tt ESMF\_Bundle}.
 !           Must be equal to or less than the number of 
-!           {\tt Field}s in the following argument.
+!           {\tt ESMF\_Field}s in the following argument.
 !     \item [fields]
-!           Array of existing {\tt Field}s.  The first {\tt fieldcount}
-!           items will be added to the {\tt Bundle}.
+!           Array of existing {\tt ESMF\_Field}s.  The first {\tt fieldcount}
+!           items will be added to the {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1174,7 +1174,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Delete a Field reference from an existing Bundle.  If the Bundle 
+!      Delete a Field reference from an existing {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} 
 !      has packed data this will mean copying the data to remove this field.
 !
 ! !REQUIREMENTS:  FLD2.5.2
@@ -1211,14 +1211,14 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Packs the {\tt Field} data into a single {\tt Array}.  If new {\tt Field}s
-!      are added to a {\tt Bundle} which already has Packed data, the data will
-!      have to be copied into a new {\tt Array}.
+!      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
+!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
+!      have to be copied into a new {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           Existing {\tt Bundle}.
+!           Existing {\tt ESMF\_Bundle}.
 !     \item [{[datamap]}]
 !           Ordering and Interleaving information.
 !     \item [{[rc]}]
@@ -1283,14 +1283,14 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Packs the {\tt Field} data into a single {\tt Array}.  If new {\tt Field}s
-!      are added to a {\tt Bundle} which already has Packed data, the data will
-!      have to be copied into a new {\tt Array}.
+!      Packs the {\tt ESMF\_Field} data into a single {\tt ESMF\_Array}.  If new {\tt ESMF\_Field}s
+!      are added to a {\tt ESMF\_Bundle} which already has Packed data, the data will
+!      have to be copied into a new {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [btype]
-!           {\tt BundleType} pointer.
+!           {\tt ESMF\_BundleType} pointer.
 !     \item [{[datamap]}]
 !           Ordering and Interleaving information.
 !     \item [{[rc]}]
@@ -1370,8 +1370,8 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Allows data values associated with a Bundle to be set through the
-!      Bundle interface instead of detaching data and setting it in a loop.
+!      Allows data values associated with a {\tt ESMF\_Bundle} to be set through the
+!      {\tt ESMF\_Bundle} interface instead of detaching data and setting it in a loop.
 !      Various restrictions on data types may be imposed.
 ! 
 ! !REQUIREMENTS:  FLD2.5.5
@@ -1398,7 +1398,7 @@ end function
 ! !DESCRIPTION:
 !      Returns a data buffer marked as having Read/Write access.  Will be
 !      exclusive access from ESMF interfaces. (See comments in the corresponding
-!      Field section for more details on access.)
+!      {\tt ESMF\_Field} section for more details on access.)
 !
 ! !REQUIREMENTS:  FLD2.5.3
 !EOP
@@ -1444,7 +1444,7 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Returns a copy of the Bundles's data buffer.
+!      Returns a copy of the {\tt ESMF\_Bundles}'s data buffer.
 !      The ESMF has allocated space for this copy; the caller can either
 !      call the memory management to free the space, or call
 !      the DropCopy routine and have the ESMF release the space.
@@ -1513,7 +1513,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Convenience routine for freeing memory associated with data copy.
-!      Note this routine does not need the Bundle as an input.
+!      Note this routine does not need the {\tt ESMF\_Bundle} as an input.
 !
 ! !REQUIREMENTS:  FLD2.5.4
 !EOP
@@ -1546,14 +1546,14 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!      Returns the Grid associated with this Bundle.
+!      Returns the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Bundle}.
 !
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt Bundle} object.
+!           A {\tt ESMF\_Bundle} object.
 !     \item [grid]
-!           The {\tt Grid} associated with all {\tt Field}s in this 
-!           {\tt Bundle}.
+!           The {\tt ESMF\_Grid} associated with all {\tt ESMF\_Field}s in this 
+!           {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1611,7 +1611,7 @@ end function
       integer, intent(out), optional :: rc                 ! return code
 !
 ! !DESCRIPTION:
-!      Find out how many dimensions are in the Grid associated with this Bundle.
+!      Find out how many dimensions are in the {\tt ESMF\_Grid} associated with this {\tt ESMF\_Bundle}.
 !
 ! !REQUIREMENTS: (none. added for completeness)
 !EOP
@@ -1658,7 +1658,7 @@ end function
       integer, intent(out), optional :: rc            ! return code
 !
 ! !DESCRIPTION:
-!      Return in what order the indicies of the Grid is specified.
+!      Return in what order the indicies of the {\tt ESMF\_Grid} is specified.
 !
 ! !REQUIREMENTS: (none. added for completeness)
 !EOP
@@ -1742,7 +1742,7 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Returns the name of the Bundle.  If the Bundle was originally created
+!      Returns the name of the {\tt ESMF\_Bundle}.  If the {\tt ESMF\_Bundle} was originally created
 !      without specifying a name, a unique name will have been generated
 !      by the framework.
 !
@@ -1837,14 +1837,14 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Returns the count of {\tt Fields} in a {\tt Bundle}.
+!      Returns the count of {\tt ESMF\_Fields} in a {\tt ESMF\_Bundle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [bundle]
-!           {\tt Bundle} to query.
+!           {\tt ESMF\_Bundle} to query.
 !     \item [count]
-!           Returned {\tt Field} count.
+!           Returned {\tt ESMF\_Field} count.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1899,17 +1899,17 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Return an array of {\tt Field} names in a {\tt Bundle}.
+!      Return an array of {\tt ESMF\_Field} names in a {\tt ESMF\_Bundle}.
 !
 !     \begin{description}
 !     \item [bundle]
-!           A {\tt Bundle} object.
+!           A {\tt ESMF\_Bundle} object.
 !     \item [namelist]
-!           An array of character strings where each {\tt Field} name
+!           An array of character strings where each {\tt ESMF\_Field} name
 !           is returned. 
 !     \item [{[namelist]}]
-!           A count of how many {\tt Field} names were returned.  Same as
-!           the number of {\tt Field}s in the {\tt Bundle}.
+!           A count of how many {\tt ESMF\_Field} names were returned.  Same as
+!           the number of {\tt ESMF\_Field}s in the {\tt ESMF\_Bundle}.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -1978,7 +1978,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Bundle from the last call to Checkpoint.
+!      all data associated with a {\t ESMF\_Bundle} from the last call to Checkpoint.
 !
 ! !REQUIREMENTS:  FLD2.5.10
 !EOP
@@ -2065,7 +2065,7 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Validates that the Bundles is internally consistent.
+!      Validates that the {\tt ESMF\_Bundles} is internally consistent.
 !      Returns error code if problems are found.
 !
 ! !REQUIREMENTS:  FLD4.1
@@ -2113,7 +2113,7 @@ end function
       integer, intent(out), optional :: rc               ! return code
 !
 ! !DESCRIPTION:
-!      Print information about a Bundle.  The options control the
+!      Print information about a {\tt ESMF\_Bundle}.  The options control the
 !      type of information and level of detail.
 !
 ! !REQUIREMENTS:  
