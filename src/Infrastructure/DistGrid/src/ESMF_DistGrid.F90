@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.67 2003/08/14 21:53:44 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.68 2003/08/27 23:09:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,6 +58,7 @@
 !     private
         integer :: MyDE             ! identifier for this DE
         integer :: local_cell_count ! local (on this DE) number of cells
+        integer, dimension(ESMF_MAXGRIDDIM) :: local_axis_length
         integer, dimension(ESMF_MAXGRIDDIM) :: global_start
         type (ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: ai_global
                                     ! local cell index in each direction using
@@ -85,6 +86,9 @@
         integer, dimension(:), pointer :: local_cell_count
                                        ! array of the numbers of cells on each
                                        ! DE
+        integer, dimension(:,:), pointer :: local_axis_length
+                                       ! array of the numbers of cells along each
+                                       ! axis on each DE
         integer :: local_cell_max      ! maximum number of cells on any DE
         integer, dimension(ESMF_MAXGRIDDIM) :: local_cell_max_dim
                                        ! maximum DE cell counts in each
@@ -139,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.67 2003/08/14 21:53:44 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.68 2003/08/27 23:09:58 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -551,6 +555,7 @@
       distgrid%MyDE%MyDE = 0
       distgrid%MyDE%local_cell_count = 0
       do i = 1,ESMF_MAXGRIDDIM
+        distgrid%MyDE%local_axis_length = 0
         distgrid%MyDE%ai_global(i)%min = 0
         distgrid%MyDE%ai_global(i)%max = 0
         distgrid%MyDE%ai_global(i)%stride = 0
@@ -564,6 +569,7 @@
         distgrid%local_cell_max_dim(i) = 0
       enddo
       nullify(distgrid%local_cell_count)
+      nullify(distgrid%local_axis_length)
       nullify(distgrid%global_start)
       nullify(distgrid%ai_global)
 
@@ -680,6 +686,11 @@
 
 !     Allocate resources based on number of DE's
       allocate(distgrid%local_cell_count(nDE), stat=status)
+      if(status .NE. 0) then
+        print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
+        return
+      endif
+      allocate(distgrid%local_axis_length(nDE,ESMF_MAXGRIDDIM), stat=status)
       if(status .NE. 0) then
         print *, "ERROR in ESMF_DistGridConstructInternal: allocate"
         return
@@ -1219,6 +1230,8 @@
         do i = 1,nDE(2)
           de = (i-1)*nDE(1) + j
           distgrid%local_cell_count(de) = countsPerDE1(j)*countsPerDE2(i)
+          distgrid%local_axis_length(de,1) = countsPerDE1(j)
+          distgrid%local_axis_length(de,2) = countsPerDE2(i)
         enddo
       enddo
 
@@ -1297,12 +1310,14 @@
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGetDE(distgrid, MyDE, local_cell_count, &
-                                    global_start, ai_global, rc)
+                                    local_axis_length, global_start, &
+                                    ai_global, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType) :: distgrid
       integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: local_cell_count
+      integer, dimension(:), intent(inout), optional :: local_axis_length
       integer, dimension(:,:), intent(inout), optional :: global_start
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM), intent(inout), &
                         optional :: ai_global
@@ -1320,6 +1335,8 @@
 !          Identifier for this {\tt ESMF\_DE}.
 !     \item[[local\_cell\_count]]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
+!     \item[[local\_axis\_length]]
+!          Local (on this {\tt ESMF\_DE}) number of cells along each axis.
 !     \item[[global\_start]]
 !          Global index of starting count for cells.
 !     \item[[ai\_global]]
@@ -1333,6 +1350,7 @@
 
       integer :: status=ESMF_FAILURE                 ! Error status
       logical :: rcpresent=.FALSE.                   ! Return code present
+      integer :: i
 
 !     Initialize return code
       if(present(rc)) then
@@ -1345,6 +1363,12 @@
 
       if(present(local_cell_count)) &
                  local_cell_count = distgrid%myDE%local_cell_count
+
+      if(present(local_axis_length)) then
+        do i = 1,size(local_axis_length)
+          local_axis_length(i) = distgrid%myDE%local_axis_length(i)
+        enddo
+      endif
 
 !jw      if(present(global_start)) global_start = distgrid%myDE%ai_global%min
 
@@ -1408,8 +1432,8 @@
       do i=1,ESMF_MAXGRIDDIM
         distgrid%MyDE%ai_global(i) = distgrid%ai_global(DE_id,i)
         distgrid%MyDE%global_start(i) = distgrid%global_start(DE_id,i)
-        local_count_dim = distgrid%ai_global(DE_id,i)%max &
-                        - distgrid%ai_global(DE_id,i)%min + 1
+        distgrid%MyDE%local_axis_length(i) = distgrid%local_axis_length(DE_id,i)
+        local_count_dim = distgrid%local_axis_length(DE_id,i)
         if (local_count_dim.ne.0) local_cell_count = local_cell_count &
                                                    * local_count_dim
       enddo
