@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.82 2004/02/19 16:39:29 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.83 2004/02/19 20:06:07 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -48,8 +48,8 @@
 !EOPI
 !BOP
 
-!    ! PUBLIC TYPES:
-!    ! Global integer parameters
+!    !PUBLIC TYPES:
+!    !Global integer parameters
 
       integer, parameter :: ESMF_SUCCESS = 0, ESMF_FAILURE = -1
       integer, parameter :: ESMF_MAXSTR = 128
@@ -389,7 +389,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.82 2004/02/19 16:39:29 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.83 2004/02/19 20:06:07 svasquez Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
