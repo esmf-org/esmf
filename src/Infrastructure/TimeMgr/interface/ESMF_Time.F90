@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.15 2003/04/09 21:34:38 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.16 2003/04/11 22:02:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -122,7 +122,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.15 2003/04/09 21:34:38 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.16 2003/04/11 22:02:38 eschwab Exp $'
 
 !==============================================================================
 !
@@ -954,25 +954,8 @@
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
 !EOP
 
-      type(ESMF_BaseTime) :: basetime
-      integer(ESMF_IKIND_I8) :: S
-      integer :: Sn, Sd
-      integer :: rc
-
-      ! get basetime from timeinterval
-      call ESMF_TimeIntervalGet(timeinterval, S=S, Sn=Sn, Sd=Sd, rc=rc)
-      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
-
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeSum(time%basetime, basetime, &
-                              ESMF_TimeInc%basetime)
-
-!  TODO: Below would be the ideal way of doing it, but ESMF_Time would need to
-!  be a "friend" of ESMF_TimeInterval in order to access its private member
-!  'basetime.' Can't do in F90!  So the above is a work-around.
-!     ! call ESMC_BaseTime base class function
-!      call c_ESMC_BaseTimeSum(time%basetime, timeinterval%basetime, &
-!                               ESMF_TimeInc%basetime)
+      call c_ESMC_BaseTimeSum(time, timeinterval, ESMF_TimeInc)
 
       end function ESMF_TimeInc
 !------------------------------------------------------------------------------
@@ -1008,25 +991,8 @@
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
 !EOP
 
-      type(ESMF_BaseTime) :: basetime
-      integer(ESMF_IKIND_I8) :: S
-      integer :: Sn, Sd
-      integer :: rc
-
-      ! get basetime from timeinterval
-      call ESMF_TimeIntervalGet(timeinterval, S=S, Sn=Sn, Sd=Sd, rc=rc)
-      call c_ESMC_BaseTimeInit(basetime, S, Sn, Sd, rc)
-
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeDiff(time%basetime, basetime, &
-                               ESMF_TimeDec%basetime)
-
-!  TODO: Below would be the ideal way of doing it, but ESMF_Time would need to
-!  be a "friend" of ESMF_TimeInterval in order to access its private member
-!  'basetime.' Can't do in F90!  So the above is a work-around.
-!     ! call ESMC_BaseTime base class function
-!       call c_ESMC_BaseTimeDiff(time%basetime, timeinterval%basetime, &
-!                                ESMF_TimeDec%basetime)
+       call c_ESMC_BaseTimeDiff(time, timeinterval, ESMF_TimeDec)
 
       end function ESMF_TimeDec
 
@@ -1062,24 +1028,8 @@
 !     TMG1.5.4, TMG2.4.4, TMG2.4.5, TMG2.4.6, TMG5.1, TMG5.2, TMG7.2
 !EOP
 
-      type(ESMF_BaseTime) :: basetime
-      integer(ESMF_IKIND_I8) :: S
-      integer :: Sn, Sd
-      integer :: rc
-
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, basetime)
-
-      ! set timeinterval return value from basetime
-      call c_ESMC_BaseTimeGet(basetime, S, Sn, Sd, rc)
-      call ESMF_TimeIntervalSet(ESMF_TimeDiff, S=S, Sn=Sn, Sd=Sd, rc=rc)
-
-!  TODO: Below would be the ideal way of doing it, but ESMF_Time would need to
-!  be a "friend" of ESMF_TimeInterval in order to access its private member
-!  'basetime.' Can't do in F90!  So the above is a work-around.
-!     ! call ESMC_BaseTime base class function
-!      call c_ESMC_BaseTimeDiff(time1%basetime, time2%basetime, &
-!                               ESMF_TimeDiff%basetime)
+      call c_ESMC_BaseTimeDiff(time1, time2, ESMF_TimeDiff)
 
       end function ESMF_TimeDiff
 
@@ -1114,8 +1064,8 @@
 !     TMG1.5.3, TMG2.4.3, TMG7.2
 !EOP
 
-!     ! invoke C to C++ entry point for ESMF_BaseTime base class function
-      call c_ESMC_BaseTimeEQ(time1%basetime, time2%basetime, ESMF_TimeEQ)
+      ! invoke C to C++ entry point for ESMF_BaseTime base class function
+      call c_ESMC_BaseTimeEQ(time1, time2, ESMF_TimeEQ)
 
       end function ESMF_TimeEQ
 
@@ -1151,7 +1101,7 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeNE(time1%basetime, time2%basetime, ESMF_TimeNE)
+      call c_ESMC_BaseTimeNE(time1, time2, ESMF_TimeNE)
 
       end function ESMF_TimeNE
 
@@ -1188,7 +1138,7 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLT(time1%basetime, time2%basetime, ESMF_TimeLT)
+      call c_ESMC_BaseTimeLT(time1, time2, ESMF_TimeLT)
 
       end function ESMF_TimeLT
 
@@ -1225,7 +1175,7 @@
 !EOP
 
       ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGT(time1%basetime, time2%basetime, ESMF_TimeGT)
+      call c_ESMC_BaseTimeGT(time1, time2, ESMF_TimeGT)
 
       end function ESMF_TimeGT
 
@@ -1261,8 +1211,8 @@
 !     TMG1.5.3, TMG2.4.3, TMG7.2
 !EOP
 
-!     ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeLE(time1%basetime, time2%basetime, ESMF_TimeLE)
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeLE(time1, time2, ESMF_TimeLE)
 
       end function ESMF_TimeLE
 
@@ -1298,8 +1248,8 @@
 !     TMG1.5.3, TMG2.4.3, TMG7.2
 !EOP
 
-!     ! call ESMC_BaseTime base class function
-      call c_ESMC_BaseTimeGE(time1%basetime, time2%basetime, ESMF_TimeGE)
+      ! call ESMC_BaseTime base class function
+      call c_ESMC_BaseTimeGE(time1, time2, ESMF_TimeGE)
 
       end function ESMF_TimeGE
 
