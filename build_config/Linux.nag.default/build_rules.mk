@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.18 2004/11/19 23:49:03 nscollins Exp $
+#  $Id: build_rules.mk,v 1.19 2005/01/04 21:19:22 theurich Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -153,7 +153,7 @@ CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
 F90LIBBASE         = /soft/com/packages/nag-f95-4.2/lib
 C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lnag -lrt -lf96 \
                      -L${CXXLIBBASE} -lcxa -lunwind -lcprts ${EXTRALIBS}
-C_CXXF90LIBS       = L${F90LIBBASE} -lnag ${MPI_LIB} -lrt -lf96 ${EXTRALIBS}
+C_CXXF90LIBS       = -L${F90LIBBASE} -lnag ${MPI_LIB} -lrt -lf96 ${EXTRALIBS}
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
