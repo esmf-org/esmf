@@ -1,4 +1,3 @@
- $Id: README,v 1.48 2004/06/18 22:06:18 nscollins Exp $
 ================================================================================
                                    README
 
@@ -76,24 +75,29 @@ System Information
 ------------------
 
 The following platforms are fully supported: Alpha, IRIX64 32-bit and 64-bit
-addressing, IBM 32-bit and 64-bit addressing, Linux intel 32-bit and 64-bit
-addressing. ESMF is built and debugged in other platforms on a regular basis.
+addressing, IBM 32-bit and 64-bit addressing, and Linux with any of the
+following compilers: Intel 32-bit and 64-bit addressing, NAG, Absoft, Lahey,
+and PGI.  ESMF is built and debugged in other platforms on a regular basis.
 Check the build_config directory for more information.
 
 
 Environment Variables
 ---------------------
 
-Currently the ESMF_DIR environment variable must be set on all
-platforms.  ESMF_DIR should be set to the path of the top
-level ESMF directory. The ESMF_COMPILER environment variable
-must be set only on Linux platforms. The possible values are:
-absoft, intel, lahey, pgi or nag. 
+The only environment variable which must be set on all platforms 
+is ESMF_DIR, which should be set to the path of the top level ESMF directory.
+The ESMF_COMPILER environment variable must be set only on 
+Linux platforms. The possible values are: absoft, intel, lahey, pgi or nag. 
+The ESMF_COMM environment variable can be set on Linux platforms to
+specify which communications library to use (mpich, lam, or mpiuni).
 
 There are several other environment variables which can be set to 
-customize the ESMF make process. The README file in the directory 
+customize the ESMF make process.  The README file in the directory 
 build_config documents the entire list of environment variables in detail, 
-as does the ESMF User's Guide.
+as does the ESMF User's Guide.  Some sites have separate versions of the
+makefiles which have already been customized for a particular machine.
+See http://sourceforge.net/projects/esmfcontrib/ for the CVS repository
+for contributed site-specific makefiles.
 
 
 Build Information
@@ -141,33 +145,34 @@ first if the unit tests have already been compiled without the
 ESMF_EXHAUSTIVE=ON option.
 
 Output files from the tests are directed to files in
-${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
-directories.
+${ESMF_DIR}/test/test${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
+directories.  ESMF_SITE will be 'default' if no specific site has
+been specified.
 
-To build documentation:
+To build documentation, including the Requirements Specification,
+the User's Guide, and the Fortran Reference Manual:
 
-  gmake pdf           ! Makes the pdf files
-  gmake html          ! Creates the html directory.
-  gmake alldoc        ! Builds all the above documents.
+  gmake doc           ! Builds these three manuals, including pdf and html
 
-Final documentation files will be located in the ${ESMF_DIR}/doc
-directory.  
+Final documentation files will be located in the ${ESMF_DIR}/doc directory.  
 
 
 Usage
 -----
 
-To use ESMF from Fortran, add the directory that contains
+After building ESMF, to use ESMF from Fortran add the directory that contains
 the ESMF *.mod file(s),
 
-${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
+${ESMF_DIR}/mod/mod${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
 
 to your search path for *.mod files.  For most compilers this path is
 identified either with a -I or a -M.  You must also link with the ESMF
-shared object library.  This is a file called libesmf.so that is
-located in the following directory:
+library.  On some platforms a shared library, libesmf.so, is built. 
+On all platforms, a standard library, libesmf.a, is built.  In addition,
+on some platforms an MPI bypass library, libmpiuni.a will be built.
+These libraries will be located in the following directory:
 
-${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_COMPILER).$(ESMF_PREC).$(ESMF_SITE)
+${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.${ESMF_COMPILER}.${ESMF_PREC}.${ESMF_SITE}
 
 There is a single ESMF module, called ESMF_Mod, that should be
 included in applications with the Fortran USE statement.  It is not
@@ -175,9 +180,6 @@ necessary to include any header files in Fortran.
 
 To use ESMF from C/C++, link with the ESMF shared object library and
 include the ESMC.h file.
-
-If you prefer standard libraries, a *.a file is provided in the same
-library directory as the shared object file.
 
 For information on how to link with shared libraries on a particular
 platform, please see the link_rules files in the platform directories
@@ -195,4 +197,14 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
+ $Id: README,v 1.49 2004/06/21 15:26:57 nscollins Exp $
 
+Earth System Modeling Framework
+Copyright 2002-2004, University Corporation for Atmospheric Research,
+Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+Laboratory, University of Michigan, National Centers for Environmental
+Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+NASA Goddard Space Flight Center.
+Licensed under the GPL.
+
+================================================================================
