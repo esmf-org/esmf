@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.13 2003/02/21 23:10:25 jwolfe Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.14 2003/02/26 20:18:33 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.13 2003/02/21 23:10:25 jwolfe Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.14 2003/02/26 20:18:33 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -952,8 +952,8 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
       type(ESMF_Array) :: array
       type(ESMF_Layout) :: layout
       integer, dimension(:), intent(in) :: decompids
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: AI_exc
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: AI_tot
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -964,7 +964,8 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
 ! !REQUIREMENTS:
         integer :: status         ! local error status
         logical :: rcpresent      ! did user specify rc?
-        integer :: size_decomp
+        integer :: size_decomp, size_AI
+        integer :: i
 
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -973,6 +974,17 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+ 
+! subtract one from location parts of indices to translate to C++
+        size_AI = size(AI_tot)
+        do i = 1,size_AI
+          AI_exc(i)%l = AI_exc(i)%l - 1
+          AI_exc(i)%r = AI_exc(i)%r - 1
+          AI_exc(i)%gstart = AI_exc(i)%gstart - 1
+          AI_tot(i)%l = AI_tot(i)%l - 1
+          AI_tot(i)%r = AI_tot(i)%r - 1
+          AI_tot(i)%gstart = AI_tot(i)%gstart - 1
+        enddo
 
 ! call c routine to halo
         size_decomp = size(decompids)
@@ -982,6 +994,17 @@ ArrayDeallocateMacro(real, R8, 3, COL3, LEN3, LOC3)
           print *, "c_ESMC_ArrayHalo returned error"
           return
         endif
+
+! add one back to location parts of indices to translate from C++
+        size_AI = size(AI_tot)
+        do i = 1,size_AI
+          AI_exc(i)%l = AI_exc(i)%l + 1
+          AI_exc(i)%r = AI_exc(i)%r + 1
+          AI_exc(i)%gstart = AI_exc(i)%gstart + 1
+          AI_tot(i)%l = AI_tot(i)%l + 1
+          AI_tot(i)%r = AI_tot(i)%r + 1
+          AI_tot(i)%gstart = AI_tot(i)%gstart + 1
+        enddo
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS

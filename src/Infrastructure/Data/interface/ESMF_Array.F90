@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.40 2003/02/21 23:11:06 jwolfe Exp $
+! $Id: ESMF_Array.F90,v 1.41 2003/02/26 20:18:52 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -193,7 +193,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.40 2003/02/21 23:11:06 jwolfe Exp $'
+      '$Id: ESMF_Array.F90,v 1.41 2003/02/26 20:18:52 jwolfe Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -3524,8 +3524,8 @@ end function
       type(ESMF_Array) :: array
       type(ESMF_Layout) :: layout
       integer, dimension(:), intent(in) :: decompids
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: AI_exc
-      type(ESMF_AxisIndex), dimension(:), intent(in) :: AI_tot
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3536,7 +3536,8 @@ end function
 ! !REQUIREMENTS:
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
-        integer :: size_decomp
+        integer :: size_decomp, size_AI
+        integer :: i
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -3544,6 +3545,16 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+! subtract one from location parts of indices to translate to C++
+        size_AI = size(AI_tot)
+        do i = 1,size_AI
+          AI_exc(i)%l = AI_exc(i)%l - 1
+          AI_exc(i)%r = AI_exc(i)%r - 1
+          AI_exc(i)%gstart = AI_exc(i)%gstart - 1
+          AI_tot(i)%l = AI_tot(i)%l - 1
+          AI_tot(i)%r = AI_tot(i)%r - 1
+          AI_tot(i)%gstart = AI_tot(i)%gstart - 1
+        enddo
 ! call c routine to halo
         size_decomp = size(decompids)
         call c_ESMC_ArrayHalo(array, layout, decompids, size_decomp, &
@@ -3552,6 +3563,16 @@ end function
           print *, "c_ESMC_ArrayHalo returned error"
           return
         endif
+! add one back to location parts of indices to translate from C++
+        size_AI = size(AI_tot)
+        do i = 1,size_AI
+          AI_exc(i)%l = AI_exc(i)%l + 1
+          AI_exc(i)%r = AI_exc(i)%r + 1
+          AI_exc(i)%gstart = AI_exc(i)%gstart + 1
+          AI_tot(i)%l = AI_tot(i)%l + 1
+          AI_tot(i)%r = AI_tot(i)%r + 1
+          AI_tot(i)%gstart = AI_tot(i)%gstart + 1
+        enddo
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
         end subroutine ESMF_ArrayHalo
