@@ -1,4 +1,4 @@
-// $Id: ESMC_F90Interface.h,v 1.1 2004/02/18 01:40:59 eschwab Exp $
+// $Id: ESMC_F90Interface.h,v 1.2 2004/02/25 03:03:05 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,21 +24,24 @@
 //BOP
 //
 // !DESCRIPTION:
-// These macros are used in the F90-to-C++ interface's C-glue-code for
-// dynamicaly allocated (deep) objects to detect NULL object pointers being
-// passed to C++.  This prevents the otherwise subsequent method invocations
-// and member dereferences on non-existent objects, thereby preventing crashing
-// or other corruptive behavior.
+// These macros are used in the F90-to-C++ interface's C-glue-code.
 //-------------------------------------------------------------------------
 //EOP
+
+// Pass not-present F90 optional argument through to C++ as NULL, otherwise
+// leave unchanged.
+#define ESMC_NOT_PRESENT_FILTER(arg) \
+                           (!ESMC_PRESENT(arg) ? ESMC_NULL_POINTER : (arg))
+
+// Macros for dynamicaly allocated (deep) objects to detect NULL object
+// pointers being passed to C++.  This prevents the otherwise subsequent
+// method invocations and member dereferences on non-existent objects,
+// thereby preventing crashing or other corruptive behavior.
 
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
   #define ESMF_CHECK_POINTER(ptr, status) \
             if ((ptr) == ESMC_NULL_POINTER) { \
-              if ((void*) (status) != (void*) ESMC_NULL_POINTER && \
-                  (void*) (status) != (void*) ESMC_BAD_POINTER) { \
-                *(status) = ESMF_FAILURE; \
-              } \
+              if (ESMC_PRESENT(status)) *(status) = ESMF_FAILURE; \
               return; \
             }
 
