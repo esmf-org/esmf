@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.36 2004/06/16 04:53:16 nscollins Exp $
+! $Id: ESMF_GridUTest.F90,v 1.37 2004/06/18 21:56:44 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.36 2004/06/16 04:53:16 nscollins Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.37 2004/06/18 21:56:44 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -114,7 +114,7 @@
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzStagger=horz_stagger, &
+                              horzstagger=horz_stagger, &
                               name=name, rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
@@ -137,15 +137,13 @@
       ! destroyed first before being used in the grid create (which is 
       ! expected to fail).  but this still crashes randomly if the layout
       ! object is left completely uninitialized.  this should be addressed.
-      ! Bug report 796975 has been filed 
-      !  Comment out the Destroy because it crashes
       !EX_UTest
       layout2 = ESMF_DELayoutCreate(vm, rc=rc)
-      !call ESMF_DELayoutDestroy(layout2, status)
+      call ESMF_DELayoutDestroy(layout2, status)
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzStagger=horz_stagger, &
+                              horzstagger=horz_stagger, &
                               name=name, rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout2, rc=status)
@@ -165,7 +163,7 @@
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzStagger=horz_stagger, &
+                              horzstagger=horz_stagger, &
                               name=name, rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
@@ -187,14 +185,13 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
-      !The following code is commented out because it does not compile
-      !Bug 927094 has been opened
+      !EX_UTest
       ! Setting the horzGridType of a Grid
-      !horz_gridtype = ESMF_GridType_LatLon
-      !call ESMF_GridSet(grid, horzGridType=horz_gridtype,rc=rc)
-      !write(failMsg, *) "Did not return ESMF_SUCCESS"
-      !write(name, *) "Setting the horz_gridtype of  Grid Test"
-      !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      horz_gridtype = ESMF_GRID_TYPE_LATLON
+      call ESMF_GridSet(grid, horzgridtype=horz_gridtype,rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Setting the horz_gridtype of  Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
       !EX_UTest
@@ -210,7 +207,7 @@
       grid = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzStagger=horz_stagger, &
+                              horzstagger=horz_stagger, &
                               name=name, rc=status)
 
       call ESMF_GridDistribute(grid, delayout=layout, rc=status)
