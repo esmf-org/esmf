@@ -1,4 +1,4 @@
-// $Id: ESMC_Time_F.C,v 1.7 2003/04/02 17:24:55 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.8 2003/04/05 01:53:48 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -44,17 +44,27 @@ extern "C" {
                                           us_, ns_, Sn, Sd, cal, tz);
        }
 
-#if 0
-       void FTN(c_esmc_timeget)(ESMC_Time *ptr,
-                                         <value> *value, int *status) {
-           *status = (ptr)->ESMC_TimeGet(&value);
+       void FTN(c_esmc_timeget)(ESMC_Time *ptr, int *YR, int *MM, int *DD,
+                                int *D, int *H, int *M, ESMF_IKIND_I8 *S,
+                                int *MS, int *US, int *NS,
+                                double *d_, double *h_, double *m_,
+                                double *s_, double *ms_, double *us_,
+                                double *ns_, int *Sn, int *Sd, int *status) {
+           *status = (ptr)->ESMC_TimeGet(YR, MM, DD, D, H, M, S, MS,
+                                         US, NS, d_, h_, m_, s_, ms_,
+                                         us_, ns_, Sn, Sd);
        }
 
-       void FTN(c_esmc_timeset)(ESMC_Time *ptr,
-                                         <value> *value, int *status) {
-           *status = (ptr)->ESMC_TimeSet(value);
+       void FTN(c_esmc_timeset)(ESMC_Time *ptr, int *YR, int *MM, int *DD,
+                                int *D, int *H, int *M, ESMF_IKIND_I8 *S,
+                                int *MS, int *US, int *NS,
+                                double *d_, double *h_, double *m_,
+                                double *s_, double *ms_, double *us_,
+                                double *ns_, int *Sn, int *Sd, int *status) {
+           *status = (ptr)->ESMC_TimeSet(YR, MM, DD, D, H, M, S, MS,
+                                         US, NS, d_, h_, m_, s_, ms_,
+                                         us_, ns_, Sn, Sd);
        }
-#endif
 
        void FTN(c_esmc_timegetcalendar)(ESMC_Time *ptr,
                                         ESMC_Calendar *calendar, int *status) {
