@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.13 2003/08/04 20:22:21 nscollins Exp $
+// $Id: ESMC_Route_F.C,v 1.14 2003/08/06 23:04:46 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,29 +81,29 @@ extern "C" {
                      int *my_DE_rcv, 
                      ESMC_AxisIndex *AI_rcv_exc, ESMC_AxisIndex *AI_rcv_tot,
                      int *AI_rcv_count, int *global_start_rcv,
-                     int *global_stride_rcv, ESMC_DELayout **layout_rcv,
+                     int *global_count_rcv, ESMC_DELayout **layout_rcv,
                      int *my_DE_snd, 
                      ESMC_AxisIndex *AI_snd_exc, ESMC_AxisIndex *AI_snd_tot, 
                      int *AI_snd_count, int *global_start_snd,
-                     int *global_stride_snd, ESMC_DELayout **layout_snd, 
+                     int *global_count_snd, ESMC_DELayout **layout_snd, 
                      int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecompute(*rank, 
                              *my_DE_rcv, AI_rcv_exc, AI_rcv_tot, 
                              *AI_rcv_count, global_start_rcv, 
-                             global_stride_rcv, *layout_rcv,
+                             global_count_rcv, *layout_rcv,
                              *my_DE_snd, AI_snd_exc, AI_snd_tot, 
                              *AI_snd_count, global_start_snd,
-                             global_stride_snd, *layout_snd);
+                             global_count_snd, *layout_snd);
        }
 
        void FTN(c_esmc_routeprecomputehalo)(ESMC_Route **ptr, int *rank, 
                   int *my_DE, ESMC_AxisIndex *AI_exc, ESMC_AxisIndex *AI_tot,
-                  int *AI_count, int *global_start, int *global_stride,
+                  int *AI_count, int *global_start, int *global_count,
                   ESMC_DELayout **layout, ESMC_Logical *periodic, int *status) {
 
            *status = (*ptr)->ESMC_RoutePrecomputeHalo(*rank, *my_DE, AI_exc,
-                             AI_tot, *AI_count, global_start, global_stride,
+                             AI_tot, *AI_count, global_start, global_count,
                              *layout, periodic);
        }
 
