@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.4 2004/01/06 21:12:07 pwjones Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.5 2004/01/07 00:04:09 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,6 +47,18 @@
       private
 
 !------------------------------------------------------------------------------
+!
+!     ! ESMF_CoordKind
+!
+!     ! An enum for identifying a type of coordinate
+
+      type ESMF_CoordKind
+      sequence
+      private
+        integer :: kind
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_PhysCoordType
 !
 
@@ -54,23 +66,25 @@
       sequence
       private
 
-         type (ESMF_Base) :: base        ! contains coordinate name 
+         type (ESMF_Base) :: base   ! contains coordinate name 
+         type (ESMF_CoordKind) :: kind
+                                    ! type of coordinate
+         character (len=ESMF_MAXSTR) :: units
+                                    ! units of coord (eg 'degrees')
 
-         type (ESMF_CoordKind) :: kind   ! type of coordinate
-         
-         character (len=ESMF_MAXSTR) :: &
-            units                        ! units of coord (eg 'degrees')
+! flags for special cases
+         logical :: aligned         ! coord is aligned with logical axis
+         logical :: equalSpaced     ! coord is equally spaced
+         logical :: cyclic          ! coord is cyclic
 
-         logical ::                     &! flags for special cases
-            aligned,                    &! coord is aligned with logical axis
-            equal_spaced,               &! coord is equally spaced
-            cyclic                       ! coord is cyclic
-
-         real (ESMF_KIND_R8) ::         &! axis extents
-            min_val,                    &! minimum value of coordinate
-            max_val,                    &! maximum value of coordinate
-            origin_offset                ! use for grids in same coord system 
-                                         ! but differ by simple shift,rotation
+! axis extents
+         real (ESMF_KIND_R8) :: minVal
+                                    ! minimum value of coordinate
+         real (ESMF_KIND_R8) :: maxVal
+                                    ! maximum value of coordinate
+         real (ESMF_KIND_R8) :: originOffset
+                                    ! use for grids in same coord system but
+                                    ! differ by simple shift, rotation
                                  
       end type
 
@@ -93,25 +107,13 @@
       type ESMF_CoordSystem
       sequence
       private
-        integer :: coord_system
-      end type
-
-!------------------------------------------------------------------------------
-!
-!     ! ESMF_CoordKind
-!
-!     ! An enum for identifying a type of coordinate
-
-      type ESMF_CoordKind
-      sequence
-      private
-        integer :: kind
+        integer :: coordSystem
       end type
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
 
-      public ESMF_PhysCoord, ESMF_PhysCoordType, ESMF_CoordSystem
+      public ESMF_PhysCoord, ESMF_PhysCoordType, ESMF_CoordSystem, ESMF_CoordKind
 
 !------------------------------------------------------------------------------
 !
@@ -221,7 +223,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.4 2004/01/06 21:12:07 pwjones Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.5 2004/01/07 00:04:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -277,9 +279,9 @@
 ! !IROUTINE: ESMF_PhysCoordCreate - One stop interface for creating new coord
 
 ! !INTERFACE:
-      function ESMF_PhysCoordCreate(coord_kind, name, units,                     &
-                                    aligned, equal_spaced, cyclic,   &
-                                    min_val, max_val, origin_offset, &
+      function ESMF_PhysCoordCreate(coordKind, name, units,       &
+                                    aligned, equalSpaced, cyclic, &
+                                    minVal, maxVal, originOffset, &
                                     rc)
 !
 ! !RETURN VALUE:
@@ -288,7 +290,7 @@
 ! !ARGUMENTS:
 
       type (ESMF_CoordKind), intent(in) :: &
-         coord_kind                   ! type of coordinate being created
+         coordKind                    ! type of coordinate being created
 
       character (len=ESMF_MAXSTR), intent(in), optional :: &
          name                         ! name of coordinate axis (eg 'latitude')
@@ -298,13 +300,13 @@
 
       logical, intent(in), optional :: &
          aligned,                    &! coord is aligned with logical axis
-         equal_spaced,               &! coord is equally spaced
+         equalSpaced,                &! coord is equally spaced
          cyclic                       ! coord is cyclic
 
       real (ESMF_KIND_R8), intent(in), optional :: &! axis extents
-         min_val,                    &! minimum value of coordinate
-         max_val,                    &! maximum value of coordinate
-         origin_offset                ! offset from origin of full axis
+         minVal,                     &! minimum value of coordinate
+         maxVal,                     &! maximum value of coordinate
+         originOffset                 ! offset from origin of full axis
 
       integer, intent(out), optional :: &
          rc                           ! return code
@@ -317,7 +319,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[coord\_kind]
+!     \item[coordKind]
 !          Type of coordinate being defined.  These must be one of
 !          the supported ESMF\_CoordKind values to allow the framework
 !          to treat certain coordinates correctly (e.g. special treatment
@@ -329,15 +331,15 @@
 !          Units used for this coordinate (e.g. degrees).
 !     \item[{[aligned]}]
 !          True if physical coordinate is aligned with logical coordinate.
-!     \item[{[equal\_spaced]}]
+!     \item[{[equalSpaced]}]
 !          True when coordinate points are equally-spaced along axis.
 !     \item[{[cyclic]}]
 !          True if coordinate is cyclic.
-!     \item[{[min\_val]}]
+!     \item[{[minVal]}]
 !          Minimum value for grid point along this coordinate.
-!     \item[{[max\_val]}]
+!     \item[{[maxVal]}]
 !          Maximum value for grid point along this coordinate.
-!     \item[{[origin\_offset]}]
+!     \item[{[originOffset]}]
 !          If the grid origin is offset or rotated from coordinate system
 !          origin, this specifies the offset in this coordinate direction.
 !          Note that this is the offset for the global grid, so if this
@@ -350,12 +352,12 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_PhysCoordType), pointer :: physcoord ! Pointer to new PhysCoord
+      type(ESMF_PhysCoordType), pointer :: physCoord ! Pointer to new PhysCoord
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
 
 !     Initialize pointers
-      nullify(physcoord)
+      nullify(physCoord)
       nullify(ESMF_PhysCoordCreate%ptr)
 
 !     Initialize return code
@@ -366,8 +368,7 @@
         rc = ESMF_FAILURE
       endif
 
-
-      allocate(physcoord, stat=status)
+      allocate(physCoord, stat=status)
 !     If error write message and return.
 !     Formal error handling will be added asap.
       if(status /= ESMF_SUCCESS) then
@@ -375,10 +376,10 @@
         return
       endif
 
-      physcoord%kind = coord_kind
+      physCoord%kind = coordKind
 
       if (present(name)) then
-         call ESMF_SetName(physcoord%base, name, "PhysCoord", status)
+         call ESMF_SetName(physCoord%base, name, "PhysCoord", status)
          if(status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysCoordCreate: set name"
             return
@@ -386,50 +387,50 @@
       endif
 
       if (present(units)) then
-         physcoord%units = units
+         physCoord%units = units
       else
-         physcoord%units = 'unknown'
+         physCoord%units = 'unknown'
       endif
 
       if (present(aligned)) then
-         physcoord%aligned = aligned
+         physCoord%aligned = aligned
       else
-         physcoord%aligned = .false.
+         physCoord%aligned = .false.
       endif
 
-      if (present(equal_spaced)) then
-         physcoord%equal_spaced = equal_spaced
+      if (present(equalSpaced)) then
+         physCoord%equalSpaced = equalSpaced
       else
-         physcoord%equal_spaced = .false.
+         physCoord%equalSpaced = .false.
       endif
 
       if (present(cyclic)) then
-         physcoord%cyclic = cyclic
+         physCoord%cyclic = cyclic
       else
-         physcoord%cyclic = .false.
+         physCoord%cyclic = .false.
       endif
 
-      if (present(min_val)) then
-         physcoord%min_val = min_val
+      if (present(minVal)) then
+         physCoord%minVal = minVal
       else
-         physcoord%min_val = -HUGE(physcoord%max_val)
+         physCoord%minVal = -HUGE(physCoord%maxVal)
       endif
 
-      if (present(max_val)) then
-         physcoord%max_val = max_val
+      if (present(maxVal)) then
+         physCoord%maxVal = maxVal
       else
-         physcoord%max_val = HUGE(physcoord%max_val)
+         physCoord%maxVal = HUGE(physCoord%maxVal)
       endif
 
-      if (present(origin_offset)) then
-         physcoord%origin_offset = origin_offset
+      if (present(originOffset)) then
+         physCoord%originOffset = originOffset
       else
-     !    physcoord%origin_offset = 0.0_ESMF_R8
-         physcoord%origin_offset = 0.0_ESMF_KIND_R8
+     !    physCoord%originOffset = 0.0_ESMF_R8
+         physCoord%originOffset = 0.0_ESMF_KIND_R8
       endif
 
 !     Set return values.
-      ESMF_PhysCoordCreate%ptr => physcoord
+      ESMF_PhysCoordCreate%ptr => physCoord
       if(rcpresent) rc = ESMF_SUCCESS
 
       end function ESMF_PhysCoordCreate
@@ -439,12 +440,12 @@
 ! !IROUTINE: ESMF_PhysCoordDestroy - Deallocates a PhysCoord
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordDestroy(physcoord, rc)
+      subroutine ESMF_PhysCoordDestroy(physCoord, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_PhysCoord), intent(inout) :: &
-         physcoord                    ! physical coordinate to destroy
+         physCoord                    ! physical coordinate to destroy
 
       integer, intent(out), optional :: &
          rc                           ! return code
@@ -454,7 +455,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          The {\tt ESMF\_PhysCoord} object which is to be destroyed.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -475,14 +476,14 @@
       endif
 
 !     Deallocate physcoord
-      deallocate(physcoord%ptr, stat=status)
+      deallocate(physCoord%ptr, stat=status)
       if(status /= ESMF_SUCCESS) then
         print *, "ERROR in ESMF_PhysCoordDestroy: Deallocate"
         return
       endif
 
 !     Nullify pointer
-      nullify(physcoord%ptr)
+      nullify(physCoord%ptr)
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -498,19 +499,19 @@
 ! !IROUTINE: ESMF_PhysCoordSet - Sets attributes of a physical coordinate
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordSet(physcoord, coord_kind, name, units, &
-                                    aligned, equal_spaced, cyclic,     &
-                                    min_val, max_val, origin_offset,   &
+      subroutine ESMF_PhysCoordSet(physCoord, coordKind, name, units, &
+                                    aligned, equalSpaced, cyclic,     &
+                                    minVal, maxVal, originOffset,     &
                                     rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_PhysCoord), intent(inout) :: &
-         physcoord                    ! PhysCoord object for which attributes
+         physCoord                    ! PhysCoord object for which attributes
                                       ! are to be assigned
 
       type(ESMF_CoordKind), intent(in), optional :: &
-         coord_kind                   ! type of ESMF coordinate
+         coordKind                    ! type of ESMF coordinate
                                       ! overrides kind defined during creation
 
       character (len=ESMF_MAXSTR), intent(in), optional :: &
@@ -519,13 +520,13 @@
 
       logical, intent(in), optional :: &
          aligned,                    &! coord is aligned with logical axis
-         equal_spaced,               &! coord is equally spaced
+         equalSpaced,                &! coord is equally spaced
          cyclic                       ! coord is cyclic
 
       real (ESMF_KIND_R8), intent(in), optional :: &! axis extents
-         min_val,                    &! minimum value of coordinate
-         max_val,                    &! maximum value of coordinate
-         origin_offset                ! offset from origin of full axis
+         minVal,                     &! minimum value of coordinate
+         maxVal,                     &! maximum value of coordinate
+         originOffset                 ! offset from origin of full axis
 
       integer, intent(out), optional :: &
          rc                           ! return code
@@ -535,7 +536,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          The {\tt ESMF\_PhysCoord} object for which attributes are
 !          to be set.
 !     \item[{[coord\_kind]}]
@@ -549,15 +550,15 @@
 !          Units used for this coordinate (e.g. degrees).
 !     \item[{[aligned]}]
 !          True if physical coordinate is aligned with logical coordinate.
-!     \item[{[equal\_spaced]}]
+!     \item[{[equalSpaced]}]
 !          True when coordinate points are equally-spaced along axis.
 !     \item[{[cyclic]}]
 !          True if coordinate is cyclic.
-!     \item[{[min\_val]}]
+!     \item[{[minVal]}]
 !          Minimum value for grid point along this coordinate.
-!     \item[{[max\_val]}]
+!     \item[{[maxVal]}]
 !          Maximum value for grid point along this coordinate.
-!     \item[{[origin\_offset]}]
+!     \item[{[originOffset]}]
 !          If the grid origin is offset or rotated from coordinate system
 !          origin, this specifies the offset in this coordinate direction.
 !          Note that this is the offset for the global grid, so if this
@@ -582,17 +583,17 @@
       endif
 
 !     Check to see if physcoord is valid
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
         print *, "ERROR in ESMF_PhysCoordSet: physcoord not yet created"
         return
       endif
 
-      if (present(coord_kind)) then
-         physcoord%kind = coord_kind
+      if (present(coordKind)) then
+         physCoord%ptr%kind = coordKind
       endif
       
       if (present(name)) then
-         call ESMF_SetName(physcoord%ptr%base, name, "PhysCoord", status)
+         call ESMF_SetName(physCoord%ptr%base, name, "PhysCoord", status)
          if(status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysCoordSet: set name"
             return
@@ -600,31 +601,31 @@
       endif
 
       if (present(units)) then
-         physcoord%ptr%units = units
+         physCoord%ptr%units = units
       endif
 
       if (present(aligned)) then
-         physcoord%ptr%aligned = aligned
+         physCoord%ptr%aligned = aligned
       endif
 
-      if (present(equal_spaced)) then
-         physcoord%ptr%equal_spaced = equal_spaced
+      if (present(equalSpaced)) then
+         physCoord%ptr%equalSpaced = equalSpaced
       endif
 
       if (present(cyclic)) then
-         physcoord%ptr%cyclic = cyclic
+         physCoord%ptr%cyclic = cyclic
       endif
 
-      if (present(min_val)) then
-         physcoord%ptr%min_val = min_val
+      if (present(minVal)) then
+         physCoord%ptr%minVal = minVal
       endif
 
-      if (present(max_val)) then
-         physcoord%ptr%max_val = max_val
+      if (present(maxVal)) then
+         physCoord%ptr%maxVal = maxVal
       endif
 
-      if (present(origin_offset)) then
-         physcoord%ptr%origin_offset = origin_offset
+      if (present(originOffset)) then
+         physCoord%ptr%originOffset = originOffset
       endif
 
 !     Set return values.
@@ -637,16 +638,16 @@
 ! !IROUTINE: ESMF_PhysCoordGet - Retrieves attributes of physical coordinate
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordGet(physcoord, coord_kind, name, units, rc)
+      subroutine ESMF_PhysCoordGet(physCoord, coordKind, name, units, rc)
 !
 ! !ARGUMENTS:
 
       type(ESMF_PhysCoord), intent(in) :: &
-         physcoord                    ! PhysCoord object for which attributes
+         physCoord                    ! PhysCoord object for which attributes
                                       ! are to be retrieved
 
       type(ESMF_CoordKind), intent(out), optional :: &
-         coord_kind                   ! type of ESMF coordinate
+         coordKind                    ! type of ESMF coordinate
 
       character (len=ESMF_MAXSTR), intent(out), optional :: &
          name,                       &! name of coordinate axis (eg 'latitude')
@@ -662,10 +663,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          The {\tt ESMF\_PhysCoord} object for which attributes are
 !          to be set.
-!     \item[{[coord\_kind]}]
+!     \item[{[coordKind]}]
 !          Standard ESMF\_CoordKind specifying the type of coordinate.
 !     \item[{[name]}]
 !          Name assigned to this coordinate.
@@ -690,19 +691,19 @@
       endif
 
 !     Check for valid physcoord
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
          print *, "ERROR in ESMF_PhysCoordGetName: PhysCoord does not exist "
          return
       endif
 
 !     Get coordinate kind if requested.
-      if (present(coord_kind)) then
-         coord_kind = physcoord%ptr%kind
+      if (present(coordKind)) then
+         coordKind = physCoord%ptr%kind
       endif
       
 !     Get name from base object if requested
       if (present(name)) then
-         call ESMF_GetName(physcoord%ptr%base, name, status)
+         call ESMF_GetName(physCoord%ptr%base, name, status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysCoordGet: error gettting name"
             return
@@ -711,7 +712,7 @@
 
 !     Get units if requested
       if (present(units)) then
-         units = physcoord%ptr%units
+         units = physCoord%ptr%units
       endif
 
 !     Set return values.
@@ -724,16 +725,16 @@
 ! !IROUTINE: ESMF_PhysCoordGetExtents - Retrieves extents of a PhysCoord.
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordGetExtents(physcoord, min_val, max_val, &
-                                          origin_offset, rc)
+      subroutine ESMF_PhysCoordGetExtents(physCoord, minVal, maxVal, &
+                                          originOffset, rc)
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physcoord
+      type (ESMF_PhysCoord), intent(in) :: physCoord
 
       real (ESMF_KIND_R8), intent(out), optional :: &
-         min_val,                   &! min coordinate value for this coord
-         max_val,                   &! max coordinate value for this coord
-         origin_offset               ! non-zero if origin different from
+         minVal,                    &! min coordinate value for this coord
+         maxVal,                    &! max coordinate value for this coord
+         originOffset                ! non-zero if origin different from
                                      !   coordinate system origin
 
       integer, intent(out), optional :: rc               
@@ -743,13 +744,13 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          Existing {\tt ESMF\_PhysCoord} for which units are requested.
-!     \item[{[min\_val]}]
+!     \item[{[minVal]}]
 !          Minimum extent of this coordinate.
-!     \item[{[max\_val]}]
+!     \item[{[maxVal]}]
 !          Maximum extent of this coordinate.
-!     \item[{[origin\_offset]}]
+!     \item[{[originOffset]}]
 !          Used if coordinates have different origin from the coordinate
 !          system origin.
 !     \item[{[rc]}] 
@@ -771,15 +772,15 @@
       endif
 
 !     Check for valid physcoord
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
          print *, "ERROR in ESMF_PhysCoordGetExtents: PhysCoord does not exist "
          return
       endif
 
 !     Now get requested extents
-      if (present(min_val)) min_val = physcoord%ptr%min_val
-      if (present(min_val)) max_val = physcoord%ptr%max_val
-      if (present(origin_offset)) origin_offset = physcoord%ptr%origin_offset
+      if (present(minVal)) minVal = physCoord%ptr%minVal
+      if (present(minVal)) maxVal = physCoord%ptr%maxVal
+      if (present(originOffset)) originOffset = physCoord%ptr%originOffset
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -791,14 +792,14 @@
 ! !IROUTINE: ESMF_PhysCoordIsAligned - Checks alignment of physical,logical coordinate.
 
 ! !INTERFACE:
-      function ESMF_PhysCoordIsAligned(physcoord, rc)
+      function ESMF_PhysCoordIsAligned(physCoord, rc)
 !
 ! !RETURN VALUE:
       logical :: &
          ESMF_PhysCoordIsAligned     ! true if physical,logical coord aligned
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physcoord
+      type (ESMF_PhysCoord), intent(in) :: physCoord
 
       integer, intent(out), optional :: rc               
 
@@ -809,7 +810,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          Existing {\tt ESMF\_PhysCoord} to check for alignment.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -830,13 +831,13 @@
       endif
 
 !     Check for valid physcoord
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
          print *, "ERROR in ESMF_PhysCoordIsAligned: PhysCoord does not exist "
          return
       endif
 
 !     Now get units
-      ESMF_PhysCoordIsAligned = physcoord%ptr%aligned
+      ESMF_PhysCoordIsAligned = physCoord%ptr%aligned
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -848,14 +849,14 @@
 ! !IROUTINE: ESMF_PhysCoordIsEqualSpaced - Checks for equally-spaced coordinates
 
 ! !INTERFACE:
-      function ESMF_PhysCoordIsEqualSpaced(physcoord, rc)
+      function ESMF_PhysCoordIsEqualSpaced(physCoord, rc)
 !
 ! !RETURN VALUE:
       logical :: &
          ESMF_PhysCoordIsEqualSpaced     ! true if physical,logical coord aligned
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physcoord
+      type (ESMF_PhysCoord), intent(in) :: physCoord
 
       integer, intent(out), optional :: rc               
 
@@ -866,7 +867,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          Existing {\tt ESMF\_PhysCoord} to check for equal spacing.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -887,13 +888,13 @@
       endif
 
 !     Check for valid physcoord
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
          print *, "ERROR in ESMF_PhysCoordIsEqualSpaced: Coord does not exist "
          return
       endif
 
 !     Now get units
-      ESMF_PhysCoordIsEqualSpaced = physcoord%ptr%equal_spaced
+      ESMF_PhysCoordIsEqualSpaced = physCoord%ptr%equalSpaced
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -905,14 +906,14 @@
 ! !IROUTINE: ESMF_PhysCoordIsCyclic - Checks alignment of physical,logical coordinate.
 
 ! !INTERFACE:
-      function ESMF_PhysCoordIsCyclic(physcoord, rc)
+      function ESMF_PhysCoordIsCyclic(physCoord, rc)
 !
 ! !RETURN VALUE:
       logical :: &
          ESMF_PhysCoordIsCyclic     ! true if physical,logical coord aligned
 !
 ! !ARGUMENTS:
-      type (ESMF_PhysCoord), intent(in) :: physcoord
+      type (ESMF_PhysCoord), intent(in) :: physCoord
 
       integer, intent(out), optional :: rc               
 
@@ -922,7 +923,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord]
+!     \item[physCoord]
 !          Existing {\tt ESMF\_PhysCoord} to check for cyclic attribute.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -943,13 +944,13 @@
       endif
 
 !     Check for valid physcoord
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
          print *, "ERROR in ESMF_PhysCoordIsCyclic: PhysCoord does not exist "
          return
       endif
 
 !     Now get units
-      ESMF_PhysCoordIsCyclic = physcoord%ptr%cyclic
+      ESMF_PhysCoordIsCyclic = physCoord%ptr%cyclic
 
 !     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -961,7 +962,7 @@
 ! !IROUTINE: ESMF_PhysCoordPointInRange - Checks whether coordinate contains point
 !
 ! !INTERFACE:
-      function ESMF_PhysCoordPointInRange(point, physcoord, rc)
+      function ESMF_PhysCoordPointInRange(point, physCoord, rc)
 
 !
 ! !RETURN VALUE:
@@ -973,7 +974,7 @@
          point           ! coordinate value of point to check
 
       type (ESMF_PhysCoord), intent(in) :: &
-         physcoord       ! physical coordinate to check if point contained
+         physCoord       ! physical coordinate to check if point contained
 
       integer, intent(out), optional :: rc  ! return code
 !
@@ -985,7 +986,7 @@
 !     \begin{description}
 !     \item[point]
 !          Coordinate value of search point.
-!     \item[physcoord]
+!     \item[physCoord]
 !          Physical coordinate object to check whether point lies within
 !          coordinate axis extents.
 !     \item[{[rc]}]
@@ -997,7 +998,7 @@
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
-      type(ESMF_CoordKind) :: coord_kind             ! kind of coord
+      type(ESMF_CoordKind) :: coordKind              ! kind of coord
       character (len=ESMF_MAXSTR) :: units           ! units of coord
       real (ESMF_KIND_R8) :: i, minlon, maxlon, pi   
                                 ! for treating double-value issue in longitude
@@ -1012,29 +1013,29 @@
       ESMF_PhysCoordPointInRange = .false.
 
 !     Check for valid physcoord
-      if (.not. associated(physcoord%ptr)) then
+      if (.not. associated(physCoord%ptr)) then
          print *, "ERROR in ESMF_PhysCoordPointInRange: PhysCoord non-existent "
          return
       endif
 
 !     Check coordinate range
-      if (point >= physcoord%ptr%min_val .and. &
-          point <= physcoord%ptr%max_val) then
+      if (point >= physCoord%ptr%minVal .and. &
+          point <= physCoord%ptr%maxVal) then
          ESMF_PhysCoordPointInRange = .true.
       endif
 
 !     If not in range but axis is longitude, check for longitude range problems.
       if (.not. ESMF_PhysCoordPointInRange) then
-         call ESMF_PhysCoordGet(physcoord, &
-                                coord_kind=coord_kind, units=units, rc=status)
+         call ESMF_PhysCoordGet(physCoord, &
+                                coordKind=coordKind, units=units, rc=status)
          if (status /= ESMF_SUCCESS) then
             print *,'ERROR in PhysCoordPointInRange: Get coord failed'
          endif
          
-         if (coord_kind == ESMF_CoordKind_Lon) then
+         if (coordKind == ESMF_CoordKind_Lon) then
 
-            minlon = physcoord%ptr%min_val
-            maxlon = physcoord%ptr%max_val
+            minlon = physCoord%ptr%minVal
+            maxlon = physCoord%ptr%maxVal
 
             if (units == 'degrees') then
                if (minlon - point > 270.0d0) then
@@ -1044,7 +1045,7 @@
                   minlon = minlon + 360.0d0
                   maxlon = maxlon + 360.0d0
                endif
-            else if (ESMF_PhysCoordGetUnits(physcoord) == 'radians') then
+            else if (units == 'radians') then
                pi = 4.0d0*atan(1.0d0)
                if (minlon - point > 1.5*pi) then
                   minlon = minlon - 2.0d0*pi
@@ -1071,10 +1072,10 @@
 ! !IROUTINE: ESMF_PhysCoordPrint - Print the contents of a PhysCoord
 
 ! !INTERFACE:
-      subroutine ESMF_PhysCoordPrint(physcoord, opt, rc)
+      subroutine ESMF_PhysCoordPrint(physCoord, opt, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_PhysCoord), intent(in) :: physcoord      
+      type(ESMF_PhysCoord), intent(in) :: physCoord      
       character (len=*), intent(in) :: opt      
       integer, intent(out), optional :: rc           
 !
@@ -1083,8 +1084,8 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[physcoord] 
-!          Physcoord whose info is to be printed.
+!     \item[physCoord] 
+!          PhysCoord whose info is to be printed.
 !     \item[{[opt]}]
 !          Print ptions that control the type of information and level of 
 !          detail.
@@ -1106,35 +1107,35 @@
 
 !     print name, units
 
-      call ESMF_GetName(physcoord%ptr%base, char_tmp, status)
+      call ESMF_GetName(physCoord%ptr%base, char_tmp, status)
       print *, '  Name   :', trim(char_tmp)
-      print *, '  Units  :', trim(physcoord%ptr%units)
+      print *, '  Units  :', trim(physCoord%ptr%units)
       if (present(rc)) rc = status
 
 !     coordinate extents
 
       print *, '  Extents:'
-      print *, '  Minval :', physcoord%ptr%min_val
-      print *, '  Maxval :', physcoord%ptr%max_val
-      if (physcoord%ptr%origin_offset /= 0.0) then
-         print *,'  Origin offset: ',physcoord%ptr%origin_offset
+      print *, '  Minval :', physCoord%ptr%minVal
+      print *, '  Maxval :', physCoord%ptr%maxVal
+      if (physCoord%ptr%originOffset /= 0.0) then
+         print *,'  Origin offset: ',physCoord%ptr%originOffset
       endif
 
 !     other attributes
 
-      if (physcoord%ptr%aligned) then
+      if (physCoord%ptr%aligned) then
          print *,'  Coordinate is     aligned with logical axis'
       else
          print *,'  Coordinate is not aligned with logical axis'
       endif
 
-      if (physcoord%ptr%equal_spaced) then
+      if (physCoord%ptr%equalSpaced) then
          print *,'  Coordinate is     equally-spaced'
       else
          print *,'  Coordinate is not equally-spaced'
       endif
 
-      if (physcoord%ptr%cyclic) then
+      if (physCoord%ptr%cyclic) then
          print *,'  Coordinate is     cyclic.'
       else
          print *,'  Coordinate is not cyclic.'
@@ -1171,8 +1172,8 @@
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_CoordSystemEqual = (CoordSystem1%coord_system == &
-                               CoordSystem2%coord_system)
+      ESMF_CoordSystemEqual = (CoordSystem1%coordSystem == &
+                               CoordSystem2%coordSystem)
 
       end function ESMF_CoordSystemEqual
 
@@ -1205,8 +1206,8 @@
 !EOP
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
-      ESMF_CoordSystemNotEqual = (CoordSystem1%coord_system /= &
-                                  CoordSystem2%coord_system)
+      ESMF_CoordSystemNotEqual = (CoordSystem1%coordSystem /= &
+                                  CoordSystem2%coordSystem)
 
       end function ESMF_CoordSystemNotEqual
 
