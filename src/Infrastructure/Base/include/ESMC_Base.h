@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.1 2002/10/25 21:03:29 eschwab Exp $
+// $Id: ESMC_Base.h,v 1.2 2002/11/04 21:23:05 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,15 +10,11 @@
 //
 // ESMF Base C++ declaration include file
 //
-// (all lines below between the !BOP and !EOP markers will be included in
-//  the automated document processing.)
 //-----------------------------------------------------------------------------
 //
- // these lines prevent this file from being read more than once if it
- // ends up being included multiple times
 
- #ifndef ESMC_BASE_H
- #define ESMC_BASE_H
+#ifndef ESMC_BASE_H
+#define ESMC_BASE_H
 
 //-----------------------------------------------------------------------------
 
@@ -49,10 +45,22 @@ enum ESMC_Status { ESMF_STATE_UNINIT=1,
                    ESMF_STATE_BUSY,
                    ESMF_STATE_INVALID };
 
+// ESMF data types and kinds
 enum ESMC_DataType { ESMF_DATA_INTEGER=1,
                      ESMF_DATA_REAL,
                      ESMF_DATA_LOGICAL,
                      ESMF_DATA_CHARACTER };
+
+enum ESMC_DataKind { ESMF_KIND_1=1,
+                     ESMF_KIND_2,
+                     ESMF_KIND_4,
+                     ESMF_KIND_8,
+                     ESMF_KIND_16 };
+
+// general logical valud
+enum ESMC_Logical { ESMF_TF_UNKNOWN=1,
+                    ESMF_TF_TRUE,
+                    ESMF_TF_FALSE };
 
 // union to hold a value of any type
 struct ESMC_DataValue {
