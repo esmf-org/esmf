@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.43 2003/03/10 03:23:03 cdeluca Exp $
+! $Id: ESMF_Array.F90,v 1.44 2003/04/02 21:04:12 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,11 +71,11 @@
         integer :: rank ! number of dimensions
         type(ESMF_DataType) :: type ! real/float, integer, etc enum
         type(ESMF_DataKind) :: kind ! fortran "kind" enum/integer
-        integer, dimension(ESMF_MAXDIM) :: counts ! array dimension sizes
-        logical :: hascounts ! counts optional
-        integer, dimension(ESMF_MAXDIM, 3) :: rinfo ! (lower/upper/stride) per rank
-        logical :: has_rinfo ! rinfo optional
-        type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: ai ! axis indices
+        !integer, dimension(ESMF_MAXDIM) :: counts ! array dimension sizes
+        !logical :: hascounts ! counts optional
+        !integer, dimension(ESMF_MAXDIM, 3) :: rinfo ! (lower/upper/stride) per rank
+        !logical :: has_rinfo ! rinfo optional
+        !type(ESMF_AxisIndex), dimension(ESMF_MAXDIM) :: ai ! axis indices
       end type
 !------------------------------------------------------------------------------
 ! ! ESMF_Array
@@ -180,6 +180,7 @@
       public ESMF_ArrayDestroy
       public ESMF_ArraySpecCreate
       !public ESMF_ArraySpecDestroy
+      public ESMF_ArraySpecGet
       public ESMF_ArraySetData, ESMF_ArrayGetData
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
       public ESMF_ArrayRedist, ESMF_ArrayHalo
@@ -193,7 +194,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.43 2003/03/10 03:23:03 cdeluca Exp $'
+      '$Id: ESMF_Array.F90,v 1.44 2003/04/02 21:04:12 nscollins Exp $'
 !==============================================================================
 !
 ! INTERFACE BLOCKS
@@ -3605,8 +3606,8 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-     function ESMF_ArraySpecCreate(rank, type, kind, counts, &
-                                   lbounds, ubounds, strides, rc)
+     function ESMF_ArraySpecCreate(rank, type, kind, rc)
+                                   !counts, lbounds, ubounds, strides, rc)
 !
 ! !RETURN VALUE:
      type(ESMF_ArraySpec), pointer :: ESMF_ArraySpecCreate
@@ -3615,10 +3616,10 @@ end function
      integer, intent(in) :: rank
      type(ESMF_DataType), intent(in) :: type
      type(ESMF_DataKind), intent(in) :: kind
-     integer, dimension(:), intent(in) :: counts
-     integer, dimension(:), intent(in), optional :: lbounds
-     integer, dimension(:), intent(in), optional :: ubounds
-     integer, dimension(:), intent(in), optional :: strides
+     !integer, dimension(:), intent(in), optional :: counts
+     !integer, dimension(:), intent(in), optional :: lbounds
+     !integer, dimension(:), intent(in), optional :: ubounds
+     !integer, dimension(:), intent(in), optional :: strides
      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3643,25 +3644,25 @@ end function
 ! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
 ! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
 !
-! \item[counts]
-! The size of each dimension in the Array. This is a 1D integer array
-! the same length as the rank.
-!
-! \item[[lbounds]]
-! The lower bounds for valid indices in the array. This is a 1D
-! integer array the same length as the rank. If not specified
-! the default values are 1 for each dimension.
-!
-! \item[[ubounds]]
-! The upper bounds for valid indices in the array. This is a 1D
-! integer array the same length as the rank. If not specified
-! the default values are same as the count in each dimension.
-!
-! \item[[strides]]
-! The strides for each rank of the array. This is a 1D
-! integer array the same length as the rank. If not specified
-! the default values are the same as the default Fortran array strides.
-!
+!% \item[counts]
+!% The size of each dimension in the Array. This is a 1D integer array
+!% the same length as the rank.
+!%
+!% \item[[lbounds]]
+!% The lower bounds for valid indices in the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are 1 for each dimension.
+!%
+!% \item[[ubounds]]
+!% The upper bounds for valid indices in the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are same as the count in each dimension.
+!%
+!% \item[[strides]]
+!% The strides for each rank of the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are the same as the default Fortran array strides.
+!%
 ! \item[[rc]]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -3688,8 +3689,8 @@ end function
           print *, "ArraySpec allocation error"
           return
         endif
-        call ESMF_ArraySpecConstruct(as, rank, type, kind, counts, &
-                                      lbounds, ubounds, strides, status)
+        call ESMF_ArraySpecConstruct(as, rank, type, kind, status)
+                                      !counts, lbounds, ubounds, strides, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "ArraySpec construction error"
           return
@@ -3701,18 +3702,18 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArraySpecConstruct(as, rank, type, kind, counts, &
-                                         lbounds, ubounds, strides, rc)
+      subroutine ESMF_ArraySpecConstruct(as, rank, type, kind, rc)
+                                          !counts, lbounds, ubounds, strides, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArraySpec), pointer :: as
       integer, intent(in) :: rank
       type(ESMF_DataType), intent(in) :: type
       type(ESMF_DataKind), intent(in) :: kind
-      integer, dimension(:), intent(in) :: counts
-      integer, dimension(:), intent(in), optional :: lbounds
-      integer, dimension(:), intent(in), optional :: ubounds
-      integer, dimension(:), intent(in), optional :: strides
+      !integer, dimension(:), intent(in), optional :: counts
+      !integer, dimension(:), intent(in), optional :: lbounds
+      !integer, dimension(:), intent(in), optional :: ubounds
+      !integer, dimension(:), intent(in), optional :: strides
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -3738,25 +3739,25 @@ end function
 ! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
 ! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
 !
-! \item[counts]
-! The size of each dimension in the Array. This is a 1D integer array
-! the same length as the rank.
-!
-! \item[[lbounds]]
-! The lower bounds for valid indices in the array. This is a 1D
-! integer array the same length as the rank. If not specified
-! the default values are 1 for each dimension.
-!
-! \item[[ubounds]]
-! The upper bounds for valid indices in the array. This is a 1D
-! integer array the same length as the rank. If not specified
-! the default values are same as the count in each dimension.
-!
-! \item[[strides]]
-! The strides for each rank of the array. This is a 1D
-! integer array the same length as the rank. If not specified
-! the default values are the same as the default Fortran array strides.
-!
+!% \item[counts]
+!% The size of each dimension in the Array. This is a 1D integer array
+!% the same length as the rank.
+!%
+!% \item[[lbounds]]
+!% The lower bounds for valid indices in the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are 1 for each dimension.
+!%
+!% \item[[ubounds]]
+!% The upper bounds for valid indices in the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are same as the count in each dimension.
+!%
+!% \item[[strides]]
+!% The strides for each rank of the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are the same as the default Fortran array strides.
+!%
 ! \item[[rc]]
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
@@ -3778,12 +3779,12 @@ end function
         as%rank = rank
         as%type = type
         as%kind = kind
-        do i=1,rank
-          as%counts(i) = counts(i)
-          !as%rinfo(i, 1) = lbounds(i)
-          !as%rinfo(i, 2) = ubounds(i)
-          !as%rinfo(i, 3) = strides(i)
-        enddo
+       ! do i=1,rank
+       ! as%counts(i) = counts(i)
+       ! !as%rinfo(i, 1) = lbounds(i)
+       ! !as%rinfo(i, 2) = ubounds(i)
+       ! !as%rinfo(i, 3) = strides(i)
+       ! enddo
         if (rcpresent) rc = ESMF_SUCCESS
         end subroutine ESMF_ArraySpecConstruct
 !------------------------------------------------------------------------------
@@ -3883,6 +3884,93 @@ end function
       name = "default array name"
       if (rcpresent) rc = ESMF_SUCCESS
       end subroutine ESMF_ArrayGetName
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArraySpecGet(as, rank, type, kind, rc)
+                                          !counts, lbounds, ubounds, strides, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_ArraySpec), intent(in) :: as
+      integer, intent(out), optional :: rank
+      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataKind), intent(out), optional :: kind
+      !integer, dimension(:), intent(in), optional :: counts
+      !integer, dimension(:), intent(in), optional :: lbounds
+      !integer, dimension(:), intent(in), optional :: ubounds
+      !integer, dimension(:), intent(in), optional :: strides
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Return information about the contents of a ArraySpec type.
+!
+! The arguments are:
+! \begin{description}
+!
+! \item[as]
+! An {\tt ArraySpec} object.
+!
+! \item[rank]
+! Array rank (dimensionality, 1D, 2D, etc). Maximum allowed is 5D.
+!
+! \item[type]
+! Array type. Valid types include {\tt ESMF\_DATA\_INTEGER},
+! {\tt ESMF\_DATA\_REAL}, {\tt ESMF\_DATA\_LOGICAL},
+! {\tt ESMF\_DATA\_CHARACTER}.
+!
+! \item[kind]
+! Array kind. Valid kinds include {\tt ESMF\_KIND\_I4},
+! {\tt ESMF\_KIND\_I8}, {\tt ESMF\_KIND\_R4}, {\tt ESMF\_KIND\_R8},
+! {\tt ESMF\_KIND\_C8}, {\tt ESMF\_KIND\_C16}.
+!
+!% \item[counts]
+!% The size of each dimension in the Array. This is a 1D integer array
+!% the same length as the rank.
+!%
+!% \item[[lbounds]]
+!% The lower bounds for valid indices in the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are 1 for each dimension.
+!%
+!% \item[[ubounds]]
+!% The upper bounds for valid indices in the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are same as the count in each dimension.
+!%
+!% \item[[strides]]
+!% The strides for each rank of the array. This is a 1D
+!% integer array the same length as the rank. If not specified
+!% the default values are the same as the default Fortran array strides.
+!%
+! \item[[rc]]
+! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!
+! \end{description}
+!
+!EOP
+! local vars
+        integer :: i
+        integer :: status ! local error status
+        logical :: rcpresent ! did user specify rc?
+! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+! get arrayspec contents
+        if(present(rank)) rank = as%rank
+        if(present(type)) type = as%type
+        if(present(kind)) kind = as%kind
+       ! do i=1,rank
+       ! as%counts(i) = counts(i)
+       ! !as%rinfo(i, 1) = lbounds(i)
+       ! !as%rinfo(i, 2) = ubounds(i)
+       ! !as%rinfo(i, 3) = strides(i)
+       ! enddo
+        if (rcpresent) rc = ESMF_SUCCESS
+        end subroutine ESMF_ArraySpecGet
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
