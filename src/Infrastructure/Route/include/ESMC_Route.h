@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.14 2003/03/13 21:18:44 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.15 2003/03/13 22:01:52 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,8 +73,11 @@
 
  // accessor methods for class members
     //int ESMC_RouteGet(<value type> *value) const;
-    int ESMC_RouteSetSend(int dst_de, void *base_addr, ESMC_XPacket *xp);
-    int ESMC_RouteSetRecv(int src_de, void *base_addr, ESMC_XPacket *xp);
+    int ESMC_RouteGetCached(ESMC_DELayout *parentlayout, int *hascachedroute, 
+                               ESMC_Route **route);
+
+    int ESMC_RouteSetSend(int dst_de, ESMC_XPacket *xp);
+    int ESMC_RouteSetRecv(int src_de, ESMC_XPacket *xp);
     
  // initialize the communication routines in this route object
     int ESMC_RoutePrecompute(int rank, int my_DE_rcv, ESMC_AxisIndex *AI_rcv,
@@ -83,7 +86,7 @@
                              int AI_snd_count, ESMC_DELayout *layout_snd);
 
  // execute the communication routines set up in this route object
-    int ESMC_RouteRun(void);
+    int ESMC_RouteRun(void *srcaddr, void *dstaddr);
 
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;

@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.6 2003/03/11 22:57:20 nscollins Exp $
+// $Id: ESMC_RTable.h,v 1.7 2003/03/13 22:01:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -58,10 +58,10 @@
      int entrycount;
      int my_deid;
      struct rtableentry {
-        int dest_deid;
-        int xpcount;
-        void* base_addr;
-        ESMC_XPacket *xp;
+        int deid;
+        int xpcount;         // this is how many are currently active
+        ESMC_XPacket *xp;    // this needs to be an array of xp's
+        int alloccount;      // and this can keep track of how many are allocd
      } *entry;
  
 // !PUBLIC MEMBER FUNCTIONS:
@@ -77,7 +77,7 @@
  // accessor methods for class members
     //int ESMC_RTableGet<Value>(<value type> *value) const;
     //int ESMC_RTableSet<Value>(<value type>  value);
-    int ESMC_RTableSetEntry(int dst_de, void *base_addr, ESMC_XPacket *xp); 
+    int ESMC_RTableSetEntry(int deid, ESMC_XPacket *xp); 
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RTableValidate(const char *options) const;
