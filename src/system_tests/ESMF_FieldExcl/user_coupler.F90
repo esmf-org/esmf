@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.7 2004/11/03 00:14:00 nscollins Exp $
+! $Id: user_coupler.F90,v 1.8 2004/11/18 20:48:48 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -104,10 +104,14 @@
       ! must be called on each state which is going to be accessed from
       ! this coupler.  when the call returns, all objects which were not
       ! in existance on all PETs now have an object which represents them.
-      call ESMF_StatePrint(importState, rc=status)
       call ESMF_StateReconcile(importState, vm, rc=status)
-      call ESMF_StatePrint(exportState, rc=status)
+      print *, "i am", pet_id, "this is my import state after reconcile"
+      call ESMF_StatePrint(importState, rc=status)
       call ESMF_StateReconcile(exportState, vm, rc=status)
+      print *, "i am", pet_id, "this is my export state after reconcile"
+      call ESMF_StatePrint(exportState, rc=status)
+      print *, "done with both reconcile calls"
+
 
       ! Query component for VM and create a layout with the right breakdown
       delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
