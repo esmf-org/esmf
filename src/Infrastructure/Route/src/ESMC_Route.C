@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.108 2004/11/17 21:47:22 theurich Exp $
+// $Id: ESMC_Route.C,v 1.109 2004/11/19 23:28:05 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.108 2004/11/17 21:47:22 theurich Exp $";
+               "$Id: ESMC_Route.C,v 1.109 2004/11/19 23:28:05 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -823,58 +823,68 @@ static int maxroutes = 10;
 
            nbytes = ESMC_DataKindSize(dk);
 
-	   // allocate temporary buffers
-           if (srctcount > 0)
-	       srcbufstart[req] = (char *)(malloc(srctcount*nbytes));
-           else
-               srcbufstart[req] = NULL;
-           if (rcvtcount > 0)
-	       rcvbufstart[req] = (char *)(malloc(rcvtcount*nbytes));
-           else
-               rcvbufstart[req] = NULL;
-	   srcbuf = srcbufstart[req];
-	   rcvbuf = rcvbufstart[req];
+           // test compacting the xpacket info
+           if (scontig_length == sstride[0]) {
+               srcbufstart[req] = (char *)srcaddr+(soffset*nbytes); 
+           } else {
+	     // allocate temporary buffers
+             if (srctcount > 0)
+	         srcbufstart[req] = (char *)(malloc(srctcount*nbytes));
+             else
+                 srcbufstart[req] = NULL;
+             srcbuf = srcbufstart[req];
            
-  //         printf("srcbufstart=%p, rcvbufstart%p\n", srcbufstart, rcvbufstart);
+  //           printf("srcbufstart=%p, rcvbufstart%p\n", srcbufstart, rcvbufstart);
 
-           // copy in to the send buffer
-	   if(srctcount > 0) {
-             switch (srank) {
-               case 2:
-                 srcitems = soffset;
-                 for (l=0; l<srep_count[0] ; l++, srcitems += sstride[0]) {
-
-                      srcptr = (char *)srcaddr+(srcitems*nbytes); 
-		      memcpy(srcbuf,srcptr,scontig_length*nbytes);
-		      srcbuf += scontig_length*nbytes;
-                 }
-                 break;
-               case 3:
-                 for (k=0; k<srep_count[1]; k++, soffset += sstride[1]) {
+             // copy in to the send buffer
+	     if(srctcount > 0) {
+               switch (srank) {
+                 case 2:
                    srcitems = soffset;
-                   for (l=0; l<srep_count[0]; l++, srcitems += sstride[0]) {
+                   for (l=0; l<srep_count[0] ; l++, srcitems += sstride[0]) {
 
                         srcptr = (char *)srcaddr+(srcitems*nbytes); 
 		        memcpy(srcbuf,srcptr,scontig_length*nbytes);
 		        srcbuf += scontig_length*nbytes;
                    }
-                 }
-                 break;
-               default:
-                 sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
-                 ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
-                                                         msgbuf, &rc);
-                 return (rc);
+                   break;
+                 case 3:
+                   for (k=0; k<srep_count[1]; k++, soffset += sstride[1]) {
+                     srcitems = soffset;
+                     for (l=0; l<srep_count[0]; l++, srcitems += sstride[0]) {
+
+                        srcptr = (char *)srcaddr+(srcitems*nbytes); 
+	  	        memcpy(srcbuf,srcptr,scontig_length*nbytes);
+	  	        srcbuf += scontig_length*nbytes;
+                     }
+                   }
+                   break;
+                 default:
+                   sprintf(msgbuf, "no code to handle rank %d yet\n", srank);
+                   ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, 
+                                                           msgbuf, &rc);
+                   return (rc);
+               }
              }
-           }
+           } 
+           if (rcontig_length == rstride[0]) {
+               rcvbufstart[req] = (char *)dstaddr+(roffset*nbytes); 
+           } else {
+	     // allocate temporary buffers
+             if (rcvtcount > 0)
+	         rcvbufstart[req] = (char *)(malloc(rcvtcount*nbytes));
+             else
+                 rcvbufstart[req] = NULL;
+             rcvbuf = rcvbufstart[req];
+           } 
 
            handle[req] = NULL;
            if(mypet == theirpet)
 	      rcvbuf = srcbufstart[req];
-	   else{
+	   else {
               //delayout->ESMC_DELayoutExchange((void **)srcbufstart, NULL,
-              // (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes,               //  mydeid, theirdeid, ESMF_TRUE);
-              
+              //  (void **)rcvbufstart, NULL, srctcount*nbytes, rcvtcount*nbytes, 
+              //   mydeid, theirdeid, ESMF_TRUE);
               vm->vmk_sendrecv(srcbufstart[req], srctcount*nbytes, theirpet,
                 rcvbufstart[req], rcvtcount*nbytes, theirpet, &handle[req]);
 //              vm->vmk_sendrecv(srcbufstart, srctcount*nbytes, theirpet,
@@ -985,7 +995,7 @@ static int maxroutes = 10;
            if(mypet == theirpet)
 	      rcvbuf = srcbufstart[req];
            else
-	    rcvbuf = rcvbufstart[req];
+	      rcvbuf = rcvbufstart[req];
     
            vm->vmk_wait(&handle[req]);
            
@@ -1019,13 +1029,12 @@ static int maxroutes = 10;
                  return (rc);
              }
            }
-
-           if (srcbufstart[req])
+           if ((scontig_length != sstride[0]) && srcbufstart[req])
                free(srcbufstart[req]);
-           if (rcvbufstart[req])
+           if ((rcontig_length != rstride[0]) && rcvbufstart[req])
                free(rcvbufstart[req]);
 
-            ++req;
+           ++req;
 	}
 
     }
