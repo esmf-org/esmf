@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.100 2004/10/05 22:55:24 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.101 2004/10/19 21:01:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.100 2004/10/05 22:55:24 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.101 2004/10/19 21:01:51 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -729,13 +729,13 @@ static int maxroutes = 10;
 
         // find out who the next id is 
         rc = ct->ESMC_CommTableGetPartner(i, &theirdeid, &needed);
-  //      if (!needed) {
-  //          printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
-  //          continue;
-  //      } else {
-  //          printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
-  //      }
-        
+        if (!needed) {
+  //       printf("RouteRun: comm partner %d not needed, looping\n", theirdeid);
+            continue;
+        } else {
+  //       printf("RouteRun: comm partner %d needed %d\n", theirdeid, needed);
+        }
+       
         // find total number of xpackets
 	rc = recvRT->ESMC_RTableGetCount(theirdeid, &xrcount);
 	rc = sendRT->ESMC_RTableGetCount(theirdeid, &xscount);
