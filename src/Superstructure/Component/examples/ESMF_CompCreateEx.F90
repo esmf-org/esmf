@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateEx.F90,v 1.2 2003/01/10 21:45:11 nscollins Exp $
+! $Id: ESMF_CompCreateEx.F90,v 1.3 2003/01/23 20:59:19 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -23,7 +23,7 @@
 !   ! Other ESMF modules which are needed by Comps
     use ESMF_IOMod
     use ESMF_LayoutMod
-    use ESMF_ComponentMod
+    use ESMF_CompMod
     
     implicit none
     
@@ -33,7 +33,7 @@
     integer, dimension(2) :: delist
     character(ESMF_MAXSTR) :: cname
     type(ESMF_Layout) :: layout
-    type(ESMF_Component) :: comp1, comp2, comp3, comp4
+    type(ESMF_Comp) :: comp1, comp2, comp3, comp4
         
 !-------------------------------------------------------------------------
 !   ! Example 1:
@@ -46,28 +46,28 @@
     layout = ESMF_LayoutCreate(2, 1, delist, ESMF_XFAST, rc)
 
     cname = "Atmosphere"
-    comp1 = ESMF_ComponentCreate(cname, layout, ESMF_GRIDCOMP, &
+    comp1 = ESMF_CompCreate(cname, layout, ESMF_GRIDCOMP, &
                                        ESMF_ATM, "/usr/local", rc=rc)  
 
     print *, "Comp Create returned, name = ", trim(cname)
 
-    call ESMF_ComponentInit(comp1, rc)
+    call ESMF_CompInit(comp1, rc)
     print *, "Comp Init returned"
 
 
-    !call ESMF_ComponentPrint(comp1, rc)
+    !call ESMF_CompPrint(comp1, rc)
     !print *, "Comp Print returned"
 
     timestep = 1
-    call ESMF_ComponentRun(comp1, timestep, rc)
+    call ESMF_CompRun(comp1, timestep, rc)
     print *, "Comp Run returned"
 
 
-    call ESMF_ComponentFinalize(comp1, rc)
+    call ESMF_CompFinalize(comp1, rc)
     print *, "Comp Finalize returned"
 
 
-    call ESMF_ComponentDestroy(comp1, rc)
+    call ESMF_CompDestroy(comp1, rc)
     print *, "Comp Destroy returned"
 
     call ESMF_LayoutDestroy(layout, rc);
