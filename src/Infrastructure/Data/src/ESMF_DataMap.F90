@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.3 2003/07/30 18:11:45 pwjones Exp $
+! $Id: ESMF_DataMap.F90,v 1.4 2003/08/05 17:46:48 dneckels Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -216,7 +216,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.3 2003/07/30 18:11:45 pwjones Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.4 2003/08/05 17:46:48 dneckels Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -686,12 +686,14 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_DataMapGet(datamap, gridrank, dimlist, rc)
+      subroutine ESMF_DataMapGet(datamap, gridrank, dimlist, &
+                       relloc, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap  
       integer, intent(out), optional :: gridrank    
       integer, dimension (:), intent(out), optional :: dimlist 
+      type(ESMF_RelLoc), optional :: relloc
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
@@ -719,6 +721,10 @@ end function
 
         if (present(gridrank)) then
            gridrank = dmp%gridrank
+        endif
+
+        if (present(relloc)) then
+           relloc = dmp%relloc
         endif
 
         if (present(dimlist)) then
