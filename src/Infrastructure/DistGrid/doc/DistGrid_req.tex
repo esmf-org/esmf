@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.7 2002/03/27 00:01:22 vbalaji Exp $
+% $Id: DistGrid_req.tex,v 1.8 2002/03/28 20:02:45 vbalaji Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -96,7 +96,8 @@ each point in the domain to one PE for computation.
 
 \begin{reqlist}
 \item[Priority]
-\item[Source] Anyone?
+\item[Source] Requirements for specific flags to control the
+  decomposition must be added here.
 \item[Status]
 \item[Verification]
 \item[Notes] in multi-threaded applications, the PE assignment is done
@@ -108,6 +109,13 @@ each point in the domain to one PE for computation.
   threads pop tasks. The pool of PEs available for threading is drawn
   from the associated PElist, of which not all are part of the PE
   layout.
+  
+  Threads can be mapped on to an anode, which can consist of multiple
+  PEs.  The main thing I'm trying to arrive at is that the
+  partitioning into threads is independent of assignment to PEs.
+  Principally, one must be able to define an arbitrary number of
+  partitions organized into a queue, off which shared-memory execution
+  threads can pop tasks as resources get freed.
 \end{reqlist}
 
 \sreq{User-specified computational domain decomposition}
@@ -184,8 +192,10 @@ specify this as input information for grid topology generation.
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes] it is natural to treat this as a DistGrid feature, rather
-  than having separate edge detection code in applications.
+\item[Notes] it is natural to treat this as a \textbf{DistGrid}
+  feature, rather than having separate edge detection code in
+  applications. There is more than one way to treat LBCs in a
+  \textbf{DistGrid}: these will be spelt out anon.
 \end{reqlist}
 
 \sreq{Data domain generation}
@@ -354,7 +364,7 @@ data transfer may not be complete when the call returns.
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
-  issues like wait-for-completion dealt with within DistGrid.
+  issues like wait-for-completion dealt with within \textbf{DistGrid}.
 \end{reqlist}
 
 \sreq{Blocked halo update}
@@ -439,7 +449,7 @@ data transfer may not be complete when the call returns.
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
-  issues like wait-for-completion dealt with within DistGrid.
+  issues like wait-for-completion dealt with within \textbf{DistGrid}.
 \end{reqlist}
 
 \sreq{Blocked data transpose}
@@ -488,6 +498,11 @@ data arrays where each array element is a derived data type.
 It shall be possible to create a copy on any PE of the entire global
 array from a distributed array.
 
+\sreq{Allgather}
+
+It shall be possible to create a copy on all PEs of the associated
+PElist of the entire global array from a distributed array.
+
 \sreq{Partial gather} \label{DG:PartGather}
 
 In a 2D decomposition, it shall be possible to perform a gather along
@@ -518,11 +533,11 @@ distribution for aggregate data transfer.
   methods may be simple and efficient.
   
   Bundling methods with similar requirements may appear in other
-  documents (e.g fields, regridding, PhysGrid), but the methods there
-  will likely cascade to here, as the main utility of bundles lies in
-  aggregate data transfer methods on distributed grids. The other
-  documents should derive an equivalent list of methods listing the
-  ones here as source.
+  documents (e.g \textbf{Fields}, \textbf{Regrid}, \textbf{PhysGrid}),
+  but the methods there will likely cascade to here, as the main
+  utility of bundles lies in aggregate data transfer methods on
+  distributed grids. The other documents should derive an equivalent
+  list of methods listing the ones here as source.
 \end{reqlist}
 
 \sreq{Initiate a bundle}
@@ -532,7 +547,8 @@ a distributed grid.
 
 \sreq{Add an array}
 
-It must be possible to add any array on a conformant DistGrid to a bundle.
+It must be possible to add any array on a conformant \textbf{DistGrid}
+to a bundle.
 
 \begin{reqlist}
 \item[Priority]
@@ -557,14 +573,14 @@ It must be possible to delete any array from a bundle.
 
 \sreq{Merge bundles}
 
-It must be possible to merge bundles sharing a DistGrid.
+It must be possible to merge bundles sharing a \textbf{DistGrid}.
 
 \begin{reqlist}
 \item[Priority]
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes] Two bundles on different DistGrids may end up on the same
+\item[Notes] Two bundles on different \textbf{DistGrid}s may end up on the same
   one after a data transpose.
 \end{reqlist}
 
@@ -823,7 +839,7 @@ methods to enforce exact redundancy.
 \req{Spectral grid}
 
 Spectral models generally have two associated grids, one in physical
-space, and one in phase (wavenumber) space. The sequence of
+space, and one in spectral (wavenumber) space. The sequence of
 transformations to pass data between the two grids is treated at its
 highest level within the Regrid semantics. Within these, there is
 generally a specific step to redistribute data to optimize specific

@@ -1,4 +1,4 @@
-% $Id: DistGrid_background.tex,v 1.4 2002/03/18 10:07:54 wsawyer Exp $
+% $Id: DistGrid_background.tex,v 1.5 2002/03/28 20:02:45 vbalaji Exp $
 
 \section{Background}
 
@@ -38,26 +38,27 @@ direct invocation of the communication primitives.
 
 \subsection{Summary}
 
-A gridded component is associated with a single PhysGrid, and thus a
-single DistGrid, distributed across all the PEs associated with the
-component. The DistGrid has operations to define domain decompositions
-on the pelist, and given user-specified data dependencies, it can
-define communication patterns, i.e. connectivities on the pelist for
+A gridded component is associated with a single global physical grid.
+Distributing this grid across PEs generates a \textbf{PhysGrid}, which
+is associated with a a single \textbf{DistGrid}, distributed across
+some or all of the PEs associated with the component. The
+\textbf{DistGrid} has operations to define domain decompositions on
+the pelist, and given user-specified data dependencies, it can define
+topologies, i.e. connectivities on the pelist for
 scheduling communication. It contains all the operations for sharing
-data according to those dependencies. This includes familiar
+data according to those dependencies.  This includes familiar
 operations like the halo update and data transpose. It can perform
-global reductions (sum, max, min, maxloc, minloc) on distributed
-data. The sum has a bitwise exact option. It can create a copy of the
-global data on a single PE, and scatter a global array across a
-PElist.
+global reductions (sum, max, min, maxloc, minloc) on distributed data.
+The sum has a bitwise exact option. It can create a copy of the global
+data on a single PE, and scatter a global array across a PElist.
 
-The DistGrid will perform sign flips, vector component interchanges,
+The \textbf{DistGrid} will perform sign flips, vector component interchanges,
 and redundancy checks as needed on certain types of grids (e.g
 tripolar grid and cubed-sphere).
 
-Operations within DistGrid do not include those which are potentially
-dependent on grid metrics. For instance, certain kinds of averaging
-operations are extremely simple on regular grids. These are
+Operations within \textbf{DistGrid} do not include those which are
+potentially dependent on grid metrics. For instance, certain kinds of
+averaging operations are extremely simple on regular grids. These are
 metric-dependent on irregularly spaced grids, and are hence considered
-to belong to the PhysGrid.
+to belong to the \textbf{PhysGrid}.
 
