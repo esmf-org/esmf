@@ -1,4 +1,4 @@
-% $Id: ESMF_adoption.tex,v 1.3 2003/05/07 20:22:29 cdeluca Exp $
+% $Id: ESMF_adoption.tex,v 1.4 2003/11/12 18:51:34 nscollins Exp $
 
 \section{Looking Ahead:  How to Adapt Applications for ESMF}
 \label{sec:Adoption}
@@ -142,46 +142,29 @@ such as States, Fields, Bundles, Grids, Arrays; ESMF services
 such as Regrid and Route; and ESMF execution/environment objects
 such as Layouts.    
 
-\item Write or adapt a main program 
+\item Use or adapt a main program 
 
-The main program must first create an Application Component.  This
-will ensure that the Framework initialization code is called and will
-provide the environment for other components to be created and run.
+The main program can be an unchanged copy of the file found in
+the {\tt AppDriver} directory.  The only customization needed is to
+set the name of the top level Gridded Component, and to set the
+name of the {\tt SetServices} routine.  The template file includes
+a call to {\tt ESMF\_Initialize()} which ensures the Framework
+initialization code is run, and will
+provide the environment for components to be created and run.
 
-The final thing the main program must do is Destroy the Application 
-Component.
+Although ESMF provides source code for the main program, it is
+{\bf not} considered part of the framework and can be changed by
+the user as needed.
+
+The final thing the main program must do is call {\tt ESMF\_Finalize()}.
 This will close down the framework and release any associated resources.
 
-The Application component is then responsible for Creating other top level
-Components including Gridded Components and Coupler Components.  It
-contains the main time loop and is responsible for calling the
-"SetServices" entry point for each Component it creates.
+The main program is responsible for creating the top level
+Component, which in turn creates other Gridded and Coupler Components.  
+It contains the main time loop and is responsible for calling the
+{\tt SetServices} entry point for each Component it creates.
 
 \end{itemize}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
