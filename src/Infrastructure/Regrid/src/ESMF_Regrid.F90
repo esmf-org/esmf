@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.57 2004/03/09 23:16:14 svasquez Exp $
+! $Id: ESMF_Regrid.F90,v 1.58 2004/03/16 21:54:05 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
       use ESMF_DataMapMod      ! ESMF datamap class
       use ESMF_DELayoutMod     ! ESMF DE layout class
       use ESMF_ArrayBaseMod    ! ESMF array  class
-      use ESMF_ArrayExpandMod  ! ESMF array  class
+      use ESMF_ArrayGetMod     ! ESMF array  class
       use ESMF_DistGridMod     ! ESMF distributed grid class
       use ESMF_PhysGridMod     ! ESMF physical grid class
       use ESMF_GridMod         ! ESMF grid   class
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.57 2004/03/09 23:16:14 svasquez Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.58 2004/03/16 21:54:05 nscollins Exp $'
 
 !==============================================================================
 
