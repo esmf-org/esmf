@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.30 2005/03/01 23:56:32 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.31 2005/03/02 00:36:11 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@ void ESMC_VMK::vmk_obtain_args(void){
   }
   // determine whether this is a SUS3=sysV or BSD derived OS
   int bsdflag=0;
-  if (!strcmp(uname, "Darwin")) bsdflag=1;    // Darwin is BSD
+  if (!strncmp(uname, "Darwin", 6)) bsdflag=1;    // Darwin is BSD
   // choose the correct ps option  
   if (bsdflag)
     sprintf(command, "env COLUMNS=8000 ps -p %d -o command > .args.%d", mypid,
