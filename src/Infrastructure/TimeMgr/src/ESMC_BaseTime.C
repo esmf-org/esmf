@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.21 2003/06/07 00:42:00 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.22 2003/06/12 17:15:41 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt BaseTime} methods declared
-// in the companion file {\tt ESMC_BaseTime.h}
+// The code in this file implements the C++ {\tt ESMC\_BaseTime} methods declared
+// in the companion file {\tt ESMC\_BaseTime.h}
 //
 //-------------------------------------------------------------------------
 //
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.21 2003/06/07 00:42:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.22 2003/06/12 17:15:41 rstaufer Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -79,7 +79,7 @@
 
 //
 // !DESCRIPTION:
-//      Get sub-day (non-calendar dependent) values of a {\tt BaseTime}
+//      Get sub-day (non-calendar dependent) values of a {\tt ESMC\_BaseTime}
 //      converted to user units.  Primarily to support F90 interface
 //
 //EOP
@@ -158,7 +158,7 @@
       int *Sd) {                // out - fractional seconds denominator
 //
 // !DESCRIPTION:
-//      Sets sub-day (non-calendar dependent) values of a {\tt BaseTime}.
+//      Sets sub-day (non-calendar dependent) values of a {\tt ESMC\_BaseTime}.
 //      Primarily to support F90 interface.
 //
 //EOP
@@ -212,7 +212,7 @@
       int Sd ) {          // in - fractional seconds, denominator
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt BaseTime} with given values
+//      Initialzes a {\tt ESMC\_BaseTime} with given values
 //
 //EOP
 // !REQUIREMENTS:  
@@ -253,8 +253,8 @@
       const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
 //
 // !DESCRIPTION:
-//      Compare for equality the current object's (this) {\tt BaseTime} with
-//      given {\tt BaseTime}, return result
+//      Compare for equality the current object's (this) {\tt ESMC\_BaseTime} with
+//      given {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -278,8 +278,8 @@
       const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
 //
 // !DESCRIPTION:
-//      Compare for inequality the current object's (this) {\tt BaseTime} with
-//      given {\tt BaseTime}, return result
+//      Compare for inequality the current object's (this) {\tt ESMC\_BaseTime} with
+//      given {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -303,8 +303,8 @@
       const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
 //
 // !DESCRIPTION:
-//      Compare for less than the current object's (this) {\tt BaseTime} with
-//      given {\tt BaseTime}, return result
+//      Compare for less than the current object's (this) {\tt ESMC\_BaseTime} with
+//      given {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -328,8 +328,8 @@
       const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime to compare
 //
 // !DESCRIPTION:
-//      Compare for greater than the current object's (this) {\tt BaseTime} with
-//      given {\tt BaseTime}, return result
+//      Compare for greater than the current object's (this) {\tt ESMC\_BaseTime} with
+//      given {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -354,7 +354,7 @@
 //
 // !DESCRIPTION:
 //      Compare for less than or equal the current object's (this)
-//      {\tt BaseTime} with given {\tt BaseTime}, return result
+//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -379,7 +379,7 @@
 //
 // !DESCRIPTION:
 //      Compare for greater than or equal the current object's (this)
-//      {\tt BaseTime} with given {\tt BaseTime}, return result
+//      {\tt ESMC\_BaseTime} with given {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -403,8 +403,8 @@
       const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime increment
 //
 // !DESCRIPTION:
-//      Increment current object's (this) {\tt BaseTime} with given
-//      {\tt BaseTime}, return result
+//      Increment current object's (this) {\tt ESMC\_BaseTime} with given
+//      {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -444,8 +444,8 @@
       const ESMC_BaseTime &baseTime) const {   // in - ESMC_BaseTime decrement
 //
 // !DESCRIPTION:
-//      Decrement current object's (this) {\tt BaseTime} with given
-//      {\tt BaseTime}, return result
+//      Decrement current object's (this) {\tt ESMC\_BaseTime} with given
+//      {\tt ESMC\_BaseTime}, return result
 //
 //EOP
 // !REQUIREMENTS:  
@@ -486,8 +486,8 @@
       const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime increment
 //
 // !DESCRIPTION:
-//      Increment current object's (this) {\tt BaseTime} with given
-//      {\tt BaseTime}
+//      Increment current object's (this) {\tt ESMC\_BaseTime} with given
+//      {\tt ESMC\_BaseTime}
 //EOP
 // !REQUIREMENTS:  
 
@@ -524,8 +524,8 @@
       const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime decrement
 //
 // !DESCRIPTION:
-//      Decrement current object's (this) {\tt BaseTime} with given
-//      {\tt BaseTime}
+//      Decrement current object's (this) {\tt ESMC\_BaseTime} with given
+//      {\tt ESMC\_BaseTime}
 //
 //EOP
 // !REQUIREMENTS:  
@@ -564,8 +564,8 @@
       const ESMC_BaseTime &baseTime) {   // in - ESMC_BaseTime
 //
 // !DESCRIPTION:
-//      Assign current object's (this) {\tt BaseTime} with given
-//      {\tt BaseTime}.  
+//      Assign current object's (this) {\tt ESMC\_BaseTime} with given
+//      {\tt ESMC\_BaseTime}.  
 //EOP
 // !REQUIREMENTS:  
 
@@ -595,7 +595,7 @@
       int Sd) {           // in - fractional seconds, denominator
 //
 // !DESCRIPTION:
-//      restore {\tt BaseTime} state for persistence/checkpointing
+//      restore {\tt ESMC\_BaseTime} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  
@@ -624,7 +624,7 @@
       int *Sd) const {     // out - fractional seconds, denominator
 //
 // !DESCRIPTION:
-//      return {\tt BaseTime} state for persistence/checkpointing
+//      return {\tt ESMC\_BaseTime} state for persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  
@@ -658,7 +658,7 @@
       const char *options) const {     // in - options
 //
 // !DESCRIPTION:
-//      validate {\tt BaseTime} state
+//      validate {\tt ESMC\_BaseTime} state
 //
 //EOP
 // !REQUIREMENTS:  
@@ -684,7 +684,7 @@
       const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
-//      print {\tt BaseTime} state for testing/debugging
+//      print {\tt ESMC\_BaseTime} state for testing/debugging
 //
 //EOP
 // !REQUIREMENTS:  
