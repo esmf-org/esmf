@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockEx.F90,v 1.33 2004/02/05 21:29:41 eschwab Exp $
+! $Id: ESMF_ClockEx.F90,v 1.34 2004/02/13 18:24:08 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,8 +15,7 @@
 !------------------------------------------------------------------------------
 !EXAMPLE        String used by test script to count examples.
 !==============================================================================
-!BOP
-!\begin{verbatim}
+!BOC
 ! !PROGRAM: ESMF_ClockEx - Clock initialization and time-stepping
 !
 ! !DESCRIPTION:
@@ -46,15 +45,13 @@
       real(ESMF_KIND_R8) :: days_r8
       type(ESMF_Calendar) :: cal
       integer :: rc
-!\end{verbatim}
-!EOP
+!EOC
 
       ! result code
       integer :: finalrc
       finalrc = ESMF_SUCCESS
 
-!BOP
-!\begin{verbatim}
+!BOC
       !
       ! initialization
       !
@@ -62,106 +59,88 @@
       ! initialize calendar to be Gregorian type
       gregorianCalendar = ESMF_CalendarCreate("Gregorian", &
                                               ESMF_CAL_GREGORIAN, rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! initialize time interval to 2 days, 4 hours (6 timesteps in 13 days)
       call ESMF_TimeIntervalSet(timeStep, d=2, h=4, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! initialize start time to 4/1/2003 2:24:00 ( 1/10 of a day )
       call ESMF_TimeSet(startTime, yy=2003, mm=4, dd=1, h=2, m=24, &
                         calendar=gregorianCalendar, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! initialize stop time to 4/14/2003 2:24:00 ( 1/10 of a day )
       call ESMF_TimeSet(stopTime, yy=2003, mm=4, dd=14, h=2, m=24, &
                         calendar=gregorianCalendar, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! initialize the clock with the above values
       clock = ESMF_ClockCreate("Clock 1", timeStep, startTime, stopTime, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! print starting time (initial current time)
       call ESMF_ClockPrint(clock, "currTime string", rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       !
       ! time step clock from start time to stop time
       !
 
       do while (.not.ESMF_ClockIsStopTime(clock, rc))
-!\end{verbatim}
-!EOP
+!EOC
 
         if (rc.NE.ESMF_SUCCESS) then
             finalrc = ESMF_FAILURE
         end if
 
-!BOP
-!\begin{verbatim}
+!BOC
         call ESMF_ClockAdvance(clock, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
         if (rc.NE.ESMF_SUCCESS) then
             finalrc = ESMF_FAILURE
         end if
 
-!BOP
-!\begin{verbatim}
+!BOC
         call ESMF_ClockPrint(clock, "currTime string", rc)
-!\end{verbatim}
-!EOP
+!EOC
 
         if (rc.NE.ESMF_SUCCESS) then
             finalrc = ESMF_FAILURE
         end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       end do
       !
       ! examine clock
@@ -169,141 +148,118 @@
 
       ! get and print clock's time_step
       call ESMF_ClockGet(clock, timeStep=time_step, rc=rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       call ESMF_ClockPrint(clock, "timeStep string", rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! get time step in integer days and seconds
       call ESMF_TimeIntervalGet(time_step, d=days, s=sec, rc=rc)
 
       print *, "Clock's timestep = ", days, " integer days, ", &
                 sec, " integer seconds."
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! get time step in floating point days
       call ESMF_TimeIntervalGet(time_step, d_r8=days_r8, rc=rc)
 
       print *, "Clock's timestep = ", days_r8, " floating point days."
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! get start time's floating point day of the year
       call ESMF_TimeGet(startTime, dayOfYear_r8=days_r8, rc=rc)
 
       print *, "Start time's floating point day of the year = ", days_r8
 
-!\end{verbatim}
-!EOP
+!EOC
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! get stop time's integer day of the year
       call ESMF_TimeGet(stopTime, dayOfYear=yD, rc=rc)
 
       print *, "Stop time's integer day of the year = ", yD
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! get clock's calendar
       call ESMF_ClockGet(clock, calendar=cal, rc=rc)
       print *, "Clock's calendar type = "
-!\end{verbatim}
-!EOP
+!EOC
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       call ESMF_CalendarPrint(cal, "calendarType", rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! get the number of times the clock was advanced
       call ESMF_ClockGet(clock, advanceCount=advanceCount, rc=rc)
 
       print *, "The clock was advanced ", advanceCount, " times."
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
   
-!BOP
-!\begin{verbatim}
+!BOC
       ! calculate the difference between the start and stop times
       time_diff = stopTime - startTime
       call ESMF_TimeIntervalGet(time_diff, d=days, s=sec, rc=rc)
 
       print *, "Difference between start and stop times = ", days, " days, ", &
                 sec, " seconds."
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       ! destroy clock
       call ESMF_ClockDestroy(clock, rc)
-!\end{verbatim}
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
      call ESMF_CalendarDestroy(gregorianCalendar, rc)
-!\end{verbatim}    
-!EOP
+!EOC
 
       if (rc.NE.ESMF_SUCCESS) then
           finalrc = ESMF_FAILURE
@@ -315,8 +271,6 @@
          print *, "FAIL: ESMF_ClockEx.F90"
       end if
 
-!BOP
-!\begin{verbatim}
+!BOC
       end program ESMF_ClockEx
-!\end{verbatim}
-!EOP
+!EOC
