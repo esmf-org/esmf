@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/01/29 21:49:14 nscollins Exp $ 
+# $Id: makefile,v 1.5 2003/01/29 23:33:15 nscollins Exp $ 
 
 all: alldocs
 
@@ -120,6 +120,8 @@ fsrc:
 	do_fprotex xform ../src/ESMF_Xform.F90
 	do_fprotex cpl ../src/ESMF_Cpl.F90
 	touch gcomp_fapi.tex
+	do_fprotex stateex ../examples/ESMF_StateCreateEx.F90
+	do_fprotex compex ../examples/ESMF_CompCreateEx.F90
 
 ccsrc:
 	do_ccprotex state ../interface/ESMC_State.C
