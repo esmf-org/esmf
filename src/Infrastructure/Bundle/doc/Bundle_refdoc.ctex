@@ -1,4 +1,4 @@
-% $Id: Bundle_refdoc.ctex,v 1.12 2004/02/25 18:59:09 cdeluca Exp $
+% $Id: Bundle_refdoc.ctex,v 1.13 2004/02/27 04:21:39 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -11,7 +11,7 @@
 \usepackage[dvips]{graphics,color}
 
 \textwidth 6.5in
-\textheight 8.5
+\textheight 8.5in
 \addtolength{\oddsidemargin}{-.75in}
 \newcommand{\mytitle}{Bundles Design}
 \newcommand{\myauthors}{Nancy Collins}
