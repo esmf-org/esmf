@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.26 2003/07/28 17:06:14 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.27 2003/07/28 17:09:33 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.26 2003/07/28 17:06:14 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.27 2003/07/28 17:09:33 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -198,7 +198,7 @@
       ! Set time to illegite day
       write(name, *) "Stop Time Initialization to  Feb. 31st. Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      call ESMF_TimeSet(stopTime, yy_i4=2003, mm_i4=2, dd_i4=31, &
+      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=2, dd_i4=31, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -220,7 +220,7 @@
       ! Set time beyond lower bound of Fliegel algoritm
       write(name, *) "Test beyond lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      call ESMF_TimeSet(stopTime, yy_i4=-4800, mm_i4=2, dd_i4=28, &
+      call ESMF_TimeSet(stopTime, yr_i4=-4800, mm_i4=2, dd_i4=28, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -353,7 +353,7 @@
       !EX_UTest
       write(name, *) "Clock Initialization with stop time set before start time Test"
       call ESMF_TimeSet(stopTime, yr_i4=2002, mm_i4=3, dd_i4=14, &
-                                  calenadar=gregorianCalendar, rc=rc)
+                                  calendar=gregorianCalendar, rc=rc)
       write(failMsg, *) "Should return ESMF_SUCCESS"
       call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
