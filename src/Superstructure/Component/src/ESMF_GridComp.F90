@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.42 2004/05/17 16:04:02 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.43 2004/05/17 22:32:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -84,7 +84,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.42 2004/05/17 16:04:02 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.43 2004/05/17 22:32:03 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -818,7 +818,7 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!   Routine to ensure {\tt gridcomp} is a valid {\tt ESMF_GridComp} object.
+!   Routine to ensure {\tt gridcomp} is a valid {\tt ESMF\_GridComp} object.
 !
 !  The arguments are:
 !  \begin{description}
