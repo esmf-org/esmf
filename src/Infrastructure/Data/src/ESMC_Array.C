@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.21 2003/02/14 17:15:16 jwolfe Exp $
+// $Id: ESMC_Array.C,v 1.22 2003/02/14 18:08:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.21 2003/02/14 17:15:16 jwolfe Exp $";
+            "$Id: ESMC_Array.C,v 1.22 2003/02/14 18:08:39 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -786,7 +786,8 @@
 //  code goes here
 //
     int rc = ESMF_FAILURE;
-    int i, j, k;
+    int i, j, k, l, m;
+    int imax, jmax, kmax, lmax, mmax;
     int tcount, rcount;
 
     printf("ArrayPrint: Array at address 0x%08lx:\n", (unsigned long)this);
@@ -794,7 +795,7 @@
                              this->rank, this->type, this->kind);
     printf("base_addr = 0x%08lx\n", (unsigned long)this->base_addr);
     printf("            ");
-    for (i=0; i<this->rank; i++)
+    for (i=0; i<this->rank; i++) 
         printf("dim[%d] = %d  ", i, this->length[i]);
     printf("\n");
     
@@ -805,7 +806,8 @@
         switch (this->rank) {
           case 1:
             printf("  Real, Dim 1, Data values:\n");
-            tcount = this->length[0];
+            imax = this->length[0];
+            tcount = imax;
             for (i=0; i<tcount; i++) {
                 printf("(%2d) =  %lg\n", i+1, *((double *)(this->base_addr) + i));
                 if ((tcount > 22) && ((i+1)==10)) {
@@ -816,19 +818,44 @@
             break;
           case 2:
             printf("  Real, Dim 2, Data values:\n");
-            tcount = this->length[0] * this->length[1];
+            imax = this->length[0];
+            jmax = this->length[1];
+            tcount = imax * jmax;
             rcount = 0;
-            for (j=0; j<this->length[1]; j++) {
-                for (i=0; i<this->length[0]; i++) {
-                    printf("(%2d,%2d) =  %lg\n", i+1, j+1, *((double *)(this->base_addr) + 
-                                              i + j*this->length[0]) );
+            for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                    printf("(%2d,%2d) =  %lg\n", i+1, j+1, 
+                               *((double *)(this->base_addr) + i + j*imax) );
                     rcount++;
                     if ((tcount > 22) && (rcount==10)) {
                        printf(" skipping to end ...\n");
-                       j = (tcount-11) / this->length[0];
-                       i = (tcount-11) % this->length[0];
+                       j = (tcount-11) / imax;
+                       i = (tcount-11) % imax;
                     }
                 }
+            }
+            break;
+          case 3:
+            printf("  Real, Dim 3, Data values:\n");
+            imax = this->length[0];
+            jmax = this->length[1];
+            kmax = this->length[2];
+            tcount = imax * jmax * kmax;
+            rcount = 0; 
+            for (k=0; k<kmax; k++) {
+              for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                printf("(%2d,%2d,%2d) =  %g\n", i+1, j+1, k+1,
+                     *((double *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    rcount++;
+                    if ((tcount > 22) && (rcount==10)) {
+                       printf(" skipping to end ...\n");
+                       k = (tcount-11) / (imax*jmax);
+                       j = ((tcount-11) / (imax*jmax)) % jmax;
+                       i = (tcount-11) % imax;
+                    }
+                }
+              }
             }
             break;
           default:
@@ -839,9 +866,10 @@
       case ESMF_DATA_INTEGER:
         switch (this->rank) {
           case 1:
-            tcount = this->length[0];
+            imax = this->length[0];
+            tcount = imax;
             printf("  Integer, Dim 1, Data values:\n");
-            for (i=0; i<this->length[0]; i++) {
+            for (i=0; i<imax; i++) {
                 printf("(%2d) =  %d\n", i+1, *((int *)(this->base_addr) + i));
                 if ((tcount > 22) && ((i+1)==10)) {
                    printf(" skipping to end ...\n");
@@ -851,19 +879,44 @@
             break;
           case 2:
             printf("  Integer, Dim 2, Data values:\n");
-            tcount = this->length[0] * this->length[1];
+            imax = this->length[0];
+            jmax = this->length[1];
+            tcount = imax * jmax;
             rcount = 0; 
-            for (j=0; j<this->length[1]; j++) {
-                for (i=0; i<this->length[0]; i++) {
-                printf("(%2d,%2d) =  %d\n", i+1, j+1, *((int *)(this->base_addr) + 
-                                              i + j*this->length[0]) );
+            for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                printf("(%2d,%2d) =  %d\n", i+1, j+1, 
+                                *((int *)(this->base_addr) + i + j*imax) );
                     rcount++;
                     if ((tcount > 22) && (rcount==10)) {
                        printf(" skipping to end ...\n");
-                       j = (tcount-11) / this->length[0];
-                       i = (tcount-11) % this->length[0];
+                       j = (tcount-11) / imax;
+                       i = (tcount-11) % imax;
                     }
                 }
+            }
+            break;
+          case 3:
+            printf("  Real, Dim 3, Data values:\n");
+            imax = this->length[0];
+            jmax = this->length[1];
+            kmax = this->length[2];
+            tcount = imax * jmax * kmax;
+            rcount = 0; 
+            for (k=0; k<kmax; k++) {
+              for (j=0; j<jmax; j++) {
+                for (i=0; i<imax; i++) {
+                printf("(%2d,%2d,%2d) =  %d\n", i+1, j+1, k+1,
+                     *((int *)(this->base_addr) + i + j*imax + k*jmax*imax));
+                    rcount++;
+                    if ((tcount > 22) && (rcount==10)) {
+                       printf(" skipping to end ...\n");
+                       k = (tcount-11) / (imax*jmax);
+                       j = ((tcount-11) / (imax*jmax)) % jmax;
+                       i = (tcount-11) % imax;
+                    }
+                }
+              }
             }
             break;
           default:
