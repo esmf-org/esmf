@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.13 2004/06/16 14:42:47 nscollins Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.14 2004/06/23 17:15:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,6 +40,8 @@
 
     integer :: finalrc 
     finalrc = ESMF_SUCCESS
+
+    call ESMF_Initialize(rc=rc)
 
 !BOE
 !\subsubsection{Create an Array based on existing data}
@@ -187,6 +189,8 @@
         print *, "FAIL: ESMF_ArrayCreateEx.F90"
     end if
 !BOC
+    call ESMF_Finalize(rc)
+
     end program ESMF_ArrayCreateEx
 !EOC
     

@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGetEx.F90,v 1.1 2004/06/16 13:04:10 nscollins Exp $
+! $Id: ESMF_ArrayGetEx.F90,v 1.2 2004/06/23 17:15:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -40,6 +40,8 @@
 
     integer :: finalrc 
     finalrc = ESMF_SUCCESS
+
+    call ESMF_Initialize(rc=rc)
 
     ! Allocate and set initial data values
     ni = 15 
@@ -175,6 +177,8 @@
         print *, "FAIL: ESMF_ArrayGetEx.F90"
     end if
 !BOC
+    call ESMF_Finalize(rc)
+
     end program ESMF_ArrayGetEx
 !EOC
     
