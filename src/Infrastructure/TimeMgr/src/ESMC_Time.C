@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.75 2004/12/10 22:49:04 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.76 2004/12/17 21:57:04 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.75 2004/12/10 22:49:04 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.76 2004/12/17 21:57:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -129,7 +129,10 @@
 
       this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
       this->timeZone = 0;                 // default is UTC
-    } else {
+
+    } else if (calendar     != ESMC_NULL_POINTER ||
+               calendarType != ESMC_NULL_POINTER ||
+               timeZone     != ESMC_NULL_POINTER) {
       // only calendar and/or timezone specified
 
       // TODO: ? validate calendar conversions? 
@@ -165,6 +168,16 @@
           { *this = saveTime; return(rc); }
       }
       return(ESMF_SUCCESS);
+
+    } else {
+
+      // no arguments specified, initialize and use defaults
+      ESMC_FractionSet(0,0,1);  // set seconds = 0
+                                // set fractional seconds numerator = 0
+                                // set fractional seconds denominator = 1
+
+      this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
+      this->timeZone = 0;                 // default is UTC
     }
     
     // TODO: validate inputs (individual and combos), set basetime values
@@ -242,22 +255,11 @@
         }
       }
 
-      // year required
-      if (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
-                                              ", year required.", &rc);
-        *this = saveTime; return(rc);
-      }
-
-      // day without a month is not good
-      if (dd != ESMC_NULL_POINTER && mm == ESMC_NULL_POINTER) {
-        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
-                                      ", day specified without a month.", &rc);
-        *this = saveTime; return(rc);
-      }
-
-      // use only one specified year (yy and yy_i8 are mutually exclusive)
-      ESMF_KIND_I8 argYY = (yy != ESMC_NULL_POINTER) ? *yy : *yy_i8;
+      // use only one specified year (yy and yy_i8 are mutually exclusive),
+      //   otherwise use default
+      ESMF_KIND_I8 argYY=0;  // default
+      if      (yy    != ESMC_NULL_POINTER) argYY = *yy;
+      else if (yy_i8 != ESMC_NULL_POINTER) argYY = *yy_i8;
       
       // use month and day specified, otherwise use defaults
       int argMM=1, argDD=1;  // defaults
