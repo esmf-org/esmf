@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.43 2003/07/17 19:52:23 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.44 2003/07/18 02:58:54 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <ESMC.h>
+ #include <ESMC_Base.h>
  #include <stdio.h>
  #include <stdlib.h>
  #include <iostream.h>
@@ -33,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.43 2003/07/17 19:52:23 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.44 2003/07/18 02:58:54 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -535,7 +536,7 @@ static int maxroutes = 10;
                                                    theirdeid, theirdeid
 #if 1 
 // NEW_SEND_RECV_INTERFACE
-                                                   , ESMC_FLOAT);
+                                                   , ESMF_KIND_R4);
 #else 
 // old interface
                                                    );
