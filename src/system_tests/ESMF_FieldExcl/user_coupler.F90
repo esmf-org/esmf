@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.8 2004/11/18 20:48:48 nscollins Exp $
+! $Id: user_coupler.F90,v 1.9 2004/12/02 17:45:29 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -107,11 +107,18 @@
       call ESMF_StateReconcile(importState, vm, rc=status)
       print *, "i am", pet_id, "this is my import state after reconcile"
       call ESMF_StatePrint(importState, rc=status)
+
       call ESMF_StateReconcile(exportState, vm, rc=status)
       print *, "i am", pet_id, "this is my export state after reconcile"
       call ESMF_StatePrint(exportState, rc=status)
       print *, "done with both reconcile calls"
 
+
+#if 1
+      ! TODO: once we have the reconcile calls sending out all the
+      ! right data turn the 1 into a 0 to remove all the following code.
+      ! reconcile will create the objects itself which we are
+      ! creating explicitily below.
 
       ! Query component for VM and create a layout with the right breakdown
       delayout = ESMF_DELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
@@ -211,6 +218,7 @@
       print *, pet_id, "User Comp 2 Init returning"
   
       ! end of new code 
+#endif
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
       print *, "Import State contains ", itemcount, " items."
