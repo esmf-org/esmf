@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.90 2003/12/12 20:24:52 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.91 2004/01/07 22:33:15 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -236,7 +236,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.90 2003/12/12 20:24:52 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.91 2004/01/07 22:33:15 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2633,7 +2633,7 @@
       allocate(gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       allocate(gl_dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(ftypep%grid, global_cell_dim=global_count, &
-                        global_start=global_start, &
+                        globalStart=global_start, &
                         periodic=periodic, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
          print *, "ERROR in FieldHalo: GridGet returned failure"
@@ -3064,7 +3064,7 @@
 
           allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
-                            global_start=src_global_start, rc=status)
+                            globalStart=src_global_start, rc=status)
 
           allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
@@ -3087,7 +3087,7 @@
 
           allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
-                            global_start=dst_global_start, rc=status)
+                            globalStart=dst_global_start, rc=status)
 
           allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
@@ -3353,7 +3353,7 @@
 
           allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_GridGet(stypep%grid, global_cell_dim=src_global_count, &
-                            global_start=src_global_start, rc=status)
+                            globalStart=src_global_start, rc=status)
 
           allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
@@ -3376,7 +3376,7 @@
 
           allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_GridGet(dtypep%grid, global_cell_dim=dst_global_count, &
-                            global_start=dst_global_start, rc=status)
+                            globalStart=dst_global_start, rc=status)
 
           allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
           allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
