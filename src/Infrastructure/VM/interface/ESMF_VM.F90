@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.5 2004/03/22 14:55:54 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.6 2004/04/20 22:59:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,11 +23,11 @@ module ESMF_VMMod
 #include "ESMF.h"
 
 !==============================================================================
-!BOP
+!BOPI
 ! !MODULE: ESMF_VMMod - The VM (virtual machine)
 !
 ! !DESCRIPTION:
-!   F90 API wrapper of C++ implemenation of VM and VMPlan
+!   F90 API wrapper of C++ implementation of VM and VMPlan
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -116,13 +116,13 @@ module ESMF_VMMod
   public ESMF_VMPlanMinThreads
   public ESMF_VMPlanMaxPEs
 
-!EOP
+!EOPI
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.5 2004/03/22 14:55:54 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.6 2004/04/20 22:59:56 nscollins Exp $'
 
 !==============================================================================
 
@@ -133,7 +133,7 @@ module ESMF_VMMod
 !==============================================================================
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSend -- Generic interface
 
 ! !INTERFACE:
@@ -148,11 +148,11 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMSend} functions.   
-!EOP 
+!EOPI 
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatter -- Generic interface
 
 ! !INTERFACE:
@@ -167,11 +167,11 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMRecv} functions.   
-!EOP 
+!EOPI 
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatter -- Generic interface
 
 ! !INTERFACE:
@@ -186,11 +186,11 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMScatter} functions.   
-!EOP 
+!EOPI 
       end interface
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGather-- Generic interface
 
 ! !INTERFACE:
@@ -205,7 +205,7 @@ module ESMF_VMMod
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_VMGather} functions.   
-!EOP 
+!EOPI 
       end interface
 
 
@@ -221,7 +221,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMInitialize - Initialize the Global VM
 
 ! !INTERFACE:
@@ -239,7 +239,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -267,7 +267,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMFinalize - Finalize Global VM
 
 ! !INTERFACE:
@@ -285,7 +285,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -502,7 +502,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMBarrier - VM wide barrier
 
 ! !INTERFACE:
@@ -523,7 +523,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -551,7 +551,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMThreadBarrier - PET thread group wide barrier
 
 ! !INTERFACE:
@@ -572,7 +572,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -600,7 +600,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendI4 - VM wide send
 
 ! !INTERFACE:
@@ -621,7 +621,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[message] 
-!        Array holing message data.
+!        Array holding message data.
 !   \item[len] 
 !        Number of elements in message
 !   \item[dest] 
@@ -630,7 +630,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -660,7 +660,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendR4 - VM wide send
 
 ! !INTERFACE:
@@ -681,7 +681,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[message] 
-!        Array holing message data.
+!        Array holding message data.
 !   \item[len] 
 !        Number of elements in message
 !   \item[dest] 
@@ -690,7 +690,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -720,7 +720,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMSendR8 - VM wide send
 
 ! !INTERFACE:
@@ -741,7 +741,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[message] 
-!        Array holing message data.
+!        Array holding message data.
 !   \item[len] 
 !        Number of elements in message
 !   \item[dest] 
@@ -750,7 +750,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -780,7 +780,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecvI4 - VM wide receive
 
 ! !INTERFACE:
@@ -801,7 +801,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object
 !   \item[message] 
-!        Array holing message data
+!        Array holding message data
 !   \item[len] 
 !        Number of elements in message
 !   \item[source] 
@@ -810,7 +810,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -840,7 +840,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecvR4 - VM wide receive
 
 ! !INTERFACE:
@@ -861,7 +861,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object
 !   \item[message] 
-!        Array holing message data
+!        Array holding message data
 !   \item[len] 
 !        Number of elements in message
 !   \item[source] 
@@ -870,7 +870,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -900,7 +900,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMRecvR8 - VM wide receive
 
 ! !INTERFACE:
@@ -921,7 +921,7 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object
 !   \item[message] 
-!        Array holing message data
+!        Array holding message data
 !   \item[len] 
 !        Number of elements in message
 !   \item[source] 
@@ -930,7 +930,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                     ! local error status
@@ -960,7 +960,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatterI4 - MPI-like VM wide Scatter
 
 ! !INTERFACE:
@@ -982,9 +982,9 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[input] 
-!        Array holing input data
+!        Array holding input data
 !   \item[output] 
-!        Array holing output data
+!        Array holding output data
 !   \item[len] 
 !        Number of elements send to each PET
 !   \item[root] 
@@ -993,7 +993,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
@@ -1024,7 +1024,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatterR4 - MPI-like VM wide Scatter
 
 ! !INTERFACE:
@@ -1046,9 +1046,9 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[input] 
-!        Array holing input data
+!        Array holding input data
 !   \item[output] 
-!        Array holing output data
+!        Array holding output data
 !   \item[len] 
 !        Number of elements send to each PET
 !   \item[root] 
@@ -1057,7 +1057,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
@@ -1088,7 +1088,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMScatterR8 - MPI-like VM wide Scatter
 
 ! !INTERFACE:
@@ -1110,9 +1110,9 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[input] 
-!        Array holing input data
+!        Array holding input data
 !   \item[output] 
-!        Array holing output data
+!        Array holding output data
 !   \item[len] 
 !        Number of elements send to each PET
 !   \item[root] 
@@ -1121,7 +1121,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
@@ -1152,7 +1152,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGatherI4 - MPI-like VM wide Gather
 
 ! !INTERFACE:
@@ -1174,9 +1174,9 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[input] 
-!        Array holing input data
+!        Array holding input data
 !   \item[output] 
-!        Array holing output data
+!        Array holding output data
 !   \item[len] 
 !        Number of elements received from each PET
 !   \item[root] 
@@ -1185,7 +1185,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
@@ -1216,7 +1216,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGatherR4 - MPI-like VM wide Gather
 
 ! !INTERFACE:
@@ -1238,9 +1238,9 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[input] 
-!        Array holing input data
+!        Array holding input data
 !   \item[output] 
-!        Array holing output data
+!        Array holding output data
 !   \item[len] 
 !        Number of elements received from each PET
 !   \item[root] 
@@ -1249,7 +1249,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
@@ -1280,7 +1280,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMGatherR8 - MPI-like VM wide Gather
 
 ! !INTERFACE:
@@ -1302,9 +1302,9 @@ module ESMF_VMMod
 !   \item[vm] 
 !        VM object.
 !   \item[input] 
-!        Array holing input data
+!        Array holding input data
 !   \item[output] 
-!        Array holing output data
+!        Array holding output data
 !   \item[len] 
 !        Number of elements received from each PET
 !   \item[root] 
@@ -1313,7 +1313,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     integer :: status                 ! local error status
@@ -1349,7 +1349,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMPlanConstruct - Construct a default plan
 
 ! !INTERFACE:
@@ -1379,7 +1379,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -1390,7 +1390,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMPlanDestruct - Destruct a vmplan
 
 ! !INTERFACE:
@@ -1411,7 +1411,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -1422,7 +1422,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMPlanMaxThreads - Set up a MaxThreads vmplan
 
 ! !INTERFACE:
@@ -1465,7 +1465,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -1478,7 +1478,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMPlanMinThreads - Set up a MinThreads vmplan
 
 ! !INTERFACE:
@@ -1521,7 +1521,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
@@ -1534,7 +1534,7 @@ module ESMF_VMMod
 
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_VMPlanMaxPEs - Set up a MaxPEs vmplan
 
 ! !INTERFACE:
@@ -1577,7 +1577,7 @@ module ESMF_VMMod
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 !------------------------------------------------------------------------------
     ! Call into the C++ interface, which will sort out optional arguments.
