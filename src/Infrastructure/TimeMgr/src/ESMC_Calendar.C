@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.56 2004/04/20 20:57:58 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.57 2004/04/23 00:23:08 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.56 2004/04/20 20:57:58 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.57 2004/04/23 00:23:08 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -1209,6 +1209,7 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS:   TMG 2.4.5
 
 // TODO: share common code with Decrement method
+// TODO: check for overflow/underflow, return 0 with LogErr message
 
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) increment
@@ -1341,6 +1342,7 @@ int ESMC_Calendar::count=0;
 // !REQUIREMENTS:   TMG 2.4.5
 
 // TODO: share common code with Increment method
+// TODO: check for overflow/underflow, return 0 with LogErr message
 
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) decrement
