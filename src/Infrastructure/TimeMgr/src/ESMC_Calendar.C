@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.19 2003/04/21 23:41:53 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.20 2003/04/23 16:26:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.19 2003/04/21 23:41:53 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.20 2003/04/23 16:26:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -221,8 +221,10 @@
 //     CACM, volume 11, number 10, October 1968, p. 657.  Julian day refers
 //     to the number of days since a reference day.  For the algorithm used,
 //     this reference day is November 24, -4713 in the Gregorian calendar.
-//     This algorithm is valid from 3/1/-4900 to 10/17/1,465,002 and takes into
-//     account leap years.
+//     This algorithm is valid from 3/1/-4900 forward and takes into
+//     account leap years.  However, it does not take into account the
+//     Gregorian Reformation where 10 days were eliminated from the calendar
+//     in September 1752.
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
@@ -232,18 +234,21 @@
         // convert Gregorian Date => Time
         case ESMC_CAL_GREGORIAN:
         {
+            //
             // Validate inputs 
-            if (YR < -4900 || YR > 1465002 || MM < 1 || MM > 12 || DD < 1) {
+            //
+            if (YR < -4900 || MM < 1 || MM > 12 || DD < 1) {
               return (ESMF_FAILURE);
             }
             // invalid before 3/1/-4900
             if (YR == -4900 && MM < 3) {
               return (ESMF_FAILURE);
             }
-            // invalid after 10/17/1,465,002
-            if (YR == 1465002 && (MM > 10 || (MM == 10 && DD > 17))) {
-              return (ESMF_FAILURE);
-            }
+
+            // TODO: upper bounds date range check dependent on machine
+            //  word size, e.g. for signed 64-bit, max date is
+            //  10/29/292,277,019,914
+
             // check day of the month for any month except February
             if (MM != 2 && DD > DaysPerMonth[MM-1]) {
               return (ESMF_FAILURE);
@@ -276,7 +281,7 @@
             for(int month=0; month < MM-1; month++) {
               T->S += DaysPerMonth[month] * SecondsPerDay;
             }
-            T->S += (DD-1) * SecondsPerDay + 148600915200;
+            T->S += (DD-1) * SecondsPerDay + 148600915200LL;
                                           // ^ adjust to match Julian time zero
             break;
         }
@@ -285,7 +290,7 @@
         {
             T->S  = YR * SecondsPerYear
                   + (MM-1) * 30 * SecondsPerDay   // each month has 30 days
-                  + (DD-1) * SecondsPerDay + 146565244800;
+                  + (DD-1) * SecondsPerDay + 146565244800LL;
                                           // ^ adjust to match Julian time zero
             break;
         }
@@ -329,9 +334,10 @@
 //     CACM, volume 11, number 10, October 1968, p. 657.  Julian day refers
 //     to the number of days since a reference day.  For the algorithm used,
 //     this reference day is November 24, -4713 in the Gregorian calendar.
-//     The algorithm is valid through all future dates, assuming standard
-//     leap-year corrections are applied (every 4 years, 100 years, and
-//     400 years).
+//     This algorithm is valid from 3/1/-4900 forward and takes into
+//     account leap years.  However, it does not take into account the
+//     Gregorian Reformation where 10 days were eliminated from the calendar
+//     in September 1752.
 //
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
@@ -343,8 +349,8 @@
         {
             // Convert basetime portion of Time into date
             // Julian day (D) => Gregorian date (YR, MM, DD)
-            // The calculation below fails for jday >= 536,802,343.
-            //    (4*templ = 2^31)
+            // The calculation below fails for jday > 106,751,991,167,300
+            //    (4*templ = 2^63)
 
             // convert basetime seconds to Julian days
             ESMF_IKIND_I8 jdays = T->S / SecondsPerDay;
@@ -375,7 +381,7 @@
         // convert Time => No Leap Date
         case ESMC_CAL_NOLEAP:
         {
-            ESMF_IKIND_I8 tmpS = T->S - 148600915200;
+            ESMF_IKIND_I8 tmpS = T->S - 148600915200LL;
                                      // ^ adjust to match Julian time zero
 
             if (YR != ESMC_NULL_POINTER) {
@@ -409,7 +415,7 @@
         // convert Time => 360 Day Date
         case ESMC_CAL_360DAY:
         {
-            ESMF_IKIND_I8 tmpS = T->S - 146565244800;
+            ESMF_IKIND_I8 tmpS = T->S - 146565244800LL;
                                      // ^ adjust to match Julian time zero
 
             if (YR != ESMC_NULL_POINTER) {
