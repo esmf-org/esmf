@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.20 2003/06/16 20:06:06 rstaufer Exp $
+! $Id: ESMF_DELayout.F90,v 1.21 2003/06/17 19:52:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.20 2003/06/16 20:06:06 rstaufer Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.21 2003/06/17 19:52:53 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -291,7 +291,7 @@
           call c_ESMC_DELayoutCreateFParent(layout, parent, 0, &
                                  de_indices, ndim, lengths, commtypes, status)
       else 
-          print *, "Error: one of parent_offsets or de_indicies must be given"
+          print *, "Error: one of parent_offsets or de_indices must be given"
           return
       endif
 
