@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.2 2002/12/06 19:23:43 eschwab Exp $
+// $Id: ESMC_Comm.h,v 1.3 2002/12/10 03:49:15 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Comm members and declares method 
-// signatures (prototypes).  The companion file ESMC_Comm.C contains
+// signatures (prototypes).  The companion file ESMC\_Comm.C contains
 // the definitions (full code bodies) for the Comm methods.
 //
 // < insert a paragraph or two explaining what you'll find in this file >

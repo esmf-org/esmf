@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.2 2002/12/06 19:27:24 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.2 2002/12/06 19:27:24 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -62,7 +62,7 @@
 //
 // !DESCRIPTION:
 //      Allocates memory for a new Layout
-//      object and uses the internal routine ESMC_LayoutContruct to
+//      object and uses the internal routine ESMC\_LayoutContruct to
 //      initialize it. There can be multiple overloaded methods with the 
 //      same name, but different argument lists.
 //
@@ -101,7 +101,7 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which destroys a Layout object previously allocated
-//      via an ESMC_LayoutCreate routine.  Define for deep classes only.
+//      via an ESMC\_LayoutCreate routine.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -137,10 +137,10 @@
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
 //      allocated Layout object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC_LayoutDestruct
+//      as needed.  Must call the corresponding ESMC\_LayoutDestruct
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC_LayoutCreate, which calls
-//      ESMC_LayoutConstruct.  Define for deep classes only.
+//      ESMF use only; end-users use ESMC\_LayoutCreate, which calls
+//      ESMC\_LayoutConstruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -240,10 +240,10 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      ESMF_LayoutConstruct, does any additional cleanup before the
+//      ESMF\_LayoutConstruct, does any additional cleanup before the
 //      original Layout object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC_LayoutDestroy, which calls
-//      ESMC_LayoutDestruct.  Define for deep classes only.
+//      use only; end-users use ESMC\_LayoutDestroy, which calls
+//      ESMC\_LayoutDestruct.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -296,7 +296,7 @@
 //      ESMF routine which only initializes Layout values; it does not
 //      allocate any resources.  Define for shallow classes only,
 //      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC_LayoutCreate.
+//      Construct/Destruct.  Can be overloaded like ESMC\_LayoutCreate.
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -496,7 +496,7 @@
 //
 // !DESCRIPTION:
 //      Validates that a Layout is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -521,7 +521,7 @@
 //
 // !DESCRIPTION:
 //      Print information about a Layout.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n

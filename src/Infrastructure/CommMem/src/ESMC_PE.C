@@ -1,4 +1,4 @@
-// $Id: ESMC_PE.C,v 1.1 2002/12/06 19:27:24 eschwab Exp $
+// $Id: ESMC_PE.C,v 1.2 2002/12/10 03:48:51 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PE.C,v 1.1 2002/12/06 19:27:24 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PE.C,v 1.2 2002/12/10 03:48:51 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize peCount (class static)
@@ -325,7 +325,7 @@ int ESMC_PE::peCount = 0;
 //
 // !DESCRIPTION:
 //      Validates that a PE is internally consistent.
-//      Returns error code if problems are found.  ESMC_Base class method.
+//      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -350,7 +350,7 @@ int ESMC_PE::peCount = 0;
 //
 // !DESCRIPTION:
 //      Print information about a PE.  The options control the
-//      type of information and level of detail.  ESMC_Base class method.
+//      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
