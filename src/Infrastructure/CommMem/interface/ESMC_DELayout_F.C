@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.14 2003/04/04 15:11:50 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.15 2003/04/07 16:54:12 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@ extern "C" {
            *ptr = ESMC_DELayoutCreate(status);
        }
 
-       void FTN(c_esmc_delayoutcreatecartparent)(ESMC_DELayout **ptr, ESMC_DELayout *parent,
+       void FTN(c_esmc_delayoutcreatefparent)(ESMC_DELayout **ptr, ESMC_DELayout *parent,
 					      int *parent_offsets, int *de_indices,
 					      int *ndim, int *lengths, ESMC_CommType 
 					      *commtypes, int *status) {
@@ -47,7 +47,7 @@ extern "C" {
 				      commtypes, status);
        }
 
-       void FTN(c_esmc_delayoutcreatecartde)(ESMC_DELayout **ptr, int *delist,
+       void FTN(c_esmc_delayoutcreatefde)(ESMC_DELayout **ptr, int *delist,
 					      int *ndim, int *lengths, ESMC_CommType 
 					      *commtypes, int *status) {
   	   *ptr = ESMC_DELayoutCreate(delist, *ndim, lengths, commtypes, status);

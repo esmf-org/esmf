@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.12 2003/04/04 20:22:37 nscollins Exp $
+! $Id: ESMF_DELayout.F90,v 1.13 2003/04/07 16:54:15 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -79,7 +79,7 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_DELayoutCreate
+      public ESMF_DELayoutCreate, ESMF_DELayoutCreateFromParent
       public ESMF_DELayoutDestroy
 
       !public ESMF_DELayoutSetData
@@ -108,7 +108,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.12 2003/04/04 20:22:37 nscollins Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.13 2003/04/07 16:54:15 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -126,8 +126,8 @@
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       module procedure ESMF_DELayoutCreateDefault1D
-      module procedure ESMF_DELayoutCreateCartFromParent
-      module procedure ESMF_DELayoutCreateCartFromDEList
+      module procedure ESMF_DELayoutCreateFromParent
+      module procedure ESMF_DELayoutCreateFromDEList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
@@ -206,22 +206,22 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateCartFromParent - Create DELayout from a given layout
+! !IROUTINE: ESMF_DELayoutCreateFromParent - Create DELayout from a given layout
 
 ! !INTERFACE:
-      function ESMF_DELayoutCreateCartFromParent(parent, parent_offsets, &
-               de_indices, ndim, lengths, commtypes, rc)
+      function ESMF_DELayoutCreateFromParent(parent, ndim, lengths, rc)
+                                   ! commtypes, parent_offsets, de_indices, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DELayout) :: ESMF_DELayoutCreateCartFromParent
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateFromParent
 !
 ! !ARGUMENTS:
       type(ESMF_DELayout), intent(inout) :: parent  ! to allocate DEs from
-      integer, intent(in) :: parent_offsets(:)      ! offsets from parent 
-      integer, intent(in) :: de_indices(:)          ! parent de indices 
       integer, intent(in) :: ndim                   ! number of dimensions
       integer, intent(in) :: lengths(:)             ! number of des in each dim
-      integer, intent(in) :: commtypes(:)           ! comm types in each dim
+      !integer, intent(in) :: commtypes(:)           ! comm types in each dim
+      !integer, intent(in), optional :: parent_offsets(:) ! offsets from parent 
+      !integer, intent(in), optional :: de_indices(:)  ! parent de indices 
       integer, intent(out), optional :: rc          ! return code
 !
 ! !DESCRIPTION:
@@ -235,12 +235,6 @@
 !   \item[parent]
 !     Parent {\tt DELayout}.
 ! 
-!   \item[parent_offsets]
-!     Offset in each parent {\tt DELayout} dimension.
-! 
-!   \item[de_indices]
-!     Selection of {\tt DE} indices to use.
-!     
 !   \item[ndim]
 !     Dimension of new {\tt DELayout}.
 !     
@@ -254,7 +248,13 @@
 !     {\tt ESMF\_COMMTYPE\_MP}, and {\tt ESMF\_COMMTYPE\_SHR}+
 !     {\tt ESMF\_COMMTYPE\_MP}.
 !
-!   \item[[rc]]
+!   \item[{[parent_offsets]}]
+!     Offset in each parent {\tt DELayout} dimension.
+! 
+!   \item[{[de_indices]}]
+!     Selection of {\tt DE} indices to use.
+!     
+!   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !
 !   \end{description}
@@ -265,6 +265,10 @@
       type (ESMF_DELayout) :: layout   ! opaque pointer to new C++ DELayout
       integer :: status                ! Error status
       logical :: rcpresent             ! Return code present
+
+      integer :: commtypes(2)           ! comm types in each dim
+      integer :: parent_offsets(2)      ! offsets from parent 
+      integer :: de_indices(2)          ! parent de indices 
 
 !     Initialize the pointer to null.
       layout%this = ESMF_NULL_POINTER
@@ -278,7 +282,7 @@
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-      call c_ESMC_DELayoutCreateCartParent(layout, parent, parent_offsets, &
+      call c_ESMC_DELayoutCreateFParent(layout, parent, parent_offsets, &
            de_indices, ndim, lengths, commtypes, status)
 
       if (status .ne. ESMF_SUCCESS) then
@@ -287,21 +291,21 @@
       endif
 
 !     set return values
-      ESMF_DELayoutCreateCartFromParent = layout 
+      ESMF_DELayoutCreateFromParent = layout 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_DELayoutCreateCartFromParent
+      end function ESMF_DELayoutCreateFromParent
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_DELayoutCreateCartFromDEList - Create DELayout from a DE List
+! !IROUTINE: ESMF_DELayoutCreateFromDEList - Create DELayout from a DE List
 
 ! !INTERFACE:
-      function ESMF_DELayoutCreateCartFromDEList(delist, ndim, lengths, &
+      function ESMF_DELayoutCreateFromDEList(delist, ndim, lengths, &
                commtypes, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DELayout) :: ESMF_DELayoutCreateCartFromDEList
+      type(ESMF_DELayout) :: ESMF_DELayoutCreateFromDEList
 !
 ! !ARGUMENTS:
       integer, intent(in) :: delist(:)            ! list of processing elements
@@ -358,7 +362,7 @@
       endif
 
 !     Routine which interfaces to the C++ creation routine.
-      call c_ESMC_DELayoutCreateCartDE(layout, delist, ndim, &
+      call c_ESMC_DELayoutCreateFDE(layout, delist, ndim, &
                  lengths, commtypes, status)
 
       if (status .ne. ESMF_SUCCESS) then
@@ -367,10 +371,10 @@
       endif
 
 !     set return values
-      ESMF_DELayoutCreateCartFromDEList = layout 
+      ESMF_DELayoutCreateFromDEList = layout 
       if (rcpresent) rc = ESMF_SUCCESS
 
-      end function ESMF_DELayoutCreateCartFromDEList
+      end function ESMF_DELayoutCreateFromDEList
 
 !------------------------------------------------------------------------------
 !BOP
