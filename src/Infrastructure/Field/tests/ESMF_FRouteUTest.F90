@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.17 2003/07/22 19:49:44 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.18 2003/07/29 21:07:58 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.17 2003/07/22 19:49:44 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.18 2003/07/29 21:07:58 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,7 +64,7 @@
       integer :: nDEs, nDE_i, nDE_j
       integer :: half, quart
       real :: x_min, x_max, y_min, y_max
-      integer :: i_max, j_max
+      integer :: counts(ESMF_MAXGRIDDIM)
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
@@ -112,8 +112,8 @@
       call ESMF_DELayoutGetDEid(layout1, myde, rc)
 
       !------------------------------------------------------------------------
-      i_max = 48
-      j_max = 24
+      counts(1) = 48
+      counts(2) = 24
       x_min = 0.0
       x_max = 20.0
       y_min = 0.0
@@ -127,7 +127,7 @@
       gname = "test grid 1"
 
       !NEX_UTest
-      grid1 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      grid1 = ESMF_GridCreate(counts=counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layout1, &
@@ -152,7 +152,7 @@
 !     call 
       ! Second grid
       gname = "test grid 2"
-      grid2 = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
+      grid2 = ESMF_GridCreate(counts=counts, &
                              x_min=x_min, x_max=x_max, &
                              y_min=y_min, y_max=y_max, &
                              layout=layout2, &
