@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.23 2003/03/21 22:39:01 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.24 2003/03/21 23:01:37 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.23 2003/03/21 22:39:01 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.24 2003/03/21 23:01:37 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -515,15 +515,11 @@
     ESMC_XPacket *intersect_XP = NULL;
     int i, j, k;
     int their_de, their_de_parent, their_decount;
-    int nx, ny;
 
     // Calculate the sending table.  If this DE is not part of the sending
     // layout (my_DE_snd = -1 ?  TODO), skip this part
     if (my_DE_snd != -1) {
  
-      // get "my" position in the sending layout
-      layout_snd->ESMC_DELayoutGetDEPosition( &nx, &ny);
-
       // get "my" AI out of the AI_snd array
       // TODO:  this is NOT going to work for data dims which are not
       //  equal the grid dims, e.g. a 2d grid with 4d data.
@@ -563,7 +559,7 @@
           }
 
           // translate from global to local data space
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank, nx, ny);
+          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank);
 
           // load the intersecting XPacket into the sending RTable
           sendRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);
@@ -576,9 +572,6 @@
     // layout (my_DE_rcv = -1 ?  TODO), skip this part
     if (my_DE_rcv != -1) {
  
-      // get "my" position in the receiving layout
-      layout_rcv->ESMC_DELayoutGetDEPosition( &nx, &ny);
-
       // get "my" AI out of the AI_rcv array
       for (k=0; k<rank; k++) {
         my_AI[k] = AI_rcv[my_DE_rcv + k*AI_rcv_count];
@@ -615,7 +608,7 @@
           }
 
           // translate from global to local
-          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank, nx, ny);
+          intersect_XP->ESMC_XPacketGlobalToLocal(intersect_XP, my_AI, rank);
 
           // load the intersecting XPacket into the receiving RTable
           recvRT->ESMC_RTableSetEntry(their_de_parent, intersect_XP);

@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.16 2003/03/21 22:17:46 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.17 2003/03/21 23:02:06 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,8 +80,7 @@
     int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
                                   int size_axisindex);
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
-                                  ESMC_AxisIndex *indexlist,
-                                  int rank, int nx, int ny);
+                                  ESMC_AxisIndex *indexlist, int rank);
                          
  
     int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty
