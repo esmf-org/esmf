@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.36 2003/10/22 18:28:43 cdeluca Exp $
+// $Id: ESMC_Clock.C,v 1.37 2003/10/22 21:58:19 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.36 2003/10/22 18:28:43 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.37 2003/10/22 21:58:19 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -1113,7 +1113,8 @@ int ESMC_Clock::count=0;
       ESMC_Alarm *alarm) {   // in - alarm to add
 //
 // !DESCRIPTION:
-//     Adds given alarm to a clock's alarm list. Used by ESMC_AlarmCreate.
+//     Adds given alarm to a clock's alarm list. 
+//     Used by {\tt ESMC\_AlarmCreate().}
 //
 //EOP
 // !REQUIREMENTS:  TMG 4.1, 4.2
