@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.3 2003/12/03 23:12:31 jwolfe Exp $
+! $Id: ESMF_DELayout.F90,v 1.4 2003/12/08 18:55:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -112,7 +112,8 @@
       public ESMF_DELayoutGetNumDEs
       public ESMF_DELayoutSetAxisIndex
       public ESMF_DELayoutParse
-      public ESMF_DELayoutGatherArrayI, ESMF_DELayoutGatherArrayR
+      public ESMF_DELayoutGatherArrayI, ESMF_DELayoutGatherArrayR  ! this is R4
+      public ESMF_DELayoutGatherArrayR8
  
       public ESMF_DELayoutCheckpoint
       public ESMF_DELayoutRestore
@@ -131,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.3 2003/12/03 23:12:31 jwolfe Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.4 2003/12/08 18:55:07 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1237,6 +1238,80 @@
         if (rcpresent) rc = status
 
         end subroutine ESMF_DELayoutGatherArrayR
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DELayoutGatherArrayR8
+!
+! !INTERFACE:
+      subroutine ESMF_DELayoutGatherArrayR8(layout, DistArray, global_dimlengths, &
+                                            decompids, AIPtr, AIPtr2, GlobalArray,&
+                                            rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DELayout) :: layout
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: DistArray
+      integer, dimension(:), intent(in) :: global_dimlengths
+      integer, dimension(:), intent(in) :: decompids
+      type(ESMF_AxisIndex), dimension(:) :: AIPtr
+      type(ESMF_AxisIndex), dimension(:) :: AIPtr2
+      real(ESMF_KIND_R8), dimension(:), intent(out) :: GlobalArray
+      integer, intent(out), optional :: rc             
+!
+! !DESCRIPTION:
+!     Performs an MPI-like Array Gather to a single processor for a real*8 array.
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+!       Local variables.
+        integer :: size_decomp              ! size of the decompids array
+        integer :: size_AI                  ! size of the axis indices arrays
+        integer :: i
+
+        integer :: status                   ! local error status
+        logical :: rcpresent                ! did user specify rc?
+
+!       initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+! subtract one from location parts of indices to translate to C++
+        size_AI = size(AIPtr)
+        do i = 1,size_AI
+          AIPtr(i)%min  = AIPtr(i)%min  - 1
+          AIPtr(i)%max  = AIPtr(i)%max  - 1
+          AIPtr2(i)%min = AIPtr2(i)%min - 1
+          AIPtr2(i)%max = AIPtr2(i)%max - 1
+        enddo
+
+!       Routine which interfaces to the C++ routine.
+        size_decomp = size(decompids)
+        call c_ESMC_DELayoutGatherArrayR(layout, DistArray, global_dimlengths, &
+                                         decompids, size_decomp, AIPtr, AIPtr2, &
+                                         GlobalArray, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "ESMF_DELayoutGatherArrayR8 error"
+          ! Do *NOT* return before we put the +1 back.
+        endif
+
+! add one back to location parts of indices to translate from C++
+        do i = 1,size_AI
+          AIPtr(i)%min  = AIPtr(i)%min  + 1
+          AIPtr(i)%max  = AIPtr(i)%max  + 1
+          AIPtr2(i)%min = AIPtr2(i)%min + 1
+          AIPtr2(i)%max = AIPtr2(i)%max + 1
+        enddo
+
+!       set return code if user specified it
+        if (rcpresent) rc = status
+
+        end subroutine ESMF_DELayoutGatherArrayR8
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
