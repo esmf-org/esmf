@@ -1,0 +1,86 @@
+// $Id: ESMC_ArrayComm_F.C,v 1.1 2003/10/07 22:29:46 nscollins Exp $
+//
+// Earth System Modeling Framework
+// Copyright 2002-2003, University Corporation for Atmospheric Research, 
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+// Laboratory, University of Michigan, National Centers for Environmental 
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// NASA Goddard Space Flight Center.
+// Licensed under the GPL.
+//
+//==============================================================================
+//
+//==============================================================================
+//
+// This file contains the Fortran interface code to link F90 and C++.
+//
+//------------------------------------------------------------------------------
+// INCLUDES
+//------------------------------------------------------------------------------
+#include <stdio.h>
+#include <string.h>
+#include <iostream.h>
+#include "ESMC.h"
+#include "ESMC_Base.h"
+#include "ESMC_Array.h"
+#include "ESMC_DELayout.h"
+#include "ESMC_Grid.h" 
+//------------------------------------------------------------------------------
+//BOP
+// !DESCRIPTION:
+//
+// The code in this file implements the inter-language code which
+//  allows F90 to call C++ for supporting {\tt Array} class functions.
+//
+//EOP
+
+// the interface subroutine names MUST be in lower case
+extern "C" {
+
+     void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,
+                                  int *global_start, int *global_dimlengths, 
+                                  int *rank_trans, int *size_rank_trans, 
+                                  int *olddecompids, int *decompids,  int *size_decomp,
+                                  ESMC_Array **RedistArray, int *status) {
+          *status = (*ptr)->ESMC_ArrayRedist(*layout, global_start, 
+                                  global_dimlengths, rank_trans,
+                                  *size_rank_trans, olddecompids, decompids, 
+                                  *size_decomp, *RedistArray);
+     }
+
+     void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **layout,
+                                ESMC_AxisIndex *ai_global, 
+                                int *global_dimlengths,
+                                int *decompids,  int *size_decomp, 
+                                ESMC_Logical *periodic, int *status) {
+          *status = (*ptr)->ESMC_ArrayHalo(*layout, ai_global, 
+                                  global_dimlengths, decompids, *size_decomp, 
+                                  periodic);
+     }
+
+     void FTN(c_esmc_arrayallgather)(ESMC_Array **ptr, ESMC_DELayout **layout,
+                                     int *decompids,  int *size_decomp,
+                                     int *global_dimlengths, 
+                                     ESMC_Array **Array_out, int *status) {
+          *status = (*ptr)->ESMC_ArrayAllGather(*layout, decompids, *size_decomp,
+                                                global_dimlengths, Array_out);
+     }
+
+     void FTN(c_esmc_arraygather)(ESMC_Array **ptr, ESMC_DELayout **layout,
+                                  int *decompids,  int *size_decomp, int *deid,
+                                  int *global_dimlengths, 
+                                  ESMC_Array **Array_out, int *status) {
+          *status = (*ptr)->ESMC_ArrayGather(*layout, decompids, *size_decomp,
+                                             global_dimlengths, *deid, Array_out);
+     }
+
+     void FTN(c_esmc_arrayscatter)(ESMC_Array **ptr, ESMC_DELayout **layout,
+                                   int *decompids,  int *size_decomp, int *deid,
+                                   ESMC_Array **Array_out, int *status) {
+          *status = (*ptr)->ESMC_ArrayScatter(*layout, decompids, *size_decomp,
+                                              *deid, Array_out);
+     }
+
+};
+
+
