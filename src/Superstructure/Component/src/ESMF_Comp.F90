@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.19 2003/02/18 22:06:19 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.20 2003/02/18 22:31:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -163,7 +163,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.19 2003/02/18 22:06:19 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.20 2003/02/18 22:31:02 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -291,7 +291,7 @@ end interface
         endif
 
         ! Set return values
-        ESMF_CompCreateNew%compp = compclass
+        ESMF_CompCreateNew%compp => compclass
         if (rcpresent) rc = ESMF_SUCCESS
 
         end function ESMF_CompCreateNew
@@ -337,8 +337,8 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-        ! call Destroy to release resources
-        !call ESMF_CompDestruct(component%compp, status)
+        ! call Destruct to release resources
+        call ESMF_CompDestruct(component%compp, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Component contents destruction error"
           return
@@ -430,12 +430,12 @@ end interface
         compp%layout = layout
         compp%filepath = filepath
 
-        compp%importstate = ESMF_StateCreate(name, ESMF_STATEIMPORT, status)
+        compp%importstate = ESMF_StateCreate(name, ESMF_STATEIMPORT, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "CompConstruct: State create error"
           return
         endif
-        compp%exportstate = ESMF_StateCreate(name, ESMF_STATEEXPORT, status)
+        compp%exportstate = ESMF_StateCreate(name, ESMF_STATEEXPORT, rc=status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "CompConstruct: State create error"
           return
@@ -492,10 +492,29 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-        ! TODO: add code here.
-        if (status .ne. ESMF_SUCCESS) then
-          print *, "Component contents destruction error"
-          return
+        ! release any storage that was allocated
+        if (associated(compp%statelist)) then
+           deallocate(compp%statelist, stat=status)
+           if (status .ne. ESMF_SUCCESS) then
+             print *, "Component contents destruction error"
+             return
+           endif
+           nullify(compp%statelist)
+        endif
+        
+        if (compp%function_count .gt. 0) then
+          deallocate(compp%function_name, stat=status)
+          if (status .ne. ESMF_SUCCESS) then
+            print *, "Component contents destruction error"
+            return
+          endif
+          nullify(compp%function_name)
+          deallocate(compp%function_list, stat=status)
+          if (status .ne. ESMF_SUCCESS) then
+            print *, "Component contents destruction error"
+            return
+          endif
+          nullify(compp%function_list)
         endif
 
         ! Set return code if user specified it
