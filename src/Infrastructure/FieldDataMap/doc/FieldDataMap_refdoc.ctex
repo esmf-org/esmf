@@ -1,4 +1,4 @@
-% $Id: FieldDataMap_refdoc.ctex,v 1.5 2004/06/03 14:37:46 nscollins Exp $ 
+% $Id: FieldDataMap_refdoc.ctex,v 1.6 2004/06/04 12:58:24 nscollins Exp $ 
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -40,6 +40,14 @@
 \input{FieldDataMap_desc}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/FieldDataMap/doc/FieldDataMap_desc}
+#endif
+
+% currently no options defined specifically for field datamaps
+%\subsection{Field DataMap Options}
+#ifdef STANDALONE
+%\input{FieldDataMap_options}
+#elif defined(CONSTITUENT)
+%\input{../Infrastructure/FieldDataMap/doc/FieldDataMap_options}
 #endif
 
 \subsection{Use and Examples}
