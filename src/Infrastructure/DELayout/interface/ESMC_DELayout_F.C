@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout_F.C,v 1.9 2004/04/28 23:11:49 cdeluca Exp $
+// $Id: ESMC_DELayout_F.C,v 1.10 2004/04/29 22:08:52 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -53,64 +53,35 @@ extern "C" {
     int *len_localDeList, int *localDe, ESMC_Logical *oneToOneFlag, 
     ESMC_Logical *logRectFlag, int *deCountPerDim, int *len_deCountPerDim,
     int *status){
-    // Sort out the non-present F90 optional arguments. 
-    // The detection of non-present F90 optional arguemtns is compiler/platform
-    // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
-    // Since the actual C++ methods expect non-present arguments to be
-    // indicated by a pointer to NULL all we need to do here is set those 
-    // that point to (NULL - 1) [which is available as macro ESMC_BAD_POINTER]
-    // to NULL as well before passing them down further.
-    (void*)deCount  == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : deCount;
-    (void*)dimCount == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : dimCount;
-    (void*)localDeCount
-      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : localDeCount;
-    (void*)localDe  == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : localDe;
-    (void*)oneToOneFlag 
-      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : oneToOneFlag;
-    (void*)logRectFlag 
-      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : logRectFlag;
-    // Done sorting out non-present F90 optional arguments.
-    int rc = (*ptr)->ESMC_DELayoutGet(deCount, dimCount, localDeCount,
-      localDeList, *len_localDeList, localDe, oneToOneFlag, logRectFlag,
+    int rc = (*ptr)->ESMC_DELayoutGet(
+      ESMC_NOT_PRESENT_FILTER(deCount), 
+      ESMC_NOT_PRESENT_FILTER(dimCount), 
+      ESMC_NOT_PRESENT_FILTER(localDeCount),
+      localDeList, *len_localDeList, 
+      ESMC_NOT_PRESENT_FILTER(localDe), 
+      ESMC_NOT_PRESENT_FILTER(oneToOneFlag), 
+      ESMC_NOT_PRESENT_FILTER(logRectFlag),
       deCountPerDim, *len_deCountPerDim);
-    if (status != ESMC_NULL_POINTER) 
+    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
       *status = rc;
   }
 
   void FTN(c_esmc_ndelayoutgetde)(ESMC_DELayout **ptr,
     int *DEid, int *DEcoord, int *len_coord, int *DEcde, int *len_cde, 
     int *DEcw, int *len_cw, int *nDEc, int *status){
-    // Sort out the non-present F90 optional arguments. 
-    // The detection of non-present F90 optional arguemtns is compiler/platform
-    // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
-    // Since the actual C++ methods expect non-present arguments to be
-    // indicated by a pointer to NULL all we need to do here is set those 
-    // that point to (NULL - 1) [which is available as macro ESMC_BAD_POINTER]
-    // to NULL as well before passing them down further.
-    (void*)nDEc      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : nDEc;
-    // Done sorting out non-present F90 optional arguments.
     int rc = (*ptr)->ESMC_DELayoutGetDE(*DEid, DEcoord, *len_coord, 
-      DEcde, *len_cde, DEcw, *len_cw, nDEc);
-    if (status != ESMC_NULL_POINTER) 
+      DEcde, *len_cde, DEcw, *len_cw, ESMC_NOT_PRESENT_FILTER(nDEc));
+    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
       *status = rc;
   }
 
   void FTN(c_esmc_ndelayoutgetdematch)(ESMC_DELayout **ptr,
     int *DEid, ESMC_DELayout **ptrMatch, int *deMatchCount, int *deMatchList,
     int *len_deMatchList, int *status){
-    // Sort out the non-present F90 optional arguments. 
-    // The detection of non-present F90 optional arguemtns is compiler/platform
-    // dependent. Currently we expect either a pointer to NULL or (NULL - 1).
-    // Since the actual C++ methods expect non-present arguments to be
-    // indicated by a pointer to NULL all we need to do here is set those 
-    // that point to (NULL - 1) [which is available as macro ESMC_BAD_POINTER]
-    // to NULL as well before passing them down further.
-    (void*)deMatchCount 
-      == (void*)ESMC_BAD_POINTER ? ESMC_NULL_POINTER : deMatchCount;
-    // Done sorting out non-present F90 optional arguments.
-    int rc = (*ptr)->ESMC_DELayoutGetDEMatch(*DEid, **ptrMatch, deMatchCount,
+    int rc = (*ptr)->ESMC_DELayoutGetDEMatch(*DEid, **ptrMatch, 
+      ESMC_NOT_PRESENT_FILTER(deMatchCount),
       deMatchList, *len_deMatchList);
-    if (status != ESMC_NULL_POINTER) 
+    if (ESMC_NOT_PRESENT_FILTER(status) != ESMC_NULL_POINTER) 
       *status = rc;
   }
 
