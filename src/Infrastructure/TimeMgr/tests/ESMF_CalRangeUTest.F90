@@ -1,4 +1,4 @@
-! $Id: ESMF_CalRangeUTest.F90,v 1.11 2003/09/02 19:41:02 svasquez Exp $
+! $Id: ESMF_CalRangeUTest.F90,v 1.12 2003/09/03 23:20:26 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalRangeUTest.F90,v 1.11 2003/09/02 19:41:02 svasquez Exp $'
+      '$Id: ESMF_CalRangeUTest.F90,v 1.12 2003/09/03 23:20:26 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -73,9 +73,6 @@
 !     Special strings (Non-exhaustive and exhaustive) have been
 !     added to allow a script to count the number and types of unit tests.
 !-------------------------------------------------------------------------------
-
-#ifdef ESMF_EXHAUSTIVE
-      !EX_UTest
 
       ! initialize ESMF framework
       call ESMF_FrameworkInitialize(rc)
@@ -175,7 +172,7 @@
       first_test = HIGH_LO
       last_test  = HIGH_HI
 #else
-      !EX_UTest
+      !NEX_UTest
       first_test = HIGH_HI
       last_test  = HIGH_HI
 #endif
@@ -224,7 +221,7 @@
           MM = 10
           DD = 3
 #else
-          !EX_UTest
+          !NEX_UTest
           ! start back 1000 days, then come forward
           Dl = Dl - 1000
 
@@ -362,8 +359,7 @@
       !
 
       ! set date via ESMF Gregorian calendar
-      call ESMF_TimeSet(time, calendar=gregCal, rc=rc)
-      call ESMF_TimeSet(time, yr_i8=YRl, mm=MM, dd=DD, rc=rc)
+      call ESMF_TimeSet(time, yr_i8=YRl, mm=MM, dd=DD, calendar=gregCal, rc=rc)
 
       ! see what we get back
       call ESMF_TimeGet(time, yr_i8=rYRl, mm=rMM, dd=rDD, d_i8=rDl, rc=rc)
@@ -399,8 +395,7 @@
       !
 
       ! set date via ESMF Julian calendar
-      call ESMF_TimeSet(time, calendar=julCal, rc=rc)
-      call ESMF_TimeSet(time, d_i8=Dl, rc=rc)
+      call ESMF_TimeSet(time, d_i8=Dl, calendar=julCal, rc=rc)
 
       ! see what we get back
       call ESMF_TimeGet(time, d_i8=rDl, rc=rc)
@@ -435,5 +430,4 @@
 
       end function ESMF_CheckTime
 
-#endif
       end program ESMF_CalRangeUTest
