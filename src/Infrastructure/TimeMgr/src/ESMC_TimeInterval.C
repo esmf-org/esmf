@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.56 2004/04/24 01:30:27 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.57 2004/04/24 01:32:20 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.56 2004/04/24 01:30:27 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.57 2004/04/24 01:32:20 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -1311,7 +1311,7 @@
     // TODO: fractional interval parts
 
     // TODO: use some form of polymorphism to share logic with
-    //       operator/ (by real) and Compare method ?
+    //       operator/ (return real) and Compare method ?
 
     // initialize result to zero
     ESMC_TimeInterval remainder;
@@ -2024,7 +2024,7 @@
     //       type?  or some other form of polymorphism ?
 
     // TODO: use some form of polymorphism to share logic with operator% and
-    //       operator/ (by real) ?
+    //       operator/ (return real) ?
 
     // calendars must be defined
     if (this->calendar == ESMC_NULL_POINTER ||
