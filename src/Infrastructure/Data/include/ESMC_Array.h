@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.13 2003/02/06 22:36:52 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.14 2003/02/10 21:24:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,41 +132,74 @@ class ESMC_Array : public ESMC_Base {    // inherits from ESMC_Base class
 	~ESMC_Array(void);
   
  // get/set methods for internal data
-    void ESMC_ArraySetRank(int rank) { this->rank = rank; }
-    int ESMC_ArrayGetRank() { return this->rank; }
+    int ESMC_ArraySetRank(int rank) { this->rank = rank; return ESMF_SUCCESS;}
+    int ESMC_ArrayGetRank(void) { return this->rank; }
 
-    void ESMC_ArraySetType(enum ESMC_DataType type) { this->type = type; }
-    enum ESMC_DataType ESMC_ArrayGetType() { return this->type; }
+    int ESMC_ArraySetType(enum ESMC_DataType type) { this->type = type; 
+                                                     return ESMF_SUCCESS;}
+    enum ESMC_DataType ESMC_ArrayGetType(void) { return this->type; }
 
-    void ESMC_ArraySetKind(enum ESMC_DataKind kind) { this->kind = kind; }
-    enum ESMC_DataKind ESMC_ArrayGetKind() { return this->kind; }
+    int ESMC_ArraySetKind(enum ESMC_DataKind kind) { this->kind = kind; 
+                                                     return ESMF_SUCCESS;}
+    enum ESMC_DataKind ESMC_ArrayGetKind(void) { return this->kind; }
 
-    void ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
-                                                   this->length[i] = l[i]; }
-    void ESMC_ArraySetLengths(int ni) { this->length[0] = ni; }
-    void ESMC_ArraySetLengths(int ni, int nj) { 
-           this->length[0] = ni; this->length[1] = nj; }
-    void ESMC_ArraySetLengths(int ni, int nj, int nk) { 
-           this->length[0] = ni; this->length[1] = nj; this->length[2] = nk; }
-    void ESMC_ArraySetLengths(int ni, int nj, int nk, int nl) { 
+    int ESMC_ArraySetLengths(int n, int *l) { for (int i = 0; i < n; i++)
+                                                   this->length[i] = l[i]; 
+                                              return ESMF_SUCCESS;}
+    int ESMC_ArraySetLengths(int ni) { this->length[0] = ni; 
+                                       return ESMF_SUCCESS;}
+    int ESMC_ArraySetLengths(int ni, int nj) { 
+           this->length[0] = ni; this->length[1] = nj; return ESMF_SUCCESS;}
+    int ESMC_ArraySetLengths(int ni, int nj, int nk) { 
            this->length[0] = ni; this->length[1] = nj; 
-           this->length[2] = nk; this->length[3] = nl; }
+           this->length[2] = nk; return ESMF_SUCCESS;}
+    int ESMC_ArraySetLengths(int ni, int nj, int nk, int nl) { 
+           this->length[0] = ni; this->length[1] = nj; 
+           this->length[2] = nk; this->length[3] = nl; return ESMF_SUCCESS;}
+    int ESMC_ArraySetLengths(int ni, int nj, int nk, int nl, int nm) { 
+           this->length[0] = ni; this->length[1] = nj; 
+           this->length[2] = nk; this->length[3] = nl; 
+           this->length[4] = nm; return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int n, int *l) { for (int i = 0; i < n; i++)
+                                                   l[i] = this->length[i]; 
+                                              return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int *ni) { *ni = this->length[0]; 
+                                        return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int *ni, int *nj) { 
+           *ni = this->length[0]; *nj = this->length[1]; return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int *ni, int *nj, int *nk) { 
+           *ni = this->length[0]; *nj = this->length[1]; 
+           *nk = this->length[2]; return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int *ni, int *nj, int *nk, int *nl) { 
+           *ni = this->length[0]; *nj = this->length[1]; 
+           *nk = this->length[2]; *nl = this->length[3]; return ESMF_SUCCESS;}
+    int ESMC_ArrayGetLengths(int *ni, int *nj, int *nk, int *nl, int *nm) { 
+           *ni = this->length[0]; *nj = this->length[1]; 
+           *nk = this->length[2]; *nl = this->length[3]; 
+           *nm = this->length[4]; return ESMF_SUCCESS;}
 
-    void ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; }
-    void ESMC_ArrayGetBaseAddr(void *base_addr) { base_addr = this->base_addr; }
+    int ESMC_ArraySetBaseAddr(void *base_addr) { this->base_addr = base_addr; 
+                                                 return ESMF_SUCCESS;}
+    int ESMC_ArrayGetBaseAddr(void *base) { base = this->base_addr; 
+                                            return ESMF_SUCCESS;}
 
-    void ESMC_ArraySetOrigin(enum ESMC_ArrayOrigin o) { this->origin = o; }
-    void ESMC_ArrayGetOrigin(enum ESMC_ArrayOrigin *o) { *o = this->origin; }
+    int ESMC_ArraySetOrigin(enum ESMC_ArrayOrigin o) { this->origin = o; 
+                                                       return ESMF_SUCCESS;}
+    enum ESMC_ArrayOrigin ESMC_ArrayGetOrigin(void) { return this->origin; }
 
     // copy the contents of an f90 ptr
-    void ESMC_ArraySetF90Ptr(struct c_F90ptr *p) {
-        memcpy((void *)(&this->f90dopev), (void *)p, sizeof(struct c_F90ptr)); }
-    void ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) {
-       memcpy((void *)p, (void *)(&this->f90dopev), sizeof(struct c_F90ptr)); }
+    int ESMC_ArraySetF90Ptr(struct c_F90ptr *p) {
+        memcpy((void *)(&this->f90dopev), (void *)p, sizeof(struct c_F90ptr)); 
+        return ESMF_SUCCESS; }
+    int ESMC_ArrayGetF90Ptr(struct c_F90ptr *p) {
+        memcpy((void *)p, (void *)(&this->f90dopev), sizeof(struct c_F90ptr)); 
+        return ESMF_SUCCESS; }
 
     // set/get the dealloc flag
-    void ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = 0; }
-    void ESMC_ArraySetDealloc(void)   { this->needs_dealloc = 1; }
+    int ESMC_ArraySetNoDealloc(void) { this->needs_dealloc = 0; 
+                                       return ESMF_SUCCESS;}
+    int ESMC_ArraySetDealloc(void)   { this->needs_dealloc = 1; 
+                                       return ESMF_SUCCESS;}
     int ESMC_ArrayNeedsDealloc(void)  { return this->needs_dealloc; }
 
     //int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim

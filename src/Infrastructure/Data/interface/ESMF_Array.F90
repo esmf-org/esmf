@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.25 2003/02/10 16:43:38 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.26 2003/02/10 21:24:52 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.25 2003/02/10 16:43:38 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.26 2003/02/10 21:24:52 nscollins Exp $'
 
 !==============================================================================
 !
@@ -596,13 +596,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -613,9 +613,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapI41D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
@@ -635,15 +636,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_I4, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_integer, ESMF_KIND_I4, & 
  1, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -710,13 +713,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -727,9 +730,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapI81D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
@@ -749,15 +753,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_I8, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_integer, ESMF_KIND_I8, & 
  1, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -824,13 +830,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -841,9 +847,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapI42D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
@@ -863,15 +870,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_I4, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_integer, ESMF_KIND_I4, & 
  2, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1), lengths(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -938,13 +947,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -955,9 +964,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapI82D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
@@ -977,15 +987,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_I8, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_integer, ESMF_KIND_I8, & 
  2, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1), lengths(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -1052,13 +1064,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -1069,9 +1081,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapR41D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
@@ -1091,15 +1104,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_R4, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_real, ESMF_KIND_R4, & 
  1, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -1166,13 +1181,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -1183,9 +1198,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapR81D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(1) ! size info for the array 
@@ -1205,15 +1221,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_R8, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_real, ESMF_KIND_R8, & 
  1, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -1280,13 +1298,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -1297,9 +1315,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapR42D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
@@ -1319,15 +1338,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_R4, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_real, ESMF_KIND_R4, & 
  2, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1), lengths(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -1394,13 +1415,13 @@ end function
 ! A Fortran 90 array pointer which can be queried for info about 
 ! type/kind/rank and sizes. 
 ! 
-! \item[[docopy]] 
+! \item[{[docopy]}] 
 ! Default to {\tt ESMF\_NO\_COPY}, makes the {\tt ESMF\_Array} reference 
 ! the existing data array. If set to {\tt ESMF\_DO\_COPY} this routine 
 ! allocates new space and copies the data from the pointer into the 
 ! new array. 
 ! 
-! \item[[rc]] 
+! \item[{[rc]}] 
 ! Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 ! \end{description} 
 ! 
@@ -1411,9 +1432,10 @@ end function
  
 ! local vars 
  type (ESMF_Array) :: array ! what C++ is going to return 
- integer :: status=ESMF_FAILURE ! local error status 
  integer :: i ! local variable 
+ integer :: status=ESMF_FAILURE ! local error status 
  logical :: rcpresent=.FALSE. ! did user specify rc? 
+ logical :: copyreq=.FALSE. ! did user specify copy? 
  
  type (ESMF_ArrWrapR82D) :: wrap ! for passing f90 ptr to C++ 
  integer :: rank, lengths(2) ! size info for the array 
@@ -1433,15 +1455,17 @@ end function
  lengths(i) = size(f90ptr, i) 
  enddo 
  
- call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_REAL, ESMF_KIND_R8, & 
+ call c_ESMC_ArrayCreateByPtr(array, ESMF_DATA_real, ESMF_KIND_R8, & 
  2, lengths, status) 
  if (status .ne. ESMF_SUCCESS) then 
  print *, "Array initial construction error" 
  return 
  endif 
  
-! !TODO: add code to handle copyflag. For now, default to NO_COPY 
- if (present(docopy) .and. (docopy .eq. ESMF_DO_COPY)) then 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
+ if (copyreq) then 
  allocate(localp( lengths(1), lengths(2) ), stat=status) 
  if (status .ne. 0) then ! f90 status, not ESMF 
  print *, "Array do_copy allocate error" 
@@ -1506,14 +1530,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapI41D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(1) ! size info for the array 
+ integer (ESMF_IKIND_I4), dimension(:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 1, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% I41Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% I41Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataI41D 
  
@@ -1541,14 +1601,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapI81D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(1) ! size info for the array 
+ integer (ESMF_IKIND_I8), dimension(:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 1, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% I81Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% I81Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataI81D 
  
@@ -1576,14 +1672,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapI42D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(2) ! size info for the array 
+ integer (ESMF_IKIND_I4), dimension(:,:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 2, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1), lengths(2) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% I42Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% I42Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataI42D 
  
@@ -1611,14 +1743,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapI82D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(2) ! size info for the array 
+ integer (ESMF_IKIND_I8), dimension(:,:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 2, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1), lengths(2) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% I82Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% I82Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataI82D 
  
@@ -1646,14 +1814,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapR41D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(1) ! size info for the array 
+ real (ESMF_IKIND_R4), dimension(:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 1, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% R41Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% R41Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataR41D 
  
@@ -1681,14 +1885,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapR81D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(1) ! size info for the array 
+ real (ESMF_IKIND_R8), dimension(:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 1, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% R81Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% R81Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataR81D 
  
@@ -1716,14 +1956,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapR42D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(2) ! size info for the array 
+ real (ESMF_IKIND_R4), dimension(:,:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 2, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1), lengths(2) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% R42Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% R42Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataR42D 
  
@@ -1751,14 +2027,50 @@ end function
 ! !REQUIREMENTS: 
  
  type (ESMF_ArrWrapR82D) :: wrap ! for passing f90 ptr to C++ 
-! 
-! TODO: code goes here 
-! 
+ integer :: rank, lengths(2) ! size info for the array 
+ real (ESMF_IKIND_R8), dimension(:,:), pointer :: localp ! local copy 
+ logical :: copyreq=.FALSE. ! are we making a copy? 
+ integer :: status=ESMF_FAILURE 
+ logical :: rcpresent=.FALSE. 
+ 
+! ! initialize return code; assume failure until success is certain 
+ if (present(rc)) then 
+ rcpresent = .TRUE. 
+ rc = ESMF_FAILURE 
+ endif 
+ 
  ! check copyflag to see if we are making a reference 
  ! or making a new array and a copy 
+ if (present(docopy)) then 
+ if (docopy .eq. ESMF_DO_COPY) copyreq = .TRUE. 
+ endif 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - get pointer error" 
+ return 
+ endif 
+ 
+ ! Allocate a new buffer if requested and return a copy 
+ if (copyreq) then 
+ call c_ESMC_ArrayGetLengths(array, 2, lengths, status) 
+ if (status .ne. ESMF_SUCCESS) then 
+ print *, "Array - cannot retrieve array dim sizes" 
+ return 
+ endif 
+ allocate(localp( lengths(1), lengths(2) ), stat=status) 
+ if (status .ne. 0) then ! f90 status, not ESMF 
+ print *, "Array do_copy allocate error" 
+ return 
+ endif 
+ ! this must do a contents assignment 
+ localp = wrap% R82Dptr 
+ f90ptr => localp 
+ else 
  f90ptr => wrap% R82Dptr 
+ endif 
+ 
+ if (rcpresent) rc = ESMF_SUCCESS 
  
  end subroutine ESMF_ArrayGetDataR82D 
  
@@ -1790,10 +2102,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I41Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateI41D 
  
@@ -1820,10 +2134,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I81Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateI81D 
  
@@ -1850,10 +2166,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I42Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateI42D 
  
@@ -1880,10 +2198,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% I82Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateI82D 
  
@@ -1910,10 +2230,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R41Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateR41D 
  
@@ -1940,10 +2262,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R81Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateR81D 
  
@@ -1970,10 +2294,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R42Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateR42D 
  
@@ -2000,10 +2326,12 @@ end function
 !EOP 
 ! !REQUIREMENTS: 
  
- call c_ESMC_ArrayGetF90Ptr(array, wrap, rc) 
+ integer :: status=ESMF_FAILURE ! local error status 
+ 
+ call c_ESMC_ArrayGetF90Ptr(array, wrap, status) 
  deallocate(wrap% R82Dptr) 
  
- if (present(rc)) rc = ESMF_SUCCESS 
+ if (present(rc)) rc = status 
  
  end subroutine ESMF_ArrayDeallocateR82D 
  

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.17 2003/02/10 16:43:37 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.18 2003/02/10 21:24:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -47,6 +47,8 @@ extern "C" {
                                         int *strides, int *status) {
              (*ptr) = ESMC_ArrayCreate(rank, type, kind, NULL,
                                      lbounds, ubounds, strides, status);
+
+             (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
 
      void FTN(c_esmc_arrayconstructbyspec)() {
@@ -59,8 +61,25 @@ extern "C" {
              (*ptr) = ESMC_ArrayCreate_F(*rank, *dt, *dk, NULL, NULL, lengths,
                                       NULL, NULL, status);
 
+             (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
+     void FTN(c_esmc_arraysetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
+      
+         *status = (*ptr)->ESMC_ArraySetLengths(*rank, lengths);
+     }
+
+     void FTN(c_esmc_arraygetlengths)(ESMC_Array **ptr, int *rank, int *lengths, int *status) {
+      
+         *status = (*ptr)->ESMC_ArrayGetLengths(*rank, lengths);
+     }
+
+     void FTN(c_esmc_arraygetrank)(ESMC_Array **ptr, int *rank, int *status) {
+      
+         *rank = (*ptr)->ESMC_ArrayGetRank();
+         *status = ESMF_SUCCESS;
+     }
+
      void FTN(c_esmc_arraydestroy)(ESMC_Array **ptr, int *status) {
          *status = ESMC_ArrayDestroy(*ptr);
      }
@@ -74,33 +93,27 @@ extern "C" {
      }
 
      void FTN(c_esmc_arraysetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
-          (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
-          *status = ESMF_SUCCESS;
+          *status = (*ptr)->ESMC_ArraySetBaseAddr((void *)(base));
      }
 
      void FTN(c_esmc_arraygetbaseaddr)(ESMC_Array **ptr, float *base, int *status) {
-          (*ptr)->ESMC_ArrayGetBaseAddr((void *)(base));
-          *status = ESMF_SUCCESS;
+          *status = (*ptr)->ESMC_ArrayGetBaseAddr((void *)base);
      }
 
      void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
-          (*ptr)->ESMC_ArraySetF90Ptr(p);
-          *status = ESMF_SUCCESS;
+          *status = (*ptr)->ESMC_ArraySetF90Ptr(p);
      }
 
      void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
-          (*ptr)->ESMC_ArrayGetF90Ptr(p);
-          *status = ESMF_SUCCESS;
+          *status = (*ptr)->ESMC_ArrayGetF90Ptr(p);
      }
 
      void FTN(c_esmc_arraysetdealloc)(ESMC_Array **ptr, int *status) {
-          (*ptr)->ESMC_ArraySetDealloc();
-          *status = ESMF_SUCCESS;
+          *status = (*ptr)->ESMC_ArraySetDealloc();
      }
 
      void FTN(c_esmc_arraysetnodealloc)(ESMC_Array **ptr, int *status) {
-          (*ptr)->ESMC_ArraySetNoDealloc();
-          *status = ESMF_SUCCESS;
+          *status = (*ptr)->ESMC_ArraySetNoDealloc();
      }
 
      void FTN(c_esmc_arrayneedsdealloc)(ESMC_Array **ptr, int flag, int *status) {
