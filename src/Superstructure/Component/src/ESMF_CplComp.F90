@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.34 2004/05/20 11:51:26 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.35 2004/05/21 09:37:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_CplComp.F90"
 !
 !     ESMF Coupler Cplcomp module
       module ESMF_CplCompMod
@@ -86,7 +88,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.34 2004/05/20 11:51:26 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.35 2004/05/21 09:37:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -194,12 +196,15 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
+                                       ESMF_CONTEXT, rc)) return
 
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                     config=config, clock=clock, rc=localrc)
-        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateNew%compp => compclass
@@ -275,13 +280,16 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
+                                       ESMF_CONTEXT, rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, rc=localrc)
-        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateConf%compp => compclass
@@ -369,13 +377,16 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
+                                       ESMF_CONTEXT, rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, vm=vm, petList=petList, rc=localrc)
-        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateVM%compp => compclass
@@ -466,14 +477,17 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
+                                       ESMF_CONTEXT, rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=localrc)
-        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateGPar%compp => compclass
@@ -564,14 +578,17 @@
 
         ! Allocate a new comp class
         allocate(compclass, stat=localrc)
-	if (EM_LogMsgFoundAllocError(localrc, "Component class", rc)) return
+	if (ESMF_LogMsgFoundAllocError(localrc, "Component class", &
+                                       ESMF_CONTEXT, rc)) return
    
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=localrc)
-        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
         ! Set return values
         ESMF_CplCompCreateCPar%compp => compclass
@@ -622,11 +639,15 @@
 
         ! call Destruct to release resources
         call ESMF_CompDestruct(cplcomp%compp, localrc)
-        if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
         ! Deallocate the cplcomp struct itself
         deallocate(cplcomp%compp, stat=localrc)
-	if (EM_LogMsgFoundAllocError(localrc, "deallocating Component class", rc)) return
+	if (ESMF_LogMsgFoundAllocError(localrc, &
+                                       "deallocating Component class", &
+                                       ESMF_CONTEXT, rc)) return
         nullify(cplcomp%compp)
  
         ! Set return code if user specified it
@@ -1145,7 +1166,9 @@
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
                    pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1199,7 +1222,9 @@
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1254,7 +1279,9 @@
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
                    pref_intra_process, pref_intra_ssi, pref_inter_ssi, localrc)
-    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
@@ -1297,7 +1324,9 @@
 
     ! call CompClass method
     call ESMF_CompWait(cplcomp%compp, localrc)
-    if (EM_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+    if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                       ESMF_CONTEXT, rc)) return
 
     ! Set return values
     if (present(rc)) rc = ESMF_SUCCESS
