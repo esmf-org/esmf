@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/09/17 22:01:38 cdeluca Exp $ 
+# $Id: makefile,v 1.2 2003/09/17 22:09:51 cdeluca Exp $ 
 
 ALL: 
 
@@ -35,8 +35,8 @@ CLOBBERDIRS =
 examples: ESMF_BundleCreateEx 
 
 
-ESMF_BundleCreateDir:
-        mkdir -p ${ESMC_TESTDIR}
+ESMF_BundleCreateDir: 
+	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_BundleCreateEx: ESMF_BundleCreateEx.o  chkopts
         -${F90CXXLD} -o ESMF_BundleCreateEx ESMF_BundleCreateEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}

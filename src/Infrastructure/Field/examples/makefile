@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/09/17 21:26:29 cdeluca Exp $ 
+# $Id: makefile,v 1.7 2003/09/17 22:10:44 cdeluca Exp $ 
 
 ALL: 
 
@@ -34,7 +34,7 @@ CLEANFILES  = *.o *.mod ESMF_FieldCreateEx ESMC_FieldCreateEx
 CLOBBERDIRS =
 
 
-examples: ESMF_FieldCreateEx ESMF_BundleCreateEx ESMC_FieldCreateEx
+examples: ESMF_FieldCreateEx ESMC_FieldCreateEx
 
 ESMF_FieldCreateDir:
 	mkdir -p ${ESMC_TESTDIR}
