@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.18 2004/02/12 23:53:45 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.19 2004/02/13 17:48:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.18 2004/02/12 23:53:45 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.19 2004/02/13 17:48:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -917,6 +917,52 @@
       end function ESMF_LRGridCreateExchange
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LRGridConstructSpecificNew - Construct a new empty logRectGrid specific type
+
+! !INTERFACE:
+      subroutine ESMF_LRGridConstructSpecificNew(lrgrid, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_LogRectGrid) :: lrgrid
+      integer, intent(out) :: rc
+!
+! !DESCRIPTION:
+!     ESMF routine which fills in the contents of an already allocated
+!     {\tt ESMF\_LogRectGrid} object.  May perform additional allocations
+!     as needed.  Must call the corresponding {\tt ESMF\_LogRectGridDestruct}
+!     routine to free the additional memory.  Intended for internal
+!     ESMF use only.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[lrgrid]
+!          The {\tt ESMF\_LogRectGrid} object to be constructed.
+!     \item[rc]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!   \end{description}
+!
+! !REQUIREMENTS:  TODO
+!EOP
+
+      integer :: i
+
+!     Initialize return code
+      rc     = ESMF_FAILURE
+
+!     Initialize lrgrid contents to default values
+      do i = 1,ESMF_MAXGRIDDIM
+        lrgrid%countPerDim(i) = 0
+        lrgrid%deltaPerDim(i) = 0.0
+      enddo
+      nullify(lrgrid%coords)
+
+!     Set return values.
+      rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridConstructSpecificNew
+
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_LRGridConstructUniform - Construct a uniform Grid
 
@@ -1076,6 +1122,7 @@
       endif
 
 !     Fill in logRectGrid derived type with subroutine arguments
+      call ESMF_LRGridConstructSpecificNew(lrgrid, rc)
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
         lrgrid%deltaPerDim(i) = useDeltas(i) 
@@ -1379,9 +1426,9 @@
       endif
 
 !     Fill in logRectGrid derived type with subroutine arguments
+      call ESMF_LRGridConstructSpecificNew(lrgrid, rc)
       do i = 1,numDims
         lrgrid%countPerDim(i) = counts(i)
-      !  lrgrid%coords         = coords
       enddo
       lrgrid%coords         => coords
       grid%gridSpecific%logRectGrid => lrgrid
