@@ -1,4 +1,4 @@
-% $Id: Array_refdoc.ctex,v 1.5 2004/03/22 19:02:29 cdeluca Exp $
+% $Id: Array_refdoc.ctex,v 1.6 2004/03/24 18:31:08 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -82,11 +82,18 @@
 
 \subsection{Class API: Basic Array Methods}
 #ifdef STANDALONE
-\input{../../Array/doc/ESMF_ArrayCreate_fapi}
 \input{../../Array/doc/ESMF_Array_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/Array/doc/ESMF_ArrayCreate_fapi}
 \input{../Infrastructure/Array/doc/ESMF_Array_fapi}
+#endif
+
+\subsection{Class API: Array Overloads for Fortran Arrays}
+#ifdef STANDALONE
+\input{../../Array/doc/ESMF_ArrayCreate_fapi}
+\input{../../Array/doc/ESMF_ArrayGet_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Array/doc/ESMF_ArrayCreate_fapi}
+\input{../Infrastructure/Array/doc/ESMF_ArrayGet_fapi}
 #endif
 
 \subsection{Class API: Array Communications}

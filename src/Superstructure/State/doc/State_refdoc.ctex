@@ -1,4 +1,4 @@
-% $Id: State_refdoc.ctex,v 1.5 2004/03/22 19:18:03 cdeluca Exp $
+% $Id: State_refdoc.ctex,v 1.6 2004/03/24 18:31:09 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,18 +85,18 @@
 \input{../Superstructure/State/doc/State_obj}
 #endif
 
-%\subsection{Global Parameters}
-%#ifdef STANDALONE
-%\input{State_fparam}
-%#elif defined(CONSTITUENT)
-%\input{../Superstructure/State/doc/State_fparam}
-%#endif
-
-\subsection{Class API}
+\subsection{Class API: Basic State Methods}
 #ifdef STANDALONE
 \input{ESMF_State_fapi}
 #elif defined(CONSTITUENT)
 \input{../Superstructure/State/doc/ESMF_State_fapi}
+#endif
+
+\subsection{Class API: State Overloads for Fortran Arrays}
+#ifdef STANDALONE
+\input{ESMF_StateGet_fapi}
+#elif defined(CONSTITUENT)
+\input{../Superstructure/State/doc/ESMF_StateGet_fapi}
 #endif
 
 #ifdef STANDALONE

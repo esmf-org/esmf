@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.36 2004/03/24 14:54:34 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.37 2004/03/24 18:31:08 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -1180,6 +1180,101 @@ end function
 
 
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_BundleGet - Return information about the Bundle
+!
+! !INTERFACE:
+      subroutine ESMF_BundleGet(bundle, grid, fieldCount, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Bundle), intent(in) :: bundle
+      type(ESMF_Grid), intent(out), optional :: grid
+      integer, intent(out), optional :: fieldCount
+      character (len = *), intent(out), optional :: name
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Returns information about the {\tt ESMF\_Bundle}.  
+!      If the {\tt ESMF\_Bundle} was originally created
+!      without specifying a name, a unique name will have been generated
+!      by the framework.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [bundle]
+!           The {\tt Bundle} object to query.
+!     \item [{[grid]}]
+!           The {\tt ESMF\_Grid} associated with the {\tt Bundle}.
+!     \item [fieldCount]
+!           Returned {\tt ESMF\_Field} count.
+!     \item [{[name]}]
+!           A character string where the {\tt Bundle} name is returned.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:  FLD2.6.1 
+
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      type(ESMF_BundleType), pointer :: btype     ! internal data
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      ! TODO: make this a common subroutine; all entry points need to do this
+
+      ! Validate bundle before using it.
+      btype => bundle%btypep
+      if (.not. associated(btype)) then
+        print *, "ERROR in ESMF_BundleGet: bad Bundle object"
+        return
+      endif
+      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
+        print *, "ERROR in ESMF_BundleGet: bad Bundle object"
+        return
+      endif
+
+      if (present(grid)) then
+          ! Validate bundle has grid before trying to return it.
+          if (btype%gridstatus .ne. ESMF_STATE_READY) then
+            print *, "ERROR in ESMF_BundleGet: no associated Grid"
+            return
+          endif
+          
+          ! OK to return grid
+          grid = btype%grid
+      endif
+
+      if (present(fieldCount)) then
+          ! Return Field count
+          fieldCount = bundle%btypep%field_count
+      endif
+
+      if (present(name)) then
+          !OK to query for name
+          call c_ESMC_GetName(btype%base, name, status)
+          if(status .NE. 0) then
+            print *, "ERROR in ESMF_BundleGet getting Name"
+            return
+          endif
+      endif
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+
+      end subroutine ESMF_BundleGet
+
+
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_BundleGetAllFields - Retrieve an array of Fields 
 !
@@ -2272,101 +2367,6 @@ end function
 !  TODO: code goes here
 !
         end subroutine ESMF_BundleGetGridPointCount
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_BundleGet - Return information about the Bundle
-!
-! !INTERFACE:
-      subroutine ESMF_BundleGet(bundle, grid, fieldCount, name, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle
-      type(ESMF_Grid), intent(out), optional :: grid
-      integer, intent(out), optional :: fieldCount
-      character (len = *), intent(out), optional :: name
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!      Returns information about the {\tt ESMF\_Bundle}.  
-!      If the {\tt ESMF\_Bundle} was originally created
-!      without specifying a name, a unique name will have been generated
-!      by the framework.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [bundle]
-!           The {\tt Bundle} object to query.
-!     \item [{[grid]}]
-!           The {\tt ESMF\_Grid} associated with the {\tt Bundle}.
-!     \item [fieldCount]
-!           Returned {\tt ESMF\_Field} count.
-!     \item [{[name]}]
-!           A character string where the {\tt Bundle} name is returned.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:  FLD2.6.1 
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      type(ESMF_BundleType), pointer :: btype     ! internal data
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      ! TODO: make this a common subroutine; all entry points need to do this
-
-      ! Validate bundle before using it.
-      btype => bundle%btypep
-      if (.not. associated(btype)) then
-        print *, "ERROR in ESMF_BundleGet: bad Bundle object"
-        return
-      endif
-      if (btype%bundlestatus .ne. ESMF_STATE_READY) then
-        print *, "ERROR in ESMF_BundleGet: bad Bundle object"
-        return
-      endif
-
-      if (present(grid)) then
-          ! Validate bundle has grid before trying to return it.
-          if (btype%gridstatus .ne. ESMF_STATE_READY) then
-            print *, "ERROR in ESMF_BundleGet: no associated Grid"
-            return
-          endif
-          
-          ! OK to return grid
-          grid = btype%grid
-      endif
-
-      if (present(fieldCount)) then
-          ! Return Field count
-          fieldCount = bundle%btypep%field_count
-      endif
-
-      if (present(name)) then
-          !OK to query for name
-          call c_ESMC_GetName(btype%base, name, status)
-          if(status .NE. 0) then
-            print *, "ERROR in ESMF_BundleGet getting Name"
-            return
-          endif
-      endif
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-
-      end subroutine ESMF_BundleGet
 
 
 !------------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.38 2004/03/24 15:59:39 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.39 2004/03/24 18:31:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -287,7 +287,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.38 2004/03/24 15:59:39 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.39 2004/03/24 18:31:09 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -610,6 +610,80 @@ function ESMF_validne(s1, s2)
 end function
 
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddArray - Add an Array to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddArray()   
+      subroutine ESMF_StateAddOneArray(state, array, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state
+      type(ESMF_Array), intent(in) :: array
+      integer, intent(out), optional :: rc
+!     
+! !DESCRIPTION:
+!      Add a single {\tt Array} reference to an existing {\tt State}.
+!      The {\tt Array} name must be unique within the {\tt State}
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      {\tt ESMF\_State} object.
+!     \item[array]
+!      The {\tt ESMF\_Fields} to be added.
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      type(ESMF_Array) :: temp_list(1)
+
+      temp_list(1) = array
+
+      call ESMF_StateTypeAddArrayList(state%statep, 1, temp_list, rc)      
+
+      end subroutine ESMF_StateAddOneArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateAddArray - Add a list of Arrays to a State
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_StateAddArray()   
+      subroutine ESMF_StateAddArrayList(state, acount, arrays, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(inout) :: state 
+      integer, intent(in) :: acount
+      type(ESMF_Array), dimension(:), intent(in) :: arrays
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Add multiple arrays to an {\tt ESMF\_State}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[state]
+!      {\tt ESMF\_State} object.
+!     \item[acount]
+!      The number of {\tt ESMF\_Arrays} to be added.
+!     \item[arrays]
+!      The array of {\tt ESMF\_Arrays} to be added.
+!     \item[{[rc]}]
+!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+        call ESMF_StateTypeAddArrayList(state%statep, acount, arrays, rc)
+
+        end subroutine ESMF_StateAddArrayList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1034,80 +1108,6 @@ end function
       if (rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_StateAddCharAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddArray - Add an Array to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddArray()   
-      subroutine ESMF_StateAddOneArray(state, array, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state
-      type(ESMF_Array), intent(in) :: array
-      integer, intent(out), optional :: rc
-!     
-! !DESCRIPTION:
-!      Add a single {\tt Array} reference to an existing {\tt State}.
-!      The {\tt Array} name must be unique within the {\tt State}
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!      {\tt ESMF\_State} object.
-!     \item[array]
-!      The {\tt ESMF\_Fields} to be added.
-!     \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-      type(ESMF_Array) :: temp_list(1)
-
-      temp_list(1) = array
-
-      call ESMF_StateTypeAddArrayList(state%statep, 1, temp_list, rc)      
-
-      end subroutine ESMF_StateAddOneArray
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateAddArray - Add a list of Arrays to a State
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_StateAddArray()   
-      subroutine ESMF_StateAddArrayList(state, acount, arrays, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(inout) :: state 
-      integer, intent(in) :: acount
-      type(ESMF_Array), dimension(:), intent(in) :: arrays
-      integer, intent(out), optional :: rc     
-!
-! !DESCRIPTION:
-!      Add multiple arrays to an {\tt ESMF\_State}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[state]
-!      {\tt ESMF\_State} object.
-!     \item[acount]
-!      The number of {\tt ESMF\_Arrays} to be added.
-!     \item[arrays]
-!      The array of {\tt ESMF\_Arrays} to be added.
-!     \item[{[rc]}]
-!      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-        call ESMF_StateTypeAddArrayList(state%statep, acount, arrays, rc)
-
-        end subroutine ESMF_StateAddArrayList
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1610,6 +1610,99 @@ end function
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_StateDestroy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_StateGet - Get information about a State
+!
+! !INTERFACE:
+      subroutine ESMF_StateGet(state, name, stateType, &
+                                     itemCount, itemNames, objTypes, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_State), intent(in) :: state
+      character (len=*), intent(out), optional :: name
+      type(ESMF_StateImpExpType), intent(out), optional :: stateType
+      integer, intent(out), optional :: itemCount
+      character (len=*), intent(out), optional :: itemNames(:)
+      type(ESMF_StateObjectType), intent(out), optional :: objTypes(:)
+      integer, intent(out), optional :: rc             
+
+!
+! !DESCRIPTION:
+!      Returns the requested information about this {\tt State}.
+!
+!     The arguments are:
+!     \begin{description}     
+!     \item[state]
+!       {\tt ESMF\_State} object.
+!      \item[{[name]}]
+!       Name of this {\tt ESMF\_State}.
+!      \item[{[stateType]}]
+!       Import or Export {\tt ESMF\_State}.  Returns either {\tt ESMF\_STATEIMPORT},
+!       {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.
+!      \item[{[itemCount]}]
+!        Count of items in this {\tt ESMF\_State}, including placeholder names.
+!      \item[{[itemNames]}]
+!        Array of item names in this {\tt ESMF\_State}, including placeholder names,
+!        {\tt itemCount} long.
+!      \item[{[objtypes]}]
+!        Array of item object types in this {\tt state}, including placeholder 
+!        names, {\tt itemCount} long.  State object types include
+!        {\tt ESMF\_STATEBUNDLE}, {\tt ESMF\_STATEFIELD}, {\tt ESMF\_STATEARRAY}, 
+!        {\tt ESMF\_STATESTATE}, {\tt ESMF\_STATEDATANAME}, or
+!        {\tt ESMF\_STATEOBJTYPEUNKNOWN}.
+!       \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!       \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: i, status
+      type(ESMF_StateType), pointer :: stypep
+      type(ESMF_StateData), pointer :: nextitem
+
+      if (.not.associated(state%statep)) then
+        print *, "Error: uninitialized or invalid State"
+        if (present(rc)) rc=ESMF_FAILURE
+        return
+      endif
+      stypep => state%statep
+      if (stypep%statestatus .ne. ESMF_STATE_READY) then
+        print *, "Error: uninitialized or invalid State"
+        if (present(rc)) rc=ESMF_FAILURE
+        return
+      endif
+
+      if (present(name)) call c_ESMC_GetName(stypep%base, name, status)
+      if (present(statetype)) statetype = stypep%st
+
+      ! TODO: indirect entries for Fields inside of Bundles complicates
+      !  this code.  the count needs to be both primary objects and
+      !  total objects.  perhaps the state derived type needs to bookkeep
+      !  both numbers.  For now, return entire raw count.
+
+      if (present(itemcount)) itemcount = stypep%datacount 
+
+      if (present(itemnames)) then
+          do i=1, stypep%datacount
+              nextitem => stypep%datalist(i)
+              itemnames(i) = nextitem%namep
+          enddo
+      endif
+
+      if (present(objtypes)) then
+          do i=1, stypep%datacount
+              nextitem => stypep%datalist(i)
+              objtypes(i) = nextitem%otype
+          enddo
+      endif
+
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_StateGet
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2524,99 +2617,6 @@ end function
       if (present(rc)) rc=ESMF_SUCCESS
 
       end subroutine ESMF_StateGetField
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_StateGet - Get information about a State
-!
-! !INTERFACE:
-      subroutine ESMF_StateGet(state, name, stateType, &
-                                     itemCount, itemNames, objTypes, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_State), intent(in) :: state
-      character (len=*), intent(out), optional :: name
-      type(ESMF_StateImpExpType), intent(out), optional :: stateType
-      integer, intent(out), optional :: itemCount
-      character (len=*), intent(out), optional :: itemNames(:)
-      type(ESMF_StateObjectType), intent(out), optional :: objTypes(:)
-      integer, intent(out), optional :: rc             
-
-!
-! !DESCRIPTION:
-!      Returns the requested information about this {\tt State}.
-!
-!     The arguments are:
-!     \begin{description}     
-!     \item[state]
-!       {\tt ESMF\_State} object.
-!      \item[{[name]}]
-!       Name of this {\tt ESMF\_State}.
-!      \item[{[stateType]}]
-!       Import or Export {\tt ESMF\_State}.  Returns either {\tt ESMF\_STATEIMPORT},
-!       {\tt ESMF\_STATEEXPORT}, or {\tt ESMF\_STATELIST}.
-!      \item[{[itemCount]}]
-!        Count of items in this {\tt ESMF\_State}, including placeholder names.
-!      \item[{[itemNames]}]
-!        Array of item names in this {\tt ESMF\_State}, including placeholder names,
-!        {\tt itemCount} long.
-!      \item[{[objtypes]}]
-!        Array of item object types in this {\tt state}, including placeholder 
-!        names, {\tt itemCount} long.  State object types include
-!        {\tt ESMF\_STATEBUNDLE}, {\tt ESMF\_STATEFIELD}, {\tt ESMF\_STATEARRAY}, 
-!        {\tt ESMF\_STATESTATE}, {\tt ESMF\_STATEDATANAME}, or
-!        {\tt ESMF\_STATEOBJTYPEUNKNOWN}.
-!       \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!       \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS:
-
-      integer :: i, status
-      type(ESMF_StateType), pointer :: stypep
-      type(ESMF_StateData), pointer :: nextitem
-
-      if (.not.associated(state%statep)) then
-        print *, "Error: uninitialized or invalid State"
-        if (present(rc)) rc=ESMF_FAILURE
-        return
-      endif
-      stypep => state%statep
-      if (stypep%statestatus .ne. ESMF_STATE_READY) then
-        print *, "Error: uninitialized or invalid State"
-        if (present(rc)) rc=ESMF_FAILURE
-        return
-      endif
-
-      if (present(name)) call c_ESMC_GetName(stypep%base, name, status)
-      if (present(statetype)) statetype = stypep%st
-
-      ! TODO: indirect entries for Fields inside of Bundles complicates
-      !  this code.  the count needs to be both primary objects and
-      !  total objects.  perhaps the state derived type needs to bookkeep
-      !  both numbers.  For now, return entire raw count.
-
-      if (present(itemcount)) itemcount = stypep%datacount 
-
-      if (present(itemnames)) then
-          do i=1, stypep%datacount
-              nextitem => stypep%datalist(i)
-              itemnames(i) = nextitem%namep
-          enddo
-      endif
-
-      if (present(objtypes)) then
-          do i=1, stypep%datacount
-              nextitem => stypep%datalist(i)
-              objtypes(i) = nextitem%otype
-          enddo
-      endif
-
-      if (present(rc)) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_StateGet
 
 
 

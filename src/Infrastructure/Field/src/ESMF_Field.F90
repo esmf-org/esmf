@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.134 2004/03/24 14:54:35 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.135 2004/03/24 18:31:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.134 2004/03/24 14:54:35 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.135 2004/03/24 18:31:09 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1533,6 +1533,78 @@
 
 !------------------------------------------------------------------------------
 !BOP
+! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
+!
+! !INTERFACE:
+      subroutine ESMF_FieldGetArray(field, array, rc)
+
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field      
+      type(ESMF_Array), intent(out) :: array
+      integer, intent(out), optional :: rc           
+
+!
+! !DESCRIPTION:
+!     Get data in {\tt ESMF\_Array} form.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           An {\tt ESMF\_Field} object.
+!     \item [{[array]}]
+!           Field {\tt ESMF\_Array}.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
+
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      character(len=ESMF_MAXSTR) :: str
+      type(ESMF_FieldType), pointer :: ftypep
+
+      ! Initialize return code   
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      ! Minimal error checking 
+      if (.not.associated(field%ftypep)) then
+        print *, "ESMF_FieldGetArray: Invalid or Destroyed Field"
+        return
+      endif
+
+      ftypep => field%ftypep
+
+      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
+        print *, "ESMF_FieldGetArray: Field not ready"
+        return
+      endif
+
+      if (ftypep%datastatus .ne. ESMF_STATE_READY) then
+          print *, "ESMF_FieldGetArray: no data associated with field"
+          return
+      endif
+
+      !call ESMF_StatusString(ftypep%datastatus, str, rc)
+      !print *, "getting array data, status = ", trim(str)
+      array = ftypep%localfield%localdata
+   
+      ! Set return values.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldGetArray
+
+!------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE: ESMF_FieldGetAttribute  - Retrieve an integer Attribute
 !
 ! !INTERFACE:
@@ -2141,7 +2213,6 @@
 
       end subroutine ESMF_FieldGetAttrInfoByNum
 
-
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_FieldGetGlobalGridInfo - Get information about the Global Grid
@@ -2236,78 +2307,6 @@
 ! TODO: code goes here
 !
         end subroutine ESMF_FieldGetLocalGridInfo
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldGetArray - Get data Array associated with the Field
-!
-! !INTERFACE:
-      subroutine ESMF_FieldGetArray(field, array, rc)
-
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field      
-      type(ESMF_Array), intent(out) :: array
-      integer, intent(out), optional :: rc           
-
-!
-! !DESCRIPTION:
-!     Get data in {\tt ESMF\_Array} form.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           An {\tt ESMF\_Field} object.
-!     \item [{[array]}]
-!           Field {\tt ESMF\_Array}.
-!     \item [{[rc]}]
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.3, FLD1.6.4 (pri 2?), FLD1.7.2
-
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      character(len=ESMF_MAXSTR) :: str
-      type(ESMF_FieldType), pointer :: ftypep
-
-      ! Initialize return code   
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
-
-      ! Minimal error checking 
-      if (.not.associated(field%ftypep)) then
-        print *, "ESMF_FieldGetArray: Invalid or Destroyed Field"
-        return
-      endif
-
-      ftypep => field%ftypep
-
-      if (ftypep%fieldstatus .ne. ESMF_STATE_READY) then
-        print *, "ESMF_FieldGetArray: Field not ready"
-        return
-      endif
-
-      if (ftypep%datastatus .ne. ESMF_STATE_READY) then
-          print *, "ESMF_FieldGetArray: no data associated with field"
-          return
-      endif
-
-      !call ESMF_StatusString(ftypep%datastatus, str, rc)
-      !print *, "getting array data, status = ", trim(str)
-      array = ftypep%localfield%localdata
-   
-      ! Set return values.
-      if(rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldGetArray
 
 !------------------------------------------------------------------------------
 !BOPI
