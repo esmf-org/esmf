@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.2 2002/11/05 17:43:23 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.3 2002/11/05 23:26:33 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,7 +118,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.2 2002/11/05 17:43:23 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.3 2002/11/05 23:26:33 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -139,7 +139,7 @@
 !        module procedure ESMF_ArrayCreateByArray1Dr8
 !        module procedure ESMF_ArrayCreateByArray1Di4
 !        module procedure ESMF_ArrayCreateByArray1Di8
-        module procedure ESMF_ArrayCreateByArray2Dr4
+        module procedure ESMF_ArrayCreateByArray2DR4
 !        module procedure ESMF_ArrayCreateByArray2Dr8
 !        module procedure ESMF_ArrayCreateByArray2Di4
 !        module procedure ESMF_ArrayCreateByArray2Di8
@@ -164,7 +164,7 @@
         module procedure ESMF_ArrayConstructNew
         module procedure ESMF_ArrayConstructBySpec
 !        module procedure ESMF_ArrayConstructByArray
-        module procedure ESMF_ArrayConstructByArray2Dr4
+        module procedure ESMF_ArrayConstructByArray2DR4
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
@@ -389,16 +389,18 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_ArrayCreateByArray2Dr4 - make an ESMF array from an F90 array
+! !IROUTINE: ESMF_ArrayCreateByArray2DR4 - make an ESMF array from an F90 ptr
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateByArray2Dr4(f90array, docopy, rc)
+      function ESMF_ArrayCreateByArray2DR4(f90ptr, ni, nj, docopy, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array), pointer :: ESMF_ArrayCreateByArray2Dr4
+      type(ESMF_Array), pointer :: ESMF_ArrayCreateByArray2DR4
 !
 ! !ARGUMENTS:
-      real(4), dimension(:,:) :: f90array
+      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      integer, intent(in) :: ni
+      integer, intent(in) :: nj
       type(ESMF_CopyFlag), intent(in) :: docopy  ! use existing buf or copy
       integer, intent(out), optional :: rc  
 !
@@ -455,17 +457,17 @@ end function
           return
         endif
 
-        call ESMF_ArrayConstructByArray2Dr4(a, f90array, docopy, status)
+        call ESMF_ArrayConstructByArray2DR4(a, f90ptr, ni, nj, docopy, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array construction error"
           return
         endif
 
 !       set return values
-        ESMF_ArrayCreateByArray2Dr4 => a
+        ESMF_ArrayCreateByArray2DR4 => a
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_ArrayCreateByArray2Dr4  
+        end function ESMF_ArrayCreateByArray2DR4  
 
 
 
@@ -670,11 +672,13 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayConstructByArray2Dr4(array, f90array, copyflag, rc)
+      subroutine ESMF_ArrayConstructByArray2DR4(array, f90ptr, ni, nj, copyflag, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array), pointer :: array 
-      real(4), dimension(:,:) :: f90array
+      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      integer, intent(in) :: ni
+      integer, intent(in) :: nj
       type(ESMF_CopyFlag), intent(in) :: copyflag
       integer, intent(out), optional :: rc 
 !
@@ -684,10 +688,40 @@ end function
 !EOP
 !
 
-        ! extract rank, shape, etc out of F90 array and fill in
-        ! ESMF array struct.
+      ! extract rank, shape, etc out of F90 array and call the C++
+      ! interface to create the ESMF_Array class data.
 
-        end subroutine ESMF_ArrayConstructByArray2Dr4
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     initialize the return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     make sure the pointer isn't already associated w/ something
+!     if ok, start with a null ptr
+      if (associated(f90ptr)) then
+          print *, "ERROR in ESMF_Allocate: pointer already associated"
+          return
+      endif
+      nullify(f90ptr)
+
+!     call the fortran intrinsic allocation function
+      allocate(f90ptr(ni, nj), stat=status)
+!     Formal error handling will be added asap.
+      if(status .NE. 0) then   ! this is the fortran rc, not ESMF's rc
+        print *, "ERROR in ESMF_Allocate: Allocation failed, status =", status
+        return
+      endif
+
+!     set return value.
+      if(rcpresent) rc = ESMF_SUCCESS
+
+
+
+        end subroutine ESMF_ArrayConstructByArray2DR4
 
 
 
