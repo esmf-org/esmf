@@ -1,5 +1,4 @@
-#pragma GCC set_debug_pwd "/Users/nancy/esmf/esmf_cvs/src/Infrastructure/Field/src"
-! $Id: ESMF_FieldGet.F90,v 1.1 2004/02/05 21:50:12 nscollins Exp $
+! $Id: ESMF_FieldGet.F90,v 1.2 2004/02/05 22:28:50 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -47,7 +46,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.F90,v 1.1 2004/02/05 21:50:12 nscollins Exp $'
+      '$Id: ESMF_FieldGet.F90,v 1.2 2004/02/05 22:28:50 nscollins Exp $'
 
 !==============================================================================
 !
