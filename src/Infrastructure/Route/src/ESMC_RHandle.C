@@ -1,4 +1,4 @@
-// $Id: ESMC_RHandle.C,v 1.8 2004/11/02 21:51:55 nscollins Exp $
+// $Id: ESMC_RHandle.C,v 1.9 2004/11/04 21:44:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-       "$Id: ESMC_RHandle.C,v 1.8 2004/11/02 21:51:55 nscollins Exp $";
+       "$Id: ESMC_RHandle.C,v 1.9 2004/11/04 21:44:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -304,6 +304,8 @@
 	rhandle1->ESMC_RoutePrint(options);
     if (rhandle2) 
 	rhandle2->ESMC_RoutePrint(options);
+    // TODO: this is commented out because TVPrint does not seem to be
+    // working.
     //if (tvalues)
     //    tvalues->ESMC_TransformValuesPrint(options);
 
