@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacketUTest.C,v 1.2 2004/04/23 22:00:39 nscollins Exp $
+// $Id: ESMC_XPacketUTest.C,v 1.3 2004/06/02 11:54:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_XPacketUTest.C,v 1.2 2004/04/23 22:00:39 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_XPacketUTest.C,v 1.3 2004/06/02 11:54:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -71,7 +71,7 @@
 
    // test initialization of members of statically allocated ESMC_XPacket
    //   may want to read back values via Get methods for comparison
-   rc = xpacket_ptr->ESMC_XPacketInit(args);
+   rc = xpacket_ptr->ESMC_XPacketSetDefault(args);
    sprintf(failMsg, "rc = %d, args = %f", rc, args);
    ESMC_Test((rc==ESMF_SUCCESS),
               failMsg, &result, ESMF_SRCLINE);

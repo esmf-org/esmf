@@ -1,4 +1,4 @@
-! $Id: ESMF_RTable.F90,v 1.4 2004/04/20 22:54:19 nscollins Exp $
+! $Id: ESMF_RTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_RTable.F90"
 !
 !     ESMF RTable Module
       module ESMF_RTableMod
@@ -21,17 +22,17 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-!!#include "ESMF_Route.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_RTableMod - One line general statement about this class
+! !MODULE: ESMF_RTableMod - Route table containing operations to perform
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the F90 wrapper code for the C++
-!  implementation of the {\tt RTable} class ...
-!
-! < Insert a paragraph or two explaining the function of this class. >
+!  implementation of the {\tt ESMF\_RTable} class, which describes how to move
+!  or send data from one address space to another to accomplish a predefined
+!  data movement operation.  This is precomputed for speed, and at execution
+!  time the only input needed are the base address pointers of the data blocks.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -60,13 +61,7 @@
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-!  Pick one or the other of the init/create sections depending on
-!  whether this is a deep class (the class/derived type has pointers to
-!  other memory which must be allocated/deallocated) or a shallow class
-!  (the class/derived type is self-contained) and needs no destroy methods
-!  other than deleting the memory for the object/derived type itself.
 
-! the following routines apply to deep classes only
       public ESMF_RTableCreate                 ! interface only, deep class
       public ESMF_RTableDestroy                ! interface only, deep class
 
@@ -76,15 +71,13 @@
       public ESMF_RTableValidate
       public ESMF_RTablePrint
  
-! < list the rest of the public interfaces here >
-!
 !
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RTable.F90,v 1.4 2004/04/20 22:54:19 nscollins Exp $'
+      '$Id: ESMF_RTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -105,10 +98,6 @@
 !EOPI
       end interface 
 !
-!------------------------------------------------------------------------------
-
-!     < add other interfaces here>
-
 !==============================================================================
 
       contains
@@ -118,6 +107,8 @@
 ! This section includes the RTable Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTableCreateNew"
 !BOPI
 ! !IROUTINE: ESMF_RTableCreateNew - Create a new RTable
 
@@ -133,23 +124,20 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt RTable} object and constructs its
+!     Allocates memory for a new {\tt ESMF\_RTable} object and constructs its
 !     internals.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[mydeid] 
+!         The local DE number.
+!     \item[decount]
+!         Total number of DE slots to create in the table.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
         type (ESMF_RTable) :: rtable     ! new C++ RTable
@@ -182,6 +170,8 @@
         end function ESMF_RTableCreateNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTableDestroy"
 !BOPI
 ! !IROUTINE: ESMF_RTableDestroy - Free all resources associated with a RTable 
 
@@ -193,19 +183,18 @@
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt RTable} object previously allocated
-!     via an {\tt ESMF_RTableCreate routine}.
+!     Destroys a {\tt ESMF\_RTable} object previously allocated
+!     via an {\tt ESMF_RTableCreate()} routine.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rtable] 
-!          The class to be destroyed.
+!          The {\tt ESMF\_RTable} to be destroyed.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -237,6 +226,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTableGet"
 !BOPI
 ! !IROUTINE: ESMF_RTableGet - Get values from a RTable
 
@@ -251,12 +242,12 @@
 
 !
 ! !DESCRIPTION:
-!     Returns the value of RTable attribute <Value>.
+!     Returns information from an {\tt ESMF\_RTable}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rtable] 
-!          Class to be queried.
+!          {\tt ESMF\_RTable} to be queried.
 !     \item[{[value1]}]
 !          Value to be retrieved.         
 !     \item[{[value2]}]
@@ -266,7 +257,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -302,6 +292,68 @@
         end subroutine ESMF_RTableGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTablePrint"
+!BOPI
+! !IROUTINE: ESMF_RTablePrint - Print the contents of a RTable
+
+! !INTERFACE:
+      subroutine ESMF_RTablePrint(rtable, options, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_RTable), intent(in) :: rtable      
+      character (len=*), intent(in), optional :: options      
+      integer, intent(out), optional :: rc           
+!
+! !DESCRIPTION:
+!     Print information about an {\tt ESMF\_RTable}.  
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[rtable] 
+!          {\tt ESMF\_RTable} to be queried.
+!     \item[{[options]}]
+!          Print options that control the type of information and level of 
+!          detail.
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+       character (len=6) :: defaultopts      ! default print options
+       integer :: status                     ! local error status
+       logical :: rcpresent
+
+       ! Initialize return code; assume failure until success is certain       
+       status = ESMF_FAILURE
+       rcpresent = .FALSE.
+       if (present(rc)) then
+         rcpresent = .TRUE.  
+         rc = ESMF_FAILURE
+       endif
+
+       defaultopts = "brief"
+
+       if(present(options)) then
+           call c_ESMC_RTablePrint(rtable, options, status)   
+       else
+           call c_ESMC_RTablePrint(rtable, defaultopts, status)
+       endif
+
+       if (status .ne. ESMF_SUCCESS) then
+         print *, "RTable print error"
+         return
+       endif
+
+       ! Set return values
+       if (rcpresent) rc = ESMF_SUCCESS
+ 
+       end subroutine ESMF_RTablePrint
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTableSet"
 !BOPI
 ! !IROUTINE: ESMF_RTableSet - Set values in a RTable
 
@@ -316,13 +368,12 @@
 
 !
 ! !DESCRIPTION:
-!     Set a RTable attribute with the given value.
-!     May be multiple routines, one per attribute.
+!     Modify an {\tt ESMF\_RTable}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rtable] 
-!          Class to be modified.
+!          {\tt ESMF\_RTable} to be modified.
 !     \item[{[value1]}]
 !          Value to be set.         
 !     \item[{[value2]}]
@@ -332,7 +383,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -368,6 +418,8 @@
         end subroutine ESMF_RTableSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RTableValidate"
 !BOPI
 ! !IROUTINE: ESMF_RTableValidate - Check internal consistency of a RTable
 
@@ -380,12 +432,12 @@
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Validates that a RTable is internally consistent.
+!     Verifies that an {\tt ESMF\_RTable} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rtable] 
-!          Class to be queried.
+!          {\tt ESMF\_RTable} to be checked.
 !     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
@@ -393,8 +445,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-!
+
        character (len=6) :: defaultopts      ! default validate options
        integer :: status                     ! local error status
        logical :: rcpresent
@@ -424,65 +475,6 @@
        if (rcpresent) rc = ESMF_SUCCESS
 
        end subroutine ESMF_RTableValidate
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_RTablePrint - Print the contents of a RTable
-
-! !INTERFACE:
-      subroutine ESMF_RTablePrint(rtable, options, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_RTable), intent(in) :: rtable      
-      character (len=*), intent(in), optional :: options      
-      integer, intent(out), optional :: rc           
-!
-! !DESCRIPTION:
-!      Print information about a RTable.  
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[rtable] 
-!          Class to be queried.
-!     \item[{[options]}]
-!          Print options that control the type of information and level of 
-!          detail.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-       character (len=6) :: defaultopts      ! default print options
-       integer :: status                     ! local error status
-       logical :: rcpresent
-
-       ! Initialize return code; assume failure until success is certain       
-       status = ESMF_FAILURE
-       rcpresent = .FALSE.
-       if (present(rc)) then
-         rcpresent = .TRUE.  
-         rc = ESMF_FAILURE
-       endif
-
-       defaultopts = "brief"
-
-       if(present(options)) then
-           call c_ESMC_RTablePrint(rtable, options, status)   
-       else
-           call c_ESMC_RTablePrint(rtable, defaultopts, status)
-       endif
-
-       if (status .ne. ESMF_SUCCESS) then
-         print *, "RTable print error"
-         return
-       endif
-
-       ! Set return values
-       if (rcpresent) rc = ESMF_SUCCESS
- 
-       end subroutine ESMF_RTablePrint
 
 !------------------------------------------------------------------------------
 

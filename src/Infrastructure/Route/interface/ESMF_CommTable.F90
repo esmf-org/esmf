@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTable.F90,v 1.4 2004/04/20 22:44:40 nscollins Exp $
+! $Id: ESMF_CommTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_CommTable.F90"
 !
 !     ESMF CommTable Module
       module ESMF_CommTableMod
@@ -21,7 +22,6 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-!!#include "ESMF_Route.h"
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_CommTableMod - One line general statement about this class
@@ -83,7 +83,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CommTable.F90,v 1.4 2004/04/20 22:44:40 nscollins Exp $'
+      '$Id: ESMF_CommTable.F90,v 1.5 2004/06/02 11:54:40 nscollins Exp $'
 
 !==============================================================================
 !
@@ -117,6 +117,8 @@
 ! This section includes the CommTable Create and Destroy methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableCreateNew"
 !BOPI
 ! !IROUTINE: ESMF_CommTableCreateNew - Create a new CommTable
 
@@ -149,7 +151,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
         type (ESMF_CommTable) :: commtable     ! new C++ CommTable
@@ -182,6 +183,8 @@
         end function ESMF_CommTableCreateNew
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableDestroy"
 !BOPI
 ! !IROUTINE: ESMF_CommTableDestroy - Free all resources associated with a CommTable 
 
@@ -205,7 +208,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -237,6 +239,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableGet"
 !BOPI
 ! !IROUTINE: ESMF_CommTableGet - Get values from a CommTable
 
@@ -266,7 +270,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -302,6 +305,8 @@
         end subroutine ESMF_CommTableGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableSet"
 !BOPI
 ! !IROUTINE: ESMF_CommTableSet - Set values in a CommTable
 
@@ -332,7 +337,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -368,6 +372,8 @@
         end subroutine ESMF_CommTableSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTableValidate"
 !BOPI
 ! !IROUTINE: ESMF_CommTableValidate - Check internal consistency of a CommTable
 
@@ -393,8 +399,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-!
+
        character (len=6) :: defaultopts      ! default validate options
        integer :: status                     ! local error status
        logical :: rcpresent
@@ -426,6 +431,8 @@
        end subroutine ESMF_CommTableValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CommTablePrint"
 !BOPI
 ! !IROUTINE: ESMF_CommTablePrint - Print the contents of a CommTable
 
@@ -452,7 +459,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
        integer :: status                     ! local error status

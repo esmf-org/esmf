@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.43 2004/04/23 21:59:47 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.44 2004/06/02 11:54:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.43 2004/04/23 21:59:47 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.44 2004/06/02 11:54:40 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -44,44 +44,6 @@
 // This section includes all the XPacket routines
 //
 //
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XPacketInit - Initialize an XPacket
-//
-// !INTERFACE:
-      int ESMC_XPacket :: ESMC_XPacketInit(
-//
-// !RETURN VALUE:
-//     integer return code
-//
-// !ARGUMENTS:
-      int nrank,
-      int noffset,
-      int ncontig_length,
-      int *nstride,
-      int *nrep_count) {
-//
-// !DESCRIPTION:
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC_XPacket.h)
-//
-//EOP
-// !REQUIREMENTS:  AAAn.n.n
-
-    rank = nrank;
-    offset = noffset;
-    contig_length = ncontig_length;
-    for (int i=0; i<rank; i++) {
-      stride[i] = nstride[i];
-      rep_count[i] = nrep_count[i];
-    }
-
-    return ESMF_SUCCESS;
-
- } // end ESMC_XPacketInit
-
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -145,6 +107,44 @@
     //return ESMF_FAILURE;
 
  //} // end ESMC_XPacketSet
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_XPacketSetDefault - Initialize an XPacket
+//
+// !INTERFACE:
+      int ESMC_XPacket :: ESMC_XPacketSetDefault(
+//
+// !RETURN VALUE:
+//     integer return code
+//
+// !ARGUMENTS:
+      int nrank,
+      int noffset,
+      int ncontig_length,
+      int *nstride,
+      int *nrep_count) {
+//
+// !DESCRIPTION:
+//
+//      Note: this is a class helper function, not a class method
+//      (see declaration in ESMC_XPacket.h)
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+    rank = nrank;
+    offset = noffset;
+    contig_length = ncontig_length;
+    for (int i=0; i<rank; i++) {
+      stride[i] = nstride[i];
+      rep_count[i] = nrep_count[i];
+    }
+
+    return ESMF_SUCCESS;
+
+ } // end ESMC_XPacketSetDefault
+
 
 //-----------------------------------------------------------------------------
 //BOP

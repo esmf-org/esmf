@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.26 2003/08/22 21:58:29 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.27 2004/06/02 11:54:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -67,8 +67,8 @@
 //
 
   public:
-    int ESMC_XPacketInit(int rank, int offset, int contig_length, int *stride,
-                         int *rep_count);
+    int ESMC_XPacketSetDefault(int rank, int offset, int contig_length, 
+                               int *stride, int *rep_count);
 
  // accessor methods for class members
     int ESMC_XPacketGet(int *nrank, int *noffset, int *ncontig_length, 

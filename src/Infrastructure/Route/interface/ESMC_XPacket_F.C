@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket_F.C,v 1.5 2004/04/23 21:58:50 nscollins Exp $
+// $Id: ESMC_XPacket_F.C,v 1.6 2004/06/02 11:54:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,7 +41,7 @@ extern "C" {
        // keep this for shallow classes, get rid of create/destroy above
        //void FTN(c_esmc_xpacketinit)(ESMC_XPacket **ptr, int *arg1, int *arg2,
        //                                            int *arg3, int *status) {
-       //    *status = (*ptr)->ESMC_XPacketInit(*arg1, *arg2, *arg3);
+       //    *status = (*ptr)->ESMC_XPacketSetDefault(*arg1, *arg2, *arg3);
        //}
 
        //void FTN(c_esmc_xpacketget)(ESMC_XPacket **ptr, 

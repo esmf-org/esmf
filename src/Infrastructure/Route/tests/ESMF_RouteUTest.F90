@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteUTest.F90,v 1.3 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_RouteUTest.F90,v 1.4 2004/06/02 11:54:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RouteUTest.F90,v 1.3 2004/03/08 16:03:24 nscollins Exp $'
+      '$Id: ESMF_RouteUTest.F90,v 1.4 2004/06/02 11:54:40 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -107,7 +107,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! add a send route
-      call ESMF_XPacketInit(sendxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
+      call ESMF_XPacketSetDefault(sendxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
       otherdeid = MODULO(mydeid+1, deidcount)
       call ESMF_RouteSetSend(route, otherdeid, sendxp, rc);
       write(name, *) "ESMF_RouteSetSend"
@@ -122,7 +122,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       ! add a recv route
-      call ESMF_XPacketInit(recvxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
+      call ESMF_XPacketSetDefault(recvxp, 2, 0, 10, (/ 1, 10 /), (/ 3, 4 /) )
       otherdeid = MODULO(mydeid-1, deidcount)
       call ESMF_RouteSetRecv(route, otherdeid, recvxp, rc);
       write(name, *) "ESMF_RouteSetRecv"

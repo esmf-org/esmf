@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.18 2004/04/20 22:55:51 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.19 2004/06/02 11:54:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -9,6 +9,7 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+#define ESMF_FILENAME "ESMF_RHandle.F90"
 !
 !     ESMF RHandle Module
       module ESMF_RHandleMod
@@ -21,17 +22,16 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include "ESMF.h"
-!!#include "ESMF_Route.h"
 !==============================================================================
 !BOPI
-! !MODULE: ESMF_RHandleMod - One line general statement about this class
+! !MODULE: ESMF_RHandleMod - Manage RouteHandles which describe Routes
 !
 ! !DESCRIPTION:
 !
 ! The code in this file implements the F90 wrapper code for the C++
-!  implementation of the {\tt ESMF\_RouteHandle} class ...
-!
-! < Insert a paragraph or two explaining the function of this class. >
+!  implementation of the {\tt ESMF\_RouteHandle} class.  This class
+!  contains the handle information for precomputed information needed to
+!  execute an {\tt ESMF\_Route} operation.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -74,7 +74,8 @@
 !------------------------------------------------------------------------------
 !     !  ESMF_RouteHandleType
 !
-      integer, parameter :: ESMF_HALOHANDLE=1, ESMF_REDISTHANDLE=2, &
+      integer, parameter :: ESMF_HALOHANDLE=1, &
+                            ESMF_REDISTHANDLE=2, &
                             ESMF_REGRIDHANDLE=3
 
 !------------------------------------------------------------------------------
@@ -104,20 +105,20 @@
 ! !PUBLIC MEMBER FUNCTIONS:
 !
 
-      public ESMF_TransformValuesCreate             ! interface only, deep class
-      public ESMF_TransformValuesDestroy            ! interface only, deep class
+      public ESMF_TransformValuesCreate           ! interface only, deep class
+      public ESMF_TransformValuesDestroy          ! interface only, deep class
 
-      public ESMF_TransformValuesGet                ! get and set values
+      public ESMF_TransformValuesGet              ! get and set values
       public ESMF_TransformValuesGetF90Ptrs
       public ESMF_TransformValuesSet
  
       public ESMF_TransformValuesValidate
       public ESMF_TransformValuesPrint
  
-      public ESMF_RouteHandleCreate                 ! interface only, deep class
-      public ESMF_RouteHandleDestroy                ! interface only, deep class
+      public ESMF_RouteHandleCreate               ! interface only, deep class
+      public ESMF_RouteHandleDestroy              ! interface only, deep class
 
-      public ESMF_RouteHandleGet                    ! get and set values
+      public ESMF_RouteHandleGet                  ! get and set values
       public ESMF_RouteHandleSet
  
       public ESMF_RouteHandleValidate
@@ -128,7 +129,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.18 2004/04/20 22:55:51 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.19 2004/06/02 11:54:40 nscollins Exp $'
 
 !==============================================================================
 
@@ -139,6 +140,8 @@
 ! This section includes the TransformValues methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesCreate"
 !BOPI
 ! !IROUTINE: ESMF_TransformValuesCreate - Create a new TransformValues obj
 
@@ -153,8 +156,8 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt TransformValues} object and constructs its
-!     internals.
+!     Allocates memory for a new {\tt ESMF\_TransformValues} object 
+!     and constructs its internals.
 !
 !     The arguments are:
 !     \begin{description}
@@ -167,7 +170,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
         type (ESMF_TransformValues) :: tv     ! new C++ TransformValues
@@ -205,6 +207,8 @@
         end function ESMF_TransformValuesCreate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesDestroy"
 !BOPI
 ! !IROUTINE: ESMF_TransformValuesDestroy - Free resources associated with a TransformValues 
 
@@ -217,18 +221,17 @@
 !
 ! !DESCRIPTION:
 !     Destroys a {\tt TransformValues} object previously allocated
-!     via an {\tt ESMF_TransformValuesCreate} routine.
+!     via an {\tt ESMF_TransformValuesCreate()} routine.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tv] 
-!          The class to be destroyed.
+!          The {\tt ESMF\_TransformValues} to be destroyed.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -260,6 +263,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesGet"
 !BOPI
 ! !IROUTINE: ESMF_TransformValuesGet - Get values from a TransformValues
 
@@ -277,12 +282,12 @@
 
 !
 ! !DESCRIPTION:
-!     Returns the requested parts of a {\tt TransformValues} type.
+!     Returns the requested parts of an {\tt ESMF\_TransformValues} type.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tv] 
-!          Class to be queried.
+!          {\tt ESMF\_TransformValues} to be queried.
 !     \item[{[numList]}]
 !          Value to be retrieved.         
 !     \item[{[srcIndex]}]
@@ -296,7 +301,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -345,8 +349,10 @@
         end subroutine ESMF_TransformValuesGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesGetF90Ptrs"
 !BOPI
-! !IROUTINE: ESMF_TransformValuesGetF90Ptrs - Get f90 ptrs from TransformValues
+! !IROUTINE: ESMF_TransformValuesGetF90Ptrs - Get Fortran ptrs from TransformValues
 
 ! !INTERFACE:
       subroutine ESMF_TransformValuesGetF90Ptrs(tv, numList, srcIndex, &
@@ -367,7 +373,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[tv] 
-!          Class to be queried.
+!          {\tt ESMF\_TransformValues} to be queried.
 !     \item[{[numList]}]
 !          Value to be retrieved.         
 !     \item[{[srcIndex]}]
@@ -381,7 +387,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -430,6 +435,8 @@
         end subroutine ESMF_TransformValuesGetF90Ptrs
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValueSet"
 !BOPI
 ! !IROUTINE: ESMF_TransformValuesSet - Set values in a TransformValues
 
@@ -447,12 +454,12 @@
 
 !
 ! !DESCRIPTION:
-!     Sets the requested parts of a {\tt TransformValues} type.
+!     Sets the requested parts of an {\tt ESMF\_TransformValues} type.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tv] 
-!          Class to be changed.
+!          {\tt ESMF\_TransformValues} to be changed.
 !     \item[{[numList]}]
 !          Value to be set.         
 !     \item[{[srcIndex]}]
@@ -466,7 +473,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -528,6 +534,8 @@
         end subroutine ESMF_TransformValuesSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesValidate"
 !BOPI
 ! !IROUTINE: ESMF_TransformValuesValidate - Check internal consistency of a TransformValues
 
@@ -540,12 +548,12 @@
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Validates that a TransformValues is internally consistent.
+!     Verifies that an {\tt ESMF\_TransformValues} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tv] 
-!          Class to be queried.
+!          {\tt ESMF\_TransformValues} to be validated.
 !     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
@@ -553,8 +561,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-!
+
        character (len=6) :: defaultopts      ! default validate options
        integer :: status                     ! local error status
        logical :: rcpresent
@@ -586,6 +593,8 @@
        end subroutine ESMF_TransformValuesValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_TransformValuesPrint"
 !BOPI
 ! !IROUTINE: ESMF_TransformValuesPrint - Print the contents of a TransformValues
 
@@ -598,12 +607,12 @@
       integer, intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!      Print information about a TransformValues.  
+!     Print information about an {\tt ESMF\_TransformValues}.  
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[tv] 
-!          Class to be queried.
+!          {\tt ESMF\_TransformValues} to be queried.
 !     \item[{[options]}]
 !          Print options that control the type of information and level of 
 !          detail.
@@ -612,7 +621,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
        integer :: status                     ! local error status
@@ -651,6 +659,8 @@
 ! This section includes the RouteHandle methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleCreate"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandleCreate - Create a new RouteHandle
 
@@ -664,8 +674,8 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Allocates memory for a new {\tt RouteHandle} object and constructs its
-!     internals.
+!     Allocates memory for a new {\tt ESMF\_RouteHandle} object and 
+!     constructs its internals.
 !
 !     The arguments are:
 !     \begin{description}
@@ -674,7 +684,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  AAAn.n.n
 
         ! local variables
         type (ESMF_RouteHandle) :: rhandle     ! new C++ RouteHandle
@@ -707,6 +716,8 @@
         end function ESMF_RouteHandleCreate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleDestroy"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandleDestroy - Free all resources associated with a RouteHandle 
 
@@ -718,19 +729,18 @@
       integer, intent(out), optional :: rc        
 !
 ! !DESCRIPTION:
-!     Destroys a {\tt RouteHandle} object previously allocated
-!     via an {\tt ESMF_RouteHandleCreate routine}.
+!     Destroys an {\tt ESMF\_RouteHandle} object previously allocated
+!     via an {\tt ESMF_RouteHandleCreate()} routine.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rhandle] 
-!          The class to be destroyed.
+!          The {\tt ESMF\_RouteHandle} to be destroyed.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -762,6 +772,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleGet"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandleGet - Get values from a RouteHandle
 
@@ -780,12 +792,12 @@
 
 !
 ! !DESCRIPTION:
-!     Returns the value of RouteHandle attribute <Value>.
+!     Returns information about an {\tt ESMF\_RouteHandle}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rhandle] 
-!          Class to be queried.
+!          {\tt ESMF\_RouteHandle} to be queried.
 !     \item[{[htype]}]
 !          Value to be retrieved.         
 !     \item[{[route1]}]
@@ -801,7 +813,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -858,6 +869,8 @@
         end subroutine ESMF_RouteHandleGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleSet"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandleSet - Set values in a RouteHandle
 
@@ -876,13 +889,12 @@
 
 !
 ! !DESCRIPTION:
-!     Set a RouteHandle attribute with the given value.
-!     May be multiple routines, one per attribute.
+!     Set an {\tt ESMF\_RouteHandle} attribute with the given value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rhandle] 
-!          Class to be modified.
+!          {\tt ESMF\_RouteHandle} to be modified.
 !     \item[{[htype]}]
 !          Value to be set.         
 !     \item[{[route1]}]
@@ -898,7 +910,6 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS: 
 
         ! local variables
         integer :: status                  ! local error status
@@ -968,6 +979,8 @@
         end subroutine ESMF_RouteHandleSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandleValidate"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandleValidate - Check internal consistency of a RouteHandle
 
@@ -980,12 +993,12 @@
       integer, intent(out), optional :: rc            
 !
 ! !DESCRIPTION:
-!     Validates that a RouteHandle is internally consistent.
+!     Validates that an {\tt ESMF\_RouteHandle} is internally consistent.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[rhandle] 
-!          Class to be queried.
+!          {\tt ESMF\_RouteHandle} to be queried.
 !     \item[{[options]}]
 !          Validation options.
 !     \item[{[rc]}] 
@@ -993,8 +1006,7 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  XXXn.n, YYYn.n
-!
+
        character (len=6) :: defaultopts      ! default validate options
        integer :: status                     ! local error status
        logical :: rcpresent
@@ -1032,6 +1044,8 @@
        end subroutine ESMF_RouteHandleValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RouteHandlePrint"
 !BOPI
 ! !IROUTINE: ESMF_RouteHandlePrint - Print the contents of a RouteHandle
 
@@ -1049,16 +1063,15 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[rhandle] 
-!          Class to be queried.
+!          {\tt ESMF\_RouteHandle} to print contents of.
 !     \item[{[options]}]
 !          Print options that control the type of information and level of 
-!          detail.
+!          detail. 
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
 
        character (len=6) :: defaultopts      ! default print options
        integer :: status                     ! local error status
