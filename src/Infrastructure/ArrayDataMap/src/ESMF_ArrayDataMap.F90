@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.24 2004/08/19 16:52:17 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.25 2004/11/30 20:59:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -145,7 +145,7 @@
 
       type ESMF_ArrayDataMap
       sequence
-      private
+      !private
 #ifndef ESMF_NO_INITIALIZERS
         type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
 #else
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.24 2004/08/19 16:52:17 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.25 2004/11/30 20:59:32 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
