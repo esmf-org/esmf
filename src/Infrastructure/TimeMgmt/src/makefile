@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2003/09/09 22:47:42 flanigan Exp $ 
+# $Id: makefile,v 1.15 2003/11/24 18:34:48 jwolfe Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -22,7 +22,7 @@ SOURCEF	  = \
 		ESMF_TODMod.f \
 		ESMF_CalendarMod.f \
 		ESMF_TimeMod.F90 \
-		ESMF_DateMod.f90 \
+		ESMF_DateMod.F90 \
 		ESMF_TimeMgrMod.F90 \
 		ESMF_AlarmMod.f \
 		ESMF_TimeMgmtMod.F90 
