@@ -1,4 +1,4 @@
-! $Id: ESMF_Init.F90,v 1.15 2004/10/20 17:18:00 nscollins Exp $
+! $Id: ESMF_Init.F90,v 1.16 2004/11/09 01:28:00 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -107,7 +107,10 @@
 !
 ! !DESCRIPTION:
 !     Initialize the ESMF.  This method must be called before
-!     any other ESMF methods are used.  Before exiting the application
+!     any other ESMF methods are used.  The method contains a
+!     barrier before returning, ensuring that all processes
+!     made it successfully through initialization.
+!     Before exiting the application
 !     the user must call {\tt ESMF\_Finalize()} to release resources 
 !     and clean up the ESMF gracefully.
 !
@@ -130,12 +133,15 @@
 !     \end{description}
 !
 !EOP
+      
+      type(ESMF_VM):: localvm
 
       call ESMF_FrameworkInternalInit(ESMF_MAIN_F90, defaultConfigFileName, &
                                       defaultCalendar, defaultLogFileName, rc)
-      if (present(vm)) then
-        call ESMF_VMGetGlobal(vm, rc)
-      endif
+      call ESMF_VMGetGlobal(localvm, rc)
+      if (present(vm)) vm = localvm
+
+      call ESMF_VMBarrier(localvm, rc)
 
       end subroutine ESMF_Initialize
 
