@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGatherUTest.F90,v 1.2 2004/09/23 20:52:33 jwolfe Exp $
+! $Id: ESMF_FieldGatherUTest.F90,v 1.3 2004/09/27 19:59:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldGatherUTest.F90,v 1.2 2004/09/23 20:52:33 jwolfe Exp $'
+      '$Id: ESMF_FieldGatherUTest.F90,v 1.3 2004/09/27 19:59:42 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -45,7 +45,7 @@
       integer :: rc
 
       ! individual test name
-      character(ESMF_MAXSTR) :: name, gName, Rgname
+      character(ESMF_MAXSTR) :: name
 
       ! individual test failure messages
       character(ESMF_MAXSTR*2) :: failMsg
@@ -68,16 +68,15 @@
       type(ESMF_VM):: vm
       type(ESMF_DELayout) :: delayout
 
-!--------------------------------------------------------------------------------
-!     The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
-!     always run. When the environment variable, EXHAUSTIVE, is set to ON then
-!     the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
-!     to OFF, then only the sanity unit tests.
-!     Special strings (Non-exhaustive and exhaustive) have been
-!     added to allow a script to count the number and types of unit tests.
-!--------------------------------------------------------------------------------
+!------------------------------------------------------------------------------
+!   The unit tests are divided into Sanity and Exhaustive. The Sanity tests are
+!   always run. When the environment variable, EXHAUSTIVE, is set to ON then
+!   the EXHAUSTIVE and sanity tests both run. If the EXHAUSTIVE variable is set
+!   to OFF, then only the sanity unit tests.
+!   Special strings (Non-exhaustive and exhaustive) have been
+!   added to allow a script to count the number and types of unit tests.
+!------------------------------------------------------------------------------
 
-      !NEX_UTest
       call ESMF_Initialize(vm=vm, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
@@ -85,11 +84,15 @@
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 20
 
+      ! test script needs this to compute right numbers for test results
+      print *, "NUMBER_OF_PROCESSORS ", npets
+
       if (npets .eq. 1) then
         print *, "This test must run with > 1 processor"
         goto 20
       endif
 
+#if ESMF_EXHAUSTIVE
       ! Create a 2D layout to be used by the Field
       delayout = ESMF_DELayoutCreate(vm, (/ 2, npets/2 /), rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 20
@@ -164,6 +167,7 @@
 
       ! check results, at least if the values are in the global computational
       ! range
+      !EX_UTest_Multi_Proc_Only
       call ESMF_DELayoutGet(delayout, localDE=myDE, rc=rc)
       ok = .true.
       if (myDE.eq.0) then
@@ -194,6 +198,7 @@
       if (rc .ne. ESMF_SUCCESS) goto 20
       call ESMF_DELayoutDestroy(delayout, rc)
       if (rc .ne. ESMF_SUCCESS) goto 20
+#endif
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
