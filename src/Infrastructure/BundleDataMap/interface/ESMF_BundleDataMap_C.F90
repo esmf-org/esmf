@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap_C.F90,v 1.5 2004/06/15 07:57:27 nscollins Exp $
+! $Id: ESMF_BundleDataMap_C.F90,v 1.6 2004/06/15 11:18:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 !==============================================================================
 ! The following line turns the CVS identifier string into a printable variable.
 !      character(*), parameter, private :: version = &
-!      '$Id: ESMF_BundleDataMap_C.F90,v 1.5 2004/06/15 07:57:27 nscollins Exp $'
+!      '$Id: ESMF_BundleDataMap_C.F90,v 1.6 2004/06/15 11:18:36 nscollins Exp $'
 !==============================================================================
 ! 
 !------------------------------------------------------------------------------
@@ -47,7 +47,7 @@
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
-      type(ESMF_Interleave), intent(in) :: btype
+      type(ESMF_InterleaveFlag), intent(in) :: btype
       integer, intent(out), optional :: rc
      
 
@@ -64,7 +64,7 @@
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
-      type(ESMF_Interleave), intent(out) :: btype
+      type(ESMF_InterleaveFlag), intent(out) :: btype
       integer, intent(out) :: rc
      
 
@@ -80,7 +80,7 @@
       use ESMF_BundleDataMapMod
 
       type(ESMF_BundleDataMap), pointer :: bdmp
-      type(ESMF_Interleave), intent(in) :: btype
+      type(ESMF_InterleaveFlag), intent(in) :: btype
       integer, intent(out) :: rc
      
 

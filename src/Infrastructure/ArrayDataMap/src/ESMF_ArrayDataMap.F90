@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.19 2004/06/15 10:57:37 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.20 2004/06/15 11:18:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,15 +61,15 @@
 !  ! Interleaved types are used when there are multiple variables or
 !  ! if individual data items are > scalar.  This is the public flag.
 
-      type ESMF_Interleave
+      type ESMF_InterleaveFlag
       sequence
       private
           integer :: il
       end type
 
-      type(ESMF_Interleave), parameter ::  &
-                    ESMF_INTERLEAVE_BY_BLOCK = ESMF_Interleave(1), &
-                    ESMF_INTERLEAVE_BY_ITEM = ESMF_Interleave(2)
+      type(ESMF_InterleaveFlag), parameter ::  &
+                    ESMF_INTERLEAVE_BY_BLOCK = ESMF_InterleaveFlag(1), &
+                    ESMF_INTERLEAVE_BY_ITEM = ESMF_InterleaveFlag(2)
 
 !------------------------------------------------------------------------------
 !  ! Expected to be used most often for packed bundles, to allow access to
@@ -79,7 +79,7 @@
       type ESMF_InterleaveType
       sequence
       private
-         type(ESMF_Interleave) :: il_type
+         type(ESMF_InterleaveFlag) :: il_type
          integer :: il_start
          integer :: il_end
          integer :: il_strides 
@@ -168,7 +168,7 @@
 !
       public ESMF_ArrayDataMap
 
-      public ESMF_Interleave
+      public ESMF_InterleaveFlag
       public ESMF_INTERLEAVE_BY_BLOCK, ESMF_INTERLEAVE_BY_ITEM
 
       public ESMF_InterleaveType ! public only for field datamap use
@@ -199,7 +199,7 @@
       public ESMF_ArrayDataMapWrite, ESMF_ArrayDataMapRead 
       public ESMF_ArrayDataMapValidate, ESMF_ArrayDataMapPrint
 
-      public ESMF_RelLocString, ESMF_InterleaveString, ESMF_IndexOrderString
+      public ESMF_RelLocString, ESMF_InterleaveFlagString, ESMF_IndexOrderString
       public ESMF_InterleaveTypeString
 
       public operator(.eq.), operator(.ne.)
@@ -211,7 +211,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.19 2004/06/15 10:57:37 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.20 2004/06/15 11:18:36 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -282,18 +282,18 @@ function ESMF_rlne(rl1, rl2)
 end function
 
 !------------------------------------------------------------------------------
-! function to compare two ESMF_Interleave flags 
+! function to compare two ESMF_InterleaveFlag flags 
 
 function ESMF_ileq(il1, il2)
  logical ESMF_ileq
- type(ESMF_Interleave), intent(in) :: il1, il2
+ type(ESMF_InterleaveFlag), intent(in) :: il1, il2
 
  ESMF_ileq = (il1%il .eq. il2%il)
 end function
 
 function ESMF_ilne(il1, il2)
  logical ESMF_ilne
- type(ESMF_Interleave), intent(in) :: il1, il2
+ type(ESMF_InterleaveFlag), intent(in) :: il1, il2
 
  ESMF_ilne = (il1%il .ne. il2%il)
 end function
@@ -1101,15 +1101,15 @@ end function
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_InterleaveString"
+#define ESMF_METHOD "ESMF_InterleaveFlagString"
 !BOPI
-! !IROUTINE:  ESMF_InterleaveString - Return a interleave as a string
+! !IROUTINE:  ESMF_InterleaveFlagString - Return a interleave as a string
 !
 ! !INTERFACE:
-      subroutine ESMF_InterleaveString(interleave, string, rc)
+      subroutine ESMF_InterleaveFlagString(interleave, string, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Interleave), intent(in) :: interleave
+      type(ESMF_InterleaveFlag), intent(in) :: interleave
       character (len = *), intent(out) :: string
       integer, intent(out), optional :: rc
 !
@@ -1134,7 +1134,7 @@ end function
 
         if (present(rc)) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_InterleaveString
+        end subroutine ESMF_InterleaveFlagString
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.55 2004/06/15 07:57:26 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.56 2004/06/15 11:18:36 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,7 +74,7 @@
       type ESMF_BundleFieldAccess
       sequence
       private
-         type(ESMF_Interleave) :: bfa_type
+         type(ESMF_InterleaveFlag) :: bfa_type
          integer :: bfa_start
          integer :: bfa_end
          integer :: bfa_strides
@@ -985,7 +985,7 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fieldList
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
+      type(ESMF_InterleaveFlag), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc             
@@ -3279,7 +3279,7 @@ end function
       integer, intent(in) :: fieldCount           
       type(ESMF_Field), dimension (:) :: fields
       type(ESMF_PackFlag), intent(in), optional :: packflag 
-      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
+      type(ESMF_InterleaveFlag), intent(in), optional :: bundleinterleave
       character (len = *), intent(in), optional :: name 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc

@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleDataMap.F90,v 1.21 2004/06/15 07:57:27 nscollins Exp $
+! $Id: ESMF_BundleDataMap.F90,v 1.22 2004/06/15 11:18:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -73,10 +73,10 @@
         ! its own private data map.   
 #ifndef ESMF_NO_INITIALIZERS
         type(ESMF_Status) :: status = ESMF_STATUS_UNINIT
-        type(ESMF_Interleave) :: bil = ESMF_INTERLEAVE_BY_ITEM
+        type(ESMF_InterleaveFlag) :: bil = ESMF_INTERLEAVE_BY_ITEM
 #else
         type(ESMF_Status) :: status 
-        type(ESMF_Interleave) :: bil
+        type(ESMF_InterleaveFlag) :: bil
 #endif
       end type
 
@@ -110,7 +110,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-       '$Id: ESMF_BundleDataMap.F90,v 1.21 2004/06/15 07:57:27 nscollins Exp $'
+       '$Id: ESMF_BundleDataMap.F90,v 1.22 2004/06/15 11:18:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -141,7 +141,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(in) :: bundledatamap  
-      type(ESMF_Interleave), intent(out), optional :: bundleinterleave
+      type(ESMF_InterleaveFlag), intent(out), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -235,7 +235,7 @@
         endif
 
         ! TODO: add print code here
-        call ESMF_InterleaveString(bundledatamap%bil, str, rc)
+        call ESMF_InterleaveFlagString(bundledatamap%bil, str, rc)
       !jw  write (msgbuf, *)  " Data: ", str
       !jw  if (ESMF_LogWrite(msgbuf, ESMF_LOG_INFO)) continue
         write (*, *)  " Data: ", str
@@ -256,7 +256,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap), intent(inout) :: bundledatamap  
-      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
+      type(ESMF_InterleaveFlag), intent(in), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
@@ -309,7 +309,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_BundleDataMap) :: bundledatamap
-      type(ESMF_Interleave), intent(in), optional :: bundleinterleave
+      type(ESMF_InterleaveFlag), intent(in), optional :: bundleinterleave
       integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
