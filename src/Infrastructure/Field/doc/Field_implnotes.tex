@@ -1,23 +1,24 @@
-% $Id: Field_implnotes.tex,v 1.1 2004/03/13 00:04:56 cdeluca Exp $
+% $Id: Field_implnotes.tex,v 1.2 2004/03/16 00:04:10 cdeluca Exp $
 
 %\subsection{Design and Implementation Notes}
 
-% <Describe strategy for overall class design.>
+\begin{enumerate}
 
-The Field class aggregates two internal subclasses: a GlobalField class
+\item The Field class aggregates two internal subclasses: a GlobalField class
 and a LocalField class.  This separation allows the code to clearly
 differentiate between functions which operate internal to a single DE
 on a local decomposition of data, and those which must be aware of the
-global state of the Field.  
- 
-There is a correspondence between the Global Distributed Grid class,
-and the Local Distributed Grid class, and Fields.  Each DE contains
-the corresponding local decompositions for Distributed Grids and Fields.
+global state of the Field.  There is a correspondence between the Global 
+Distributed Grid class, and the Local Distributed Grid class, and Fields.  
+Each DE contains the corresponding local decompositions for Distributed Grids 
+and Fields.
 
-Some methods which have a Field interface will actually be
+\item Some methods which have a Field interface will actually be
 implemented at the underlying Grid or Array level; they
 will be inherited by the Field class.  This allows the user
 API (Application Programming Interface) to present functions at
 the level which is most consistent to the application without
 restricting where inside the ESMF the actual implementation
 is done.
+
+\end{enumerate}
