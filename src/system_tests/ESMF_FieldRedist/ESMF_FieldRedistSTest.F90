@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.9 2004/03/20 03:55:03 cdeluca Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.10 2004/03/22 19:47:08 nscollins Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -160,7 +160,7 @@
 
     ! get coordinate arrays available for setting the source data array
     allocate(coordArray(2))
-    call ESMF_GridGetCoord(grid1, relloc=ESMF_CELL_CENTER, &
+    call ESMF_GridGetCoord(grid1, horzRelloc=ESMF_CELL_CENTER, &
                            centerCoord=coordArray, rc=status)
     call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
     call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
