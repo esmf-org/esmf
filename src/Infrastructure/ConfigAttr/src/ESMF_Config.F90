@@ -467,7 +467,7 @@
 
       iret = 0
 
-      if ( unique ) then
+      if ( present( unique ) ) then
          print *, myname_, ' Uniqueness of labels is not checked yet '
       endif
 
