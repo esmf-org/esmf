@@ -1,4 +1,4 @@
-! $Id: ESMF_Clock.F90,v 1.6 2003/03/27 01:52:51 eschwab Exp $
+! $Id: ESMF_Clock.F90,v 1.7 2003/03/28 00:47:58 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Clock.F90,v 1.6 2003/03/27 01:52:51 eschwab Exp $'
+      '$Id: ESMF_Clock.F90,v 1.7 2003/03/28 00:47:58 eschwab Exp $'
 
 !==============================================================================
 
@@ -293,7 +293,8 @@
 
 ! !ARGUMENTS:
       type(ESMF_Clock), intent(inout) :: clock
-      type(ESMF_Alarm), intent(out), optional :: RingingAlarmList(:)
+      type(ESMF_Alarm), dimension(MAX_ALARMS), intent(out), optional :: &
+                                        RingingAlarmList
       integer, intent(out), optional :: NumRingingAlarms
       integer, intent(out), optional :: rc
 !   
@@ -383,7 +384,7 @@
 !     TMG3.5.1
 !EOP
 
-!      call c_ESMC_ClockGetAdvanceCount(clock, AdvanceCount, rc)
+      call c_ESMC_ClockGetAdvanceCount(clock, AdvanceCount, rc)
     
       end subroutine ESMF_ClockGetAdvanceCount
 
