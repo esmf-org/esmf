@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.7 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.8 2004/03/08 22:49:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.7 2004/03/08 16:03:24 nscollins Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.8 2004/03/08 22:49:31 jwolfe Exp $'
 
 !==============================================================================
 
@@ -182,7 +182,8 @@
                  "returned failure"
         return
       endif
-      call ESMF_GridGetDE(dstGrid, localCellCountPerDim=dstCounts, rc=status)
+      call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
+                          localCellCountPerDim=dstCounts, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetDE ", &
                  "returned failure"
@@ -206,7 +207,8 @@
                  "returned failure"
         return
       endif
-      call ESMF_GridGetDE(srcGrid, localCellCountPerDim=srcCounts, rc=status)
+      call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
+                          localCellCountPerDim=srcCounts, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructLinear: GridGetDE ", &
                  "returned failure"
@@ -240,11 +242,14 @@
    !              information locally to calculate the regrid weights
 
       route = ESMF_RegridRouteConstruct(3, srcGrid, dstGrid, &
-                                        recvDomainList, total=.false., rc=status)
+                                        recvDomainList, &
+                                        srcDataMap=srcDataMap, &
+                                        total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
 !      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, &
 !                                            recvDomainListTot, &
+!                                            srcDataMap=srcDataMap, &
 !                                            total=.true., rc=status)
 
       ! Now use temporary route to gather necessary coordinates

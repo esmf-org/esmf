@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.29 2004/03/08 16:03:24 nscollins Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.30 2004/03/08 22:48:59 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -157,7 +157,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.29 2004/03/08 16:03:24 nscollins Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.30 2004/03/08 22:48:59 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -349,8 +349,8 @@
 
 ! !INTERFACE:
       function ESMF_RegridRouteConstruct(numDims, srcGrid, dstGrid, &
-                                         recvDomainList, srcArray, srcDatamap, &
-                                         dstArray, dstDatamap, total, rc)
+                                         recvDomainList, srcDatamap, srcArray, &
+                                         dstDatamap, dstArray, total, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Route) :: ESMF_RegridRouteConstruct
@@ -361,10 +361,10 @@
       type(ESMF_Grid), intent(in) :: srcGrid
       type(ESMF_Grid), intent(in) :: dstGrid
       type(ESMF_DomainList), intent(inout) :: recvDomainList
+      type(ESMF_DataMap), intent(in) :: srcDatamap
       type(ESMF_Array), intent(in), optional :: srcArray
-      type(ESMF_DataMap), intent(in), optional :: srcDatamap
-      type(ESMF_Array), intent(in), optional :: dstArray
       type(ESMF_DataMap), intent(in), optional :: dstDatamap
+      type(ESMF_Array), intent(in), optional :: dstArray
       logical, intent(in), optional :: total
       integer, intent(out), optional :: rc
 
@@ -395,6 +395,7 @@
       type(ESMF_AxisIndex), dimension(:,:), pointer :: allAI, allLocalAI
       type(ESMF_DELayout) :: srcDELayout
       type(ESMF_DomainList) :: sendDomainList
+      type(ESMF_RelLoc) :: horzRelLoc
       type(ESMF_Route) :: route
 
 !     Initialize return code
@@ -411,13 +412,13 @@
 
       call ESMF_GridGetDELayout(srcGrid, srcDELayout, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridGetDELayout ", &
+        print *, "ERROR in RegridRouteConstruct: GridGetDELayout ", &
                  "returned failure"
         return
       endif
       call ESMF_DELayoutGetDEID(srcDELayout, myDE, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: DELayoutGetDEID ", &
+        print *, "ERROR in RegridRouteConstruct: DELayoutGetDEID ", &
                  "returned failure"
         return
       endif
@@ -425,10 +426,11 @@
       ! Extract some layout information for use in this regrid.
       call ESMF_GridGet(srcGrid, numDims=gridrank, rc=status)
       allocate (myAI(gridrank))
-      call ESMF_GridGetDE(srcGrid, globalAIPerDim=myAI, total=totalUse, &
-                          rc=status)
+      call ESMF_DataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
+                          globalAIPerDim=myAI, total=totalUse, rc=status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructBilinear: GridGetDE ", &
+        print *, "ERROR in RegridRouteConstruct: GridGetDE ", &
                  "returned failure"
         return
       endif
