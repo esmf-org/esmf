@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayMacros.h,v 1.9 2003/04/24 16:45:42 nscollins Exp $
+! $Id: ESMF_ArrayMacros.h,v 1.10 2003/04/24 20:56:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -682,6 +682,7 @@
         logical :: rcpresent                ! did user specify rc? @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\
         logical :: willcopy                 ! do we need to copy data? @\
+        type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_IKIND_##mtypekind), dimension(mdim), pointer :: newp  @\
@@ -700,18 +701,22 @@
         if (.not. present(f90ptr)) then @\
            willalloc = .true. @\
            willcopy = .false. @\
+           do_dealloc = ESMF_TF_TRUE @\
         else @\
            if (docopy .eq. ESMF_DATA_SPACE) then @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
                willalloc = .true. @\
                willcopy = .false. @\
+               do_dealloc = ESMF_TF_TRUE @\
            else if (docopy .eq. ESMF_DATA_COPY) then @\
                willalloc = .true. @\
                willcopy = .true. @\
+               do_dealloc = ESMF_TF_TRUE @\
            else       ! ESMF_DATA_REF @\
                newp => f90ptr    ! ptr alias, important this be =>  @\
                willalloc = .false. @\
                willcopy = .false. @\
+               do_dealloc = ESMF_TF_FALSE @\
            endif @\
         endif @\
  @\
@@ -741,7 +746,7 @@
         wrap%##mtypekind##mrank##Dptr => newp @\
         call c_ESMC_ArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
                                  lbounds, ubounds, strides, offsets, & @\
-                                 ESMF_TF_TRUE, ESMF_TF_TRUE, status) @\
+                                 ESMF_TF_TRUE, do_dealloc, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Array internal set info error" @\
