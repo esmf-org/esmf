@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2003/04/04 18:28:45 jwolfe Exp $ 
+# $Id: makefile,v 1.2 2003/04/04 23:24:51 jwolfe Exp $ 
 
 ALL: system_tests
 
@@ -48,7 +48,7 @@ $(ESMC_TESTDIR)/ESMF_SysTest74558: ESMF_SysTest74558.o FlowMod.o \
 
 RUN_ESMF_SysTest74558:
 	-@rm -f testlog stdlog.* logfile.* ESMF_SysTest74558.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_SysTest74558 >$(ESMC_TESTDIR)/ESMF_SysTest74558.stdout
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_SysTest74558 >$(ESMC_TESTDIR)/ESMF_SysTest74558.stdout
 
 RUN_ESMF_SysTest74558UNI:
 	echo "ESMF_SysTest74558 cannot be run as uniprocessor."

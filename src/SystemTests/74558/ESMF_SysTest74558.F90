@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest74558.F90,v 1.2 2003/04/04 21:39:00 nscollins Exp $
+! $Id: ESMF_SysTest74558.F90,v 1.3 2003/04/04 23:24:22 jwolfe Exp $
 !
 ! System test code #74558
 
@@ -23,7 +23,7 @@
     implicit none
     
     ! Local variables
-    integer :: de_id, rc, delist(1)
+    integer :: de_id, rc, delist(4)
     character(len=ESMF_MAXSTR) :: aname, cname1
     type(ESMF_DELayout) :: layout1, layout2
     type(ESMF_State) :: c1exp
@@ -60,8 +60,8 @@
 
     ! Create the model component
     cname1 = "fluid flow"
-    delist = (/ 0 /)
-    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 1, 1 /), (/ 0 /), rc)
+    delist = (/ 0, 1, 2, 3 /)
+    layout2 = ESMF_DELayoutCreate(delist, 2, (/ 2, 2 /), (/ 0, 0, 0 ,0 /), rc)
     ! TODO: add 1D layout support to DELayout and DistGrid
     !layout2 = ESMF_DELayoutCreate(delist, 1, (/ 1 /), (/ 0 /), rc)
     comp1 = ESMF_GridCompCreate(cname1, layout=layout2, rc=rc)
