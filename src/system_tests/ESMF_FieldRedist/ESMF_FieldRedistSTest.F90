@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.1 2004/03/03 17:56:19 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.2 2004/03/04 23:56:43 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -25,25 +25,24 @@
     implicit none
     
     ! Local variables
-    integer :: nx, ny, nz, i, j, k, rc, ii, jj, kk
+    integer :: nx, ny, i, j, rc
     integer, dimension(:), allocatable :: delist
     integer :: result, len, base, ndes, deId, nde(2)
     integer :: miscount
     integer :: status
-    integer, dimension(3) :: decompids1, decompids2, counts
+    integer, dimension(2) :: decompids1, decompids2, counts, localCounts
     logical :: match
     real(ESMF_KIND_R8) :: pi
-    real(ESMF_KIND_R8), dimension(3) :: min, max
-    real(ESMF_KIND_R8), dimension(:), pointer :: coordZ
+    real(ESMF_KIND_R8), dimension(2) :: min, max
     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
-    real(ESMF_KIND_R8), dimension(:,:,:), pointer :: srcdata, dstdata, resdata
-    type(ESMF_GridKind)    :: horzGridKind,    vertGridKind
-    type(ESMF_GridStagger) :: horzStagger,     vertStagger
-    type(ESMF_CoordSystem) :: horzCoordSystem, vertCoordSystem
+    real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, dstdata, resdata
+    type(ESMF_GridKind)    :: horzGridKind
+    type(ESMF_GridStagger) :: horzStagger
+    type(ESMF_CoordSystem) :: horzCoordSystem
     type(ESMF_DELayout) :: layout0, layout1
     type(ESMF_ArraySpec) :: arrayspec
     type(ESMF_Array) :: array1, array2, array3
-    type(ESMF_Array), dimension(:), pointer :: coordArray, coordZArray
+    type(ESMF_Array), dimension(:), pointer :: coordArray
     type(ESMF_Grid)  ::  grid1,  grid2
     type(ESMF_Field) :: field1, field2, field3
     type(ESMF_RouteHandle) :: rh12, rh23
@@ -107,62 +106,49 @@
     pi = 3.14159
     counts(1) = 60
     counts(2) = 50
-    counts(3) = 40
     min(1) = 0.0
     max(1) = 60.0
     min(2) = 0.0
     max(2) = 50.0
-    min(3) = 0.0
-    max(3) = 20.0
     horzGridKind    = ESMF_GridKind_XY
     horzStagger     = ESMF_GridStagger_A
     horzCoordSystem = ESMF_CoordSystem_Cartesian
-    vertGridKind    = ESMF_GridKind_XY
-    vertStagger     = ESMF_GridStagger_VertCenter
-    vertCoordSystem = ESMF_CoordSystem_Height
-    call ESMF_ArraySpecInit(arrayspec, rank=3, type=ESMF_DATA_REAL, &
+    call ESMF_ArraySpecInit(arrayspec, rank=2, type=ESMF_DATA_REAL, &
                             kind=ESMF_R8)
 
     decompids1(1) = 1
     decompids1(2) = 2
-    decompids1(3) = 0
-    grid1 = ESMF_GridCreateLogRectUniform(3, counts=counts, &
-                              minGlobalCoordPerDim=min, &
-                              maxGlobalCoordPerDim=max, &
-                              layout=layout1, &
-                              decompIds=decompids1, &
-                              horzGridKind=horzGridKind, &
-                              horzStagger=horzStagger, &
-                              horzCoordSystem=horzCoordSystem, &
-                              vertGridKind=vertGridKind, &
-                              vertStagger=vertStagger, &
-                              vertCoordSystem=vertCoordSystem, &
-                              name="source grid", rc=status)
+    grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          layout=layout1, &
+                                          decompIds=decompids1, &
+                                          horzGridKind=horzGridKind, &
+                                          horzStagger=horzStagger, &
+                                          horzCoordSystem=horzCoordSystem, &
+                                          name="source grid", rc=status)
     field1 = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
-                              vertRelloc=ESMF_CELL_CELL, haloWidth=2, &
-                              name="field1", rc=rc)
+                              haloWidth=2, name="field1", rc=rc)
     field3 = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
-                              vertRelloc=ESMF_CELL_CELL, haloWidth=2, &
-                              name="field3", rc=rc)
+                              haloWidth=2, name="field3", rc=rc)
 
-    decompids2(1) = 1
-    decompids2(2) = 0
-    decompids2(3) = 2
-    grid2 = ESMF_GridCreateLogRectUniform(3, counts=counts, &
-                              minGlobalCoordPerDim=min, &
-                              maxGlobalCoordPerDim=max, &
-                              layout=layout1, &
-                              decompIds=decompids2, &
-                              horzGridKind=horzGridKind, &
-                              horzStagger=horzStagger, &
-                              horzCoordSystem=horzCoordSystem, &
-                              vertGridKind=vertGridKind, &
-                              vertStagger=vertStagger, &
-                              vertCoordSystem=vertCoordSystem, &
-                              name="destination grid", rc=status)
+    decompids2(1) = 2
+    decompids2(2) = 1
+    grid2 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                                          minGlobalCoordPerDim=min, &
+                                          maxGlobalCoordPerDim=max, &
+                                          layout=layout1, &
+                                          decompIds=decompids2, &
+                                          horzGridKind=horzGridKind, &
+                                          horzStagger=horzStagger, &
+                                          horzCoordSystem=horzCoordSystem, &
+                                          name="destination grid", rc=status)
     field2 = ESMF_FieldCreate(grid2, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
-                              vertRelloc=ESMF_CELL_CELL, haloWidth=2, &
-                              name="field2", rc=rc)
+                              haloWidth=2, name="field2", rc=rc)
+
+    ! create the routehandles
+    rh12 = ESMF_RouteHandleCreate(status)
+    rh23 = ESMF_RouteHandleCreate(status)
 
     ! precompute redist patterns
     call ESMF_FieldRedistStore(field1, field2, layout1, rh12, total=.false., &
@@ -174,26 +160,18 @@
     call ESMF_FieldGetData(field1, array1, rc)
     call ESMF_ArrayGetData(array1, srcdata, ESMF_DATA_REF, rc)
 
-    ! TODO: should be allocated 3 and then GridGetCoord should be fixed to
-    !       be able to get all three axes
     allocate(coordArray(2))
     call ESMF_GridGetCoord(grid1, relloc=ESMF_CELL_CENTER, &
                            centerCoord=coordArray, rc=status)
     call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
     call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
-    allocate(coordZArray(1))
-    call ESMF_GridGetCoord(grid1, relloc=ESMF_CELL_CELL, &
-                           centerCoord=coordZArray, rc=status)
-    call ESMF_ArrayGetData(coordZArray(1), coordZ, ESMF_DATA_REF, status)
+    call ESMF_ArrayGet(coordArray(1), counts=localCounts, rc=status)
 
     ! set data array to a function of coordinates
-    do k = 1,counts(3)
-      do j = 1,counts(2)
-         do i = 1,counts(1)
-             srcdata(i,j,k) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                                   + 2.0*sin(coordY(i,j)/50.0*pi) &
-                                   + 8.0*sin(coordZ(k)  /20.0*pi)
-         enddo
+    do j = 1,localCounts(2)
+       do i = 1,localCounts(1)
+           srcdata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                               + 2.0*sin(coordY(i,j)/50.0*pi) 
       enddo
     enddo
 
@@ -257,20 +235,18 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
     match    = .true.
     miscount = 0
-    do i     = 1,counts(1)
-      do j   = 1,counts(2)
-        do k = 1,counts(3)
-          if (srcdata(i,j,k) .ne. resdata(i,j,k)) then
-            print *, "array contents do not match at: (", i,j,k, ") on DE ", &
-                     deId, ".  src=", srcdata(i,j,k), "dst=", resdata(i,j,k)
-            match = .false.
-            miscount = miscount + 1
-            if (miscount .gt. 40) then
-              print *, "more than 40 mismatches, skipping rest of loop"
-              goto 10
-            endif
+    do i     = 1,localCounts(1)
+      do j   = 1,localCounts(2)
+        if (srcdata(i,j) .ne. resdata(i,j)) then
+          print *, "array contents do not match at: (", i,j, ") on DE ", &
+                   deId, ".  src=", srcdata(i,j), "dst=", resdata(i,j)
+          match = .false.
+          miscount = miscount + 1
+          if (miscount .gt. 40) then
+            print *, "more than 40 mismatches, skipping rest of loop"
+            goto 10
           endif
-        enddo
+        endif
       enddo
     enddo
     if (match) print *, "Array contents matched correctly!! deId = ", deId
