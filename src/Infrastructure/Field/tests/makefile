@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.13 2003/04/09 23:48:43 flanigan Exp $ 
+\# $Id: makefile,v 1.14 2003/04/10 22:50:58 svasquez Exp $ 
 
 ALL:  tests
 
@@ -81,7 +81,7 @@ ESMF_FieldUTest.rm:
 # Field Route function
 #
 $(ESMC_TESTDIR)/ESMF_FRouteUTest: ESMF_FRouteUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FRouteUTest ESMF_FRouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_FRouteUTest ESMF_FRouteUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
 	${RM} ESMF_FRouteUTest.o
 
 RUN_ESMF_FRouteUTest:
