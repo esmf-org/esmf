@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.67 2004/08/04 15:23:09 nscollins Exp $
+#  $Id: common.mk,v 1.68 2004/08/04 17:20:58 svasquez Exp $
 #===============================================================================
 #   common.mk
 #
@@ -141,8 +141,7 @@ OBJS		= ${OBJSC} ${OBJSF}
 DO_UT_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ut_results.pl -d $(ESMF_TESTDIR) 
 DO_EX_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results
 DO_EX_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_ex_results.bash
-DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results
-DO_ST_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results.bash
+DO_ST_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_st_results.pl -d $(ESMF_TESTDIR)
 DO_SUM_RESULTS	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary
 DO_SUM_RESULTS.BASH	= ${ESMF_TOP_DIR}/scripts/test_scripts/do_summary.bash
 
@@ -400,11 +399,7 @@ system_tests: chkopts build_libs chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests tree
-	-@if [ -e /bin/ksh ] ; then \
-		$(DO_ST_RESULTS) ; \
-	  else \
-          	$(DO_ST_RESULTS.BASH)  ; \
-	 fi; \
+	$(DO_ST_RESULTS) ;  \
 
 tree_system_tests: tree_build_system_tests tree_run_system_tests
 
@@ -422,12 +417,7 @@ system_tests_uni: chkopts chkdir_tests
 	   fi; \
 	fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_system_tests_uni tree
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_ST_RESULTS) ; \
-          else \
-                $(DO_ST_RESULTS.BASH)  ; \
-         fi; \
-
+	$(DO_ST_RESULTS) ;  \
 
 tree_system_tests_uni: tree_build_system_tests tree_run_system_tests_uni
 
@@ -471,11 +461,7 @@ run_system_tests:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests tree
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_ST_RESULTS) ;  \
-          else \
-                $(DO_ST_RESULTS.BASH)  ; \
-         fi; \
+	$(DO_ST_RESULTS) ;  \
 
 tree_run_system_tests: $(SYSTEM_TESTS_RUN) 
 
@@ -493,11 +479,7 @@ run_system_tests_uni:  chkopts chkdir_tests
 	   fi; \
         fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_system_tests_uni tree
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_ST_RESULTS) ;  \
-          else \
-                $(DO_ST_RESULTS.BASH)  ; \
-         fi; \
+	$(DO_ST_RESULTS) ;  \
 
 tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 
@@ -505,11 +487,7 @@ tree_run_system_tests_uni: $(SYSTEM_TESTS_RUN_UNI)
 # report statistics on system tests
 #
 check_system_tests:
-	-@if [ -e /bin/ksh ] ; then \
-                $(DO_ST_RESULTS) ;  \
-          else \
-                $(DO_ST_RESULTS.BASH)  ; \
-         fi; \
+	$(DO_ST_RESULTS) ;  \
 
 
 #-------------------------------------------------------------------------------
