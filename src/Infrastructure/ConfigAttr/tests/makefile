@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/04/16 04:03:48 lzaslavsky Exp $
+# $Id: makefile,v 1.3 2003/04/29 16:07:48 svasquez Exp $
 
 ALL:  tests
 
@@ -21,7 +21,7 @@ TESTS_RUN     = RUN_ESMF_ConfigUTest \
 #		RUN_ESMC_ConfigUTest 
 
 TESTS_RUN_UNI = RUN_ESMF_ConfigUTestUNI \
-		RUN_ESMC_ConfigUTestUNI 
+#		RUN_ESMC_ConfigUTestUNI 
 
 TESTS_RM      = ESMF_ConfigUTest.rm \
 #                ESMC_ConfigUTest.rm
