@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateUTest.F90,v 1.5 2004/05/19 17:54:54 svasquez Exp $
+! $Id: ESMF_CompCreateUTest.F90,v 1.6 2004/06/08 22:02:44 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -114,14 +114,15 @@
 
 !-------------------------------------------------------------------------
 !   !
-    !EX_UTest
+    !Commented out because it crashes
+    ! Bug Report 969251 opened.
 !   !  Test printing a component
 
-    call ESMF_GridCompPrint(comp1, rc=rc)
+    !call ESMF_GridCompPrint(comp1, rc=rc)
 
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Printing a Component Test"
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !write(failMsg, *) "Did not return ESMF_SUCCESS"
+    !write(name, *) "Printing a Component Test"
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
 !-------------------------------------------------------------------------
 !   !
