@@ -1,10 +1,10 @@
-// $Id: ESMC_Time_F.C,v 1.1 2003/03/14 05:12:43 eschwab Exp $
+// $Id: ESMC_Time_F.C,v 1.2 2003/03/22 05:44:50 eschwab Exp $
 //
 // Earth System Modeling Framework
-// Copyright 2002-2003, University Corporation for Atmospheric Research, 
-// Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
-// Laboratory, University of Michigan, National Centers for Environmental 
-// Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+// Copyright 2002-2003, University Corporation for Atmospheric Research,
+// Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+// Laboratory, University of Michigan, National Centers for Environmental
+// Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
 // NASA Goddard Space Flight Center.
 // Licensed under the GPL.
 //
@@ -17,10 +17,7 @@
 //------------------------------------------------------------------------------
 // INCLUDES
 //------------------------------------------------------------------------------
-#include <stdio.h>
-#include <string.h>
 #include "ESMC.h"
-#include "ESMC_Base.h"
 #include "ESMC_Time.h"
 //------------------------------------------------------------------------------
 //BOP
@@ -35,51 +32,88 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       // keep these for deep classes, or see init below for shallow
-       void FTN(c_esmc_timecreate)(ESMC_Time **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *ptr = ESMC_TimeCreate(*arg1, *arg2, *arg3, status);
-       }
-
-       void FTN(c_esmc_timedestroy)(ESMC_Time **ptr, int *status) {
-           *status = ESMC_TimeDestroy(*ptr);
-       }
-
+#if 0
        // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_timeinit)(ESMC_Time **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *status = (*ptr)->ESMC_TimeInit(*arg1, *arg2, *arg3);
-       }
+       void FTN(c_esmc_timeinit)(ESMC_Time **ptr, int *YY, int *MM, int *DD,
+                                 int *D, int *H, int *M, int *S, int *MS,
+                                 int *US, int *NS,
+                                 double *d_, double *h_, double *m_,
+                                 double *s_, double *ms_, double *us_,
+                                 double *ns_, int *Sn, int *Sd,
 
-       // for either shallow or deep classes, the following are needed. 
-       void FTN(c_esmc_timegetconfig)(ESMC_Time **ptr, 
-                                         ESMC_TimeConfig *config, int *status) {
-           *status = (*ptr)->ESMC_TimeGetConfig(&config);
-       }
-
-       void FTN(c_esmc_timesetconfig)(ESMC_Time **ptr, 
-                                         ESMC_TimeConfig *config, int *status) {
-           *status = (*ptr)->ESMC_TimeSetConfig(config);
-       }
-
-       void FTN(c_esmc_timeget)(ESMC_Time **ptr, 
-                                         <value> *value, int *status} {
+       void FTN(c_esmc_timeget)(ESMC_Time **ptr,
+                                         <value> *value, int *status) {
            *status = (*ptr)->ESMC_TimeGet(&value);
        }
 
-       void FTN(c_esmc_timeset)(ESMC_Time **ptr, 
-                                         <value> *value, int *status} {
+       void FTN(c_esmc_timeset)(ESMC_Time **ptr,
+                                         <value> *value, int *status) {
            *status = (*ptr)->ESMC_TimeSet(value);
        }
+#endif
 
-       void FTN(c_esmc_timevalidate)(ESMC_Time **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_TimeValidate(opts);
+       void FTN(c_esmc_timegetcalendar)(ESMC_Time **ptr,
+                                        ESMC_Calendar **calendar, int *status) {
+           *status = (*ptr)->ESMC_TimeGetCalendar(*calendar);
        }
 
-       void FTN(c_esmc_timeprint)(ESMC_Time **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_TimePrint(opts);
+       void FTN(c_esmc_timesetcalendar)(ESMC_Time **ptr,
+                                        ESMC_Calendar **calendar, int *status) {
+           *status = (*ptr)->ESMC_TimeSetCalendar(*calendar);
        }
 
+       void FTN(c_esmc_timeissamecal)(ESMC_Time **ptr, ESMC_Time **time,
+                                      int *esmf_timeIsSameCal, int *status) {
+           *esmf_timeIsSameCal = (*ptr)->ESMC_TimeIsSameCal(*time, status);
+       }
+
+       void FTN(c_esmc_timegettimezone)(ESMC_Time **ptr,
+                                        int *timezone, int *status) {  
+           *status = (*ptr)->ESMC_TimeGetTimeZone(timezone);
+       }
+
+       void FTN(c_esmc_timesettimezone)(ESMC_Time **ptr,
+                                        int *timezone, int *status) {  
+           *status = (*ptr)->ESMC_TimeSetTimeZone(*timezone);
+       }
+
+       void FTN(c_esmc_timegetstring)(ESMC_Time **ptr,
+                                      char *timestring, int *status) { 
+           *status = (*ptr)->ESMC_TimeGetString(timestring);
+       }
+
+       void FTN(c_esmc_timegetdayofyear)(ESMC_Time **ptr,
+                                         double *dayofyear, int *status) {
+           *status = (*ptr)->ESMC_TimeGetDayOfYear(dayofyear);
+       }
+
+       void FTN(c_esmc_timegetdayofweek)(ESMC_Time **ptr,
+                                         int *dayofweek, int *status) {   
+           *status = (*ptr)->ESMC_TimeGetDayOfWeek(dayofweek);
+       }
+
+       void FTN(c_esmc_timegetdayofmonth)(ESMC_Time **ptr,
+                                          int *dayofmonth, int *status) {
+           *status = (*ptr)->ESMC_TimeGetDayOfMonth(dayofmonth);
+       }
+
+       void FTN(c_esmc_timegetmidmonth)(ESMC_Time **ptr,
+                                        ESMC_Time **midmonth, int *status) {  
+           *status = (*ptr)->ESMC_TimeGetMidMonth(*midmonth);
+       }
+
+       void FTN(c_esmc_timegetrealtime)(ESMC_Time **ptr,
+                                        int *status) {                 
+           *status = (*ptr)->ESMC_TimeGetRealTime();      
+       }
+
+       void FTN(c_esmc_timevalidate)(ESMC_Time **ptr, const char *opts,
+                                     int *status) {
+           *status = (*ptr)->ESMC_BaseValidate(opts);
+       }
+
+       void FTN(c_esmc_timeprint)(ESMC_Time **ptr, const char *opts,
+                                  int *status) {
+           *status = (*ptr)->ESMC_BasePrint(opts);
+       }
 };
-
-
