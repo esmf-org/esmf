@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.35 2003/03/10 03:23:09 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.36 2003/03/17 18:55:45 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,7 +115,10 @@
     public ESMF_GridSetConfig
     !public ESMF_GridGetCoord
     public ESMF_GridSetCoord
-    public ESMF_GridGetDE    ! temporary to access DistGrid from above
+    public ESMF_GridGetDE            ! access DistGrid from above
+    public ESMF_GridGetAllAxisIndex  ! access DistGrid from above
+    public ESMF_GridGetDELayout      ! access DistGrid from above
+    ! TODO:  combine all get subroutines into one
     public ESMF_GridGlobalToLocalIndex
     public ESMF_GridLocalToGlobalIndex
     public ESMF_GridGet
@@ -199,7 +202,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.35 2003/03/10 03:23:09 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.36 2003/03/17 18:55:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1537,6 +1540,104 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetDE
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetAllAxisIndex - Get array of AxisIndices from a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetAllAxisIndex(grid, AI, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a DistGrid attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[[AI]]
+!          Array of {\tt AxisIndices} corresponding to the {\tt Grid}.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     call DistGrid method to retrieve information otherwise not available
+!     to the application level
+      call ESMF_DistGridGetAllAxisIndex(grid%ptr%distgrid%ptr, AI, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetAllAxisIndex: distgrid get"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetAllAxisIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_GridGetDELayout - Get pointer to a DELayout from a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridGetDELayout(grid, layout, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid) :: grid
+      type(ESMF_DELayout), pointer :: layout
+      integer, intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Get a DistGrid attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid]
+!          Class to be queried.
+!     \item[[layout]]
+!          Pointer to the {\tt DELayout} corresponding to the {\tt Grid}.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     call DistGrid method to retrieve information otherwise not available
+!     to the application level
+      call ESMF_DistGridGetDELayout(grid%ptr%distgrid%ptr, layout, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridGetDELayout: distgrid get delayout"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridGetDELayout
 
 !------------------------------------------------------------------------------
 !BOP

@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.33 2003/03/10 03:23:08 cdeluca Exp $
+! $Id: ESMF_DistGrid.F90,v 1.34 2003/03/17 18:56:04 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,7 +81,7 @@
       sequence
 !     private
         type (ESMF_Base) :: base
-        type (ESMF_DELayout) :: layout
+        type (ESMF_DELayout) :: layout  ! TODO: should this be a pointer?
         type (ESMF_MyDE) :: MyDE       ! local DE identifiers
         logical :: covers_domain       ! identifier if distgrid covers
                                        ! the entire physical domain
@@ -139,6 +139,9 @@
     public ESMF_DistGridSetCounts
     public ESMF_DistGridGetDE
     public ESMF_DistGridSetDE
+    public ESMF_DistGridGetAllAxisIndex
+    public ESMF_DistGridGetDELayout
+    ! TODO:  combine all the get subroutines into one
     public ESMF_DistGridGetValue
     public ESMF_DistGridSetValue
     public ESMF_DistGridLocalToGlobalIndex
@@ -152,7 +155,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.33 2003/03/10 03:23:08 cdeluca Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.34 2003/03/17 18:56:04 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1342,7 +1345,7 @@
         rc = ESMF_FAILURE
       endif
 
-!     if present, get information from physgrid derived type
+!     if present, get information from distgrid derived type
       if(present(MyDE)) MyDE = distgrid%myDE%MyDE
       if(present(lcelltot_count)) lcelltot_count = distgrid%myDE%lcelltot_count
       if(present(lcellexc_count)) lcellexc_count = distgrid%myDE%lcellexc_count
@@ -1423,6 +1426,96 @@
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_DistGridSetDEInternal
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridGetAllAxisIndex - Get array of AxisIndices for DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetAllAxisIndex(distgrid, AI, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: AI
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get a DistGrid attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid]
+!          Class to be modified.
+!     \item[[AI]]
+!          Array of {\tt AxisIndices} corresponding to the {\tt DistGrid}.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     get information from distgrid derived type
+      AI = distgrid%lcellexc_index
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetAllAxisIndex
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_DistGridGetDELayout - Get pointer to a DELayout for a DistGrid
+
+! !INTERFACE:
+      subroutine ESMF_DistGridGetDELayout(distgrid, layout, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGridType) :: distgrid
+      type(ESMF_DELayout), pointer :: layout
+      integer, intent(out), optional :: rc            
+
+!
+! !DESCRIPTION:
+!     Get a DistGrid attribute with the given value.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[distgrid]
+!          Class to be modified.
+!     \item[[layout]]
+!          Pointer to the {\tt DELayout} corresponding to the {\tt DistGrid}.
+!     \item[[rc]]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+      integer :: status=ESMF_FAILURE                 ! Error status
+      logical :: rcpresent=.FALSE.                   ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+!     get information from distgrid derived type
+      layout = distgrid%layout
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridGetDELayout
 
 !------------------------------------------------------------------------------
 !BOP
