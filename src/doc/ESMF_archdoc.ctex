@@ -1,4 +1,4 @@
-% $Id: ESMF_archdoc.ctex,v 1.9 2003/01/29 19:21:25 cnh Exp $
+% $Id: ESMF_archdoc.ctex,v 1.10 2003/01/29 20:50:22 cnh Exp $
 
 %
 \documentclass[]{article}
@@ -67,10 +67,6 @@
 
 %\section{ESMF Compliance and Framework Adoption}
 \input{ESMF_implications}
-
-%\section{Framework-Wide Design Elements}
-\input{ESMF_fwdesign}
-\input{ESMF_usage}
 
 \newpage
 %\section{Glossary}

@@ -186,7 +186,7 @@ It provides methods for returning a pointer to the memory
 location of the start of the data, and conversion routines 
 for altering the characteristics of the data.  
 Information about how the {\tt Data Array} is laid
-out in memory is managed by the {\tt Ordering} class.
+out in memory is managed by the {\tt Datamap} class.
 
 A {\tt Data Array} can be associated with a {\tt Field} or with a {\tt Bundle}.
 Data associated with a {\tt Field} consists of only a single variable,
@@ -197,9 +197,9 @@ locality of reference while iterating the array,
 or for ease in setting multiple data values in one operation.
 
 
-\subsubsection{Ordering (ESMF\_Ordering)}
+\subsubsection{Ordering (ESMF\_Datamap)}
 \label{sec:ordering} 
-An {\tt Ordering} is the description of how multidimentional data have been
+An {\tt Datamap} is the description of how multidimentional data have been
 linearized in memory.  This includes multidimensional array index information (e.g. C-order
 vs Fortran-order), vector or tensor data item ordering information (e.g. all Xs then all
 Ys vs [X,Y], [X,Y] tuples), and for {\tt Data Array}s associated with a {\tt Bundle} object which contain

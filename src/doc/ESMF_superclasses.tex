@@ -39,12 +39,13 @@ Section~\ref{sec:controlflow}).
 
 The ability to remap to adapt to different computing platform sizes 
 and characteristics is essential for performance portability.
-{\tt Gridded Component}s can be configured for SPMD or MPMD and 
+Where their physics content permits
+{\tt Gridded Component}s can be configured for
 sequential or concurrent execution without changes to the {\tt Gridded 
 Component} code.  Changes to {\tt Coupler} or application code are likely to 
 be required (see Section~\ref{sec:scoping}).
 
-The ability to overlap computation with communication is also important for
+The ability to overlap computation with communication is also essential for
 performance.  We facilitate this by enabling the user to initiate data 
 sends during {\tt Gridded Component} execution, as soon as the data is ready.
 
@@ -69,7 +70,9 @@ can be scoped on a parallel platform.  There is only one {\tt Application Compon
 defined for any application; it initially allocates resources and tracks 
 application-wide information. 
 The {\tt Application Component} must be instantiated on 
-any {\tt Decomposition Elements} or {\tt DE}s (see Section~\ref{sec:progmodel}) on 
+any {\tt Decomposition Elements}\footnote{In ESMF {\tt Decomposition Elements} are the
+basic abstration that provides platform neutral parallelism, they are discussed in detail
+in Section~\ref{sec:progmodel}} or {\tt DE}s on 
 which other components
 within the application are defined.  This is true whether the 
 application consists of a single executable or multiple 
@@ -102,11 +105,7 @@ as a single executable we have a sequential execution SPMD configuration.
 
 Within an application, a {\tt Gridded Component} may also reside on 
 a subset of {\tt DE}s.  These {\tt DE}s may wholly coincide with, be wholly 
-contained within or wholly contain another component.  Multiple {\tt Gridded 
-Component}s may be defined as separate executables.  A typical 
-concurrent execution MPMD configuration is one in which {\tt Gridded Component}s 
-are defined on separate {\tt DE}s and run simultaneously as multiple 
-executables.  
+contained within or wholly contain another component.  
 
 It is possible for ESMF applications to contain some component sets
 that are executing sequentially and others that are executing concurrently.
@@ -138,18 +137,6 @@ application may itself be composed of other coupled systems.}
 \scalebox{0.7}{\includegraphics{CouplerScaling.eps}}
 \end{figure}
 
-\subsubsection{System startup}
-
-The basic startup procedure for an ESMF application is shown in figure \ref{fig:ESMFApplicationMain}. Startup
-begins by creating the top-level in figure \ref{fig:couplerscaling}. Any ESMF component could reside at the top-level, so
-all ESMF components are created to be consistent with the startup sequence shown in figure \ref{fig:ESMFApplicationMain}.
-
-\begin{figure}
-\caption[{ESMF Boot Up Stage}]{The basic startup procedure for
-all ESMF applications.}
-\label{fig:ESMFApplicationMain}
-\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
-\end{figure}
 
 \subsection{Flow of Control}
 \label{sec:controlflow}
@@ -238,6 +225,19 @@ In this example, the coupling is one-way, so that the ocean
 receives data from the atmosphere but does not send any data back.  Atmosphere
 and ocean components are configured for concurrent execution.
 
+\subsubsection{System startup}
+
+The basic startup procedure for an ESMF application is shown in figure \ref{fig:ESMFApplicationMain}. Startup
+begins by creating the top-level in figure \ref{fig:couplerscaling}. Any ESMF component could reside at the top-level, so
+all ESMF components are created to be consistent with the startup sequence shown in figure \ref{fig:ESMFApplicationMain}.
+
+\begin{figure}
+\caption[{ESMF Boot Up Stage}]{The basic startup procedure for
+all ESMF applications.}
+\label{fig:ESMFApplicationMain}
+\scalebox{0.7}{\includegraphics{ESMFApplicationMain.eps}}
+\end{figure}
+
 The application begins by creating atmosphere, ocean, and coupler components.
 The atmosphere initialization method defines the atmosphere import and export states
 (import state creation is not shown) and the ocean initialization method defines
@@ -269,13 +269,6 @@ as an argument before it proceeds to make any changes to data in the export stat
 that may still needed.  The atmosphere and ocean proceed to the next 
 timestep, and validate their import states as the timestep begins.  
 
-\begin{figure}
-\caption[{Coupling Sequence}]{One-way coupling between an atmosphere and
-ocean executing concurrently.}
-\label{fig:1waycoupling}
-\scalebox{0.70}{\includegraphics{OneWayCoupling.eps}}
-\end{figure}
-
 \subsection{Class Descriptions}
 
 The following are brief descriptions of the objects involved in the
@@ -299,7 +292,7 @@ and retrieve information about subcomponents.
 All {\tt Coupler}s, {\tt Gridded Component}s and {\tt Application}s possess 
 these methods. 
 
-\subsubsection{Application Component (ESMF\_App)}
+\subsubsection{Application Component }
 
 The {\tt Application Component} class is responsible for managing those 
 functions that relate to an entire scientific application running under ESMF.
@@ -310,13 +303,13 @@ configures any resources needed to run the framework.  The {\tt Application}
 class can be queried for information such as an experiment name, model name, and run 
 type (ESMF\_INIT, ESMF\_BRANCH, etc.).  
 
-\subsubsection{Coupler Component (ESMF\_Cpl)}
+\subsubsection{Coupler Component }
 A {\tt Coupler} is a user-customized type of {\tt Component} that 
 encompasses all the functionality needed to communicate data between two or 
 more {\tt Component}s.  A {\tt Coupler} has a coupling initiation method that 
 defines and returns a set of {\tt Transform}s.
 
-\subsubsection{Gridded Component (ESMF\_GComp)}
+\subsubsection{Gridded Component }
 \label{sec:griddedcomponent} 
 A {\tt Gridded Component} is a user-customized {\tt Component} 
 that typically represents a physical system discretized on some spatial grid.

@@ -107,7 +107,7 @@ ID list, or by defining a {\tt Layout}.
 All ESMF objects inherit from an ESMF {\tt Base} class.  
 The {\tt Base} class is an abstraction of the data and behavior common to all
 classes in the framework.  Some methods and data can be
-inherited directly; others are expected to be overloaded by
+inherited directly; others are expected to be overloaded and/or overridden by
 higher level objects.  {\tt Base} class methods include setting and querying 
 attributes, print, validate, read/write, and restart. 
 
@@ -121,8 +121,9 @@ and not specialized by higher level objects.
 
 \subsubsection{Machine Model (ESMF\_Machine)} 
 \label{sec:machine} 
-The {\tt Machine Model} provides a general representation of 
-key features of computer hardware and system software.  
+The {\tt Machine Model} provides a general abstraction of 
+key, system specific, features of computer hardware and system software in
+the ESMF Programming Model.
 This information is used by the framework to 
 perform resource allocation, data distribution, and dynamic load balancing.  
 The {\tt Machine Model} can be queried for information such as

@@ -15,7 +15,7 @@ from a software engineering perspective; for example, a software developer who
 wishes to extend the ESMF to include significantly new functionality.  It assumes 
 a basic knowledge of object-oriented design concepts and terminology, familiarity 
 with the C, C++, and FORTRAN programming languages, and an understanding of 
-diagramming using the Unified Modeling Language (UML).  Most scientific users will 
+diagramming using the Unified Modeling Language (UML).  Most users will 
 not need or want this level of technical detail, and are advised to turn to 
 the {\it ESMF User's Guide}{\http://www.esmf.ucar.edu/esmf\_docs/ESMF\_usrdoc/} 
 and the {\it ESMF User's Reference}{\http://www.esmf.ucar.edu/esmf\_docs/ESMF\_refdoc/} 
@@ -29,20 +29,20 @@ software elements are partly defined or unimplemented.  For example, a framework
 may require that a gridded model provide a {\tt GetGrid} method, and specify 
 a format for describing the grid, but leave the implementation of the method up
 to the framework user.  This relatively non-intrusive sort of standardization enables 
-different model components to interact with each other, and to use fully
-complete, general methods provided by the framework (in this case, perhaps a 
+different model components to interact with each other, and also
+use general methods provided by the framework (for example a framework supplied
 {\tt Regrid} method).
 
 The functional split between developing and combining components is the
 foremost feature of the ESMF architecture.  The simplest view of the ESMF 
-is that it consists of an {\it infrastructure} of utilities and data 
+is that it consists of a layered {\it infrastructure} of utilities and data 
 structures for building model components and a {\it superstructure} for coupling 
 and running them.  User-provided components fit between these 
 layers like the filling in a sandwich.  Each successively higher layer builds
 on elements of the one below it.  Utilities such as communication
 primitives, logging and profiling tools are used in methods that
-manipulate field and grid data structures.  These data structures may in 
-turn be integrated into user-supplied components, or they may simply 
+manipulate field and grid data structures.  These data structures may be
+tightly integrated into user-supplied components, or they may simply 
 help to wrap a component's native data structures in order to provide 
 a standard interface for coupling.  The superstructure provides a systematic 
 approach to sequencing and synchronizing user-supplied components that 
@@ -61,7 +61,7 @@ major classes in the framework, their structure, their relationship to each othe
 and the sequence of events for key interactions.  Section~\ref{sec:implications} 
 contains a preliminary definition of ESMF compliance, and outlines the sorts
 of modifications that will be required to adopt the framework.  Section~\ref{sec:glos} is a 
-glossary of terms. Prior these detailed technical discussion, we examine existing frameworks within our 
+glossary of terms. Prior to these detailed technical discussion, we examine existing frameworks within our 
 community and how they have motivated and influenced ESMF design
 
 
