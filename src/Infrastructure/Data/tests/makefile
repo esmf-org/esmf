@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2003/02/21 14:59:46 nscollins Exp $ 
+# $Id: makefile,v 1.8 2003/02/21 18:32:31 nscollins Exp $ 
 
 ALL:  tests
 
@@ -23,7 +23,7 @@ TESTEXAMPLES_3  = \
 
 TESTEXAMPLES_9  = \
 	ESMF_ArrayTest RUN_ESMF_ArrayTestUNI ESMF_ArrayTest.rm \
-	ESMF_ArrayF90Ptr RUN_ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.rm \
+	ESMF_ArrayF90Ptr RUN_ESMF_ArrayF90PtrUNI ESMF_ArrayF90Ptr.rm \
 	ESMF_ArrayBasic RUN_ESMF_ArrayBasicUNI ESMF_ArrayBasic.rm
 
 TESTSF       = ESMF_ArrayTest.F90 ESMF_ArrayBasic.F90 ESMF_ArrayF90Ptr.F90
