@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.34 2004/05/05 13:53:30 nscollins Exp $
+// $Id: ESMC_LogErr.h,v 1.35 2004/05/05 20:30:48 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,8 +40,8 @@
 #include "ESMF_LogConstants.inc"
 #include "ESMF_ErrConstants.inc"
 
-enum EMSC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
-                        
+enum ESMC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
+//extern ESMC_Log Glog;                        
 int ESMC_LogInitialize(char filename[]);
 int ESMC_LogFinalize();
 void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
@@ -81,15 +81,15 @@ class ESMC_Log {
     int ESMC_LogWrite(char msg[],int logtype);
     int ESMC_LogWrite(char msg[],int logtype,char modmeth[]);
     int ESMC_LogWrite(char msg[],int logtype,char module[],char method[]);
-    int ESMC_LogWrite(char FILE[],int LINE,char msg[],int logtype);
-    int ESMC_LogWrite(char FILE[],int LINE,char msg[],int logtype,char modmeth[]);
-    int ESMC_LogWrite(char FILE[],int LINE,char msg[],int logtype,char module[],char method[]);
+    int ESMC_LogWrite(int LINE,char FILE[],char msg[],int logtype);
+    int ESMC_LogWrite(int LINE,char FILE[],char msg[],int logtype,char modmeth[]);
+    int ESMC_LogWrite(int LINE,char FILE[],char msg[],int logtype,char module[],char method[]);
     int ESMC_LogFoundError(int rc,char msg[],int logtype);
     int ESMC_LogFoundError(int rc,char msg[],int logtype,char modmeth[]);
     int ESMC_LogFoundError(int rc,char msg[],int logtype,char module[],char method[]);
-    int ESMC_LogFoundError(int rc,char FILE[],int LINE,char msg[],int logtype);
-    int ESMC_LogFoundError(int rc,char FILE[],int LINE,char msg[],int logtype,char modmeth[]);
-    int ESMC_LogFoundError(int rc,char FILE[],int LINE,char msg[],int logtype,char module[],char method[]);
+    int ESMC_LogFoundError(int rc,int LINE,char FILE[],char msg[],int logtype);
+    int ESMC_LogFoundError(int rc,int LINE,char FILE[],char msg[],int logtype,char modmeth[]);
+    int ESMC_LogFoundError(int rc,int LINE,char FILE[],char msg[],int logtype,char module[],char method[]);
     //void ESMC_LogInfo(char* fmt,...);   
     //char charData[],char strData[][32],int intData[], double floatData[]);
     //int ESMC_LogGetUnit()

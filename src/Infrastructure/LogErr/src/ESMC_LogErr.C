@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.41 2004/05/04 21:53:43 eschwab Exp $
+// $Id: ESMC_LogErr.C,v 1.42 2004/05/05 20:30:48 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.41 2004/05/04 21:53:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.42 2004/05/05 20:30:48 cpboulder Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -156,7 +156,6 @@ int ESMC_LogFinalize(
 //   none
 //
 // !ARGUMENTS:
-
 
    )
 //
@@ -426,8 +425,8 @@ int ESMC_Log::ESMC_LogWrite(
 //  none
 //
 // !ARGUMENTS:
-	char FILE[],
 	int LINE,
+	char FILE[],
 	char msg[],	// Log Entry
     	int logtype// Log Type   
     )
@@ -488,8 +487,8 @@ int ESMC_Log::ESMC_LogWrite(
 //  none
 //
 // !ARGUMENTS:
-    char FILE[],
     int LINE,
+    char FILE[],
     char msg[],	// Log Entry
     int logtype,// Log Type   
     char modmeth[]
@@ -542,8 +541,8 @@ int ESMC_Log::ESMC_LogWrite(
 //  none
 //
 // !ARGUMENTS:
-    char FILE[],
     int LINE,
+    char FILE[],
     char msg[],	// Log Entry
     int logtype,// Log Type   
     char module[],
@@ -614,8 +613,8 @@ int ESMC_Log::ESMC_LogFoundError(
 //
 // !ARGUMENTS:
     int rc,
-    char FILE[],
     int LINE,
+    char FILE[],
     char msg[],	// Log Entry
     int logtype// Log Type   
       
@@ -627,7 +626,7 @@ int ESMC_Log::ESMC_LogFoundError(
 	int result=ESMF_FALSE;
 	if (rc!=ESMF_SUCCESS)
 	{
-		ESMC_LogWrite(FILE,LINE,msg,logtype);
+		ESMC_LogWrite(LINE,FILE,msg,logtype);
 		result=ESMF_TRUE;
 	}
 	return result;
@@ -641,8 +640,8 @@ int ESMC_Log::ESMC_LogFoundError(
 //
 // !ARGUMENTS:
     int rc,
-    char FILE[],
     int LINE,
+    char FILE[],
     char msg[],	// Log Entry
     int logtype,// Log Type   
     char modmeth[]      
@@ -654,7 +653,7 @@ int ESMC_Log::ESMC_LogFoundError(
 	int result=ESMF_FALSE;
 	if (rc!=ESMF_SUCCESS)
 	{
-		ESMC_LogWrite(FILE,LINE,msg,logtype,modmeth);
+		ESMC_LogWrite(LINE,FILE,msg,logtype,modmeth);
 		result=ESMF_TRUE;
 	}
 	return result;
@@ -668,8 +667,8 @@ int ESMC_Log::ESMC_LogFoundError(
 //
 // !ARGUMENTS:
     int rc,
-    char FILE[],
     int LINE,
+    char FILE[],
     char msg[],	// Log Entry
     int logtype,// Log Type   
     char module[],
@@ -683,7 +682,7 @@ int ESMC_Log::ESMC_LogFoundError(
 	int result=ESMF_FALSE;
 	if (rc!=ESMF_SUCCESS)
 	{
-		ESMC_LogWrite(FILE,LINE,msg,logtype,module,method);
+		ESMC_LogWrite(LINE,FILE,msg,logtype,module,method);
 		result=ESMF_TRUE;
 	}
 	return result;

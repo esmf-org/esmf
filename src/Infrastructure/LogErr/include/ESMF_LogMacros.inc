@@ -1,5 +1,5 @@
 #if 0
- $Id: ESMF_LogMacros.inc,v 1.4 2004/05/04 20:05:50 cpboulder Exp $
+ $Id: ESMF_LogMacros.inc,v 1.5 2004/05/05 20:30:48 cpboulder Exp $
 
  Earth System Modeling Framework
  Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,42 +19,21 @@
 #endif
 
 #define ESMC_LogWrite(msg,logtype) \
-ESMC_LogWrite(__FILE__,__LINE__,msg,logtype)
+ESMC_LogWrite(__LINE__,__FILE__,msg,logtype)
 
 #define ESMC_LogWrite(msg,logtype,modmeth) \
-ESMC_LogWrite(__FILE__,__LINE__,msg,logtype,modmeth)
+ESMC_LogWrite(__LINE__,__FILE__,msg,logtype,modmeth)
 
 #define ESMC_LogWrite(msg,logtype,module,method) \
-ESMC_LogWrite(__FILE__,__LINE__,msg,logtype,module,method)
+ESMC_LogWrite(__LINE__,__FILE__,msg,logtype,module,method)
 
 #define ESMC_LogFoundError(rc,msg,logtype) \
-ESMC_LogFoundError(rc,__FILE__,__LINE__,msg,logtype)
+ESMC_LogFoundError(rc,__LINE__,__FILE__,msg,logtype)
 
 #define ESMC_LogFoundError(rc,msg,logtype,modmeth) \
-ESMC_LogFoundError(rc,__FILE__,__LINE__,msg,logtype,modmeth)
+ESMC_LogFoundError(rc,__LINE__,__FILE__,msg,logtype,modmeth)
 
 #define ESMC_LogFoundError(rc,msg,logtype,module,method) \
-ESMC_LogFoundError(rc,__FILE__,__LINE__,msg,logtype,module,method)
+ESMC_LogFoundError(rc,__LINE__,__FILE__,msg,logtype,module,method)
 
-
-#define ESMC_LogErrMsg(err,msg) \
-ESMC_LogErrMsg_LN(err,__LINE__,__FILE__,__DIR__,msg)
-
-#define ESMF_LogErr(anErr,err) \
-ESMF_LogErr_LN(anErr,err,__LINE__,__FILE__,__DIR__)
-
-#define ESMC_LogErr(err) \
-ESMC_LogErr_LN(err,__LINE__,__FILE__,__DIR__)
-
-#define ESMF_LogWarnMsg(anErr,err,msg) \
-ESMF_LogWarnMsg_LN(anErr,err,__LINE__,__FILE__,__DIR__,msg)
-
-#define ESMC_LogWarnMsg(err,msg) \
-ESMC_LogWarnMsg_LN(err,__LINE__,__FILE__,__DIR__,msg)
-
-#define ESMF_LogWarn(anErr,err) \
-ESMF_LogWarn_LN(anErr,err,__LINE__,__FILE__,__DIR__)
-
-#define ESMC_LogWarn(err) \
-ESMC_LogWarn_LN(err,__LINE__,__FILE__,__DIR__)
 
