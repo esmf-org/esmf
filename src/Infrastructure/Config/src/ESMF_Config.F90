@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.29 2003/07/24 22:07:37 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.1 2003/09/17 22:59:11 cdeluca Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !

@@ -1,7 +1,7 @@
 
 All: alldoc
 
-LOCDIR = src/Infrastructure/ConfigAttr/doc
+LOCDIR = src/Infrastructure/Config/doc
 
 DVIFILES  =	Config_reqdoc.dvi \
 		Config_refdoc.dvi

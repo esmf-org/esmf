@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/05/02 23:46:15 lzaslavsky Exp $
+# $Id: makefile,v 1.1 2003/09/17 22:59:11 cdeluca Exp $
 
 # leave alone.
 ALL: lib 
@@ -24,13 +24,12 @@ OBJSC     = $(addsuffix .o, $(basename $(SOURCEC)))
 OBJSF     = $(addsuffix .o, $(basename $(SOURCEF)))
 TEXFILES  = $(addsuffix .tex, $(basename $(SOURCEF)))
 
-# is MANSEC something about documentation?
-MANSEC	  = ConfigAttrobj
+MANSEC	  = Configobj
 LIBBASE	  = libesmf
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/ConfigAttr/src
+LOCDIR	  = src/Infrastructure/Config/src
 
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
