@@ -1,4 +1,4 @@
-% $Id: gcomp_ccparam.tex,v 1.1 2003/01/07 21:34:59 nscollins Exp $
+% $Id: GridComp_usage.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,19 +8,14 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\subsection{Parameters}
-
-\begin{description}
-
-\item [<ITEM1>] <Description of ITEM1.>
-
-\item [<ITEM2>] <Description of ITEM2.>
-
-\end{description}
+%\subsection{Use and Examples}
 
 
-
-
-
+A Gridded Component is a computational entity which
+consumes and produces data.  It uses a State object to
+exchange data between itself and other Components.
+It can call a Transform method to exchange data
+without returning to the calling level.  It uses
+a Clock object to manage time.
 
 

@@ -1,0 +1,29 @@
+% $Id: GridComp_rest.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
+%
+% Earth System Modeling Framework
+% Copyright 2002-2003, University Corporation for Atmospheric Research, 
+% Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
+% Laboratory, University of Michigan, National Centers for Environmental 
+% Prediction, Los Alamos National Laboratory, Argonne National Laboratory, 
+% NASA Goddard Space Flight Center.
+% Licensed under the GPL.
+
+%\subsubsection{Restrictions and Future Work}
+
+\begin{enumerate}
+
+\item Gridded Components must only communicate with other
+components via data in State objects.  They must 
+not make direct references to data in other States.
+
+\item If possible, Gridded Components should attempt to make 
+all data private, so public names do not interfere with data 
+in other components.
+
+\item It is not expected that a single Gridded Component be able 
+to function in both sequential and concurrent modes, although 
+Gridded Components of different types can be nested. For example,
+a concurrently called Gridded Component can contain several nested 
+sequential Gridded Components.  
+
+\end{enumerate}

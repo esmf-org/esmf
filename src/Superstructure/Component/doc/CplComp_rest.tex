@@ -1,4 +1,4 @@
-% $Id: cpl_design.tex,v 1.2 2003/02/20 17:31:23 nscollins Exp $
+% $Id: CplComp_rest.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,10 +8,9 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\subsection{Design}
+%\subsubsection{Restrictions and Future Work}
 
-A Coupler Component manages the transformation of data between Components.
-It contains a list of State objects and the operations needed to
-make them compatible, including such things as regridding, unit
-conversion, etc.
+Couplers are user-written code and need to be
+customized for each combination of Components
+which they are interacting with.
 

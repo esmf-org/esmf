@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.35 2004/03/18 22:23:59 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.36 2004/03/23 22:50:29 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -288,7 +288,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.35 2004/03/18 22:23:59 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.36 2004/03/23 22:50:29 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -750,7 +750,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_State}.
+!      Attaches a real attribute to an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -807,7 +807,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_State}.
+!      Attaches a real list attribute to an {\tt ESMF\_State}.
 !
 ! 
 !     The arguments are:
@@ -873,7 +873,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_State}.
+!      Attaches an logical attribute to an {\tt ESMF\_State}.
 !
 ! 
 !     The arguments are:
@@ -931,7 +931,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_State}.
+!      Attaches an logical list attribute to an {\tt ESMF\_State}.
 !
 ! 
 !     The arguments are:
@@ -997,7 +997,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_State}.
+!      Attaches a character attribute to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1089,7 +1089,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple arrays to a {\tt ESMF\_State}.
+!      Add multiple arrays to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1237,7 +1237,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple fields to a {\tt ESMF\_State}.
+!      Add multiple fields to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1396,7 +1396,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple states to a {\tt ESMF\_State}.
+!      Add multiple states to an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1478,24 +1478,24 @@ end function
 !    it will do an error check to verify the total number of items found
 !    in the argument lists matches this count of the expected number of items.
 !   \item[{[dataneeded]}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISNEEDED} or 
 !    {\tt ESMF\_STATEDATANOTNEEDED}.  If not specified, the default value is
 !    set to {\tt ESMF\_STATEDATAISNEEDED}.
 !   \item[{[dataready]}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAREADYTOWRITE},
 !    {\tt ESMF\_STATEDATAREADYTOREAD}, or {\tt ESMF\_STATEDATANOTREADY}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEDATAREADYTOREAD}.
 !   \item[{[datavalid]}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISVALID},
 !    {\tt ESMF\_STATEDATAINVALID}, or {\tt ESMF\_STATEDATAVALIDITYUNKNOWN}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEDATAISVALID}.
 !   \item[{[datareqrestart}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISRESTART} or
 !    {\tt ESMF\_STATEDATANORESTART}. If not specified, the default 
 !    value is set to {\tt ESMF\_STATEDATAISRESTART}.
@@ -1733,7 +1733,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an integer attribute from a {\tt ESMF\_State}.
+!      Returns an integer attribute from an {\tt ESMF\_State}.
 !
 ! 
 !     The arguments are:
@@ -1856,12 +1856,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_State}.
+!      Returns a real attribute from an {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      A {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [value]
@@ -1913,12 +1913,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns a real attribute from a {\tt ESMF\_State}.
+!      Returns a real attribute from an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      A {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [count]
@@ -1978,12 +1978,12 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical attribute from a {\tt ESMF\_State}.
+!      Returns an logical attribute from an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      A {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item [name]
 !      The name of the Attribute to retrieve.
 !     \item [value]
@@ -2035,7 +2035,7 @@ end function
 
 !
 ! !DESCRIPTION:
-!      Returns an logical list attribute from a {\tt ESMF\_State}.
+!      Returns an logical list attribute from an {\tt ESMF\_State}.
 ! 
 !     The arguments are:
 !     \begin{description}
@@ -2159,7 +2159,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      A {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item [count]
 !      The number of attributes on this object.
 !     \item [{[rc]}] 
@@ -2280,7 +2280,7 @@ end function
 !     The arguments are:
 !     \begin{description}
 !     \item [state]
-!      A {\tt ESMF\_State} object.
+!      An {\tt ESMF\_State} object.
 !     \item [num]
 !      The number of the Attribute to query.
 !     \item [name]
@@ -3428,24 +3428,24 @@ end function
 !    This argument is optional, and if specified is used as an error check
 !    to verify that the actual total number of items found matches this count.
 !   \item[{[dataneeded]}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISNEEDED} or 
 !    {\tt ESMF\_STATEDATANOTNEEDED}.  If not specified, the default value is
 !    set to {\tt ESMF\_STATEDATAISNEEDED}.
 !   \item[{[dataready]}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAREADYTOWRITE},
 !    {\tt ESMF\_STATEDATAREADYTOREAD}, or {\tt ESMF\_STATEDATANOTREADY}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEDATAREADYTOREAD}.
 !   \item[{[datavalid]}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISVALID},
 !    {\tt ESMF\_STATEDATAINVALID}, or {\tt ESMF\_STATEDATAVALIDITYUNKNOWN}.
 !    If not specified, the default value is set to 
 !    {\tt ESMF\_STATEDATAISVALID}.
 !   \item[{[datareqrestart}]
-!    Set the default value for new items added to a {\tt ESMF\_State}.  
+!    Set the default value for new items added to an {\tt ESMF\_State}.  
 !    Valid values are {\tt ESMF\_STATEDATAISRESTART} or
 !    {\tt ESMF\_STATEDATANORESTART}. If not specified, the default 
 !    value is set to {\tt ESMF\_STATEDATAISRESTART}.
@@ -3769,7 +3769,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple arrays to a {\tt ESMF\_State}.  Internal routine only.
+!      Add multiple arrays to an {\tt ESMF\_State}.  Internal routine only.
 !
 !     The arguments are:
 !     \begin{description}
@@ -4170,7 +4170,7 @@ end function
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Add multiple bundles to a {\tt ESMF\_State}.  Internal routine only.
+!      Add multiple bundles to an {\tt ESMF\_State}.  Internal routine only.
 !
 !     The arguments are:
 !     \begin{description}

@@ -1,4 +1,4 @@
-% $Id: gcomp_rest.tex,v 1.3 2004/03/22 19:18:03 cdeluca Exp $
+% $Id: CplComp_usage.tex,v 1.1 2004/03/23 22:50:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -8,13 +8,10 @@
 % NASA Goddard Space Flight Center.
 % Licensed under the GPL.
 
-%\subsubsection{Restrictions and Future Work}
+%\subsection{Design}
 
-Gridded Components must only communicate with other
-Components via data in State objects.  They must 
-not make direct references to data in other states.
-
-If possible, Components should attempt to make all
-data private, so public names do not interfere with data in
-other components.
+A Coupler Component manages the transformation of data between Components.
+It contains a list of State objects and the operations needed to
+make them compatible, including such things as regridding, unit
+conversion, etc.
 

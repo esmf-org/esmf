@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.25 2004/03/22 19:18:03 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.26 2004/03/23 22:50:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -50,25 +50,25 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{gcomp_desc}
+\input{GridComp_desc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_desc}
+\input{../Superstructure/Component/doc/GridComp_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{gcomp_usage}
+\input{GridComp_usage}
 \input{ESMF_GCompEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_usage}
+\input{../Superstructure/Component/doc/GridComp_usage}
 \input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-\input{gcomp_rest}
+\input{GridComp_rest}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/gcomp_rest}
+\input{../Superstructure/Component/doc/GridComp_rest}
 #endif
 
 \subsection{Class API: Basic GridComp Methods}
@@ -91,25 +91,25 @@
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{cpl_desc}
+\input{CplComp_desc}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_desc}
+\input{../Superstructure/Component/doc/CplComp_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{cpl_usage}
+\input{CplComp_usage}
 \input{ESMF_CplEx_fapi}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_usage}
+\input{../Superstructure/Component/doc/CplComp_usage}
 \input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 #endif
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-\input{cpl_rest}
+\input{CplComp_rest}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/cpl_rest}
+\input{../Superstructure/Component/doc/CplComp_rest}
 #endif
 
 \subsection{Class API: Basic CplComp Methods}
@@ -128,11 +128,6 @@
 
 
 %%%%%%% end class sections %%%%%%%%
-
-#ifdef STANDALONE
-\section{Review Status}
-\input{Component_desrev}
-#endif
 
 #ifdef STANDALONE
 %\section{Glossary}
