@@ -1,4 +1,4 @@
-! $Id: user_model.F90,v 1.4 2003/02/28 21:46:11 nscollins Exp $
+! $Id: user_model.F90,v 1.5 2003/03/02 19:37:07 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,16 +123,18 @@
         endif
 
         ! Get information from the component.
-        call ESMF_CompGet(comp, import=myimport, layout=mylayout, rc=status)
+        call ESMF_CompGet(comp, import=myimport, export=myexport, &
+                                                  layout=mylayout, rc=status)
+        ! Something to show we are running on different procs
+        call ESMF_LayoutGetDEId(mylayout, de_id, rc=status)
+        print *, "User Comp Run running on DE ", de_id
+
         call ESMF_StatePrint(myimport, rc=status)
         call ESMF_StateGetData(myimport, "humidity", humidity, rc=status)
         call ESMF_FieldPrint(humidity, "", rc=status)
 
         ! This is where the model specific computation goes.
 
-        ! Something to show we are running on different procs
-        call ESMF_LayoutGetDEId(mylayout, de_id, rc=status)
-        print *, "User Comp Run running on DE ", de_id
 
 
         ! Here is where the output state is updated.
