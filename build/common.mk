@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.32 2004/01/14 17:33:43 nscollins Exp $
+#  $Id: common.mk,v 1.33 2004/01/25 04:36:54 nscollins Exp $
 #===============================================================================
 #  common.mk
 #
@@ -420,9 +420,6 @@ $(ESMC_TESTDIR)/ESMF_%STest : $(SYSTEM_TESTS_OBJ) ESMF_%STest.o
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
-	@echo ""
-	@echo "****************************************"
-	@echo ""
 
 #
 # run_system_tests
@@ -491,9 +488,6 @@ $(ESMC_TESTDIR)/ESMF_%UTest : ESMF_%UTest.o
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
-	@echo ""
-	@echo "****************************************"
-	@echo ""
 
 
 #
@@ -567,9 +561,6 @@ $(ESMF_EXDIR)/ESMF_%Ex : ESMF_%Ex.o
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	rm -f  $^
-	@echo ""
-	@echo "****************************************"
-	@echo ""
 
 
 $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o  
@@ -577,9 +568,6 @@ $(ESMF_EXDIR)/ESMC_%Ex: ESMC_%Ex.o
         -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
         $(SL_LINKOPTS)
 	rm -f $^
-	@echo ""
-	@echo "****************************************"
-	@echo ""
 
 #
 # run_examples
@@ -624,9 +612,6 @@ $(ESMC_TESTDIR)/%App : $(DEMO_OBJ) %Demo.o
 	${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} \
 	$(SL_LINKOPTS)
 	${RM} -f *.o *.mod
-	@echo ""
-	@echo "****************************************"
-	@echo ""
 
 
 #
