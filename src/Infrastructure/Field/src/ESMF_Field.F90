@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.15 2003/04/17 20:41:13 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.16 2003/04/21 21:38:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -210,7 +210,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.15 2003/04/17 20:41:13 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.16 2003/04/21 21:38:06 nscollins Exp $'
 
 !==============================================================================
 !
@@ -373,17 +373,6 @@
 
 !------------------------------------------------------------------------------
 
-interface operator (.eq.)
- module procedure ESMF_sfeq
- module procedure ESMF_dteq
- module procedure ESMF_dkeq
-end interface
-
-interface operator (.ne.)
- module procedure ESMF_sfne
- module procedure ESMF_dtne
- module procedure ESMF_dkne
-end interface
 
 !
 !==============================================================================

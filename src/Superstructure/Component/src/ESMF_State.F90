@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.34 2003/04/17 22:15:23 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.35 2003/04/21 21:35:44 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -251,14 +251,14 @@
       public ESMF_StateRestore
  
       public ESMF_StatePrint, ESMF_StateValidate
-      public ESMF_imexeq, ESMF_needeq, ESMF_redyeq, ESMF_valideq
-      public ESMF_imexne, ESMF_needne, ESMF_redyne, ESMF_validne
+
+      public operator(.eq.), operator(.ne.)
 !EOP
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.34 2003/04/17 22:15:23 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.35 2003/04/21 21:35:44 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -318,9 +318,6 @@ end interface
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
- module procedure ESMF_sfeq
- module procedure ESMF_dteq
- module procedure ESMF_dkeq
  module procedure ESMF_oteq
  module procedure ESMF_imexeq
  module procedure ESMF_needeq
@@ -329,9 +326,6 @@ interface operator (.eq.)
 end interface
 
 interface operator (.ne.)
- module procedure ESMF_sfne
- module procedure ESMF_dtne
- module procedure ESMF_dkne
  module procedure ESMF_otne
  module procedure ESMF_imexne
  module procedure ESMF_needne

@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.3 2003/04/16 01:21:18 nscollins Exp $
+! $Id: ESMF_Bundle.F90,v 1.4 2003/04/21 21:38:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -158,6 +158,8 @@
        public ESMF_BundleValidate     ! Check internal consistency
        public ESMF_BundlePrint        ! Print contents of a Bundle
 
+       public operator(.eq.), operator(.ne.)
+
 !  !subroutine ESMF_BundleGetDataMap
 !
 !  !subroutine ESMF_BundleCheckpoint(bundle, iospec, rc)
@@ -246,16 +248,10 @@
 !------------------------------------------------------------------------------
 interface operator (.eq.)
  module procedure ESMF_pfeq
- module procedure ESMF_sfeq
- module procedure ESMF_dteq
- module procedure ESMF_dkeq
 end interface
 
 interface operator (.ne.)
  module procedure ESMF_pfne
- module procedure ESMF_sfne
- module procedure ESMF_dtne
- module procedure ESMF_dkne
 end interface
 
 

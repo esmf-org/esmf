@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.31 2003/04/14 14:51:28 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.32 2003/04/21 21:35:37 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -266,8 +266,7 @@
       public ESMF_StatusString, ESMF_DataTypeString
 
 !  Overloaded = operator functions
-      public ESMF_sfeq, ESMF_dteq, ESMF_dkeq, ESMF_opeq
-      public ESMF_sfne, ESMF_dtne, ESMF_dkne, ESMF_opne
+      public operator(.eq.), operator(.ne.)
 !
 !
 !EOP
@@ -276,12 +275,13 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.31 2003/04/14 14:51:28 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.32 2003/04/21 21:35:37 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare 
 !  them as if they were simple integers.
+ 
 
 interface operator (.eq.)
  module procedure ESMF_sfeq
@@ -296,6 +296,7 @@ interface operator (.ne.)
  module procedure ESMF_dkne
  module procedure ESMF_opne
 end interface
+
 
 !------------------------------------------------------------------------------
 
