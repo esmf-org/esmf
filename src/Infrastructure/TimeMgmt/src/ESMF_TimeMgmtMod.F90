@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeMgmtMod.F90,v 1.2 2002/12/11 21:50:13 nscollins Exp $
+! $Id: ESMF_TimeMgmtMod.F90,v 1.3 2002/12/11 22:11:45 nscollins Exp $
       module ESMF_TimeMgmtMod
 !===============================================================================
 !BOP
@@ -20,7 +20,7 @@
       implicit none
 
 
-!      integer, parameter :: ESMF_SUCCESS=0
+      integer, parameter :: ESMF_SUCCESS=0
 
       integer, parameter :: ESMF_ERR_RETURN=0, &
                              ESMF_ERR_EXIT=1, &
