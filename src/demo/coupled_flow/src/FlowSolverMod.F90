@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+! $Id: FlowSolverMod.F90,v 1.2 2003/09/25 15:10:23 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -165,7 +165,8 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords, global_max_coords
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coords
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coords
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
       integer :: counts(2)

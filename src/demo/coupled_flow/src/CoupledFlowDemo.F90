@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+! $Id: CoupledFlowDemo.F90,v 1.2 2003/09/25 15:10:23 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -134,7 +134,7 @@
     integer :: mid, by2, quart, by4
 
     type(ESMF_Grid) :: gridTop, gridIN, gridFS
-    real :: mincoords(ESMF_MAXGRIDDIM), maxcoords(ESMF_MAXGRIDDIM)
+    real(ESMF_KIND_R8) :: mincoords(ESMF_MAXGRIDDIM), maxcoords(ESMF_MAXGRIDDIM)
     integer :: counts(ESMF_MAXGRIDDIM)
     integer :: horz_gridtype, vert_gridtype
     integer :: horz_stagger, vert_stagger

@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.1 2003/09/18 18:33:09 cdeluca Exp $
+! $Id: CoupledFlowApp.F90,v 1.2 2003/09/25 15:10:23 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -47,7 +47,7 @@
     ! Variables related to grid and clock
     integer :: counts(2)
     integer :: i_max, j_max
-    real :: x_min, x_max, y_min, y_max
+    real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
     integer :: s_month, s_day, s_hour, s_min
     integer :: e_month, e_day, e_hour, e_min
 
