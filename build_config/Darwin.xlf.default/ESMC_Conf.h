@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: ESMC_Conf.h,v 1.1 2004/03/18 22:29:55 nscollins Exp $"
+"$Id: ESMC_Conf.h,v 1.2 2004/06/28 13:22:26 nscollins Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -80,6 +80,9 @@ Licensed under the GPL.
 #define ESMC_USE_KBYTES_FOR_SIZE
 
 #define ESMC_USE_A_FOR_DEBUGGER
+
+#define ESMC_PRESENT(arg) ( (arg) != 0 )
+
 
 #if S32
 #define ESMF_IS_32BIT_MACHINE 1
