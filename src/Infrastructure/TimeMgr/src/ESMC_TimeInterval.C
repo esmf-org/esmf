@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.69 2004/10/27 18:49:30 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.70 2004/10/29 23:44:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -38,7 +38,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.69 2004/10/27 18:49:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.70 2004/10/29 23:44:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -119,9 +119,9 @@
     // save current value to restore in case of failure
     ESMC_TimeInterval saveTimeInterval = *this;
 
-    ESMC_FractionSetw(0);  // set seconds = 0
-    ESMC_FractionSetn(0);  // set fractional seconds numerator = 0
-    ESMC_FractionSetd(1);  // set fractional seconds denominator = 1
+    ESMC_FractionSet(0,0,1);  // set seconds = 0
+                              // set fractional seconds numerator = 0
+                              // set fractional seconds denominator = 1
     this->yy = 0;
     this->mm = 0;
     this->d  = 0;
@@ -2731,9 +2731,7 @@
 
 //   ESMC_BaseTime(0, 0, 1) { // TODO: F90 issue with base class constructor?
 
-   ESMC_FractionSetw(0);
-   ESMC_FractionSetn(0);
-   ESMC_FractionSetd(1);
+   ESMC_FractionSet(0,0,1);
    yy = 0;
    mm = 0;
    d  = 0;

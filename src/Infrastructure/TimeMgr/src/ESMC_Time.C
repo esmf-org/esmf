@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.68 2004/10/27 18:49:29 eschwab Exp $"
+// $Id: ESMC_Time.C,v 1.69 2004/10/29 23:44:30 eschwab Exp $"
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.68 2004/10/27 18:49:29 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.69 2004/10/29 23:44:30 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -123,9 +123,9 @@
         us_r8 != ESMC_NULL_POINTER || ns_r8 != ESMC_NULL_POINTER ||
         sN    != ESMC_NULL_POINTER || sD    != ESMC_NULL_POINTER) {
 
-      ESMC_FractionSetw(0);  // set seconds = 0
-      ESMC_FractionSetn(0);  // set fractional seconds numerator = 0
-      ESMC_FractionSetd(1);  // set fractional seconds denominator = 1
+      ESMC_FractionSet(0,0,1);  // set seconds = 0
+                                // set fractional seconds numerator = 0
+                                // set fractional seconds denominator = 1
 
       this->calendar = ESMC_NULL_POINTER; // to trap no calendar case below
       this->timeZone = 0;                 // default is UTC
@@ -1059,9 +1059,9 @@
 // !REQUIREMENTS:  
 
 //   ESMC_BaseTime(0,0,1) {  // TODO: F90 issue with base class constructor?
-   ESMC_FractionSetw(0);  // set seconds = 0
-   ESMC_FractionSetn(0);  // set fractional seconds numerator = 0
-   ESMC_FractionSetd(1);  // set fractional seconds denominator = 1
+   ESMC_FractionSet(0,0,1);  // set seconds = 0
+                             // set fractional seconds numerator = 0
+                             // set fractional seconds denominator = 1
    calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
                                   // TODO: replace with ESMC_Base logic
    timeZone = 0;
