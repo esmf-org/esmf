@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.15 2003/04/15 20:30:42 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.16 2003/04/16 21:14:24 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.15 2003/04/15 20:30:42 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.16 2003/04/16 21:14:24 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -248,7 +248,7 @@
             break;
         }
         // convert No Leap Date => Time
-        // TODO:  assumes time zero = 1/1/0000 00:00:00, make same as
+        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
         //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
         case ESMC_CAL_NOLEAP:
         {
@@ -266,6 +266,18 @@
         {
             // convert Julian days to basetime seconds (>= 64 bit)
             T->S = (ESMF_IKIND_I8) D * (ESMF_IKIND_I8) SecondsPerDay;
+
+            break;
+        }
+        // convert 360 Day Date => Time
+        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
+        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
+        case ESMC_CAL_360DAY:
+        {
+            T->S  = (ESMF_IKIND_I8) (YR-1) * (ESMF_IKIND_I8) SecondsPerYear;
+            T->S += (MM-1) * 30 * SecondsPerDay;  // 30 days per month
+            T->S += (DD-1) * SecondsPerDay;
+            
             break;
         }
         default:
@@ -347,12 +359,12 @@
             break;
         }
         // convert Time => No Leap Date
-        // TODO:  assumes time zero = 1/1/0000 00:00:00, make same as
+        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
         //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
         case ESMC_CAL_NOLEAP:
         {
             if (YR != ESMC_NULL_POINTER) {
-              *YR     = (T->S / SecondsPerYear) + 1;
+              *YR = (T->S / SecondsPerYear) + 1;
             }
             int day = ((T->S % SecondsPerYear) / SecondsPerDay) + 1;
 
@@ -372,7 +384,6 @@
               *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
             }
 
-            
             break;
         }
         // convert Time => Julian Date
@@ -382,6 +393,31 @@
             if (D != ESMC_NULL_POINTER) {
               *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
             }
+            break;
+        }
+        // convert Time => 360 Day Date
+        // TODO:  assumes time zero = 1/1/0001 00:00:00, make same as
+        //        Gregorian/Julian time zero = 11/24/-4713 00:00:00 ?
+        case ESMC_CAL_360DAY:
+        {
+            if (YR != ESMC_NULL_POINTER) {
+              *YR = (T->S / SecondsPerYear) + 1;
+            }
+
+            int day_of_year = ((T->S % SecondsPerYear) / SecondsPerDay) + 1;
+
+            if (MM != ESMC_NULL_POINTER) {
+              *MM = (day_of_year / 30) + 1;  // 30 days per month
+            }
+            if (DD != ESMC_NULL_POINTER) {
+              *DD = day_of_year % 30;        // 30 days per month
+            }
+
+            // convert basetime seconds to Julian days
+            if (D != ESMC_NULL_POINTER) {
+              *D = T->S / (ESMF_IKIND_I8) SecondsPerDay;
+            }
+
             break;
         }
         default:
