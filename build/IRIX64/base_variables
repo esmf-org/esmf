@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.15 2003/04/14 17:23:10 nscollins Exp $ 
+# $Id: base_variables,v 1.16 2003/04/23 17:06:29 flanigan Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -67,8 +67,8 @@ OCOMP_FOPTFLAGS	   = -O3
 
 PARCH		   = IRIX
 
-SL_SUFFIX   = 
-SL_LIBOPTS  = 
+SL_SUFFIX   = so
+SL_LIBOPTS  = -rpath $(ESMF_LIBDIR) -shared
 SL_LINKOPTS = 
 SL_F_LINKER = $(F90CXXLD)
 SL_C_LINKER = $(CXXF90LD)

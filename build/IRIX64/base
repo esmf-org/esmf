@@ -1,4 +1,4 @@
-# $Id: base,v 1.6 2003/04/09 19:18:06 flanigan Exp $ 
+# $Id: base,v 1.7 2003/04/23 17:06:28 flanigan Exp $ 
 #
 
 include $(ESMF_BUILD_DIR)/$(ESMF_ARCH)/base_variables
@@ -56,7 +56,7 @@ include $(ESMF_BUILD_DIR)/common
 
 ###################
 #
-shared: 
+shared: build_shared
 
 #
 # Notes:
