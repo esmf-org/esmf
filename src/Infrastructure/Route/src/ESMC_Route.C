@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.82 2004/03/06 00:03:20 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.83 2004/03/09 23:53:19 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.82 2004/03/06 00:03:20 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.83 2004/03/09 23:53:19 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -1115,7 +1115,8 @@ static int maxroutes = 10;
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
 
-    ESMC_AxisIndex myAI[ESMF_MAXDIM], theirAI[ESMF_MAXDIM];
+    ESMC_AxisIndex myAI[ESMF_MAXDIM], myTotalAI[ESMF_MAXDIM],
+                                        theirAI[ESMF_MAXDIM];
     ESMC_XPacket *myXP = NULL;
     ESMC_XPacket *theirXP = NULL;
     ESMC_XPacket intersectXP;
@@ -1141,7 +1142,7 @@ static int maxroutes = 10;
       //  equal the grid dims, e.g. a 2d grid with 4d data.
       for (k=0; k<rank; k++) {
         myAI[k]          =      srcCompAI[srcMyDE + k*srcAICount];
-      //  my_AI_exc[k].max = my_AI_tot[k].max;
+        myTotalAI[k]     =     srcTotalAI[srcMyDE + k*srcAICount];
         myGlobalStart[k] = srcGlobalStart[srcMyDE + k*srcAICount];
       }
 
@@ -1164,8 +1165,7 @@ static int maxroutes = 10;
 
           // get "their" AI out of the dstAI array
           for (k=0; k<rank; k++) {
-            theirAI[k] = dstCompAI[theirDE + k*dstAICount];
-       //     theirAI_exc[k].max = their_AI_tot[k].max;
+            theirAI[k]     =  dstCompAI[theirDE + k*dstAICount];
           }
  
           // calculate "their" XPacket in the sense of the global data
@@ -1183,7 +1183,7 @@ static int maxroutes = 10;
           }
 
           // translate from global to local data space
-          intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myAI, 
+          intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI, 
                                                 rank, myGlobalStart);
 
           // load the intersecting XPacket into the sending RTable
@@ -1207,7 +1207,7 @@ static int maxroutes = 10;
       // get "my" AI out of the dstAI array
       for (k=0; k<rank; k++) {
         myAI[k]          =      dstCompAI[dstMyDE + k*dstAICount];
-    //    myAI_exc[k].max = myAI_tot[k].max;
+        myTotalAI[k]     =     dstTotalAI[dstMyDE + k*dstAICount];
         myGlobalStart[k] = dstGlobalStart[dstMyDE + k*dstAICount];
       }
 
@@ -1229,8 +1229,7 @@ static int maxroutes = 10;
 
           // get "their" AI out of the srcAI array
           for (k=0; k<rank; k++) {
-            theirAI[k] = srcCompAI[theirDE + k*srcAICount];
-     //       theirAI_exc[k].max = theirAI_tot[k].max;
+            theirAI[k]     =  srcCompAI[theirDE + k*srcAICount];
           }
  
           // calculate "their" XPacket in the sense of the global data
@@ -1248,7 +1247,7 @@ static int maxroutes = 10;
           }
 
           // translate from global to local
-          intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myAI, 
+          intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI, 
                                                 rank, myGlobalStart);
 
           // load the intersecting XPacket into the receiving RTable
