@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.19 2003/03/21 22:37:43 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.20 2003/03/21 23:02:32 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.19 2003/03/21 22:37:43 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.20 2003/03/21 23:02:32 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -367,13 +367,9 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_XPacket *global_XP, // in  - global XPacket
-      ESMC_AxisIndex *indexlist,      // in  - set of AxisIndices
-      int rank,                       // in  - rank of AxisIndex array
-      int nx,                         // in  - position of DE in the first
-                                      //       decomposition
-      int ny) {                       // in  - position of DE in the second
-                                      //       decomposition
+      ESMC_XPacket *global_XP,     // in  - global XPacket
+      ESMC_AxisIndex *indexlist,   // in  - set of AxisIndices
+      int rank) {                  // in  - rank of AxisIndex array
 //
 // !DESCRIPTION:
 //      Translates a global XPacket into a local XPacket.
@@ -393,10 +389,15 @@
       break;
       case 2:
         {
-          int gstart = ny*indexlist[0].max + indexlist[0].gstart;
-          this->left  = global_XP->left  - gstart;
-          this->right = global_XP->right - gstart;
-          this->strides[0] = global_XP->strides[0];
+          int my_stride = indexlist[0].r - indexlist[0].l + 1;
+          int my_row = global_XP->left/indexlist[0].max;
+          int my_left = global_XP->left - my_row*indexlist[0].max
+                      - indexlist[0].gstart;
+          int my_right = global_XP->left - my_row*indexlist[0].max
+                       - indexlist[0].gstart;
+          this->left  = my_row*my_stride + my_left;
+          this->right = my_row*my_stride + my_right;
+          this->strides[0] = my_stride;
           this->num[0] = global_XP->num[0];
         }
       break;
