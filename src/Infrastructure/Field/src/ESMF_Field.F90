@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.79 2003/10/09 22:06:10 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.80 2003/10/09 22:55:17 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -235,7 +235,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.79 2003/10/09 22:06:10 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.80 2003/10/09 22:55:17 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -4065,8 +4065,8 @@
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGetPhysGrid(src_grid, src_relloc, local_min=src_min, &
-                                  local_max=src_max, rc=status)
+        call ESMF_GridGetPhysGrid(src_grid, src_relloc, localMin=src_min, &
+                                  localMax=src_max, rc=status)
         call ESMF_GridBoxIntersectSend(dst_grid, src_grid, src_min, src_max, &
                                        myAI, sendDomainList, status)
       endif
@@ -4087,8 +4087,8 @@
           return
         endif
         ! From the grid get the bounding box on this DE
-        call ESMF_GridGetPhysGrid(dst_grid, dst_relloc, local_min=dst_min, &
-                                  local_max=dst_max, rc=status)
+        call ESMF_GridGetPhysGrid(dst_grid, dst_relloc, localMin=dst_min, &
+                                  localMax=dst_max, rc=status)
         call ESMF_GridBoxIntersectRecv(src_grid, dst_min, dst_max, &
                                        recvDomainList, status)
       endif
