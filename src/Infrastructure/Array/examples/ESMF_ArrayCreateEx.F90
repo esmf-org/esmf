@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayCreateEx.F90,v 1.3 2003/12/03 21:44:58 svasquez Exp $
+! $Id: ESMF_ArrayCreateEx.F90,v 1.4 2003/12/03 23:40:45 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -102,6 +102,7 @@
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
+        print *, "FAILED"
     end if
 
     print *, "array 2 print returned"
@@ -115,7 +116,7 @@
     print *, "array 2 getdata returned"
     print *, "realptr2 data = ", realptr2
 
-    call ESMF_ArrayDestroy(array2)
+    call ESMF_ArrayDestroy(array2, rc)
 
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
