@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.74 2004/10/14 22:49:03 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.75 2004/10/14 22:59:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.74 2004/10/14 22:49:03 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.75 2004/10/14 22:59:30 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -346,13 +346,31 @@
       call ESMF_ArraySpecSet(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc=rc)
       write(name, *) "Creating an ArraySpec Test "
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+      !EX_UTest
       f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
                                           name="rh", rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
       !EX_UTest
+      ! Verifing that a destroying a destroyed  Field is handled properly.
+      call ESMF_FieldDestroy(f2, rc=rc)  ! should succeed, f2 exists
+      call ESMF_FieldDestroy(f2, rc=rc)  ! should fail
+      write(failMsg, *) ""
+      write(name, *) "Destroying a destroyed Field Test"
+      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! verify we can create a 3d data on a 2d grid
+      call ESMF_ArraySpecSet(arrayspec, 3, ESMF_DATA_REAL, ESMF_R4, rc=rc)
+      f2 = ESMF_FieldCreate(grid, arrayspec, horzRelloc=ESMF_CELL_CENTER, &
+                                          name="rh", rc=rc)
       write(failMsg, *) "Did not return ESMF_SUCCESS"
-      write(name, *) "Creating a Field with a Grid and ArraySpec Test FLD1.1.1"
+      write(name, *) "Creating a Field with a 2d Grid and 3d ArraySpec"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
@@ -444,15 +462,6 @@
                             ESMF_CELL_CELL, 3, dm, "Field 0", ios, rc)
       write(failMsg, *) ""
       write(name, *) "Creating a Field with an uninitialized Grid and Array Test"
-      call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-      !------------------------------------------------------------------------
-
-      !EX_UTest
-      ! Verifing that a destroying a destroyed  Field is handled properly.
-      call ESMF_FieldDestroy(f2, rc=rc)  ! should succeed, f2 exists
-      call ESMF_FieldDestroy(f2, rc=rc)  ! should fail
-      write(failMsg, *) ""
-      write(name, *) "Destroying a destroyed Field Test"
       call ESMF_Test((rc.ne.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
