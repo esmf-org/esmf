@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.20 2005/02/28 16:40:43 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.21 2005/02/28 21:59:44 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -139,7 +139,7 @@
 
       fromFlow_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, vm, &
-                                 fromFlow_rh, rc=rc)
+                                 routehandle=fromFlow_rh, rc=rc)
       
     endif
 
@@ -151,7 +151,7 @@
 
       fromInject_rh = ESMF_RouteHandleCreate(rc)
       call ESMF_FieldRedistStore(src_field, dst_field, vm, &
-                                 fromInject_rh, rc=rc)
+                                 routehandle=fromInject_rh, rc=rc)
 
     endif
 

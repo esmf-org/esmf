@@ -1,4 +1,4 @@
-! $Id: CouplerMod.F90,v 1.15 2005/02/28 17:03:54 nscollins Exp $
+! $Id: CouplerMod.F90,v 1.16 2005/02/28 21:59:24 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -93,7 +93,7 @@
 
         ! Precompute and return a routehandle which identifies this operation
         call ESMF_FieldRedistStore(srcfield, dstfield, vm, &
-                                   rh_Flow_to_Inject, rc=rc)
+                                   routehandle=rh_Flow_to_Inject, rc=rc)
 
       endif
 
@@ -106,7 +106,7 @@
 
         ! Precompute and return a routehandle which identifies this operation
         call ESMF_FieldRedistStore(srcfield, dstfield, vm, &
-                                   rh_Inject_to_Flow, rc=rc)
+                                   routehandle=rh_Inject_to_Flow, rc=rc)
 
       endif
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_FRoute4UTest.F90,v 1.11 2005/02/28 16:29:39 nscollins Exp $
+! $Id: ESMF_FRoute4UTest.F90,v 1.12 2005/02/28 21:57:25 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRoute4UTest.F90,v 1.11 2005/02/28 16:29:39 nscollins Exp $'
+      '$Id: ESMF_FRoute4UTest.F90,v 1.12 2005/02/28 21:57:25 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -291,7 +291,7 @@
       ! route test
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "Field Redist Store Test"
-      call ESMF_FieldRedistStore(f1, f2, vm, rh, rc=rc)
+      call ESMF_FieldRedistStore(f1, f2, vm, routehandle=rh, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.29 2005/02/28 16:56:02 nscollins Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.30 2005/02/28 21:59:05 nscollins Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -147,9 +147,9 @@
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! precompute communication patterns
-    call ESMF_FieldRedistStore(field1, field2, vm, rh12, rc=rc)
+    call ESMF_FieldRedistStore(field1, field2, vm, routehandle=rh12, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
-    call ESMF_FieldRedistStore(field2, field3, vm, rh23, rc=rc)
+    call ESMF_FieldRedistStore(field2, field3, vm, routehandle=rh23, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
 
     ! get coordinate arrays available for setting the source data array
