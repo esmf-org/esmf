@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldDataMap.F90,v 1.7 2004/06/01 22:21:30 cdeluca Exp $
+! $Id: ESMF_FieldDataMap.F90,v 1.8 2004/06/03 15:01:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -111,7 +111,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
      character(*), parameter, private :: version =  &
-         '$Id: ESMF_FieldDataMap.F90,v 1.7 2004/06/01 22:21:30 cdeluca Exp $'
+         '$Id: ESMF_FieldDataMap.F90,v 1.8 2004/06/03 15:01:51 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -243,7 +243,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap), intent(in) :: datamap
-      character (len = *), intent(in) :: options
+      character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
@@ -502,7 +502,7 @@
 !
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap), intent(in) :: datamap
-      character (len = *), intent(in) :: options
+      character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -718,7 +718,7 @@
 ! !ARGUMENTS:
       type(ESMF_FieldDataMap) :: datamap
       integer, intent(in) :: dataRank
-      integer, dimension(:), intent(in) :: dataIndices
+      integer, dimension(:), intent(in), optional :: dataIndices
       integer, dimension(:), intent(in), optional :: counts
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -733,7 +733,7 @@
 !       An {\tt ESMF\_FieldDataMap} object.
 ! \item [dataRank] 
 !       The number of the array dimensions.
-! \item [dataIndices] 
+! \item [{[dataIndices]}] 
 !	The Grid rank which corresponds to this Array rank.  If
 !       there is no correspondance (because the Array has a higher rank
 !       than the Grid), the value must be 0.  The default is a 1-to-1
