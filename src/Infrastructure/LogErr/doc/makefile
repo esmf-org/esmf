@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.7 2004/03/18 00:10:36 cdeluca Exp $
+# $Id: makefile,v 1.8 2004/06/22 17:12:58 eschwab Exp $
 ALL: alldoc
 
 CFLAGS    =
@@ -61,7 +61,7 @@ DIRS =
 
 CLEANDIRS   = LogErr_refdoc $(HTMLFILES)
 CLEANFILES  = $(TEXFILES_TO_MAKE) *.aux *.bbl *.blg *.log *.toc *.dvi \
-              *.ORIG LogErr_reqdoc.tex \
+              *.ORIG LogErr_refdoc.tex \
               $(PDFFILES)
 
 CLOBBERDIRS =
