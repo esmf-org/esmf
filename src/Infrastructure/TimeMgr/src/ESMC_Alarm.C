@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.19 2003/10/22 01:03:48 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.20 2003/10/22 03:33:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.19 2003/10/22 01:03:48 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.20 2003/10/22 03:33:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -76,6 +76,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+    int returnCode;
     ESMC_Alarm *alarm;
 
     try {
@@ -144,8 +145,11 @@ int ESMC_Alarm::count=0;
     if (sticky != ESMC_NULL_POINTER) {
       alarm->sticky = *sticky;
     }
-     
-    *rc = alarm->ESMC_AlarmValidate();
+
+    returnCode = alarm->ESMC_AlarmValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
 
     return(alarm);
 
@@ -305,7 +309,7 @@ int ESMC_Alarm::count=0;
     int rc = ESMF_SUCCESS;
 
     // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
-    if (tempName != ESMC_NULL_POINTER) {
+    if (nameLen > 0) {
       if (strlen(this->name) < nameLen) {
         // copy all of it
         strcpy(tempName, this->name);
@@ -1104,6 +1108,7 @@ int ESMC_Alarm::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+    name[0] = '\0';
     nRingDurationTimeSteps = 0;
     nTimeStepsRinging = 0;
     ringing = ringingOnCurrTimeStep = ringingOnPrevTimeStep = false;

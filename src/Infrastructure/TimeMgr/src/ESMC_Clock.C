@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.34 2003/10/22 01:06:28 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.35 2003/10/22 03:33:00 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.34 2003/10/22 01:06:28 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.35 2003/10/22 03:33:00 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter
@@ -71,6 +71,7 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  
 
+    int returnCode;
     ESMC_Clock *clock;
 
     try {
@@ -108,8 +109,11 @@ int ESMC_Clock::count=0;
     clock->currTime = clock->startTime;
     clock->prevTime = clock->currTime;
 
-    *rc = clock->ESMC_ClockValidate();
-    
+    returnCode = clock->ESMC_ClockValidate();
+    if (rc != ESMC_NULL_POINTER) {
+      *rc = returnCode;
+    }
+
     return(clock);
 
  } // end ESMC_ClockCreate
@@ -240,7 +244,7 @@ int ESMC_Clock::count=0;
     int rc = ESMF_SUCCESS;
 
     // TODO: use inherited methods from ESMC_Base or share with ESMC_Alarm
-    if (tempName != ESMC_NULL_POINTER) {
+    if (nameLen > 0) {
       if (strlen(this->name) < nameLen) {
         // copy all of it
         strcpy(tempName, this->name);
@@ -1058,6 +1062,7 @@ int ESMC_Clock::count=0;
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
+    name[0] = '\0';
     advanceCount = 0;
     numAlarms = 0;
     id = ++count;  // TODO: inherit from ESMC_Base class
