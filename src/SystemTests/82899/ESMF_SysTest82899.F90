@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest82899.F90,v 1.16 2003/09/04 18:57:57 cdeluca Exp $
+! $Id: ESMF_SysTest82899.F90,v 1.17 2003/09/04 19:55:55 nscollins Exp $
 !
 ! System test code #82899
 !  Field Halo with periodic boundary conditions.
@@ -155,6 +155,12 @@
 !-------------------------------------------------------------------------
 !     Run section
 !
+
+    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
+
+    call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
+    if (rc .ne. ESMF_SUCCESS) goto 10
 
     call ESMF_GridCompRun(comp1, importstate=import, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
