@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.9 2002/01/09 22:40:44 dneckels Exp $
+% $Id: ESMF_install.tex,v 1.10 2002/01/28 19:29:59 dneckels Exp $
 
 \section{Installation}
 
@@ -76,11 +76,33 @@ it will take significantly longer to complete than the basic tests.
 
 \noindent To build documentation:
 \begin{verbatim}
-  gmake dvi           ! Makes the dvi files
-  gmake pdf           ! Makes the pdf files
+  gmake dvi           ! Makes the dvi files.
+  gmake pdf           ! Makes the pdf files.
   gmake html          ! Creates the html directory.
   gmake alldoc        ! Builds all the above documents.
 \end{verbatim}
+
+\noindent To build documentation for one module:
+
+\noindent First change directory to the where the desired module's documentation resides;  for
+example, to build the {\tt TimeMgmt} documentation start with:
+
+\begin{verbatim}
+cd ${ESMF_DIR}/src/Infrastructure/TimeMgmt/doc
+\end{verbatim}
+
+\noindent Next issue on of the following commands:
+\begin{verbatim}
+  gmake localdvi      ! Builds local dvi files.
+  gmake localpdf      ! Builds local pdf files.
+  gmake localhtml     ! Builds local html files.
+  gmake localdoc      ! Builds all of the local documents.
+\end{verbatim}
+
+\noindent The output from this local documentation build is in the top level {\tt doc}
+directory, as with the previous commands.
+
+\smallskip
 
 To use the library from C/C++, link with the library executable and include
 the {\tt ``ESMC.h''} file.
