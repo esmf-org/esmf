@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.45 2004/12/02 23:26:04 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.46 2004/12/07 17:14:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.45 2004/12/02 23:26:04 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.46 2004/12/07 17:14:53 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -560,7 +560,7 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 //EOPI
     int fixedpart, nbytes;
-    int *ip;
+    int *ip, i;
     ESMC_Status *sp;
     char *cp;
 
@@ -584,10 +584,11 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     if (attrAlloc > 0) {
          nbytes = attrAlloc * sizeof(ESMC_Attribute *);
          attrList = (ESMC_Attribute **)malloc(nbytes);
-         memcpy((char *)attrList, cp, nbytes);
-         cp += nbytes;
+         for (i=0; i<attrCount; i++)
+            // attrList[i] = ESMC_Attribute::ESMC_Deserialize(buffer, offset);
+            attrList[i] = NULL;
+         cp = (char *)(buffer + *offset);
     }
-    // TODO: if vector list, have to corral those  
 
     // update offset to point to past the current obj
     *offset = (cp - buffer);
@@ -681,7 +682,7 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) {         // inout - original offset, updated to point 
+      int *offset) const {   // inout - original offset, updated to point 
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -689,7 +690,7 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
 //
 //EOPI
     int fixedpart, nbytes;
-    int *ip;
+    int *ip, i;
     ESMC_Status *sp;
     char *cp;
 
@@ -717,13 +718,9 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
     *ip++ = attrAlloc;
     cp = (char *)ip;
     if (attrCount > 0) {
-         nbytes = sizeof(ESMC_Attribute *) * attrAlloc;
-         if ((*length - (cp-buffer)) < nbytes) {
-            buffer = (char *)realloc((void *)buffer, *length + 2*nbytes);
-            *length += 2 * nbytes;
-         }
-         memcpy(cp, (char *)attrList, nbytes);
-         cp += nbytes;
+         for (i=0; i<attrCount; i++)
+         ; //    attrlist[i]->ESMC_Attribute::ESMC_Serialize(buffer, length, offset);
+         cp = (char *)(buffer + *offset);
     }
     // TODO: if vector list, have to corral those  
 
@@ -887,7 +884,36 @@ ESMC_ObjectID ESMC_ID_NONE = {99, "ESMF_None"};
      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
      return ESMF_SUCCESS;
-};
+}
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_AxisIndexCopy"
+//BOP
+// !IROUTINE:  ESMC_AxisIndexCopy - assignment operator for axis indices
+//
+// !INTERFACE:
+      int ESMC_AxisIndexCopy(
+//
+// !RETURN VALUE:
+//    error code 
+//
+// !ARGUMENTS:
+        ESMC_AxisIndex *src,           // in - ESMC_AxisIndex
+        ESMC_AxisIndex *dst) {         // out - ESMC_AxisIndex
+//
+// !DESCRIPTION:
+//   copy an AxisIndex
+//
+//EOP
+  int i, len;
+
+  dst->min = src->min;
+  dst->max = src->max;
+  dst->stride = src->stride;
+
+  return ESMF_SUCCESS;
+}
 
 //-----------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3017,6 +3043,92 @@ extern "C" {
 }  // end ESMC_AttributeCopyAll
 
 //-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Serialize"
+//BOPI
+// !IROUTINE:  ESMC_Serialize - Turn the object information into a byte stream
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_Serialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // inout - byte stream to fill
+      int *length,           // inout - buf length; realloc'd here if needed
+      int *offset) const {   // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn info in attribute class into a stream of bytes.
+//
+//EOPI
+    int fixedpart, nbytes;
+    int *ip;
+    ESMC_Status *sp;
+    char *cp;
+
+    fixedpart = sizeof(ESMC_Attribute);
+    if ((*length - *offset) < fixedpart) {
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        *length += 2 * fixedpart;
+    }
+
+    cp = (buffer + *offset);
+    memcpy(cp, this, sizeof(ESMC_Attribute));
+    cp += sizeof(ESMC_Attribute);
+
+    if (items > 1) {
+        // TODO: put data here if separate vector list
+        ;
+    }
+    
+    *offset = (cp - buffer);
+   
+    
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Serialize
+
+//-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_Deserialize"
+//BOPI
+// !IROUTINE:  ESMC_Deserialize - Turn a byte stream into an object
+//
+// !INTERFACE:
+      int ESMC_Attribute::ESMC_Deserialize(
+//
+// !RETURN VALUE:
+//    {\tt ESMF\_SUCCESS} or error code on failure.
+//
+// !ARGUMENTS:
+      char *buffer,          // in - byte stream to read
+      int *offset) {         // inout - original offset, updated to point 
+                             //  to first free byte after current obj info
+//
+// !DESCRIPTION:
+//    Turn a stream of bytes into an object.
+//
+//EOPI
+    int fixedpart, nbytes;
+    int *ip, i;
+    ESMC_Status *sp;
+    char *cp;
+
+    cp = (buffer + *offset);
+
+    // update offset to point to past the current obj
+    *offset = (cp - buffer);
+   
+    
+  return ESMF_SUCCESS;
+
+ } // end ESMC_Deserialize
+//-----------------------------------------------------------------------------
+
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMC_Print"
 //BOP
@@ -3029,7 +3141,7 @@ extern "C" {
 //    int return code
 // 
 // !ARGUMENTS:
-      void) {                    // could add options at some point
+      void) const {                    // could add options at some point
 // 
 // !DESCRIPTION:
 //     Print the contents of a Attribute object

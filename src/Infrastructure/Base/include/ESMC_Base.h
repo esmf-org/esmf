@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.h,v 1.59 2004/12/02 23:26:05 nscollins Exp $
+// $Id: ESMC_Base.h,v 1.60 2004/12/07 17:14:53 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -123,7 +123,7 @@ typedef struct ESMC_ObjectID {
 //  char / Character - single character string (lists not allowed)
 //  ESMC_Logical - single value or arrays (note: not bool or .TRUE.)
 struct ESMC_Attribute {
- //private:   // TODO: fix the interfaces and then make this private again
+ private:
     char attrName[ESMF_MAXSTR]; // inline to reduce memory thrashing
     ESMC_DataType dt;           // type for selecting the right pointer below
     ESMC_DataKind dk;           // item size for pointers below
@@ -146,7 +146,9 @@ struct ESMC_Attribute {
     };
 
  public:
-    int ESMC_Print(void);
+    int ESMC_Print(void) const;
+    int ESMC_Serialize(char *buffer, int *length, int *offset) const;
+    int ESMC_Deserialize(char *buffer, int *offset);
     ESMC_Attribute& operator=(const ESMC_Attribute &);
     ESMC_Attribute(void);
     ESMC_Attribute(char *name, ESMC_DataType datatype, ESMC_DataKind datakind,
@@ -240,7 +242,7 @@ class ESMC_Base
     int   ESMC_BaseGetF90ClassName(char *name, int nlen) const;
 
     // flatten an object into a byte stream, and reconstitute it again
-    int ESMC_Serialize(char *buffer, int *length, int *offset);
+    int ESMC_Serialize(char *buffer, int *length, int *offset) const;
     int ESMC_Deserialize(char *buffer, int *offset);
     
     // optional Read/Write methods for any ESMF class
@@ -359,6 +361,7 @@ int ESMC_AttributeGetObjectList(ESMC_Base *anytypelist, ESMC_Attribute *valuelis
 
 int ESMC_AxisIndexSet(ESMC_AxisIndex *ai, int min, int max, int stride);
 int ESMC_AxisIndexGet(ESMC_AxisIndex *ai, int *min, int *max, int *stride);
+int ESMC_AxisIndexCopy(ESMC_AxisIndex *src, ESMC_AxisIndex *dst);
 int ESMC_AxisIndexPrint(ESMC_AxisIndex *ai);
 ESMC_Logical ESMC_AxisIndexEqual(ESMC_AxisIndex *ai1, ESMC_AxisIndex *ai2);
 
