@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.4 2004/08/02 21:04:49 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.5 2004/08/02 21:32:57 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -39,9 +39,11 @@ getopts("d:", \%options);
 			 push ex_files, "$File::Find::name\n" if -x ;
 	}
 	# Get count of executable Unit Tests found
-	$u_t_count=grep (/\UTest/i, @ex_files);
+	$u_t_count=grep (/UTest/, @ex_files);
+	print $u_t_count;
 	# Get executable Unit tests files
-	@u_t_ex=grep (/\UTest/i, @ex_files);
+	@u_t_ex=grep (/UTest/, @ex_files);
+
 
 	if ($u_t_count eq 0) {
 		print "There are no executable unit test files, either the 'gmake build_tests' has \n";
@@ -73,9 +75,9 @@ getopts("d:", \%options);
 			 push all_files, "$File::Find::name\n"  if -e;
 	}
 	# Get count of *UTest.stdout files found
-	$u_t_so_count=grep (/\UTest.stdout/i, @all_files);
+	$u_t_so_count=grep (/UTest.stdout/, @all_files);
 	# Get *UTest.stdout files
-	@stdout_files=grep (/\UTest.stdout/i, @all_files);
+	@stdout_files=grep (/UTest.stdout/, @all_files);
 
         if ($u_t_so_count eq 0) {
                 print "There are no unit test stdout files. \n\n";
@@ -99,11 +101,11 @@ getopts("d:", \%options);
 				push(file_lines, $line);
 			}
 			close ($file);
-			$count=grep ( /PASS/i, @file_lines);
+			$count=grep ( /PASS/, @file_lines);
 			$pass_count=$pass_count + $count;
-			$count=grep ( /FAIL/i, @file_lines);
+			$count=grep ( /FAIL/, @file_lines);
 			$fail_count=$fail_count + $count;
-			push (fail_lines, grep( /FAIL/i, @file_lines));
+			push (fail_lines, grep( /FAIL/, @file_lines));
 			@file_lines=();
                 }
                 print "\n\n";
