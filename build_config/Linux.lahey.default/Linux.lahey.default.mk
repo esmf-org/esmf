@@ -1,4 +1,4 @@
-# $Id: Linux.lahey.default.mk,v 1.1 2003/10/17 19:34:56 nscollins Exp $
+# $Id: Linux.lahey.default.mk,v 1.2 2003/10/17 19:42:52 nscollins Exp $
 #
 # Linux.default.default.mk
 #
@@ -153,15 +153,12 @@ OCOMP_FOPTFLAGS	   = -O
 PARCH		   = linux_lf95
 
 SL_SUFFIX   = so
-SL_LIBOPTS  = 
-#SL_LIBOPTS  = -shared
+SL_LIBOPTS  = -shared
 SL_LINKOPTS = 
-SL_F_LINKER = $(F90CXXLD) 
-#SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
+SL_F_LINKER = $(F90CXXLD) -rpath $(ESMF_LIBDIR) -rpath /usr/local/lf9560/lib
 SL_C_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR) -Wl,-rpath /usr/local/lf9560/lib
 SL_LIB_LINKER = $(CXXF90LD) -Wl,-rpath $(ESMF_LIBDIR)
-SL_LIBS_TO_MAKE = 
-#SL_LIBS_TO_MAKE = libesmf liboldworld
+SL_LIBS_TO_MAKE = libesmf liboldworld
 
 ############################################################
 #
