@@ -1,4 +1,4 @@
-% $Id: Data_refdoc.ctex,v 1.1 2003/04/08 15:23:50 flanigan Exp $
+% $Id: Data_refdoc.ctex,v 1.2 2003/04/29 17:47:03 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -48,10 +48,6 @@
 % \input{../Infrastructure/Data/doc/Data_syn}
 % #endif
 
-\section{Installation and General Usage}
-See the \htmladdnormallink{ESMF User's Guide}{http://www.esmf.ucar.edu/esmf_docs/ESMF_usrdoc/} for installation instructions and a discussion of overall 
-usage of the ESMF libraries.
-
 %\section{Architecture}
 % #ifdef STANDALONE
 % \input{Data_arch}
@@ -59,8 +55,7 @@ usage of the ESMF libraries.
 % \input{../Infrastructure/Data/doc/Data_arch}
 % #endif
 
-\newpage
-\section{<Name1> Class}
+\section{Array Class}
 
 % \subsection{Description}
 % #ifdef STANDALONE
@@ -76,6 +71,13 @@ usage of the ESMF libraries.
 % \input{../Infrastructure/Data/doc/class_rest}
 % #endif
 
+\subsection{Class API}
+#ifdef STANDALONE
+\input{ESMF_Array_fapi}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Data/doc/ESMF_Array_fapi}
+#endif
+
 % \subsection{Use and Examples}
 % #ifdef STANDALONE
 % %\input{class_ex} 
@@ -83,8 +85,8 @@ usage of the ESMF libraries.
 % %\input{../Infrastructure/Data/doc/class_ex} 
 % #endif
 
-\newpage
-\section{<Name2> Class} ...
+%\newpage
+%\section{<Name2> Class} ...
 
 #ifdef STANDALONE
 %\section{Glossary}

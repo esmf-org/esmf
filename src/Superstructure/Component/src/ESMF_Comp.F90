@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.45 2003/04/28 20:10:19 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.46 2003/04/29 17:47:06 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -180,7 +180,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.45 2003/04/28 20:10:19 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.46 2003/04/29 17:47:06 cdeluca Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1244,6 +1244,7 @@ end function
       end subroutine ESMF_FrameworkInitialize
 
 !------------------------------------------------------------------------------
+!BOP
 ! !IROUTINE:  ESMF_FrameworkFinalize - Clean up and close the ESMF Framework.
 !
 ! !INTERFACE:
