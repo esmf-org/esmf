@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.8 2004/02/17 23:18:59 nscollins Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.9 2004/03/05 19:18:45 nscollins Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -27,15 +27,20 @@
     ! Subroutine to set entry points.
     external setserv
 
-    ! Local variables
+    ! Module Local variables
     type(ESMF_GridComp) :: comp1
     type(ESMF_DELayout) :: layout1, deflayout
     !integer, dimension(12) :: delist
     integer, dimension(4) :: delist
-    integer :: de_id
     character(len=ESMF_MAXSTR) :: cname
     type(ESMF_State) :: import
-    integer :: i, ndes, rc
+    integer :: i, ndes, de_id, rc
+
+    ! width of halo region
+    integer, parameter :: halo_width = 2
+
+    ! route handle
+    type(ESMF_RouteHandle), save :: routehandle
         
     ! cumulative result: count failures; no failures equals "all pass"
     integer :: testresult = 0
@@ -168,6 +173,19 @@
     end program FieldHalo
     
 
+! module global data
+
+    module shared
+      use ESMF_Mod
+
+      ! width of halo region
+      integer, parameter, public :: halo_width = 2
+
+      ! route handle
+      type(ESMF_RouteHandle), save, public :: routehandle
+    end module shared
+        
+! end global data
 !
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
@@ -203,6 +221,7 @@
 !
     subroutine myinit(comp, importstate, exportstate, clock, rc)
       use ESMF_Mod
+      use shared
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
@@ -270,7 +289,7 @@
       ! Create a Field using the Grid and ArraySpec created above
       fname = "DE id"
       field1 = ESMF_FieldCreate(grid1, arrayspec, horizRelloc=ESMF_CELL_CENTER, &
-                                haloWidth=2, name=fname, rc=rc)
+                                haloWidth=halo_width, name=fname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_FieldPrint(field1, "", rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
@@ -298,13 +317,16 @@
       enddo
 
       ! Set initial data values over computational domain to the de identifier
-     call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
-     if (rc .ne. ESMF_SUCCESS) goto 30
-      do j=index(2)%min,index(2)%max
-        do i=index(1)%min,index(1)%max
-          ldata(i,j) =de_id
-        enddo
+      call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
+       do j=index(2)%min,index(2)%max
+         do i=index(1)%min,index(1)%max
+           ldata(i,j) =de_id
+         enddo
       enddo
+
+      ! and have the framework precompute the halo communication patterns
+      call ESMF_FieldHaloStore(field1, routehandle, rc=rc)
 
       print *, "Exiting Initialization routine"
 
@@ -324,6 +346,7 @@
 
     subroutine myrun(comp, importstate, exportstate, clock, rc)
       use ESMF_Mod
+      use shared
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
@@ -350,9 +373,8 @@
 
       ! Call Field method to halo data.  This updates the data in place.
       print *, "about to call Field Halo"
-      call ESMF_FieldHalo(field1, rc=rc)
-      !call ESMF_FieldHaloPrecompute(field1, route, rc=rc)
-      !call ESMF_FieldHaloRun(field1, route, rc=rc)
+      !call ESMF_FieldHalo(field1, rc=rc)   ! deprecated
+      call ESMF_FieldHalo(field1, routehandle, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       print *, "returned from Field Halo call"
 
@@ -374,6 +396,7 @@
 
     subroutine myfinal(comp, importstate, exportstate, clock, rc)
       use ESMF_Mod
+      use shared
 
       type(ESMF_GridComp) :: comp
       type(ESMF_State) :: importstate, exportstate
@@ -383,7 +406,7 @@
       ! Local variables
       integer :: i, j, ni, nj, xpos, ypos, nx, ny
       integer :: de_id, mismatch, target
-      integer :: pattern(3,3), halo_width
+      integer :: pattern(3,3)
       integer(ESMF_KIND_I4), dimension(:,:), pointer :: ldata
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_DELayout) :: layout
@@ -392,8 +415,10 @@
       type(ESMF_Array) :: array1
 
       print *, "Entering Finalize routine"
-      ! this must match halo width in original program!!
-      halo_width = 2
+
+      ! release the saved information about the communications
+      call ESMF_FieldHaloRelease(routehandle, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 30
 
       ! Get layout from component
       call ESMF_GridCompGet(comp, layout=layout, rc=rc)
