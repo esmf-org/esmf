@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.1 2004/01/26 17:44:00 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.2 2004/02/05 00:06:41 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -92,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.1 2004/01/26 17:44:00 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.2 2004/02/05 00:06:41 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -314,11 +314,11 @@
       type(ESMF_FieldType), pointer :: ftypep     ! field type info
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout               ! layout
-      integer :: i, gridrank, datarank, thisdim, thislength
+      integer :: i, gridrank, datarank, thisdim, thislength, numDims
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, globalCellCountPerDim
-      integer, dimension(ESMF_MAXGRIDDIM) :: maxLocalCellCountPerDim, local_maxlengths
+      integer, dimension(:), allocatable :: decomps, globalCellCountPerDim
+      integer, dimension(:), allocatable :: maxLocalCellCountPerDim, local_maxlengths
       integer, dimension(:), pointer :: decompids
    
       ! Initialize return code   
@@ -338,7 +338,14 @@
       if(status .NE. ESMF_SUCCESS) then 
         print *, "ERROR in FieldGather: DataMapGet returned failure"
         return
-      endif 
+      endif
+
+      call ESMF_GridGet(ftypep%grid, numDims=numDims, rc=status)
+      allocate(globalCellCountPerDim(numDims), stat=status)
+      allocate(maxLocalCellCountPerDim(numDims), stat=status)
+      allocate(local_maxlengths(numDims), stat=status)
+      allocate(decomps(numDims), stat=status)
+
       call ESMF_GridGet(ftypep%grid, &
                         globalCellCountPerDim=globalCellCountPerDim, &
                         maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
@@ -361,12 +368,12 @@
 
       allocate(decompids(datarank), stat=status)
       do i=1, datarank
-        decompids(i) = dimorder(i)
+        decompids(i)         = dimorder(i)
         global_dimlengths(i) = dimlengths(i)
         if(dimorder(i).ne.0) then
-          decompids(i) = decomps(dimorder(i))
+          decompids(i)         = decomps(dimorder(i))
           global_dimlengths(i) = globalCellCountPerDim(dimorder(i))
-          local_maxlengths(i) = maxLocalCellCountPerDim(dimorder(i))
+          local_maxlengths(i)  = maxLocalCellCountPerDim(dimorder(i))
         endif
       enddo
 
@@ -398,6 +405,13 @@
         print *, "ERROR in FieldGather: Array Gather returned failure"
         return
       endif 
+
+      ! Clean up
+      deallocate(globalCellCountPerDim)
+      deallocate(maxLocalCellCountPerDim)
+      deallocate(local_maxlengths)
+      deallocate(decomps)
+      deallocate(decompids)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -568,7 +582,7 @@
       type(ESMF_AxisIndex) :: axis(ESMF_MAXDIM)   ! Size info for Grid
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
-      integer :: i, j, gridrank, datarank, thisdim
+      integer :: i, j, gridrank, datarank, thisdim, numDims
       integer :: dimorder(ESMF_MAXDIM)   
       integer :: dimlengths(ESMF_MAXDIM)   
       type(ESMF_Route) :: route
@@ -576,11 +590,11 @@
       logical :: hascachedroute    ! can we reuse an existing route?
       integer :: nDEs
       integer :: my_DE
-      integer, dimension(ESMF_MAXGRIDDIM) :: global_count
+      integer, dimension(:), allocatable :: global_count
       integer, dimension(:,:), allocatable :: globalStartPerDEPerDim
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI, dst_AI
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI, gl_dst_AI
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
       integer :: AI_count
 
    
@@ -618,12 +632,16 @@
 
       ! Get global starting counts and global counts
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
+      call ESMF_GridGet(ftypep%grid, numDims=numDims, rc=status)
       AI_count = nDEs
-      allocate(globalStartPerDEPerDim(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(gl_src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
-      allocate(gl_dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(global_count(numDims), stat=status)
+      allocate(periodic(numDims), stat=status)
+      allocate(globalStartPerDEPerDim(nDEs, numDims), stat=status)
+      allocate(src_AI(nDEs, numDims), stat=status)
+      allocate(dst_AI(nDEs, numDims), stat=status)
+      allocate(gl_src_AI(nDEs, numDims), stat=status)
+      allocate(gl_dst_AI(nDEs, numDims), stat=status)
+
       call ESMF_GridGet(ftypep%grid, globalCellCountPerDim=global_count, &
                         globalStartPerDEPerDim=globalStartPerDEPerDim, &
                         periodic=periodic, rc=status)
@@ -687,10 +705,12 @@
       ! get rid of temporary arrays
       if (allocated(globalStartPerDEPerDim)) &
          deallocate(globalStartPerDEPerDim, stat=status)
-      if (associated(src_AI)) deallocate(src_AI, stat=status)
-      if (associated(dst_AI)) deallocate(dst_AI, stat=status)
-      if (associated(gl_src_AI)) deallocate(gl_src_AI, stat=status)
-      if (associated(gl_dst_AI)) deallocate(gl_dst_AI, stat=status)
+      if (allocated(global_count)) deallocate(global_count, stat=status)
+      if (allocated(periodic))     deallocate(periodic, stat=status)
+      if (associated(src_AI))      deallocate(src_AI, stat=status)
+      if (associated(dst_AI))      deallocate(dst_AI, stat=status)
+      if (associated(gl_src_AI))   deallocate(gl_src_AI, stat=status)
+      if (associated(gl_dst_AI))   deallocate(gl_dst_AI, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -942,22 +962,21 @@
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: i, gridrank, datarank, thisdim
+      integer :: i, gridrank, datarank, thisdim, numDims
       integer :: nx, ny
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
       type(ESMF_LocalArray) :: src_local_array, dst_local_array
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
+      integer, dimension(:), allocatable :: src_global_count
       integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
+      integer, dimension(:), allocatable :: dst_global_count
       integer, dimension(:,:), allocatable :: dst_global_start
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -1053,18 +1072,20 @@
 
       ! set up things we need to find a cached route or precompute one
       if (hassrcdata) then
+          call ESMF_GridGet(stypep%grid, numDims=numDims, rc=status)
           call ESMF_DELayoutGetSize(srclayout, nx, ny);
           AI_snd_count = nx * ny
 
-          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(src_global_count(numDims), stat=status)
+          allocate(src_global_start(AI_snd_count, numDims), stat=status)
+          allocate(src_AI_tot(AI_snd_count, numDims), stat=status)
+          allocate(src_AI_exc(AI_snd_count, numDims), stat=status)
+          allocate(gl_src_AI_tot(AI_snd_count, numDims), stat=status)
+          allocate(gl_src_AI_exc(AI_snd_count, numDims), stat=status)
+
           call ESMF_GridGet(stypep%grid, &
                             globalCellCountPerDim=src_global_count, &
                             globalStartPerDEPerDim=src_global_start, rc=status)
-
-          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
                                            stypep%grid, src_AI_tot, &
                                            src_AI_exc, rc=rc)
@@ -1077,18 +1098,20 @@
           AI_snd_count = 0
       endif
       if (hasdstdata) then
+          call ESMF_GridGet(dtypep%grid, numDims=numDims, rc=status)
           call ESMF_DELayoutGetSize(dstlayout, nx, ny);
           AI_rcv_count = nx * ny
 
-          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(dst_global_count(numDims), stat=status)
+          allocate(dst_global_start(AI_rcv_count, numDims), stat=status)
+          allocate(dst_AI_tot(AI_rcv_count, numDims), stat=status)
+          allocate(dst_AI_exc(AI_rcv_count, numDims), stat=status)
+          allocate(gl_dst_AI_tot(AI_snd_count, numDims), stat=status)
+          allocate(gl_dst_AI_exc(AI_snd_count, numDims), stat=status)
+
           call ESMF_GridGet(dtypep%grid, &
                             globalCellCountPerDim=dst_global_count, &
                             globalStartPerDEPerDim=dst_global_start, rc=status)
-
-          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
                                            dtypep%grid, dst_AI_tot, &
                                            dst_AI_exc, rc=rc)
@@ -1102,7 +1125,8 @@
       endif
           
       ! periodic only matters for halo operations
-      do i=1, ESMF_MAXGRIDDIM
+      allocate(periodic(numDims), stat=status)
+      do i=1, numDims
         periodic(i) = ESMF_FALSE
       enddo
 
@@ -1157,16 +1181,19 @@
       !call ESMF_RouteDestroy(route, rc)
 
       ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (associated(gl_src_AI_tot)) deallocate(gl_src_AI_tot, stat=status)
-      if (associated(gl_src_AI_exc)) deallocate(gl_src_AI_exc, stat=status)
-      if (associated(gl_dst_AI_tot)) deallocate(gl_dst_AI_tot, stat=status)
-      if (associated(gl_dst_AI_exc)) deallocate(gl_dst_AI_exc, stat=status)
+      if (associated(src_AI_tot))      deallocate(src_AI_tot, stat=status)
+      if (associated(src_AI_exc))      deallocate(src_AI_exc, stat=status)
+      if (associated(dst_AI_tot))      deallocate(dst_AI_tot, stat=status)
+      if (associated(dst_AI_exc))      deallocate(dst_AI_exc, stat=status)
+      if (associated(gl_src_AI_tot))   deallocate(gl_src_AI_tot, stat=status)
+      if (associated(gl_src_AI_exc))   deallocate(gl_src_AI_exc, stat=status)
+      if (associated(gl_dst_AI_tot))   deallocate(gl_dst_AI_tot, stat=status)
+      if (associated(gl_dst_AI_exc))   deallocate(gl_dst_AI_exc, stat=status)
+      if (allocated(src_global_count)) deallocate(src_global_count, stat=status)
       if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
+      if (allocated(dst_global_count)) deallocate(dst_global_count, stat=status)
       if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
+      if (allocated(periodic))         deallocate(periodic, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1233,22 +1260,21 @@
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
       logical :: hascachedroute    ! can we reuse an existing route?
-      integer :: i, gridrank, datarank, thisdim
+      integer :: i, numDims, gridrank, datarank, thisdim
       integer :: nx, ny
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_exc, dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: src_AI_tot, dst_AI_tot
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_exc, gl_dst_AI_exc
       type(ESMF_AxisIndex), dimension(:,:), pointer :: gl_src_AI_tot, gl_dst_AI_tot
       type(ESMF_LocalArray) :: src_local_array, dst_local_array
-      integer, dimension(ESMF_MAXGRIDDIM) :: src_global_count
+      integer, dimension(:), allocatable :: src_global_count
       integer, dimension(:,:), allocatable :: src_global_start
-      integer, dimension(ESMF_MAXGRIDDIM) :: dst_global_count
+      integer, dimension(:), allocatable :: dst_global_count
       integer, dimension(:,:), allocatable :: dst_global_start
-      type(ESMF_Logical), dimension(ESMF_MAXGRIDDIM) :: periodic
+      type(ESMF_Logical), dimension(:), allocatable :: periodic
       integer :: AI_snd_count, AI_rcv_count
 
    
@@ -1344,18 +1370,20 @@
 
       ! set up things we need to find a cached route or precompute one
       if (hassrcdata) then
+          call ESMF_GridGet(stypep%grid, numDims=numDims, rc=status)
           call ESMF_DELayoutGetSize(srclayout, nx, ny);
           AI_snd_count = nx * ny
 
-          allocate(src_global_start(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(src_global_count(numDims), stat=status)
+          allocate(src_global_start(AI_snd_count, numDims), stat=status)
+          allocate(src_AI_tot(AI_snd_count, numDims), stat=status)
+          allocate(src_AI_exc(AI_snd_count, numDims), stat=status)
+          allocate(gl_src_AI_tot(AI_snd_count, numDims), stat=status)
+          allocate(gl_src_AI_exc(AI_snd_count, numDims), stat=status)
+
           call ESMF_GridGet(stypep%grid, &
                             globalCellCountPerDim=src_global_count, &
                             globalStartPerDEPerDim=src_global_start, rc=status)
-
-          allocate(src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_src_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(stypep%localfield%localdata, &
                                            stypep%grid, src_AI_tot, &
                                            src_AI_exc, rc=rc)
@@ -1368,18 +1396,20 @@
           AI_snd_count = 0
       endif
       if (hasdstdata) then
+          call ESMF_GridGet(dtypep%grid, numDims=numDims, rc=status)
           call ESMF_DELayoutGetSize(dstlayout, nx, ny);
           AI_rcv_count = nx * ny
 
-          allocate(dst_global_start(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
+          allocate(dst_global_count(numDims), stat=status)
+          allocate(dst_global_start(AI_rcv_count, numDims), stat=status)
+          allocate(dst_AI_tot(AI_rcv_count, numDims), stat=status)
+          allocate(dst_AI_exc(AI_rcv_count, numDims), stat=status)
+          allocate(gl_dst_AI_tot(AI_snd_count, numDims), stat=status)
+          allocate(gl_dst_AI_exc(AI_snd_count, numDims), stat=status)
+
           call ESMF_GridGet(dtypep%grid, &
                             globalCellCountPerDim=dst_global_count, &
                             globalStartPerDEPerDim=dst_global_start, rc=status)
-
-          allocate(dst_AI_tot(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(dst_AI_exc(AI_rcv_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_tot(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
-          allocate(gl_dst_AI_exc(AI_snd_count, ESMF_MAXGRIDDIM), stat=status)
           call ESMF_ArrayGetAllAxisIndices(dtypep%localfield%localdata, &
                                            dtypep%grid, dst_AI_tot, &
                                            dst_AI_exc, rc=rc)
@@ -1393,7 +1423,8 @@
       endif
           
       ! periodic only matters for halo operations
-      do i=1, ESMF_MAXGRIDDIM
+      allocate(periodic(numDims), stat=status)
+      do i=1, numDims
         periodic(i) = ESMF_FALSE
       enddo
 
@@ -1449,16 +1480,19 @@
       !call ESMF_RouteDestroy(route, rc)
 
       ! get rid of temporary arrays
-      if (associated(src_AI_tot)) deallocate(src_AI_tot, stat=status)
-      if (associated(src_AI_exc)) deallocate(src_AI_exc, stat=status)
-      if (associated(dst_AI_tot)) deallocate(dst_AI_tot, stat=status)
-      if (associated(dst_AI_exc)) deallocate(dst_AI_exc, stat=status)
-      if (associated(gl_src_AI_tot)) deallocate(gl_src_AI_tot, stat=status)
-      if (associated(gl_src_AI_exc)) deallocate(gl_src_AI_exc, stat=status)
-      if (associated(gl_dst_AI_tot)) deallocate(gl_dst_AI_tot, stat=status)
-      if (associated(gl_dst_AI_exc)) deallocate(gl_dst_AI_exc, stat=status)
+      if (associated(src_AI_tot))      deallocate(src_AI_tot, stat=status)
+      if (associated(src_AI_exc))      deallocate(src_AI_exc, stat=status)
+      if (associated(dst_AI_tot))      deallocate(dst_AI_tot, stat=status)
+      if (associated(dst_AI_exc))      deallocate(dst_AI_exc, stat=status)
+      if (associated(gl_src_AI_tot))   deallocate(gl_src_AI_tot, stat=status)
+      if (associated(gl_src_AI_exc))   deallocate(gl_src_AI_exc, stat=status)
+      if (associated(gl_dst_AI_tot))   deallocate(gl_dst_AI_tot, stat=status)
+      if (associated(gl_dst_AI_exc))   deallocate(gl_dst_AI_exc, stat=status)
+      if (allocated(src_global_count)) deallocate(src_global_count, stat=status)
       if (allocated(src_global_start)) deallocate(src_global_start, stat=status)
+      if (allocated(dst_global_count)) deallocate(dst_global_count, stat=status)
       if (allocated(dst_global_start)) deallocate(dst_global_start, stat=status)
+      if (allocated(periodic))         deallocate(periodic, stat=status)
 
       ! Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
@@ -1571,7 +1605,7 @@
       integer :: i
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths, &
                                          global_dimlengths
-      integer, dimension(ESMF_MAXGRIDDIM) :: decomps, global_cell_dim
+      integer, dimension(ESMF_MAXGRIDDIM) :: decomps
       integer :: my_src_DE, my_dst_DE, my_DE
       type(ESMF_Array) :: src_array, dst_array
       type(ESMF_Grid) :: src_grid, dst_grid
