@@ -1,4 +1,4 @@
-! $Id: ESMF_AppMainEx.F90,v 1.12 2004/01/08 21:05:49 nscollins Exp $
+! $Id: ESMF_AppMainEx.F90,v 1.13 2004/01/14 17:10:24 nscollins Exp $
 !
 ! Example code for a main Application program. 
 
@@ -18,36 +18,180 @@
 
     module PHYS_mod
 
+    use ESMF_Mod
+
     public PHYS_SetServices
 
     contains
 
-    subroutine PHYS_SetServices()
-    end subroutine
+    subroutine PHYS_SetServices(gcomp, rc)
+      type(ESMF_GridComp) :: gcomp
+      integer :: rc
+
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
+                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
+                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
+                                                     ESMF_SINGLEPHASE, rc)
+      
+    end subroutine PHYS_SetServices
+      
+      
+    subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: importstate
+      type(ESMF_State) :: exportstate
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "PHYS initialize routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_init
+
+    subroutine my_run(gcomp, importstate, exportstate, externalclock, rc)
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: importstate
+      type(ESMF_State) :: exportstate
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "PHYS run routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_run
+
+    subroutine my_final(gcomp, importstate, exportstate, externalclock, rc)
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: importstate
+      type(ESMF_State) :: exportstate
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "PHYS finalize routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_final
 
     end module
 
 
     module DYNM_mod
 
+    use ESMF_Mod
+
     public DYNM_SetServices
 
     contains
 
-    subroutine DYNM_SetServices()
-    end subroutine
+    subroutine DYNM_SetServices(gcomp, rc)
+      type(ESMF_GridComp) :: gcomp
+      integer :: rc
+
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETINIT, my_init, &
+                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETRUN, my_run, &
+                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_GridCompSetEntryPoint(gcomp, ESMF_SETFINAL, my_final, &
+                                                     ESMF_SINGLEPHASE, rc)
+      
+    end subroutine DYNM_SetServices
+      
+      
+    subroutine my_init(gcomp, importstate, exportstate, externalclock, rc)
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: importstate
+      type(ESMF_State) :: exportstate
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "DYNM initialize routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_init
+
+    subroutine my_run(gcomp, importstate, exportstate, externalclock, rc)
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: importstate
+      type(ESMF_State) :: exportstate
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "DYNM run routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_run
+
+    subroutine my_final(gcomp, importstate, exportstate, externalclock, rc)
+      type(ESMF_GridComp) :: gcomp
+      type(ESMF_State) :: importstate
+      type(ESMF_State) :: exportstate
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "DYNM finalize routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_final
 
     end module
 
 
     module CPLR_mod
 
+    use ESMF_Mod
+
     public CPLR_SetServices
 
     contains
 
-    subroutine CPLR_SetServices()
-    end subroutine
+    subroutine CPLR_SetServices(cpl, rc)
+      type(ESMF_CplComp) :: cpl
+      integer :: rc
+
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETINIT, my_init, &
+                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETRUN, my_run, &
+                                                     ESMF_SINGLEPHASE, rc)
+       call ESMF_CplCompSetEntryPoint(cpl, ESMF_SETFINAL, my_final, &
+                                                     ESMF_SINGLEPHASE, rc)
+      
+    end subroutine CPLR_SetServices
+      
+      
+    subroutine my_init(cpl, statelist, externalclock, rc)
+      type(ESMF_CplComp) :: cpl
+      type(ESMF_State), dimension(:) :: statelist
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "CPLR initialize routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_init
+
+    subroutine my_run(cpl, statelist, externalclock, rc)
+      type(ESMF_CplComp) :: cpl
+      type(ESMF_State), dimension(:) :: statelist
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "CPLR run routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_run
+
+    subroutine my_final(cpl, statelist, externalclock, rc)
+      type(ESMF_CplComp) :: cpl
+      type(ESMF_State), dimension(:) :: statelist
+      type(ESMF_Clock) :: externalclock
+      integer :: rc
+
+      print *, "CPLR finalize routine called"
+      rc = ESMF_SUCCESS
+
+    end subroutine my_final
 
     end module
 
@@ -91,7 +235,7 @@
 
     ! Create the top level application component
 
-    cname = "Top Level Application"
+    cname = "Top Level Atmosphere Model Component"
     top = ESMF_GridCompCreate(cname, configfile="setup.rc", rc=rc)  
 
     delist1 = (/ (i, i=0,3) /)
@@ -116,7 +260,7 @@
     gcomp2 = ESMF_GridCompCreate(cname2, layout2, ESMF_ATM, rc=rc)
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_GridCompSetServices(gcomp1, DYNM_SetServices, rc)
+    call ESMF_GridCompSetServices(gcomp2, DYNM_SetServices, rc)
 
     print *, "Comp Create returned, name = ", trim(cname2)
 
@@ -127,7 +271,7 @@
     cpl = ESMF_CplCompCreate(cname, layout3, rc=rc)
 
     ! This single user-supplied subroutine must be a public entry point.
-    call ESMF_CplCompSetServices(gcomp1, CPLR_SetServices, rc)
+    call ESMF_CplCompSetServices(cpl, CPLR_SetServices, rc)
 
     print *, "Comp Create returned, name = ", trim(cname)
 
@@ -186,7 +330,7 @@
 
 
     ! Give each component a chance to write out final results, clean up.
-    ! Call each Init routine in turn.  There is an optional index number
+    ! Call each Finalize routine in turn.  There is an optional index number
     !  for those components which have multiple entry points.
     call ESMF_GridCompFinalize(gcomp1, exportstate=states(1), clock=tclock, rc=rc)
     call ESMF_GridCompFinalize(gcomp2, importstate=states(2), clock=tclock, rc=rc)

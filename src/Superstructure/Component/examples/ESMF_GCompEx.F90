@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.7 2003/11/07 21:55:34 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.8 2004/01/14 17:10:24 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -117,8 +117,120 @@
    
     end subroutine GComp_Final
 
-
     end module ESMF_GriddedCompEx
+    
+
+
+!-------------------------------------------------------------------------
+!-------------------------------------------------------------------------
+
+
+    program ESMF_AppMainEx
+    
+!   ! The ESMF Framework module
+    use ESMF_Mod
+    
+    ! User supplied modules
+    use ESMF_GriddedCompEx, only: GComp_SetServices
+    implicit none
+    
+!   ! Local variables
+    integer :: x, y, i, rc
+    logical :: finished
+    type(ESMF_Clock) :: tclock
+    type(ESMF_Calendar) :: gregorianCalendar
+    type(ESMF_TimeInterval) :: timeStep
+    type(ESMF_Time) :: startTime, stopTime
+    integer :: delistall(4), delist1(4), delist2(4), delist3(4)
+    character(ESMF_MAXSTR) :: cname, cname1, cname2
+    type(ESMF_DELayout) :: layoutall, layout1, layout2, layout3
+    type(ESMF_State) :: importstate, exportstate
+    type(ESMF_GridComp) :: gcomp
+        
+!-------------------------------------------------------------------------
+!   ! Initialize the Framework
+
+    call ESMF_Initialize(rc=rc)
+
+!-------------------------------------------------------------------------
+!   !
+!   !  Create, Init, Run, Finalize, Destroy Components.
+ 
+    print *, "Application Example 1:"
+
+    ! Create the top level application component
+
+    delist1 = (/ (i, i=0,3) /)
+    layout1 = ESMF_DELayoutCreate(delist1, 2, (/ 1, 4 /), (/ 0, 0 /), rc)
+
+    cname = "Atmosphere Model Gridded Component"
+    gcomp = ESMF_GridCompCreate(cname, layout1, configfile="setup.rc", rc=rc)  
+
+    ! This single user-supplied subroutine must be a public entry point.
+    call ESMF_GridCompSetServices(gcomp, GComp_SetServices, rc)
+
+    print *, "Comp Create returned, name = ", trim(cname)
+
+    ! Create the necessary import and export states used to pass data
+    !  between components.
+
+    importstate = ESMF_StateCreate(cname, ESMF_STATEIMPORT, rc=rc)
+    exportstate = ESMF_StateCreate(cname, ESMF_STATEEXPORT, rc=rc)
+
+    ! See the TimeMgr document for the details on the actual code needed
+    !  to set up a clock.
+    ! initialize calendar to be Gregorian type
+    call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+
+    ! initialize time interval to 6 hours
+    call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
+
+    ! initialize start time to 5/1/2004
+    call ESMF_TimeSet(startTime, yr=2004, mm=5, dd=1, &
+                      calendar=gregorianCalendar, rc=rc)
+
+    ! initialize stop time to 5/2/2004
+    call ESMF_TimeSet(stopTime, yr=2004, mm=5, dd=2, &
+                      calendar=gregorianCalendar, rc=rc)
+
+    ! initialize the clock with the above values
+    tclock = ESMF_ClockCreate("top clock", timeStep, startTime, stopTime, rc=rc)
+     
+    ! Call the Init routine.  There is an optional index number
+    !  for those components which have multiple entry points.
+    call ESMF_GridCompInitialize(gcomp, importstate, exportstate, clock=tclock, rc=rc)
+    print *, "Comp Initialize complete"
+
+
+    ! Main run loop.
+    finished = .false.
+    do while (.not. finished)
+
+        call ESMF_GridCompRun(gcomp, importstate, exportstate, clock=tclock, rc=rc)
+        call ESMF_ClockAdvance(tclock, timestep)
+
+        ! query clock for current time
+        if (ESMF_ClockIsStopTime(tclock)) finished = .true.
+
+    enddo
+    print *, "Comp Run complete"
+
+
+    ! Give the component a chance to write out final results, clean up.
+    call ESMF_GridCompFinalize(gcomp, importstate, exportstate, clock=tclock, rc=rc)
+    print *, "Comp Finalize complete"
+
+
+    ! Destroy components.
+    call ESMF_GridCompDestroy(gcomp, rc)
+    print *, "Comp Destroy returned"
+
+
+    print *, "Application Example 1 finished"
+
+    call ESMF_Finalize(rc=rc)
+
+    end program ESMF_AppMainEx
     
 !\end{verbatim}
     
