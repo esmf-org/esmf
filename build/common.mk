@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.50 2004/04/28 22:40:27 slswift Exp $
+#  $Id: common.mk,v 1.51 2004/04/29 16:42:11 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -624,13 +624,13 @@ check_examples:
 #-------------------------------------------------------------------------------
 
 demo: chkopts build_libs chkdir_tests
-	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_demo tree
 
 tree_demo: tree_build_demo tree_run_demo
 
 demo_uni: chkopts build_libs chkdir_tests
-	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_demo_uni tree
 
 tree_demo_uni: tree_build_demo tree_run_demo_uni
@@ -639,7 +639,7 @@ tree_demo_uni: tree_build_demo tree_run_demo_uni
 # build_demo
 #
 build_demo: chkopts chkdir_tests
-	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_build_demo tree
 
 tree_build_demo: $(DEMO_BUILD) 
@@ -655,13 +655,13 @@ $(ESMC_TESTDIR)/%App : %Demo.o $(DEMO_OBJ) $(ESMFLIB)
 # run_demo
 #
 run_demo:  chkopts chkdir_tests
-	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo tree
 
 tree_run_demo: $(DEMO_RUN) 
 
 run_demo_uni:  chkopts chkdir_tests
-	@if [ -d src/Demo ] ; then cd src/Demo; fi; \
+	@if [ -d src/demo ] ; then cd src/demo; fi; \
 	$(MAKE) ESMF_BOPT=$(ESMF_BOPT) ACTION=tree_run_demo_uni tree
 
 tree_run_demo_uni: $(DEMO_RUN_UNI) 
@@ -1004,7 +1004,7 @@ build_shared:
 # \input and \includegraphics LaTeX commands.
 #
 
-TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/Demo/coupled_flow:" 
+TEXINPUTS_VALUE = ".:$(ESMF_DIR)/src/doc:$(ESMF_BUILD_DOCDIR):$(ESMF_DIR)/src/demo/coupled_flow:" 
 
 #-------------------------------------------------------------------------------
 #  dvi rules
