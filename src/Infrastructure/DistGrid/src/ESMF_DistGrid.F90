@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.126 2004/10/14 18:57:31 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.127 2004/12/04 00:25:19 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,13 +209,15 @@
     public ESMF_DistGridAllocate
     public ESMF_DistGridValidate
     public ESMF_DistGridPrint
+    public ESMF_DistGridSerialize
+    public ESMF_DistGridDeserialize
  
 !EOPI
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.126 2004/10/14 18:57:31 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.127 2004/12/04 00:25:19 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2893,6 +2895,163 @@
       endif
 
       end subroutine ESMF_DistGridPrint
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_DistGridSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_DistGridSerialize - Serialize distgrid info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_DistGridSerialize(distgrid, buffer, length, offset, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_DistGrid), intent(in) :: distgrid
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_DistGrid} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_GridWrite()} and {\tt ESMF\_GridRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [distgrid]
+!           {\tt ESMF\_DistGrid} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc                     ! Error status
+      integer :: nDEs
+      type(ESMF_DistGridGlobal), pointer :: glob
+
+      ! shortcut to internals
+      glob => distgrid%ptr%globalComp
+
+      ! get the number of DEs from the layout to pass through
+      call ESMF_DELayoutGet(distgrid%ptr%delayout, deCount=nDEs, rc=localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! serialize the grid derived type
+      call c_ESMC_DistGridSerialize(distgrid%ptr%dimCount, nDEs, &
+                                    distgrid%ptr%decompIDs, &
+                                    glob%cellCountPerDEPerDim, &
+                                    buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_GridDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_GridDeserialize - Deserialize a byte stream into a Grid
+!
+! !INTERFACE:
+      subroutine ESMF_DistGridDeserialize(buffer, offset, decompIDs, &
+                                          countPerDEDecomp1, &
+                                          countPerDEDecomp2, rc)
+!
+! !ARGUMENTS:
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, dimension(2), intent(inout) :: decompIDs
+      integer, dimension(:), intent(inout) :: countPerDEDecomp1
+      integer, dimension(:), intent(inout), optional :: countPerDEDecomp2
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Grid object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_GridWrite()} and {\tt ESMF\_GridRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+
+      integer :: localrc, status             ! Error status, allocation status
+      integer :: dimCount, i, i1, nDE1, nDE2
+      integer, dimension(:,:), allocatable :: cellCountPerDEPerDim
+      type(ESMF_DELayout) :: delayout
+
+      ! figure out sizes
+      nDE2       = 1
+      dimCount   = 1
+      nDE1       = size(countPerDEDecomp1)
+      if (present(countPerDEDecomp2)) then
+        nDE2     = size(countPerDEDecomp2)
+        dimCount = 2
+      endif
+
+      ! allocate array for distgrid deserialization
+      allocate(cellCountPerDEPerDim(nDE1*nDE2, dimCount), stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "cellCountPerDEPerDim", &
+                                     ESMF_CONTEXT, rc)) return
+
+      ! deserialize the grid derived type
+      call c_ESMC_DistGridDeserialize(decompIDs, &
+                                      cellCountPerDEPerDim, &
+                                      buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                 ESMF_ERR_PASSTHRU, &
+                                 ESMF_CONTEXT, rc)) return
+
+      ! load decomposition information into arrays
+      do i = 1,nDE1
+        countPerDEDecomp1(i) = cellCountPerDEPerDim(i,1)
+      enddo
+      if (present(countPerDEDecomp2)) then
+        do i = 1,nDE2
+          i1 = (i-1)*nDE1 + 1
+          countPerDEDecomp2(i) = cellCountPerDEPerDim(i1,2)
+        enddo
+      endif
+
+      ! clean up
+      deallocate(cellCountPerDEPerDim, stat=localrc)
+      if (ESMF_LogMsgFoundAllocError(localrc, "deallocate", &
+                                     ESMF_CONTEXT, rc)) return
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_DistGridDeserialize
 
 !------------------------------------------------------------------------------
 

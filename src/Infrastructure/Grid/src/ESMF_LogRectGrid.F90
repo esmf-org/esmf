@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.114 2004/12/03 20:47:48 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.115 2004/12/04 00:23:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.114 2004/12/03 20:47:48 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.115 2004/12/04 00:23:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -8882,6 +8882,143 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_LRGridDecompose
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LRGridSerialize"
+
+!BOPI
+! !IROUTINE: ESMF_LRGridSerialize - Serialize lr grid specific info into a byte stream
+!
+! !INTERFACE:
+      subroutine ESMF_LRGridSerialize(grid, buffer, length, offset, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridClass), pointer :: grid
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: length
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Takes an {\tt ESMF\_Grid} object and adds all the information needed
+!      to save the information to a file or recreate the object based on this
+!      information.   Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_GridWrite()} and {\tt ESMF\_GridRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [grid]
+!           {\tt ESMF\_Grid} object to be serialized.
+!     \item [buffer]
+!           Data buffer which will hold the serialized information.
+!     \item [length]
+!           Current length of buffer, in bytes.  If the serialization
+!           process needs more space it will allocate it and update
+!           this length.
+!     \item [offset]
+!           Current write offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           available byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc                         ! Error status
+      integer :: i
+      type(ESMF_LogRectGrid), pointer :: lrgrid  ! lrgrid class
+
+      ! shortcut to internals
+      lrgrid => grid%gridSpecific%logRectGrid
+
+      ! serialize the grid derived type
+      call c_ESMC_LRGridSerialize(grid%dimCount, &
+                                  lrgrid%countPerDim(1), &
+                                  lrgrid%deltaPerDim(1), &
+                                  buffer(1), length, offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! loop over the arrays of coords
+      do i = 1,grid%dimCount
+        call c_ESMC_ArraySerialize(lrgrid%coords(i), buffer(1), length, &
+                                   offset, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      enddo
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridSerialize
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LRGridDeserialize"
+
+!BOPI
+! !IROUTINE: ESMF_LRGridDeserialize - Deserialize a byte stream into an LRGrid
+!
+! !INTERFACE:
+      subroutine ESMF_LRGridDeserialize(grid, buffer, offset, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_GridClass), pointer :: grid
+      integer(ESMF_KIND_I4), pointer, dimension(:) :: buffer
+      integer, intent(inout) :: offset
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!      Takes a byte-stream buffer and reads the information needed to
+!      recreate a Grid object.  Recursively calls the deserialize routines
+!      needed to recreate the subobjects.
+!      Expected to be used by {\tt ESMF\_StateReconcile()} and
+!      by {\tt ESMF\_GridWrite()} and {\tt ESMF\_GridRead()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [buffer]
+!           Data buffer which holds the serialized information.
+!     \item [offset]
+!           Current read offset in the current buffer.  This will be
+!           updated by this routine and return pointing to the next
+!           unread byte in the buffer.
+!     \item [{[rc]}]
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOPI
+      integer :: localrc, status             ! Error status, allocation status
+      integer :: i
+      type(ESMF_LogRectGrid), pointer :: lrgrid  ! lrgrid class
+
+      ! shortcut to internals
+      lrgrid => grid%gridSpecific%logRectGrid
+
+      ! serialize the grid derived type
+      call c_ESMC_LRGridDeserialize(lrgrid%countPerDim(1), &
+                                    lrgrid%deltaPerDim(1), &
+                                    buffer(1), offset, localrc)
+      if (ESMF_LogMsgFoundError(localrc, &
+                                ESMF_ERR_PASSTHRU, &
+                                ESMF_CONTEXT, rc)) return
+
+      ! loop over the arrays of coords
+      do i = 1,grid%dimCount
+        call c_ESMC_ArrayDeserialize(lrgrid%coords(i), buffer(1), &
+                                     offset, localrc)
+        if (ESMF_LogMsgFoundError(localrc, &
+                                  ESMF_ERR_PASSTHRU, &
+                                  ESMF_CONTEXT, rc)) return
+      enddo
+
+      ! call the appropriate create function -- is this necessary or is it all there?
+
+      if  (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_LRGridDeserialize
 
 !------------------------------------------------------------------------------
  
