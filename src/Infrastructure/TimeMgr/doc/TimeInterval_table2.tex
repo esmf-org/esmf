@@ -1,0 +1,58 @@
+% $Id: TimeInterval_table2.tex,v 1.1 2004/01/26 21:30:16 eschwab Exp $
+
+\newpage
+
+ESMF\_TimeIntervalGet() has 3 unique {\it input} arguments: {\tt startTime}, {\tt endTime} and {\tt calendar}.  The following tables shows how the use them to perform time unit conversions on time intervals defined with years, months and/or days. Columns 2 through 4 show usage for time intervals associated ({\tt Set()}) with a calendar.  The last column shows usage for time intervals not associated (not {\tt Set()}) with any calendar.
+\begin{center}
+\begin{table}
+
+\caption{\label{table:timeIntervalGet}ESMF\_TimeIntervalGet() Method {\bf Input} Argument Usage for Time Intervals using years, months and/or days}
+
+\begin{tabular}{|p{1.5in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|}
+\hline
+
+% column headers
+{\bf ESMF\_TimeIntervalGet() Input Arguments} &
+  {\bf Gregorian, Julian, No-leap Calendars} &
+  {\bf 360-Day Calendar} &
+  {\bf Custom Calendar} &
+  {\bf Julian-day, No-Cal Calendar} &
+  {\bf Calendar undefined} (not set) \\
+\hline\hline
+
+% row 1, column 1
+{\bf {\tt startTime} \newline
+     or \newline
+     {\tt endTime}} &
+
+% row 1, column 2
+  Use either {\tt startTime} or {\tt endTime}, if not already associated with the time interval, to define conversion from relative-to-absolute units or vice versa {\tt (yy, mm) <-> (d, h, m, s)}.  Unnecessary if converting between {\tt (yy <-> mm)} or {\tt (d, h, m, s) <-> (d, h, m, s)}, or if No-Leap, between {\tt (yy <-> d)} &
+
+% row 1, column 3
+  Unnecessary because conversion is defined for all units, since years and months are absolute. &
+
+% row 1, column 4
+  Depends on calendar defined.  Most will be either Earth-type or space-type.  If Earth-type, behavior will be like the Gregorian/Julian/No-leap/360-day calendars.  If space-type, only years will likely be defined, not months.  And years will be absolute, defined in terms of days or seconds.  Hence {\tt startTime} or {\tt endTime} would be unnecessary for space-type since conversions would be defined in all cases. &
+
+% row 1, column 5
+  Unnecessary because conversion is defined for all units; only days (absolute) are defined, years and months are not. &
+
+% row 1, column 6
+  Calendar must be known to define conversion from relative-to-absolute units or vice versa.  Use either {\tt startTime} or {\tt endTime} for Gregorian, Julian, No-Leap, or relative Custom calendars, as described in the columns to the left.  For other calendars, only need to use the {\tt calendar} argument (see below). \\
+\hline
+
+% row 2, columns 1-5
+{\bf {\tt calendar}} &
+  \multicolumn{4}{l}{Unnecessary (redundant), since calendar is already defined! (see above)} &
+
+% row 2, column 6
+  Use on 360-Day, Julian-Day, No-Cal, or absolute Custom calendars to convert {\tt (yy, mm) <-> (d, h, m, s)}.  Use on Gregorian and Julian calendars only for {\tt (yy <-> mm)} conversions.  Use on No-Leap calendar for {\tt (yy <-> mm)} or {\tt yy <-> (d, h, m, s)} conversions.  Use on all calendars for {\tt d <-> {\tt (h, m, s)} conversions to define days.  Unnecessary for {\tt (h, m, s)} <-> (h, m, s)} conversions.  \\
+\hline
+
+% row 3, all columns
+  \multicolumn{6}{l}{For undefined cases, argument calendar mismatches, or if all 3 of {\tt startTime, endTime, and calendar} are specified, an error code will be returned and an {\tt ESMF\_LogErr} message written.} \\
+\hline
+
+\end{tabular}
+\end{table}
+\end{center}

@@ -1,0 +1,51 @@
+% $Id: TimeInterval_table5.tex,v 1.1 2004/01/26 21:30:16 eschwab Exp $
+
+\newpage
+\begin{center}
+\begin{table}
+
+\caption{\label{table:timeIntervalCompar}Class ESMF\_TimeInterval Comparison Overloaded Operation Definitions for Time Intervals using years, months and/or days}
+
+\begin{tabular}{|p{1.5in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|}
+\hline
+
+% column headers
+{\bf ESMF\_TimeInterval Comparison Operation} &
+  {\bf Gregorian, Julian, No-leap Calendars} &
+  {\bf 360-Day Calendar} &
+  {\bf Custom Calendar} &
+  {\bf Julian-day, No-Cal Calendar} &
+  {\bf Calendar undefined} (not set) \\
+\hline\hline
+
+% row 1, column 1
+{\bf Ti1 == Ti2 \newline
+     Ti1 /= Ti2 \newline
+     Ti1 <  Ti2 \newline
+     Ti1 >  Ti2 \newline
+     Ti1 <= Ti2 \newline
+     Ti1 >= Ti2} &
+
+% row 1, column 2
+  Defined if Ti1 and Ti2 are both only relative {\tt (yy, mm)} or both only absolute {\tt (d, h, m, s)} (and {\tt yy} for No-Leap). &
+
+% row 1, column 3
+  Defined in all cases, because years and months are absolute. &
+
+% row 1, column 4
+  Depends on calendar defined.  Most will be either Earth-type or space-type.  If Earth-type, behavior will be like the Gregorian/Julian/No-leap/360-day calendars.  If space-type, only years will likely be defined, not months.  And years will be absolute, defined in terms of days or seconds.  Hence space-type would be defined in all cases. &
+
+% row 1, column 5
+  Defined in all cases, because only days (absolute) are defined, years and months are not. &
+
+% row 1, column 6
+  Defined if only one of year, month, or days is specified, because the relation between years, months and days is not known (calendar specific).  So, can compare years to years, months to months, or days to days. \\
+\hline
+
+% row 2, all columns
+  \multicolumn{6}{l}{For undefined cases or calendar mismatches between Ti1 and Ti2, false will be returned and an {\tt ESMF\_LogErr} message written.} \\
+\hline
+
+\end{tabular}
+\end{table}
+\end{center}

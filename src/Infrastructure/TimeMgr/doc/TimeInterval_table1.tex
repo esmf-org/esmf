@@ -1,0 +1,72 @@
+% $Id: TimeInterval_table1.tex,v 1.1 2004/01/26 21:30:15 eschwab Exp $
+
+\subsubsection [API Usage Tables] {API Usage Tables}
+\newpage
+
+The ISO 8601 standard states that Time Intervals can be specified in one of four ways:
+
+  -- By a relative duration of time. \\
+  -- By a starting time instant and a duration. \\
+  -- By a duration and an ending time instant. \\
+  -- By the duration of time specified by both a starting and ending time instant. (also possible via {\tt ESMF\_Time's} "Ti = T1 - T2" overloaded operator (-) (see table further below)).
+
+The first specification method is handled by simply using the various time unit arguments of {\tt ESMF\_TimeIntervalSet()}.  The second, third, and fourth methods are handled within {\tt ESMF\_TimeInterval} by using the optional arguments startTime and endTime to {\tt ESMF\_TimeIntervalSet()}.
+
+The following table shows how to use {\tt ESMF\_TimeIntervalSet()} with the optional arguments {\tt startTime}, {\tt endTime}, and {\tt calendar} with respect to different calendars and absolute or relative time intervals.  Absolute time intervals are reducible to units of seconds, whereas relative time intervals are not.
+\begin{center}
+\begin{table}
+
+\caption{\label{table:timeIntervalSet}ESMF\_TimeIntervalSet() Method {\bf Input} Argument Usage for Time Intervals using years, months and/or days}
+
+\begin{tabular}{|p{1.5in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|}
+\hline
+
+% column headers
+{\bf ESMF\_TimeIntervalSet() Input Arguments} &
+  {\bf Gregorian, Julian, No-leap Calendars} &
+  {\bf 360-Day Calendar} &
+  {\bf Custom Calendar} &
+  {\bf Julian-day, No-Cal Calendar} &
+  {\bf Calendar undefined} (not set) \\
+\hline\hline
+
+% row 1, column 1
+{\bf {\tt startTime} \newline
+     and/or \newline
+     {\tt endTime}} &
+
+% row 1, column 2
+  Use either {\tt startTime} and/or {\tt endTime} to define an absolute time interval (reducible to seconds). &
+
+% row 1, column 3
+  Unnecessary because years and months are absolute.  However, can be used if convenient. &
+
+% row 1, column 4
+  Depends on calendar defined.  Most will be either Earth-type or space-type.  If Earth-type, behavior will be like the Gregorian/Julian/No-leap/360-day calendars.  If space-type, only years will likely be defined, not months.  And years will be absolute, defined in terms of days or seconds.  Hence {\tt startTime} or {\tt endTime} would be unnecessary for space-type.  However, can be used if convenient. &
+
+% row 1, column 5
+  Unnecessary because only days (absolute) are defined, years and months are not.  However, can be used if convenient. &
+
+% row 1, column 6
+  Does not apply (don't use); usage implies a calendar (see columns to the left)! \\
+\cline{2-5}
+
+% row 2, columns 1-5
+  & \multicolumn{4}{l}{If {\tt startTime} and/or {\tt endTime} is used, the calendar defined therein is used to set the time interval's calendar.  Hence usage is mutually exclusive with the {\tt calendar} argument (see below).} \\
+\hline
+
+% row 3, columns 1-5
+{\bf {\tt calendar}} &
+  \multicolumn{4}{l}{Use to associate time interval with a specific calendar.  Mutually exclusive with {\tt startTime/endTime} usage (see above).} &
+
+% row 3, column 6
+  Does not apply (don't use); usage implies a calendar (see columns to the left)! \\
+\hline
+
+% row 4, all columns
+  \multicolumn{6}{l}{For calendar mismatches between {\tt startTime} and {\tt endTime}, or if {\tt startTime} or {\tt endTime}, and {\tt calendar} are specified, an error code will be returned and an {\tt ESMF\_LogErr} message written.} \\
+\hline
+
+\end{tabular}
+\end{table}
+\end{center}

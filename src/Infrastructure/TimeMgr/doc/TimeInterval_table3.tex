@@ -1,0 +1,47 @@
+% $Id: TimeInterval_table3.tex,v 1.1 2004/01/26 21:30:16 eschwab Exp $
+
+\newpage
+
+The following tables show how {\tt ESMF\_Time}'s and {\tt ESMF\_TimeInterval}'s existing arithmetic and comparison operators will be defined for calendar intervals, taking into account different calendars, and whether intervals are absolute or relative.
+
+The following variables are used in the tables below:
+
+{\tt type(ESMF\_TimeInterval) :: Ti, Ti1, Ti2, Ti3}  ! as calendar intervals (yy, mm, d) \\
+{\tt type(ESMF\_Time)         :: T1, T2} \\
+{\tt integer(ESMF\_KIND\_I4)  :: I} \\
+{\tt real(ESMF\_KIND\_R8)     :: R} \\
+{\tt type(ESMF\_Fraction)     :: F}   ! exact rational numerator/denominator value \\
+\begin{center}
+\begin{table}
+
+\caption{\label{table:timeArith}Class ESMF\_Time Arithmetic Overloaded Operation Definitions for Time Intervals using years, months and/or days}
+
+\begin{tabular}{|p{1.5in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|}
+\hline
+
+% column headers
+{\bf ESMF\_Time Arithmetic Operation} &
+  {\bf Gregorian, Julian, No-leap Calendars} &
+  {\bf 360-Day Calendar} &
+  {\bf Custom Calendar} &
+  {\bf Julian-day, No-Cal Calendar} &
+  {\bf Calendar undefined} (not set) \\
+\hline\hline
+
+% row 1
+{\bf T2 = T1 + Ti \newline T2 = T1 - Ti} &
+  \multicolumn{5}{l}{Defined in all cases for all calendars, since if Ti is relative, its absolute size can be determined from the value and calendar of time instant T1.  Satisfies requirement TMG2.4.5.} \\
+\hline
+
+% row 2
+{\bf Ti = T1 - T2} &
+  \multicolumn{5}{l}{Defined in all cases for all calendars, since time instants are absolute.  Satisfies requirement TMG2.4.6.} \\
+\hline
+
+% row 3, all columns
+  \multicolumn{6}{l}{For undefined cases or calendar mismatches between T1 and Ti or T1 and T2, a 0 will be returned and an {\tt ESMF\_LogErr} message written.} \\
+\hline
+
+\end{tabular}
+\end{table}
+\end{center}

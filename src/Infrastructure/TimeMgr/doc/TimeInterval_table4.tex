@@ -1,0 +1,87 @@
+% $Id: TimeInterval_table4.tex,v 1.1 2004/01/26 21:30:16 eschwab Exp $
+
+\newpage
+\begin{center}
+\begin{table}
+
+\caption{\label{table:timeIntervalArith}Class ESMF\_TimeInterval Arithmetic Overloaded Operation Definitions for Time Intervals using years, months and/or days}
+
+\begin{tabular}{|p{1.5in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|p{1.25in}|}
+\hline
+
+% column headers
+{\bf ESMF\_TimeInterval Arithmetic Operation} &
+  {\bf Gregorian, Julian, No-leap Calendars} &
+  {\bf 360-Day Calendar} &
+  {\bf Custom Calendar} &
+  {\bf Julian-day, No-Cal Calendar} &
+  {\bf Calendar undefined} (not set) \\
+\hline\hline
+
+% row 1, column 1
+{\bf R = Ti1 / Ti2 \newline
+     F = Ti1 / Ti2 \newline
+     Ti3 = Ti1 \% Ti2} &
+
+% row 1, column 2
+  Defined if Ti1 and Ti2 are both only relative {\tt (yy, mm)} or both only absolute {\tt (d, h, m, s)} (and {\tt yy} for No-Leap), or if Ti1 (numerator) is zero. &
+
+% row 1, column 3
+  Defined in all cases, because years and months are absolute. &
+
+% row 1, column 4
+  Depends on calendar defined.  Most will be either Earth-type or space-type.  If Earth-type, behavior will be like the Gregorian, Julian, No-leap, or 360-day calendars.  If space-type, only years will likely be defined, not months.  And years will be absolute, defined in terms of days or seconds.  Hence space-type would be defined in all cases. &
+
+% row 1, column 5
+  Defined in all cases, because only days (absolute) are defined, years and months are not. &
+
+% row 1, column 6
+  Defined if only one of year, month, or days is specified, because the relation between years, months and days is not known (calendar specific).  Hence, can divide years by years, months by months, or days by days. \\
+\hline
+
+% row 2
+{\bf Ti2 = Ti1 / I \newline
+     Ti2 = Ti1 / R} &
+  \multicolumn{5}{l}{Defined in all cases for all calendars since division by a single number is distibutive across all absolute and relative elements in the numerator.} \\
+\hline
+
+% row 3
+{\bf Ti2 = Ti1 * I \newline
+     Ti2 = Ti1 * R \newline
+     Ti2 = Ti1 * F} &
+  \multicolumn{5}{l}{Defined in all cases for all calendars since multiplication by a single number is distibutive across all absolute and relative elements in the multiplicand.} \\
+\hline
+
+% row 4
+{\bf Ti3 =  Ti1 + Ti2 \newline
+     Ti3 =  Ti1 - Ti2} &
+  \multicolumn{5}{l}{Defined in all cases for all calendars since addition/subtraction can be done with like-unit absolute and relative elements in the addends or minuend/subtrahend.} \\
+\hline
+
+% row 5, column 1
+{\bf Ti2 =  |Ti1| \newline
+     Ti2 = -|Ti1|} &
+
+% row 5, column 2
+  Defined if Ti1's absolute and/or relative elements can be reduced to a set of one or more units all having the same sign. &
+
+% row 5, column 3
+  Defined in all cases, because years and months are absolute. &
+
+% row 5, column 4
+  Depends on calendar defined.  Most will be either Earth-type or space-type.  If Earth-type, behavior will be like the Gregorian/Julian/No-leap/360-day calendars.  If space-type, only years will likely be defined, not months.  And years will be absolute, defined in terms of days or seconds.  Hence space-type would be defined in all cases. &
+
+% row 5, column 5
+  Defined in all cases, because only days (absolute) are defined, years and months are not. &
+
+% row 5, column 6
+  Defined if Ti1's elements all have the same sign. \\
+\hline
+
+% row 6, all columns
+  \multicolumn{6}{l}{For undefined cases, or a calendar mismatch between Ti1 and Ti2, a 0 will be returned and an {\tt ESMF\_LogErr} message written.} \\
+\hline
+
+\end{tabular}
+\end{table}
+\end{center}
