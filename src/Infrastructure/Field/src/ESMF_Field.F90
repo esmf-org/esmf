@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.41 2003/07/22 19:48:20 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.42 2003/07/23 17:03:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -214,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.41 2003/07/22 19:48:20 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.42 2003/07/23 17:03:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2419,7 +2419,10 @@
 
       ! Get global starting counts and global strides
       call ESMF_DElayoutGetNumDEs(layout, nDEs, rc=status)
+      AI_count = nDEs
       allocate(global_start(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(src_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
+      allocate(dst_AI(nDEs, ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(ftypep%grid, global_cell_dim=global_stride, &
                         global_start=global_start, rc=status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -2428,16 +2431,16 @@
       endif 
 
       ! set up things we need to find a cached route or precompute one
-!jw  need to get all AI's for all DE's
+      call ESMF_ArrayGetAllAxisIndices(ftypep%localfield%localdata, ftypep%grid, &
+                                       totalindex=dst_AI, compindex=src_AI, &
+                                       rc=status)       
           
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
-      call ESMF_RouteGetCached(datarank, &
-                               my_DE, dst_AI, dst_AI, &
-                               AI_count, layout, &
-                               my_DE, src_AI, src_AI, &
-                               AI_count, layout, &
-                               hascachedroute, route, rc=status)
+      call ESMF_RouteGetCached(datarank, my_DE, dst_AI, dst_AI, &
+                               AI_count, layout, my_DE, src_AI, src_AI, &
+                               AI_count, layout, hascachedroute, route, &
+                               rc=status)
 
       if (.not. hascachedroute) then
           ! Create the route object.
