@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.7 2003/02/27 17:53:59 flanigan Exp $ 
+# $Id: base_variables,v 1.8 2003/03/05 18:17:18 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -20,7 +20,7 @@ C_FLINKER_SLFLAG   = -Wl,-rpath,
 C_CLINKER	   = cc
 C_FLINKER	   = f95
 C_CCV		   = ${C_CC} --version
-C_FCV              = f95 -V
+C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc -lf2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
