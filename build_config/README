@@ -114,12 +114,16 @@ Environment Variables
                    Other possible settings are mpich and lam.
 
  ESMF_COMPILER     Variable specifying which compiler to use.  Value
-                   can be default, absoft, intel, lahey, pgi or nag. 
+                   can be default, absoft, intel, lahey, nag, pgi or xlf. 
                    If the value is default or ESMF_COMPILER is 
                    left unset, then the default compiler 
-                   will be used.  Exceptions for default values:
-                   On Linux machines the default value is lahey and
-                   on Darwin machines it is absoft.
+                   will be used.  On systems which usually come with a
+                   single vendor-supplied compiler, the default is to use
+                   this compiler.  On systems like Linux clusters where
+                   there is no single vendor compiler installed on all
+                   systems, you will generally want to set this.
+                   The default for Linux systems is lahey and on
+                   Darwin (Mac OS X) systems it is absoft.
 
  ESMF_C_COMPILER   Variable specifying which C/C++ compiler to use.
                    In most cases this should not be set; the default
@@ -210,7 +214,7 @@ provided only for the supported platforms.
 
 
 ================================================================================
- $Id: README,v 1.18.2.1 2005/03/10 23:50:14 jwolfe Exp $
+ $Id: README,v 1.18.2.2 2005/03/10 23:54:04 jwolfe Exp $
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
