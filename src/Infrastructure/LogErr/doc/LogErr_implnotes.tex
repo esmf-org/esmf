@@ -1,4 +1,4 @@
-% $Id: LogErr_implnotes.tex,v 1.6 2004/03/17 23:12:24 svasquez Exp $
+% $Id: LogErr_implnotes.tex,v 1.7 2004/03/17 23:46:53 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,7 +20,7 @@ These utility functions call the standard Fortran write, open and close function
 If you call the Log methods from C/C++ code, you bypass the utility functions
 and all I/O is done with the C I/O libraries.
 
-At initialization a {\tt ESMF\_LogArray} is created.  This array is a container 
+At initialization a LogArray is created.  This array is a container 
 that holds multiple Logs.  Within the LogArray, one or more Logs may be created.  
 Each Log stores information for a specific Log file.   When working with 
 more than one Log file, multiple Logs are required (one Log for each Log file).  
