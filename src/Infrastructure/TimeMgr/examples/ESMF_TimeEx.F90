@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeEx.F90,v 1.17 2003/12/17 23:42:35 svasquez Exp $
+! $Id: ESMF_TimeEx.F90,v 1.18 2004/01/06 16:53:58 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -13,11 +13,6 @@
       program ESMF_TimeEx
 
 !------------------------------------------------------------------------------
-
-! The following line turns the CVS identifier string into a printable variable.
-      character(*), parameter :: version = &
-      '$Id: ESMF_TimeEx.F90,v 1.17 2003/12/17 23:42:35 svasquez Exp $'
-!
 !==============================================================================
 !BOP
 !\begin{verbatim}
@@ -27,7 +22,11 @@
 !
 ! This program shows examples of Time initialization and manipulation
 !-----------------------------------------------------------------------------
+
+      ! ESMF Framework module
+      use ESMF_Mod
       implicit none
+
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar
 
@@ -211,21 +210,9 @@
           finalrc = ESMF_FAILURE
       end if
 
+!BOP
+!\begin{verbatim}
       print *, "time1 day of the year = ", dayOfYear
-
-!BOP
-!\begin{verbatim}
-      call ESMF_TimeGet(time1, dayOfMonth=dayOfMonth, rc=rc)
-!\end{verbatim}
-!EOP
-
-      if (rc.NE.ESMF_SUCCESS) then
-          finalrc = ESMF_FAILURE
-      end if
-
-!BOP
-!\begin{verbatim}
-      print *, "time1 day of the month = ", dayOfMonth
 
       call ESMF_TimeGet(time1, dayOfWeek=dayOfWeek, rc=rc)
 !\end{verbatim}
