@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.4 2003/03/13 21:59:24 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.5 2003/03/13 22:21:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -192,7 +192,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.4 2003/03/13 21:59:24 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.5 2003/03/13 22:21:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2188,6 +2188,9 @@
       stypep = srcfield%ftypep
       dtypep = dstfield%ftypep
 
+      ! TODO: we need not only to know if this DE has data in the field,
+      !   but also the de id for both src & dest fields
+
       ! if srclayout ^ parentlayout == NULL, nothing to send
       ! call ESMF_GridGetDELayout(stypep%grid, srclayout, status)
       ! call ESMF_DELayoutThisDEExists(parentlayout, srclayout, hassrcdata)
@@ -2245,6 +2248,18 @@
           endif 
       endif
 
+      ! set up things we need to find a cached route or precompute one
+      if (hassrcdata) then
+          ! call ESMF_GridGetAllAIs(stypep%grid, srcAI)
+          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
+          AI_count = nx * ny
+      endif
+      if (hasdstdata) then
+          ! call ESMF_GridGetAllAIs(dtypep%grid, dstAI)
+          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
+          AI_count = nx * ny
+      endif
+          
       ! Does this same route already exist?  If so, then we can drop
       ! down immediately to RouteRun.
       call ESMF_RouteGetCached(parentlayout, &! field1, field2, 
@@ -2255,18 +2270,9 @@
           ! includes the DEs from both fields.
           route = ESMF_RouteCreate(parentlayout, rc) 
 
-          ! TODO:  get this list mostly from grid
-          do i=1, datarank
-             my_AI(i)%l = 0
-             AI(i)%l = 0
-          enddo
-
-          call ESMF_DELayoutGetSize(dstlayout, nx, ny);
-
-          AI_count = nx * ny
-          
-          call ESMF_RoutePrecompute(route, my_AI, AI, AI_count, datarank, &
-                                                 srclayout, dstlayout, status)
+          call ESMF_RoutePrecompute(route, datarank, my_dst_DE, dstAI, &
+                                   AI_rcv_count, dstlayout, my_src_DE, &
+                                   srcAI, AI_snd_count, srclayout)
 
       endif
 
