@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.37 2003/04/14 14:51:40 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.38 2003/04/14 16:34:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.37 2003/04/14 14:51:40 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.38 2003/04/14 16:34:23 nscollins Exp $'
 
 !==============================================================================
 !
@@ -839,7 +839,7 @@
         if (present(configfile)) then
           !lconfig = ESMF_CreateConfig(configfile, rc=status)
         else
-          lconfig = config
+          !lconfig = config
         endif
 
         ! Call construction method to initialize component internals
