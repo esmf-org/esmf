@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.64 2004/02/11 21:51:26 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.65 2004/02/18 01:51:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.64 2004/02/11 21:51:26 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.65 2004/02/18 01:51:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -309,7 +309,8 @@
 ! run this test only on platforms that support F95 initializers, otherwise
 !   may crash or produce FAIL
 ! see bug #755424
-! TODO:  test count will be "off-by-one" where this test doesn't run
+! TODO:  test count will be "off-by-one" on platforms where this test
+!        doesn't run
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
       !NEX_UTest
       ! This code crashes, bug 79753 has been opened.
@@ -409,11 +410,22 @@
 
       ! ----------------------------------------------------------------------------
 
-! run this test only on platforms that support F95 initializers, otherwise
+! run these tests only on platforms that support F95 initializers, otherwise
 !   may crash or produce FAIL
 ! see bug #755445
-! TODO:  test count will be "off-by-one" where this test doesn't run
+! TODO:  test count will be "off-by-one" on platforms where this test
+!        doesn't run
 #if !defined(ESMF_NO_INITIALIZERS) && !defined(ESMF_AIX_8_INITBUG)
+      ! ClockPrint with an unallocated clock
+      !NEX_UTest
+       write(name, *) "Clock Print Test with unallocated clock"
+       write(failMsg, *) " Returned ESMF_SUCCESS"
+       call ESMF_ClockPrint(clock, rc=rc)
+       call ESMF_Test((rc.eq.ESMF_FAILURE), &
+                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
       ! Initialize clock with uninitialized Start Time.
       !NEX_UTest
        write(name, *) "Clock Initialization Test with uninitialized startTime"
