@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.3 2003/12/09 20:42:00 nscollins Exp $
+! $Id: FlowMod.F90,v 1.4 2004/01/30 00:39:19 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -64,8 +64,8 @@
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: g_min(2), g_max(2)
       integer, dimension(ESMF_MAXGRIDDIM) :: counts
-      integer :: horz_gridtype, vert_gridtype
-      integer :: horz_stagger, vert_stagger
+      type(ESMF_GridKind) :: horz_gridkind, vert_gridkind
+      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: myde, halo_width
 !
@@ -85,23 +85,24 @@
         g_max(1) = 200.0
         g_min(2) = 0.0
         g_max(2) = 50.0
-        horz_gridtype = ESMF_GridType_XY
-        vert_gridtype = ESMF_GridType_Unknown
-        horz_stagger = ESMF_GridStagger_D
+        horz_gridkind = ESMF_GridKind_XY
+        vert_gridkind = ESMF_GridKind_Unknown
+        horz_stagger = ESMF_GridStagger_D_NE
         vert_stagger = ESMF_GridStagger_Unknown
         horz_coord_system = ESMF_CoordSystem_Cartesian
         vert_coord_system = ESMF_CoordSystem_Unknown
         halo_width = 1
 
-        grid = ESMF_GridCreate(2, counts=counts, &
-                               min=g_min, max=g_max, &
+        grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+                               minGlobalCoordPerDim=g_min, &
+                               maxGlobalCoordPerDim=g_max, &
                                layout=layout, &
-                               horz_gridtype=horz_gridtype, &
-                               vert_gridtype=vert_gridtype, &
-                               horz_stagger=horz_stagger, &
-                               vert_stagger=vert_stagger, &
-                               horz_coord_system=horz_coord_system, &
-                               vert_coord_system=vert_coord_system, &
+                               horzGridKind=horz_gridkind, &
+                               vertGridKind=vert_gridkind, &
+                               horzStagger=horz_stagger, &
+                               vertStagger=vert_stagger, &
+                               horzCoordSystem=horz_coord_system, &
+                               vertCoordSystem=vert_coord_system, &
                                name="source grid", rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in User1_init:  grid create"
