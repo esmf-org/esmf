@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.6 2004/02/09 17:52:06 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.7 2004/02/13 20:24:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -223,7 +223,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.6 2004/02/09 17:52:06 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.7 2004/02/13 20:24:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -763,7 +763,7 @@ end function
 
         if (present(dimlist)) then
            dimlength = size(dimlist,1)
-           if (dimlength .lt. gridrank) then
+           if (dimlength .lt. dmp%gridrank) then
              print *, "ESMF_DataMapGet: dimlist too short for grid rank"
              return
            endif
