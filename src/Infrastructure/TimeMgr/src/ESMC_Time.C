@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.61 2004/05/19 22:05:07 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.62 2004/05/21 00:27:34 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -202,16 +202,24 @@
 
       // calendar required
       if (this->calendar == ESMC_NULL_POINTER) {
-        goto ESMC_TIMESET_FAILURE;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                                              ", calendar required.", &rc);
+        *this = saveTime; return(rc);
       }
 
       // year required
-      if (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER)
-        goto ESMC_TIMESET_FAILURE;
+      if (yy == ESMC_NULL_POINTER && yy_i8 == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                                              ", year required.", &rc);
+        *this = saveTime; return(rc);
+      }
 
       // day without a month is not good
-      if (dd != ESMC_NULL_POINTER && mm == ESMC_NULL_POINTER)
-        goto ESMC_TIMESET_FAILURE;
+      if (dd != ESMC_NULL_POINTER && mm == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_INCOMP,
+                                      ", day specified without a month.", &rc);
+        *this = saveTime; return(rc);
+      }
 
       // use only one specified year (yy and yy_i8 are mutually exclusive)
       ESMF_KIND_I8 argYY = (yy != ESMC_NULL_POINTER) ? *yy : *yy_i8;
@@ -222,28 +230,39 @@
       if (dd != ESMC_NULL_POINTER) argDD = *dd;
 
       // do the conversion
-      if (this->calendar->ESMC_CalendarConvertToTime(argYY, argMM, argDD,
-                                                     0, this)
-            != ESMF_SUCCESS) goto ESMC_TIMESET_FAILURE;
+      rc = this->calendar->ESMC_CalendarConvertToTime(argYY, argMM, argDD,
+                                                      0, this);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        { *this = saveTime; return(rc); }
 
     // is a Julian-days style date specified?
     } else if (d != ESMC_NULL_POINTER || d_i8 != ESMC_NULL_POINTER) {
 
       // calendar required
-      if (this->calendar == ESMC_NULL_POINTER) goto ESMC_TIMESET_FAILURE;
+      if (this->calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                                              ", calendar required.", &rc);
+        *this = saveTime; return(rc);
+      }
 
       ESMF_KIND_I8 argD = (d != ESMC_NULL_POINTER) ? *d : *d_i8;
-      if (this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, argD, this) !=
-          ESMF_SUCCESS) goto ESMC_TIMESET_FAILURE;
+      rc = this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, argD, this);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
 
     } else if (d_r8 != ESMC_NULL_POINTER) {
       // calendar required
-      if (this->calendar == ESMC_NULL_POINTER) goto ESMC_TIMESET_FAILURE;
+      if (this->calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                                              ", calendar required.", &rc);
+        *this = saveTime; return(rc);
+      }
 
       // integer part
-      if (this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, 
-                                                     (ESMF_KIND_I8) *d_r8,
-          this) != ESMF_SUCCESS) goto ESMC_TIMESET_FAILURE;
+      rc = this->calendar->ESMC_CalendarConvertToTime(0, 0, 0, 
+                                              (ESMF_KIND_I8) *d_r8, this);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+          { *this = saveTime; return(rc); }
 
       // fractional part
       this->s += (ESMF_KIND_I8) (modf(*d_r8, ESMC_NULL_POINTER) * 
@@ -254,12 +273,11 @@
     ESMC_BaseTimeSet(h, m, s, s_i8, ms, us, ns, h_r8, m_r8, s_r8,
                      ms_r8, us_r8, ns_r8, sD, sN);
 
-    if (ESMC_TimeValidate() != ESMF_SUCCESS) goto ESMC_TIMESET_FAILURE;
-    else return(ESMF_SUCCESS);
+    rc = ESMC_TimeValidate();
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        { *this = saveTime; return(rc); }
 
-    ESMC_TIMESET_FAILURE:
-      *this = saveTime;
-      return(rc);
+    return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeSet
 
@@ -319,27 +337,34 @@
 
     // TODO: fractional, sub-seconds
 
+    int rc = ESMF_SUCCESS;
+
     // convert base time to date according to calendar type
     if (yy != ESMC_NULL_POINTER || yy_i8 != ESMC_NULL_POINTER ||
         mm != ESMC_NULL_POINTER || dd  != ESMC_NULL_POINTER ||
         d  != ESMC_NULL_POINTER || d_i8  != ESMC_NULL_POINTER ||
         d_r8 != ESMC_NULL_POINTER) {
-      if (this->calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
-      if (this->calendar->ESMC_CalendarConvertToDate(this, yy, yy_i8, mm, dd,
-                                                     d, d_i8, d_r8) ==
-                          ESMF_FAILURE) return(ESMF_FAILURE);
+      if (this->calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD,
+                                 ", calendar required.", &rc); return(rc);
+      }
+      rc = this->calendar->ESMC_CalendarConvertToDate(this, yy, yy_i8, mm, dd,
+                                                      d, d_i8, d_r8);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
     }
 
     // get seconds based date (64-bit s_i8 or real s_r8) if requested;
     //   base time get needs to convert entire base time.  Requirements: TMG2.1
-    if (ESMC_BaseTimeGet(this->s, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+    rc = ESMC_BaseTimeGet(this->s, ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                   ESMC_NULL_POINTER, s_i8, ESMC_NULL_POINTER,
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER, s_r8,
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER) !=
-                         ESMF_SUCCESS) return(ESMF_FAILURE);
+                                  ESMC_NULL_POINTER);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // get number of seconds in a day
     int secPerDay = 0;  // default if day not defined
@@ -352,45 +377,55 @@
                                           this->s % secPerDay : this->s;
 
     // use base class to get all other sub-day values (within date's day)
-    if (ESMC_BaseTimeGet((timeToConvert), h, m, s, ESMC_NULL_POINTER,
+    rc = ESMC_BaseTimeGet((timeToConvert), h, m, s, ESMC_NULL_POINTER,
                          ms, us, ns, h_r8, m_r8, ESMC_NULL_POINTER, ms_r8,
-                         us_r8, ns_r8, sN, sD) !=
-                     ESMF_SUCCESS) return(ESMF_FAILURE);
+                         us_r8, ns_r8, sN, sD);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     if (calendar != ESMC_NULL_POINTER) {
       *calendar = this->calendar;
     }
     if (calendarType != ESMC_NULL_POINTER) {
-      if (this->calendar == ESMC_NULL_POINTER) return(ESMF_FAILURE);
+      if (this->calendar == ESMC_NULL_POINTER) {
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_PTR_NULL,
+             ", calendarType requires a calendar to be set.", &rc); return(rc);
+      }
       *calendarType = this->calendar->calendarType;
     }
     if (timeZone != ESMC_NULL_POINTER) {
       *timeZone = this->timeZone;
     }
     if (tempTimeString != ESMC_NULL_POINTER && timeStringLen > 0) {
-      if (ESMC_TimeGetString(tempTimeString) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_TimeGetString(tempTimeString);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
       *tempTimeStringLen = strlen(tempTimeString);
     }
     if (dayOfWeek != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetDayOfWeek(dayOfWeek) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_TimeGetDayOfWeek(dayOfWeek);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
     }
     if (midMonth != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetMidMonth(midMonth) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_TimeGetMidMonth(midMonth);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
     }
     if (dayOfYear != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetDayOfYear(dayOfYear) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_TimeGetDayOfYear(dayOfYear);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
     }
     if (dayOfYear_r8 != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetDayOfYear(dayOfYear_r8) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_TimeGetDayOfYear(dayOfYear_r8);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
     }
     if (dayOfYear_intvl != ESMC_NULL_POINTER) {
-      if (ESMC_TimeGetDayOfYear(dayOfYear_intvl) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_TimeGetDayOfYear(dayOfYear_intvl);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
     }
 
     return(ESMF_SUCCESS);
@@ -512,9 +547,12 @@
 //EOP
 // !REQUIREMENTS:  
 
+    int rc = ESMF_SUCCESS;
+
     // use base class Set()
-    if (ESMC_BaseTime::ESMC_BaseTimeSet(s, sN, sD) != ESMF_SUCCESS)
-      return(ESMF_FAILURE);
+    rc = ESMC_BaseTime::ESMC_BaseTimeSet(s, sN, sD);
+    if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+      return(rc);
 
     // set calendar type
     this->calendar = ESMC_NULL_POINTER;  // to detect invalid, unset time
@@ -526,8 +564,9 @@
 
     } else if (calendarType != (ESMC_CalendarType)0) {  // 2nd choice
       // set to specified built-in type; create if necessary
-      if (ESMC_CalendarCreate(calendarType) != ESMF_SUCCESS)
-        return(ESMF_FAILURE);
+      rc = ESMC_CalendarCreate(calendarType);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
       this->calendar = ESMC_Calendar::internalCalendar[calendarType-1];
     } // otherwise leave NULL, TODO: implement ESMC_Base logic, then can
       // set default calendar
