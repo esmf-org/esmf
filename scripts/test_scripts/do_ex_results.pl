@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ex_results.pl,v 1.9 2005/02/02 20:17:33 svasquez Exp $
+# $Id: do_ex_results.pl,v 1.10 2005/02/03 00:18:43 svasquez Exp $
 # This script runs at the end of the examples and "check_results" targets.
 # The purpose is to give the user the results of running the examples.
 
@@ -143,7 +143,7 @@ getopts("d:b:", \%options);
                                 s/\./ /; # Break it into 2 fields
                                 s/([^ ]*) ([^ ]*)/$1/; # Get rid of the 2nd field
                         }
-                        # Find the act_ex_files fles that are in the fail_tests
+                        # Find the act_ex_files fles that are in the pass_tests
                         foreach $file ( @pass_tests) {
                                 push @pass_ex_files, grep (/$file/, @act_ex_files);
                         }
@@ -156,16 +156,15 @@ getopts("d:b:", \%options);
                         print "\n\n";
                         # Sort the pass_ex_files
                         @pass_ex_files = sort (@pass_ex_files);
-                        foreach $file (@pass_ex_files) {
-                        print "         $file";
-                        }
+                        print @pass_ex_files;
                         print "\n\n";
                 }
-
 		if ($fail_count != 0) {
                 	# Find the act_ex_files fles that are in the pass_tests
-                	foreach $file ( @pass_tests) {
-                               	pop @act_ex_files, grep (/$file/, @act_ex_files);
+                	foreach $file ( @pass_ex_files) {
+				foreach (@act_ex_files){
+					s/$file//s;
+				}
                 	}
 			if ($fail_count == 1) {
 				print "The following example failed, did not build, or did not execute:\n";
@@ -176,9 +175,7 @@ getopts("d:b:", \%options);
                		print "\n\n";
 			# Sort the act_ex_files
 			@act_ex_files = sort (@act_ex_files);
-			foreach $file (@act_ex_files) {
-			print "         $file";
-			}
+			print @act_ex_files;
                		print "\n\n";
 		}
 		
