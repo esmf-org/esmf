@@ -1,4 +1,4 @@
-! $Id: ESMF_IO.F90,v 1.6 2002/12/12 23:36:44 nscollins Exp $
+! $Id: ESMF_IO.F90,v 1.7 2003/04/15 16:01:51 nscollins Exp $
 !-------------------------------------------------------------------------
 !
 ! ESMF IO module
@@ -66,6 +66,9 @@
       public ESMF_IOSpec
 
 ! !PUBLIC MEMBER FUNCTIONS:
+
+!     Temporary for putting system dependent I/O code in a single place.
+      public ESMF_IOFlush
 !
 !     function ESMF_IOSpecCreate() (interface only)
 !     function ESMF_IOSpecCreateNew()
@@ -120,6 +123,37 @@
 
       contains
 
+!-------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_IOFlush - flush output on a unit number
+!
+! !INTERFACE:
+      subroutine ESMF_IOFlush(unitNumber, rc)
+!
+! !PARAMETERS:
+      integer, intent(in) :: unitNumber
+      integer, intent(out), optional :: rc               ! return code
+
+!
+! !DESCRIPTION:
+!   Call the system-dependent routine to force output.
+
+!
+! !REQUIREMENTS: 
+
+!EOP
+      integer :: status
+
+      status = ESMF_FAILURE
+
+#if ((ESMF_ARCH == IRIX) || (ESMF_ARCH == IRIX64))
+      call flush(unitNumber, status)
+#endif
+
+      end subroutine ESMF_IOFlush
+
+
+!-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !BOP
 !
