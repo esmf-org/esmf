@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.18 2003/03/21 22:17:26 jwolfe Exp $
+// $Id: ESMC_XPacket.C,v 1.19 2003/03/21 22:37:43 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.18 2003/03/21 22:17:26 jwolfe Exp $";
+              "$Id: ESMC_XPacket.C,v 1.19 2003/03/21 22:37:43 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -329,7 +329,7 @@
           this->right = global_l[1]*indexlist[0].max + global_r[0];
           this->strides[0] = indexlist[0].max;
           this->num[0] = indexlist[1].r - indexlist[1].l + 1;
-     printf("outgoing XPacket:\n");
+     printf("outgoing ");
      this->ESMC_XPacketPrint();
         }
       break;
@@ -446,13 +446,13 @@
 
     printf("XPacket: rank=%d, left=%d, right=%d, ", rank, left, right);
  
-    printf("   strides=(");
-    for (i=0; i<rank; i++) 
-      printf("%d ", strides[i]);
-    printf("), num=(");
-    for (int i=0; i<rank; i++) 
-      printf("%d, ", num[i]);
-    printf(")\n"); 
+    printf("strides=(");
+    for (i=0; i<rank-1; i++) 
+      printf("%d,", strides[i]);
+    printf("%d), num=(", strides[i]);
+    for (int i=0; i<rank-1; i++) 
+      printf("%d,", num[i]);
+    printf("%d)\n", num[i]); 
 
     return ESMF_SUCCESS;
 
