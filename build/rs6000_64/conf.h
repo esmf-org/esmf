@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.7 2003/02/25 21:11:52 nscollins Exp $"
+"$Id: conf.h,v 1.8 2003/06/20 22:48:26 jwolfe Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -52,6 +52,7 @@
 #define ESMC_HAVE_MEMMOVE
 
 #define ESMC_HAVE_PRAGMA_DISJOINT
+#define ESMC_RESTRICT __restrict
 
 #define ESMC_USE_DBX_DEBUGGER
 #define ESMC_HAVE_SYS_RESOURCE_H
