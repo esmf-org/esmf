@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.40 2004/03/16 00:08:09 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.41 2004/03/16 21:08:53 nscollins Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -6,6 +6,7 @@
 \usepackage{html}
 \usepackage{times}
 \usepackage{graphicx}
+\usepackage{hyperref}
 \usepackage[T1]{fontenc}
 
 \newcommand{\docmttype}{Reference Manual for Fortran}
