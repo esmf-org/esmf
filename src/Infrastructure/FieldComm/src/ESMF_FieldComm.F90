@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.23 2004/04/13 22:57:18 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.24 2004/04/14 16:28:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -38,6 +38,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
+      use ESMF_DELayoutMod    ! TODO:  get rid of this once CommHandle is moved
       use ESMF_newDELayoutMod    ! ESMF layout class
       use ESMF_LocalArrayMod
       use ESMF_ArrayMod
@@ -92,7 +93,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.23 2004/04/13 22:57:18 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.24 2004/04/14 16:28:16 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -353,7 +354,7 @@
       endif 
 
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(ftypep%grid, delayout, status)
+      call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
       call ESMF_ArrayGather(ftypep%localfield%localdata, delayout, decompids, &
                             global_dimlengths, local_maxlengths, destinationDE, &
                             array, status)
@@ -1047,26 +1048,26 @@
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
-      call ESMF_GridGetDELayout(src_grid, srcDElayout, status)
+      call ESMF_GridGet(src_grid, delayout=srcDElayout, rc=status)
  !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, srcDElayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(srcDElayout, localDe=my_src_DE, status)
+          call ESMF_newDELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
           call ESMF_FieldGetArray(srcfield, src_array, rc=status)
           call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
-      call ESMF_GridGetDELayout(dst_grid, dstDElayout, status)
+      call ESMF_GridGet(dst_grid, delayout=dstDElayout, rc=status)
  !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, dstDElayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(dstDElayout, localDe=my_dst_DE, status)
+          call ESMF_newDELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
           call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
           call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
       endif
@@ -1220,7 +1221,7 @@
       endif     
 
       ! Our DE number in the parent layout
-      call ESMF_newDELayoutGet(parentDElayout, localDE=my_DE, status)
+      call ESMF_newDELayoutGet(parentDElayout, localDE=my_DE, rc=status)
 
       ! TODO: we need not only to know if this DE has data in the field,
       !   but also the de id for both src & dest fields
@@ -1233,26 +1234,26 @@
 
       ! if srclayout ^ parentlayout == NULL, nothing to send from this DE id.
       call ESMF_FieldGet(srcfield, grid=src_grid, rc=status)
-      call ESMF_GridGetDELayout(src_grid, srcDElayout, status)
+      call ESMF_GridGet(src_grid, delayout=srcDElayout, rc=status)
  !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, srcDElayout, hasdata)
       hassrcdata = (hasdata .eq. ESMF_TRUE) 
       hassrcdata = .true.   ! temp for now
       if (hassrcdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(srcDElayout, localDE=my_src_DE, status)
+          call ESMF_newDELayoutGet(srcDElayout, localDE=my_src_DE, rc=status)
           call ESMF_FieldGetArray(srcfield, src_array, rc=status)
           call ESMF_FieldGet(srcfield, datamap=src_datamap, rc=status)
       endif
 
       ! if dstlayout ^ parentlayout == NULL, nothing to recv on this DE id.
       call ESMF_FieldGet(dstfield, grid=dst_grid, rc=status)
-      call ESMF_GridGetDELayout(dst_grid, dstDElayout, status)
+      call ESMF_GridGet(dst_grid, delayout=dstDElayout, rc=status)
  !jw   call ESMF_DELayoutGetDEExists(parentDElayout, my_DE, dstDElayout, hasdata)
       hasdstdata = (hasdata .eq. ESMF_TRUE) 
       hasdstdata = .true.   ! temp for now
       if (hasdstdata) then
           ! don't ask for our de number if this de isn't part of the layout
-          call ESMF_newDELayoutGet(dstDElayout, localDE=my_dst_DE, status)
+          call ESMF_newDELayoutGet(dstDElayout, localDE=my_dst_DE, rc=status)
           call ESMF_FieldGetArray(dstfield, dst_array, rc=status)
           call ESMF_FieldGet(dstfield, datamap=dst_datamap, rc=status)
       endif
@@ -1391,7 +1392,7 @@
       enddo
 
       ! Call Array method to perform actual work
-      call ESMF_GridGetDELayout(ftypep%grid, delayout, status)
+      call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
       call ESMF_ArrayScatter(array, delayout, decompids, sourceDE, dstarray, &
                              status)
       if(status .NE. ESMF_SUCCESS) then 
@@ -1491,10 +1492,10 @@
 
       ! Get the Layout from the Field's Grid
       ftypep = field%ftypep
-      call ESMF_GridGetDELayout(ftypep%grid, delayout, status)
+      call ESMF_GridGet(ftypep%grid, delayout=delayout, rc=status)
 
       ! Our DE number in the layout
-      call ESMF_newDELayoutGet(delayout, localDE=my_DE, status)
+      call ESMF_newDELayoutGet(delayout, localDE=my_DE, rc=status)
 
       ! Query the datamap and set info for grid so it knows how to
       !  match up the array indices and the grid indices.
@@ -1515,7 +1516,7 @@
       endif 
 
       ! Get global starting counts and global counts
-      call ESMF_newDElayoutGet(layout, deCount=nDEs, rc=status)
+      call ESMF_newDElayoutGet(delayout, deCount=nDEs, rc=status)
       call ESMF_GridGet(ftypep%grid, dimCount=numDims, rc=status)
       AI_count = nDEs
       allocate(global_count(numDims), stat=status)
