@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.98 2004/03/03 17:47:37 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.99 2004/03/04 23:51:45 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1553,13 +1553,12 @@
 ! !IROUTINE: ESMF_DistGridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridGetDE(dgtype, MyDE, localCellCount, &
+      subroutine ESMF_DistGridGetDE(dgtype, localCellCount, &
                                     localCellCountPerDim, globalStartPerDim, &
                                     globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
-      integer, intent(inout), optional :: MyDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
@@ -1576,8 +1575,6 @@
 !     \begin{description}
 !     \item[dgtype]
 !          Class to be modified.
-!     \item[{[MyDE]}]
-!          Identifier for this {\tt ESMF\_DE}.
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
@@ -1618,8 +1615,6 @@
       endif
 
       ! If present, get information from distgrid derived type
-      if(present(MyDE)) MyDE = me%MyDE
-
       if(present(localCellCount)) &
                  localCellCount = me%localCellCount
 
