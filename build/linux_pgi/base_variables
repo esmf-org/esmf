@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.2 2002/01/15 22:13:39 dneckels Exp $ 
+# $Id: base_variables,v 1.3 2002/01/28 21:30:25 dneckels Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -28,7 +28,7 @@ C_SYS_LIB	   = -ldl -lc -lg2c -lm
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS	   = -O -Wall -Wshadow  -fomit-frame-pointer
+O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
 # ########################## C++ compiler ##################################
 #
