@@ -1,4 +1,4 @@
-% $Id: ESMF_buildreq.tex,v 1.7 2003/07/09 22:06:53 flanigan Exp $
+% $Id: ESMF_buildreq.tex,v 1.8 2003/07/09 23:04:43 flanigan Exp $
 
 \sreq{Build}
 
@@ -24,14 +24,14 @@ for all releases:
 \item[all] Builds all libraries, test programs and documentation.
 \item[install] Installs ESMF products.
 
-\item[build\_libs] Builds .so archive files.
+\item[build\_libs] Builds .a and .so library files.
 \item[build\_c] Compiles all c and c++ source code.  
 \item[build\_f] Compiles all FORTRAN source code 
 
 \item[tests] Builds and runs the unit tests
 \item[tests\_uni] Builds and runs single processor unit tests.
 
-\item[run\_tests\_uni] Runs the single processor tests.
+\item[run\_tests\_uni] Runs the single processor unit tests.
 \item[system\_tests] Builds and runs system tests.
 \item[system\_tests\_uni] Builds and runs single processor system tests.
 
@@ -53,7 +53,7 @@ for all releases:
 
 \ssreq{Local Builds}
 Builds within the current working directory will be
-accomplished with a build to the same targets as
+accomplished using the same makefile targets as
 used in the top level.
 Only build tasks within and below the current working directory
 will be processed.  
@@ -96,10 +96,9 @@ code to the ESMF and EVA source trees.
 \end{reqlist}
 
 \ssreq{EVA Builds}
-EVA will will be able to access the build system
-of a checked out and built  ESMF release.  EVA will
-have the ability to use .a or .so ESMF library files
-without access to ESMF source code tree.
+EVA will use either the build system
+of a checked out and built  ESMF source release or 
+an install percompiled version of the ESMF library files.
 \begin{reqlist}
 {\bf Priority:} 1. \\
 {\bf Source:} Application Group \\
