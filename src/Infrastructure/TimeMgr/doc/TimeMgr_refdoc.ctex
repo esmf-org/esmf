@@ -97,40 +97,40 @@
 #endif
 #endif
 
-% -------------------
-% Time Interval Class
-% -------------------
+% --------------
+% Calendar Class
+% --------------
 \newpage
-\section{Time Interval Class}
+\section{Calendar Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{TimeInterval_desc}
+\input{Calendar_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_desc}
+\input{../Infrastructure/TimeMgr/doc/Calendar_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{TimeInterval_usage}
-\input{TimeInterval_fex}
+\input{Calendar_usage}
+\input{Calendar_fex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_usage}
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_fex}
+\input{../Infrastructure/TimeMgr/doc/Calendar_usage}
+\input{../Infrastructure/TimeMgr/doc/Calendar_fex}
 #endif
 
-\subsection{Restrictions}
-#ifdef STANDALONE
-\input{TimeInterval_rest}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
-#endif
+%\subsubsection{Restrictions}
+%#ifdef STANDALONE
+%\input{Calendar_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
+%#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_TimeInterval_fapi}
+\input{ESMF_Calendar_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMF_TimeInterval_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMF_Calendar_fapi}
 #endif
 
 % ----------
@@ -169,40 +169,40 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_Time_fapi}
 #endif
 
-% --------------
-% Calendar Class
-% --------------
+% -------------------
+% Time Interval Class
+% -------------------
 \newpage
-\section{Calendar Class}
+\section{Time Interval Class}
 
 \subsection{Description}
 #ifdef STANDALONE
-\input{Calendar_desc}
+\input{TimeInterval_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_desc}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_desc}
 #endif
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{Calendar_usage}
-\input{Calendar_fex}
+\input{TimeInterval_usage}
+\input{TimeInterval_fex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/Calendar_usage}
-\input{../Infrastructure/TimeMgr/doc/Calendar_fex}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_usage}
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_fex}
 #endif
 
-%\subsubsection{Restrictions}
-%#ifdef STANDALONE
-%\input{Calendar_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
-%#endif
+\subsection{Restrictions}
+#ifdef STANDALONE
+\input{TimeInterval_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/TimeInterval_rest}
+#endif
 
 \subsection{Class API}
 #ifdef STANDALONE
-\input{ESMF_Calendar_fapi}
+\input{ESMF_TimeInterval_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/TimeMgr/doc/ESMF_Calendar_fapi}
+\input{../Infrastructure/TimeMgr/doc/ESMF_TimeInterval_fapi}
 #endif
 
 % -----------

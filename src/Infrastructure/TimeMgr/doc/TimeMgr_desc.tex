@@ -1,4 +1,4 @@
-% $Id: TimeMgr_desc.tex,v 1.4 2003/08/12 18:17:33 cdeluca Exp $
+% $Id: TimeMgr_desc.tex,v 1.5 2003/08/13 02:39:58 cdeluca Exp $
 
 The ESMF Time Manager utility includes software for time and date 
 representation and calculations, model time advancement, and the 
@@ -22,6 +22,10 @@ Support for varying and negative time steps. \\[.05in] \hline
 \end{tabular}
 \end{center}
 
+\begin{center}
+\includegraphics{TimeMgr_desc.eps}
+\end{center}
+
 \subsection{Time Manager Classes}
 There are five ESMF classes that represent time concepts:
 \begin{itemize}
@@ -31,8 +35,9 @@ Calendars may be queried for quantities such as seconds per day,
 days per month, and days per year.  A Calendar can be 
 used to keep track of the date as a Gridded Component advances 
 in time. 
-\item {\bf Time} A Time represents a time instant, such as 
-November 28, 1964, at 7:31pm EST.  The Time class can be used 
+\item {\bf Time} A Time represents a time instant in a particular
+calendar, such as November 28, 1964, at 7:31pm EST in the Gregorian 
+calendar.  The Time class can be used 
 to represent the start and stop time of a time integration.
 \item {\bf TimeInterval} TimeIntervals represent a period 
 of time, such as 300 milliseconds.  Time steps can be represented 
