@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.20 2003/09/04 22:24:21 cdeluca Exp $
+! $Id: ESMF_LogErr.F90,v 1.21 2003/09/09 20:05:07 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,7 +11,8 @@
 !==============================================================================
 !
 
-#include "ESMF_Macros.inc"
+#include "ESMF.h"
+!#include "ESMF_Macros.inc"
 #include "ESMF_LogConstants.inc"
 
 module ESMF_LogErrMod
@@ -71,27 +72,25 @@ type ESMF_Log
                                                   !array of
                                                   !Fortran unit numbers
 
+                                                  !Control settings on output
+                                                  ! flush and halt.
 
-    type(ESMF_Logical) :: verboseSet=ESMF_TRUE !An ESMF_Log object will write
-                                                  !output only if verbose
-						  !is set to
-					          !ESMF_TRUE
-    
-    type(ESMF_Logical) :: flushSet=ESMF_FALSE  !An ESMF_Log object
-                                                  !will have its
-                                                  !output flushed if
-						  !flushSet is set
-					          !to ESMF_TRUE 
+!An ESMF_Log object will write output only if verbose is set to ESMF_TRUE
+!An ESMF_Log object will flush its output if flushSet is set to ESMF_TRUE 
+!An ESMF_Log object will halt on a warning if haltOnWarn is set to ESMF_TRUE 
+!An ESMF_Log object will halt on an error if haltOnErr is set to ESMF_TRUE. 
 
-    type(ESMF_Logical) :: haltOnWarn=ESMF_FALSE !An ESMF_Log object will halt
-                                                   !on encountering a warning if
-					           !haltOnWarn is set to
-						   !ESMF_TRUE 
-
-    type (ESMF_Logical) :: haltOnErr=ESMF_TRUE  !An ESMF_Log object will halt
-                                                   !on encountering an error if
-					           !haltOnErr is set to
-						   !ESMF_TRUE. 
+#ifndef ESMF_NO_INITIALIZERS
+    type(ESMF_Logical) :: verboseSet=ESMF_TRUE 
+    type(ESMF_Logical) :: flushSet=ESMF_FALSE   
+    type(ESMF_Logical) :: haltOnWarn=ESMF_FALSE 
+    type(ESMF_Logical) :: haltOnErr=ESMF_TRUE  
+#else
+    type(ESMF_Logical) :: verboseSet
+    type(ESMF_Logical) :: flushSet
+    type(ESMF_Logical) :: haltOnWarn
+    type(ESMF_Logical) :: haltOnErr
+#endif
 
     character(len=32) nameLogErrFile      !Name of an ESMF_Log objects's
                                           !output file 
