@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/06/08 09:27:14 nscollins Exp $ 
+# $Id: makefile,v 1.4 2004/06/16 17:49:09 svasquez Exp $ 
 
 ALL:  build_examples
 
@@ -40,9 +40,9 @@ CLOBBERDIRS =
 # ESMF_ArrayCommEx
 #
 run_ESMF_ArrayCommEx:
-	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMC_ArrayCommEx > $(ESMF_EXDIR)/ESMC_ArrayCommEx.stdout
+	-${MPIRUN} -np 4 $(ESMF_EXDIR)/ESMF_ArrayCommEx > $(ESMF_EXDIR)/ESMF_ArrayCommEx.stdout
 
 
 run_ESMF_ArrayCommEx_uni:
-	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMC_ArrayCommEx > $(ESMF_EXDIR)/ESMC_ArrayCommEx_uni.stdout
+	-${MPIRUN} -np 1 $(ESMF_EXDIR)/ESMF_ArrayCommEx > $(ESMF_EXDIR)/ESMF_ArrayCommEx_uni.stdout
 
