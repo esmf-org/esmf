@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.22 2003/07/24 21:55:32 jwolfe Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.23 2003/07/24 22:46:37 jwolfe Exp $
 !
 ! System test code #70385
 
@@ -205,7 +205,7 @@
       ! Local variables
       integer :: i, j
       type(ESMF_DELayout) :: layout1 
-      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index, indexc
+      type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       type(ESMF_Grid) :: grid1
       type(ESMF_Field) :: field1
       type(ESMF_ArraySpec) :: arrayspec
@@ -280,7 +280,7 @@
       call ESMF_ArrayGetData(array1, ldata, ESMF_DATA_REF, rc)
 
       ! Set initial data values over whole array to -1
-      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, compindex=indexc, rc=rc)
+      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       do j=index(2)%min,index(2)%max
         do i=index(1)%min,index(1)%max
@@ -289,10 +289,10 @@
       enddo
 
       ! Set initial data values over computational domain to the de identifier
-     ! call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
-     ! if (rc .ne. ESMF_SUCCESS) goto 30
-      do j=indexc(2)%min,indexc(2)%max
-        do i=indexc(1)%min,indexc(1)%max
+     call ESMF_ArrayGetAxisIndex(array1, compindex=index, rc=rc)
+     if (rc .ne. ESMF_SUCCESS) goto 30
+      do j=index(2)%min,index(2)%max
+        do i=index(1)%min,index(1)%max
           ldata(i,j) =de_id
         enddo
       enddo
@@ -406,7 +406,7 @@
       print *, "data back from array"
 
       ! Get size of local array
-      call ESMF_GridGetDE(grid1, ai_global=index, rc=rc)
+      call ESMF_ArrayGetAxisIndex(array1, totalindex=index, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       ni = index(1)%max - index(1)%min + 1
       nj = index(2)%max - index(2)%min + 1
