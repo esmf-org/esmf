@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateEx.F90,v 1.24 2004/11/15 23:50:51 nscollins Exp $
+! $Id: ESMF_GridCreateEx.F90,v 1.25 2004/12/22 00:20:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -178,13 +178,10 @@
 
       ! distribute the grid using the same layout as from the first example
       ! but specifying the decomposition of computational cells
-! TODO: bug in grid distribute is causing this to core dump or hang on
-! several systems.  comment this back in when the bug is fixed.  nsc 15nov04
-!      call ESMF_GridDistribute(grid2, delayout=layout, &
-!                               countsPerDEDim1=countsPerDE1, &
-!                               countsPerDEDim2=countsPerDE2, &
-!                               rc=rc)
-! TODO: end
+      call ESMF_GridDistribute(grid2, delayout=layout, &
+                               countsPerDEDim1=countsPerDE1, &
+                               countsPerDEDim2=countsPerDE2, &
+                               rc=rc)
 
 !EOC
  
