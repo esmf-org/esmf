@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.6 2004/04/09 19:54:14 eschwab Exp $
+! $Id: ESMF_StateUTest.F90,v 1.7 2004/05/07 22:56:16 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.6 2004/04/09 19:54:14 eschwab Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.7 2004/05/07 22:56:16 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 !     ! Local variables
@@ -106,7 +106,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      call ESMF_StateAddData(state1, bundle1, rc)
+      call ESMF_StateAddBundle(state1, bundle1, rc)
       write(name, *) "Adding a Bundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -122,7 +122,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      call ESMF_StateAddData(state1, bundle1, rc)
+      call ESMF_StateAddBundle(state1, bundle1, rc)
       write(name, *) "Adding a second Bundle to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -138,7 +138,7 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
       !NEX_UTest
-      call ESMF_StateAddData(state1, field1, rc)
+      call ESMF_StateAddField(state1, field1, rc)
       write(name, *) "Adding a Field to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -156,7 +156,7 @@
       call ESMF_ArrayGet(array1, name=aname, rc=rc)  ! get the name for later
 
       !NEX_UTest
-      call ESMF_StateAddData(state1,array1, rc)
+      call ESMF_StateAddArray(state1,array1, rc)
       write(name, *) "Adding an Array to a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -173,7 +173,7 @@
 
       !NEX_UTest
       ! Test getting Bundle from State
-      call  ESMF_StateGetData(state1, bundlename, bundle2(1), rc=rc)
+      call  ESMF_StateGetBundle(state1, bundlename, bundle2(1), rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Bundle from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -277,7 +277,7 @@
 
       !NEX_UTest
       ! Test getting Field from State
-      call  ESMF_StateGetData(state1, fieldname, field2, rc=rc)
+      call  ESMF_StateGetField(state1, fieldname, field2, rc=rc)
       write(failMsg, *) ""
       write(name, *) "Getting Field from a State Test"
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
@@ -350,7 +350,7 @@
       ! Test adding an uninitialized Field to a State
       ! This code crashes, it will be commented out until
       ! bug 709032 is fixed.
-      call ESMF_StateAddData(state1, field4, rc)
+      call ESMF_StateAddField(state1, field4, rc)
       write(name, *) "Adding an uninitialized  Field to a State Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                        name, failMsg, result, ESMF_SRCLINE)
@@ -358,7 +358,7 @@
 
       !EX_UTest
       ! Test adding an uninitialized Array to a State
-      call ESMF_StateAddData(state1, array3, rc)
+      call ESMF_StateAddArray(state1, array3, rc)
       write(name, *) "Adding an uninitialized Array to a State Test"
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                         name, failMsg, result, ESMF_SRCLINE)
