@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.10 2003/04/17 20:48:09 nscollins Exp $
+// $Id: ESMC_LogErr.C,v 1.11 2003/04/25 20:07:34 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.10 2003/04/17 20:48:09 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.11 2003/04/25 20:07:34 shep_smith Exp $";
 //----------------------------------------------------------------------------/
 //
 // This section includes all the Log routines
@@ -430,37 +430,40 @@ void ESMC_Log::ESMC_LogInfoFortran(
  ESMC_LogPrintHeader(fortIO);
  int numStr=0;
  char* chPtr;
- int* intPtr;
  char msg[72]; 
- int len=0;
- int len2;
+ char stringTemp[72];
+ char stringToPrint[72];
+ int len;
 
+ stringToPrint[0]=NULL;
  for (chPtr=fmt; *chPtr; chPtr++)
   {
     if (*chPtr != '%') {
-      FTN(f_esmf_logprintchar)(&unitNumber,chPtr,&flush,"",&len, 1, 0);
+      sprintf(stringTemp,"%c",*chPtr);
+      strcat(stringToPrint,stringTemp);
    } else {
    chPtr++;
    while (*chPtr == '-' || isdigit(*chPtr) || *chPtr == '.' ||
                  *chPtr == 'h' || *chPtr=='l') chPtr++;
    switch (*chPtr) {
      case 'c':
-      FTN(f_esmf_logprintchar)(&unitNumber,charData,&flush,"",&len, 1, 0);
+      sprintf(stringTemp,"%c",*charData);
+      strcat(stringToPrint,stringTemp);
       charData++;
       break;
      case 's':
       strcpy(msg,strData[numStr]);
-      len2=strlen(msg);
-      FTN(f_esmf_logprintstring)(&unitNumber,msg,&len2,&flush,"",&len, len2, 0);
+      strcat(stringToPrint,msg);
       numStr++;
       break;
      case 'd':
-      intPtr=intData;
-      FTN(f_esmf_logprintint)(&unitNumber,intPtr,&flush,"",&len, 0);
+      sprintf(stringTemp,"%d",*intData);
+      strcat(stringToPrint,stringTemp);
       intData++;
       break;
      case 'f':
-      FTN(f_esmf_logprintreal)(&unitNumber,floatData,&flush,"",&len, 0);
+      sprintf(stringTemp,"%f",*floatData);
+      strcat(stringToPrint,stringTemp);
       floatData++;
       break;
      default:
@@ -468,7 +471,8 @@ void ESMC_Log::ESMC_LogInfoFortran(
     }
    }
   }
- FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
+ len=strlen(stringToPrint);
+ FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,len);
  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
 }     
 //-----------------------------------------------------------------------------
@@ -501,22 +505,27 @@ void ESMC_Log::ESMC_LogInfoFortran(
   struct tm *timePtr;  
   time_t timeVal;   
   char* timeAsc;    
+  char underline[]="-------------------------";
   time(&timeVal);
   timePtr=localtime(&timeVal);
   timeAsc=asctime(timePtr);
   int len1=strlen(timeAsc);
-  int len2=0;
+  timeAsc[len1-1]='\0';
   if (fortIO == ESMF_LOG_TRUE) { 
-   FTN(f_esmf_logprintstring)(&unitNumber,timeAsc,&len1,&flush,"",&len2, len1, len2);
+   FTN(f_esmf_logprintstring)(&unitNumber,timeAsc,&flush,len1);
+   len1=strlen(underline);
+   FTN(f_esmf_logprintstring)(&unitNumber,underline,&flush,len1);
+
   } else {
     fprintf(logErrCFilePtr[numFilePtr],"%s",timeAsc);
+    fprintf(logErrCFilePtr[numFilePtr],"%s",underline);
     if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
   } 
 #ifdef HAS_MPI
   rank=MPI::COMM_WORLD.Get_rank();
-  len2=4;
   if (fortIO == ESMF_LOG_TRUE) { 
-   FTN(f_esmf_logprintint)(&unitNumber,&rank,&flush,"PE: ",&len2, 0);
+   sprintf(stringToPrint,"PE: %d",rank);
+   FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,72);
   } else {
     fprintf(logErrCFilePtr[numFilePtr],"PE: %d",rank);
     if (flush==ESMF_LOG_TRUE) fflush(logErrCFilePtr[numFilePtr]);
@@ -1000,34 +1009,35 @@ void ESMC_Log:: ESMC_LogPrint(
 //EOP
 {
  char errMsg[32];
- int len1,len2;
+ char stringToPrint[72];
+ int len;
  ESMC_LogGetErrMsg(errCode,errMsg);
  if (fortIO == ESMF_LOG_TRUE) {
-  len1=12;
-  FTN(f_esmf_logprintint)(&unitNumber,&errCode,&flush,"Error Code: ",&len1, len1);
-  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
-  len1=0;
-  len2=strlen(errMsg);
-  FTN(f_esmf_logprintstring)(&unitNumber,errMsg,&len2,&flush,"",&len1, len2, len1);
-  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
-  len1=11;
-  len2=strlen(dir);
-  FTN(f_esmf_logprintstring)(&unitNumber,dir,&len2,&flush,"Directory: ",&len1, len2, len1);
-  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
-  len1=6;
-  len2=strlen(file);
-  FTN(f_esmf_logprintstring)(&unitNumber,file,&len2,&flush,"File: ",&len1, len2, len1);
-  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
-  len1=7;
-  FTN(f_esmf_logprintint)(&unitNumber,&line,&flush,"Line: ",&len1, len1);
-  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
-  if ((msg != NULL) && (msg[0] != '\0')) {
-     len1=10;
-     len2=strlen(msg);
-     FTN(f_esmf_logprintstring)(&unitNumber,msg, &len2,&flush,"Comments: ",&len1, len2, len1);
-     FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
+
+  sprintf(stringToPrint,"Error Code: %d",errCode);
+  len=strlen(stringToPrint);
+  FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,len);
+  
+  len=strlen(errMsg);
+  FTN(f_esmf_logprintstring)(&unitNumber,errMsg,&flush,len);
+
+  sprintf(stringToPrint,"Directory: %s",dir);
+  len=strlen(stringToPrint);
+  FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,len);
+
+  sprintf(stringToPrint,"File: %s",file);
+  len=strlen(stringToPrint);
+  FTN(f_esmf_logprintstring)(&unitNumber,file,&flush,len);
+
+  sprintf(stringToPrint,"Line: %d",line);
+  len=strlen(stringToPrint);
+  FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,len);
+
+  if (msg != '\0') {
+     sprintf(stringToPrint,"Comments: %s",msg);
+     len=strlen(stringToPrint);
+     FTN(f_esmf_logprintstring)(&unitNumber,stringToPrint,&flush,len);
   }
-  FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
   FTN(f_esmf_logprintnewline)(&unitNumber,&flush);
  } else {
   fprintf(logErrCFilePtr[numFilePtr],"Error Code: %d\n",errCode);
@@ -1095,7 +1105,6 @@ void ESMC_Log:: ESMC_LogPrint(
            strcpy(msg,"Warning Detected.");
            break;
   default:
-           strcpy(msg,"Unknown error code.");
            printf("Unknown error code.\n");
            exit(EXIT_FAILURE);
  }     
