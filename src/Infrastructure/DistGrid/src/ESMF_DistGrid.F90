@@ -41,6 +41,7 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_DELayoutMod
+      use ESMF_newDELayoutMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -147,6 +148,7 @@
         integer :: dimCount               ! Number of dimensions
         integer :: gridBoundaryWidth      ! # of exterior cells/edge
         type (ESMF_DELayout) :: layout    ! the layout for this grid
+        type(ESMF_newDELayout) :: delayout    ! the delayout for this grid
 
       ! 1 per dimension of the Grid
 
@@ -212,7 +214,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.104 2004/03/24 23:57:15 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.105 2004/04/05 21:02:03 theurich Exp $'
 
 !==============================================================================
 !
@@ -364,7 +366,7 @@
       function ESMF_DistGridCreateInternal(dimCount, counts, layout, decompIDs, &
                                            countsPerDEDim1, countsPerDEDim2, &
                                            periodic, coversDomain, &
-                                           name, rc)
+                                           name, rc, delayout)
 !
 ! !RETURN VALUE:
       type(ESMF_DistGrid) :: ESMF_DistGridCreateInternal
@@ -380,6 +382,7 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
+      type(ESMF_newDELayout), intent(in), optional :: delayout
 
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt ESMF\_DistGrid} object, constructs its
@@ -446,7 +449,7 @@
                                   countsPerDEDim1, countsPerDEDim2, &
                                   periodic=periodic, &
                                   coversDomain=coversDomain, &
-                                  name=name, rc=rc)
+                                  name=name, rc=rc, delayout=delayout)
 
 !     Set return values.
       ESMF_DistGridCreateInternal%ptr => dgtype
@@ -626,7 +629,8 @@
                                                 decompIDs, counts, &
                                                 countsPerDEDim1, countsPerDEDim2, &
                                                 gridBoundaryWidth, periodic, &
-                                                coversDomain, name, rc)
+                                                coversDomain, name, rc, &
+                                                delayout)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -641,6 +645,7 @@
       type(ESMF_Logical), dimension(dimCount), intent(in), optional :: coversDomain
       character (len = *), intent(in), optional :: name  
       integer, intent(out), optional :: rc               
+      type(ESMF_newDELayout), intent(in), optional :: delayout
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
@@ -739,6 +744,10 @@
         do i = 1,dimCount
           dgtype%coversDomain(i) = coversDomain(i)
         enddo
+      endif
+
+      if(present(delayout)) then
+        dgtype%delayout  = delayout
       endif
 
       ! Calculate values for computational cells
