@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.4 2003/10/07 22:37:10 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.5 2003/10/08 21:36:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,8 +55,9 @@ extern "C" {
              (*status) = (*ptr != NULL) ? ESMF_SUCCESS : ESMF_FAILURE;
      }
  
-     void FTN(c_esmc_localarraysetinfo)(ESMC_LocalArray **ptr, 
-                               struct c_F90ptr *fptr, void *base, int *counts,
+     void FTN(c_esmc_localarraysetinternal)(ESMC_LocalArray **ptr, 
+                               struct c_F90ptr *fptr,
+                               void *base, int *counts,
                                int *lbounds, int *ubounds, int *offsets,
                                ESMC_Logical *contig, ESMC_Logical *dealloc,
                                int *status) {
@@ -66,8 +67,35 @@ extern "C" {
               return;
           }
          *status = (*ptr)->ESMC_LocalArraySetInfo(fptr, base, counts, 
-                                            lbounds, ubounds, offsets, 
-                                            *contig, *dealloc);
+                                                  lbounds, ubounds, offsets, 
+                                                  contig, dealloc);
+     }
+
+     void FTN(c_esmc_localarraysetinfo)(ESMC_LocalArray **ptr, 
+                                        int *counts, int *lbounds, 
+                                        int *ubounds, int *offsets,
+                                        int *status) {
+      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
+         *status = (*ptr)->ESMC_LocalArraySetInfo(NULL, NULL, counts, 
+                                                  lbounds, ubounds, offsets, 
+                                                  NULL, NULL);
+     }
+
+     void FTN(c_esmc_localarraygetinfo)(ESMC_LocalArray **ptr, 
+                               void *base, int *counts,
+                               int *lbounds, int *ubounds, int *offsets,
+                               int *status) {
+      
+          if ((ptr == NULL) || (*ptr == NULL)) {
+              *status = ESMF_FAILURE;
+              return;
+          }
+         *status = (*ptr)->ESMC_LocalArrayGetInfo(NULL, base, counts, 
+                                                  lbounds, ubounds, offsets);
      }
 
      void FTN(c_esmc_localarraysetlengths)(ESMC_LocalArray **ptr, int *rank, int *lengths, int *status) {

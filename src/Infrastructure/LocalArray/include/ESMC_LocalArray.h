@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.2 2003/10/07 22:37:09 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.3 2003/10/08 21:36:51 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -109,8 +109,8 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     ESMC_Logical iscontig;         // optimization possible if all contig
     void *base_addr;               // real start of memory
     int offset[ESMF_MAXDIM];       // byte offset from base to 1st element/dim
-    int lbounds[ESMF_MAXDIM];      // used for fortran indexing
-    int ubounds[ESMF_MAXDIM];      // used for fortran indexing
+    int lbound[ESMF_MAXDIM];       // used for fortran indexing
+    int ubound[ESMF_MAXDIM];       // used for fortran indexing
     int counts[ESMF_MAXDIM];       // number of elements/dim
     int bytestride[ESMF_MAXDIM];   // byte spacing between elements/dim
     struct c_F90ptr f90dopev;      // opaque object which is real f90 ptr
@@ -198,8 +198,9 @@ class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
     // get and set useful combinations of values that fortran cares about
     int ESMC_LocalArraySetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
                           int *lbounds, int *ubounds, int *offsets, 
-                          ESMC_Logical contig, ESMC_Logical dealloc);
-    // TODO: add Get method
+                          ESMC_Logical *contig, ESMC_Logical *dealloc);
+    int ESMC_LocalArrayGetInfo(struct c_F90ptr *fptr, void *base, int *counts, 
+                          int *lbounds, int *ubounds, int *offsets);
 
     // Restructuring methods and higher level functions.  If we accumulate
     // enough of these they should be moved to another source file.

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_LocalArrayMacros.h,v 1.2 2003/09/22 22:53:06 nscollins Exp $
+! $Id: ESMF_LocalArrayMacros.h,v 1.3 2003/10/08 21:36:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -682,12 +682,12 @@
         logical :: rcpresent                ! did user specify rc? @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\
         logical :: willcopy                 ! do we need to copy data? @\
-        type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInfo call @\
+        type(ESMF_Logical) :: do_dealloc    ! dealloc flag for SetInternal call @\
  @\
         type (ESMF_ArrWrap##mtypekind##mrank##D) :: wrap ! to pass f90 ptr to C++ @\
         mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: newp  @\
         integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds @\
-        integer, dimension(ESMF_MAXDIM) :: strides, offsets @\
+        integer, dimension(ESMF_MAXDIM) :: offsets @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -737,17 +737,16 @@
         ! Now set all the new accumulated information about the array - the @\
         ! F90 pointer, the base addr, the counts, etc. @\
  @\
-        ! TODO: query the ptr for strides/lbounds/ubounds/offsets/whatever @\
+        ! TODO: query the ptr for lbounds/ubounds/offsets/whatever @\
         !  and set them in the array object.  For now, used fixed values. @\
         lbounds = 1 @\
         ubounds = 1 @\
         ubounds(1:mrank) = counts(1:mrank) @\
-        strides = 0 @\
         offsets = 0 @\
  @\
         wrap%##mtypekind##mrank##Dptr => newp @\
-        call c_ESMC_LocalArraySetInfo(array, wrap, newp ( mloc ), counts, & @\
-                                 lbounds, ubounds, strides, offsets, & @\
+        call c_ESMC_LocalArraySetInternal(array, wrap, newp ( mloc ), counts, & @\
+                                 lbounds, ubounds, offsets, & @\
                                  ESMF_TRUE, do_dealloc, status) @\
  @\
         if (status .ne. ESMF_SUCCESS) then @\

@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.2 2003/10/07 22:37:10 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.3 2003/10/08 21:36:51 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -404,8 +404,8 @@
     int *lbounds,             // in - lowest valid index
     int *ubounds,             // in - highest valid index
     int *offsets,             // in - numbytes from base to 1st item/dim
-    ESMC_Logical contig,      // in - is memory chunk contiguous?
-    ESMC_Logical dealloc) {   // in - do we need to deallocate at delete?
+    ESMC_Logical *contig,     // in - is memory chunk contiguous?
+    ESMC_Logical *dealloc) {  // in - do we need to deallocate at delete?
 //
 // !DESCRIPTION:
 //     Sets a list of values associated with an already created pointer.
@@ -418,36 +418,102 @@
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
   
-    // note - starts at 1; base includes rank 1 size
-    for (i=1; i<rank; i++)
-	bytes += ESMF_F90_PTR_PLUS_RANK;
-   
-   //fprintf(stderr, "setting f90 ptr from %lx to %lx, %d bytes for rank %d\n", 
-   //                (long int)fptr, (long int)(&this->f90dopev), bytes, rank);
+    if (fptr) {
+        // note - starts at 1; base includes rank 1 size
+        for (i=1; i<rank; i++)
+    	bytes += ESMF_F90_PTR_PLUS_RANK;
+       
+       //fprintf(stderr, "setting f90 ptr from %lx to %lx, %d bytes for rank %d\n", 
+       //                (long int)fptr, (long int)(&this->f90dopev), bytes, rank);
+    
+        memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
+    }
 
-    memcpy((void *)(&this->f90dopev), (void *)fptr, bytes);
+    if (base)
+        base_addr = base;
 
-    base_addr = base;
+    // valid values
     for (i=0; i<rank; i++) {
         counts[i]     = icounts ? icounts[i] : 0;
         offset[i]     = offsets ? offsets[i] : 0;
         bytestride[i] = 0;
-//        lbound[i] = lbounds ? lbounds[i] : 0;
-//        ubound[i] = ubounds ? ubounds[i] : counts[i];
+        lbound[i] = lbounds ? lbounds[i] : 0;
+        ubound[i] = ubounds ? ubounds[i] : counts[i];
     }
+    // filler for unused ranks
     for (i=rank; i<ESMF_MAXDIM; i++) {
-        counts[i]     = 1;
+        counts[i]     = 0;
         offset[i]     = 0;
         bytestride[i] = 1;
-//        lbound[i] = 1;
-//        ubound[i] = 1;
+        lbound[i] = 1;
+        ubound[i] = 1;
     }
-    iscontig = contig;
-    needs_dealloc = dealloc;
+    if (contig)
+        iscontig = *contig;
+    if (dealloc)
+        needs_dealloc = *dealloc;
 
     return ESMF_SUCCESS; 
 
  } // end ESMC_LocalArraySetInfo
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_LocalArrayGetInfo - Get the most common F90 needs
+//
+// !INTERFACE:
+      int ESMC_LocalArray::ESMC_LocalArrayGetInfo(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+    struct c_F90ptr *fptr,    // in - f90 pointer
+    void *base,               // in - base memory address
+    int *icounts,             // in - counts along each dim
+    int *lbounds,             // in - lowest valid index
+    int *ubounds,             // in - highest valid index
+    int *offsets) {           // in - numbytes from base to 1st item/dim
+//
+// !DESCRIPTION:
+//     Gets a list of values associated with an already created pointer.
+//     This particular set was chosen to mesh well with creation on the
+//     F90 side.  Other combinations will probably be useful.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    int i, rank = this->rank;
+    int bytes = ESMF_F90_PTR_BASE_SIZE;
+  
+    if (fptr) {
+        // note - starts at 1; base includes rank 1 size
+        for (i=1; i<rank; i++)
+    	    bytes += ESMF_F90_PTR_PLUS_RANK;
+       
+        memcpy((void *)fptr, (void *)(&this->f90dopev), bytes);
+    }
+
+    if (base)
+        base = base_addr;
+
+    if (icounts) 
+        for (i=0; i<rank; i++) 
+            icounts[i] = counts[i];
+    if (lbounds)
+        for (i=0; i<rank; i++)  
+            lbounds[i] = lbound[i];
+    if (ubounds) 
+        for (i=0; i<rank; i++) 
+            ubounds[i] = ubound[i];
+    if (offsets) 
+        for (i=0; i<rank; i++) 
+            offsets[i] = offset[i];
+    
+
+    return ESMF_SUCCESS; 
+
+ } // end ESMC_LocalArrayGetInfo
 
 //-----------------------------------------------------------------------------
 //BOP

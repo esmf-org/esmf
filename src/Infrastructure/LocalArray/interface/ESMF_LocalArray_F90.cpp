@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/10/07 22:37:10 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/10/08 21:36:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -159,7 +159,7 @@ ArrayAllTypeMacro()
       public ESMF_LocalArraySpecGet
 
       public ESMF_LocalArraySetData, ESMF_LocalArrayGetData
-      !public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
+      public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
       public ESMF_LocalArrayGet, ESMF_LocalArrayGetName
  
       public ESMF_LocalArrayF90Allocate
@@ -182,7 +182,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.3 2003/10/07 22:37:10 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.4 2003/10/08 21:36:51 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1215,6 +1215,70 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
 
         end subroutine ESMF_LocalArrayDestroy
 
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LocalArraySetInfo
+!
+! !INTERFACE:
+      subroutine ESMF_LocalArraySetInfo(array, counts, lbounds, ubounds, &
+                                        offsets, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_LocalArray), intent(inout) :: array 
+      integer, dimension(:), intent(in), optional :: counts
+      integer, dimension(:), intent(in), optional :: lbounds
+      integer, dimension(:), intent(in), optional :: ubounds
+      integer, dimension(:), intent(in), optional :: offsets
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Must be used with care - if you set the values on an already created
+!      array object to be inconsistent with the F90 pointer, then bad things
+!      will happen.
+!
+!EOP
+
+        integer :: status
+
+        call c_ESMC_LocalArraySetInfo(array, counts, lbounds, ubounds, &
+                                      offsets, status)
+
+        if (present(rc)) rc = status
+
+        end subroutine ESMF_LocalArraySetInfo
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LocalArrayGetInfo
+!
+! !INTERFACE:
+      subroutine ESMF_LocalArrayGetInfo(array, counts, lbounds, ubounds, &
+                                        offsets, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_LocalArray), intent(in) :: array 
+      integer, dimension(:), intent(out), optional :: counts
+      integer, dimension(:), intent(out), optional :: lbounds
+      integer, dimension(:), intent(out), optional :: ubounds
+      integer, dimension(:), intent(out), optional :: offsets
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Get back information about counts and upper and lower bounds
+!      from an already created array object.
+!
+!EOP
+
+        integer :: status
+
+        call c_ESMC_LocalArrayGetInfo(array, counts, lbounds, ubounds, &
+                                      offsets, status)
+
+        if (present(rc)) rc = status
+
+        end subroutine ESMF_LocalArrayGetInfo
 
 
 !------------------------------------------------------------------------------
