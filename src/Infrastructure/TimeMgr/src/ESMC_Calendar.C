@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.77 2004/12/03 00:57:57 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.78 2004/12/06 21:08:55 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.77 2004/12/03 00:57:57 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.78 2004/12/06 21:08:55 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -250,7 +250,7 @@ int ESMC_Calendar::count=0;
 
     // check if valid internal calendar already exists
     if (*internalCal != ESMC_NULL_POINTER) {
-      if ((*internalCal)->ESMC_CalendarValidate()) {
+      if ((*internalCal)->ESMC_CalendarValidate() == ESMF_SUCCESS) {
         return(ESMF_SUCCESS);
       } else {
         // something malformed exists; delete it and try again
