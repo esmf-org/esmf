@@ -1,4 +1,4 @@
-! $Id: FieldHalo.F90,v 1.2 2003/09/18 22:26:08 cdeluca Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.1 2003/09/19 21:36:45 jwolfe Exp $
 !
 ! System test FieldHalo
 
