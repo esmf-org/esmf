@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.3 2003/02/11 19:03:31 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.4 2003/03/18 04:32:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -107,10 +107,10 @@ class ESMC_Alarm {
 
     // Alarm is a shallow class, so only Init methods are needed
     // (TMG 4.1, 4.7)
-    int ESMC_AlarmInit(ESMC_TimeInterval *RingInterval,
-                       ESMC_Time         *RingTime,
-                       ESMC_Time         *StopTime,
-                       bool Enabled);
+    int ESMC_AlarmInit(ESMC_TimeInterval *ringInterval,
+                       ESMC_Time         *ringTime,
+                       ESMC_Time         *stopTime,
+                       bool enabled);
 
     // Alarm doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
@@ -121,9 +121,10 @@ class ESMC_Alarm {
     int ESMC_AlarmTurnOn(void);    // TMG4.6: manually turn on/off
     int ESMC_AlarmTurnOff(void);
 
-    bool ESMC_AlarmIsRinging(void);    // TMG 4.4: synchronous query for apps
-    bool ESMC_AlarmCheckRingTime(ESMC_Time *CurrTime, bool positive,
-                                 int rc);
+    bool ESMC_AlarmIsRinging(int *rc) const;
+                                         // TMG 4.4: synchronous query for apps
+    bool ESMC_AlarmCheckRingTime(ESMC_Time *clockCurrTime, bool positive,
+                                 int *rc) const;
                          // associated clock should invoke after advance:
                          // TMG4.4, 4.6
                          // Check for crossing RingTime in either positive or
@@ -134,23 +135,23 @@ class ESMC_Alarm {
 
     // accessor methods
 
-    int ESMC_AlarmGetRingInterval(ESMC_TimeInterval *RingInterval);
+    int ESMC_AlarmGetRingInterval(ESMC_TimeInterval *ringInterval) const;
                                                            // TMG4.7
-    int ESMC_AlarmSetRingInterval(ESMC_TimeInterval *RingInterval);
+    int ESMC_AlarmSetRingInterval(ESMC_TimeInterval *ringInterval);
                                                            // TMG4.5.2, 4.7
 
-    int ESMC_AlarmGetRingTime(ESMC_Time *RingTime);
+    int ESMC_AlarmGetRingTime(ESMC_Time *ringTime) const;
                                                            // TMG4.7, 4.8
-    int ESMC_AlarmSetRingTime(ESMC_Time *RingTime); 
+    int ESMC_AlarmSetRingTime(ESMC_Time *ringTime); 
                                                            // TMG4.5.1, 4.7, 4.8
 
-    int ESMC_AlarmGetPrevRingTime(ESMC_Time *PrevRingTime);
+    int ESMC_AlarmGetPrevRingTime(ESMC_Time *prevRingTime) const;
                                                            // TMG 4.7, 4.8
-    int ESMC_AlarmSetPrevRingTime(ESMC_Time *PrevRingTime);
+    int ESMC_AlarmSetPrevRingTime(ESMC_Time *prevRingTime);
                                                            // TMG 4.7, 4.8
 
-    int ESMC_AlarmGetStopTime(ESMC_Time *StopTime); // TMG 4.5.2, 4.7
-    int ESMC_AlarmSetStopTime(ESMC_Time *StopTime); // TMG 4.5.2, 4.7
+    int ESMC_AlarmGetStopTime(ESMC_Time *stopTime) const ; // TMG 4.5.2, 4.7
+    int ESMC_AlarmSetStopTime(ESMC_Time *stopTime); // TMG 4.5.2, 4.7
 
 
     // required methods inherited and overridden from the ESMC_Base class
@@ -159,13 +160,13 @@ class ESMC_Alarm {
     int ESMC_BaseValidate(const char *options) const;
 
     // for persistence/checkpointing
-    int ESMC_BasePrint(ESMC_TimeInterval *RingInterval,
-                       ESMC_Time         *RingTime,
-                       ESMC_Time         *PrevRingTime,
-                       ESMC_Time         *StopTime,
-                       bool              *Ringing,
-                       bool              *Enabled,
-                       int               *ID) const;
+    int ESMC_BasePrint(ESMC_TimeInterval *ringInterval,
+                       ESMC_Time         *ringTime,
+                       ESMC_Time         *prevRingTime,
+                       ESMC_Time         *stopTime,
+                       bool              *ringing,
+                       bool              *enabled,
+                       int               *id) const;
 
     // for testing/debugging
     int ESMC_BasePrint(void) const;

@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.4 2003/03/18 04:32:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,22 +71,22 @@
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
-!     public ESMF_AlarmInit
-!     public ESMF_AlarmEnable
-!     public ESMF_AlarmDisable
-!     public ESMF_AlarmTurnOn
-!     public ESMF_AlarmTurnOff
-!     public ESMF_AlarmIsRinging
-!     public ESMF_AlarmCheckRingTime
-!     public ESMF_AlarmGetRingInterval
-!     public ESMF_AlarmSetRingInterval
-!     public ESMF_AlarmGetRingTime
-!     public ESMF_AlarmSetRingTime
-!     public ESMF_AlarmGetPrevRingTime
-!     public ESMF_AlarmSetPrevRingTime
-!     public ESMF_AlarmGetStopTime
-!     public ESMF_AlarmSetStopTime
-!
+      public ESMF_AlarmInit
+      public ESMF_AlarmEnable
+      public ESMF_AlarmDisable
+      public ESMF_AlarmTurnOn
+      public ESMF_AlarmTurnOff
+      public ESMF_AlarmIsRinging
+      public ESMF_AlarmCheckRingTime
+      public ESMF_AlarmGetRingInterval
+      public ESMF_AlarmSetRingInterval
+      public ESMF_AlarmGetRingTime
+      public ESMF_AlarmSetRingTime
+      public ESMF_AlarmGetPrevRingTime
+      public ESMF_AlarmSetPrevRingTime
+      public ESMF_AlarmGetStopTime
+      public ESMF_AlarmSetStopTime
+ 
 ! Required inherited and overridden ESMF_Base class methods
 
       public ESMF_BaseValidate
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.3 2003/02/11 19:03:33 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.4 2003/03/18 04:32:09 eschwab Exp $'
 
 !==============================================================================
 !
@@ -333,7 +333,7 @@
 ! !IROUTINE: ESMF_AlarmCheckRingTime - Method used by a clock to check whether to trigger an alarm
 !
 ! !INTERFACE:
-      function ESMF_AlarmCheckRingTime(alarm, ClockCurrTime, rc)
+      function ESMF_AlarmCheckRingTime(alarm, ClockCurrTime, positive, rc)
 !
 ! !RETURN VALUE:
       logical :: ESMF_AlarmCheckRingTime
@@ -341,6 +341,7 @@
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(inout) :: alarm
       type(ESMF_Time), intent(in) :: ClockCurrTime
+      integer, intent(in) :: positive
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -353,6 +354,8 @@
 !          The object instance to check if time to ring   
 !     \item[ClockCurrTime]
 !          The {\tt Clock}'s current time
+!     \item[positive]
+!          Whether to check ring time in the positive or negative direction
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -362,7 +365,7 @@
 !EOP
 
       call c_ESMC_AlarmCheckRingTime(alarm, ESMF_AlarmCheckRingTime, &
-                                     ClockCurrTime, rc)
+                                     ClockCurrTime, positive, rc)
 
       end function ESMF_AlarmCheckRingTime
 

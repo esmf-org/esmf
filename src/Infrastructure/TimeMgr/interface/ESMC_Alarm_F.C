@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.1 2003/03/14 05:12:12 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.2 2003/03/18 04:32:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,51 +35,101 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-       // keep these for deep classes, or see init below for shallow
-       void FTN(c_esmc_alarmcreate)(ESMC_Alarm **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *ptr = ESMC_AlarmCreate(*arg1, *arg2, *arg3, status);
+       void FTN(c_esmc_alarminit)(ESMC_Alarm **ptr,
+                ESMC_TimeInterval *ringInterval, ESMC_Time *ringTime,
+                ESMC_Time *stopTime, int *enabled, int *status) {
+           *status = (*ptr)->ESMC_AlarmInit(ringInterval, ringTime, stopTime,
+                                            *enabled);
        }
 
-       void FTN(c_esmc_alarmdestroy)(ESMC_Alarm **ptr, int *status) {
-           *status = ESMC_AlarmDestroy(*ptr);
+       void FTN(c_esmc_alarmenable)(ESMC_Alarm **ptr, int *status) {
+           *status = (*ptr)->ESMC_AlarmEnable();
        }
 
-       // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_alarminit)(ESMC_Alarm **ptr, int *arg1, int *arg2,
-                                                   int *arg3, int *status) {
-           *status = (*ptr)->ESMC_AlarmInit(*arg1, *arg2, *arg3);
+       void FTN(c_esmc_alarmdisable)(ESMC_Alarm **ptr, int *status) {
+           *status = (*ptr)->ESMC_AlarmDisable();
        }
 
-       // for either shallow or deep classes, the following are needed. 
-       void FTN(c_esmc_alarmgetconfig)(ESMC_Alarm **ptr, 
-                                         ESMC_AlarmConfig *config, int *status) {
-           *status = (*ptr)->ESMC_AlarmGetConfig(&config);
+       void FTN(c_esmc_alarmturnon)(ESMC_Alarm **ptr, int *status) {
+           *status = (*ptr)->ESMC_AlarmTurnOn();
        }
 
-       void FTN(c_esmc_alarmsetconfig)(ESMC_Alarm **ptr, 
-                                         ESMC_AlarmConfig *config, int *status) {
-           *status = (*ptr)->ESMC_AlarmSetConfig(config);
+       void FTN(c_esmc_alarmturnoff)(ESMC_Alarm **ptr, int *status) {
+           *status = (*ptr)->ESMC_AlarmTurnOff();
        }
 
-       void FTN(c_esmc_alarmget)(ESMC_Alarm **ptr, 
-                                         <value> *value, int *status} {
-           *status = (*ptr)->ESMC_AlarmGet(&value);
+       void FTN(c_esmc_alarmisringing)(ESMC_Alarm **ptr, 
+                int *esmf_alarmIsRinging, int *status) {
+           *esmf_alarmIsRinging = (int) (*ptr)->ESMC_AlarmIsRinging(status);
        }
 
-       void FTN(c_esmc_alarmset)(ESMC_Alarm **ptr, 
-                                         <value> *value, int *status} {
-           *status = (*ptr)->ESMC_AlarmSet(value);
+       void FTN(c_esmc_alarmcheckringtime)(ESMC_Alarm **ptr,
+                int *esmf_alarmCheckRingTime, ESMC_Time *clockCurrTime, 
+                int *positive, int *status) {
+           *esmf_alarmCheckRingTime =
+                (int) (*ptr)->ESMC_AlarmCheckRingTime(clockCurrTime, *positive,
+                                                      status);
        }
 
-       void FTN(c_esmc_alarmvalidate)(ESMC_Alarm **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_AlarmValidate(opts);
+       void FTN(c_esmc_alarmgetringinterval)(ESMC_Alarm **ptr, 
+                                             ESMC_TimeInterval *ringInterval,
+                                             int *status) {
+           *status = (*ptr)->ESMC_AlarmGetRingInterval(ringInterval);
        }
 
-       void FTN(c_esmc_alarmprint)(ESMC_Alarm **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_AlarmPrint(opts);
+       void FTN(c_esmc_alarmsetringinterval)(ESMC_Alarm **ptr, 
+                                             ESMC_TimeInterval *ringInterval,
+                                             int *status) {
+           *status = (*ptr)->ESMC_AlarmSetRingInterval(ringInterval);
        }
 
+       void FTN(c_esmc_alarmgetringtime)(ESMC_Alarm **ptr, 
+                                         ESMC_Time *ringTime,
+                                         int *status) {
+           *status = (*ptr)->ESMC_AlarmGetRingTime(ringTime);
+       }
+
+       void FTN(c_esmc_alarmsetringtime)(ESMC_Alarm **ptr, 
+                                         ESMC_Time *ringTime,
+                                         int *status) {
+           *status = (*ptr)->ESMC_AlarmSetRingTime(ringTime);
+       }
+
+       void FTN(c_esmc_alarmgetprevringtime)(ESMC_Alarm **ptr, 
+                                             ESMC_Time *prevRingTime,
+                                             int *status) {
+           *status = (*ptr)->ESMC_AlarmGetPrevRingTime(prevRingTime);
+       }
+
+       void FTN(c_esmc_alarmsetprevringtime)(ESMC_Alarm **ptr, 
+                                             ESMC_Time *prevRingTime,
+                                             int *status) {
+           *status = (*ptr)->ESMC_AlarmSetPrevRingTime(prevRingTime);
+       }
+
+       void FTN(c_esmc_alarmgetstoptime)(ESMC_Alarm **ptr, 
+                                         ESMC_Time *stopTime,
+                                         int *status) {
+           *status = (*ptr)->ESMC_AlarmGetStopTime(stopTime);
+       }
+
+       void FTN(c_esmc_alarmsetstoptime)(ESMC_Alarm **ptr, 
+                                         ESMC_Time *stopTime,
+                                         int *status) {
+           *status = (*ptr)->ESMC_AlarmSetStopTime(stopTime);
+       }
+
+       void FTN(c_esmc_alarmeq)(ESMC_Alarm **alarm1, ESMC_Alarm **alarm2,
+                                int *esmf_alarmEQ) {
+           *esmf_alarmEQ = (int) (**alarm1 == **alarm2);
+       }
+
+       void FTN(c_esmc_basevalidate)(ESMC_Alarm **ptr, const char *opts,
+                                     int *status) {
+           *status = (*ptr)->ESMC_BaseValidate(opts);
+       }
+
+       void FTN(c_esmc_baseprint)(ESMC_Alarm **ptr, int *status) {
+           *status = (*ptr)->ESMC_BasePrint();
+       }
 };
-
-
