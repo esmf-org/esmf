@@ -1,6 +1,6 @@
-! $Id: FieldHaloPeriodic.F90,v 1.1 2003/09/18 21:26:47 cdeluca Exp $
+! $Id: FieldHaloPeriodic.F90,v 1.2 2003/09/18 22:32:11 cdeluca Exp $
 !
-! System test code #82899
+! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
 
 !-------------------------------------------------------------------------
@@ -9,7 +9,7 @@
 !BOP
 !
 ! !DESCRIPTION:
-! System test number 82899.
+! System test FieldHaloPeriodic.
 !
 !
 !\begin{verbatim}
@@ -32,7 +32,7 @@
     end module
 
 
-    program ESMF_SysTest82899
+    program FieldHaloPeriodic
 
 #include <ESMF_Macros.inc>
 
@@ -69,9 +69,9 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "------------------"
-    print *, "System Test #82899:"
-    print *, "------------------"
+    print *, "------------------------------"
+    print *, "System Test FieldHaloPeriodic:"
+    print *, "------------------------------"
 
 !
 !-------------------------------------------------------------------------
@@ -131,7 +131,7 @@
     enddo
     print *, ""
 
-    cname = "System Test #82899"
+    cname = "System Test FieldHaloPeriodic"
     comp1 = ESMF_GridCompCreate(name=cname, layout=layout1, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
 
@@ -191,11 +191,11 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test #82899 complete!"
+10    print *, "System Test FieldHaloPeriodic complete!"
 
     if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *) "System Test failure"
-      write(testname, *) "System Test 82899: Field Halo Test"
+      write(testname, *) "System Test FieldHaloPeriodic: Field Halo Test"
 
       call ESMF_Test(rc.eq.ESMF_SUCCESS, &
                         testname, failMsg, testresult, ESMF_SRCLINE)
@@ -216,7 +216,7 @@
     
     call ESMF_FrameworkFinalize(rc)
 
-    end program ESMF_SysTest82899
+    end program FieldHaloPeriodic
     
 
 !

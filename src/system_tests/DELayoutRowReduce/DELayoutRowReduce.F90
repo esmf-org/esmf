@@ -1,4 +1,4 @@
-! $Id: DELayoutRowReduce.F90,v 1.2 2003/09/18 22:26:08 cdeluca Exp $
+! $Id: DELayoutRowReduce.F90,v 1.3 2003/09/18 22:32:11 cdeluca Exp $
 !
 ! System test DELayoutRowReduce
 
@@ -55,7 +55,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
-    print *, "System Test #69527:"
+    print *, "System Test DELayoutRowReduce:"
 
 
 !
