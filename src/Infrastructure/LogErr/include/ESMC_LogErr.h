@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.30 2004/04/28 20:14:21 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.31 2004/04/29 22:01:29 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,6 +45,7 @@ enum EMSC_LogFileType{ESMC_LOG_INFO=1,ESMC_LOG_WARN=2,ESMC_LOG_ERROR=3};
                         
 int ESMC_LogInitialize(char filename[]);
 int ESMC_LogFinalize();
+void ESMC_TimeStamp(int *y,int* mn,int *d,int *h,int *m,int *s,int *ms);
 class ESMC_Log {
   private:
 // !PRIVATE MEMBER FUNCIONS:

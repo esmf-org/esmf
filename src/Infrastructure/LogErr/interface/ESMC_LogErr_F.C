@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr_F.C,v 1.3 2004/04/28 21:21:43 cpboulder Exp $
+// $Id: ESMC_LogErr_F.C,v 1.4 2004/04/29 22:01:29 cpboulder Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -22,13 +22,14 @@
  // associated class definition file and others
 #include <string.h>
 #include <stdlib.h>
+#include <sys/time.h>
 #include "ESMC_LogErr.h"
 #include "ESMC_Base.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.3 2004/04/28 21:21:43 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr_F.C,v 1.4 2004/04/29 22:01:29 cpboulder Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -108,6 +109,48 @@ extern "C" {
   return;
 
 }  // end c_ESMC_Logfinalize
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  c_ESMC_LogTimeStamp - Get Time Stamp
+//
+// !INTERFACE:
+      void FTN(c_esmc_timestamp)(
+//
+// !RETURN VALUE:
+//    none.  timestamp is passed thru the parameter list
+// 
+// !RETURN VALUE:
+//  none
+//
+// !ARGUMENTS:
+    int *y,
+    int *mn,
+    int *d,
+    int *h,
+    int *m,
+    int *s,
+    int *ms
+      
+    )
+// !DESCRIPTION:
+// TimeStamp
+//EOP
+{
+    time_t tm;
+    struct tm ti;
+    struct timeval tv;	
+    gettimeofday(&tv,NULL);
+    ti=*localtime(&tv.tv_sec);
+    *y=ti.tm_year+1900;
+    *mn=ti.tm_mon;
+    *d=ti.tm_mday;
+    *h=ti.tm_hour;
+    *m=ti.tm_min;
+    *s=ti.tm_sec;
+    *ms=tv.tv_usec;
+    return;
+}  // end c_ESMC_Timestamp
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------

@@ -236,19 +236,20 @@ end subroutine ESMF_LogOpen
 ! 
 !EOP
 	
-   	character(len=10) 					:: t
-	character(len=8) 					:: d
-	character(len=7)					:: lt
-	character(len=32)					:: f
-	character(len=32)					::tmodule
-	character(len=32)					::tmethod
-	integer							::status
-	integer							::ok
-	integer							::i
-	
+   	character(len=10) 				:: t
+	character(len=8) 				:: d
+	character(len=7)				:: lt
+	character(len=32)				:: f
+	character(len=32)				::tmodule
+	character(len=32)				::tmethod
+	integer					        ::status
+	integer						::ok
+	integer						::i
+	integer						::y,mn,dy,h,m,s,ms
 	if (present(rc)) rc=ESMF_FAILURE
 	if (present(method)) tmethod=adjustl(method)
 	if (present(module)) tmodule=adjustl(module)
+	call c_esmc_timestamp(y,mn,dy,h,m,s,ms)
 	if (present(aLog)) then	  
 		if (aLog%FileIsOpen .eq. ESMF_TRUE) then
 			call DATE_AND_TIME(d,t)	
@@ -267,25 +268,26 @@ end subroutine ESMF_LogOpen
 				ACTION="WRITE",STATUS="UNKNOWN",IOSTAT=status)
 				if (status.eq.0) then
 					if ((present(module)).and.(present(method))) then
-		  				WRITE(aLog%unitnumber,100) d,t,lt,f,__LINE__,tmodule,tmethod,msg
-                    	100 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a,a)
-						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-						lt,"    ",f,__LINE__,"  ",tmodule,tmethod,msg		
+		  				WRITE(aLog%unitnumber,100) d,y,mn,dy,h,m,s,ms,lt,f,__LINE__,tmodule,tmethod,msg
+                    				100 FORMAT(a8,1x,i4,i2,i2,1x,i2,i2,i2,1x,i6,1x,a,1x,a,1x,i5,1x,a,a,a)
+						!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"
+						!",y,mn,dy,h,m,s,ms," ",&
+						!lt,"    ",f,__LINE__,"  ",tmodule,tmethod,msg		
 					else if ((present(module)).and. .not.(present(method))) then
-		  				WRITE(aLog%unitnumber,101) d,t,lt,f,__LINE__,tmodule,msg
-						101 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
-						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-						lt,"    ",f,__LINE__,"  ",tmodule,msg
+		  				WRITE(aLog%unitnumber,101) d,y,mn,dy,h,m,s,ms,lt,f,__LINE__,tmodule,msg
+						101  FORMAT(a8,1x,i4,i2,i2,1x,i2,i2,i2,1x,i6,1x,a,1x,a,1x,i5,1x,a,a)
+						!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						!lt,"    ",f,__LINE__,"  ",tmodule,msg
 					else if (.not.(present(module)).and.(present(method))) then
-		  				WRITE(aLog%unitnumber,102) d,t,lt,f,__LINE__,tmodule,msg
-						102 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a,a)
-						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-						lt,"    ",f,__LINE__,"  ",tmodule,msg
+		  				WRITE(aLog%unitnumber,102) d,y,mn,dy,h,m,s,ms,lt,f,__LINE__,tmethod,msg
+						102  FORMAT(a8,1x,i4,i2,i2,1x,i2,i2,i2,1x,i6,1x,a,1x,a,1x,i5,1x,a,a)
+						!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						!lt,"    ",f,__LINE__,"  ",tmodule,msg
 					else
-						WRITE(aLog%unitnumber,103) d,t,lt,f,__LINE__,msg
-						103 FORMAT(a8,2x,a10,2x,a7,2x,a32,2x,i5,2x,a)
-						if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
-						lt,"    ",f,__LINE__,"  ",msg
+						WRITE(aLog%unitnumber,103) d,y,mn,dy,h,m,s,ms,lt,f,__LINE__,msg
+						103  FORMAT(a8,1x,i4,i2,i2,1x,i2,i2,i2,1x,i6,1x,a,1x,a,1x,i5,1x,a)
+						!if (aLog%verbose .eq. ESMF_TRUE) print *,d,"  ",t,"  ",&
+						!lt,"    ",f,__LINE__,"  ",msg
 					endif	
 					CLOSE(UNIT=aLog%stdOutUnitNumber)
 					if (present(rc)) rc=ESMF_SUCCESS
