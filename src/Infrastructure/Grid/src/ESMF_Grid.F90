@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.14 2002/12/11 18:36:18 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.15 2002/12/13 18:51:24 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -119,8 +119,8 @@
     public ESMF_GridDestroy
     public ESMF_GridGetConfig
     public ESMF_GridSetConfig
-    !public ESMF_GridGetCoordinate
-    public ESMF_GridSetCoordinate
+    !public ESMF_GridGetCoord
+    public ESMF_GridSetCoord
     !public ESMF_GridGetLMask
     public ESMF_GridSetLMask
     !public ESMF_GridGetMMask
@@ -183,7 +183,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.14 2002/12/11 18:36:18 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.15 2002/12/13 18:51:24 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -228,13 +228,13 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      interface ESMF_GridSetCoordinate
+      interface ESMF_GridSetCoord
 
 ! !PRIVATE MEMBER FUNCTIONS:
-         module procedure ESMF_GridSetCoordinateFromArray
-         module procedure ESMF_GridSetCoordinateFromBuffer
-         module procedure ESMF_GridSetCoordinateCompute
-         module procedure ESMF_GridSetCoordinateCopy
+         module procedure ESMF_GridSetCoordFromArray
+         module procedure ESMF_GridSetCoordFromBuffer
+         module procedure ESMF_GridSetCoordCompute
+         module procedure ESMF_GridSetCoordCopy
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -483,8 +483,8 @@
       character(len=4) :: physgrid_name       !
       integer :: coord_id                     ! integer identifier for coordinate
       integer :: physgrid_id                  ! integer identifier for physgrid
-      integer :: nproc_i                      ! Number of processors in 1st dir
-      integer :: nproc_j                      ! Number of processors in 2nd dir
+      integer :: nDE_i                        ! Number of DE's in 1st dir
+      integer :: nDE_j                        ! Number of DE's in 2nd dir
       integer :: status=ESMF_FAILURE          ! Error status
       logical :: rcpresent=.FALSE.            ! Return code present
 
@@ -522,17 +522,11 @@
       grid%horz_coord_system = horz_coord_system
       grid%vert_coord_system = vert_coord_system
 
-!     Call layout to get processor count in i and j directions
-!     call ESMF_LayoutGetSizeXY(nproc_i, nproc_j, status)  !TODO  do this here
-                                    ! or in DistGrid?
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateInternal: Layout get size xy"
-        return
-      endif
-      nproc_i = 1
-      nproc_j = 1
-!     grid%distgrid = ESMF_DistGridCreate(nproc_i, nproc_j, status)  ! TODO finish
-                                    ! argument list
+!     For time being, just set the number of DE
+      nDE_i = 1
+      nDE_j = 1
+      grid%distgrid = ESMF_DistGridCreate(nDE_i=nDE_i, nDE_j=nDE_j, &
+                                          i_max=i_max, j_max=j_max, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridCreateInternal: Distgrid create"
         return
@@ -542,17 +536,19 @@
       grid%num_physgrids = 1
       physgrid_name = 'base'
       physgrid_id = 1
-!     grid%physgrids(1) = ESMF_PhysGridCreateInternal(physgrid_name, status)
+      grid%physgrids(1) = ESMF_PhysGridCreate(physgrid_name, i_max, j_max, &
+                                              x_min, x_max, y_min, y_max, status)
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateInternal: Physgrid create internal"
+        print *, "ERROR in ESMF_GridCreateInternal: Physgrid create"
         return
       endif
-!     Call SetCoordinateCompute to create physical coordinates of subgrid
+!     Call SetCoordCompute to create physical coordinates of subgrid
       do coord_id = 1,6
-         call ESMF_GridSetCoordinateCompute(grid, physgrid_id, coord_id, status)
+         call ESMF_GridSetCoordCompute(grid, physgrid_id, coord_id, &
+                                       status)
       enddo
       if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridCreateInternal: Grid set coordinate compute"
+        print *, "ERROR in ESMF_GridCreateInternal: Grid set coord compute"
         return
       endif
 
@@ -1159,10 +1155,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetCoordinateFromArray - Set the coordinates of a Grid from an existing ESMF array
+! !IROUTINE: ESMF_GridSetCoordFromArray - Set the coordinates of a Grid from an existing ESMF array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordinateFromArray(Grid, array, id, rc)
+      subroutine ESMF_GridSetCoordFromArray(Grid, array, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1198,14 +1194,14 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_GridSetCoordinateFromArray
+      end subroutine ESMF_GridSetCoordFromArray
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetCoordinateFromBuffer - Set the coordinates of a Grid from an existing data buffer
+! !IROUTINE: ESMF_GridSetCoordFromBuffer - Set the coordinates of a Grid from an existing data buffer
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordinateFromBuffer(Grid, buffer, id, rc)
+      subroutine ESMF_GridSetCoordFromBuffer(Grid, buffer, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1241,14 +1237,14 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_GridSetCoordinateFromBuffer
+      end subroutine ESMF_GridSetCoordFromBuffer
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetCoordinateCompute - Compute coordinates for a Grid
+! !IROUTINE: ESMF_GridSetCoordCompute - Compute coordinates for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordinateCompute(Grid, physgrid_id, coord_id, rc)
+      subroutine ESMF_GridSetCoordCompute(Grid, physgrid_id, coord_id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridType) :: grid
@@ -1265,7 +1261,7 @@
 !     \item[grid]
 !          Pointer to a {\tt Grid} to be modified.
 !     \item[[physgrid_id]]
-!          Identifier for physgrid.
+!          Identifier of the {\tt PhysGrid} to be modified.
 !     \item[[coord_id]]
 !          Identifier for which set of coordinates are being set:
 !             1  center\_x
@@ -1283,17 +1279,32 @@
 !EOP
 ! !REQUIREMENTS:
 
-!
-!  code goes here
-!
-      end subroutine ESMF_GridSetCoordinateCompute
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), coord_id, status)
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_PhysGridConstructNew: PhysGrid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridSetCoordCompute
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridSetCoordinateCopy - Copies coordinates from one grid to another
+! !IROUTINE: ESMF_GridSetCoordCopy - Copies coordinates from one grid to another
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetCoordinateCopy(Grid, Grid_in, id, rc)
+      subroutine ESMF_GridSetCoordCopy(Grid, Grid_in, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
@@ -1328,7 +1339,7 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_GridSetCoordinateCopy
+      end subroutine ESMF_GridSetCoordCopy
 
 !------------------------------------------------------------------------------
 !BOP
