@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.47 2004/06/15 22:48:14 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.48 2004/06/23 13:19:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.47 2004/06/15 22:48:14 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.48 2004/06/23 13:19:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -177,7 +177,8 @@
 !           as the communication between DEs has been scheduled.
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
-!           {\tt ESMF\_NONBLOCKING}.
+!           {\tt ESMF\_NONBLOCKING}.  
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
@@ -262,6 +263,7 @@
 !           If not present, the default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
@@ -344,6 +346,7 @@
 !           blocking.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
@@ -578,6 +581,7 @@
 !           If not present, default is to do synchronous communication.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
@@ -937,6 +941,7 @@
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
@@ -1045,6 +1050,7 @@
 !           If not present, default is to do synchronous communications.
 !           Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !           {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !           If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !           argument is required.  Information about the pending operation
@@ -1390,6 +1396,7 @@
 !      If not present, default is to do synchronous communications.
 !      Valid values for this flag are {\tt ESMF\_BLOCKING} and 
 !      {\tt ESMF\_NONBLOCKING}.
+!      (This feature is not yet supported.  All operations are synchronous.)
 !     \item [{[commhandle]}]
 !      If the {\tt blockingflag} is set to {\tt ESMF\_NONBLOCKING} this 
 !      argument is required.  Information about the pending operation
