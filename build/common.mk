@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.53 2004/05/14 22:34:23 slswift Exp $
+#  $Id: common.mk,v 1.54 2004/05/18 11:30:18 nscollins Exp $
 #===============================================================================
 #   common.mk
 #
@@ -98,7 +98,11 @@ endif
 #-------------------------------------------------------------------------------
 
 # Comment out the following flag if you want to allow VM to use Pthreads
-CPPFLAGS        = -DVM_DONT_SPAWN_PTHREADS
+CPPFLAGS       += -DVM_DONT_SPAWN_PTHREADS
+
+# Comment out the following lines if you want to include the IO code
+CPPFLAGS       += -DESMF_NO_IOCODE
+export ESMF_NO_IOCODE = true
 
 ifndef ESMF_BUILD
 export ESMF_BUILD := $(ESMF_TOP_DIR)
