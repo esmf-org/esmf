@@ -1,4 +1,4 @@
-! $Id: ESMF_AlarmUTest.F90,v 1.15 2004/06/17 21:34:01 eschwab Exp $
+! $Id: ESMF_AlarmUTest.F90,v 1.16 2004/08/06 22:33:09 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_AlarmUTest.F90,v 1.15 2004/06/17 21:34:01 eschwab Exp $'
+      '$Id: ESMF_AlarmUTest.F90,v 1.16 2004/08/06 22:33:09 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,19 +52,19 @@
 
       logical :: bool
       ! instantiate a clock 
-      type(ESMF_Clock) :: clock, clock1
-      type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3
+      type(ESMF_Clock) :: clock, clock1, clock2
+      type(ESMF_Alarm) :: alarm, alarm1, alarm2, alarm3, alarm4
       type(ESMF_Alarm) :: alarmList(10)
       logical :: enabled, isringing, sticky, alarmsEqual, alarmsNotEqual
       logical :: willRingNext
-      integer :: alarmCount
+      integer :: alarmCount, nstep, sstep, i
 
       ! instantiate a calendar
       type(ESMF_Calendar) :: gregorianCalendar, julianCalendar, &
                              no_leapCalendar, esmf_360dayCalendar
 
       ! instantiate timestep, start and stop times
-      type(ESMF_TimeInterval) :: timeStep
+      type(ESMF_TimeInterval) :: timeStep, alarmStep
       type(ESMF_Time) :: startTime, stopTime, alarmTime, nextTime
       type(ESMF_Time) :: currentTime
       character(ESMF_MAXSTR) :: aName
@@ -743,6 +743,52 @@
       bool =  ESMF_AlarmWasPrevRinging(alarm, rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(.not.bool), &
                       name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      !Test Non-Sticky Alarms
+      !  from Chris Hill via support issue 996229
+      write(failMsg, *) " Did not return nstep=48, sstep=73, i=144, and ESMF_SUCCESS"
+      write(name, *) "Non-Sticky Alarm Test 1"
+      call ESMF_TimeIntervalSet(timeStep, s=100, rc=rc)
+      call ESMF_TimeIntervalSet(alarmStep, s=150, rc=rc)
+      call ESMF_TimeSet(startTime, yy=1999, mm=12, dd=31, h=23, &
+                        calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeSet(stopTime, yy=2000, mm=1, dd=1, h=3, &
+                        calendar=gregorianCalendar, rc=rc)
+      clock2=ESMF_ClockCreate("Clock 2", timeStep, startTime, stopTime, rc=rc)
+      call ESMF_TimeSet(alarmTime, yy=2000, mm=1, dd=1, h=1, &
+                        calendar=gregorianCalendar, rc=rc)
+      alarm4 = ESMF_AlarmCreate(clock=clock2, ringTime=alarmTime, &
+                                ringInterval=alarmStep, sticky=.false., rc=rc)
+      ! number of clock time steps alarm rings for
+      nstep = 0
+
+      ! starting time step number for first alarm ring
+      sstep = 0
+
+      ! total clock time steps
+      i = 0
+
+      ! run the clock
+      do while (.not. ESMF_ClockIsStopTime(clock2, rc=rc))
+        i = i + 1
+        call ESMF_ClockGetAlarmList(clock2, ESMF_ALARMLIST_RINGING, &
+                                    alarmList, alarmCount, rc=rc)
+        if (alarmCount .gt. 0) then
+          if (sstep .eq. 0) sstep = i
+          nstep = nstep + 1
+        endif
+        call ESMF_ClockAdvance(clock2, rc=rc)
+      enddo
+
+      call ESMF_Test((rc.eq.ESMF_SUCCESS).and.(nstep.eq.48) &
+                                         .and.(sstep.eq.73) &
+                                         .and.(i.eq.144), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      call ESMF_AlarmDestroy(alarm4, rc=rc)
+      call ESMF_ClockDestroy(clock2, rc=rc)
 
       ! ----------------------------------------------------------------------------
 
