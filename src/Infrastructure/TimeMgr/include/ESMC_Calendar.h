@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.35 2004/02/13 01:01:59 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.36 2004/02/18 01:47:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -221,7 +221,7 @@ class ESMC_Calendar {
     friend ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar*, int*);
 
     // friend function to de-allocate clock
-    friend int ESMC_CalendarDestroy(ESMC_Calendar *);
+    friend int ESMC_CalendarDestroy(ESMC_Calendar **);
     
 // !PRIVATE MEMBER FUNCTIONS:
 //
@@ -264,7 +264,7 @@ class ESMC_Calendar {
     ESMC_Calendar *ESMC_CalendarCreate(ESMC_Calendar *calendar, int *rc=0);
 
     // friend function to de-allocate calendar
-    int ESMC_CalendarDestroy(ESMC_Calendar *calendar);
+    int ESMC_CalendarDestroy(ESMC_Calendar **calendar);
 
     // friend to restore state
     ESMC_Calendar *ESMC_CalendarReadRestart(int nameLen,

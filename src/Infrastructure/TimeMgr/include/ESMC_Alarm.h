@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.24 2004/02/04 23:23:59 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.25 2004/02/18 01:47:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -239,7 +239,7 @@ class ESMC_Alarm {
     friend ESMC_Alarm *ESMC_AlarmCreate(ESMC_Alarm*, int*);
 
     // friend to de-allocate alarm
-    friend int ESMC_AlarmDestroy(ESMC_Alarm *);
+    friend int ESMC_AlarmDestroy(ESMC_Alarm **);
 
 
 // !PRIVATE MEMBER FUNCTIONS:
@@ -279,7 +279,7 @@ class ESMC_Alarm {
     ESMC_Alarm *ESMC_AlarmCreate(ESMC_Alarm *alarm, int *rc=0);
 
     // friend to de-allocate alarm
-    int ESMC_AlarmDestroy(ESMC_Alarm *alarm);
+    int ESMC_AlarmDestroy(ESMC_Alarm **alarm);
 
     // friend to restore state
     ESMC_Alarm *ESMC_AlarmReadRestart(int nameLen,

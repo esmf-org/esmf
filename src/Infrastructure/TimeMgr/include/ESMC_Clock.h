@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.33 2004/02/11 21:56:51 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.34 2004/02/18 01:47:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -209,7 +209,7 @@
     friend ESMC_Clock *ESMC_ClockCreate(ESMC_Clock*, int*);
 
     // friend function to de-allocate clock
-    friend int ESMC_ClockDestroy(ESMC_Clock *);
+    friend int ESMC_ClockDestroy(ESMC_Clock **);
 
     // friend to allocate and initialize alarm from heap
     //   (needs access to clock current time to initialize alarm ring time)
@@ -256,7 +256,7 @@
     ESMC_Clock *ESMC_ClockCreate(ESMC_Clock *clock, int *rc=0);
 
     // friend function to de-allocate clock
-    int ESMC_ClockDestroy(ESMC_Clock *clock);
+    int ESMC_ClockDestroy(ESMC_Clock **clock);
 
     // friend to restore state
     ESMC_Clock *ESMC_ClockReadRestart(int nameLen,
