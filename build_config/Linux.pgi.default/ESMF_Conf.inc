@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF_Conf.inc,v 1.3 2005/02/03 17:50:10 nscollins Exp $
+$Id: ESMF_Conf.inc,v 1.4 2005/03/09 22:04:58 jwolfe Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,7 +21,7 @@ by letting us write conditional code.
 
 #if 0
 the PGI compiler has a bug which prevents forward pointer references from
-working if also using the sequence keyword.  for PGI only, don't sequence
+working if also using the sequence keyword.  for PGI only, dont sequence
 the State derived types.
 #endif
 
