@@ -1,4 +1,4 @@
-// $Id: ESMC_Alloc.h,v 1.1 2002/12/06 16:45:14 nscollins Exp $
+// $Id: ESMC_Alloc.h,v 1.2 2002/12/07 00:00:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,8 +24,13 @@
 
  // fortran interface declarations
 extern "C" {
-   void FTN(f_esmf_allocate2dr4)(void *f90ptr, int *ni, int *nj, int *rc);
-   void FTN(f_esmf_deallocate2dr4)(void *f90ptr, int *rc);
+
+struct c_F90ptr {
+   int pad[12];
+};
+
+   void FTN(f_esmf_allocate2dr4)(struct c_F90ptr *f90ptr, int *ni, int *nj, int *rc);
+   void FTN(f_esmf_deallocate2dr4)(struct c_F90ptr *f90ptr, int *rc);
 };
 
 #endif  // ESMC_Alloc_H

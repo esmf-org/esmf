@@ -1,4 +1,4 @@
-! $Id: ESMF_Alloc.F90,v 1.2 2002/12/06 16:43:57 nscollins Exp $
+! $Id: ESMF_Alloc.F90,v 1.3 2002/12/07 00:00:30 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -72,7 +72,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alloc.F90,v 1.2 2002/12/06 16:43:57 nscollins Exp $'
+      '$Id: ESMF_Alloc.F90,v 1.3 2002/12/07 00:00:30 nscollins Exp $'
 
 !==============================================================================
 !
@@ -195,10 +195,10 @@
 
 !     make sure the pointer isn't already associated w/ something
 !     if ok, start with a null ptr
-      !if (associated(f90ptr)) then
-      !    print *, "ERROR in ESMF_Allocate: pointer already associated"
-      !    return
-      !endif
+      if (associated(f90ptr)) then
+          print *, "ERROR in ESMF_Allocate: pointer already associated"
+          return
+      endif
       nullify(f90ptr)
 
 !     call the fortran intrinsic allocation function

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.5 2002/12/06 16:42:07 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.6 2002/12/07 00:00:18 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.5 2002/12/06 16:42:07 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.6 2002/12/07 00:00:18 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -150,7 +150,7 @@
     int *offsets,              // offset in bytes to start of each dim
     int *lengths,              // number of items in each dim
     int *strides,              // number of bytes between successive items/dim
-    void *f90ptr,              // opaque type which fortran understands (dope v)
+    struct c_F90ptr *f90ptr,     // opaque type which fortran understands (dope v)
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
@@ -188,11 +188,9 @@
 //   The return from this routine is a pointer to the new Array data.
 //
      ESMC_Array *a = new ESMC_Array;
-     int ni, nj;
   
-     (allocfuncaddr)(f90ptr, &ni, &nj, rc);
+     (allocfuncaddr)(f90ptr, lengths+0, lengths+1, rc);
 
-     //*rc = ESMF_SUCCESS;
      return a;
 
  } // end ESMC_ArrayCreate_F
@@ -262,6 +260,9 @@
 //
 //  code goes here
 //
+    int rc = ESMF_FAILURE;
+
+    return rc;
 
  } // end ESMC_ArrayDestruct
 
@@ -288,7 +289,9 @@
 //
 //  code goes here
 //
+    int rc = ESMF_FAILURE;
 
+    return rc;
  } // end ESMC_ArrayGetConfig
 
 //-----------------------------------------------------------------------------
@@ -313,6 +316,9 @@
 //
 //  code goes here
 //
+    int rc = ESMF_FAILURE;
+
+    return rc;
 
  } // end ESMC_ArraySetConfig
 
@@ -391,6 +397,9 @@
 //
 //  code goes here
 //
+    int rc = ESMF_FAILURE;
+
+    return rc;
 
  } // end ESMC_ArrayValidate
 
@@ -418,21 +427,25 @@
 //
 //  code goes here
 //
+    int rc = ESMF_FAILURE;
+
+    return rc;
 
  } // end ESMC_ArrayPrint
 
+extern "C" {
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_AllocFuncStore - internal routine
 //
 // !INTERFACE:
-      ESMC_AllocFuncStore(
+      int ESMC_AllocFuncStore(
 //
 // !RETURN VALUE:
 //    return code
 //
 // !ARGUMENTS:
-      void *func) {   // in - fortran function pointer
+      void (*func)(struct c_F90ptr *, int *, int *, int *)) {   // in - fortran function pointer
 //
 // !DESCRIPTION:
 //      stores a fortran function pointer used to call back into
@@ -459,13 +472,13 @@
 // !IROUTINE:  ESMC_DeallocFuncStore - internal routine
 //
 // !INTERFACE:
-      ESMC_DeallocFuncStore(
+      int ESMC_DeallocFuncStore(
 //
 // !RETURN VALUE:
 //    return code
 //
 // !ARGUMENTS:
-      void *func) {   // in - fortran function pointer
+      void (*func)(struct c_F90ptr *, int *, int *, int *)) {   // in - fortran function pointer
 //
 // !DESCRIPTION:
 //      stores a fortran function pointer used to call back into
@@ -486,6 +499,8 @@
         
 
  } // end ESMC_DeallocFuncStore
+
+}
 
 //-----------------------------------------------------------------------------
 //BOP

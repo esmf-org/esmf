@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.3 2002/12/06 16:43:54 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.4 2002/12/07 00:00:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,10 +33,10 @@
 
 // the interface subroutine names MUST be in lower case
 extern "C" {
-     void FTN(c_esmc_storeallocfunc)(void *func, int *status) {
+     void FTN(c_esmc_storeallocfunc)(void (*func)(struct c_F90ptr *, int *, int *, int *), int *status) {
          *status = ESMC_AllocFuncStore(func);
      }
-     void FTN(c_esmc_storedeallocfunc)(void *func, int *status) {
+     void FTN(c_esmc_storedeallocfunc)(void (*func)(struct c_F90ptr *, int *, int *, int *), int *status) {
          *status = ESMC_DeallocFuncStore(func);
      }
      void FTN(c_esmc_arraycreate)(ESMC_Array *ptr, int rank, 
@@ -51,8 +51,9 @@ extern "C" {
      void FTN(c_esmc_arrayconstructbyspec)() {
      }
 
-     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, void *f90ptr, 
+     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, struct c_F90ptr *f90ptr, 
                                               int *ni, int *nj, int *status) {
+             struct c_F90ptr tp;
              int lengths[2];
              enum ESMC_DataType dt;
              enum ESMC_DataKind dk;
@@ -64,7 +65,7 @@ extern "C" {
              dk = ESMF_KIND_4;
              
              ptr = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
-                                      NULL, f90ptr, status);
+                                      NULL, &tp, status);
      }
  
      void FTN(c_esmc_arraydestroy)(ESMC_Array *ptr, int *status) {

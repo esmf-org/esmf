@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.4 2002/12/06 16:42:57 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.5 2002/12/07 00:00:39 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,8 @@
 
 //-----------------------------------------------------------------------------
 
-#include <ESMC_Data.h> 
+#include "ESMC_Data.h" 
+#include "ESMC_Alloc.h"
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -52,8 +53,8 @@ class ESMC_ArrayConfig {
 };
 
 // private static data - address of fortran callback funcs
-static void (*allocfuncaddr)(void *, int *, int *, int *) = (void *)0;
-static void (*deallocfuncaddr)(void *, int *, int *, int *) = (void *)0;
+static void (*allocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = (void *)0;
+static void (*deallocfuncaddr)(struct c_F90ptr *, int *, int *, int *) = (void *)0;
 
 
 // class declaration type
@@ -127,10 +128,12 @@ int ESMC_ArrayDestroy(ESMC_Array *array);
 ESMC_Array *ESMC_ArrayCreate_F(int rank, enum ESMC_DataType dt, 
                                enum ESMC_DataKind dk, void *base, 
                                int *offsets, int *lengths, int *strides, 
-                               void *f90ptr, int *rc);
+                               struct c_F90ptr *f90ptr, int *rc);
 
 // internal methods for setting the call back addrs
-int ESMC_AllocFuncStore(void *func);
-int ESMC_DeallocFuncStore(void *func);
+extern "C" {
+    int ESMC_AllocFuncStore(void (*func)(struct c_F90ptr *, int *, int *, int *));
+    int ESMC_DeallocFuncStore(void (*func)(struct c_F90ptr *, int *, int *, int *));
+}
 
  #endif  // ESMC_Array_H
