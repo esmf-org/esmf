@@ -1,4 +1,4 @@
-% $Id: GridComp_usage.tex,v 1.4 2004/04/21 22:05:58 cdeluca Exp $
+% $Id: GridComp_usage.tex,v 1.5 2004/06/23 17:11:36 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -10,10 +10,11 @@
 
 %\subsection{Use and Examples}
 
-A Gridded Component is a computational entity which
-consumes and produces data.  It uses a State object to
-exchange data between itself and other Components.  It 
-uses a Clock object to manage time.
+A Gridded Component is a computational entity which consumes 
+and produces data.  It uses a State object to exchange data 
+between itself and other Components.  It uses a Clock object 
+to manage time, and a VM to describe its own and its child
+components' computational resources.
 
 \subsubsection{The SetServices Method}
 
@@ -40,7 +41,7 @@ such as the Initialize, Run, and Finalize subroutines.  The subroutine
 {\tt ESMF\_GridCompSetEntryPoint} should be called for
 each of the required subroutines.  
 
-The names of the Initialize, Run, and Finalize subroutines do not
+The names of the initialize, run, and finalize subroutines do not
 need to be public, and in fact are encourage to be private to lower
 the chances of public symbol clashes between different components.
 
