@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.4 2004/10/07 16:31:22 nscollins Exp $
+! $Id: user_model1.F90,v 1.5 2004/10/11 22:52:09 jwolfe Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -63,7 +63,7 @@
         integer, intent(out) :: rc
 
        ! Local variables
-        type(ESMF_Field) :: humidity
+        type(ESMF_Field) :: humidity1
         type(ESMF_VM) :: vm
         type(ESMF_DELayout) :: delayout
         type(ESMF_Grid) :: grid1
@@ -89,7 +89,7 @@
 
         print *, pet_id, "User Comp 1 Init starting"
 
-        ! Add a "humidity" field to the export state.
+        ! Add a "humidity1" field to the export state.
         countsPerDE1 = (/ 15, 15, 15, 15 /)
         countsPerDE2 = (/ 40 /)
 
@@ -120,13 +120,13 @@
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Create the field and have it create the array internally
-        humidity = ESMF_FieldCreate(grid1, arrayspec, &
-                                    horzRelloc=ESMF_CELL_CENTER, &
-                                    haloWidth=0, name="humidity", rc=status)
+        humidity1 = ESMF_FieldCreate(grid1, arrayspec, &
+                                     horzRelloc=ESMF_CELL_CENTER, &
+                                     haloWidth=0, name="humidity1", rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetArray(humidity, array1, rc=status)
+        call ESMF_FieldGetArray(humidity1, array1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_ArrayGetData(array1, idata, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
@@ -134,7 +134,7 @@
         ! Set initial data values over whole array to our de id
         idata = real(pet_id)
 
-        call ESMF_StateAddField(exportState, humidity, rc=status)
+        call ESMF_StateAddField(exportState, humidity1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
      !   call ESMF_StatePrint(exportState, rc=status)
 
@@ -161,7 +161,7 @@
         integer, intent(out) :: rc
 
        ! Local variables
-        type(ESMF_Field) :: humidity
+        type(ESMF_Field) :: humidity1
         type(ESMF_RelLoc) :: relloc
         type(ESMF_Array) :: array1
         type(ESMF_Array), dimension(:), pointer :: coordArray
@@ -175,11 +175,11 @@
         pi = 3.14159
 
         ! Get the Field and Bundle data from the State
-        call ESMF_StateGetField(exportState, "humidity", humidity, rc=status)
+        call ESMF_StateGetField(exportState, "humidity1", humidity1, rc=status)
       
         ! get the grid and coordinates
         allocate(coordArray(2))
-        call ESMF_FieldGet(humidity, grid=grid, horzRelLoc=relloc, rc=status)
+        call ESMF_FieldGet(humidity1, grid=grid, horzRelLoc=relloc, rc=status)
         call ESMF_GridGetDELocalInfo(grid, localCellCountPerDim=counts, &
                                      horzRelLoc=relloc, rc=status)
         if (counts(1)*counts(2).ne.0) then
@@ -190,8 +190,8 @@
         endif
 
         ! update field values here
-        ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=status)
-        call ESMF_FieldGetArray(humidity, array1, rc=status) 
+        ! call ESMF_StateGetDataPointer(exportState, "humidity1", idata, rc=status)
+        call ESMF_FieldGetArray(humidity1, array1, rc=status) 
         ! Get a pointer to the start of the data
         call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc=status)
 
@@ -207,7 +207,7 @@
         endif
 
      !   call ESMF_StatePrint(exportState, rc=status)
-     !   call ESMF_FieldPrint(humidity, rc=status)
+     !   call ESMF_FieldPrint(humidity1, rc=status)
      !   call ESMF_ArrayPrint(array1, "", rc=status)
  
         print *, "User Comp Run returning"

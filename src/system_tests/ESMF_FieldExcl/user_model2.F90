@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.4 2004/10/07 16:31:22 nscollins Exp $
+! $Id: user_model2.F90,v 1.5 2004/10/11 22:52:22 jwolfe Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -63,7 +63,7 @@
       integer, intent(out) :: rc
 
 !   ! Local variables
-      type(ESMF_Field) :: humidity
+      type(ESMF_Field) :: humidity2
       type(ESMF_VM) :: vm
       type(ESMF_DELayout) :: delayout
       type(ESMF_Grid) :: grid1
@@ -90,7 +90,7 @@
 
       print *, pet_id, "User Comp 2 Init starting"
 
-      ! Add a "humidity" field to the import state.
+      ! Add a "humidity2" field to the import state.
       countsPerDE1 = (/ 10, 6, 12, 12 /)
       countsPerDE2 = (/ 50 /)
       min(1) = 0.0
@@ -125,18 +125,18 @@
       if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Create the field and have it create the array internally
-      humidity = ESMF_FieldCreate(grid1, arrayspec, &
-                                  horzRelloc=ESMF_CELL_NFACE, &
-                                  haloWidth=0, name="humidity", rc=status)
+      humidity2 = ESMF_FieldCreate(grid1, arrayspec, &
+                                   horzRelloc=ESMF_CELL_NFACE, &
+                                   haloWidth=0, name="humidity2", rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetArray(humidity, array1, rc=status)
+      call ESMF_FieldGetArray(humidity2, array1, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_ArrayGetData(array1, idata, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
   
-      call ESMF_StateAddField(importState, humidity, rc=status)
+      call ESMF_StateAddField(importState, humidity2, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
       !   call ESMF_StatePrint(importState, rc=status)
   
@@ -163,7 +163,7 @@
       integer, intent(out) :: rc
 
 !   ! Local variables
-      type(ESMF_Field) :: humidity
+      type(ESMF_Field) :: humidity2
       type(ESMF_Array) :: array1
       integer :: status
 
@@ -172,11 +172,11 @@
 
       ! Get information from the component.
   !    call ESMF_StatePrint(importState, rc=status)
-      call ESMF_StateGetField(importState, "humidity", humidity, rc=status)
-  !    call ESMF_FieldPrint(humidity, "", rc=status)
+      call ESMF_StateGetField(importState, "humidity2", humidity2, rc=status)
+  !    call ESMF_FieldPrint(humidity2, "", rc=status)
     
       ! This is where the model specific computation goes.
-      call ESMF_FieldGetArray(humidity, array1, rc=status)
+      call ESMF_FieldGetArray(humidity2, array1, rc=status)
       print *, "Imported Array in user model 2:"
   !    call ESMF_ArrayPrint(array1, "", rc=status)
 
@@ -211,7 +211,7 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetField(importState, "humidity", field, rc=status)
+      call ESMF_StateGetField(importState, "humidity2", field, rc=status)
       if (rc .ne. ESMF_SUCCESS) then
         finalrc = status
         goto 30
