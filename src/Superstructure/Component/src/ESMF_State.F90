@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.35 2003/04/21 21:35:44 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.36 2003/04/22 17:14:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.35 2003/04/21 21:35:44 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.36 2003/04/22 17:14:39 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -868,7 +868,7 @@ end function
         ! Fill in basic information
         stypep%st = statetype
         stypep%compname = compname
-        stypep%stvalid = ESMF_STATEDATAINVALID
+        stypep%stvalid = ESMF_STATEDATAISVALID
         stypep%alloccount = 0
         stypep%datacount = 0
         nullify(stypep%datalist)
