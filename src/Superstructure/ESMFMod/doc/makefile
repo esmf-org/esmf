@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2004/04/23 22:48:51 nscollins Exp $ 
+# $Id: makefile,v 1.2 2004/08/03 20:19:57 nscollins Exp $ 
 
 ALL: alldoc
 
@@ -14,15 +14,11 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Superstructure/ESMFMod/doc
 
-DVIFILES  =     ESMFMod.dvi
-#		ESMFMod.dvi \
-
+DVIFILES  =     ESMFMod_refdoc.dvi
 
 PDFFILES  =     $(ESMC_DOCDIR)/ESMFMod_refdoc.pdf
-#		$(ESMC_DOCDIR)/ESMFMod_reqdoc.pdf \
 
 HTMLFILES =     $(ESMC_DOCDIR)/ESMFMod_refdoc
-#		$(ESMC_DOCDIR)/ESMFMod_reqdoc \
 
 
 #
