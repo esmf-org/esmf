@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.h,v 1.24 2003/08/13 21:50:57 jwolfe Exp $
+// $Id: ESMC_XPacket.h,v 1.25 2003/08/14 21:57:27 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -80,7 +80,7 @@
                               ESMC_XPacket *xpacket2);
     int ESMC_XPacketGlobalToLocal(ESMC_XPacket *global_XP,
                                   ESMC_AxisIndex *indexlist, int rank,
-                                  int *global_start, int* memory_stride);
+                                  int *global_start);
                          
     int ESMC_XPacketEmpty();      // returns true (1) if the xp is empty
     int ESMC_XPacketPrint(void);
@@ -91,8 +91,7 @@
   
   
     friend int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
-                                         int size_axisindex, int *global_start,
-                                         int* global_count, int* memory_stride,
+                                         int size_axisindex, int *global_count,
                                          ESMC_Logical (*boundary)[2],
                                          ESMC_XPacket **xp_list, int *xp_count);
 
@@ -108,8 +107,7 @@
 
 // non-class method - creates a list of xp's to return
 int ESMC_XPacketFromAxisIndex(struct ESMC_AxisIndex *indexlist,
-                              int size_axisindex, int *global_start,
-                              int* global_count, int* memory_stride,
+                              int size_axisindex, int *global_count,
                               ESMC_Logical (*boundary)[2],
                               ESMC_XPacket **xp_list, int *xp_count);
 
