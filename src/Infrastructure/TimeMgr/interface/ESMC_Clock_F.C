@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.9 2003/04/15 16:47:40 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.10 2003/04/25 09:07:41 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -41,6 +41,27 @@ extern "C" {
                                   int *status) {
            *status = (ptr)->ESMC_ClockInit(timeStep, startTime, stopTime,
                                            refTime);
+       }
+
+       void FTN(c_esmc_clockaddalarm)(ESMC_Clock *ptr,
+                                      ESMC_Alarm *alarm,
+                                      int *status) {
+           *status = (ptr)->ESMC_ClockAddAlarm(alarm);
+       }
+
+       void FTN(c_esmc_clockgetalarmlist)(ESMC_Clock *ptr,
+                                          ESMC_Alarm **alarmList,
+                                          int *numAlarms, int *status) {
+           *status = (ptr)->ESMC_ClockGetAlarmList(alarmList, numAlarms);
+       }
+
+       void FTN(c_esmc_clockgetnumalarms)(ESMC_Clock *ptr,
+                                          int *numAlarms, int *status) {
+           *status = (ptr)->ESMC_ClockGetNumAlarms(numAlarms);
+       }
+
+       void FTN(c_esmc_clocksynctowallclock)(ESMC_Clock *ptr, int *status) {
+           *status = (ptr)->ESMC_ClockSyncToWallClock();
        }
 
        void FTN(c_esmc_clockadvance)(ESMC_Clock *ptr,
