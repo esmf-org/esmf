@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.35 2004/02/05 00:11:15 cdeluca Exp $
+% $Id: ESMF_install.tex,v 1.36 2004/02/19 23:51:37 svasquez Exp $
 
 \subsection{ESMF Download Options}
 
@@ -33,6 +33,7 @@ shared objects for are noted on the download webpage.
 \input{ESMF_systemreq}
 
 \subsubsection{ESMF Environment Variables}
+\label{EnvironmentVariables}
 
 Currently the ESMF\_DIR environment variable must be set on all
 platforms.  ESMF\_DIR should be set to the path of the top
@@ -138,6 +139,18 @@ Build the library with the command:
 
 Build options that enable you to copy the library and *.mod files to
 specified directories are explained in Section~\ref{BuildOptions}. 
+
+Makefiles throughout the framework are configured to allow users to
+compile files only in the directory where {\tt gmake} is entered. Shared
+libraries are rebuilt only if necessary. In addition the entire ESMF
+framework may be built from any directory by entering {\tt gmake all},
+assuming that all the environmental variables are set correctly as
+described in Section~\ref{EnvironmentVariables}.
+
+Users may also run examples or execute unit tests of specific classes
+by changing directories to the desired class {\tt examples} or {\tt tests} 
+directories and entering {\tt gmake run\_examples} or 
+{\tt gmake run\_tests}, respectively.
 
 \subsubsection{Building the ESMF Documentation}
 \label{BuildDocumentation}
