@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.18 2003/03/25 16:44:56 nscollins Exp $
+// $Id: ESMC_Comm.C,v 1.19 2003/03/27 20:41:23 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.18 2003/03/25 16:44:56 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.19 2003/03/27 20:41:23 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,7 +69,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
  // initialize local inter-thread buffer TODO: beginnings of memory mgmt ?
  void *ESMC_Comm::lbuf = 0;
  int  ESMC_Comm::lbufSize = 4096;              // TODO:  from config file ?
- ESMC_Type_e ESMC_Comm::lbufType = ESMC_INT;   // TODO: from config file ?
+ ESMC_Type ESMC_Comm::lbufType = ESMC_INT;   // TODO: from config file ?
 
  // initialize inter-thread comm variables
  pthread_mutex_t ESMC_Comm::bufMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -140,7 +140,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
       int nthreadsperproc,    // in - number of threads per process
       int nprocs,             // in - number of processes
       int lbufsize,           // in - number of local message buffer elements
-      ESMC_Type_e lbuftype) { // in - type of local message buffer elements
+      ESMC_Type lbuftype) { // in - type of local message buffer elements
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes Comm values; it does not
@@ -551,7 +551,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
       int nthreadsperproc,    // in - number of threads per process
       int nprocs,             // in - number of processes
       int lbufsize,           // in - number of local message buffer elements
-      ESMC_Type_e lbuftype) { // in - type of local message buffer elements
+      ESMC_Type lbuftype) { // in - type of local message buffer elements
 //
 // !DESCRIPTION:
 //      Calls standard ESMF deep or shallow methods for initialization
@@ -607,7 +607,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 // !ARGUMENTS:
       void *buf,
       int num,
-      ESMC_Type_e type,
+      ESMC_Type type,
       ESMC_DE *dest,
       int tag,
       int *request) {
@@ -736,7 +736,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 // !ARGUMENTS:
       void *buf,
       int num,
-      ESMC_Type_e type,
+      ESMC_Type type,
       ESMC_DE *root) {
 //
 // !DESCRIPTION:
@@ -771,7 +771,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Type_e type,
+      ESMC_Type type,
       ESMC_DE *root) {
 //
 // !DESCRIPTION:
@@ -796,52 +796,6 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CommSendRecv - Sends and receives a message
-//
-// !INTERFACE:
-      int ESMC_Comm::ESMC_CommSendRecv(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void *sbuf,
-      void *rbuf,
-      int snum,
-      int rnum,
-      int sde,
-      int rde) {
-//
-// !DESCRIPTION:
-//    Performs an MPI-style send and receive call.
-//      
-//
-//EOP
-
-  MPI_Status status;
-
-  // if we're both sending and receiving from our own mpi process,
-  // then do a straight memory copy and don't call MPI.
-  if ((rde == DE->pID) && (sde == DE->pID)) {
-     if (snum != rnum) { 
-        printf("sending bytes != receiving bytes in CommSendRecv\n");
-        return ESMF_FAILURE;
-     }
-     memcpy(rbuf, sbuf, snum*sizeof(float));
-    
-  } else {
-      MPI_Sendrecv(sbuf, snum, MPI_FLOAT, rde, ESMF_MPI_TAG,
-                   rbuf, rnum, MPI_FLOAT, sde, MPI_ANY_TAG,
-                   MPI_COMM_WORLD, &status);
-      // TODO: check return status and set esmf error code if bad
-  }
-
-  return(ESMF_SUCCESS);
-
- } // end ESMC_CommSendRecv
-
-//-----------------------------------------------------------------------------
-//BOP
 // !IROUTINE:  ESMC_CommAllGatherV - All DEs to All DEs Gather vectors
 //
 // !INTERFACE:
@@ -856,7 +810,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *rbuf,
       int *rlen,
       int *rdispls,
-      ESMC_Type_e type) {
+      ESMC_Type type) {
 //
 // !DESCRIPTION:
 //      
@@ -946,7 +900,7 @@ for(int i=0; i<12; i++) cout << rbuf[i] << " ";
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Type_e type) {
+      ESMC_Type type) {
 //
 // !DESCRIPTION:
 //      
@@ -1032,7 +986,7 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Type_e type) {
+      ESMC_Type type) {
 //
 // !DESCRIPTION:
 //      
@@ -1064,8 +1018,8 @@ MPI_Comm_size(MPI_COMM_WORLD, &nMPIprocs);
       void *sbuf,
       void *rbuf,
       int num,
-      ESMC_Type_e type,
-      ESMC_Op_e op) {
+      ESMC_Type type,
+      ESMC_Op op) {
 //
 // !DESCRIPTION:
 //      

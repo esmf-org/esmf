@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.9 2003/03/24 16:58:53 jwolfe Exp $
+// $Id: ESMC_DELayout.C,v 1.10 2003/03/27 20:41:24 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,6 +29,7 @@
 //using std::endl;
 #include <new>       // new, bad_alloc
 #include <ESMC.h>
+#include <mpi.h>
 
  // associated class definition file
  #include <ESMC_DELayout.h>
@@ -36,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.9 2003/03/24 16:58:53 jwolfe Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.10 2003/03/27 20:41:24 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -982,10 +983,6 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
-
  } // end ESMC_DELayoutSetConfig
 
 //-----------------------------------------------------------------------------
@@ -1554,7 +1551,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_DELayoutSendRecv - perform an MPI-like send and receive
+// !IROUTINE:  ESMC_DELayoutSendRecv - send / receive operation within a delayout
 //
 // !INTERFACE:
       int ESMC_DELayout::ESMC_DELayoutSendRecv(
@@ -1563,12 +1560,12 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    int error return code
 //
 // !ARGUMENTS:
-      void *sarray,            // in  - send array
-      void *rarray,            // in  - receive array
-      int sarraylen,            // in  - send array length
-      int rarraylen,            // in  - receive array length
-      int sde,                  // in  - send de
-      int rde) {                // in  - receive de
+      void *sbuf,               // in  - send array
+      void *rbuf,               // in  - receive array
+      int snum,                 // in  - send array length
+      int rnum,                 // in  - receive array length
+      int sde_index,            // in  - send de
+      int rde_index) {          // in  - receive de
 
 //
 // !DESCRIPTION:
@@ -1576,11 +1573,29 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 //EOP
 
-  int rc = ESMF_FAILURE;
+  int rc;
+  MPI_Status status;
 
-  rc = comm.ESMC_CommSendRecv(sarray, rarray, sarraylen, rarraylen, sde, rde);
-  if (rc != ESMF_SUCCESS) {
-    cout << "ESMC_DELayoutSendRecv error" << endl;
+  // If we're both sending and receiving from our own process,
+  // then do a straight memory copy and don't call message passing.
+  if (rde_index == sde_index) {
+     if (snum != rnum) { 
+        printf("sending bytes != receiving bytes in CommSendRecv\n");
+        return ESMF_FAILURE;
+     }
+     memcpy(rbuf, sbuf, snum*sizeof(float));
+     rc = ESMF_SUCCESS;
+    
+  } else {
+      if (MPI_Sendrecv(sbuf, snum, MPI_FLOAT, rde_index, ESMF_MPI_TAG,
+		       rbuf, rnum, MPI_FLOAT, sde_index, MPI_ANY_TAG,
+		       MPI_COMM_WORLD, &status) == MPI_SUCCESS) {
+        rc = ESMF_SUCCESS;
+      }
+      else {
+        printf("Failure in MPI_Sendrecv \n");
+        return ESMF_FAILURE;
+      }
   }
 
   return(rc);
@@ -1605,7 +1620,6 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //      Returns error code if problems are found.  ESMC\_Base class method.
 //
 //EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
 
   return(ESMF_SUCCESS);
 
@@ -1630,7 +1644,6 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //      type of information and level of detail.  ESMC\_Base class method.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
 
   //cout << "nxDELayout, nyDELayout, nzDELayout = " << nxDELayout << "," << nyDELayout << "," << nzDELayout << endl;
   //cout << "commHint = " << commHint << "\n";
@@ -1782,7 +1795,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
       int *dataArray,          // in  - 1D integer data array
       int *result,             // out - single integer value
       int arrayLen,            // in  - length of dataArray
-      ESMC_Op_e op)  {         // in  - reduction operation (sum, min, max ...)
+      ESMC_Op op)  {         // in  - reduction operation (sum, min, max ...)
 //
 // !DESCRIPTION:
 //      performs requested reduction operation on given data array across
