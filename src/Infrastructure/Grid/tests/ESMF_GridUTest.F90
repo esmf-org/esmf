@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.39 2004/06/21 19:59:25 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.40 2004/06/21 23:32:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.39 2004/06/21 19:59:25 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.40 2004/06/21 23:32:56 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -137,21 +137,21 @@
       ! destroyed first before being used in the grid create (which is 
       ! expected to fail).  but this still crashes randomly if the layout
       ! object is left completely uninitialized.  this should be addressed.
-      !Bug 76975 is repoened.
-      layout2 = ESMF_DELayoutCreate(vm, rc=rc)
+      !EX_UTest
+      !layout2 = ESMF_DELayoutCreate(vm, rc=rc)
       !call ESMF_DELayoutDestroy(layout2, status)
-      !grid = ESMF_GridCreateHorzXYUni(counts=counts, &
-                              !minGlobalCoordPerDim=grid_min, &
-                              !maxGlobalCoordPerDim=grid_max, &
-                              !horzstagger=horz_stagger, &
-                              !name=name, rc=status)
+      grid = ESMF_GridCreateHorzXYUni(counts=counts, &
+                              minGlobalCoordPerDim=grid_min, &
+                              maxGlobalCoordPerDim=grid_max, &
+                              horzstagger=horz_stagger, &
+                              name=name, rc=status)
 
-      !call ESMF_GridDistribute(grid, delayout=layout2, rc=status)
+      call ESMF_GridDistribute(grid, delayout=layout2, rc=status)
 
-      !write(failMsg, *) "Returned ESMF_SUCCESS"
-      !write(name, *) "Creating a Grid with a non created layout Test"
-      !call ESMF_Test((status.ne.ESMF_SUCCESS), &
-                      !name, failMsg, result, ESMF_SRCLINE)
+      write(failMsg, *) "Returned ESMF_SUCCESS"
+      write(name, *) "Creating a Grid with a non created layout Test"
+      call ESMF_Test((status.ne.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
 
