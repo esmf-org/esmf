@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.11 2004/01/29 18:58:48 svasquez Exp $
+! $Id: ESMF_State.F90,v 1.12 2004/02/04 21:39:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -174,7 +174,7 @@
 #endif
       private
         type(ESMF_StateObjectType) :: otype
-        character(len=ESMF_MAXSTR), pointer :: namep
+        character(len=ESMF_MAXSTR) :: namep
         type(ESMF_DataHolder), pointer :: datap
         integer :: indirect_index
         type(ESMF_StateDataNeeded) :: needed
@@ -277,7 +277,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.11 2004/01/29 18:58:48 svasquez Exp $'
+      '$Id: ESMF_State.F90,v 1.12 2004/02/04 21:39:57 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -956,14 +956,6 @@ end function
               endif
               nullify(nextitem%datap)
             endif
-            if (associated(nextitem%namep)) then
-              deallocate(nextitem%namep, stat=status)
-              if(status .NE. 0) then     ! this is an F90 rc, not esmf's
-                 print *, "ERROR in ESMF_StateDestruct: namep deallocation"
-                 return
-              endif
-              nullify(nextitem%namep)
-            endif
           enddo
         endif
         stypep%datacount = 0
@@ -1287,12 +1279,6 @@ end function
             nextitem%otype = ESMF_STATEBUNDLE
 
             ! Add name
-            allocate(nextitem%namep, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding bundles to a state"
-              return
-            endif
-
             call ESMF_BundleGetName(bundles(i), nextitem%namep, status)
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddBundleList: get bundle name"
@@ -1344,11 +1330,6 @@ end function
               return
             endif
 
-            allocate(nextitem%namep, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding field pointers to a state"
-              return
-            endif
             call ESMF_FieldGetName(field, nextitem%namep)
     
             nullify(nextitem%datap)
@@ -1611,12 +1592,6 @@ end function
             nextitem%otype = ESMF_STATEFIELD
 
             ! Add name
-            allocate(nextitem%namep, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: 3 adding fields to a state"
-              return
-            endif
-
             call ESMF_FieldGetName(fields(i), nextitem%namep, status)
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddFieldList: get field name"
@@ -1854,12 +1829,6 @@ end function
             nextitem%otype = ESMF_STATEARRAY
 
             ! Add name
-            allocate(nextitem%namep, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding arrays to a state"
-              return
-            endif
-
             call ESMF_ArrayGetName(arrays(i), nextitem%namep, status)
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddArrayList: get array name"
@@ -2081,12 +2050,6 @@ end function
             nextitem%otype = ESMF_STATESTATE
 
             ! Add name
-            allocate(nextitem%namep, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: adding states to a state"
-              return
-            endif
-
             call ESMF_StateGetName(states(i), nextitem%namep, status)
             if (status .ne. ESMF_SUCCESS) then
               print *, "ERROR in ESMF_StateTypeAddStateList: get state name"
@@ -2317,12 +2280,6 @@ end function
             nextitem%otype = ESMF_STATEDATANAME
 
             ! Add name
-            allocate(nextitem%namep, stat=status)
-            if (status .ne. 0) then    ! F90 return code
-              print *, "Error: 6 adding fields to a state"
-              return
-            endif
-
             nextitem%namep = namelist(i)
 
             nullify(nextitem%datap)
@@ -3015,8 +2972,7 @@ end function
 ! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
-      type(ESMF_State), pointer :: top
-      type(ESMF_State), pointer :: nested
+      type(ESMF_State) :: top
       logical :: exists
       integer :: status
 
@@ -3042,9 +2998,9 @@ end function
               return
           endif
           
-          top%statep = dataitem%datap%spp
+          top%statep => dataitem%datap%spp
       else
-          top%statep = state%statep
+          top%statep => state%statep
       endif
 
 
@@ -3115,8 +3071,7 @@ end function
 ! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
-      type(ESMF_State), pointer :: top
-      type(ESMF_State), pointer :: nested
+      type(ESMF_State) :: top
       logical :: exists
       integer :: status
 
@@ -3142,9 +3097,9 @@ end function
               return
           endif
           
-          top%statep = dataitem%datap%spp
+          top%statep => dataitem%datap%spp
       else
-          top%statep = state%statep
+          top%statep => state%statep
       endif
 
 
@@ -3220,8 +3175,7 @@ end function
 ! !REQUIREMENTS:
 
       type(ESMF_StateData), pointer :: dataitem
-      type(ESMF_State), pointer :: top
-      type(ESMF_State), pointer :: nested
+      type(ESMF_State) :: top
       logical :: exists
       integer :: status
 
@@ -3247,9 +3201,9 @@ end function
               return
           endif
           
-          top%statep = dataitem%datap%spp
+          top%statep => dataitem%datap%spp
       else
-          top%statep = state%statep
+          top%statep => state%statep
       endif
 
 
