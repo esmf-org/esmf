@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.34 2003/06/27 21:18:01 flanigan Exp $
+! $Id: ESMF_Field.F90,v 1.35 2003/07/09 17:29:16 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -43,7 +43,6 @@
       use ESMF_GridMod
       use ESMF_ArrayMod
       use ESMF_DELayoutMod
-      use ESMF_XPacketMod
       use ESMF_RouteMod
       use ESMF_DataMapMod
       implicit none
@@ -213,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.34 2003/06/27 21:18:01 flanigan Exp $'
+      '$Id: ESMF_Field.F90,v 1.35 2003/07/09 17:29:16 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2546,8 +2545,6 @@
       logical :: rcpresent                        ! Return code present
       type(ESMF_FieldType) :: stypep, dtypep      ! field type info
       type(ESMF_Route) :: route
-      type(ESMF_XPacket) :: srclxp, dstlxp        ! src/dst localdata xps
-      type(ESMF_XPacket) :: srcgxp, dstgxp        ! src/dst global xp
       type(ESMF_DELayout) :: srclayout, dstlayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
       logical :: hassrcdata        ! does this DE contain localdata from src?
