@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.46 2004/05/26 01:43:15 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.47 2004/06/08 21:46:40 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.46 2004/05/26 01:43:15 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.47 2004/06/08 21:46:40 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static alarm instance counter
@@ -89,18 +89,6 @@ int ESMC_Alarm::count=0;
 
     // default return code
     if (rc != ESMC_NULL_POINTER) *rc = ESMF_FAILURE;
-
-// ============================================================================
-#if 0
-    ESMC_LogDefault.ESMC_LogWrite("Test message number 1", ESMC_LOG_INFO);
-    ESMC_LogDefault.ESMC_LogWrite("Test message number 2", ESMC_LOG_WARN);
-    char logMsg[ESMF_MAXSTR];
-    sprintf(logMsg, "alarm name %s, Test message number 3", name);
-    ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
-    ESMC_LogDefault.ESMC_LogFoundError(ESMF_FAILURE, rc);
-    ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_MEM, ESMF_ERR_PASSTHRU, rc);
-#endif
-// ============================================================================
 
     if (ringTime == ESMC_NULL_POINTER && ringInterval == ESMC_NULL_POINTER) {
       ESMC_LogDefault.ESMC_LogWrite("Must specify at least one of ringTime or "
