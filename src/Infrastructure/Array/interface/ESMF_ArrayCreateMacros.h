@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_ArrayCreateMacros.h,v 1.8 2004/10/19 21:26:23 nscollins Exp $
+! $Id: ESMF_ArrayCreateMacros.h,v 1.9 2005/02/15 17:28:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -115,23 +115,18 @@
         type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
-        logical :: rcpresent                ! did user specify rc? @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
+        if (present(rc)) rc = ESMF_FAILURE @\
         array%this = ESMF_NULL_POINTER @\
- @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
  @\
         ! Test to see if array already allocated, and fail if so. @\
         if (associated(fptr)) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+           call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                                 "Pointer cannot already be allocated", & @\
-                                 ESMF_CONTEXT, rc)) return @\
+                                 ESMF_CONTEXT, rc) @\
+           return @\
         endif @\
  @\
         ! Always supply a halo value, setting it to 0 if not specified. @\
@@ -150,10 +145,13 @@
  @\
         call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                  fptr, ESMF_DATA_SPACE, lbounds, ubounds, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind = array @\
-        if (rcpresent) rc = status @\
+        if (present(rc)) rc = status @\
  @\
         end function ESMF_ArrayCreateByMTPtr##mrank##D##mtypekind   @\
  @\
@@ -237,7 +235,6 @@
         type (ESMF_Array) :: array          ! new array object @\
         integer :: status                   ! local error status @\
         integer :: hwidth                   ! local copy of halo width @\
-        logical :: rcpresent                ! did user specify rc? @\
         type (ESMF_CopyFlag) :: copy        ! do we copy or ref? @\
         integer, dimension(mrank) :: counts ! per dim @\
         integer, dimension(mrank) :: lbounds ! per dim @\
@@ -245,13 +242,8 @@
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
-        rcpresent = .FALSE. @\
+        if (present(rc)) rc = ESMF_FAILURE @\
         array%this = ESMF_NULL_POINTER @\
- @\
-        if (present(rc)) then @\
-          rcpresent = .TRUE. @\
-          rc = ESMF_FAILURE @\
-        endif @\
  @\
         ! Set default for copyflag @\
         if (present(docopy)) then @\
@@ -262,9 +254,10 @@
  @\
         ! Test to see if array is not already allocated, and fail if so. @\
         if (.not.associated(fptr)) then @\
-          if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
+          call ESMF_LogMsgSetError(ESMF_RC_OBJ_BAD, & @\
                                 "Pointer must already be allocated", & @\
-                                 ESMF_CONTEXT, rc)) return @\
+                                 ESMF_CONTEXT, rc) @\
+          return @\
         endif @\
  @\
         ! Get sizes from current array, although the construct routine @\
@@ -289,10 +282,13 @@
  @\
         call ESMF_ArrayConstructF90Ptr##mrank##D##mtypekind(array, counts, hwidth,& @\
                                   fptr, copy, lbounds, ubounds, status) @\
+        if (ESMF_LogMsgFoundError(status, & @\
+                                  ESMF_ERR_PASSTHRU, & @\
+                                  ESMF_CONTEXT, rc)) return @\
  @\
         ! return value set by c_ESMC func above @\
         ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind = array @\
-        if (rcpresent) rc = status @\
+        if (present(rc)) rc = status @\
  @\
         end function ESMF_ArrayCreateByFullPtr##mrank##D##mtypekind   @\
  @\
@@ -379,7 +375,6 @@
         ! Local variables @\
         integer :: status                   ! local error status @\
         integer :: i                        ! loop counter @\
-        logical :: rcpresent                ! did user specify rc? @\
         logical :: willalloc                ! do we need to alloc/dealloc? @\
         logical :: willcopy                 ! do we need to copy data? @\
         logical :: zerosize                 ! one or more counts = 0 @\
@@ -450,9 +445,10 @@
                     lb(i) = 0 @\
                     ub(i) = 0 @\
                 else if (lb(i) .gt. ub(i)) then @\
-                    if (ESMF_LogMsgFoundError(ESMF_RC_ARG_BAD, & @\
+                    call ESMF_LogMsgSetError(ESMF_RC_ARG_BAD, & @\
                                  "Lower bounds must be .le. upper bounds", & @\
-                                 ESMF_CONTEXT, rc)) return @\
+                                 ESMF_CONTEXT, rc) @\
+                    return @\
                 endif @\
             enddo @\
             if (zerosize) then @\
