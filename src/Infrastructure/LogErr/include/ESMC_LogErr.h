@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.h,v 1.33 2004/05/04 20:19:08 cpboulder Exp $
+// $Id: ESMC_LogErr.h,v 1.34 2004/05/05 13:53:30 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -118,6 +118,9 @@ class ESMC_Log {
     FILE *ESMC_LogFile;
     //ESMC_Log();
 };
+
+// the default global log object
+extern ESMC_Log Glog;
 
 //EOP
 
