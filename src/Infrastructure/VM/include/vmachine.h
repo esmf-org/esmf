@@ -172,6 +172,9 @@ class vmplan{
     int *spawnflag;   // for each pet: 0-don't spawn, >=1-spawn threads
     int *contribute;  // pet id to which non-spawning pet contributes its cores
     int *cspawnid;    // idication to which one of spawned pets to contribute to
+    // vmachine references for this PET (as many entries as this PET spawns)
+    int nspawn;       // number of PETs this PET will spwan
+    vmachine **myvms; // this array holds pointers to heap vmachine instances
     // Communication preferences
     // These preferences will be satisfied if the architecture supports it, 
     // otherwise the default communication setting is chosen instead.
@@ -182,6 +185,10 @@ class vmplan{
   public:
     vmplan(void);
       // native constructor (sets communication preferences to defaults)
+    ~vmplan(void);
+      // native destructor
+    void vmplan_garbage(void);
+      // perform garbage collection within a vmplan object
     void vmplan_maxthreads(vmachine &vm);  
       // set up a vmplan that will maximize the number of thread-pets
     void vmplan_maxthreads(vmachine &vm, int max);  
@@ -225,9 +232,6 @@ class vmplan{
       int pref_intra_process, int pref_intra_ssi, int pref_inter_ssi); 
       // set up a vmplan that will have pets with the maximum number of cores
       // available, but not more than max and only use PETs listed in plist
-    void vmplan_allthreadsoneprocess(vmachine &vm, int pid);  
-      // set up a vmplan with all pets running under one process -> testing...
-
     void vmplan_print(void);  
 
   friend class vmachine;

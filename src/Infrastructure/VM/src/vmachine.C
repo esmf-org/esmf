@@ -345,6 +345,7 @@ struct contrib_id{
 
 struct vmachine_spawn_arg{
   // members which are different for each new pet
+  vmachine *myvm;             // pointer to vm instance on heap
   pthread_t pthid;            // pthread id of the spawned thread
   int mypet;                  // new mypet 
   int *ncontributors;         // number of pets that contributed cores 
@@ -377,8 +378,8 @@ static void *vmachine_spawn(void *arg){
 #if (VERBOSITY > 0)
   printf("hello from within vmachine_spawn, mypet=%d\n", sarg->mypet);
 #endif
-  // instantiate a new virtual machine object for this pet
-  vmachine vm;
+  // obtain reference to the vm instance on heap
+  vmachine &vm = *(sarg->myvm);
   // setup the pet section in this vm instance
   vm.vmachine_construct(sarg->mypet, sarg->npets, sarg->lpid, sarg->pid,
     sarg->tid, sarg->ncpet, sarg->cid, sarg->mpi_g, sarg->mpi_c,
@@ -490,7 +491,11 @@ void *vmachine::vmachine_enter(class vmplan &vmp,
     at_least_1 = 1;
   vmachine_spawn_arg *sarg = new vmachine_spawn_arg[at_least_1];
   // now:
-  //    sarg[] has as my elements as mypet spawns threads, but at least one
+  //    sarg[] has as many elements as mypet spawns threads, but at least one
+  // next, allocate as many vm objects off the heap as there will be spawned
+  // next, set pointers in sarg to the vmachine instances on the heap
+  for (int i=0; i<vmp.spawnflag[mypet]; i++)
+    sarg[i].myvm = vmp.myvms[i];
   // next, determine new_npets and new_mypet_base ...
   int new_mypet_base=0;
   int new_npets=0;
@@ -511,7 +516,7 @@ void *vmachine::vmachine_enter(class vmplan &vmp,
   int **new_cid = new int*[new_npets];
   contrib_id **new_contributors = new contrib_id*[new_npets];
   // important note for the new_commarray:
-  // every PET that enters vmachine_enter (which are all of the current vmachine)
+  // every PET that enters vmachine_enter(which are all of the currentvmachine)
   // will get a new_commarray allocated. However, only those PETs that actually
   // spawn will really use it and free it during vmachine_destruct. The 
   // superficial allocations need to be dealt with in vmachine_enter still to
@@ -1057,10 +1062,40 @@ int vmachine::vmachine_tidpet(int i){
 
 vmplan::vmplan(void){
   // native constructor
+  // invalidate the arrays
+  spawnflag = NULL;
+  contribute = NULL;
+  cspawnid = NULL;
+  // invalidate the vmachine pointer array
+  myvms = NULL;
   // set the default communication preferences
   pref_intra_process = PREF_INTRA_PROCESS_SHMHACK;
   pref_intra_ssi = PREF_INTRA_SSI_MPI1;
   pref_inter_ssi = PREF_INTER_SSI_MPI1;
+}
+
+
+vmplan::~vmplan(void){
+  // native destructor
+  vmplan_garbage();
+}
+
+  
+void vmplan::vmplan_garbage(void){
+  // perform garbage collection within a vmplan object
+  if (spawnflag != NULL){
+    delete [] spawnflag;
+    delete [] contribute;
+    delete [] cspawnid;
+    spawnflag = NULL;
+    contribute = NULL;
+    cspawnid = NULL;
+  }
+  if (myvms != NULL){
+    for (int i=0; i<nspawn; i++)
+      delete myvms[i];
+    delete [] myvms;
+  }
 }
 
 
@@ -1087,6 +1122,9 @@ void vmplan::vmplan_maxthreads(vmachine &vm, int max,
 void vmplan::vmplan_maxthreads(vmachine &vm, int max, int *plist, int nplist){
   // set up a vmplan that will maximize the number of thread-pets up to max
   // but only allow PETs listed in plist to participate
+  // first do garbage collection on current object
+  vmplan_garbage();
+  // now set stuff up...
   npets = vm.npets;
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1157,6 +1195,12 @@ void vmplan::vmplan_maxthreads(vmachine &vm, int max, int *plist, int nplist){
     }
   }
   delete [] issiid;
+  delete [] nssiid;
+  // now deal with mypet specific members
+  nspawn = spawnflag[vm.mypet];
+  myvms = new vmachine*[nspawn];
+  for (int i=0; i<nspawn; i++)
+    myvms[i] = new vmachine;
 }
 
 
@@ -1191,6 +1235,9 @@ void vmplan::vmplan_minthreads(vmachine &vm, int max, int *plist, int nplist){
   // set up a vmplan that will only have single threaded pet instantiations
   // and claim all cores of pets that don't make it through, up to max cores/pet
   // but only allow PETs listed in plist to participate
+  // first do garbage collection on current object
+  vmplan_garbage();
+  // now set stuff up...
   npets = vm.npets;
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1236,6 +1283,11 @@ void vmplan::vmplan_minthreads(vmachine &vm, int max, int *plist, int nplist){
   }
   delete [] core_count;
   delete [] first_pet_index;
+  // now deal with mypet specific members
+  nspawn = spawnflag[vm.mypet];
+  myvms= new vmachine*[nspawn];
+  for (int i=0; i<nspawn; i++)
+    myvms[i] = new vmachine;
 }
 
 
@@ -1269,6 +1321,9 @@ void vmplan::vmplan_maxcores(vmachine &vm, int max){
 void vmplan::vmplan_maxcores(vmachine &vm, int max, int *plist, int nplist){
   // set up a vmplan that will have pets with the maximum number of cores
   // available, but not more than max and only use PETs listed in plist
+  // first do garbage collection on current object
+  vmplan_garbage();
+  // now set stuff up...
   npets = vm.npets;
   spawnflag = new int[npets];
   contribute = new int[npets];
@@ -1319,6 +1374,12 @@ void vmplan::vmplan_maxcores(vmachine &vm, int max, int *plist, int nplist){
     }
   }
   delete [] issiid;
+  delete [] nssiid;
+  // now deal with mypet specific members
+  nspawn = spawnflag[vm.mypet];
+  myvms = new vmachine*[nspawn];
+  for (int i=0; i<nspawn; i++)
+    myvms[i] = new vmachine;
 }
 
 
@@ -1333,41 +1394,6 @@ void vmplan::vmplan_maxcores(vmachine &vm, int max, int *plist, int nplist,
     this->pref_inter_ssi = pref_inter_ssi;
   vmplan_maxcores(vm, max, plist, nplist);
 }
-
-
-void vmplan::vmplan_allthreadsoneprocess(vmachine &vm, int pid){
-  // set up a vmplan with all pets running under one process -> testing...
-  npets = vm.npets;
-  spawnflag = new int[npets];
-  contribute = new int[npets];
-  cspawnid = new int[npets];
-  // loop over pets and find first pet to match pid
-  int pet_match=0;
-  int i;
-  for(i=0; i<npets; i++)
-    if(vm.pid[i]==pid) break;
-  if (i<npets) 
-    pet_match=i;
-  // initialize the matched pet
-  spawnflag[pet_match]=1;           // spawn at least one thread
-  contribute[pet_match]=pet_match;  // contribute cores to itself
-  cspawnid[pet_match]=0;            // contribute cores to itself
-  // loop over pets and set spawnflag
-  for(int i=0; i<npets; i++)
-    if (i!=pet_match)
-      if (vm.pid[i]==pid){
-        // this pet will spawn at least one pet
-        spawnflag[i]=1;     // spawn one thread in new virtual machine from pet
-        contribute[i]=i;    // contribute cores to itself
-        cspawnid[i]=0;      // contribute cores to itself
-      }else{
-        // all other pets will contribute to the first pet with matching pid
-        spawnflag[i]=0;     // don't spawn from this pet
-        contribute[i]=pet_match;   // dcontribute cores
-        cspawnid[i]=spawnflag[pet_match];     // invalidate
-        ++spawnflag[pet_match];   // increment
-      }
-} 
 
 
 void vmplan::vmplan_print(void){
