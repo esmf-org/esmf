@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayComm.F90,v 1.7 2003/12/09 21:45:01 nscollins Exp $
+! $Id: ESMF_ArrayComm.F90,v 1.8 2003/12/10 00:42:14 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -76,7 +76,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayComm.F90,v 1.7 2003/12/09 21:45:01 nscollins Exp $'
+      '$Id: ESMF_ArrayComm.F90,v 1.8 2003/12/10 00:42:14 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -773,15 +773,15 @@
 ! !REQUIREMENTS:
       integer :: status         ! local error status
       logical :: rcpresent      ! did user specify rc?
-      integer :: size_decomp, gridrank, datarank
+      integer :: gridrank, datarank
       integer :: i, j, nDEs
       type(ESMF_DELayout) :: layout
-      integer, dimension(:), pointer :: decompids
+      integer, dimension(ESMF_MAXDIM) :: decompids
       integer, dimension(:,:), pointer :: localAxisLengths, tempLAL
       integer, dimension(ESMF_MAXDIM) :: dimorder, dimlengths
       integer, dimension(ESMF_MAXGRIDDIM) :: decomps
-      integer, dimension(ESMF_MAXGRIDDIM) :: localMaxDimCount, tempLMDC
-      integer, dimension(ESMF_MAXDIM) :: globalCellDim, tempGCD
+      integer, dimension(ESMF_MAXDIM) :: localMaxDimCount, globalCellDim
+      integer, dimension(ESMF_MAXGRIDDIM) :: tempLMDC, tempGCD
 
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -794,7 +794,7 @@
 ! extract necessary information from the grid
       call ESMF_GridGetDELayout(grid, layout, status)
       call ESMF_DELayoutGetNumDEs(layout, nDEs, status)
-      allocate(localAxisLengths(nDEs,ESMF_MAXGRIDDIM), stat=status)
+      allocate(localAxisLengths(nDEs,ESMF_MAXDIM), stat=status)
       allocate(tempLAL(nDEs,ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGet(grid, global_cell_dim=tempGCD, &
                         local_axis_length=tempLAL, &
@@ -825,7 +825,6 @@
       endif
 
 ! calculate decompids and dimlengths, modified if necessary by dimorders
-      allocate(decompids(datarank), stat=status)
       do i=1, datarank
         decompids(i) = dimorder(i)
         globalCellDim(i) = dimlengths(i)
@@ -843,11 +842,9 @@
         endif
       enddo
 
-! TODO:  set AxisIndices like in the Field call??
 
 ! call c routine to allgather
-        size_decomp = size(decompids)
-        call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
+        call c_ESMC_ArrayAllGather(array, layout, decompids, datarank, &
                                    localAxisLengths, globalCellDim, &
                                    localMaxDimCount, array_out, status)
 
