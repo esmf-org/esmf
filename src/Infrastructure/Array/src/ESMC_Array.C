@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.39 2004/12/02 17:58:49 nscollins Exp $
+// $Id: ESMC_Array.C,v 1.40 2004/12/07 17:14:11 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -39,7 +39,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.39 2004/12/02 17:58:49 nscollins Exp $";
+            "$Id: ESMC_Array.C,v 1.40 2004/12/07 17:14:11 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1921,39 +1921,47 @@
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) {         // inout - original offset, updated to point 
+      int *offset) const {   // inout - original offset, updated to point 
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
 //    Turn info in array class into a stream of bytes.
-//    Warning!  This version does not yet preserve the data.  That
-//    part of the code is not implemented yet.
 //
 //EOPI
-    int fixedpart, nbytes, rc;
+    int fixedpart, rc;
+    int i, *ip;
     char *cp;
+    struct ESMC_AxisIndex *ap;
 
-    fixedpart = sizeof(ESMC_Array);
+    fixedpart = sizeof(ESMC_Array) + byte_count;
     if ((*length - *offset) < fixedpart) {
-        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart);
+        buffer = (char *)realloc((void *)buffer, *length + 2*fixedpart + byte_count);
         *length += 2 * fixedpart;
     }
 
-    // TODO: to do this correctly, we should serialize first the base,
-    //  then the localarray part, then finally the array part.  for now
-    //  just memcpy the block - but this will *not* preserve attributes
-    //  correctly.  
-    // rc = a->ESMC_Base::ESMC_Serialize(buffer, length, offset);
-    // rc = a->ESMC_LocalArray::ESMC_Serialize(buffer, length, offset);
+    // First, serialize the base class, then the localarray part, then
+    // finally the data unique to arrays.
+    rc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+    rc = ESMC_LocalArray::ESMC_Serialize(buffer, length, offset);
+
     //  then serialize here just the additional data contained in an array:
     //  the AI info and the halo widths.
 
-    cp = (char *)(buffer + *offset);
-    memcpy(cp, (void *)this, sizeof(ESMC_Array));
-    cp += sizeof(ESMC_Array);
+    ap = (struct ESMC_AxisIndex *)(buffer + *offset);
+  
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_total+i, ap); ap++;
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_comp+i, ap);  ap++;
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_excl+i, ap);  ap++;
+    }
 
-    // TODO:  now this needs to copy the actual data into the buffer.
-
+    ip = (int *)ap;
+    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+        *ip++ = hwidth[i][0];
+        *ip++ = hwidth[i][1];
+    }
+  
+    cp = (char *)ip;
     *offset = (cp - buffer);
    
     return ESMF_SUCCESS;
@@ -1968,7 +1976,7 @@
 // !IROUTINE:  ESMC_ArrayDeserialize - Turn a byte stream into an object
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayDeserialize(
+      int ESMC_Array::ESMC_ArrayDeserialize(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -1980,25 +1988,40 @@
 //
 // !DESCRIPTION:
 //    Turn a stream of bytes into an object.
-//    Warning!  This version does not yet restore the data.  That
-//    part of the code is not implemented yet.
 //
 //EOPI
-    ESMC_Array *a = new ESMC_Array;
+    int rc;
+    int i, *ip;
     char *cp;
+    struct ESMC_AxisIndex *ap;
 
-    // TODO: see the comment above about explicitly calling the base
-    //  and localarray methods.
+    // First, deserialize the base class, then the localarray part, then
+    // finally the data unique to arrays.
+    rc = ESMC_Base::ESMC_Deserialize(buffer, offset);
+    rc = ESMC_LocalArray::ESMC_Deserialize(buffer, offset);
 
-    cp = (char *)(buffer + *offset);
-    memcpy((void *)a, cp, sizeof(ESMC_Array));
-    cp += sizeof(ESMC_Array);
+    //  then deserialize here just the additional data contained in an array:
+    //  the AI info and the halo widths.
 
-    // TODO:  now this needs to copy over the actual data from the buffer.
+    ip = (int *)(buffer + *offset);
+  
+    ap = (struct ESMC_AxisIndex *)ip;
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy(ap, ai_total+i); ap++;
+        ESMC_AxisIndexCopy(ap, ai_comp+i);  ap++;
+        ESMC_AxisIndexCopy(ap, ai_excl+i);  ap++;
+    }
 
+    ip = (int *)ap;
+    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+        hwidth[i][0] = *ip++;
+        hwidth[i][1] = *ip++;
+    }
+  
+    cp = (char *)ip;
     *offset = (cp - buffer);
    
-    return a;
+    return ESMF_SUCCESS;
 
  } // end ESMC_ArrayDeserialize
 
@@ -2017,7 +2040,7 @@
 // !ARGUMENTS:
       char *buffer,          // inout - byte stream to fill
       int *length,           // inout - buf length; realloc'd here if needed
-      int *offset) {         // inout - original offset, updated to point 
+      int *offset) const {   // inout - original offset, updated to point 
                              //  to first free byte after current obj info
 //
 // !DESCRIPTION:
@@ -2026,8 +2049,10 @@
 //    type/rank/shape information.
 //
 //EOPI
-    int fixedpart, nbytes;
+    int fixedpart, rc;
+    struct ESMC_AxisIndex *ap;
     char *cp;
+    int i, *ip;
 
     fixedpart = sizeof(ESMC_Array);
     if ((*length - *offset) < fixedpart) {
@@ -2035,13 +2060,30 @@
         *length += 2 * fixedpart;
     }
 
-    // TODO: see the comment above about explicitly calling the base
-    //  and localarray methods.
+    // First, serialize the base class, then the localarray part, then
+    // finally the data unique to arrays.
+    rc = ESMC_Base::ESMC_Serialize(buffer, length, offset);
+    rc = ESMC_LocalArray::ESMC_LocalArraySerializeNoData(buffer, length, offset);
 
-    cp = (char *)(buffer + *offset);
-    memcpy(cp, (void *)this, sizeof(ESMC_Array));
-    cp += sizeof(ESMC_Array);
+    //  then serialize here just the additional data contained in an array:
+    //  the AI info and the halo widths.
 
+    ip = (int *)(buffer + *offset);
+  
+    ap = (struct ESMC_AxisIndex *)ip;
+    for (i=0; i<ESMF_MAXDIM; i++) {
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_total+i, ap); ap++;
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_comp+i, ap);  ap++;
+        ESMC_AxisIndexCopy((ESMC_AxisIndex *)ai_excl+i, ap);  ap++;
+    }
+
+    ip = (int *)ap;
+    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+        *ip++ = hwidth[i][0];
+        *ip++ = hwidth[i][1];
+    }
+  
+    cp = (char *)ip;
     *offset = (cp - buffer);
    
     return ESMF_SUCCESS;
@@ -2056,7 +2098,7 @@
 // !IROUTINE:  ESMC_ArrayDeserializeNoData - Turn a byte stream into an object
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayDeserializeNoData(
+      int ESMC_Array::ESMC_ArrayDeserializeNoData(
 //
 // !RETURN VALUE:
 //    {\tt ESMF\_SUCCESS} or error code on failure.
@@ -2071,37 +2113,36 @@
 //    preserve any data, only the type/rank/shape of the array.
 //
 //EOPI
-    ESMC_Array *a = new ESMC_Array;
+    struct ESMC_AxisIndex *ap;
     char *cp;
-    int i, bytes;
+    int i, *ip;
 
-    // TODO: see the comment above about explicitly calling the base
-    //  and localarray methods.
+    // call base, then localarray.
+    this->ESMC_Base::ESMC_Deserialize(buffer, offset);
+    this->ESMC_LocalArray::ESMC_LocalArrayDeserializeNoData(buffer, offset);
 
-    cp = (char *)(buffer + *offset);
-    memcpy((void *)a, cp, sizeof(ESMC_Array));
-    cp += sizeof(ESMC_Array);
+    //  then deserialize here just the additional data contained in an array:
+    //  the AI info and the halo widths.
 
-    // overwrite data-related fields
-    a->base_addr = NULL;
+    ip = (int *)(buffer + *offset);
+  
+    ap = (struct ESMC_AxisIndex *)ip;
     for (i=0; i<ESMF_MAXDIM; i++) {
-        a->counts[i] = 0;
-        a->lbound[i] = 0;
-        a->ubound[i] = 0;
-        a->offset[i] = 0;
+        ESMC_AxisIndexCopy(ap, ai_total+i); ap++;
+        ESMC_AxisIndexCopy(ap, ai_comp+i);  ap++;
+        ESMC_AxisIndexCopy(ap, ai_excl+i);  ap++;
     }
 
-    // note - starts at 1; base includes rank 1 size
-    bytes = ESMF_F90_PTR_BASE_SIZE;
-    for (i=1; i<a->rank; i++)
-        bytes += ESMF_F90_PTR_PLUS_RANK;
-
-    memset((void *)(&a->f90dopev), 0, bytes);
-    
-
+    ip = (int *)ap;
+    for (i=0; i<ESMF_MAXGRIDDIM; i++) {
+        hwidth[i][0] = *ip++;
+        hwidth[i][1] = *ip++;
+    }
+  
+    cp = (char *)ip;
     *offset = (cp - buffer);
    
-    return a;
+    return ESMF_SUCCESS;
 
  } // end ESMC_ArrayDeserializeNoData
 

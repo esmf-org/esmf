@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.32 2004/12/02 18:28:39 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.33 2004/12/07 17:14:11 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -399,8 +399,8 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in/out - array object
-      char *buf,                // in/out - really a byte stream
+      ESMC_Array **array,       // in - array object
+      char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
@@ -440,20 +440,22 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in/out - array object
-      char *buf,                // in/out - really a byte stream
+      ESMC_Array **array,       // in/out - empty array object to fill in
+      char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
 // 
 // !DESCRIPTION:
 //     Deserialize the contents of a array object.
-//     Warning!!  Not completely implemented yet.
 //
 //EOP
 
   int i, status;
 
-  (*array) = ESMC_ArrayDeserialize(buf, offset);
+  // create a new array object to deserialize into
+  *array = new ESMC_Array;
+
+  (*array)->ESMC_ArrayDeserialize(buf, offset);
 
   if (rc) *rc = ESMF_SUCCESS;
 
@@ -475,8 +477,8 @@ extern "C" {
 //    none.  return code is passed thru the parameter list
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in/out - array object
-      char *buf,                // in/out - really a byte stream
+      ESMC_Array **array,       // in - array object
+      char *buf,                // in/out - a byte stream buffer
       int *length,              // in/out - number of allocated bytes
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
@@ -516,8 +518,8 @@ extern "C" {
 //    none.  return code is passed thru the parameter list.
 // 
 // !ARGUMENTS:
-      ESMC_Array **array,       // in/out - array object
-      char *buf,                // in/out - really a byte stream
+      ESMC_Array **array,       // in/out - empty array object to fill in
+      char *buf,                // in - byte stream buffer
       int *offset,              // in/out - current offset in the stream
       int *rc) {                // out - return code
 // 
@@ -529,7 +531,10 @@ extern "C" {
 
   int i, status;
 
-  (*array) = ESMC_ArrayDeserializeNoData(buf, offset);
+  // create a new array object to deserialize into
+  *array = new ESMC_Array;
+
+  (*array)->ESMC_ArrayDeserializeNoData(buf, offset);
 
   if (rc) *rc = ESMF_SUCCESS;
 

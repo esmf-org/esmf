@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.h,v 1.35 2004/12/01 18:33:16 nscollins Exp $
+// $Id: ESMC_Array.h,v 1.36 2004/12/07 17:14:10 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -83,9 +83,11 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
     //int ESMC_ArraySet<Value>(<value type>  value);
     
  // required methods inherited and overridden from the ESMC_Base class
+    int ESMC_ArrayDeserialize(char *buffer, int *offset);
+    int ESMC_ArrayDeserializeNoData(char *buffer, int *offset);
     int ESMC_ArrayPrint(const char *options = NULL) const;
-    int ESMC_ArraySerialize(char *buffer, int *length, int *offset);
-    int ESMC_ArraySerializeNoData(char *buffer, int *length, int *offset);
+    int ESMC_ArraySerialize(char *buffer, int *length, int *offset) const;
+    int ESMC_ArraySerializeNoData(char *buffer, int *length, int *offset) const;
     int ESMC_ArrayValidate(const char *options) const;
     int ESMC_ArrayWrite(const char *options, const char *filename) const;
 
@@ -179,9 +181,6 @@ class ESMC_Array : public ESMC_LocalArray {  // inherits from LocalArray class
                           int decompids[], int size_decomp,
                           int deid, ESMC_Array **Array_out);
     
- // < declare the rest of the public interface methods here >
-    friend ESMC_Array *ESMC_ArrayDeserializeNoData(char *buffer, int *offset);
-  
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
@@ -214,9 +213,6 @@ ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk,
 ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
-
-ESMC_Array *ESMC_ArrayDeserialize(char *buffer, int *offset);
-ESMC_Array *ESMC_ArrayDeserializeNoData(char *buffer, int *offset);
 
 
 // fortran accessible functions.
