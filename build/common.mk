@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.35 2004/01/30 04:40:27 nscollins Exp $
+#  $Id: common.mk,v 1.36 2004/01/30 21:37:21 svasquez Exp $
 #===============================================================================
 #  common.mk
 #
@@ -952,4 +952,52 @@ $(ESMC_DOCDIR)/%_reqdoc: %_reqdoc.ctex $(REQDOC_DEP_FILES)
 #-------------------------------------------------------------------------------
 include $(ESMF_BUILD_DIR)/build_config/$(ESMF_ARCH).$(ESMF_COMPILER).$(ESMF_SITE)/build_rules.mk
 
+#  DO NOT REMOVE These examples are used by the implementation report.
+#
+#  testexamples_X - Runs various test suites
+#    1 - basic C suite used in installation tests
+#    2 - additional C suite including graphics
+#    3 - basic Fortran .F suite
+#    4 - uniprocessor version of 1 and 2
+#    5 - C examples that require complex numbers
+#    6 - C examples that don't work with complex numbers
+#    7 - C examples that require BlockSolve
+#    8 - Fortran .F examples that don't work with complex numbers
+#    9 - uniprocessor version of 3
+#   10 - Fortran examples that require complex
+#   11 - uniprocessor version of 5
+#   12 - basic f90 examples
+#   13 - Examples that should only be compiled.
+#
+testexamples_1: ${TESTEXAMPLES_1}
+vtestexamples_1:
+        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_1
+testexamples_2: ${TESTEXAMPLES_2}
+testexamples_3: ${TESTEXAMPLES_3}
+vtestexamples_3:
+        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_3
+testexamples_4: ${TESTEXAMPLES_4}
+vtestexamples_4:
+        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_4
+testexamples_5: ${TESTEXAMPLES_5}
+testexamples_6: ${TESTEXAMPLES_6}
+testexamples_7: ${TESTEXAMPLES_7}
+testexamples_8: ${TESTEXAMPLES_8}
+testexamples_9: ${TESTEXAMPLES_9}
+vtestexamples_9:
+        dir=`pwd`; cd ${ESMC_TESTDIR}; ${OMAKE} -f $${dir}/makefile MAKEFILE=$${dir}/makefile testexamples_9
+testexamples_10: ${TESTEXAMPLES_10}
+testexamples_11: ${TESTEXAMPLES_11}
+testexamples_12: ${TESTEXAMPLES_12}
+testexamples_13: ${TESTEXAMPLES_13}
+
+buildexamples_1: ${BUILDEXAMPLES_1}
+buildexamples_2: ${BUILDEXAMPLES_2}
+buildexamples_3: ${BUILDEXAMPLES_3}
+buildexamples_4: ${BUILDEXAMPLES_4}
+buildexamples_5: ${BUILDEXAMPLES_5}
+buildexamples_6: ${BUILDEXAMPLES_6}
+buildexamples_7: ${BUILDEXAMPLES_7}
+buildexamples_8: ${BUILDEXAMPLES_8}
+buildexamples_9: ${BUILDEXAMPLES_9}
 
