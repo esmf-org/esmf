@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: do_ut_results.pl,v 1.6 2004/08/02 21:35:20 svasquez Exp $
+# $Id: do_ut_results.pl,v 1.7 2004/08/04 17:17:24 svasquez Exp $
 # This script runs at the end of the "run_tests" and "run_tests_uni" targets.
 # The purpose is to give the user the results of running the unit tests.
 
@@ -112,16 +112,17 @@ getopts("d:", \%options);
 		print "Unit test stdout files of zero length indicate that the unit test\n";
 		print "did not run because it failed to compile or it failed to execute. \n\n";
 
-		print " $pass_count  Unit Tests passed \n\n"; 
+		print " $pass_count  Unit Tests passed. \n\n"; 
 
 		if ($fail_count != 0) {
 			print "The following unit tests fail:\n";
 			print @fail_lines;
 		}
 		else {
-			print "No unit tests failed\n";
+			print "No unit tests failed.\n";
 		}
         }
+        print "\n\n";
 
 exit 0;
 
