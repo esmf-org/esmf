@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.45 2004/01/29 04:44:35 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.46 2004/01/29 20:10:45 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.45 2004/01/29 04:44:35 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.46 2004/01/29 20:10:45 eschwab Exp $'
 
 !==============================================================================
 
@@ -208,7 +208,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSet - Initialize or set the Calendar type
+! !IROUTINE: ESMF_CalendarSet - Set the Calendar type
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSet(calendar, type, rc)
@@ -219,7 +219,7 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes or sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
+!     Sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
 !
 !     The arguments are:
 !     \begin{description}
@@ -248,7 +248,7 @@
     
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarSetCustom - Initialize or set a custom Calendar
+! !IROUTINE: ESMF_CalendarSetCustom - Set a custom Calendar
 
 ! !INTERFACE:
       subroutine ESMF_CalendarSetCustom(calendar, daysPerMonth, &

@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.39 2004/01/29 04:44:35 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.40 2004/01/29 20:10:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -29,7 +29,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.39 2004/01/29 04:44:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.40 2004/01/29 20:10:45 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static calendar instance counter
@@ -145,7 +145,7 @@ int ESMC_Calendar::count=0;
 
 //-------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CalendarSet - calendar initializer
+// !IROUTINE:  ESMC_CalendarSet - Set a calendar's type
 //
 // !INTERFACE:
       int ESMC_Calendar::ESMC_CalendarSet(
@@ -154,10 +154,10 @@ int ESMC_Calendar::count=0;
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CalendarType type) {   // in - initialize to be Calendar type
+      ESMC_CalendarType type) {   // in - set to be Calendar type
 //
 // !DESCRIPTION:
-//      Initialzes a {\tt EMSC\_Calendar} to be of a specific type
+//      Sets a {\tt EMSC\_Calendar} to be of a specific type
 //
 //EOP
 // !REQUIREMENTS:

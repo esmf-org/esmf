@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.26 2004/01/29 04:44:35 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.27 2004/01/29 20:10:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -130,9 +130,6 @@ class ESMC_Calendar {
 // !PUBLIC MEMBER FUNCTIONS:
 
   public:
-
-// TODO: make dynamically allocatable ESMC_CalendarCreate() to ensure
-// persistence in times/clocks.
 
     int ESMC_CalendarSet(ESMC_CalendarType type);
     int ESMC_CalendarSetCustom(int          *monthsPerYear=0,
