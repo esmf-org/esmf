@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.h,v 1.15 2004/04/20 19:02:22 nscollins Exp $
+// $Id: ESMC_newDELayout.h,v 1.16 2004/04/23 15:00:42 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -121,12 +121,8 @@ ESMC_newDELayout *ESMC_newDELayoutCreate(ESMC_VM &vm, int *nDEs, int ndim,
 
 int ESMC_newDELayoutDestroy(ESMC_newDELayout *layout);
   
-
 void **ESMC_newDELayoutDataCreate(int n, int *rc);
 int ESMC_newDELayoutDataAdd(void **ptr, void *a, int index);
 int ESMC_newDELayoutDataDestroy(void **ptr);
-
-int ESMC_newDELayoutCreateGlobal(void);
-ESMC_newDELayout *ESMC_newDELayoutGetGlobal(void);
 
 #endif  // ESMC_newDELayout_H

@@ -1,4 +1,4 @@
-! $Id: ESMF_newDELayout.F90,v 1.24 2004/04/20 19:02:27 nscollins Exp $
+! $Id: ESMF_newDELayout.F90,v 1.25 2004/04/23 15:00:45 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -144,9 +144,6 @@
       public ESMF_newDELayoutCreate
       public ESMF_newDELayoutDestroy
       
-      public ESMF_newDELayoutCreateGlobal
-      public ESMF_newDELayoutGetGlobal
-
       public ESMF_newDELayoutGet
       public ESMF_newDELayoutGetDE
       public ESMF_newDELayoutGetDEMatch
@@ -168,7 +165,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_newDELayout.F90,v 1.24 2004/04/20 19:02:27 nscollins Exp $'
+      '$Id: ESMF_newDELayout.F90,v 1.25 2004/04/23 15:00:45 theurich Exp $'
 
 !==============================================================================
 ! 
@@ -434,53 +431,6 @@ contains
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE: ESMF_newDELayoutCreateGlobal - Create default global DELayout
-
-! !INTERFACE:
-  subroutine ESMF_newDELayoutCreateGlobal(rc)
-!
-! !ARGUMENTS:
-    integer,            intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Create an 1-dimensional, logically rectangular default DELayout.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOPI
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.
-      rc = ESMF_FAILURE
-    endif
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutCreateGlobal(status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutCreateGlobal error"
-      return
-    endif
-    
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_newDELayoutCreateGlobal
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_newDELayoutDestroy - Destroy a DELayout object
 
@@ -720,56 +670,6 @@ contains
     if (rcpresent) rc = ESMF_SUCCESS
 
   end subroutine ESMF_newDELayoutGetDE
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_newDELayoutGetGlobal - Get default global DELayout
-
-! !INTERFACE:
-  subroutine ESMF_newDELayoutGetGlobal(delayout, rc)
-!
-! !ARGUMENTS:
-    type(ESMF_newDELayout), intent(out) :: delayout
-    integer, intent(out), optional :: rc
-!         
-!
-! !DESCRIPTION:
-!     Return the default global layout.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[delayout]
-!          Global DELayout.
-!     \item[{[rc]}] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:  SSSn.n, GGGn.n
-
-    integer :: status                 ! local error status
-    logical :: rcpresent
-
-    ! Initialize return code; assume failure until success is certain       
-    status = ESMF_FAILURE
-    rcpresent = .FALSE.
-    if (present(rc)) then
-      rcpresent = .TRUE.
-      rc = ESMF_FAILURE
-    endif
-
-    ! Routine which interfaces to the C++ creation routine.
-    call c_ESMC_nDELayoutGetGlobal(delayout, status)
-    if (status /= ESMF_SUCCESS) then
-      print *, "c_ESMC_nDELayoutGetGlobal error"
-      return
-    endif
-    
-    ! set return values
-    if (rcpresent) rc = ESMF_SUCCESS
- 
-  end subroutine ESMF_newDELayoutGetGlobal
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
