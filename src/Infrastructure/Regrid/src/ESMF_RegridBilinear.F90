@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.5 2003/06/11 23:08:29 nscollins Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.6 2003/06/13 22:39:06 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,7 +55,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.5 2003/06/11 23:08:29 nscollins Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.6 2003/06/13 22:39:06 nscollins Exp $'
 
 !==============================================================================
 !
@@ -187,14 +187,14 @@
       rc = ESMF_SUCCESS
       status = ESMF_SUCCESS
 
-      call ESMF_RegridConsEmpty(ESMF_RegridConsByFieldBilinear, status)
+      call ESMF_RegridConstructEmpty(ESMF_RegridConsByFieldBilinear, status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
 
       !
       ! Set name and field pointers
       !
       
-      call ESMF_RegridTypeSet(ESMF_RegridConsByFieldBilinear,          &
+      call ESMF_RegridTypeSet(ESMF_RegridConsByFieldBilinear,                 &
                               name=name, src_field = src_field,               &
                                          dst_field = dst_field,               &
                                          method = ESMF_RegridMethod_Bilinear, &
