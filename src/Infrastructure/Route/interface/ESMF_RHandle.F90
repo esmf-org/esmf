@@ -1,4 +1,4 @@
-! $Id: ESMF_RHandle.F90,v 1.8 2003/09/02 18:56:16 nscollins Exp $
+! $Id: ESMF_RHandle.F90,v 1.9 2003/09/02 21:25:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -114,7 +114,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RHandle.F90,v 1.8 2003/09/02 18:56:16 nscollins Exp $'
+      '$Id: ESMF_RHandle.F90,v 1.9 2003/09/02 21:25:54 nscollins Exp $'
 
 !==============================================================================
 
@@ -167,7 +167,7 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_RouteHandleCreate(status)
+        call c_ESMC_RouteHandleCreate(rhandle, status)
         if (status .ne. ESMF_SUCCESS) then  
           print *, "RouteHandle create error"
           return  
