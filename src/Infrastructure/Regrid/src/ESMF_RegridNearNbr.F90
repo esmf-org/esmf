@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridNearNbr.F90,v 1.13 2004/04/09 17:00:53 jwolfe Exp $
+! $Id: ESMF_RegridNearNbr.F90,v 1.14 2004/05/24 23:03:53 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,6 +10,8 @@
 !
 !==============================================================================
 !
+#define ESMF_FILENAME "ESMF_RegridNearNbr.F90"
+!
 !     ESMF Nearest-Neighbor Distance-weighted Regrid Module
       module ESMF_RegridNearNbrMod
 !
@@ -20,7 +22,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF.h"
+#include <ESMF.h>
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_RegridNearNbrMod - Nearest-neighbor distance-weighted regrid
@@ -57,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridNearNbr.F90,v 1.13 2004/04/09 17:00:53 jwolfe Exp $'
+      '$Id: ESMF_RegridNearNbr.F90,v 1.14 2004/05/24 23:03:53 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -88,6 +90,8 @@
 ! This section includes the nearest-neighbor Regrid construct methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConsByFieldNearNbr"
 !BOPI
 ! !IROUTINE: ESMF_RegridConsByFieldNearNbr - Constructs nearest-neighbor Regrid structure for a field pair
 
@@ -186,7 +190,7 @@
       !call ESMF_RegridTypeSet(ESMF_RegridConsByFieldNearNbr,          &
       !                        name=name, src_field = src_field,       &
       !                                   dst_field = dst_field,       &
-      !                                   method = ESMF_RegridMethod_NearNbr, &
+      !                                   method = ESMF_REGRID_METHOD_NEAR_NBR, &
       !                                   rc = status)
       if (status /= ESMF_SUCCESS) rc = ESMF_FAILURE
       
@@ -369,6 +373,8 @@
       end function ESMF_RegridConsByFieldNearNbr
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConsByBundleNearNbr"
 !BOPI
 ! !IROUTINE: ESMF_RegridConsByBundleNearNbr - Constructs nearest-neighbor Regrid structure for a bundle pair
 

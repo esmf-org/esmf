@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.47 2004/05/17 22:34:20 jwolfe Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.48 2004/05/24 23:04:05 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -9,6 +9,8 @@
 ! Licensed under the GPL.
 !
 !==============================================================================
+!
+#define ESMF_FILENAME "ESMF_RegridTypes.F90"
 !
 !     ESMF Regrid Types Module
       module ESMF_RegridTypesMod
@@ -43,6 +45,7 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod       ! ESMF base   class
+      use ESMF_LogErrMod
       use ESMF_DELayoutMod
       use ESMF_LocalArrayMod
       use ESMF_ArrayDataMapMod
@@ -103,36 +106,36 @@
 ! !PUBLIC DATA MEMBERS:
 !
   
-      integer, parameter, public ::       &! supported regrid methods
-         ESMF_RegridMethod_none     =  0, &! no regridding or undefined regrid
-         ESMF_RegridMethod_Bilinear =  1, &! bilinear (logically-rect grids)
-         ESMF_RegridMethod_Bicubic  =  2, &! bicubic  (logically-rect grids)
-         ESMF_RegridMethod_Conserv1 =  3, &! 1st-order conservative
-         ESMF_RegridMethod_Conserv2 =  4, &! 2nd-order conservative
-         ESMF_RegridMethod_Raster   =  5, &! regrid by rasterizing domain
-         ESMF_RegridMethod_NearNbr  =  6, &! nearest-neighbor dist-weighted avg
-         ESMF_RegridMethod_Fourier  =  7, &! Fourier transform
-         ESMF_RegridMethod_Legendre =  8, &! Legendre transform
-         ESMF_RegridMethod_Index    =  9, &! index-space regrid (shift, stencil)
-         ESMF_RegridMethod_Linear   = 10, &! linear for 1-d regridding
-         ESMF_RegridMethod_Spline   = 11, &! cubic spline for 1-d regridding
-         ESMF_RegridMethod_RegridCopy=51, &! copy existing regrid
-         ESMF_RegridMethod_Shift    = 52, &! shift addresses of existing regrid
-         ESMF_RegridMethod_Adjoint  = 53, &! create adjoint of existing regrid
-         ESMF_RegridMethod_File     = 89, &! read a regrid from a file
-         ESMF_RegridMethod_User     = 90   ! user-supplied method
+      integer, parameter, public ::          &! supported regrid methods
+         ESMF_REGRID_METHOD_NONE       =  0, &! no regridding or undefined regrid
+         ESMF_REGRID_METHOD_BILINEAR   =  1, &! bilinear (logically-rect grids)
+         ESMF_REGRID_METHOD_BICUBIC    =  2, &! bicubic  (logically-rect grids)
+         ESMF_REGRID_METHOD_CONSERV1   =  3, &! 1st-order conservative
+         ESMF_REGRID_METHOD_CONSERV2   =  4, &! 2nd-order conservative
+         ESMF_REGRID_METHOD_RASTER     =  5, &! regrid by rasterizing domain
+         ESMF_REGRID_METHOD_NEAR_NBR   =  6, &! nearest-neighbor dist-weighted avg
+         ESMF_REGRID_METHOD_FOURIER    =  7, &! Fourier transform
+         ESMF_REGRID_METHOD_LEGENDRE   =  8, &! Legendre transform
+         ESMF_REGRID_METHOD_INDEX      =  9, &! index-space regrid (shift, stencil)
+         ESMF_REGRID_METHOD_LINEAR     = 10, &! linear for 1-d regridding
+         ESMF_REGRID_METHOD_SPLINE     = 11, &! cubic spline for 1-d regridding
+         ESMF_REGRID_METHOD_REGRIDCOPY = 51, &! copy existing regrid
+         ESMF_REGRID_METHOD_SHIFT      = 52, &! shift addresses of existing regrid
+         ESMF_REGRID_METHOD_ADJOINT    = 53, &! create adjoint of existing regrid
+         ESMF_REGRID_METHOD_FILE       = 89, &! read a regrid from a file
+         ESMF_REGRID_METHOD_USER       = 90   ! user-supplied method
 
-      integer, parameter, public ::     &! options for field data motion
-         ESMF_RegridDistrb_None   =  0, &! no data motion required or undefined
-         ESMF_RegridDistrb_Source =  1, &! redistribute source field
-         ESMF_RegridDistrb_Dest   =  2, &! redistribute destination field
-         ESMF_RegridDistrb_Both   =  3   ! redistribute both 
+      integer, parameter, public ::      &! options for field data motion
+         ESMF_REGRID_DISTRB_NONE   =  0, &! no data motion required or undefined
+         ESMF_REGRID_DISTRB_SOURCE =  1, &! redistribute source field
+         ESMF_REGRID_DISTRB_DEST   =  2, &! redistribute destination field
+         ESMF_REGRID_DISTRB_BOTH   =  3   ! redistribute both 
 
-      integer, parameter, public ::       &! options for normalization
-         ESMF_RegridNormOpt_Unknown  = 0, &! unknown or undefined normalization
-         ESMF_RegridNormOpt_None     = 1, &
-         ESMF_RegridNormOpt_DstArea  = 2, &
-         ESMF_RegridNormOpt_FracArea = 3
+      integer, parameter, public ::     &! options for normalization
+         ESMF_REGRID_NORM_UNKNOWN  = 0, &! unknown or undefined normalization
+         ESMF_REGRID_NORM_NONE     = 1, &! no normalization
+         ESMF_REGRID_NORM_DSTAREA  = 2, &
+         ESMF_REGRID_NORM_FRACAREA = 3
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
@@ -155,7 +158,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.47 2004/05/17 22:34:20 jwolfe Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.48 2004/05/24 23:04:05 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -187,6 +190,8 @@
 ! module to facilitate branching based on type of regridding required.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridAddLink1D"
 !BOPI
 ! !IROUTINE: ESMF_RegridAddLink1D - Adds address pair and regrid weight to regrid
 
@@ -223,8 +228,7 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      logical :: rcpresent
-      integer :: status
+      integer :: localrc
       integer, dimension(:), pointer :: srcPtr, dstPtr
       integer :: numList
       real(kind=ESMF_KIND_R8), dimension(:), pointer :: wgtPtr
@@ -232,19 +236,17 @@
       type (ESMF_Array) :: &! temps for use when re-sizing arrays
          srcAddTmp, dstAddTmp, weightsTmp
 
-!     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+!     Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
-                                   dstIndex=dstIndex, weights=weights, rc=status)
-      call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, status)
+                                   dstIndex=dstIndex, weights=weights, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
+      call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, localrc)
+      call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, localrc)
+      call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! increment number of links for this regrid
       numList = numList + 1
@@ -257,13 +259,16 @@
       dstPtr(numList) = dstAdd
       wgtPtr(numList) = weight
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
-                                   dstIndex=dstIndex, weights=weights, rc=status)
+                                   dstIndex=dstIndex, weights=weights, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridAddLink1D
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridAddLink2D"
 !BOPI
 ! !IROUTINE: ESMF_RegridAddLink2D - Adds address pair and regrid weight to regrid
 
@@ -304,10 +309,9 @@
 !     \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-!  TODO
-      logical :: rcpresent
-      integer :: status
+! !REQUIREMENTS: !  TODO
+
+      integer :: localrc
       integer, dimension(:), pointer :: srcPtr, dstPtr
       integer :: numList, i, i1
       logical :: aggregateUse, newLink
@@ -316,23 +320,21 @@
       type (ESMF_Array) :: &! temps for use when re-sizing arrays
          srcAddTmp, dstAddTmp, weightsTmp
 
-!     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+!     Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       newLink = .true.
       aggregateUse = .false.
       if (present(aggregate)) aggregateUse=aggregate
 
       call ESMF_TransformValuesGet(tv, numList=numList, srcIndex=srcIndex, &
-                                   dstIndex=dstIndex, weights=weights, rc=status)
-      call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, status)
-      call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, status)
+                                   dstIndex=dstIndex, weights=weights, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
+      call ESMF_LocalArrayGetData(srcIndex, srcPtr, ESMF_DATA_REF, localrc)
+      call ESMF_LocalArrayGetData(dstIndex, dstPtr, ESMF_DATA_REF, localrc)
+      call ESMF_LocalArrayGetData(weights , wgtPtr, ESMF_DATA_REF, localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! if the aggregation flag is set, search through the already existing
       ! links for the current address pair
@@ -365,13 +367,16 @@
       endif
 
       call ESMF_TransformValuesSet(tv, numList=numList, srcIndex=srcIndex, &
-                                   dstIndex=dstIndex, weights=weights, rc=status)
+                                   dstIndex=dstIndex, weights=weights, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
-      rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridAddLink2D
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridRouteConstruct"
 !BOPI
 ! !IROUTINE: ESMF_RegridRouteConstruct - Constructs a Route used to gather data
 
@@ -412,8 +417,8 @@
 ! !REQUIREMENTS:
 !EOPI
 !TODO: Leave here or move to Route?
-      logical :: rcpresent
-      integer :: status
+
+      integer :: localrc
       integer :: myDE, gridrank, nDEs, theirDE, i, j
       integer, dimension(:), allocatable :: dimOrder
       logical :: totalUse
@@ -428,77 +433,54 @@
       type(ESMF_RelLoc) :: horzRelLoc
       type(ESMF_Route) :: route
 
-!     Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+!     Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
 !     use optional arguments if present
       totalUse = .false.
-      if(present(total)) totalUse = total
+      if (present(total)) totalUse = total
 
-      call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: GridGetDELayout ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_DELayoutGet(srcDELayout, localDE=myDE, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: DELayoutGet ", &
-                 "returned failure"
-        return
-      endif
+      call ESMF_GridGet(srcGrid, delayout=srcDELayout, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
+      call ESMF_DELayoutGet(srcDELayout, localDE=myDE, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! Extract some layout information for use in this regrid.
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
+      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
       allocate (myAI(gridrank))
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           globalAIPerDim=myAI, reorder=reorder, &
-                          total=totalUse, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: GridGetDE ", &
-                 "returned failure"
-        return
-      endif
+                          total=totalUse, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! From each grid get the bounding box information on this DE
-      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=status)
+      call ESMF_GridGet(srcGrid, dimCount=gridrank, rc=localrc)
       allocate (srcMin(gridrank))
       allocate (srcMax(gridrank))
-      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=status)
+      call ESMF_GridGet(dstGrid, dimCount=gridrank, rc=localrc)
       allocate (dstMin(gridrank))
       allocate (dstMax(gridrank))
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=status)
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=horzRelLoc, rc=localrc)
       call ESMF_GridGetDE(srcGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=srcMin, &
                           maxLocalCoordPerDim=srcMax, &
-                          reorder=.false., rc=status)
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=status)
+                          reorder=.false., rc=localrc)
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=horzRelLoc, rc=localrc)
       call ESMF_GridGetDE(dstGrid, horzRelLoc=horzRelLoc, &
                           minLocalCoordPerDim=dstMin, &
                           maxLocalCoordPerDim=dstMax, &
-                          reorder=.false., rc=status)
+                          reorder=.false., rc=localrc)
 
       ! calculate intersections
       call ESMF_GridBoxIntersectSend(dstGrid, srcGrid, srcMin, srcMax, &
-                                     myAI, sendDomainList, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: GridBoxIntersectSend ", &
-                 "returned failure"
-        return
-      endif
+                                     myAI, sendDomainList, localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
       call ESMF_GridBoxIntersectRecv(srcGrid, dstMin, dstMax, &
-                                     recvDomainList, total=totalUse, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: GridBoxIntersectRecv ", &
-                 "returned failure"
-        return
-      endif
+                                     recvDomainList, total=totalUse, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! Modify DomainLists for Array dimensions larger than Grid dimensions
       ! TODO: move this to its own subroutine?
@@ -508,11 +490,11 @@
         allocate(myArrayLocalAI(dimCount))
         allocate(dimOrder(dimCount))
         if (totalUse) then
-          call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=status)
+          call ESMF_ArrayGetAxisIndex(srcArray, totalindex=myArrayAI, rc=localrc)
         else
-          call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=status)
+          call ESMF_ArrayGetAxisIndex(srcArray, compindex=myArrayAI, rc=localrc)
         endif
-        call ESMF_FieldDataMapGet(srcDataMap, dataIndices=dimOrder, rc=status)
+        call ESMF_FieldDataMapGet(srcDataMap, dataIndices=dimOrder, rc=localrc)
         do i = 1,sendDomainList%num_domains
           do j = 1,sendDomainList%domains(i)%rank
             myAI(j) = sendDomainList%domains(i)%ai(j)
@@ -538,15 +520,15 @@
         enddo
 
       ! recvDomainList next
-        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=status)
+        call ESMF_DELayoutGet(srcDELayout, deCount=nDEs, rc=localrc)
         allocate(allAI(nDEs,dimCount))
         allocate(allLocalAI(nDEs,dimCount))
         if (totalUse) then
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                           totalindex=allAI, rc=status)
+                                           totalindex=allAI, rc=localrc)
         else
           call ESMF_ArrayGetAllAxisIndices(srcArray, srcGrid, srcDataMap, &
-                                           compindex=allAI, rc=status)
+                                           compindex=allAI, rc=localrc)
         endif
         do i = 1,recvDomainList%num_domains
           theirDE = recvDomainList%domains(i)%DE + 1
@@ -581,16 +563,14 @@
       endif
 
       ! Create Route
-      route = ESMF_RouteCreate(parentDELayout, status)
+      route = ESMF_RouteCreate(parentDELayout, localrc)
       call ESMF_RoutePrecomputeDomList(route, dimCount, myDE, sendDomainList, &
-                                       recvDomainList, status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridRouteConstruct: ", &
-                 "RoutePrecomputeDomList returned failure"
-        return
-      endif
+                                       recvDomainList, localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
       ! set size of recv items in Route
-      call ESMF_RouteSetRecvItems(route, recvDomainList%total_points, status)
+      call ESMF_RouteSetRecvItems(route, recvDomainList%total_points, localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! Clean up
       deallocate(myAI)
@@ -601,11 +581,13 @@
 
       ! Set return values
       ESMF_RegridRouteConstruct = route
-      if(rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_RegridRouteConstruct
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridGet"
 !BOP
 ! !IROUTINE: ESMF_RegridGet - Get an attribute of a Regrid
 
@@ -661,22 +643,16 @@
 !EOP
 ! !REQUIREMENTS:  TODO
 
-      logical :: rcpresent
-      integer :: status
+      integer :: localrc
       type(ESMF_RegridType), pointer :: rtype
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then 
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
  
       rtype => regrid%ptr
       ! Get name if requested
       if (present(name)) then
-        call ESMF_GetName(rtype%base, name, status)
+        call ESMF_GetName(rtype%base, name, localrc)
         ! TODO: add error check
       endif
 
@@ -707,11 +683,13 @@
       ! get method
       if (present(method)) method = rtype%method
 
-      if (rcpresent) rc = status
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridSet"
 !BOPI
 ! !IROUTINE: ESMF_RegridSet - Set attribute of a Regrid
 
@@ -765,21 +743,16 @@
 !EOPI
 ! !REQUIREMENTS:  TODO
 
-      logical :: rcpresent
-      integer :: status
+      integer :: localrc
       type(ESMF_RegridType), pointer :: rtype
 
-      status = ESMF_SUCCESS
-      rcpresent=.FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initalize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
  
       rtype => regrid%ptr
       ! Set name if requested
       if (present(name)) then
-        call ESMF_SetName(rtype%base, name, "Regrid", status)
+        call ESMF_SetName(rtype%base, name, "Regrid", localrc)
         ! TODO: add error check
       endif
 
@@ -798,11 +771,13 @@
       ! get method 
       if (present(method)) rtype%method = method
 
-      if (rcpresent) rc = status
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConstructEmpty"
 !BOPI
 ! !IROUTINE: ESMF_RegridConstructEmpty - Create empty regrid structure
 
@@ -830,30 +805,27 @@
 !EOPI
 ! !REQUIREMENTS:
 
-      logical :: rcpresent
-      integer :: status
+      integer :: localrc
 
-      ! Initialize return code
-      status = ESMF_SUCCESS
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! initialize the base object
-      call ESMF_BaseCreate(regrid%base, "Regrid", rc=status)
+      call ESMF_BaseCreate(regrid%base, "Regrid", rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
       ! TODO: add error handling
 
       ! initialize scalars
-      regrid%method         = ESMF_RegridMethod_none
-      regrid%redistrbOption = ESMF_RegridDistrb_None
+      regrid%method         = ESMF_REGRID_METHOD_NONE
+      regrid%redistrbOption = ESMF_REGRID_DISTRB_NONE
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridConstructEmpty
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDestruct"
 !BOPI
 ! !IROUTINE: ESMF_RegridDestruct - Free any Regrid memory allocated internally
 
@@ -882,24 +854,18 @@
 !EOPI
 ! !REQUIREMENTS:
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if(present(rc)) then
-        rcpresent=.TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
-      regrid%method         = ESMF_RegridMethod_none
-      regrid%redistrbOption = ESMF_RegridDistrb_None
+      regrid%method         = ESMF_REGRID_METHOD_NONE
+      regrid%redistrbOption = ESMF_REGRID_DISTRB_NONE
 
       ! and free anything associated with the base object
-      call ESMF_BaseDestroy(regrid%base, status)
+      call ESMF_BaseDestroy(regrid%base, localrc)
 
-      if (rcpresent) rc = status
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
 

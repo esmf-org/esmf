@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.29 2004/05/17 22:33:58 jwolfe Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.30 2004/05/24 23:03:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,6 +10,8 @@
 !
 !==============================================================================
 !
+#define ESMF_FILENAME "ESMF_RegridConserv.F90"
+!
 !     ESMF Conservative Regrid Module
       module ESMF_RegridConservMod
 !
@@ -19,7 +21,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-#include "ESMF.h"
+#include <ESMF.h>
 !==============================================================================
 !BOPI
 ! !MODULE: ESMF_RegridConservMod - Conservative interpolation
@@ -72,7 +74,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.29 2004/05/17 22:33:58 jwolfe Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.30 2004/05/24 23:03:27 jwolfe Exp $'
 
 !==============================================================================
 
@@ -83,6 +85,8 @@
 ! This section includes the conservative Regrid construct methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConstructConserv"
 !BOPI
 ! !IROUTINE: ESMF_RegridConstructConserv - Constructs conservative Regrid structure 
 
@@ -90,7 +94,7 @@
       function ESMF_RegridConstructConserv(srcArray, srcGrid, srcDataMap, &
                                            dstArray, dstGrid, dstDataMap, &
                                            parentDELayout, srcMask, dstMask, &
-                                           normOpt, order, rc)
+                                           regridnorm, order, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructConserv
@@ -105,7 +109,7 @@
       type(ESMF_DELayout),     intent(in ) :: parentDELayout
       type(ESMF_Mask),         intent(in ), optional :: srcMask
       type(ESMF_Mask),         intent(in ), optional :: dstMask
-      integer,                 intent(in ), optional :: normOpt
+      integer,                 intent(in ), optional :: regridnorm
       integer,                 intent(in ), optional :: order
       integer,                 intent(out), optional :: rc
 !
@@ -143,9 +147,9 @@
 !     \item[{[dstMask]}]
 !          Optional mask to specify or eliminate destination points from
 !          regridding.  Default is that all destination points participate. 
-!     \item[{[normOpt]}]
+!     \item[{[regridnorm]}]
 !          Optional normalization option.  
-!          Default is {\tt ESMF\_RegridNormOpt\_FracArea}.
+!          Default is {\tt ESMF\_REGRID\_NORM\_FRACAREA}.
 !     \item[{[order]}]
 !          Optional integer to set conservation order.  The default is 1,
 !          for first-order.
@@ -157,13 +161,12 @@
 ! !REQUIREMENTS:  TODO
 
       ! local variables
-      integer :: status            ! Error status
-      logical :: rcpresent         ! Return code present
+      integer :: localrc           ! Error status
       integer :: &
            aSize,                 &!
            nC,                    &!
            datarank,              &!
-           normOptUse,            &!
+           regridNormUse,         &!
            orderUse,              &!
            i,                     &! loop counter
            numDstCorners,         &!
@@ -229,43 +232,30 @@
            srcLocalCornerArray     !
 
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! Construct an empty regrid structure
-      rh = ESMF_RouteHandleCreate(rc=status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: RouteHandleCreate ", &
-                 "returned failure"
-        return
-      endif
+      rh = ESMF_RouteHandleCreate(rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! Set optional parameters if present - otherwise set defaults
       orderUse    = 1
       if (present(order)) orderUse = order
-      normOptUse  = ESMF_RegridNormOpt_FracArea
-      if (present(normOpt)) normOptUse = normOpt
+      regridNormUse  = ESMF_REGRID_NORM_FRACAREA
+      if (present(regridnorm)) regridNormUse = regridnorm
 
       ! Set regrid method and array pointers       TODO: add name
       if (orderUse.eq.1) then
         call ESMF_RegridSet(tempRegrid, &
                             srcArray=srcArray, dstArray=dstArray, &
-                            method = ESMF_RegridMethod_Conserv1, rc=status)
+                            method = ESMF_REGRID_METHOD_CONSERV1, rc=localrc)
       else
         call ESMF_RegridSet(tempRegrid, &
                             srcArray=srcArray, dstArray=dstArray, &
-                            method = ESMF_RegridMethod_Conserv2, rc=status)
+                            method = ESMF_REGRID_METHOD_CONSERV2, rc=localrc)
       endif
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: RegridTypeSet ", &
-                 "returned failure"
-        return
-      endif
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       ! set reordering information
       srcOrder(:) = gridOrder(:,srcGrid%ptr%coordOrder%order,2)
@@ -273,89 +263,66 @@
 
       ! get destination grid info
       !TODO: Get grid masks?
-      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: FieldDataMapGetRelloc ", &
-                 "returned failure"
-        return
-      endif
+      call ESMF_FieldDataMapGet(dstDataMap, horzRelloc=dstRelLoc, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
       dstCounts(3) = 2
       call ESMF_GridGetDE(dstGrid, horzRelLoc=dstRelLoc, &
                           localCellCountPerDim=dstCounts(1:2), &
-                          reorder=.false., rc=status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: GridGetDE ", &
-                 "returned failure"
-        return
-      endif
+                          reorder=.false., rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       allocate(dstLocalCoordArray(2))
       allocate(dstLocalCornerArray(2))
       call ESMF_GridGetCoord(dstGrid, horzRelLoc=dstRelLoc, &
                              centerCoord=dstLocalCoordArray, &
                              cornerCoord=dstLocalCornerArray, &
-                             reorder=.false., rc=status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: GridGetCoord ", &
-                 "returned failure"
-        return
-      endif
+                             reorder=.false., rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
       call ESMF_ArrayGetData(dstLocalCoordArray(1), dstLocalCoordX, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
       call ESMF_ArrayGetData(dstLocalCoordArray(2), dstLocalCoordY, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
       call ESMF_ArrayGetData(dstLocalCornerArray(1), dstLocalCornerX, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
       call ESMF_ArrayGetData(dstLocalCornerArray(2), dstLocalCornerY, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
 
       ! get source grid info
-      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: FieldDataMapGetRelloc ", &
-                 "returned failure"
-        return
-      endif
-      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: GridGet ", &
-                 "returned failure"
-        return
-      endif
+      call ESMF_FieldDataMapGet(srcDataMap, horzRelloc=srcRelLoc, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
+      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
       srcCounts(3) = 2
       call ESMF_GridGetDE(srcGrid, horzRelLoc=srcRelLoc, &
                           localCellCountPerDim=srcCounts(1:2), &
-                          reorder=.false., rc=status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: GridGetDE ", &
-                 "returned failure"
-        return
-      endif
+                          reorder=.false., rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
 
       allocate(srcLocalCoordArray(2))
       allocate(srcLocalCornerArray(2))
       call ESMF_GridGetCoord(srcGrid, horzRelLoc=srcRelLoc, &
                              centerCoord=srcLocalCoordArray, &
                              cornerCoord=srcLocalCornerArray, &
-                             reorder=.false., rc=status)
-      if (status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in RegridConstructConserv: GridGetCoord ", &
-                 "returned failure"
-        return
-      endif
+                             reorder=.false., rc=localrc)
+ !      if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
       call ESMF_ArrayGetData(srcLocalCoordArray(1), srcLocalCoordX, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
       call ESMF_ArrayGetData(srcLocalCoordArray(2), srcLocalCoordY, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
       call ESMF_ArrayGetData(srcLocalCornerArray(1), srcLocalCornerX, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
       call ESMF_ArrayGetData(srcLocalCornerArray(2), srcLocalCornerY, &
-                             ESMF_DATA_REF, status)
+                             ESMF_DATA_REF, localrc)
 
       call ESMF_GridGetCellMask(srcGrid, srcMaskArray, relloc=srcRelLoc, &
-                                rc=status)
+                                rc=localrc)
       call ESMF_ArrayGetData(srcMaskArray, srcLocalMask, ESMF_DATA_REF, &
-                             status)
+                             localrc)
 
       hassrcdata = .true.   ! temp for now
       hasdstdata = .true.   ! temp for now
@@ -367,25 +334,25 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      call ESMF_ArrayGet(srcArray, rank=datarank, rc=status)
+      call ESMF_ArrayGet(srcArray, rank=datarank, rc=localrc)
       route = ESMF_RegridRouteConstruct(datarank, srcGrid, dstGrid, &
                          recvDomainList, parentDELayout, &
                          srcArray=srcArray, srcDataMap=srcDataMap, &
                          dstArray=dstArray, dstDataMap=dstDataMap, &
-                         total=.false., rc=status)
-      call ESMF_RouteHandleSet(rh, route1=route, rc=status)
+                         total=.false., rc=localrc)
+      call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
 
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
                              recvDomainList, parentDELayout, &
                              srcDataMap=srcDataMap, &
                              dstDataMap=dstDataMap, &
                              reorder=.false., total=.false., &
-                             rc=status)
+                             rc=localrc)
 
       ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
       nC = size(srcLocalCornerX,1)
-      call ESMF_RouteGetRecvItems(tempRoute, aSize, status)
+      call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
       allocate(srcGatheredCoordX(aSize))
       allocate(srcGatheredCoordY(aSize))
       allocate(srcGatheredMask  (aSize))
@@ -395,20 +362,20 @@
       ! Execute Route now to gather grid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
       call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCoordX, &
-                                    srcGatheredCoordX, status)
+                                    srcGatheredCoordX, localrc)
       call ESMF_RouteRunF90PtrR821D(tempRoute, srcLocalCoordY, &
-                                    srcGatheredCoordY, status)
+                                    srcGatheredCoordY, localrc)
       ! TODO: move this loop to a Route routine?
       do i = 1,nC
         temp2d => srcLocalCornerX(i,:,:)
         temp1d => srcGatheredCornerX(i,:)
-        call ESMF_RouteRunF90PtrR821D(tempRoute, temp2d, temp1d, status)
+        call ESMF_RouteRunF90PtrR821D(tempRoute, temp2d, temp1d, localrc)
         temp2d => srcLocalCornerY(i,:,:)
         temp1d => srcGatheredCornerY(i,:)
-        call ESMF_RouteRunF90PtrR821D(tempRoute, temp2d, temp1d, status)
+        call ESMF_RouteRunF90PtrR821D(tempRoute, temp2d, temp1d, localrc)
       enddo
       call ESMF_RouteRunF90PtrI421D(tempRoute, srcLocalMask, &
-                                    srcGatheredMask, status)
+                                    srcGatheredMask, localrc)
 
       ! now all necessary data is local
 
@@ -429,7 +396,7 @@
       if (present(srcMask)) then
   !      srcUserMask = srcMask
       else
-        call ESMF_RouteGetRecvItems(tempRoute, aSize, status)
+        call ESMF_RouteGetRecvItems(tempRoute, aSize, localrc)
         allocate(srcUserMask(aSize))
         srcUserMask = .TRUE.
       endif
@@ -442,7 +409,7 @@
     !  dstUsrArea  (:) = ?       ! should come from user
 
       ! For spherical coordinates, convert all coordinates to radians
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
         dstLocalCoordX  =  dstLocalCoordX*pi/180.0d0
         dstLocalCoordY  =  dstLocalCoordY*pi/180.0d0
         dstLocalCornerX = dstLocalCornerX*pi/180.0d0
@@ -466,7 +433,7 @@
    !   srcUsrArea  (:) = ?
 
       ! For spherical coordinates, convert all coordinates to radians
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
         srcGatheredCoordX  =  srcGatheredCoordX*pi/180.0d0
         srcGatheredCoordY  =  srcGatheredCoordY*pi/180.0d0
         srcGatheredCornerX = srcGatheredCornerX*pi/180.0d0
@@ -485,7 +452,7 @@
       endif
 
       ! Loop through domains for the search routine
-      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=status)
+      call ESMF_GridGet(srcGrid, horzCoordSystem=coordSystem, rc=localrc)
       numSrcCorners = size(srcLocalCornerX,1)   ! TODO: should be from a Grid call
       numDstCorners = size(dstLocalCornerX,1)
 
@@ -503,13 +470,13 @@
                                       srcArea, srcUsrArea, srcFracArea, &
                                       srcUserMask, &
                                       srcGatheredCornerX, srcGatheredCornerY, &
-                                      rc=status)
-        call ESMF_RegridConservNormalize(tv, orderUse, normOptUse, &
+                                      rc=localrc)
+        call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
                                       aSize, dstCounts(1), dstCounts(2), &
                                       srcOrder, dstOrder, &
                                       dstArea, dstUsrArea, dstFracArea, &
                                       srcArea, srcUsrArea, srcFracArea, &
-                                      rc=status)
+                                      rc=localrc)
       else
         call ESMF_RegridConservSearch(tv, orderUse, coordSystem, &
                                       aSize, numSrcCorners, &
@@ -525,27 +492,38 @@
                                       srcUserMask, &
                                       srcGatheredCornerX, srcGatheredCornerY, &
                                       dstCentroidX, dstCentroidY, &
-                                      srcCentroidX, srcCentroidY, status)
-        call ESMF_RegridConservNormalize(tv, orderUse, normOptUse, &
+                                      srcCentroidX, srcCentroidY, localrc)
+        call ESMF_RegridConservNormalize(tv, orderUse, regridNormUse, &
                                       aSize, dstCounts(1), dstCounts(2), &
                                       srcOrder, dstOrder, &
                                       dstArea, dstUsrArea, dstFracArea, &
                                       srcArea, srcUsrArea, srcFracArea, &
                                       dstCentroidX, dstCentroidY, &
-                                      srcCentroidX, srcCentroidY, status)
+                                      srcCentroidX, srcCentroidY, localrc)
       endif
 
       ! Set the routehandle
-      call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
+      call ESMF_RouteHandleSet(rh, tdata=tv, rc=localrc)
 
       ! Clean up some allocatables and return
-      call ESMF_RouteDestroy(tempRoute, status)
-      deallocate(dstUsrArea, dstFracArea)
-      deallocate(srcUsrArea, srcFracArea)
+      call ESMF_RouteDestroy(tempRoute, localrc)
+      deallocate(dstArea)
+      deallocate(dstUsrArea)
+      deallocate(dstFracArea)
+      deallocate(srcArea)
+      deallocate(srcUsrArea)
+      deallocate(srcFracArea)
       if (order > 1) then
-        deallocate(dstCentroidX, dstCentroidY)
-        deallocate(srcCentroidX, srcCentroidY)
+        deallocate(dstCentroidX)
+        deallocate(dstCentroidY)
+        deallocate(srcCentroidX)
+        deallocate(srcCentroidY)
       endif
+      deallocate(srcGatheredCoordX)
+      deallocate(srcGatheredCoordY)
+      deallocate(srcGatheredMask)
+      deallocate(srcGatheredCornerX)
+      deallocate(srcGatheredCornerY)
       deallocate(dstLocalCoordArray)
       deallocate(srcLocalCoordArray)
       deallocate(dstLocalCornerArray)
@@ -555,11 +533,13 @@
       
       ESMF_RegridConstructConserv = rh
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
 
       end function ESMF_RegridConstructConserv
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservSearch"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservSearch - Searches a conservative Regrid structure
 
@@ -657,8 +637,7 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      integer :: localrc                          ! Error status
       integer ::           &
          iDst, jDst,       &! more loop counters
          ibDst, ieDst,     &! beg, end of exclusive domain in i-dir of dest grid
@@ -676,6 +655,7 @@
       integer :: nextCorner      ! corner of cell that segment ends on
       integer :: numSubseg       ! number of subsegments
 
+      logical :: dummy
       logical :: lcoinc    ! flag for coincident segments
       logical :: lreverse  ! flag for reversing direction of segment
 
@@ -693,20 +673,17 @@
       real(ESMF_KIND_R8), dimension(:), allocatable :: weights
                                 ! local regridding weight array
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! determine number of weights for each entry based
       ! on input order of interpolation
       if (order == 1) then
         allocate(weights(1))
       else
-        print *,'2nd order conservative not currently supported'
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                    "2nd order conservative not currently supported", &
+                                    ESMF_CONTEXT, rc)
         return
         allocate(weights(3))  ! 2nd-order requires 3 weights
       endif
@@ -779,7 +756,9 @@
               ! near cell or threshold boundary
               numSubseg = numSubseg + 1
               if (numSubseg > maxSubseg) then
-                print *,'Error in RegridConservSearch: exceeded maxSubseg'
+                dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                            "numSubseg exceeded maxSubseg", &
+                                            ESMF_CONTEXT, rc)
                 return
               endif
 
@@ -792,13 +771,13 @@
                                                  xbeg, ybeg, xend, yend, fullLine, &
                                                  dstCenterX, dstCenterY, &
                                                  dstCornerX, dstCornerY, &
-                                                 dstMask, coordSystem, status)
+                                                 dstMask, coordSystem, localrc)
 
               ! compute line integral for this subsegment.
               call ESMF_RegridConservLineInt(weights, coordSystem,       &
                                              xIntersectLast, xIntersect, &
                                              yIntersectLast, yIntersect, &
-                                             xref, yref, status)
+                                             xref, yref, localrc)
 
               ! if integrating in reverse order, change
               ! sign of weights
@@ -813,11 +792,11 @@
                   dstAdd(dstOrder(1)) = iDst
                   dstAdd(dstOrder(2)) = jDst
                   call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
-                                          aggregate=.true., rc=status)
-                  if (status /= ESMF_SUCCESS) then
-                    print *,'Error ESMF_RegridConservSearch: add link'
-                    return
-                  endif
+                                          aggregate=.true., rc=localrc)
+                  if (ESMF_LogMsgFoundError(localrc, &
+                                            ESMF_ERR_PASSTHRU, &
+                                            ESMF_CONTEXT, rc)) return
+
                   srcFracArea(srcAdd) = srcFracArea(srcAdd) + weights(1)
                   dstFracArea(iDst,jDst) = dstFracArea(iDst,jDst) + weights(1)
                 endif
@@ -901,7 +880,9 @@
               ! threshold boundary
               numSubseg = numSubseg + 1
               if (numSubseg > maxSubseg) then
-                print *,'Error in RegridConservSearch: exceeded maxSubseg'
+                dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                            "numSubseg exceeded maxSubseg", &
+                                            ESMF_CONTEXT, rc)
                 return
               endif
 
@@ -914,13 +895,13 @@
                                                  xbeg, ybeg, xend, yend, fullLine, &
                                                  srcCenterX, srcCenterY, &
                                                  srcCornerX, srcCornerY, &
-                                                 srcMask, coordSystem, status)
+                                                 srcMask, coordSystem, localrc)
 
               ! compute line integral for this subsegment.
               call ESMF_RegridConservLineInt(weights, coordSystem,       &
                                              xIntersectLast, xIntersect, &
                                              yIntersectLast, yIntersect, &
-                                             xref, yref, status)
+                                             xref, yref, localrc)
 
               ! if integrating in reverse order, change sign of weights
               if (lreverse) then
@@ -934,11 +915,9 @@
                   dstAdd(dstOrder(1)) = iDst
                   dstAdd(dstOrder(2)) = jDst
                   call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
-                                          aggregate=.true., rc=status)
-                  if (status /= ESMF_SUCCESS) then
-                    print *,'Error ESMF_RegridConservSearch: add link'
-                    return
-                  endif
+                                          aggregate=.true., rc=localrc)
+ !                  if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
+
                   srcFracArea(srcAdd) = srcFracArea(srcAdd) + weights(1)
                   dstFracArea(iDst,jDst) = dstFracArea(iDst,jDst) + weights(1)
                 endif
@@ -970,7 +949,7 @@
       ! grid (i.e. as a grid corner point). if pole is missing from only
       ! one grid, need to correct only the area and centroid of that
       ! grid.  if missing from both, do complete weight calculation.
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
 
         ! North Pole
         weights(1) =  pi2
@@ -1020,11 +999,8 @@
           dstAdd(dstOrder(1)) = iDst
           dstAdd(dstOrder(2)) = jDst
           call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
-                                  aggregate=.true., rc=status)
-          if (status /= ESMF_SUCCESS) then
-            print *,'Error ESMF_RegridConservSearch: add link'
-            return
-          endif
+                                  aggregate=.true., rc=localrc)
+ !          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
         endif
 
         ! South Pole
@@ -1075,11 +1051,8 @@
           dstAdd(dstOrder(1)) = iDst
           dstAdd(dstOrder(2)) = jDst
           call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), &
-                                  aggregate=.true., rc=status)
-          if (status /= ESMF_SUCCESS) then
-            print *,'Error ESMF_RegridConservSearch: add link'
-            return
-          endif
+                                  aggregate=.true., rc=localrc)
+ !          if (ESMF_LogMsgFoundError(localrc, ESMF_ERR_PASSTHRU, rc)) return
         endif
 
       endif  ! coordSystem_Spherical
@@ -1099,27 +1072,29 @@
       ! Clean up some allocatables and return
       deallocate(weights)
 
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_RegridConservSearch
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservNormalize"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservNormalize - Normalizes a conservative Regrid structure
 
 ! !INTERFACE:
-      subroutine ESMF_RegridConservNormalize(tv, order, normOpt, &
-                                          srcSize, dstSizeX, dstSizeY, &
-                                          srcOrder, dstOrder, &
-                                          dstArea, dstUsrArea, dstFracArea, &
-                                          srcArea, srcUsrArea, srcFracArea, &
-                                          dstCentroidX, dstCentroidY, &
-                                          srcCentroidX, srcCentroidY, rc)
+      subroutine ESMF_RegridConservNormalize(tv, order, regridnorm, &
+                                             srcSize, dstSizeX, dstSizeY, &
+                                             srcOrder, dstOrder, &
+                                             dstArea, dstUsrArea, dstFracArea, &
+                                             srcArea, srcUsrArea, srcFracArea, &
+                                             dstCentroidX, dstCentroidY, &
+                                             srcCentroidX, srcCentroidY, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(inout) :: tv
       integer, intent(in) :: order
-      integer, intent(in) :: normOpt
+      integer, intent(in) :: regridnorm
       integer, intent(in) :: srcSize
       integer, intent(in) :: dstSizeX
       integer, intent(in) :: dstSizeY
@@ -1180,14 +1155,15 @@
 ! !REQUIREMENTS:  TODO
 !EOPI
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
+      character(len=ESMF_MAXSTR) :: logMsg
+      integer :: localrc                          ! Error status
       integer :: &
            iDst, jDst,            &!
            n, numLinks,           &!
            srcAdd                  !
       integer(ESMF_KIND_I4), dimension(:), pointer :: &
            dstIndex, srcIndex      !
+      logical :: dummy
       real(ESMF_KIND_R8) :: &
            normFactor              ! factor for normalizing wts
       real(ESMF_KIND_R8), dimension(:), pointer :: &
@@ -1201,20 +1177,17 @@
            dstindexarr,           &!
            weightsarr              !
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! determine number of weights for each entry based
       ! on input order of interpolation
       if (order == 1) then
         allocate(weights(1))
       else
-        print *,'2nd order conservative not currently supported'
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                    "2nd order conservative not currently supported", &
+                                    ESMF_CONTEXT, rc)
         return
         allocate(weights(3))  ! 2nd-order requires 3 weights
       endif
@@ -1233,14 +1206,14 @@
         jDst       = dstIndex((n-1)*2 + dstOrder(2))
         weights(1) = weightsData(n)            ! TODO: fix this for second order
 
-        select case (normOpt)
-        case (ESMF_RegridNormOpt_None)
+        select case (regridnorm)
+        case (ESMF_REGRID_NORM_NONE)
           normFactor = 1.0d0
 
-        case (ESMF_RegridNormOpt_DstArea)
+        case (ESMF_REGRID_NORM_DSTAREA)
           normFactor = 1.0d0/dstArea(iDst,jDst)
 
-        case (ESMF_RegridNormOpt_FracArea)
+        case (ESMF_REGRID_NORM_FRACAREA)
           normFactor = 1.0d0/dstFracArea(iDst,jDst)
 
         case default
@@ -1266,16 +1239,18 @@
 
       do srcAdd = 1,srcSize
         if (srcArea(srcAdd) < -.01) then
-          print *,'ERROR: ESMF_RegridConservSearch:Source grid area error ', &
-                   srcAdd,srcArea(srcAdd)
+          print logMsg, "Source grid area < -0.01, value is ", srcArea(srcAdd), &
+                        " at location ", srcAdd
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
       enddo
 
       do jDst   = 1,dstSizeY
         do iDst = 1,dstSizeX
           if (dstArea(iDst,jDst) < -.01) then
-            print *,'ERROR: ESMF_RegridConservSearch:Dest grid area error ', &
-                     iDst,jDst,dstArea(iDst,jDst)
+            print logMsg, "Dest grid area < -0.01, value is ", &
+                           dstArea(iDst,jDst), " at location ", iDst, jDst
+            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
           temp2d(iDst,jDst) = 0.0d0
         enddo
@@ -1288,10 +1263,14 @@
         weights(1) = weightsData(n)             ! TODO: fix this for second order
 
         if (weightsData(n) < -.05) then
-          print *,'Regrid weight < 0 ', srcAdd, iDst, jDst, weights(1)
+          print logMsg, "Regrid weight < 0, value is ", weights(1), &
+                        " at location ", srcAdd, iDst, jDst
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
-        if (normOpt /= ESMF_RegridNormOpt_None .AND. weights(1) > 1.05d0) then
-          print *,'Regrid weight > 1 ', srcAdd, iDst, jDst, weights(1)
+        if (regridnorm /= ESMF_REGRID_NORM_NONE .AND. weights(1) > 1.05d0) then
+          print logMsg, "Regrid weight > 1.05, value is ", weights(1), &
+                        " at location ", srcAdd, iDst, jDst
+          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         ! sum the weight for each dest grid point
         temp2d(iDst,jDst) = temp2d(iDst,jDst) + weights(1)
@@ -1301,19 +1280,21 @@
       do jDst   = 1,dstSizeY
         do iDst = 1,dstSizeX
 
-          select case(normOpt)
-          case (ESMF_RegridNormOpt_DstArea)
+          select case(regridnorm)
+          case (ESMF_REGRID_NORM_DSTAREA)
             normFactor = dstFracArea(iDst,jDst)
-          case (ESMF_RegridNormOpt_FracArea)
+          case (ESMF_REGRID_NORM_FRACAREA)
             normFactor = 1.0d0
-          case (ESMF_RegridNormOpt_None)
+          case (ESMF_REGRID_NORM_NONE)
             normFactor = dstFracArea(iDst,jDst)*dstArea(iDst,jDst)
           end select
 
           if (abs(temp2d(iDst,jDst)) > 1.d-12 .AND. &
               abs(temp2d(iDst,jDst)-normFactor) > .05) then
-            print *,'Error: sum of weights for regrid ', iDst, jDst, &
-                     temp2d(iDst,jDst),normFactor
+            print logMsg, "Sum of weights for regrid , value is ", &
+                           temp2d(iDst,jDst), " should be ", normFactor, &
+                          " at location ", srcAdd, iDst, jDst
+            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
         enddo
       enddo
@@ -1321,11 +1302,13 @@
       ! clean up and set return value
       deallocate(weights)
       deallocate(temp2d)
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
       
       end subroutine ESMF_RegridConservNormalize
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservLineInt"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservLineInt - Line integrals for conservative scheme
 
@@ -1387,8 +1370,9 @@
 
       ! variables used locally
       integer :: iorder     ! order of interpolation
-      integer :: status     ! for internal error flags
-      logical :: rcpresent  ! flag for requested return code
+      integer :: localrc    ! for internal error flags
+
+      logical :: dummy
 
       real (ESMF_KIND_R8) :: &
         dx,               &! x,longitude difference for integral
@@ -1397,13 +1381,8 @@
         coslat1, coslat2, &! cosines of latitude endpoint
         lon1, lon2         ! longitude differences
 
-      ! Initialize return code
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-        rcpresent = .TRUE.
-        rc = ESMF_FAILURE
-      endif
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
 
       ! determine order of scheme from size of weight array
       iorder = size(weights)
@@ -1413,7 +1392,7 @@
       select case(coordSystem%coordSystem)
 
       ! Spherical coordinates
-      case(2)     ! ESMF_CoordSystem_Spherical
+      case(2)     ! ESMF_COORD_SYSTEM_SPHERICAL
 
         ! check for proper longitude range and include negative sign and
         ! trapezoidal 1/2 factor in dx
@@ -1466,7 +1445,7 @@
         endif
 
       ! Cartesian coordinates
-      case(3)     ! ESMF_CoordSystem_Cartesian
+      case(3)     ! ESMF_COORD_SYSTEM_CARTESIAN
 
         ! include negative sign and trapezoidal 0.5 factor in dx
         dx = 0.5d0*(xbeg - xend)
@@ -1488,16 +1467,20 @@
 
       ! Unknown or invalid coordSystem
       case default
-        print *,'Error ESMF_RegridConservLineInt: bad coordSystem'
+        dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
+                                    "Unknown or invalid coordSystem", &
+                                    ESMF_CONTEXT, rc)
         return
       end select
 
       ! successful return
-      if (rcpresent) rc = ESMF_SUCCESS
+      if (present(rc)) rc = ESMF_SUCCESS
  
       end subroutine ESMF_RegridConservLineInt
 
 !-----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservIntersect1D"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservIntersect1D - finds next intersection
 ! !INTERFACE:
@@ -1596,7 +1579,7 @@
       integer ::         &
         n,               &! dummies for addresses
         corner, nextCorner,        &! loop index, next index
-        status,          &! error signal
+        localrc,         &! error signal
         nCells,          &! search grid size
         numCorners        ! number of corners in each search grid cell
 
@@ -1631,13 +1614,15 @@
                             ! transformation for finding intersections in
                             ! spherical coordinates
                                   
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       ! initialize defaults, flags, etc.
       lreverse = .false.
       lcoinc   = .false.
       lthresh  = .false.
       loutside = .false.
       found    = .false.
-      status   = ESMF_FAILURE
       
       nCells     = size(srchCenterX)
       numCorners = size(srchCornerX, 1)
@@ -1659,7 +1644,7 @@
       srchMaxY = maxval(srchCornerY)
 
       ! correct for longitude crossings if necessary
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
         if ((xe-xb) > 1.5*pi) then
           xe = xe - pi2
         else if ((xe-xb) < -1.5*pi) then
@@ -1674,7 +1659,7 @@
       ! if this the coordinate system is spherical and the point is
       ! poleward of the threshold latitudes, compute the intersection
       ! in a transformed coordinate system to avoid pole singularity
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
         if (yb > northThreshold .or. yb < southThreshold) then
           call ESMF_RegridConservIntrsctPole1D(nLoc, &
                                      xIntersect, yIntersect, &
@@ -1682,7 +1667,7 @@
                                      xbeg, ybeg, xend, yend, fullLine, &
                                      northThreshold, southThreshold,   &
                                      srchCornerX, srchCornerY,         &
-                                     mask, coordSystem, status) 
+                                     mask, coordSystem, localrc) 
            return
          endif
        endif
@@ -1699,7 +1684,7 @@
           cornerY = srchCornerY(:,n)
 
           ! check for longitude crossings in spherical coords
-          if (coordSystem == ESMF_CoordSystem_Spherical) then
+          if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
 
             if ((xb - refx) >  pi) then
               xb = xb - pi2
@@ -1842,7 +1827,7 @@
           rhs1 = x1 - xb
           rhs2 = y1 - yb
 
-          if (coordSystem == ESMF_CoordSystem_Spherical) then
+          if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
             if (mat1 >  pi) then
               mat1 = mat1 - pi2
             else if (mat1 < -pi) then
@@ -1892,7 +1877,7 @@
                 rhs2 = y1 - fullLine(4)
               endif
 
-              if (coordSystem == ESMF_CoordSystem_Spherical) then
+              if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
                 if (mat1 >  pi) then
                   mat1 = mat1 - pi2
                 else if (mat1 < -pi) then
@@ -1937,7 +1922,7 @@
 
         ! if intersection crosses pole threshold, reset intersection to
         !   threshold lat
-        if (coordSystem == ESMF_CoordSystem_Spherical) then
+        if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
           if (yIntersect > northThreshold .OR. &
               yIntersect < southThreshold) then
             if (yIntersect > 0.0d0) then
@@ -1966,6 +1951,8 @@
       end subroutine ESMF_RegridConservIntersect1D
 
 !-----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservIntersect2D"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservIntersect2D - finds next intersection
 ! !INTERFACE:
@@ -2069,7 +2056,7 @@
       integer ::         &
         i, j,            &! dummies for addresses
         corner, nextCorner,        &! loop index, next index
-        status,          &! error signal
+        localrc,         &! error signal
         iCells, jCells,  &! search grid size
         numCorners        ! number of corners in each search grid cell
 
@@ -2104,13 +2091,15 @@
                             ! transformation for finding intersections in
                             ! spherical coordinates
                                   
+      ! Initialize return code; assume failure until success is certain
+      if (present(rc)) rc = ESMF_FAILURE
+
       ! initialize defaults, flags, etc.
       lreverse = .false.
       lcoinc   = .false.
       lthresh  = .false.
       loutside = .false.
       found    = .false.
-      status   = ESMF_FAILURE
       
       iCells     = size(srchCenterX, 1)
       jCells     = size(srchCenterX, 2)
@@ -2133,7 +2122,7 @@
       srchMaxY = maxval(srchCornerY)
 
       ! correct for longitude crossings if necessary
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
         if ((xe-xb) > 1.5*pi) then
           xe = xe - pi2
         else if ((xe-xb) < -1.5*pi) then
@@ -2148,7 +2137,7 @@
       ! if this the coordinate system is spherical and the point is
       ! poleward of the threshold latitudes, compute the intersection
       ! in a transformed coordinate system to avoid pole singularity
-      if (coordSystem == ESMF_CoordSystem_Spherical) then
+      if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
         if (yb > northThreshold .or. yb < southThreshold) then
           call ESMF_RegridConservIntrsctPole2D(iLoc, jLoc, &
                                      xIntersect, yIntersect, &
@@ -2156,7 +2145,7 @@
                                      xbeg, ybeg, xend, yend, fullLine, &
                                      northThreshold, southThreshold,   &
                                      srchCornerX, srchCornerY,         &
-                                     mask, coordSystem, status) 
+                                     mask, coordSystem, localrc) 
            return
          endif
        endif
@@ -2175,7 +2164,7 @@
           cornerY = srchCornerY(:,i,j)
 
           ! check for longitude crossings in spherical coords
-          if (coordSystem == ESMF_CoordSystem_Spherical) then
+          if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
 
             if ((xb - refx) >  pi) then
               xb = xb - pi2
@@ -2321,7 +2310,7 @@
           rhs1 = x1 - xb
           rhs2 = y1 - yb
 
-          if (coordSystem == ESMF_CoordSystem_Spherical) then
+          if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
             if (mat1 >  pi) then
               mat1 = mat1 - pi2
             else if (mat1 < -pi) then
@@ -2371,7 +2360,7 @@
                 rhs2 = y1 - fullLine(4)
               endif
 
-              if (coordSystem == ESMF_CoordSystem_Spherical) then
+              if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
                 if (mat1 >  pi) then
                   mat1 = mat1 - pi2
                 else if (mat1 < -pi) then
@@ -2416,7 +2405,7 @@
 
         ! if intersection crosses pole threshold, reset intersection to
         !   threshold lat
-        if (coordSystem == ESMF_CoordSystem_Spherical) then
+        if (coordSystem == ESMF_COORD_SYSTEM_SPHERICAL) then
           if (yIntersect > northThreshold .OR. &
               yIntersect < southThreshold) then
             if (yIntersect > 0.0d0) then
@@ -2445,6 +2434,8 @@
       end subroutine ESMF_RegridConservIntersect2D
 
 !-----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservIntrsctPole1D"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservIntrsctPole1D
 ! !INTERFACE:
@@ -2534,6 +2525,7 @@
 
       ! local variables
       integer :: &
+        localrc,            &
         n,                  &! dummies for addresses
         nCells,             &! number of cells in search grid
         numCorners,         &! number of corners in each cell of search grid
@@ -2863,6 +2855,8 @@
       end subroutine ESMF_RegridConservIntrsctPole1D
 
 !-----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridConservIntrsctPole2D"
 !BOPI
 ! !IROUTINE: ESMF_RegridConservIntrsctPole2D
 ! !INTERFACE:
@@ -3292,6 +3286,8 @@
       end subroutine ESMF_RegridConservIntrsctPole2D
 
 !----------------------------------------------------------------------
+!EOPI#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_LatLonToPoleXY"
 !BOPI
 ! !IROUTINE: ESMF_LatLonToPoleXY
 ! !INTERFACE:
@@ -3320,7 +3316,6 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOPI
 
       ! local variables
       real (ESMF_KIND_R8) :: rns           ! sign factor for transformation
@@ -3348,6 +3343,8 @@
       end subroutine ESMF_LatLonToPoleXY
 
 !----------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_PoleXYToLatLon"
 !BOPI
 ! !IROUTINE: ESMF_PoleXYToLatLon
 ! !INTERFACE:
