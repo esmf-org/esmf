@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray.F90,v 1.7 2004/02/11 19:05:06 nscollins Exp $
+! $Id: ESMF_LocalArray.F90,v 1.8 2004/02/11 19:57:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -43,6 +43,7 @@
       use ESMF_BaseMod
       use ESMF_IOMod
       implicit none
+
 !------------------------------------------------------------------------------
 ! !PRIVATE TYPES:
       private
@@ -52,69 +53,88 @@
 ! ! Indicates whether a data array should be copied or referenced.
 ! ! This matches an enum on the C++ side and the values must match.
 ! ! Update ../include/ESMC_LocalArray.h if you change these values.
+
       type ESMF_CopyFlag
       sequence
       private
         integer :: docopy
       end type
+
       type(ESMF_CopyFlag), parameter :: &
                             ESMF_DATA_COPY = ESMF_CopyFlag(1), &
                             ESMF_DATA_REF = ESMF_CopyFlag(2), &
                             ESMF_DATA_DEFER = ESMF_CopyFlag(3), &
                             ESMF_DATA_SPACE = ESMF_CopyFlag(4), &
                             ESMF_DATA_NONE = ESMF_CopyFlag(5) ! private
+
 !------------------------------------------------------------------------------
 ! ! ESMF_LocalArrayOrigin
 !
 ! ! Private flag which indicates the create was initiated on the F90 side.
 ! ! This matches an enum on the C++ side and the values must match.
 ! ! Update ../include/ESMC_LocalArray.h if you change these values.
+
       type ESMF_LocalArrayOrigin
       sequence
       private
         integer :: origin
       end type
+
       type(ESMF_LocalArrayOrigin), parameter :: &
                             ESMF_FROM_FORTRAN = ESMF_LocalArrayOrigin(1), &
                             ESMF_FROM_CPLUSPLUS = ESMF_LocalArrayOrigin(2)
+
 !------------------------------------------------------------------------------
 ! ! ESMF_DomainType
 !
 ! ! Indicates whether a data array should be copied or referenced.
 ! ! This matches an enum on the C++ side and the values must match.
 ! ! Update ../include/ESMC_LocalArray.h if you change these values.
+
       type ESMF_DomainType
       sequence
       private
         integer :: dt
       end type
+
       type(ESMF_DomainType), parameter :: &
                             ESMF_DOMAIN_TOTAL = ESMF_DomainType(1), &
                             ESMF_DOMAIN_COMPUTATIONAL = ESMF_DomainType(2), &
                             ESMF_DOMAIN_EXCLUSIVE = ESMF_DomainType(3)
+
 !------------------------------------------------------------------------------
 ! ! ESMF_ArraySpec
 !
 ! ! Data array specification, with no associated data buffer.
+
       type ESMF_ArraySpec
       sequence
       !!private
+
         integer :: rank ! number of dimensions
         type(ESMF_DataType) :: type ! real/float, integer, etc enum
         type(ESMF_DataKind) :: kind ! fortran "kind" enum/integer
+
       end type
+
 !------------------------------------------------------------------------------
 ! ! ESMF_LocalArray
 !
 ! ! LocalArray data type. All information is kept on the C++ side inside
 ! ! the class structure.
+
       type ESMF_LocalArray
       sequence
       !!private
         ! opaque pointer to the C++ class data
-        !type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+        ! disable this for now - it causes too many compiler problems
+
+
+
         type(ESMF_Pointer) :: this
+
       end type
+
 !------------------------------------------------------------------------------
 ! ! Internal wrapper structures for passing f90 pointers to C++ and
 ! ! guaranteeing they are passed by reference on all compilers and all
@@ -259,6 +279,8 @@
 ! < end macro - do not edit directly > 
  
 
+
+
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
@@ -266,52 +288,69 @@
       public ESMF_DomainType
       public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_COMPUTATIONAL, ESMF_DOMAIN_EXCLUSIVE
 !------------------------------------------------------------------------------
+
 ! !PUBLIC MEMBER FUNCTIONS:
+
       public ESMF_LocalArrayCreate
       public ESMF_LocalArrayDestroy
+
       public ESMF_ArraySpecInit
       public ESMF_ArraySpecGet
+
       public ESMF_LocalArraySetData, ESMF_LocalArrayGetData
       public ESMF_LocalArraySetInfo, ESMF_LocalArrayGetInfo
       public ESMF_LocalArrayGet, ESMF_LocalArrayGetName
+
       public ESMF_LocalArrayF90Allocate
       public ESMF_LocalArrayF90Deallocate
       public ESMF_LocalArrConstrF90Ptr ! needed for C++ callback only
+
       public ESMF_LocalArraySlice
       !public ESMF_LocalArrayReshape
+
       public ESMF_LocalArrayWriteRestart
       public ESMF_LocalArrayReadRestart
       public ESMF_LocalArrayWrite
       public ESMF_LocalArrayRead
+
       public ESMF_LocalArrayValidate
       public ESMF_LocalArrayPrint
 !EOP
       public operator(.eq.), operator(.ne.)
+
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray.F90,v 1.7 2004/02/11 19:05:06 nscollins Exp $'
+      '$Id: ESMF_LocalArray.F90,v 1.8 2004/02/11 19:57:55 nscollins Exp $'
+
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
+
 !BOP
 ! !IROUTINE: ESMF_LocalArrayCreate -- Generic interface to create an LocalArray
+
 ! !INTERFACE:
      interface ESMF_LocalArrayCreate
+
 ! !PRIVATE MEMBER FUNCTIONS:
 !
         module procedure ESMF_LocalArrayCreateByList ! specify TKR
         module procedure ESMF_LocalArrayCreateByLst1D ! allow integer counts
         module procedure ESMF_LocalArrayCreateBySpec ! specify ArraySpec
+
         ! Plus interfaces for each T/K/R expanded by macro.
 !EOP
+
+
 ! ! < interfaces for each T/K/R >
 ! --LocalArray--InterfaceMacro(LocalArrCreateByMTArr)
 !
 ! ! < interfaces for each T/K/R >
 ! --LocalArray--InterfaceMacro(LocalArrCreateByFullArr)
+
        ! < interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
@@ -343,6 +382,7 @@
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
        ! < interfaces for each T/K/R >
 !------------------------------------------------------------------------------ 
 ! <This section created by macro - do not edit directly> 
@@ -373,6 +413,8 @@
  module procedure ESMF_LocalArrCreateByFlPtrR85D 
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
+
 
 !BOP
 ! !DESCRIPTION:
@@ -423,11 +465,15 @@
 !
 end interface
 !EOP
+
 !------------------------------------------------------------------------------
+
 !BOP
 ! !IROUTINE: ESMF_LocalArrayGetData -- Get an F90 pointer to the data contents
+
 ! !INTERFACE:
      interface ESMF_LocalArrayGetData
+
 ! !PRIVATE MEMBER FUNCTIONS:
 !
       ! < declarations of interfaces for each T/K/R >
@@ -461,12 +507,14 @@ end interface
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 ! !DESCRIPTION:
 ! This interface provides a single entry point for the various
 ! types of {\tt ESMF\_LocalArrayGetData} functions.
 !
 !EOP
 end interface
+
 !------------------------------------------------------------------------------
 interface operator (.eq.)
  module procedure ESMF_cfeq
@@ -474,20 +522,30 @@ end interface
 interface operator (.ne.)
  module procedure ESMF_cfne
 end interface
+
 !==============================================================================
+
       contains
+
 !==============================================================================
+
 ! functions to compare two ESMF_CopyFlags to see if they are the same or not
+
 function ESMF_cfeq(cf1, cf2)
  logical ESMF_cfeq
  type(ESMF_CopyFlag), intent(in) :: cf1, cf2
+
  ESMF_cfeq = (cf1%docopy .eq. cf2%docopy)
 end function
+
 function ESMF_cfne(cf1, cf2)
  logical ESMF_cfne
  type(ESMF_CopyFlag), intent(in) :: cf1, cf2
+
  ESMF_cfne = (cf1%docopy .ne. cf2%docopy)
 end function
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -496,6 +554,7 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayCreateByLst1D -- Convenience cover for 1D counts
+
 ! !INTERFACE:
       function ESMF_LocalArrayCreateByLst1D(rank, type, kind, counts, rc)
 !
@@ -544,14 +603,21 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
         integer, dimension(1) :: countlist
+
         countlist(1) = counts
+
         ESMF_LocalArrayCreateByLst1D = &
                ESMF_LocalArrayCreateByList(rank, type, kind, countlist, rc)
+
         end function ESMF_LocalArrayCreateByLst1D
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayCreateByList -- Create an LocalArray specifying all options.
+
 ! !INTERFACE:
       function ESMF_LocalArrayCreateByList(rank, type, kind, counts, rc)
 !
@@ -596,18 +662,23 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
+
         ! Local vars
         type (ESMF_LocalArray) :: array ! new C++ LocalArray
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
+
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         ! TODO: should this take the counts, or not? for now i am going to
         ! set the counts after i have created the f90 array and not here.
         call c_ESMC_LocalArrayCreateNoData(array, rank, type, kind, &
@@ -616,14 +687,20 @@ end function
           print *, "LocalArray construction error"
           return
         endif
+
         call ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, status)
+
         ! Set return values
         ESMF_LocalArrayCreateByList = array
         if (rcpresent) rc = status
+
         end function ESMF_LocalArrayCreateByList
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayCreateBySpec -- Create a new LocalArray from an ArraySpec
+
 ! !INTERFACE:
       function ESMF_LocalArrayCreateBySpec(spec, counts, rc)
 !
@@ -656,6 +733,7 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
         ! Local vars
         type (ESMF_LocalArray) :: array ! new C++ LocalArray
         integer :: status ! local error status
@@ -663,24 +741,32 @@ end function
         integer :: rank
         type(ESMF_DataType) :: type
         type(ESMF_DataKind) :: kind
+
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         array%this = ESMF_NULL_POINTER
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         call ESMF_ArraySpecGet(spec, rank, type, kind, status)
         if (status .ne. ESMF_SUCCESS) return
+
         ! Call the list function to make the array
         ESMF_LocalArrayCreateBySpec = ESMF_LocalArrayCreateByList(rank, type, &
                                       kind, counts, status)
         if (rcpresent) rc = status
+
         end function ESMF_LocalArrayCreateBySpec
+
+
 !------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE: ESMF_LocalArrConstrF90Ptr - Create and add F90 ptr to array
+
 ! !INTERFACE:
      subroutine ESMF_LocalArrConstrF90Ptr(array, counts, rank, type, kind, rc)
 !
@@ -731,23 +817,30 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
+
         ! Local vars
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
         integer :: localkind, localtype
+
         status = ESMF_FAILURE
         rcpresent = .FALSE.
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         localtype = type%dtype
         localkind = kind%dkind
+
         ! Call a T/K/R specific interface in order to create the proper
         ! type of F90 pointer, allocate the space, set the values in the
         ! Array object, and return. (The routine this code is calling is
         ! generated by macro.)
+
         !! macros which are expanded by the preprocessor
         select case (localtype)
           case (ESMF_DATA_INTEGER%dtype)
@@ -762,6 +855,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrI81D(array, counts, rc=status)
                   case default
                 end select
+
               case (2)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -772,6 +866,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrI82D(array, counts, rc=status)
                   case default
                 end select
+
               case (3)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -782,6 +877,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrI83D(array, counts, rc=status)
                   case default
                 end select
+
               case (4)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -792,6 +888,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrI84D(array, counts, rc=status)
                   case default
                 end select
+
               case (5)
                 select case (localkind)
                   case (ESMF_I2%dkind)
@@ -802,8 +899,10 @@ end function
                     call ESMF_LocalArrConstrF90PtrI85D(array, counts, rc=status)
                   case default
                 end select
+
               case default
             end select
+
            case (ESMF_DATA_REAL%dtype)
             select case (rank)
               case (1)
@@ -814,6 +913,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrR81D(array, counts, rc=status)
                   case default
                 end select
+
               case (2)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -822,6 +922,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrR82D(array, counts, rc=status)
                   case default
                 end select
+
               case (3)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -830,6 +931,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrR83D(array, counts, rc=status)
                   case default
                 end select
+
               case (4)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -838,6 +940,7 @@ end function
                     call ESMF_LocalArrConstrF90PtrR84D(array, counts, rc=status)
                   case default
                 end select
+
               case (5)
                 select case (localkind)
                   case (ESMF_R4%dkind)
@@ -846,16 +949,23 @@ end function
                     call ESMF_LocalArrConstrF90PtrR85D(array, counts, rc=status)
                   case default
                 end select
+
               case default
             end select
           case default
          end select
+
+
         ! Set return code if caller specified it
         if (rcpresent) rc = status
+
         end subroutine ESMF_LocalArrConstrF90Ptr
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -941,6 +1051,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1028,6 +1139,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1113,6 +1225,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1200,6 +1313,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1285,6 +1399,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1372,6 +1487,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1457,6 +1573,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1544,6 +1661,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1629,6 +1747,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1716,6 +1835,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1801,6 +1921,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -1888,6 +2009,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -1973,6 +2095,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2060,6 +2183,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2145,6 +2269,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2232,6 +2357,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2317,6 +2443,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2404,6 +2531,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2489,6 +2617,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2576,6 +2705,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2661,6 +2791,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2748,6 +2879,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -2833,6 +2965,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -2920,6 +3053,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3006,9 +3140,13 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3112,6 +3250,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3217,6 +3356,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3320,6 +3460,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3425,6 +3566,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3528,6 +3670,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3633,6 +3776,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3736,6 +3880,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -3841,6 +3986,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -3944,6 +4090,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4049,6 +4196,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4152,6 +4300,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4257,6 +4406,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4360,6 +4510,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4465,6 +4616,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4568,6 +4720,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4673,6 +4826,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4776,6 +4930,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -4881,6 +5036,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -4984,6 +5140,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5089,6 +5246,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5192,6 +5350,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5297,6 +5456,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5400,6 +5560,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5505,6 +5666,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5609,9 +5771,12 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5693,6 +5858,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5776,6 +5942,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -5857,6 +6024,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -5940,6 +6108,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6021,6 +6190,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6104,6 +6274,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6185,6 +6356,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6268,6 +6440,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6349,6 +6522,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6432,6 +6606,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6513,6 +6688,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6596,6 +6772,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6677,6 +6854,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6760,6 +6938,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -6841,6 +7020,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -6924,6 +7104,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7005,6 +7186,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7088,6 +7270,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7169,6 +7352,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7252,6 +7436,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7333,6 +7518,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7416,6 +7602,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7497,6 +7684,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7580,6 +7768,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7662,9 +7851,14 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7764,6 +7958,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -7865,6 +8060,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -7964,6 +8160,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8065,6 +8262,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8164,6 +8362,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8265,6 +8464,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8364,6 +8564,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8465,6 +8666,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8564,6 +8766,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8665,6 +8868,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8764,6 +8968,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -8865,6 +9070,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -8964,6 +9170,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9065,6 +9272,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9164,6 +9372,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9265,6 +9474,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9364,6 +9574,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9465,6 +9676,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9564,6 +9776,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9665,6 +9878,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9764,6 +9978,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -9865,6 +10080,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -9964,6 +10180,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10065,6 +10282,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -10165,9 +10383,13 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -10304,6 +10526,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10442,6 +10665,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -10578,6 +10802,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10716,6 +10941,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -10852,6 +11078,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -10990,6 +11217,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -11126,6 +11354,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11264,6 +11493,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -11400,6 +11630,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11538,6 +11769,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -11674,6 +11906,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -11812,6 +12045,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -11948,6 +12182,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12086,6 +12321,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -12222,6 +12458,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12360,6 +12597,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -12496,6 +12734,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12634,6 +12873,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -12770,6 +13010,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -12908,6 +13149,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -13044,6 +13286,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13182,6 +13425,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -13318,6 +13562,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13456,6 +13701,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOPI 
@@ -13593,9 +13839,12 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -13670,6 +13919,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13746,6 +13996,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -13820,6 +14071,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -13896,6 +14148,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -13970,6 +14223,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14046,6 +14300,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -14120,6 +14375,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14196,6 +14452,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -14270,6 +14527,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14346,6 +14604,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -14420,6 +14679,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14496,6 +14756,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -14570,6 +14831,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14646,6 +14908,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -14720,6 +14983,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14796,6 +15060,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -14870,6 +15135,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -14946,6 +15212,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15020,6 +15287,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15096,6 +15364,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15170,6 +15439,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15246,6 +15516,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15320,6 +15591,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15396,6 +15668,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15471,9 +15744,12 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
 !! < start of macros which become actual function bodies after expansion >
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15506,6 +15782,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15540,6 +15817,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15572,6 +15850,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15606,6 +15885,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15638,6 +15918,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15672,6 +15953,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15704,6 +15986,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15738,6 +16021,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15770,6 +16054,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15804,6 +16089,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15836,6 +16122,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15870,6 +16157,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15902,6 +16190,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -15936,6 +16225,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -15968,6 +16258,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16002,6 +16293,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -16034,6 +16326,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16068,6 +16361,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -16100,6 +16394,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16134,6 +16429,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -16166,6 +16462,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16200,6 +16497,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -16232,6 +16530,7 @@ end function
  
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
+
 
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
@@ -16266,6 +16565,7 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !------------------------------------------------------------------------------ 
 ! <Created by macro - do not edit directly > 
 !BOP 
@@ -16299,9 +16599,13 @@ end function
 ! < end macro - do not edit directly > 
 !------------------------------------------------------------------------------ 
 
+
 !! < end of automatically generated function >
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -16334,6 +16638,7 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
         ! Local vars
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
@@ -16341,6 +16646,7 @@ end function
         integer :: rank
         type(ESMF_DataType) :: type
         type(ESMF_DataKind) :: kind
+
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -16348,11 +16654,20 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
+        ! Simple validity check
+        if (array%this .eq. ESMF_NULL_POINTER) then
+            print *, "LocalArray not initialized or Destroyed"
+            return
+        endif
+
         needsdealloc = .FALSE.
+
         ! TODO: document the current rule - if we do the allocate in
         ! the case of ESMF_DATA_COPY at create time then we delete the
         ! space. otherwise, the user needs to destroy the array
         ! (we will ignore the data) and call deallocate themselves.
+
         ! Call Destruct first, then free this memory
         call c_ESMC_LocalArrayNeedsDealloc(array, needsdealloc, status)
         if (needsdealloc) then
@@ -16366,6 +16681,7 @@ end function
           endif
           call c_ESMC_LocalArraySetNoDealloc(array, status)
         endif
+
         ! Calling deallocate first means this will not return back to F90
         ! before returning for good.
         call c_ESMC_LocalArrayDestroy(array, status)
@@ -16373,10 +16689,16 @@ end function
           print *, "LocalArray destruction error"
           return
         endif
+
+        ! mark this as destroyed
         array%this = ESMF_NULL_POINTER
-! set return code if user specified it
+
+        ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_LocalArrayDestroy
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArraySetInfo
@@ -16399,11 +16721,17 @@ end function
 ! will happen.
 !
 !EOP
+
         integer :: status
+
         call c_ESMC_LocalArraySetInfo(array, counts, lbounds, ubounds, &
                                       offsets, status)
+
         if (present(rc)) rc = status
+
         end subroutine ESMF_LocalArraySetInfo
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayGetInfo
@@ -16425,11 +16753,17 @@ end function
 ! from an already created array object.
 !
 !EOP
+
         integer :: status
+
         call c_ESMC_LocalArrayGetInfo(array, counts, lbounds, ubounds, &
                                       offsets, status)
+
         if (present(rc)) rc = status
+
         end subroutine ESMF_LocalArrayGetInfo
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
@@ -16453,11 +16787,14 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
         if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_LocalArraySetData
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -16502,17 +16839,22 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
+
         ! Local vars
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
+
         ! Initialize pointer
         status = ESMF_FAILURE
         rcpresent = .FALSE.
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         ! Set arrayspec contents with some checking to keep Silverio at bay
         if (rank.ge.1 .and. rank.le.ESMF_MAXDIM) then
           as%rank = rank
@@ -16524,8 +16866,13 @@ end function
         ! TODO: similar for type and kind
         as%type = type
         as%kind = kind
+
         if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_ArraySpecInit
+
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -16548,6 +16895,7 @@ end function
       type(ESMF_Pointer), intent(out), optional :: base
       character(len=ESMF_MAXSTR), intent(out), optional :: name
       integer, intent(out), optional :: rc
+
 !
 ! !DESCRIPTION:
 ! Returns information about the {\tt ESMF\_LocalArray}. For queries
@@ -16556,9 +16904,12 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
+
       integer :: status ! Error status
       logical :: rcpresent ! Return code present
       integer :: lrank ! Local use to get rank
+
       ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -16566,57 +16917,71 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
+
+
       if (present(rank)) then
          call c_ESMC_LocalArrayGetRank(array, rank, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(type)) then
          call c_ESMC_LocalArrayGetType(array, type, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(kind)) then
          call c_ESMC_LocalArrayGetKind(array, kind, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(counts)) then
          call c_ESMC_LocalArrayGetRank(array, lrank, status)
          if (status .ne. ESMF_SUCCESS) return
          call c_ESMC_LocalArrayGetLengths(array, lrank, counts, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(lbounds)) then
          call c_ESMC_LocalArrayGetRank(array, lrank, status)
          if (status .ne. ESMF_SUCCESS) return
          call c_ESMC_LocalArrayGetLbounds(array, lrank, lbounds, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(ubounds)) then
          call c_ESMC_LocalArrayGetRank(array, lrank, status)
          if (status .ne. ESMF_SUCCESS) return
          call c_ESMC_LocalArrayGetUbounds(array, lrank, ubounds, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(base)) then
          call c_ESMC_LocalArrayGetBaseAddr(array, base, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (present(name)) then
          call c_ESMC_LocalArrayGetName(array, name, status)
          if (status .ne. ESMF_SUCCESS) return
       endif
+
       if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_LocalArrayGet
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayGetName - Retrieve the name of a LocalArray
 !
 ! !INTERFACE:
       subroutine ESMF_LocalArrayGetName(array, name, rc)
+
 !
 ! !ARGUMENTS:
       type(ESMF_LocalArray), intent(in) :: array
       character (len = *), intent(out) :: name
       integer, intent(out), optional :: rc
+
 !
 ! !DESCRIPTION:
 ! Returns the name of the {\tt ESMF\_LocalArray}. If the array was
@@ -16625,8 +16990,10 @@ end function
 !
 !EOP
 ! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
       integer :: status ! Error status
       logical :: rcpresent ! Return code present
+
 ! Initialize return code; assume failure until success is certain
       status = ESMF_FAILURE
       rcpresent = .FALSE.
@@ -16634,13 +17001,18 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
       endif
+
       call c_ESMC_LocalArrayGetName(array, name, status)
       if(status .eq. ESMF_FAILURE) then
         print *, "ERROR in ESMF_LocalArrayGetName"
         return
       endif
+
       if (rcpresent) rc = ESMF_SUCCESS
+
       end subroutine ESMF_LocalArrayGetName
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -16682,10 +17054,12 @@ end function
 ! \end{description}
 !
 !EOP
+
         ! Local vars
         integer :: i
         integer :: status ! local error status
         logical :: rcpresent ! did user specify rc?
+
         ! Initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
@@ -16693,18 +17067,25 @@ end function
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         ! Get arrayspec contents
+
         if(present(rank)) rank = as%rank
         if(present(type)) type = as%type
         if(present(kind)) kind = as%kind
+
         if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_ArraySpecGet
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
 ! This section is Allocate/Deallocate for LocalArrays
 !
 !------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 !!! TODO: the interface now calls ESMF_LocalArrConstrF90Ptr instead of
 !!! this routine. It maybe can go away? and can we do something with
@@ -16745,10 +17126,12 @@ end function
 !
 !EOPI
 ! !REQUIREMENTS:
+
     integer :: status ! local error status
     integer, dimension(ESMF_MAXDIM) :: lbounds, ubounds
     integer, dimension(ESMF_MAXDIM) :: offsets
     integer :: localkind, localtype
+
     !! local variables, expanded by macro
 ! <Created by macro - do not edit directly > 
  type(ESMF_ArrWrapI21D) :: localI21D 
@@ -16787,10 +17170,14 @@ end function
  type(ESMF_ArrWrapR85D) :: localR85D 
  
 
+
+
     status = ESMF_FAILURE
     if (present(rc)) rc = ESMF_FAILURE
+
     localtype = type%dtype
     localkind = kind%dkind
+
     !! macros which are expanded by the preprocessor
     select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
@@ -16886,6 +17273,7 @@ end function
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -16977,6 +17365,7 @@ end function
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17068,6 +17457,7 @@ end function
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17159,6 +17549,7 @@ end function
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17250,8 +17641,10 @@ end function
 
               case default
             end select
+
           case default
         end select
+
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
@@ -17316,6 +17709,7 @@ end function
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17378,6 +17772,7 @@ end function
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17440,6 +17835,7 @@ end function
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17502,6 +17898,7 @@ end function
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17564,12 +17961,17 @@ end function
 
               case default
             end select
+
           case default
         end select
       case default
      end select
+
      if (present(rc)) rc = status
+
      end subroutine ESMF_LocalArrayF90Allocate
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayF90Deallocate - Deallocate an F90 pointer
@@ -17602,8 +18004,10 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
     integer :: status ! local error status
     integer :: localkind, localtype
+
     !! local variables, expanded by macro
 ! <Created by macro - do not edit directly > 
  type(ESMF_ArrWrapI21D) :: localI21D 
@@ -17642,9 +18046,13 @@ end function
  type(ESMF_ArrWrapR85D) :: localR85D 
  
 
+
+
     if (present(rc)) rc = ESMF_FAILURE
+
     localtype = type
     localkind = kind
+
     !! macros which are expanded by the preprocessor
     select case (localtype)
       case (ESMF_DATA_INTEGER%dtype)
@@ -17674,6 +18082,7 @@ end function
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17699,6 +18108,7 @@ end function
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17724,6 +18134,7 @@ end function
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17749,6 +18160,7 @@ end function
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_I2%dkind)
@@ -17774,8 +18186,10 @@ end function
 
               case default
             end select
+
           case default
         end select
+
        case (ESMF_DATA_REAL%dtype)
         select case (rank)
           case (1)
@@ -17796,6 +18210,7 @@ end function
 
               case default
             end select
+
           case (2)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17814,6 +18229,7 @@ end function
 
               case default
             end select
+
           case (3)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17832,6 +18248,7 @@ end function
 
               case default
             end select
+
           case (4)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17850,6 +18267,7 @@ end function
 
               case default
             end select
+
           case (5)
             select case (localkind)
               case (ESMF_R4%dkind)
@@ -17868,17 +18286,23 @@ end function
 
               case default
             end select
+
           case default
         end select
       case default
      end select
+
      if (status .ne. 0) then
         print *, "ESMC_ArrayDelete: Deallocation error"
         return
       endif
+
      if (present(rc)) rc = ESMF_SUCCESS
+
      end subroutine ESMF_LocalArrayF90Deallocate
+
 !------------------------------------------------------------------------------
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -17914,19 +18338,23 @@ end function
         type (ESMF_DataKind) :: kind
         type (ESMF_DataType) :: type
         integer :: i, counts(ESMF_MAXDIM)
+
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         newarray%this = ESMF_NULL_POINTER
+
         ! Initialize return code; assume failure until success is certain
         if (present(rc)) then
           rcpresent = .TRUE.
           rc = ESMF_FAILURE
         endif
+
         ! Get info from the existing array
         call c_ESMC_LocalArrayGetRank(array, rank, status)
         call c_ESMC_LocalArrayGetType(array, type, status)
         call c_ESMC_LocalArrayGetKind(array, kind, status)
         call c_ESMC_LocalArrayGetLengths(array, rank, counts, status)
+
         ! Basic sanity checks - slice dim is ok, sliced location exists, etc.
         if ((slicedim .lt. 1) .or. (slicedim .gt. rank)) then
             print *, "ESMF_LocalArraySlice: slicedim value ", slicedim, &
@@ -17938,6 +18366,7 @@ end function
                                         " must be between 1 and ", counts(rank)
             return
         endif
+
         ! This slice will be rank < 1. Remove the counts corresponding
         ! to the sliced dim (save for later error checking).
         ! TODO: add error checks
@@ -17945,25 +18374,36 @@ end function
            counts(i) = counts(i+1)
         enddo
         rank = rank - 1
+
         call c_ESMC_LocalArrayCreateNoData(newarray, rank, type, kind, &
                                            ESMF_FROM_FORTRAN, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "LocalArray construction error"
           return
         endif
+
         call ESMF_LocalArrConstrF90Ptr(newarray, counts, rank, type, kind, status)
+
         ! At this point the new array exists, and has space allocated, but it
         ! does not contain data from the old array. Now we have a T/K/R prob.
+
         ! put old F90 ptr into wrap
         ! call c_ESMC_LocalArrayGetF90Ptr(array, wrap, status)
+
         ! put new F90 ptr into wrap
         ! call c_ESMC_LocalArrayGetF90Ptr(newarray, wrap, status)
+
         ! there must be something like this we can do here...
         ! newarray = RESHAPE(array(sliceloc, :, :), counts)
+
+
         ! Set return values
         ESMF_LocalArraySlice = newarray
         if (rcpresent) rc = status
+
         end function ESMF_LocalArraySlice
+
+
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
@@ -17987,11 +18427,15 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
         if (present(rc)) rc = ESMF_FAILURE
+
         end subroutine ESMF_LocalArrayWriteRestart
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -18012,18 +18456,26 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
         type (ESMF_LocalArray) :: a
+
 ! this is just to shut the compiler up
         a%this = ESMF_NULL_POINTER
+
 !
 ! TODO: add code here
 !
+
         ESMF_LocalArrayReadRestart = a
+
         if (present(rc)) rc = ESMF_FAILURE
+
         end function ESMF_LocalArrayReadRestart
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -18043,10 +18495,12 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
        character (len=16) :: defaultopts ! default write options
        character (len=16) :: defaultfile ! default filename
        integer :: status ! local error status
        logical :: rcpresent
+
        ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
        rcpresent = .FALSE.
@@ -18054,20 +18508,27 @@ end function
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
        defaultopts = "singlefile"
        defaultfile = "datafile"
+
        if(present(filename)) then
            call c_ESMC_LocalArrayWrite(array, defaultopts, trim(filename), status)
        else
            call c_ESMC_LocalArrayWrite(array, defaultopts, trim(defaultfile), status)
        endif
+
        if (status .ne. ESMF_SUCCESS) then
          print *, "LocalArray write error"
          return
        endif
+
        ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
+
         end subroutine ESMF_LocalArrayWrite
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
@@ -18087,18 +18548,26 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
         type (ESMF_LocalArray) :: a
+
 ! this is just to shut the compiler up
         a%this = ESMF_NULL_POINTER
+
 !
 ! TODO: add code here
 !
+
         ESMF_LocalArrayRead = a
+
         if (present(rc)) rc = ESMF_FAILURE
+
         end function ESMF_LocalArrayRead
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayValidate - Check validity of LocalArray object
@@ -18117,12 +18586,14 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
        character (len=6) :: defaultopts ! default print options
        integer :: status ! local error status
        logical :: rcpresent
+
        ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
        rcpresent = .FALSE.
@@ -18130,24 +18601,32 @@ end function
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
+
        defaultopts = "brief"
+
        ! Simple validity checks
        if (array%this .eq. ESMF_NULL_POINTER) then
            print *, "LocalArray not initialized or Destroyed"
            return
        endif
+
        if(present(options)) then
            !call c_ESMC_LocalArrayValidate(array, options, status)
        else
            !call c_ESMC_LocalArrayValidate(array, defaultopts, status)
        endif
+
        !if (status .ne. ESMF_SUCCESS) then
        ! print *, "LocalArray validate error"
        ! return
        !endif
+
        ! Set return values
        if (rcpresent) rc = ESMF_SUCCESS
+
        end subroutine ESMF_LocalArrayValidate
+
+
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_LocalArrayPrint - Print contents of an LocalArray object
@@ -18166,12 +18645,14 @@ end function
 !
 !EOP
 ! !REQUIREMENTS:
+
 !
 ! TODO: code goes here
 !
        character (len=6) :: defaultopts ! default print options
        integer :: status ! local error status
        logical :: rcpresent
+
        ! Initialize return code; assume failure until success is certain
        status = ESMF_FAILURE
        rcpresent = .FALSE.
@@ -18179,22 +18660,31 @@ end function
          rcpresent = .TRUE.
          rc = ESMF_FAILURE
        endif
-       ! Simple validity checks
+
        if (array%this .eq. ESMF_NULL_POINTER) then
-           print *, "LocalArray not initialized or Destroyed"
-           return
+         print *, "LocalArray Print:"
+         print *, " Empty or Uninitialized Array"
+         if (present(rc)) rc = ESMF_SUCCESS
+         return
        endif
+
        defaultopts = "brief"
+
        if(present(options)) then
            call c_ESMC_LocalArrayPrint(array, options, status)
        else
            call c_ESMC_LocalArrayPrint(array, defaultopts, status)
        endif
+
        if (status .ne. ESMF_SUCCESS) then
          print *, "LocalArray print error"
          return
        endif
+
 ! set return values
        if (rcpresent) rc = ESMF_SUCCESS
+
        end subroutine ESMF_LocalArrayPrint
+
+
         end module ESMF_LocalArrayMod
