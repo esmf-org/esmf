@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.14 2004/05/18 16:13:32 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.15 2004/05/19 02:16:07 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -123,7 +123,7 @@ module ESMF_VMMod
   public ESMF_VMGet
   public ESMF_VMGetPET
   public ESMF_VMPrint
-  ! For advanced ESMF application use
+  ! For ESMF application use (communications)
   public ESMF_VMBarrier
   public ESMF_VMThreadBarrier
   public ESMF_VMSend
@@ -145,7 +145,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.14 2004/05/18 16:13:32 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.15 2004/05/19 02:16:07 theurich Exp $'
 
 !==============================================================================
 
@@ -251,8 +251,8 @@ module ESMF_VMMod
   subroutine ESMF_VMGetGlobal(vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(out)      :: vm
-    integer, intent(out), optional  :: rc           
+    type(ESMF_VM), intent(out)            :: vm
+    integer,       intent(out), optional  :: rc           
 !
 ! !DESCRIPTION:
 !   Get Global VM
@@ -393,8 +393,8 @@ module ESMF_VMMod
   subroutine ESMF_VMPrint(vm, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_VM), intent(in)      :: vm
-    integer, intent(out), optional :: rc           
+    type(ESMF_VM), intent(in)            :: vm
+    integer,       intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !   Print VM internals
@@ -440,13 +440,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendI4(vm, message, len, dest, rc)
+  subroutine ESMF_VMSendI4(vm, message, count, dst, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),         intent(in)            :: vm
     integer(ESMF_KIND_I4), intent(in)            :: message(:)  
-    integer,               intent(in)            :: len
-    integer,               intent(in)            :: dest
+    integer,               intent(in)            :: count
+    integer,               intent(in)            :: dst
     integer,               intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -458,9 +458,9 @@ module ESMF_VMMod
 !        VM object.
 !   \item[message] 
 !        Array holding message data.
-!   \item[len] 
+!   \item[count] 
 !        Number of elements in message
-!   \item[dest] 
+!   \item[dst] 
 !        Destination PET
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -481,8 +481,8 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len * 4 ! 4 bytes
-    call c_ESMC_VMSend(vm, message, size, dest, status)
+    size = count * 4 ! 4 bytes
+    call c_ESMC_VMSend(vm, message, size, dst, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
       return
@@ -501,13 +501,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR4(vm, message, len, dest, rc)
+  subroutine ESMF_VMSendR4(vm, message, count, dst, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
     real(ESMF_KIND_R4), intent(in)            :: message(:)  
-    integer,            intent(in)            :: len
-    integer,            intent(in)            :: dest
+    integer,            intent(in)            :: count
+    integer,            intent(in)            :: dst
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -519,9 +519,9 @@ module ESMF_VMMod
 !        VM object.
 !   \item[message] 
 !        Array holding message data.
-!   \item[len] 
+!   \item[count] 
 !        Number of elements in message
-!   \item[dest] 
+!   \item[dst] 
 !        Destination PET
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -542,8 +542,8 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len * 4 ! 4 bytes
-    call c_ESMC_VMSend(vm, message, size, dest, status)
+    size = count * 4 ! 4 bytes
+    call c_ESMC_VMSend(vm, message, size, dst, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
       return
@@ -562,13 +562,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMSend()
-  subroutine ESMF_VMSendR8(vm, message, len, dest, rc)
+  subroutine ESMF_VMSendR8(vm, message, count, dst, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
     real(ESMF_KIND_R8), intent(in)            :: message(:)  
-    integer,            intent(in)            :: len
-    integer,            intent(in)            :: dest
+    integer,            intent(in)            :: count
+    integer,            intent(in)            :: dst
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
@@ -580,9 +580,9 @@ module ESMF_VMMod
 !        VM object.
 !   \item[message] 
 !        Array holding message data.
-!   \item[len] 
+!   \item[count] 
 !        Number of elements in message
-!   \item[dest] 
+!   \item[dst] 
 !        Destination PET
 !   \item[{[rc]}] 
 !        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -603,8 +603,8 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len * 8 ! 8 bytes
-    call c_ESMC_VMSend(vm, message, size, dest, status)
+    size = count * 8 ! 8 bytes
+    call c_ESMC_VMSend(vm, message, size, dst, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
       return
@@ -623,12 +623,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvI4(vm, message, len, source, rc)
+  subroutine ESMF_VMRecvI4(vm, message, count, source, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),         intent(in)            :: vm
     integer(ESMF_KIND_I4), intent(in)            :: message(:)  
-    integer,               intent(in)            :: len
+    integer,               intent(in)            :: count
     integer,               intent(in)            :: source
     integer,               intent(out), optional :: rc           
 !
@@ -641,7 +641,7 @@ module ESMF_VMMod
 !        VM object
 !   \item[message] 
 !        Array holding message data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements in message
 !   \item[source] 
 !        Source PET
@@ -664,7 +664,7 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMRecv(vm, message, size, source, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
@@ -684,12 +684,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR4(vm, message, len, source, rc)
+  subroutine ESMF_VMRecvR4(vm, message, count, source, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
     real(ESMF_KIND_R4), intent(in)            :: message(:)  
-    integer,            intent(in)            :: len
+    integer,            intent(in)            :: count
     integer,            intent(in)            :: source
     integer,            intent(out), optional :: rc           
 !
@@ -702,7 +702,7 @@ module ESMF_VMMod
 !        VM object
 !   \item[message] 
 !        Array holding message data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements in message
 !   \item[source] 
 !        Source PET
@@ -725,7 +725,7 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMRecv(vm, message, size, source, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
@@ -745,12 +745,12 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMRecv()
-  subroutine ESMF_VMRecvR8(vm, message, len, source, rc)
+  subroutine ESMF_VMRecvR8(vm, message, count, source, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM),      intent(in)            :: vm
     real(ESMF_KIND_R8), intent(in)            :: message(:)  
-    integer,            intent(in)            :: len
+    integer,            intent(in)            :: count
     integer,            intent(in)            :: source
     integer,            intent(out), optional :: rc           
 !
@@ -763,7 +763,7 @@ module ESMF_VMMod
 !        VM object
 !   \item[message] 
 !        Array holding message data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements in message
 !   \item[source] 
 !        Source PET
@@ -786,7 +786,7 @@ module ESMF_VMMod
       rc = ESMF_FAILURE
     endif
 
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMRecv(vm, message, size, source, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMSend error"
@@ -806,13 +806,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterI4(vm, input, output, len, root, rc)
+  subroutine ESMF_VMScatterI4(vm, input, output, count, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
     integer(ESMF_KIND_I4), intent(in)      :: input(:)
     integer(ESMF_KIND_I4), intent(out)     :: output(:)
-    integer, intent(in)                     :: len, root
+    integer, intent(in)                     :: count, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -827,7 +827,7 @@ module ESMF_VMMod
 !        Array holding input data
 !   \item[output] 
 !        Array holding output data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements send to each PET
 !   \item[root] 
 !        Root PET id
@@ -851,7 +851,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMScatter(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMScatter error"
@@ -871,13 +871,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterR4(vm, input, output, len, root, rc)
+  subroutine ESMF_VMScatterR4(vm, input, output, count, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
     real(ESMF_KIND_R4), intent(in)          :: input(:)
     real(ESMF_KIND_R4), intent(out)         :: output(:)
-    integer, intent(in)                     :: len, root
+    integer, intent(in)                     :: count, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -892,7 +892,7 @@ module ESMF_VMMod
 !        Array holding input data
 !   \item[output] 
 !        Array holding output data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements send to each PET
 !   \item[root] 
 !        Root PET id
@@ -916,7 +916,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMScatter(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMScatter error"
@@ -936,13 +936,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMScatter()
-  subroutine ESMF_VMScatterR8(vm, input, output, len, root, rc)
+  subroutine ESMF_VMScatterR8(vm, input, output, count, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
     real(ESMF_KIND_R8), intent(in)          :: input(:)
     real(ESMF_KIND_R8), intent(out)         :: output(:)
-    integer, intent(in)                     :: len, root
+    integer, intent(in)                     :: count, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -957,7 +957,7 @@ module ESMF_VMMod
 !        Array holding input data
 !   \item[output] 
 !        Array holding output data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements send to each PET
 !   \item[root] 
 !        Root PET id
@@ -981,7 +981,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len * 8 ! 8 bytes
+    size = count * 8 ! 8 bytes
     call c_ESMC_VMScatter(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMScatter error"
@@ -1001,13 +1001,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherI4(vm, input, output, len, root, rc)
+  subroutine ESMF_VMGatherI4(vm, input, output, count, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
     integer(ESMF_KIND_I4), intent(in)       :: input(:)
     integer(ESMF_KIND_I4), intent(out)      :: output(:)
-    integer, intent(in)                     :: len, root
+    integer, intent(in)                     :: count, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -1022,7 +1022,7 @@ module ESMF_VMMod
 !        Array holding input data
 !   \item[output] 
 !        Array holding output data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements received from each PET
 !   \item[root] 
 !        Root PET id
@@ -1046,7 +1046,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMGather(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMGather error"
@@ -1066,13 +1066,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherR4(vm, input, output, len, root, rc)
+  subroutine ESMF_VMGatherR4(vm, input, output, count, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
     real(ESMF_KIND_R4), intent(in)          :: input(:)
     real(ESMF_KIND_R4), intent(out)         :: output(:)
-    integer, intent(in)                     :: len, root
+    integer, intent(in)                     :: count, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -1087,7 +1087,7 @@ module ESMF_VMMod
 !        Array holding input data
 !   \item[output] 
 !        Array holding output data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements received from each PET
 !   \item[root] 
 !        Root PET id
@@ -1111,7 +1111,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len * 4 ! 4 bytes
+    size = count * 4 ! 4 bytes
     call c_ESMC_VMGather(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMGather error"
@@ -1131,13 +1131,13 @@ module ESMF_VMMod
 
 ! !INTERFACE:
   ! Private name; call using ESMF_VMGather()
-  subroutine ESMF_VMGatherR8(vm, input, output, len, root, rc)
+  subroutine ESMF_VMGatherR8(vm, input, output, count, root, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_VM), intent(in)               :: vm
     real(ESMF_KIND_R8), intent(in)          :: input(:)
     real(ESMF_KIND_R8), intent(out)         :: output(:)
-    integer, intent(in)                     :: len, root
+    integer, intent(in)                     :: count, root
     integer, intent(out), optional          :: rc
 !         
 !
@@ -1152,7 +1152,7 @@ module ESMF_VMMod
 !        Array holding input data
 !   \item[output] 
 !        Array holding output data
-!   \item[len] 
+!   \item[count] 
 !        Number of elements received from each PET
 !   \item[root] 
 !        Root PET id
@@ -1176,7 +1176,7 @@ module ESMF_VMMod
     endif
     
     ! Routine which interfaces to the C++ creation routine.
-    size = len * 8 ! 8 bytes
+    size = count * 8 ! 8 bytes
     call c_ESMC_VMGather(vm, input, output, size, root, status)
     if (status /= ESMF_SUCCESS) then
       print *, "c_ESMC_VMGather error"
