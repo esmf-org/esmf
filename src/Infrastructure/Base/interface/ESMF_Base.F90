@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.11 2002/11/08 22:40:51 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.12 2002/12/12 23:48:23 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -118,6 +118,7 @@
          integer :: ID
          integer :: ref_count
          type (ESMF_Status) :: base_status
+         character (len=ESMF_MAXSTR) :: name
      end type
 
 ! !PUBLIC TYPES:
@@ -132,6 +133,7 @@
 
       public ESMF_Status, ESMF_DataType, ESMF_DataKind, ESMF_DataValue 
       public ESMF_Attribute, ESMF_BasePointer, ESMF_Base, ESMF_Pointer
+      public ESMF_SetName, ESMF_GetName
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -191,13 +193,64 @@
 !------------------------------------------------------------------------------
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
-      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.11 2002/11/08 22:40:51 nscollins Exp $'
+      character(*), parameter, private :: version = '$Id: ESMF_Base.F90,v 1.12 2002/12/12 23:48:23 nscollins Exp $'
 !------------------------------------------------------------------------------
-
-!-------------------------------------------------------------------------
+!------------------------------------------------------------------------------
 
       contains
 
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_SetName - set the name of this object
+!
+! !INTERFACE:
+      subroutine ESMF_SetName(anytype, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base) :: anytype                         ! any ESMF object/type
+      character (len = *), intent(in) :: name            ! object/type name
+      integer, intent(out), optional :: rc               ! return code
+
+!
+! !DESCRIPTION:
+!     Associate a name with any type in the system.
+
+!
+!EOP
+! !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+      anytype%name = name
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_SetName
+
+!-------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_GetName - set the name of this object
+!
+! !INTERFACE:
+      subroutine ESMF_GetName(anytype, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Base), intent(in) :: anytype             ! any ESMF object/type
+      character (len = *), intent(out) :: name           ! object/type name
+      integer, intent(out), optional :: rc               ! return code
+
+!
+! !DESCRIPTION:
+!     Return the name of any type in the system.
+
+!
+!EOP
+! !REQUIREMENTS:  FLD1.5, FLD1.5.3
+
+      name = anytype%name
+      if (present(rc)) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GetName
+
+
+!-------------------------------------------------------------------------
 !BOP
 ! !IROUTINE:  ESMF_AttributeSet - set attribute on an ESMF type
 !
