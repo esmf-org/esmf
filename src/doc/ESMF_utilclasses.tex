@@ -7,12 +7,27 @@ The previous Infrastructure section described the data handling
 objects in the ESMF library. This section describes the lowest level
 objects in the Infrastructure layer, the Utility classes.
 
-At first glance the Utility classes have very little in common;
+\subsection{Design Goals and Considerations}
+
+The goal of the utility layer is to present a uniform interface
+for common system functions.  Each hardware architecture and
+software system has different system libraries and methods
+for accomplishing what are logically the same tasks.  Routines
+in this layer
+must insulate user code from these variations so that it is
+portable from system to system.
+
+\subsection{Overview}
+
+The Utility classes have very little in common;
 some are lightweight classes which maintain no internal state; 
 others have state and exist for the lifetime of the application.  
 Some run within a single process; others exist per processor and 
 may communicate to other instantiations of itself on different processors.
-The advantage of collecting these functions 
+But each system implements these functions differently, and it
+is important to have a uniform set of interfaces which
+is portable from machine to machine.
+Another advantage of collecting these functions 
 into a base-level utility set is to help avoid circular referencing.
 In most cases they occupy the lowest level of the object hierarchy.
 
@@ -21,8 +36,6 @@ all other classes in the ESMF library.
 Some of these methods will be called directly by user-supplied
 code; others are intended to provide support for internal ESMF 
 library code.
-
-\subsection{Overview}
 
 The Layout object is used by any part of the library which needs
 to decompose a task/problem/dataset into subsets.
