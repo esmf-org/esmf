@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/09/25 21:01:38 nscollins Exp $
+# $Id: makefile,v 1.3 2003/09/30 14:55:07 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -28,7 +28,7 @@ include $(ESMF_DIR)/makefile
 
 # on the absoft compiler on the mac, files in this dir have to have
 # > 16 bit internal jump tables.  see the absoft faq's for more info.
-ifeq ($(ESMF_COMP),absoft)
+ifeq ($(ESMF_COMPILER),absoft)
 FFLAGS += -N11
 endif
 
