@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.60 2003/09/04 22:01:11 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.61 2003/09/04 22:29:09 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -213,8 +213,8 @@
       end type
 
       type(ESMF_Logical), parameter :: ESMF_TF_UNKNOWN  = ESMF_Logical(1), &
-                                       ESMF_TF_TRUE     = ESMF_Logical(2), &
-                                       ESMF_TF_FALSE    = ESMF_Logical(3)
+                                       ESMF_TRUE     = ESMF_Logical(2), &
+                                       ESMF_FALSE    = ESMF_Logical(3)
 
 !------------------------------------------------------------------------------
 !
@@ -259,7 +259,7 @@
       public ESMF_Domain, ESMF_DomainList
 
       public ESMF_AxisIndex, ESMF_AxisIndexSet, ESMF_AxisIndexGet
-      public ESMF_Logical, ESMF_TF_TRUE, ESMF_TF_FALSE
+      public ESMF_Logical, ESMF_TRUE, ESMF_FALSE
 
 ! !PUBLIC MEMBER FUNCTIONS:
 !
@@ -354,7 +354,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.60 2003/09/04 22:01:11 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.61 2003/09/04 22:29:09 cdeluca Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
