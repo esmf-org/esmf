@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.8 2003/09/23 15:20:56 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.9 2004/01/08 22:26:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.8 2003/09/23 15:20:56 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.9 2004/01/08 22:26:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -394,7 +394,7 @@
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout) :: statelist
+      type (ESMF_State), dimension(:), intent(inout) :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -494,7 +494,7 @@
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout) :: statelist
+      type (ESMF_State), dimension(:), intent(inout) :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
@@ -701,7 +701,7 @@
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: component
-      type (ESMF_State), intent(inout) :: statelist
+      type (ESMF_State), dimension(:), intent(inout) :: statelist
       type (ESMF_Clock), intent(in), optional :: clock
       integer, intent(in), optional :: phase
       integer, intent(out), optional :: rc 
