@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.16 2003/02/11 23:10:29 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.17 2003/02/11 23:24:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -242,7 +242,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.16 2003/02/11 23:10:29 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.17 2003/02/11 23:24:57 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1654,7 +1654,7 @@ end function
            
       do i=1, dcount
         nextitem => stypep%datalist(i)
-        if (nextitem%namep .eq. dataname) then
+        if (trim(nextitem%namep) .eq. trim(dataname)) then
            itemfound = .TRUE.
            itemindex = i
            exit             ! leave loop at this point
