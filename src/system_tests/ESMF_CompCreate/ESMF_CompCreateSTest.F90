@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateSTest.F90,v 1.10 2004/04/27 13:44:59 nscollins Exp $
+! $Id: ESMF_CompCreateSTest.F90,v 1.11 2004/05/27 22:47:00 jwolfe Exp $
 !
 ! System test CompCreate
 !  Description on Sourceforge under System Test #63029
@@ -157,7 +157,7 @@
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
  
- 10   print *, "System Test CompCreate complete!"
+ 10   print *, "System Test CompCreate complete"
 
       if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         ! Standard ESMF Test output to log file
@@ -169,7 +169,7 @@
 
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! Component Create complete"
+          write(finalMsg, *) "SUCCESS: Component Create complete."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif

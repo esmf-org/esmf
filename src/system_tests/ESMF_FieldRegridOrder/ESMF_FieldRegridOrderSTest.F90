@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.7 2004/04/27 15:25:44 nscollins Exp $
+! $Id: ESMF_FieldRegridOrderSTest.F90,v 1.8 2004/05/27 22:49:18 jwolfe Exp $
 !
 ! System test code FieldRegridOrder
 !  Description on Sourceforge under System Test #xxxxxx
@@ -261,7 +261,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldRegridOrder complete!"
+10    print *, "System Test FieldRegridOrder complete."
 
     ! Only on PET 0 or any PET with an error. 
     if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
@@ -275,7 +275,7 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS!! Order Regrid test finished correctly."
+        write(finalMsg, *) "SUCCESS: Order Regrid test finished correctly."
       else
         write(finalMsg, *) "System Test did not succeed.  Error code ", rc
       endif

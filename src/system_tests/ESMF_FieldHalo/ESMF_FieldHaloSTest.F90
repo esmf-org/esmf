@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.28 2004/05/26 22:02:31 jwolfe Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.29 2004/05/27 22:47:39 jwolfe Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -126,7 +126,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldHalo complete!"
+10    print *, "System Test FieldHalo complete"
 
     if ((my_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *) "System Test failure"
@@ -137,7 +137,7 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS!! Halo values are as expected"
+        write(finalMsg, *) "SUCCESS.  Halo values are as expected."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Halo values do not match expected, or error code set ", rc

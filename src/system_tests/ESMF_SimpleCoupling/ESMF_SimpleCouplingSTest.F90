@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.16 2004/04/27 15:57:50 nscollins Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.17 2004/05/27 22:50:58 jwolfe Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -254,7 +254,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test SimpleCoupling complete!"
+10    print *, "System Test SimpleCoupling complete."
 
       ! Only output on processor 0, or if error anyplace
       if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
@@ -268,7 +268,7 @@
 
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! Component Coupling complete"
+          write(finalMsg, *) "SUCCESS: Component Coupling complete."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif

@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.16 2004/04/27 17:22:20 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.17 2004/05/27 22:50:03 jwolfe Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -280,7 +280,7 @@
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
-10    print *, "Coupled Flow Demo complete!"
+10    print *, "Coupled Flow Demo complete."
 
       if ((pet_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
         write(failMsg, *)  "System Test failure"
@@ -291,7 +291,7 @@
 
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! See output files for computed values"
+          write(finalMsg, *) "SUCCESS: See output files for computed values"
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif

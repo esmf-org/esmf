@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayRedistSTest.F90,v 1.10 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: ESMF_ArrayRedistSTest.F90,v 1.11 2004/05/27 22:46:38 jwolfe Exp $
 !
 ! System test ArrayRedist
 !  Description on Sourceforge under System Test #70384
@@ -284,7 +284,7 @@
         enddo
       enddo
     enddo
-    if (match) print *, "Array contents matched correctly!! DE_id = ", de_id
+    if (match) print *, "Array contents matched correctly: DE_id = ", de_id
 10  continue
 
     print *, "Finalize section finished"
@@ -311,7 +311,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test ArrayRedist complete!"
+20    print *, "System Test ArrayRedist complete"
 
     if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Transposed transpose not same as original"
@@ -322,7 +322,7 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS!! Data transposed twice same as original"
+        write(finalMsg, *) "SUCCESS: Data transposed twice same as original."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Data transpose does not match expected values, or error code set ", rc

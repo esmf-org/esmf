@@ -1,4 +1,4 @@
-! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.11 2004/04/28 23:12:12 cdeluca Exp $
+! $Id: ESMF_CplOnExclDEsSTest.F90,v 1.12 2004/05/27 22:47:20 jwolfe Exp $
 !
 ! System test code CouplingOnExclDEs
 !  Description on Sourceforge under System Test #62503
@@ -250,7 +250,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test CouplingOnExclDEs complete!"
+10    print *, "System Test CouplingOnExclDEs complete."
 
       ! Only on de 0 or any DE with an error. 
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
@@ -264,7 +264,7 @@
   
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! Component test finished correctly."
+          write(finalMsg, *) "SUCCESS: Component test finished correctly."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif

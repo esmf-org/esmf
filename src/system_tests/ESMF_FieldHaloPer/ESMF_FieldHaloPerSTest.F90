@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloPerSTest.F90,v 1.26 2004/05/26 22:05:56 jwolfe Exp $
+! $Id: ESMF_FieldHaloPerSTest.F90,v 1.27 2004/05/27 22:47:58 jwolfe Exp $
 !
 ! System test FieldHaloPeriodic
 !  Field Halo with periodic boundary conditions.
@@ -144,7 +144,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test FieldHaloPeriodic complete!"
+10    print *, "System Test FieldHaloPeriodic complete."
 
     call ESMF_VMGet(vm, localPet=pe_id, rc=rc)
     if ((pe_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
@@ -156,7 +156,7 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if (rc .eq. ESMF_SUCCESS) then
-        write(finalMsg, *) "SUCCESS!! Periodic Halo values are as expected"
+        write(finalMsg, *) "SUCCESS.  Periodic Halo values are as expected."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Periodic Halo values do not match expected, or error code set ", rc

@@ -1,4 +1,4 @@
-! $Id: ESMF_RowReduceSTest.F90,v 1.26 2004/05/26 22:03:29 jwolfe Exp $
+! $Id: ESMF_RowReduceSTest.F90,v 1.27 2004/05/27 22:50:41 jwolfe Exp $
 !
 ! System test DELayoutRowReduce
 !  Description on Sourceforge under System Test #69725
@@ -92,13 +92,14 @@
 
       counts(1) = 41
       counts(2) = 20
-      min(1) = 0.0
-      max(1) = 20.5
-      min(2) = 0.0
-      max(2) = 5.0
+      min(1) = 0.0d0
+      max(1) = 20.5d0
+      min(2) = 0.0d0
+      max(2) = 5.0d0
       horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
+      print *, "right before grid create"
       grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
@@ -256,7 +257,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10     print *, "System Test DELayoutRowReduce complete!"
+10     print *, "System Test DELayoutRowReduce complete."
 
 
     ! Only print on DE 0 for success, or any DE with an error
@@ -273,8 +274,8 @@
 
       ! Separate message to console for quick confirmation of success/failure
       if ((result .eq. rightvalue) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS!! Row reduction value (", rightvalue, &
-                           ") is correct"
+        write(finalMsg, *) "SUCCESS: Row reduction value (", rightvalue, &
+                           ") is correct."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
                                "Row reduction result", result, "not equal ", &

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.25 2004/05/27 17:52:29 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.26 2004/05/27 22:48:17 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -296,7 +296,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-20    print *, "System Test FieldRedist complete!"
+20    print *, "System Test FieldRedist complete."
 
     if ((my_pet .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
       write(failMsg, *)  "Transposed transpose not same as original"
@@ -307,7 +307,7 @@
 
       ! Separate message to console, for quick confirmation of success/failure
       if ((miscount.eq.0) .and. (rc .eq. ESMF_SUCCESS)) then
-        write(finalMsg, *) "SUCCESS!! Data transposed twice same as original"
+        write(finalMsg, *) "SUCCESS: Data transposed twice same as original."
       else
         write(finalMsg, *) "System Test did not succeed. ", &
         "Data transpose does not match expected values, or error code set ", rc

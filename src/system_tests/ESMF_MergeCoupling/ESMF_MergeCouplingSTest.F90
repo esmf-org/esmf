@@ -1,4 +1,4 @@
-! $Id: ESMF_MergeCouplingSTest.F90,v 1.9 2004/04/28 23:12:15 cdeluca Exp $
+! $Id: ESMF_MergeCouplingSTest.F90,v 1.10 2004/05/27 22:50:21 jwolfe Exp $
 !
 ! System test code MergeCoupling
 !  Description on Sourceforge under System Test #62502
@@ -318,7 +318,7 @@
 
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
-10    print *, "System Test MergeCoupling complete!"
+10    print *, "System Test MergeCoupling complete."
 
       ! Only output on processor 0, or if error anyplace
       if ((de_id .eq. 0) .or. (rc .ne. ESMF_SUCCESS)) then
@@ -332,7 +332,7 @@
 
         ! Separate message to console, for quick confirmation of success/failure
         if (rc .eq. ESMF_SUCCESS) then
-          write(finalMsg, *) "SUCCESS!! Merge Component Coupling complete"
+          write(finalMsg, *) "SUCCESS: Merge Component Coupling complete."
         else
           write(finalMsg, *) "System Test did not succeed.  Error code ", rc
         endif
