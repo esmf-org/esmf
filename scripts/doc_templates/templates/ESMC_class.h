@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.6 2002/10/11 17:11:45 eschwab Exp $
+// $Id: ESMC_class.h,v 1.7 2002/10/11 22:50:11 eschwab Exp $
 //
 // ESMF <Class> C++ definition include file
 //
@@ -10,18 +10,18 @@
 //  the automated document processing.)
 //-------------------------------------------------------------------------
 //
-// these lines prevent this file from being read more than once if it
-// ends up being included multiple times
+ // these lines prevent this file from being read more than once if it
+ // ends up being included multiple times
 
-#ifndef ESMC_<Class>_H
-#define ESMC_<Class>_H
+ #ifndef ESMC_<Class>_H
+ #define ESMC_<Class>_H
 
 //-------------------------------------------------------------------------
 
-// Put any constants or macros which apply to the whole component in this file.
-// Anything public or esmf-wide should be up higher at the top level
-// include files.
-#include <ESMC_<Comp>.h> 
+ // Put any constants or macros which apply to the whole component in this file.
+ // Anything public or esmf-wide should be up higher at the top level
+ // include files.
+ #include <ESMC_<Comp>.h> 
 
 //-------------------------------------------------------------------------
 //BOP
@@ -38,28 +38,28 @@
 //-------------------------------------------------------------------------
 // 
 // !USES:
-#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-//#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
+ #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
+ //#include <ESMC_XXX.h>   // other dependent classes (subclasses, aggregates,
                         // composites, associates, friends)
 
 // !PUBLIC TYPES:
-class ESMC_<Class>Config;
-class ESMC_<Class>;
+ class ESMC_<Class>Config;
+ class ESMC_<Class>;
 
 // !PRIVATE TYPES:
 
-// class configuration type
-class ESMC_<Class>Config {
-  private:
-//   < insert resource items here >
-};
+ // class configuration type
+ class ESMC_<Class>Config {
+   private:
+ //   < insert resource items here >
+ };
 
-// class definition type
-class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
+ // class definition type
+ class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
 
-  private:
-//  < insert class members here >  corresponds to type ESMF_<Class> members
-//                                 in F90 modules
+   private:
+ //  < insert class members here >  corresponds to type ESMF_<Class> members
+ //                                 in F90 modules
 
 // !PUBLIC MEMBER FUNCTIONS:
 //
@@ -70,43 +70,43 @@ class ESMC_<Class> : public ESMC_Base {    // inherits from ESMC_Base class
 //  other than deleting the memory for the object/derived type itself.
 
   public:
-// the following methods apply to deep classes only
+ // the following methods apply to deep classes only
     ESMC_<Class> *ESMC_<Class>Create(args, int rc);// interface only, deep class
     int ESMC_<Class>Destroy(void);            // interface only, deep class
     int ESMC_<Class>Construct(args);          // internal only, deep class
     int ESMC_<Class>Destruct(void);           // internal only, deep class
 
-// or
-// the following method applies to a shallow class
+ // or
+ // the following method applies to a shallow class
     int ESMC_<Class>Init(args);         // shallow class only
 
-// optional configuration methods
+ // optional configuration methods
     int ESMC_<Class>GetConfig(ESMC_<Class>Config *config) const;
     int ESMC_<Class>SetConfig(const ESMC_<Class>Config *config);
 
-// accessor methods for class members
+ // accessor methods for class members
     int ESMC_<Class>Get<Value>(<value type> *value) const;
     int ESMC_<Class>Set<Value>(<value type>  value);
     
-// required methods inherited and overridden from the ESMC_Base class
+ // required methods inherited and overridden from the ESMC_Base class
     int ESMC_<Class>Validate(const char *options) const;
     int ESMC_<Class>Print(const char *options) const;
 
-// native C++ constructors/destructors
+ // native C++ constructors/destructors
 	ESMC_<Class>(args);
 	~ESMC_<Class>(args);
   
-// < list the rest of the public interface methods here >
+ // < list the rest of the public interface methods here >
   
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
 //
-// < declare private interface methods here >
+ // < declare private interface methods here >
 //
 //EOP
 //-------------------------------------------------------------------------
 
-};   // end class ESMC_<Class>
+ };   // end class ESMC_<Class>
 
-#endif  // ESMC_<Class>_H
+ #endif  // ESMC_<Class>_H
