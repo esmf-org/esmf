@@ -8,7 +8,7 @@
 # NASA Goddard Space Flight Center.
 # Licensed under the GPL.
 #
-# $Id: do_newcomp,v 1.7 2003/01/30 15:58:51 nscollins Exp $
+# $Id: do_newcomp,v 1.8 2003/02/21 16:05:45 nscollins Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -105,9 +105,9 @@ endif
           sed 's/<Comp>/'$comp'/g' > $srcdir/ESMF_class.F90
       endif
 
-      if(!(-r $intfdir/ESMC_class.C)) then
-          cp $DOCT_DIR/ESMC_class.C $intfdir
-          chmod 644 $intfdir/ESMC_class.C
+      if(!(-r $intfdir/ESMC_class_F.C)) then
+          cp $DOCT_DIR/inter_ESMC_class_F.C $intfdir
+          chmod 644 $intfdir/ESMC_class_F.C
       endif
       breaksw
   case c:
@@ -116,13 +116,13 @@ endif
           chmod 644 $srcdir/ESMC_class.C
       endif
 
-      if(!(-r $intfdir/ESMF_class.F90)) then
-          cat $DOCT_DIR/ESMF_class.F90 | \
-          sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class.F90
+      if(!(-r $intfdir/ESMF_class_C.F90)) then
+          cat $DOCT_DIR/inter_ESMF_class_C.F90 | \
+          sed 's/<Comp>/'$comp'/g' > $intfdir/ESMF_class_C.F90
       endif
       breaksw
   default:
-    echo "Valid options are: [ c | f]"
+    echo "Valid options are: [ c | f ]"
     exit
   endsw
 endif

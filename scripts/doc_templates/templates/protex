@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 #
-#  $Id: protex,v 1.9 2003/02/10 17:55:04 rstaufer Exp $
+#  $Id: protex,v 1.10 2003/02/21 16:05:45 nscollins Exp $
 #
 #BOP
 #
@@ -630,6 +630,10 @@ KEY:       foreach $key ( @keys ) {
   print $_;
   if ( $source ) { &do_eoc(); }     
   print '%...............................................................';
+ 
+  print "\\setlength{\\parskip}{\\oldparskip}";
+  print "\\setlength{\\parindent}{\\oldparindent}";
+  print "\\setlength{\\baselineskip}{\\oldbaselineskip}";
 
   unless ( $opt_b ) {
      print "\\end{document}";
@@ -859,9 +863,12 @@ sub print_preamble {
     print "%-------------------------------------------------------------";
 }#end unless
 
-    print "\\parskip        0pt";
-    print "\\parindent      0pt";
-    print "\\baselineskip  11pt";
+    print "\\setlength{\\oldparskip}{\\parskip}";
+    print "\\setlength{\\parskip}{0pt}";
+    print "\\setlength{\\oldparindent}{\\parindent}";
+    print "\\setlength{\\parindent}{0pt}";
+    print "\\setlength{\\oldbaselineskip}{\\baselineskip}";
+    print "\\setlength{\\baselineskip}{11pt}";
 
 }# end sub print_preamble
 
