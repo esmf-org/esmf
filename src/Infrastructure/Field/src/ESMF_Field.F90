@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.109 2004/02/26 19:38:09 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.110 2004/02/26 19:50:45 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,14 +217,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.109 2004/02/26 19:38:09 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.110 2004/02/26 19:50:45 cdeluca Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreate - Create a new Field with data
 !
 ! !INTERFACE:
@@ -242,11 +242,11 @@
 !     an {\tt ESMF\_Array}.
 !    
  
-!EOPI
+!EOP
       end interface
 !
 !------------------------------------------------------------------------------
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a new Field without data
 !
 ! !INTERFACE:
@@ -263,7 +263,7 @@
 !     The variations allow a {\tt ESMF\_Grid} to be specified or not, and for
 !     the data description to be specified or not.
  
-!EOPI
+!EOP
       end interface
 !
 !------------------------------------------------------------------------------
@@ -640,7 +640,7 @@
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated data buffer
 
 ! !INTERFACE:
-      ! private name; call using ESMF_FieldCreateNoData()
+      ! internal name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoBuffer(grid, arrayspec, horizRelloc, vertRelloc, &
                                         haloWidth, datamap, name, iospec, rc)
 !
@@ -742,7 +742,7 @@
 ! !IROUTINE: ESMF_FieldCreateNoData - Create a Field with no associated Array object
 
 ! !INTERFACE:
-      ! private name; call using ESMF_FieldCreateNoData()
+      ! internal name; call using ESMF_FieldCreateNoData()
       function ESMF_FieldCreateNoArray(grid, horizRelloc, vertRelloc, &
                                        haloWidth, datamap, name, iospec, rc)
 !
@@ -960,10 +960,10 @@
 !           {\tt ESMF\_DataMap}
 !
 !     \item [{[name]}]
-!	{\tt ESMF\_Field} name.
+!       {\tt ESMF\_Field} name.
 !
 !     \item [{[iospec]}]
-!	{\tt ESMF\_Field} {\tt ESMF\_IOSpec}.
+!       {\tt ESMF\_Field} {\tt ESMF\_IOSpec}.
 !
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
