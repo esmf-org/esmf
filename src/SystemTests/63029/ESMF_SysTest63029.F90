@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest63029.F90,v 1.1 2003/02/26 01:18:02 nscollins Exp $
+! $Id: ESMF_SysTest63029.F90,v 1.2 2003/02/27 23:03:27 nscollins Exp $
 !
 ! System test code #63029
 
@@ -104,9 +104,13 @@
 !-------------------------------------------------------------------------
 
       call ESMF_CompRun(comp1, rc)
-      print *, "Comp Run returned"
+      print *, "Comp Run returned first time"
 
+      call ESMF_CompRun(comp1, rc)
+      print *, "Comp Run returned second time"
  
+      call ESMF_CompRun(comp1, rc)
+      print *, "Comp Run returned third time"
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 !     Finalize section
