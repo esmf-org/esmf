@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.13 2003/04/17 20:48:08 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.14 2003/04/25 20:04:33 shep_smith Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,8 +74,8 @@ end type ESMF_Log
 
    public ESMF_Log
    public ESMF_LogInit, ESMF_LogOpenFortran, ESMF_LogCloseFortran
-   public ESMF_LogPrintString, ESMF_LogPrintChar, ESMF_LogPrintInt
-   public ESMF_LogPrintReal, ESMF_LogPrintNewline
+   public ESMF_LogPrintString, ESMF_LogPrintNewline
+   public ESMF_LogErr_,ESMF_LogErrMsg_, ESMF_LogWarn_, ESMF_LogWarnMsg_
 
 !EOP
 !----------------------------------------------------------------------------
@@ -126,6 +126,178 @@ subroutine ESMF_LogInit(aLog, verbose, flushflag, haltOnErr, haltOnWarn)
 end subroutine ESMF_LogInit
 
 
+
+!-----------------------------------------------------------------------
+!BOP
+!
+! !IROUTINE: ESMF_LogWarnMsg  - writes a warning message to the log file
+!
+! !INTERFACE:
+!
+subroutine ESMF_LogWarnMsg_(aLog, errCode, line,file,dir,msg)
+
+! !ARGUMENTS:
+    type(ESMF_Log) :: aLog
+
+    integer, intent(in) :: errCode        !integer value for error code         
+
+    character(len=*), intent(in) :: msg    !msg written to log file
+
+    integer, intent(in) :: line           !line number of warning; argument
+                                          !supplied by macro
+
+    character(len=*), intent(in) :: file  !file where warning occurred in;
+                                          !argument supplied by macro
+
+    character(len=*), intent(in) :: dir   !directory where warning occurred in;
+                                          !argument supplied by macro
+
+! !DESCRIPTION:
+!    This routine calls esmf_logerrmsg_ln in ESMC_LogErrInterface.C
+!    to write a warning message to the log file.  This warning
+!    message consists of the erroCode, a description of the warning, the 
+!    line number, file, and directory of the error, and a message. A 
+!    preprocessor macro adds the predefined preprocessor symbolic
+!    constants \_\_LINE\_\_, \_\_FILE\_\_, and \_\_DIR\_\_ when
+!    ESMF_LogWarnMsg is called user code.  Note,
+!    the value of \_\_DIR\_\_ 
+!    must be suppliled by the user (usually done in
+!    the makefile.).  By default, execution continues after encountering
+!    a warning, but by calling the routine ESMF\_LogWarnHalt(), the user
+!    can halt on warnings.
+!
+!EOP
+!--------------------------------------------------------------------------
+
+   integer :: msgLength
+   integer :: fileLength
+   integer :: dirLength
+
+
+   msgLength=len(msg)
+   fileLength=len(file)
+   dirLength=len(dir)
+
+   call esmf_logwarnmsg_ln(aLog,errcode, line, file,dir,msg,fileLength, &
+                          dirlength, msglength)
+
+ end subroutine ESMF_LogWarnMsg_
+
+!-----------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogWarn - writes a warning message to log file
+
+! !INTERFACE:
+  subroutine ESMF_LogWarn_(aLog, errCode,line,file,dir)
+
+! !ARGUMENTS:
+    type(ESMF_Log) :: aLog
+
+    integer, intent(in) :: errCode         !Error code
+
+    integer, intent(in) :: line            !line number of warning; argument
+                                           !supplied by macro
+
+    character(len=*), intent(in) :: file   !file where warning occurred in;
+                                           !argument supplied by macro
+
+    character(len=*), intent(in) :: dir    !directory where warning occurred in;
+                                           !argument supplied by macro
+
+!
+! !DESCRIPTION:
+!   This routine is identical to ESMF\_LogWarnMsg, except a msg is
+!   not written to the log file.
+!
+!EOP
+!-----------------------------------------------------------------------
+
+   integer :: fileLength
+   integer :: dirLength
+
+   fileLength=len(file)
+   dirLength=len(file)
+
+   call ESMF_LogWarn_Ln(aLog,errCode,line,file,dir,fileLength,dirLength)
+
+ end subroutine ESMF_LogWarn_
+
+!-----------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogErr - writes a error message to log file
+
+! !INTERFACE:
+ subroutine ESMF_LogErrMsg_(aLog, errCode,line,file,dir,msg)
+
+! !ARGUMENTS:
+    type(ESMF_Log) :: aLog
+
+    integer, intent(in) :: errCode         !integer value for error code
+
+    character(len=*), intent(in) :: msg    !msg written to log file
+
+    integer, intent(in) :: line            !line number of warning; argument
+                                           !supplied by macro
+
+    character(len=*), intent(in) :: file   !file where warning occurred in;
+                                           !argument supplied by macro
+
+    character(len=*), intent(in) :: dir    !directory where warning occurred in;
+                                           !argument supplied by macro
+
+! !DESCRIPTION:
+!   This routine is identical to ESMF\_LogErrMsg, except a msg is
+!   not written to the log file.
+!
+!EOP
+!-----------------------------------------------------------------------
+
+    integer :: fileLength
+    integer :: dirLength
+    integer :: msgLength
+
+    fileLength=len(file)
+    dirLength=len(dir)
+    msgLength=len(msg)
+    call ESMF_LogErrMsg_Ln(aLog,errCode,line,file,dir,msg,fileLength,dirLength)
+
+ end subroutine ESMF_LogErrMsg_
+!-----------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_LogErr - writes a error message to log file
+
+! !INTERFACE:
+ subroutine  ESMF_LogErr_(aLog, errCode,line,file,dir)
+
+! !ARGUMENTS:
+    type(ESMF_Log) :: aLog
+
+    integer, intent(in) :: errCode         !integer value for error code
+
+    integer, intent(in) :: line            !line number of warning; argument
+                                           !supplied by macro
+
+    character(len=*), intent(in) :: file   !file where warning occurred in;
+                                           !argument supplied by macro
+
+    character(len=*), intent(in) :: dir    !directory where warning occurred in;
+                                           !argument supplied by macro
+
+! !DESCRIPTION:
+!   This routine is identical to ESMF\_LogErrMsg, except a msg is
+!   not written to the log file.
+!
+!EOP
+!-----------------------------------------------------------------------
+
+    integer :: fileLength
+    integer :: dirLength
+
+    fileLength=len(file)
+    dirLength=len(dir)
+    call ESMF_LogErr_Ln(aLog,errCode,line,file,dir,fileLength,dirLength)
+
+ end subroutine ESMF_LogErr_
 
 !----------------------------------------------------------------------------
 !BOP
@@ -208,44 +380,6 @@ end subroutine ESMF_LogCloseFortran
 
 !----------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_LogPrintChar  - Prints a character and an optional message
-!
-! !INTERFACE:
-  subroutine ESMF_LogPrintChar(unitNumber,charData,flushSet,msg,length)
-
-! !ARGUMENTS:
-  integer, intent(in)::unitNumber,flushSet !See ESMF_Log data type
-
-  character, intent(in)::charData          !character to be printed out
-
-  character(len=32), intent(in):: msg      !optional message; only
-					   !printed out if length is
-					   !greater than zero.
-  integer, intent(in) :: length
-
-! !DESCRIPTION:
-! This routine, and the routines that follow it, are used by ESMC\_LogPrint()
-! ESMC\_LogPrintHeader() in the Log class.  Ordinarily, these Log routines would
-! have just used fprintf.  However, because we needed to use the Fortran I/O 
-! libraries when calling Log from a Fortran code
-! (see the discussion about the class design), we had to make 
-! calls to ESMF\_LogPrintChar() and the subroutines below, in addition to
-! C's fprintf() (We still have to support C/C++, so we still need fprintf() ).
-! ESMF\_LogPrintChar() and the routines below are not particularly general,
-! but do the trick.
-!EOP
-
-  integer :: istat, i
-
-  if (length .ne. 0) write(unitNumber,10,ADVANCE="no") (msg(i:i),i=1,length) 
-  write(unitNumber,10,ADVANCE="no") charData
-  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-  10 format(A1)
-
- end subroutine
-
-!----------------------------------------------------------------------------
-!BOP
 ! !IROUTINE: ESMF_LogPrintNewLine - prints a newline character
 !
 ! !INTERFACE:
@@ -255,8 +389,7 @@ end subroutine ESMF_LogCloseFortran
   integer, intent(in)::unitNumber,flushSet
 
 ! !DESCRIPTION:
-! Prints a newline character.  See ESMF\_LogPrintChar for more 
-! discussion.
+! Prints a newline character. 
 !EOP
 
   integer :: istat
@@ -272,79 +405,29 @@ end subroutine ESMF_LogCloseFortran
 ! !IROUTINE: ESMF_LogPrintString - prints a string
 !
 ! !INTERFACE:
- subroutine ESMF_LogPrintString(unitNumber,stringData,len1,flushSet,msg,len2)
+ subroutine ESMF_LogPrintString(unitNumber,stringToPrint,flushSet)
 
 ! !ARGUMENTS:
-  integer, intent(in)::unitNumber,flushSet,len1,len2
-  character(len=32), intent(in)::msg,stringData
+  integer, intent(in)::unitNumber,flushSet
+  character(len=*), intent(in)::stringToPrint
 
 ! !DESCRIPTION:
-! Prints a string; see ESMF\_LogPrintChar() for a fuller discussion
+! This routine, is used by ESMC\_LogPrint() and
+! ESMC\_LogPrintHeader() in the Log class to print a string.
+! Ordinarily, these Log routines would
+! have just used fprintf.  However, because we need to allow one to use the Fortran I/O 
+! libraries when Fortran I/O is selected
+! (see the discussion about the class design), we need to call a Fortran routine to do the printing
+! and this is the one!
+!  
 !EOP
 
   integer :: i,istat
 
-  if (len2 .ne. 0) write(unitNumber,10,ADVANCE="no") (msg(i:i),i=1,len2)
-  write(unitNumber,10,ADVANCE="no") (stringData(i:i), i=1,len1)
+  write(unitNumber,10) stringToPrint
   if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-  10 format(A1)
+  10 format(A)
  end subroutine ESMF_LogPrintString
 
   
-!----------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_LogPrintInt - prints an int
-!
-! !INTERFACE:
- subroutine ESMF_LogPrintInt(unitnumber, intData, flushSet, msg, length)
-!
-! !ARGUMENTS:
-  integer, intent(in) :: unitNumber
-  integer, intent(in) :: intData
-  integer, intent(in) :: flushSet
-  character(len=32), intent(in) :: msg
-  integer, intent(in) :: length
-
-! !DESCRIPTION
-! Prints an integer; see ESMF\_LogPrintChar() for more details
-!
-!EOP
-  integer :: istat, i
-
-  if (length .ne. 0) write(unitNumber,20,ADVANCE="no") (msg(i:i),i=1,length)
-  write(unitNumber,10,ADVANCE="no") intData
-  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-  10 format(I3)
-  20 format(A1)
-
- end subroutine ESMF_LogPrintInt
-
-!----------------------------------------------------------------------------
-! !IROUTINE: ESMF_LogPrintReal - prints a real number
-!
-! !INTERFACE:
- subroutine ESMF_LogPrintReal(unitNumber,floatData,flushSet,msg,length)
-
-! !ARGUMENTS:
-  integer, intent(in) :: unitNumber
-  real, intent(in) :: floatData
-  integer, intent(in) :: flushSet
-  character(len=32), intent(in) :: msg
-  integer, intent(in) :: length
-
-! !DESCRIPTION:
-! Prints a real number; see ESMF\_LogPrintChar() for a longer discussion
-!
-!EOP
-  integer :: istat, i
-
-  if (length .ne. 0) write(unitNumber,20,ADVANCE="no") (msg(i:i),i=1,length)
-  write(unitNumber,10,ADVANCE="no") floatdata 
-  if (flushSet .eq. ESMF_LOG_TRUE) call ESMF_IOFlush(unitNumber, istat)
-
-  10 format(F14.7)
-  20 format(A1)
-
- end subroutine ESMF_LogPrintReal
-
 end module ESMF_LogErrMod
