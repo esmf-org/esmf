@@ -3,8 +3,9 @@
 
 \subsection{Introduction}
 
-The Infrastructure layer of the ESMF system contains both lower
-level utility routines and higher level data handling objects.
+The Infrastructure layer of the ESMF system contains both 
+higher level data handling objects and 
+lower level utility routines.
 This section discusses the data objects and how they relate to
 the rest of the ESMF library and to user-supplied code.  
 See Section~\ref{utilclasses} for a discussion of the utility layer.
@@ -33,7 +34,7 @@ Fields, Physical Grids, Distributed Grids, and Data Arrays.
 The Physical Grid carries global coordinate information and grid type,
 the Distributed Grid manages decomposition information, 
 the Data Array carries the actual
-data values, and Fields and Bundles tie them together.
+data values, and Fields and Bundles tie these objects together.
 
 The Field level is the highest functional data access level in the ESMF library.
 The Field object connects computational Data objects, the underlying
@@ -42,10 +43,10 @@ objects, and metadata Attribute objects.
 It provides methods
 for setting, retrieving, configuring, and querying these subobjects,
 as well as methods for manipulating the relationship between the
-data and the grid, and for doing data I/O. 
-% It provides methods to query global information about a dataset, 
-% get coordinate and topology information, and 
-% get a pointer to the start of a data subset for local processing. 
+data and the grid.  It also contains methods for data I/O, either
+between parts of the same Field during Halo updates, between
+other components in the application as part of the State import or
+export process, or as Read/Write calls to and from persistent storage.
 The Field object uses information from the Grid object to provide
 two different types of views of the field to the calling code.
 One is a unified logical view of the entire Field as a whole,
@@ -59,14 +60,24 @@ The Bundle object collects multiple Field objects which share a
 common or compatible Grid object.  In addition to methods for
 setting, retrieving, and querying the constituent Fields, it provides
 methods for configuring and querying memory layouts for the Data objects
-and some limited operations on all Fields in a Bundle.
+and data I/O methods, for example to efficiently exchange State data
+containing multiple Fields with other components.
 
-A Physical Grid object is responsible for
-maintaining information about the global coordinates.
+A Physical Grid object maintains
+information about the global coordinates.  In general this data
+is described implicitly by specifying the grid type and the
+corresponding parameters.  However it is possible that the
+Physical Grid must be completely enumerated, perhaps in the
+case of assimilated data or unstructure data.
 A Distributed Grid maintains and manages
 the decomposition of the whole problem is spread across multiple
-processing elements.  << this needs more details, but how
-much and at what level?  various possible grid types, etc?? nsc. >> 
+processing elements.  It uses methods in the Layout object to
+query for the current number of processing elements available
+and the relative speeds of connection at the hardware level.  
+Information specified by
+the user is encapsulated in a State object which gives the
+Distributed Grid information such as the preferred mapping of
+the fastest communication path to a specific problem grid axis.
 
 A Data object is responsible for maintaining
 information about the individual value type (e.g. float, integer), 
@@ -101,12 +112,14 @@ the following object hierarchy:
 \subsubsection{Bundle (ESMF\_Bundle)}
 \label{sec:bundle} 
 \begin{description}
-\item [Description] A Bundle contains one or more Fields which are defined on the
-same Grid.  It allows the application to manipulate multiple fields in an identical
-manner with a single set of calls.  It also allows the option of interleaving data
-from multiple fields into a single Data Array for more efficient memory access patterns.
-\item [Function] The Bundle class is an aggregation of the Field class.  It provides methods 
-for getting and setting fields.  It provides methods for querying information about the
+\item [Description] A Bundle contains one or more Fields which are defined on 
+the same Grid.  It allows the application to manipulate multiple fields in 
+an identical manner with a single set of calls.  It also allows the option 
+of interleaving data from multiple fields into a single Data Array for 
+more efficient memory access patterns.  
+\item [Function] The Bundle class is an aggregation of the Field class.  
+It provides methods for getting and setting fields.  It provides methods 
+for querying information about the
 underlying grid.  It provides methods for requesting the packing of data, the
 reordering of that packed data, and detaching and attaching the data.
 \end{description}
