@@ -1,8 +1,8 @@
-# $Id: makefile,v 1.18 2003/02/27 17:54:07 flanigan Exp $ 
+# $Id: makefile,v 1.19 2003/02/27 23:28:39 flanigan Exp $ 
 
 include $(ESMF_DIR)/makefile
 
-DIRS     = Base BasicUtil IO ConfigAttr Error Log TimeMgmt Machine TimeMgr \
+DIRS     = Base IO ConfigAttr Error Log TimeMgmt Machine TimeMgr \
 	   CommMem PerfProf Data DistGrid PhysGrid Grid Fields Regrid App \
 	   mpiuni
 
