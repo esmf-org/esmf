@@ -1,4 +1,4 @@
-! $Id: ESMF_SimpleCouplingSTest.F90,v 1.20 2005/02/14 04:07:17 theurich Exp $
+! $Id: ESMF_SimpleCouplingSTest.F90,v 1.21 2005/03/03 22:24:15 nscollins Exp $
 !
 ! System test code SimpleCoupling
 !  Description on Sourceforge under System Test #62502
@@ -72,8 +72,9 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Find out how many PETs we were started with
-    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
+
     if (npets .lt. 4) then
         print *, "This system test needs to run at least 4-way, current np = ", npets
         goto 10
@@ -213,11 +214,6 @@
       call ESMF_CplCompFinalize(cpl, c1exp, c2imp, clock=clock, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 10
       print *, "Coupler Finalize finished, rc =", rc
-
-
-      ! Figure out our local processor id for message below.
-      call ESMF_VMGet(vm, localPet=pet_id, rc=rc)
-      if (rc .ne. ESMF_SUCCESS) goto 10
 
 
       print *, "------------------------------------------------------------"
