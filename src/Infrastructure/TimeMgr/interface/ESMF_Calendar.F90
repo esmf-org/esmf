@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.20 2003/06/07 00:42:00 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.21 2003/06/11 06:58:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,7 +132,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.20 2003/06/07 00:42:00 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.21 2003/06/11 06:58:44 eschwab Exp $'
 
 !==============================================================================
 
@@ -155,7 +155,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes a {\tt ESMF\_Calendar} to the given {\tt ESMF\_CalendarType}
+!     Initializes a {\tt ESMF\_Calendar} to the given {\tt ESMF\_Calendar} type
 !
 !     The arguments are:
 !     \begin{description}
@@ -255,9 +255,10 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
-!          Calendar to restore
+!          {\tt ESMF\_Calendar} to restore
 !     \item[Type]
-!          The {\tt ESMF\_CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN, etc.
+!          The {\tt ESMF\_CalendarType} ESMF\_CAL\_GREGORIAN,
+!          ESMF\_CAL\_JULIAN, etc.
 !     \item[DaysPerMonth]
 !          Integer array of days per month, for each of the 12 months
 !     \item[SecondsPerDay]
@@ -307,9 +308,10 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
-!          Calendar to save
+!          {\tt ESMF\_Calendar} to save
 !     \item[Type]
-!          The {\tt ESMF\_CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIAN, etc.
+!          The {\tt ESMF\_CalendarType} ESMF\_CAL\_GREGORIAN,
+!           ESMF\_CAL\_JULIAN, etc.
 !     \item[DaysPerMonth]
 !          Integer array of days per month, for each of the 12 months
 !     \item[SecondsPerDay]
@@ -352,7 +354,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
-!          Calendar to validate
+!          {\tt ESMF\_Calendar} to validate
 !     \item[{[opts]}]
 !          Validate options
 !     \item[{[rc]}]
@@ -386,7 +388,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[calendar]
-!          Calendar to print out
+!          {\tt ESMF\_Calendar} to print out
 !     \item[{[opts]}]
 !          Print options
 !     \item[{[rc]}]

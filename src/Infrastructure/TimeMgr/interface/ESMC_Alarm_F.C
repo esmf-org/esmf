@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm_F.C,v 1.9 2003/06/07 00:41:59 eschwab Exp $
+// $Id: ESMC_Alarm_F.C,v 1.10 2003/06/11 06:58:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt Alarm} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_Alarm} class functions.
 //
 //EOP
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.11 2003/04/28 23:13:37 eschwab Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.12 2003/06/11 06:58:43 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,7 +24,7 @@
 // !DESCRIPTION:
 //
 // The code in this file implements the inter-language code which
-//  allows F90 to call C++ for supporting {\tt BaseTime} class functions.
+//  allows F90 to call C++ for supporting {\tt ESMC\_BaseTime} class functions.
 //
 //EOP
 

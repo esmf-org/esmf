@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.19 2003/06/10 15:57:56 jwolfe Exp $
+! $Id: ESMF_Alarm.F90,v 1.20 2003/06/11 06:58:43 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -106,7 +106,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.19 2003/06/10 15:57:56 jwolfe Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.20 2003/06/11 06:58:43 eschwab Exp $'
 
 !==============================================================================
 !
@@ -155,7 +155,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes an {\tt Alarm}
+!     Initializes an {\tt ESMF\_Alarm}
 !
 !     The arguments are:
 !     \begin{description}
@@ -267,7 +267,7 @@
 !     \item[alarm]
 !          The object instance to get the ring time
 !     \item[RingTime]
-!          The {\tt Alarm}'s ring time
+!          The {\tt ESMF\_Alarm}'s ring time
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -300,7 +300,7 @@
 !     \item[alarm]
 !          The object instance to set the ring time
 !     \item[RingTime]
-!          The {\tt Alarm}'s ring time to set
+!          The {\tt ESMF\_Alarm}'s ring time to set
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -333,7 +333,7 @@
 !     \item[alarm]
 !          The object instance to get the previous ring time
 !     \item[PrevRingTime]
-!          The {\tt Alarm}'s previous ring time
+!          The {\tt ESMF\_Alarm}'s previous ring time
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -366,7 +366,7 @@
 !     \item[alarm]
 !          The object instance to set the previous ring time
 !     \item[PrevRingTime]
-!          The {\tt Alarm}'s previous ring time to set
+!          The {\tt ESMF\_Alarm}'s previous ring time to set
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -392,7 +392,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get an {\tt Alarm}'s stop time
+!     Get an {\tt ESMF\_Alarm}'s stop time
 !
 !     The arguments are:
 !     \begin{description}
@@ -432,7 +432,7 @@
 !     \item[alarm]
 !          The object instance to set the stop time
 !     \item[StopTime]
-!          The {\tt Alarm}'s stop time
+!          The {\tt ESMF\_Alarm}'s stop time
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -716,7 +716,7 @@
 !     \item[Ringing]
 !          The {\tt ESMF\_Alarm}'s ringing state
 !     \item[Enabled]
-!          Alarm enabled/disabled
+!          {\tt ESMF\_Alarm} enabled/disabled
 !     \item[ID]
 !          The {\tt ESMF\_Alarm}'s ID
 !     \item[{[rc]}]
@@ -769,7 +769,7 @@
 !     \item[Ringing]
 !          The {\tt ESMF\_Alarm}'s ringing state
 !     \item[Enabled]
-!          Alarm enabled/disabled
+!          {\tt ESMF\_Alarm} enabled/disabled
 !     \item[ID]
 !          The {\tt ESMF\_Alarm}'s ID
 !     \item[{[rc]}]
@@ -802,7 +802,7 @@
 !     The arguments are:  
 !     \begin{description}
 !     \item[alarm]
-!          Alarm to validate
+!          {\tt ESMF\_Alarm} to validate
 !     \item[{[opts]}]
 !          Validate options
 !     \item[{[rc]}]
@@ -836,7 +836,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          Alarm to print out
+!          {\tt ESMF\_Alarm} to print out
 !     \item[{[opts]}]
 !          Print options
 !     \item[{[rc]}]

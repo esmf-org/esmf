@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.22 2003/06/07 00:42:00 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.23 2003/06/11 06:58:44 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -133,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.22 2003/06/07 00:42:00 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.23 2003/06/11 06:58:44 eschwab Exp $'
 
 !==============================================================================
 !
@@ -166,7 +166,8 @@
       module procedure ESMF_TimeIntervalQuotR
 
 ! !DESCRIPTION:
-!     This interface overloads the / operator for the {\tt ESMF\_TimeInterval} class
+!     This interface overloads the / operator for the {\tt ESMF\_TimeInterval}
+!     class
 !
 !EOP
       end interface
@@ -182,7 +183,8 @@
       module procedure ESMF_TimeIntervalProdR
 
 ! !DESCRIPTION:
-!     This interface overloads the * operator for the {\tt ESMF\_TimeInterval} class
+!     This interface overloads the * operator for the {\tt ESMF\_TimeInterval}
+!     class
 !
 !EOP
       end interface
@@ -353,8 +355,8 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the value of the {\tt TimeInterval} in units specified by the user
-!     via F90 optional arguments.
+!     Get the value of the {\tt ESMF\_TimeInterval} in units specified by the
+!     user via F90 optional arguments.
 !
 !     Time manager represents and manipulates time internally with integers 
 !     to maintain precision.  Hence, user-specified floating point values are
@@ -615,7 +617,7 @@
       type(ESMF_TimeInterval), intent(in) :: timeinterval
 
 ! !DESCRIPTION:
-!     Return a {\tt TimeInterval}'s negative absolute value.
+!     Return a {\tt ESMF\_TimeInterval}'s negative absolute value.
 !
 !     The arguments are:
 !     \begin{description}
@@ -724,8 +726,8 @@
       integer, intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides a {\tt ESMF\_TimeInterval} by an integer divisor, returns quotient as a
-!     {\tt TimeInterval}
+!     Divides a {\tt ESMF\_TimeInterval} by an integer divisor, returns
+!     quotient as a {\tt ESMF\_TimeInterval}
 !
 !     The arguments are:
 !     \begin{description}
@@ -759,7 +761,7 @@
       double precision, intent(in) :: divisor
 
 ! !DESCRIPTION:
-!     Divides a {\tt ESMF\_TimeInterval} by a double precision divisor, returns
+!     Divides an {\tt ESMF\_TimeInterval} by a double precision divisor, returns
 !     quotient as a {\tt ESMF\_TimeInterval}
 !
 !     The arguments are:
@@ -902,9 +904,9 @@
       type(ESMF_TimeInterval), intent(in) :: timeinterval2
 
 ! !DESCRIPTION:
-!     Add two {\tt ESMF\_TimeIntervals}, return sum as a {\tt ESMF\_TimeInterval}.
-!     Maps overloaded (+) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     Add two {\tt ESMF\_TimeIntervals}, return sum as a
+!     {\tt ESMF\_TimeInterval}.  Maps overloaded (+) operator interface
+!     function to {\tt ESMF\_BaseTime} base class.
 !
 !     The arguments are:
 !     \begin{description}
@@ -979,7 +981,7 @@
 
 !DESCRIPTION:
 !     Return true if both given time intervals are equal, false otherwise.
-!     Maps overloaded (==) operator interface function to {\tt ESMF\_ESMF\_BaseTime}
+!     Maps overloaded (==) operator interface function to {\tt ESMF\_BaseTime}
 !     base class.
 !
 !     The arguments are:
@@ -1051,9 +1053,8 @@
 
 ! !DESCRIPTION:
 !     Return true if first time interval is less than second time interval,
-!     false otherwise.
-!     Maps overloaded (<) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     false otherwise. Maps overloaded (<) operator interface function to
+!     {\tt ESMF\_BaseTime} base class.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1088,9 +1089,8 @@
 
 ! !DESCRIPTION:
 !     Return true if first time interval is greater than second time interval,
-!     false otherwise.
-!     Maps overloaded (>) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     false otherwise.  Maps overloaded (>) operator interface function to
+!     {\tt ESMF\_BaseTime} base class.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1162,9 +1162,8 @@
 
 ! !DESCRIPTION:
 !     Return true if first time interval is greater than or equal to second
-!     time interval, false otherwise.
-!     Maps overloaded (>=) operator interface function to {\tt ESMF\_BaseTime}
-!     base class.
+!     time interval, false otherwise. Maps overloaded (>=) operator interface
+!     function to {\tt ESMF\_BaseTime} base class.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1210,7 +1209,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
-!          Time interval to restore
+!          {\tt ESMF\_TimeInterval} to restore
 !     \item[S]
 !          64-bit integer seconds
 !     \item[Sn]
@@ -1250,12 +1249,12 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on a {\tt ESMF\_TimeInterval}'s properties
+!     Perform a save on an {\tt ESMF\_TimeInterval}'s properties
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
-!          Time interval to save
+!          {\tt ESMF\_TimeInterval} to save
 !     \item[S]
 !          64-bit integer seconds
 !     \item[Sn]
@@ -1296,7 +1295,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[timeinterval]
-!          Time interval to validate
+!          {\tt ESMF\_TimeInterval} to validate
 !     \item[{[opts]}]
 !          Validate options
 !     \item[{[rc]}]
@@ -1324,7 +1323,7 @@
       integer, intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt ESMF\_TimeInterval}'s
+!     To support testing/debugging, print out an {\tt ESMF\_TimeInterval}'s
 !     properties.
 !
 !     The arguments are:
