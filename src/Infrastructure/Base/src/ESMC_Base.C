@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.40 2004/06/10 23:39:47 cdeluca Exp $
+// $Id: ESMC_Base.C,v 1.41 2004/06/15 07:07:19 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.40 2004/06/10 23:39:47 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.41 2004/06/15 07:07:19 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -2432,13 +2432,17 @@ extern "C" {
   char msgbuf[ESMF_MAXSTR];
 
   sprintf(msgbuf, "name '%s', type %s", attrName, ESMC_DataTypeString(dt));
-  ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+  printf(msgbuf);
+  //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
 
-  if (items <= 0) 
-      ESMC_LogDefault.ESMC_LogWrite("\n", ESMC_LOG_INFO);
+  if (items <= 0) {
+      printf("\n");
+      //ESMC_LogDefault.ESMC_LogWrite("\n", ESMC_LOG_INFO);
+  }
 
   if (items == 1) {
-      ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
+      printf(", value: ");
+      //ESMC_LogDefault.ESMC_LogWrite(", value: ", ESMC_LOG_INFO);
       switch (dt) {
         case ESMF_DATA_INTEGER:   sprintf(msgbuf, "%d\n", vi); break;
         case ESMF_DATA_REAL:      sprintf(msgbuf, "%g\n", vr); break; 
@@ -2449,12 +2453,14 @@ extern "C" {
                              "unknown value", &rc);
              return rc;
       }
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      printf(msgbuf);
+      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   if (items > 1) { 
       sprintf(msgbuf, ", %d items, values:\n", items);
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      printf(msgbuf);
+      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
       for (int i=0; i<items; i++) {
           switch (dt) {
             case ESMF_DATA_INTEGER: sprintf(msgbuf, " item %d: %d\n", i, vip[i]); break;
@@ -2467,7 +2473,8 @@ extern "C" {
              return rc;
           }
       }
-      ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
+      printf(msgbuf);
+      //ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_INFO);
   }
 
   return ESMF_SUCCESS;
