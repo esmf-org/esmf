@@ -3,11 +3,11 @@
 
 \subsection{Introduction}
 
-Utility routines may be utilitized by any other class in the ESMF
-library.  
-Selected of these routines are available to be called by user code as well.
-Collecting these functions into a base-level utility set helps to 
-avoid circular referencing.
+Methods provided by Utility classes are available for use by  
+all classes in the ESMF library.  Collecting these functions 
+into a base-level utility set helps to avoid circular referencing.  
+Some of these methods will be called directly by user-supplied
+code; others provide support for internal ESMF library routines.
 
 The functions provided by the utility objects vary in scope and
 complexity.  Some are lightweight classes which maintain no
@@ -18,9 +18,10 @@ of itself on different processors.
 
 \subsection{Overview}
 
-<< these have very little in common.  are these short paragraphs
-useful as an intro or are they just duplicating effort in the
-class details??  nsc.  >>
+<< by their very nature these utility routines have very little 
+in common.  are these short overview paragraphs useful, or do
+they just duplicate the details which follow in the class
+detail sections?   nsc. >>
 
 The Layout object is used by any part of the library which needs
 to decompose a task/problem/dataset into subsets.
@@ -83,15 +84,19 @@ messages produced by a multiprocess application.  It provides
 methods for uniformly formatting the messages to facilitate
 post-processing by filters and automated tools.
 
-Attributes are a list of (name, value) pairs associated with
-any object in the library.  The value can be of any data type.
-There are methods for listing, setting, and querying attribute lists.
+The Diagnostic routines provide assistance with both performance
+profiling and code debugging.  Timing routines support measurement
+of both serial and parallel time intervals around certain sections
+of code.  Debugging routines allow dynamic control over the level
+of detail, enabling or disabling of different functional categories,
+and assist with bit-level comparisons for debugging strategies which 
+involve running a simulation under differing conditions and
+comparing intermediate results.  These routines use methods from
+the Time class for computing profile information, and from 
+the Log class to collect and output results.
 
 
 \subsection{Class Details}
-
-<< i did add sections below on log and error, but don't know if they're
-detailed enough.  also added some to the time mgr.  nsc. >> 
 
 \subsubsection{Layout (ESMF\_Layout)}
 \label{sec:layout} 
@@ -226,15 +231,17 @@ formatting information, for selecting a single unified log vs.\  a log
 file per processor.
 \end{description}
 
-\subsubsection{Attributes (ESMF\_Attribute)}
-\label{sec:attribute} 
+\subsubsection{Diagnostics (ESMF\_Diagnostics)}
+\label{sec:diagnostics} 
 \begin{description}
-\item [Description] Attributes are lists of (name, value) pairs associated with
-any object in the library.  The value can be of any data type.  Many
-objects in the system are required to have names, so those objects will
-have at least a ("Name", string) attribute.
-\item [Function] The Attribute class supports methods for listing,
-setting, and querying attribute lists.
+\item [Description] Diagnostics are collections of routines for
+gathering information about how the simulation is behaving.  
+These include both routines for finding program bugs
+as well as understanding execution bottlenecks.
+\item [Function] The Diagnostic class supports methods for specifying
+diagnostic information, enabling and disabling the production of
+that information.  It also contains methods for timing sections of
+code, in both serial and parallel execution models.
 \end{description}
 
 
