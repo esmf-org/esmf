@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.4 2003/05/07 17:20:09 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.5 2003/05/10 18:01:11 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1637,6 +1637,18 @@
         call ESMF_FieldAllGather(field_flag, outarray, status)
         if (de_id .eq. 0) then
           write(filename, 20)  "FLAG", file_no
+          call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
+        endif
+        call ESMF_ArrayDestroy(outarray, status)
+
+        do j = jmin, jmax
+          do i = imin, imax
+            de(i,j) = de_id
+          enddo
+        enddo
+        call ESMF_FieldAllGather(field_de, outarray, status)
+        if (de_id .eq. 0) then
+          write(filename, 20)  "DE", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         endif
         call ESMF_ArrayDestroy(outarray, status)

@@ -1,4 +1,4 @@
-! $Id: FlowArraysMod.F90,v 1.1 2003/05/07 06:58:54 cdeluca Exp $
+! $Id: FlowArraysMod.F90,v 1.2 2003/05/10 18:01:12 nscollins Exp $
 !
 !-------------------------------------------------------------------------
 !BOP
@@ -22,23 +22,24 @@
 !
 ! arrays
 !
-      public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag
+      public :: sie, u, v, rho, rhoi, rhou, rhov, p, q, flag, de
       public :: nbc
       public :: iobs_min, iobs_max, jobs_min, jobs_max
 
       real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: sie, u, v
       real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: rho, rhoi, rhou, rhov
-      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: p, q, flag
+      real(kind=ESMF_IKIND_R4), dimension(:,:), pointer :: p, q, flag, de
       integer, dimension(4) :: nbc
       integer, dimension(50) :: iobs_min, iobs_max, jobs_min, jobs_max
 !
 ! Fields
 !
       public :: field_sie, field_u, field_v, field_rho, field_rhoi, field_rhou, &
-                field_rhov, field_p, field_q, field_flag
+                field_rhov, field_p, field_q, field_flag, field_de
 
       type(ESMF_Field) :: field_sie, field_u, field_v, field_rho, field_rhoi, &
-                          field_rhou, field_rhov, field_p, field_q, field_flag
+                          field_rhou, field_rhov, field_p, field_q, field_flag, &
+                          field_de
 !
 ! scalars here
 !
@@ -177,6 +178,11 @@
       call ESMF_FieldGetData(field_flag, array_temp, rc=status)
       call ESMF_ArrayGetData(array_temp, flag, ESMF_DATA_REF, status)
 
+      field_de   = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
+                   name="DE", rc=status)
+      call ESMF_FieldGetData(field_de, array_temp, rc=status)
+      call ESMF_ArrayGetData(array_temp, de, ESMF_DATA_REF, status)
+
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysAlloc"
         return
@@ -234,6 +240,7 @@
       call ESMF_FieldDestroy(field_p   , rc=status)
       call ESMF_FieldDestroy(field_q   , rc=status)
       call ESMF_FieldDestroy(field_flag, rc=status)
+      call ESMF_FieldDestroy(field_de  , rc=status)
 
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in FlowArraysDealloc"
