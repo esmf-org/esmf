@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock_F.C,v 1.36 2005/02/07 23:35:57 eschwab Exp $
+// $Id: ESMC_Clock_F.C,v 1.35.2.1 2005/02/08 23:46:07 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.71 2005/02/07 23:35:43 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.70.2.1 2005/02/08 23:46:06 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.71 2005/02/07 23:35:43 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.70.2.1 2005/02/08 23:46:06 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // initialize static clock instance counter

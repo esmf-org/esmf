@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.82 2005/02/07 23:38:18 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.81.2.1 2005/02/08 23:46:08 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.82 2005/02/07 23:38:18 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.81.2.1 2005/02/08 23:46:08 eschwab Exp $'
 
 !==============================================================================
 !
