@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.45 2004/03/10 20:37:58 eschwab Exp $
+! $Id: ESMF_Alarm.F90,v 1.46 2004/03/16 23:03:03 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,44 +71,39 @@
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_AlarmCreate
-      public ESMF_AlarmDestroy
-      public ESMF_AlarmSet
-      public ESMF_AlarmGet
-
-      public ESMF_AlarmEnable
-      public ESMF_AlarmDisable
-      public ESMF_AlarmIsEnabled
-
-      public ESMF_AlarmRingerOn
-      public ESMF_AlarmRingerOff
-      public ESMF_AlarmIsRinging
-      public ESMF_AlarmWillRingNext
-      public ESMF_AlarmWasPrevRinging
-
-      public ESMF_AlarmSticky
-      public ESMF_AlarmNotSticky
-      public ESMF_AlarmIsSticky
-
       public operator(==)
       public operator(/=)
- 
-! Required inherited and overridden ESMF_Base class methods
-
-      public ESMF_AlarmReadRestart
-      public ESMF_AlarmWriteRestart
-      public ESMF_AlarmValidate
+      public ESMF_AlarmCreate
+      public ESMF_AlarmDestroy
+      public ESMF_AlarmDisable
+      public ESMF_AlarmEnable
+      public ESMF_AlarmGet
+      public ESMF_AlarmIsEnabled
+      public ESMF_AlarmIsRinging
+      public ESMF_AlarmIsSticky
+      public ESMF_AlarmNotSticky
       public ESMF_AlarmPrint
+      public ESMF_AlarmReadRestart
+      public ESMF_AlarmRingerOff
+      public ESMF_AlarmRingerOn
+      public ESMF_AlarmSet
+      public ESMF_AlarmSticky
+      public ESMF_AlarmValidate
+      public ESMF_AlarmWasPrevRinging
+      public ESMF_AlarmWillRingNext
+      public ESMF_AlarmWriteRestart
 !EOPI
 
 ! !PRIVATE MEMBER FUNCTIONS:
-
       private ESMF_AlarmEQ
+      private ESMF_AlarmNE
+      private ESMF_AlarmCreateCopy
+      private ESMF_AlarmCreateNew
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.45 2004/03/10 20:37:58 eschwab Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.46 2004/03/16 23:03:03 eschwab Exp $'
 
 !==============================================================================
 !
@@ -116,23 +111,7 @@
 !
 !==============================================================================
 !BOP
-! !INTERFACE:
-      interface ESMF_AlarmCreate    
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_AlarmCreateNew
-      module procedure ESMF_AlarmCreateCopy
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt ESMF\_Alarm} Create
-!     methods.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmOverloadedOperator(==) - Test if Alarm 1 is equal to Alarm 2
+! !IROUTINE:  ESMF_AlarmOperator(==) - Test if Alarm 1 is equal to Alarm 2
 !
 ! !INTERFACE:
       interface operator(==)
@@ -171,7 +150,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmOverloadedOperator(/=) - Test if Alarm 1 is not equal to Alarm 2
+! !IROUTINE:  ESMF_AlarmOperator(/=) - Test if Alarm 1 is not equal to Alarm 2
 !
 ! !INTERFACE:
       interface operator(/=)
@@ -208,18 +187,65 @@
 
       end interface
 !
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_AlarmCreate    
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_AlarmCreateCopy
+      module procedure ESMF_AlarmCreateNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Alarm} Create
+!     methods.
+!
+!EOP
+      end interface
+!
 !==============================================================================
 
       contains
 
 !==============================================================================
-!------------------------------------------------------------------------------
+!BOP    
+! !IROUTINE: ESMF_AlarmCreate - Create a copy of an Alarm
+
+! !INTERFACE:
+      function ESMF_AlarmCreateCopy(alarm, rc)
+
+! !RETURN VALUE:
+      type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in)            :: alarm
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Creates a copy of a given {\tt ESMF\_Alarm}.
 !
-! This section includes the Set/Get methods.
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_AlarmCreate()}.
 !
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!        The {\tt ESMF\_Alarm} to copy.
+!     \item[{[rc]}]
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point to copy alarm
+      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
+
+      end function ESMF_AlarmCreateCopy
+
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmCreateNew - Create a new Alarm
+! !IROUTINE: ESMF_AlarmCreate - Create a new Alarm
 
 ! !INTERFACE:
       function ESMF_AlarmCreateNew(name, clock, ringTime, ringInterval, &
@@ -318,42 +344,6 @@
       end function ESMF_AlarmCreateNew
 
 !------------------------------------------------------------------------------
-!BOP    
-! !IROUTINE: ESMF_AlarmCreateCopy - Create a copy of an Alarm
-
-! !INTERFACE:
-      function ESMF_AlarmCreateCopy(alarm, rc)
-
-! !RETURN VALUE:
-      type(ESMF_Alarm) :: ESMF_AlarmCreateCopy
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
-      integer,          intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Creates a copy of a given {\tt ESMF\_Alarm}.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_AlarmCreate()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!        The {\tt ESMF\_Alarm} to copy.
-!     \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!     invoke C to C++ entry point to copy alarm
-      call c_ESMC_AlarmCreateCopy(ESMF_AlarmCreateCopy, alarm, rc)
-
-      end function ESMF_AlarmCreateCopy
-
-!------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_AlarmDestroy
 !
@@ -385,98 +375,63 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmSet - Set Alarm properties
+! !IROUTINE: ESMF_AlarmDisable - Disable an Alarm
 
 ! !INTERFACE:
-      subroutine ESMF_AlarmSet(alarm, name, clock, ringTime, ringInterval, &
-                               stopTime, ringDuration, ringTimeStepCount, &
-                               refTime, ringing, enabled, sticky, rc)
+      subroutine ESMF_AlarmDisable(alarm, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_Alarm),        intent(inout)         :: alarm
-      character (len=*),       intent(in),  optional :: name
-      type(ESMF_Clock),        intent(in),  optional :: clock
-      type(ESMF_Time),         intent(in),  optional :: ringTime
-      type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
-      type(ESMF_Time),         intent(in),  optional :: stopTime
-      type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
-      integer,                 intent(in),  optional :: ringTimeStepCount
-      type(ESMF_Time),         intent(in),  optional :: refTime
-      logical,                 intent(in),  optional :: ringing
-      logical,                 intent(in),  optional :: enabled
-      logical,                 intent(in),  optional :: sticky
-      integer,                 intent(out), optional :: rc
+      type(ESMF_Alarm), intent(inout)         :: alarm
+      integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Sets/resets one or more of the properties of an {\tt ESMF\_Alarm} that
-!     was previously initialized via {\tt ESMF\_AlarmCreate()}.
+!     Disables an {\tt ESMF\_Alarm}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          The object instance to set.
-!     \item[{[name]}]
-!          The new name for this alarm.  
-!     \item[{[clock]}]
-!          Re-associates this alarm with a different clock.
-!     \item[{[ringTime]}]
-!          The next ring time for a one-shot alarm or a repeating (interval)
-!          alarm.
-!     \item[{[ringInterval]}]
-!          The ring interval for repeating (interval) alarms.
-!     \item[{[stopTime]}]
-!          The stop time for repeating (interval) alarms.
-!     \item[{[ringDuration]}]
-!          The absolute ring duration.  If not sticky (see argument below),
-!          alarms rings for ringDuration, then turns itself off.  Mutually 
-!          exclusive with ringTimeStepCount (below); used only if
-!          ringTimeStepCount is zero.
-!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
-!     \item[{[ringTimeStepCount]}]
-!          The relative ring duration.  If not sticky (see argument below),
-!          alarms rings for ringTimeStepCount, then turns itself off.
-!          Mutually exclusive with ringDuration (above); used if non-zero,
-!          otherwise ringDuration is used.
-!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
-!     \item[{[refTime]}]
-!          The reference (i.e. base) time for an interval alarm.
-!     \item[{[ringing]}]
-!          Sets the ringing state.
-!          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
-!     \item[{[enabled]}]
-!          Sets the enabled state.  If disabled, an alarm will not function
-!          at all.
-!          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
-!     \item[{[sticky]}]
-!          Sets the sticky state.  If sticky, once an alarm is ringing, it
-!          will remain ringing until turned off manually via a user call to
-!          {\tt ESMF\_AlarmRingerOff()}.  If not sticky, an alarm will turn
-!          itself off after a certain ring duration specified by either
-!          ringDuration or ringTimeStepCount (see above).
-!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!          The object instance to disable.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
 !EOP
 ! !REQUIREMENTS:
-!     TMG4.1, TMG4.7
+!     TMG4.5.3
+    
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmDisable(alarm, rc)
 
-      ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
+      end subroutine ESMF_AlarmDisable
 
-      ! get length of given name for C++ validation
-      if (present(name)) then
-        nameLen = len_trim(name)
-      end if
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmEnable - Enable an Alarm
+
+! !INTERFACE:
+      subroutine ESMF_AlarmEnable(alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(inout)         :: alarm
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Enables an {\tt ESMF\_Alarm} to function.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to enable.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMG4.5.3
 
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmSet(alarm, nameLen, name, clock, ringTime, &
-                           ringInterval, stopTime, ringDuration, &
-                           ringTimeStepCount, refTime, ringing, &
-                           enabled, sticky, rc)
+      call c_ESMC_AlarmEnable(alarm, rc)
 
-      end subroutine ESMF_AlarmSet
+      end subroutine ESMF_AlarmEnable
 
 !------------------------------------------------------------------------------
 !BOP
@@ -589,66 +544,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmEnable - Enable an Alarm
-
-! !INTERFACE:
-      subroutine ESMF_AlarmEnable(alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout)         :: alarm
-      integer,          intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Enables an {\tt ESMF\_Alarm} to function.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to enable.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-! !REQUIREMENTS:
-!     TMG4.5.3
-
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmEnable(alarm, rc)
-
-      end subroutine ESMF_AlarmEnable
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AlarmDisable - Disable an Alarm
-
-! !INTERFACE:
-      subroutine ESMF_AlarmDisable(alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout)         :: alarm
-      integer,          intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Disables an {\tt ESMF\_Alarm}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to disable.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-! !REQUIREMENTS:
-!     TMG4.5.3
-    
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmDisable(alarm, rc)
-
-      end subroutine ESMF_AlarmDisable
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE:  ESMF_AlarmIsEnabled - Check if Alarm is enabled
 
 ! !INTERFACE:
@@ -679,68 +574,6 @@
       call c_ESMC_AlarmIsEnabled(alarm, ESMF_AlarmIsEnabled, rc)
 
       end function ESMF_AlarmIsEnabled
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmRingerOn - Turn on an Alarm
-
-
-! !INTERFACE:
-      subroutine ESMF_AlarmRingerOn(alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout)         :: alarm
-      integer,          intent(out), optional :: rc
-    
-! !DESCRIPTION:
-!     Turn on an {\tt ESMF\_Alarm}; sets ringing state.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to turn on.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG4.6
-
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmRingerOn(alarm, rc)
-
-      end subroutine ESMF_AlarmRingerOn
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmRingerOff - Turn off an Alarm
-
-! !INTERFACE:
-      subroutine ESMF_AlarmRingerOff(alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout)         :: alarm
-      integer,          intent(out), optional :: rc
-    
-! !DESCRIPTION:
-!     Turn off an {\tt ESMF\_Alarm}; unsets ringing state.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to turn off.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-! !REQUIREMENTS:
-!     TMG4.6
-
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmRingerOff(alarm, rc)
-
-      end subroutine ESMF_AlarmRingerOff
 
 !------------------------------------------------------------------------------
 !BOP
@@ -781,116 +614,36 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmWillRingNext - Check if Alarm will ring upon the next clock timestep
+! !IROUTINE:  ESMF_AlarmIsSticky - Check if Alarm is sticky
 
 ! !INTERFACE:
-      function ESMF_AlarmWillRingNext(alarm, timeStep, rc)
+      function ESMF_AlarmIsSticky(alarm, rc)
 !
 ! !RETURN VALUE:
-      logical :: ESMF_AlarmWillRingNext
-
-! !ARGUMENTS:
-      type(ESMF_Alarm),        intent(in)            :: alarm
-      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Check if {\tt ESMF\_Alarm} will ring on the next clock timestep, either
-!     the current clock timestep or a passed-in timestep.
-!
-!     See also method
-!       {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_NEXTRINGING, ...)}
-!     to get a list of all alarms belonging to a {\tt ESMF\_Clock} that will
-!     ring on the next time step.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The alarm to check for next ringing state.
-!     \item[{[timeStep]}]
-!          Optional timestep to use instead of the clock's.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-! !REQUIREMENTS:
-!     TMG4.4
-    
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmWillRingNext(alarm, timeStep, ESMF_AlarmWillRingNext, rc)
-
-      end function ESMF_AlarmWillRingNext
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmWasPrevRinging - Check if Alarm was ringing on the previous clock timestep
-
-! !INTERFACE:
-      function ESMF_AlarmWasPrevRinging(alarm, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_AlarmWasPrevRinging
+      logical :: ESMF_AlarmIsSticky
 
 ! !ARGUMENTS:
       type(ESMF_Alarm), intent(in)            :: alarm
       integer,          intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Check if {\tt ESMF\_Alarm} was ringing on the previous clock timestep.
-!
-!     See also method
-!       {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_PREVRINGING, ...)}
-!     get a list of all alarms belonging to a {\tt ESMF\_Clock} that were
-!     ringing on the previous time step.
+!     Check if {\tt alarm} is sticky.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[alarm]
-!          The object instance to check for previous ringing state.
+!          The object instance to check for sticky state.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!EOP
-! !REQUIREMENTS:
-!     TMG4.4
-    
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, rc)
-
-      end function ESMF_AlarmWasPrevRinging
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmSticky - Set an Alarm's sticky flag
-
-
-! !INTERFACE:
-      subroutine ESMF_AlarmSticky(alarm, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(inout)         :: alarm
-      integer,          intent(out), optional :: rc
-    
-! !DESCRIPTION:
-!     Set an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
-!     it remains ringing until {\tt ESMF\_AlarmRingerOff()} is called.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to be set sticky.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
 !EOP
 ! !REQUIREMENTS:
 !     TMGn.n.n
-
+    
 !     invoke C to C++ entry point
-      call c_ESMC_AlarmSticky(alarm, rc)
+      call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, rc)
 
-      end subroutine ESMF_AlarmSticky
+      end function ESMF_AlarmIsSticky
 
 !------------------------------------------------------------------------------
 !BOP
@@ -933,203 +686,6 @@
                                  ringTimeStepCount, rc)
 
       end subroutine ESMF_AlarmNotSticky
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmIsSticky - Check if Alarm is sticky
-
-! !INTERFACE:
-      function ESMF_AlarmIsSticky(alarm, rc)
-!
-! !RETURN VALUE:
-      logical :: ESMF_AlarmIsSticky
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in)            :: alarm
-      integer,          intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Check if {\tt alarm} is sticky.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to check for sticky state.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-    
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmIsSticky(alarm, ESMF_AlarmIsSticky, rc)
-
-      end function ESMF_AlarmIsSticky
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_AlarmEQ - Compare two Alarms for equality
-!
-! !INTERFACE:
-      function ESMF_AlarmEQ(alarm1, alarm2)
-!
-! !RETURN VALUE:
-      logical :: ESMF_AlarmEQ
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm1
-      type(ESMF_Alarm), intent(in) :: alarm2
-
-! !DESCRIPTION:
-!     This method overloads the (==) operator for the {\tt ESMF\_Alarm}
-!     class.  See "interface operator(==)" above for complete description.
-!
-!EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
-
-      end function ESMF_AlarmEQ
-
-!------------------------------------------------------------------------------
-!BOPI
-! !IROUTINE:  ESMF_AlarmNE - Compare two Alarms for inequality
-!
-! !INTERFACE:
-      function ESMF_AlarmNE(alarm1, alarm2)
-!
-! !RETURN VALUE:
-      logical :: ESMF_AlarmNE
-
-! !ARGUMENTS:
-      type(ESMF_Alarm), intent(in) :: alarm1
-      type(ESMF_Alarm), intent(in) :: alarm2
-
-! !DESCRIPTION:
-!     This method overloads the (/=) operator for the {\tt ESMF\_Alarm}
-!     class.  See "interface operator(/=)" above for complete description.
-!
-!EOPI
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmNE(alarm1, alarm2, ESMF_AlarmNE)
-
-      end function ESMF_AlarmNE
-
-!------------------------------------------------------------------------------
-!
-! This section defines the overridden Read, Write, Validate and Print methods
-! from the ESMF_Base class
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm (not implemented)
-
-! !INTERFACE:
-      function ESMF_AlarmReadRestart(name, iospec, rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Alarm) :: ESMF_AlarmReadRestart
-!
-! !ARGUMENTS:
-      character (len=*), intent(in)            :: name
-      type(ESMF_IOSpec), intent(in),  optional :: iospec
-      integer,           intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Restores an {\tt ESMF\_Alarm} object from the last call to
-!     {\tt ESMF\_AlarmWriteRestart()}.  (Not implemented yet).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[name]
-!          The name of the object instance to restore.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-      ! get length of given name for C++ validation
-      integer :: nameLen
-      nameLen = len_trim(name)
-
-!     invoke C to C++ entry point to allocate and restore alarm
-      call c_ESMC_AlarmReadRestart(ESMF_AlarmReadRestart, nameLen, name, &
-                                   iospec, rc)
-
-      end function ESMF_AlarmReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm (not implemented)
-
-! !INTERFACE:
-      subroutine ESMF_AlarmWriteRestart(alarm, iospec, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm),  intent(in)            :: alarm
-      type(ESMF_IOSpec), intent(in),  optional :: iospec
-      integer,           intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Saves an {\tt ESMF\_Alarm} object.  Default options are to select the
-!     fastest way to save to disk.  (Not implemented yet).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[alarm]
-!          The object instance to save.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmWriteRestart(alarm, iospec, rc)
-
-      end subroutine ESMF_AlarmWriteRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_AlarmValidate - Validate an Alarm's properties
-
-! !INTERFACE:
-      subroutine ESMF_AlarmValidate(alarm, options, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Alarm),  intent(in)            :: alarm
-      character (len=*), intent(in),  optional :: options
-      integer,           intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Perform a validation check on a {\tt ESMF\_Alarm}'s properties.  The
-!     options control the type of validation.
-!
-!     The arguments are:  
-!     \begin{description}
-!     \item[alarm]
-!          {\tt ESMF\_Alarm} to be validated.
-!     \item[{[options]}]
-!          Validation options.  TODO:  To be determined.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description} 
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-      
-!     invoke C to C++ entry point
-      call c_ESMC_AlarmValidate(alarm, options, rc)
-    
-      end subroutine ESMF_AlarmValidate
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1187,6 +743,435 @@
       call c_ESMC_AlarmPrint(alarm, options, rc)   
 
       end subroutine ESMF_AlarmPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmReadRestart - Restore the contents of an Alarm (not implemented)
+
+! !INTERFACE:
+      function ESMF_AlarmReadRestart(name, iospec, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Alarm) :: ESMF_AlarmReadRestart
+!
+! !ARGUMENTS:
+      character (len=*), intent(in)            :: name
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Restores an {\tt ESMF\_Alarm} object from the last call to
+!     {\tt ESMF\_AlarmWriteRestart()}.  (Not implemented yet).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!          The name of the object instance to restore.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+      ! get length of given name for C++ validation
+      integer :: nameLen
+      nameLen = len_trim(name)
+
+!     invoke C to C++ entry point to allocate and restore alarm
+      call c_ESMC_AlarmReadRestart(ESMF_AlarmReadRestart, nameLen, name, &
+                                   iospec, rc)
+
+      end function ESMF_AlarmReadRestart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmRingerOff - Turn off an Alarm
+
+! !INTERFACE:
+      subroutine ESMF_AlarmRingerOff(alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(inout)         :: alarm
+      integer,          intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Turn off an {\tt ESMF\_Alarm}; unsets ringing state.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to turn off.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMG4.6
+
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmRingerOff(alarm, rc)
+
+      end subroutine ESMF_AlarmRingerOff
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmRingerOn - Turn on an Alarm
+
+
+! !INTERFACE:
+      subroutine ESMF_AlarmRingerOn(alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(inout)         :: alarm
+      integer,          intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Turn on an {\tt ESMF\_Alarm}; sets ringing state.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to turn on.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG4.6
+
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmRingerOn(alarm, rc)
+
+      end subroutine ESMF_AlarmRingerOn
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmSet - Set Alarm properties
+
+! !INTERFACE:
+      subroutine ESMF_AlarmSet(alarm, name, clock, ringTime, ringInterval, &
+                               stopTime, ringDuration, ringTimeStepCount, &
+                               refTime, ringing, enabled, sticky, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm),        intent(inout)         :: alarm
+      character (len=*),       intent(in),  optional :: name
+      type(ESMF_Clock),        intent(in),  optional :: clock
+      type(ESMF_Time),         intent(in),  optional :: ringTime
+      type(ESMF_TimeInterval), intent(in),  optional :: ringInterval
+      type(ESMF_Time),         intent(in),  optional :: stopTime
+      type(ESMF_TimeInterval), intent(in),  optional :: ringDuration
+      integer,                 intent(in),  optional :: ringTimeStepCount
+      type(ESMF_Time),         intent(in),  optional :: refTime
+      logical,                 intent(in),  optional :: ringing
+      logical,                 intent(in),  optional :: enabled
+      logical,                 intent(in),  optional :: sticky
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets/resets one or more of the properties of an {\tt ESMF\_Alarm} that
+!     was previously initialized via {\tt ESMF\_AlarmCreate()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to set.
+!     \item[{[name]}]
+!          The new name for this alarm.  
+!     \item[{[clock]}]
+!          Re-associates this alarm with a different clock.
+!     \item[{[ringTime]}]
+!          The next ring time for a one-shot alarm or a repeating (interval)
+!          alarm.
+!     \item[{[ringInterval]}]
+!          The ring interval for repeating (interval) alarms.
+!     \item[{[stopTime]}]
+!          The stop time for repeating (interval) alarms.
+!     \item[{[ringDuration]}]
+!          The absolute ring duration.  If not sticky (see argument below),
+!          alarms rings for ringDuration, then turns itself off.  Mutually 
+!          exclusive with ringTimeStepCount (below); used only if
+!          ringTimeStepCount is zero.
+!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[ringTimeStepCount]}]
+!          The relative ring duration.  If not sticky (see argument below),
+!          alarms rings for ringTimeStepCount, then turns itself off.
+!          Mutually exclusive with ringDuration (above); used if non-zero,
+!          otherwise ringDuration is used.
+!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[refTime]}]
+!          The reference (i.e. base) time for an interval alarm.
+!     \item[{[ringing]}]
+!          Sets the ringing state.
+!          See also {\tt ESMF\_AlarmRingerOn()}, {\tt ESMF\_AlarmRingerOff()}.
+!     \item[{[enabled]}]
+!          Sets the enabled state.  If disabled, an alarm will not function
+!          at all.
+!          See also {\tt ESMF\_AlarmEnable()}, {\tt ESMF\_AlarmDisable()}.
+!     \item[{[sticky]}]
+!          Sets the sticky state.  If sticky, once an alarm is ringing, it
+!          will remain ringing until turned off manually via a user call to
+!          {\tt ESMF\_AlarmRingerOff()}.  If not sticky, an alarm will turn
+!          itself off after a certain ring duration specified by either
+!          ringDuration or ringTimeStepCount (see above).
+!          See also {\tt ESMF\_AlarmSticky()}, {\tt ESMF\_AlarmNotSticky()}.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMG4.1, TMG4.7
+
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmSet(alarm, nameLen, name, clock, ringTime, &
+                           ringInterval, stopTime, ringDuration, &
+                           ringTimeStepCount, refTime, ringing, &
+                           enabled, sticky, rc)
+
+      end subroutine ESMF_AlarmSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmSticky - Set an Alarm's sticky flag
+
+
+! !INTERFACE:
+      subroutine ESMF_AlarmSticky(alarm, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(inout)         :: alarm
+      integer,          intent(out), optional :: rc
+    
+! !DESCRIPTION:
+!     Set an {\tt ESMF\_Alarm}'s sticky flag; once alarm is ringing,
+!     it remains ringing until {\tt ESMF\_AlarmRingerOff()} is called.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to be set sticky.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmSticky(alarm, rc)
+
+      end subroutine ESMF_AlarmSticky
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmValidate - Validate an Alarm's properties
+
+! !INTERFACE:
+      subroutine ESMF_AlarmValidate(alarm, options, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm),  intent(in)            :: alarm
+      character (len=*), intent(in),  optional :: options
+      integer,           intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Perform a validation check on a {\tt ESMF\_Alarm}'s properties.  The
+!     options control the type of validation.
+!
+!     The arguments are:  
+!     \begin{description}
+!     \item[alarm]
+!          {\tt ESMF\_Alarm} to be validated.
+!     \item[{[options]}]
+!          Validation options.  TODO:  To be determined.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description} 
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+      
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmValidate(alarm, options, rc)
+    
+      end subroutine ESMF_AlarmValidate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmWasPrevRinging - Check if Alarm was ringing on the previous clock timestep
+
+! !INTERFACE:
+      function ESMF_AlarmWasPrevRinging(alarm, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_AlarmWasPrevRinging
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in)            :: alarm
+      integer,          intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Check if {\tt ESMF\_Alarm} was ringing on the previous clock timestep.
+!
+!     See also method
+!       {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_PREVRINGING, ...)}
+!     get a list of all alarms belonging to a {\tt ESMF\_Clock} that were
+!     ringing on the previous time step.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to check for previous ringing state.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMG4.4
+    
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmWasPrevRinging(alarm, ESMF_AlarmWasPrevRinging, rc)
+
+      end function ESMF_AlarmWasPrevRinging
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_AlarmWillRingNext - Check if Alarm will ring upon the next clock timestep
+
+! !INTERFACE:
+      function ESMF_AlarmWillRingNext(alarm, timeStep, rc)
+!
+! !RETURN VALUE:
+      logical :: ESMF_AlarmWillRingNext
+
+! !ARGUMENTS:
+      type(ESMF_Alarm),        intent(in)            :: alarm
+      type(ESMF_TimeInterval), intent(in),  optional :: timeStep
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Check if {\tt ESMF\_Alarm} will ring on the next clock timestep, either
+!     the current clock timestep or a passed-in timestep.
+!
+!     See also method
+!       {\tt ESMF\_ClockGetAlarmList(clock, ESMF\_ALARMLIST\_NEXTRINGING, ...)}
+!     to get a list of all alarms belonging to a {\tt ESMF\_Clock} that will
+!     ring on the next time step.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The alarm to check for next ringing state.
+!     \item[{[timeStep]}]
+!          Optional timestep to use instead of the clock's.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!EOP
+! !REQUIREMENTS:
+!     TMG4.4
+    
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmWillRingNext(alarm, timeStep, ESMF_AlarmWillRingNext, rc)
+
+      end function ESMF_AlarmWillRingNext
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_AlarmWriteRestart - Save the contents of an Alarm (not implemented)
+
+! !INTERFACE:
+      subroutine ESMF_AlarmWriteRestart(alarm, iospec, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Alarm),  intent(in)            :: alarm
+      type(ESMF_IOSpec), intent(in),  optional :: iospec
+      integer,           intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Saves an {\tt ESMF\_Alarm} object.  Default options are to select the
+!     fastest way to save to disk.  (Not implemented yet).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[alarm]
+!          The object instance to save.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmWriteRestart(alarm, iospec, rc)
+
+      end subroutine ESMF_AlarmWriteRestart
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_AlarmEQ - Compare two Alarms for equality
+!
+! !INTERFACE:
+      function ESMF_AlarmEQ(alarm1, alarm2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_AlarmEQ
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm1
+      type(ESMF_Alarm), intent(in) :: alarm2
+
+! !DESCRIPTION:
+!     This method overloads the (==) operator for the {\tt ESMF\_Alarm}
+!     class.  See "interface operator(==)" above for complete description.
+!
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmEQ(alarm1, alarm2, ESMF_AlarmEQ)
+
+      end function ESMF_AlarmEQ
+
+!------------------------------------------------------------------------------
+!BOPI
+! !IROUTINE:  ESMF_AlarmNE - Compare two Alarms for inequality
+!
+! !INTERFACE:
+      function ESMF_AlarmNE(alarm1, alarm2)
+!
+! !RETURN VALUE:
+      logical :: ESMF_AlarmNE
+
+! !ARGUMENTS:
+      type(ESMF_Alarm), intent(in) :: alarm1
+      type(ESMF_Alarm), intent(in) :: alarm2
+
+! !DESCRIPTION:
+!     This method overloads the (/=) operator for the {\tt ESMF\_Alarm}
+!     class.  See "interface operator(/=)" above for complete description.
+!
+!EOPI
+!     invoke C to C++ entry point
+      call c_ESMC_AlarmNE(alarm1, alarm2, ESMF_AlarmNE)
+
+      end function ESMF_AlarmNE
 
 !------------------------------------------------------------------------------
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.56 2004/03/10 21:52:17 eschwab Exp $
+! $Id: ESMF_Calendar.F90,v 1.57 2004/03/16 23:03:04 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -101,26 +101,33 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_CalendarCreate
-      public ESMF_CalendarDestroy
-      public ESMF_CalendarSet
-      public ESMF_CalendarGet
-
-! Required inherited and overridden ESMF_Base class methods
-
-      public ESMF_CalendarReadRestart
-      public ESMF_CalendarWriteRestart
-      public ESMF_CalendarValidate
-      public ESMF_CalendarPrint
-
       public operator(==)
       public operator(/=)
+      public ESMF_CalendarCreate
+      public ESMF_CalendarDestroy
+      public ESMF_CalendarGet
+      public ESMF_CalendarPrint
+      public ESMF_CalendarReadRestart
+      public ESMF_CalendarSet
+      public ESMF_CalendarValidate
+      public ESMF_CalendarWriteRestart
 !EOPI
+
+! !PRIVATE MEMBER FUNCTIONS:
+      private ESMF_CalendarEQ
+      private ESMF_CalendarNE
+      private ESMF_CalendarTypeEQ
+      private ESMF_CalendarTypeNE
+      private ESMF_CalendarCreateCopy
+      private ESMF_CalendarCreateCustom
+      private ESMF_CalendarCreateNew
+      private ESMF_CalendarSetCustom
+      private ESMF_CalendarSetNew
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.56 2004/03/10 21:52:17 eschwab Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.57 2004/03/16 23:03:04 eschwab Exp $'
 
 !==============================================================================
 ! 
@@ -128,40 +135,7 @@
 ! 
 !==============================================================================
 !BOP
-! !INTERFACE:
-      interface ESMF_CalendarCreate    
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_CalendarCreateNew
-      module procedure ESMF_CalendarCreateCustom
-      module procedure ESMF_CalendarCreateCopy
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt ESMF\_Calendar}
-!     Create methods.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !INTERFACE:
-      interface ESMF_CalendarSet    
-
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_CalendarSetNew
-      module procedure ESMF_CalendarSetCustom
-
-! !DESCRIPTION:
-!     This interface provides a single entry point for {\tt ESMF\_Calendar}
-!     Set methods.
-!
-!EOP
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarOverloadedOperator(==) - Test if Calendar 1 is equal to Calendar 2
+! !IROUTINE:  ESMF_CalendarOperator(==) - Test if Calendar 1 is equal to Calendar 2
 !
 ! !INTERFACE:
       interface operator(==)
@@ -198,7 +172,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarTypeOverloadedOperator(==) - Test if Calendar Type 1 is equal to Calendar Type 2
+! !IROUTINE:  ESMF_CalendarTypeOperator(==) - Test if Calendar Type 1 is equal to Calendar Type 2
 !
 ! !INTERFACE:
 !     interface operator(==)
@@ -237,7 +211,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarOverloadedOperator(/=) - Test if Calendar 1 is not equal to Calendar 2
+! !IROUTINE:  ESMF_CalendarOperator(/=) - Test if Calendar 1 is not equal to Calendar 2
 !
 ! !INTERFACE:
       interface operator(/=)
@@ -274,7 +248,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_CalendarTypeOverloadedOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
+! !IROUTINE:  ESMF_CalendarTypeOperator(/=) - Test if Calendar Type 1 is not equal to Calendar Type 2
 !
 ! !INTERFACE:
 !     interface operator(/=)
@@ -310,75 +284,83 @@
 !     TMGx.x.x
 !
        end interface    
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_CalendarCreate    
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarCreateCopy
+      module procedure ESMF_CalendarCreateCustom
+      module procedure ESMF_CalendarCreateNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Calendar}
+!     Create methods.
+!
+!EOP
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_CalendarSet    
+
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_CalendarSetCustom
+      module procedure ESMF_CalendarSetNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for {\tt ESMF\_Calendar}
+!     Set methods.
+!
+!EOP
+      end interface
 !
 !==============================================================================
 
       contains
 
 !==============================================================================
-!
-! This section includes the Set methods.
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarCreateNew - Create a new Calendar
+!BOP    
+! !IROUTINE: ESMF_CalendarCreate - Create a copy of a Calendar
 
 ! !INTERFACE:
-      function ESMF_CalendarCreateNew(name, calendarType, rc)
+      function ESMF_CalendarCreateCopy(calendar, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Calendar) :: ESMF_CalendarCreateNew
+      type(ESMF_Calendar) :: ESMF_CalendarCreateCopy
 
 ! !ARGUMENTS:
-      character (len=*),       intent(in),  optional :: name
-      type(ESMF_CalendarType), intent(in)            :: calendarType
-      integer,                 intent(out), optional :: rc
+      type(ESMF_Calendar), intent(in)            :: calendar
+      integer,             intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Creates and sets a {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
+!     Creates a copy of a given {\tt ESMF\_Calendar}.
 !
 !     This is a private method; invoke via the public overloaded entry point
 !     {\tt ESMF\_CalendarCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[{[name]}]
-!          The name for the newly created calendar.  If not specified, a
-!          default unique name will be generated: "CalendarNNN" where NNN
-!          is a unique sequence number from 001 to 999.
-!     \item[calendarType]
-!          The {\tt ESMF\_CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
-!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
-!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
-!            {\tt ESMF\_CAL\_NOCALENDAR}.
-!          See the "Time Manager Reference" document for a description of
-!          each calendar type.
+!     \item[calendar]
+!        The {\tt ESMF\_Calendar} to copy.
 !     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!    
+!
 !EOP
 ! !REQUIREMENTS:
-!     TMGn.n.n
 
-      ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
+!     invoke C to C++ entry point to copy calendar
+      call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, rc)
 
-      ! get length of given name for C++ validation
-      if (present(name)) then
-        nameLen = len_trim(name)
-      end if
-    
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarCreateNew(ESMF_CalendarCreateNew, nameLen, name, &
-                                    calendarType, rc)
-    
-      end function ESMF_CalendarCreateNew
-    
+      end function ESMF_CalendarCreateCopy
+
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CalendarCreateCustom - Create a custom Calendar
+! !IROUTINE: ESMF_CalendarCreate - Create a custom Calendar
 
 ! !INTERFACE:
       function ESMF_CalendarCreateCustom(name, daysPerMonth, secondsPerDay, &
@@ -478,41 +460,62 @@
       end function ESMF_CalendarCreateCustom
     
 !------------------------------------------------------------------------------
-!BOP    
-! !IROUTINE: ESMF_CalendarCreateCopy - Create a copy of a Calendar
+!BOP
+! !IROUTINE: ESMF_CalendarCreate - Create a new Calendar
 
 ! !INTERFACE:
-      function ESMF_CalendarCreateCopy(calendar, rc)
+      function ESMF_CalendarCreateNew(name, calendarType, rc)
 
 ! !RETURN VALUE:
-      type(ESMF_Calendar) :: ESMF_CalendarCreateCopy
+      type(ESMF_Calendar) :: ESMF_CalendarCreateNew
 
 ! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
-      integer,             intent(out), optional :: rc
+      character (len=*),       intent(in),  optional :: name
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Creates a copy of a given {\tt ESMF\_Calendar}.
+!     Creates and sets a {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
 !
 !     This is a private method; invoke via the public overloaded entry point
 !     {\tt ESMF\_CalendarCreate()}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[calendar]
-!        The {\tt ESMF\_Calendar} to copy.
+!     \item[{[name]}]
+!          The name for the newly created calendar.  If not specified, a
+!          default unique name will be generated: "CalendarNNN" where NNN
+!          is a unique sequence number from 001 to 999.
+!     \item[calendarType]
+!          The {\tt ESMF\_CalendarType}.  Valid values are:
+!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
+!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
+!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
+!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!          See the "Time Manager Reference" document for a description of
+!          each calendar type.
 !     \item[{[rc]}]
-!        Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
-!
+!    
 !EOP
 ! !REQUIREMENTS:
+!     TMGn.n.n
 
-!     invoke C to C++ entry point to copy calendar
-      call c_ESMC_CalendarCreateCopy(ESMF_CalendarCreateCopy, calendar, rc)
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
 
-      end function ESMF_CalendarCreateCopy
-
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarCreateNew(ESMF_CalendarCreateNew, nameLen, name, &
+                                    calendarType, rc)
+    
+      end function ESMF_CalendarCreateNew
+    
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CalendarDestroy
@@ -543,160 +546,6 @@
 
       end subroutine ESMF_CalendarDestroy
 
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarSetNew - Set the Calendar type
-
-! !INTERFACE:
-      subroutine ESMF_CalendarSetNew(calendar, name, calendarType, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Calendar),     intent(inout)         :: calendar
-      character (len=*),       intent(in),  optional :: name
-      type(ESMF_CalendarType), intent(in)            :: calendarType
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSet()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          The object instance to initialize.
-!     \item[{[name]}]
-!          The new name for this calendar.
-!     \item[calendarType]
-!          The {\tt CalendarType}.  Valid values are:
-!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
-!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
-!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
-!            {\tt ESMF\_CAL\_NOCALENDAR}.
-!          See the "Time Manager Reference" document for a description of
-!          each calendar type.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!    
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-    
-      ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
-
-      ! get length of given name for C++ validation
-      if (present(name)) then
-        nameLen = len_trim(name)
-      end if
-    
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarSetNew(calendar, nameLen, name, calendarType, rc)
-    
-      end subroutine ESMF_CalendarSetNew
-    
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_CalendarSetCustom - Set a custom Calendar
-
-! !INTERFACE:
-      subroutine ESMF_CalendarSetCustom(calendar, name, daysPerMonth, &
-                                        secondsPerDay, &
-                                        daysPerYear, daysPerYearDn, &
-                                        daysPerYearDd, rc)
-! !ARGUMENTS:
-      type(ESMF_Calendar),   intent(inout)         :: calendar
-      character (len=*),     intent(in),  optional :: name
-      integer, dimension(:), intent(in),  optional :: daysPerMonth
-      integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not implemented
-      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not implemented
-      integer,               intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Sets properties in a custom {\tt ESMF\_Calendar}.
-!
-!     This is a private method; invoke via the public overloaded entry point
-!     {\tt ESMF\_CalendarSet()}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          The object instance to initialize.
-!     \item[{[name]}]
-!          The new name for this calendar.
-!     \item[{[daysPerMonth]}]
-!          Integer array of days per month, for each month of the year.
-!          The number of months per year is variable and taken from the
-!          size of the array.  If unspecified, months per year = 0,
-!          with the days array undefined.
-!     \item[{[secondsPerDay]}]
-!          Integer number of seconds per day.  Defaults to 86400 if not 
-!          specified.
-!     \item[{[daysPerYear]}]
-!          Integer number of days per year.  Use with daysPerYearDn and
-!          daysPerYearDd (see below) to specify a days-per-year calendar
-!          for any planetary body.  Default = 0.  (Not implemented yet).
-!     \item[{[daysPerYearDn]}]
-!          Integer numerator portion of fractional number of days per year
-!          (daysPerYearDn/daysPerYearDd).
-!          Use with daysPerYear (see above) and daysPerYearDd (see below) to
-!          specify a days-per-year calendar for any planetary body.
-!          Default = 0.  (Not implemented yet).
-!     \item[{[daysPerYearDd]}]
-!          Integer denominator portion of fractional number of days per year
-!          (daysPerYearDn/daysPerYearDd).
-!          Use with daysPerYear and daysPerYearDn (see above) to
-!          specify a days-per-year calendar for any planetary body.
-!          Default = 1.  (Not implemented yet).
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!     
-!EOP
-! !REQUIREMENTS:
-!     TMG2.3.4
-
-      ! initialize name length to zero for non-existent name
-      integer :: nameLen = 0
-
-      ! initialize number of months per year to zero for not-present
-      !   daysPerMonth
-      integer :: monthsPerYear = 0
-
-      ! get length of given name for C++ validation
-      if (present(name)) then
-        nameLen = len_trim(name)
-      end if
-
-      ! get size of given daysPerMonth array for C++ validation
-      if (present(daysPerMonth)) then
-        monthsPerYear = size(daysPerMonth)
-      end if
-
-!     invoke C to C++ entry point
-
-      if (present(daysPerMonth)) then
-        call c_ESMC_CalendarSetCustom1(calendar, &
-                                      nameLen, name, &
-                                      daysPerMonth(1), monthsPerYear, &
-                                      secondsPerDay, &
-                                      daysPerYear, daysPerYearDn, &
-                                      daysPerYearDd, rc)
-      else
-        call c_ESMC_CalendarSetCustom0(calendar, &
-                                      nameLen, name, &
-                                      monthsPerYear, &
-                                      secondsPerDay, &
-                                      daysPerYear, daysPerYearDn, &
-                                      daysPerYearDd, rc)
-      end if
-
-      end subroutine ESMF_CalendarSetCustom
-    
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
@@ -807,6 +656,319 @@
       end subroutine ESMF_CalendarGet
     
 !------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarPrint - Print the contents of a Calendar
+
+! !INTERFACE:
+      subroutine ESMF_CalendarPrint(calendar, options, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Calendar), intent(in)            :: calendar
+      character (len=*),   intent(in),  optional :: options
+      integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Prints out an {\tt ESMF\_Calendar}'s properties, in support of testing    !     and debugging.  The options control the type of information and level     
+!     of detail. 
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          {\tt ESMF\_Calendar} to be printed out.
+!     \item[{[options]}]
+!          Print options. If none specified, prints all calendar property
+!                             values. \\
+!          "name"           - print the calendar's name. \\
+!          "calendarType"   - print the calendar's type 
+!                               (e.g. ESMF\_CAL\_GREGORIAN). \\
+!          "daysPerMonth"   - print the array of number of days for
+!                               each month. \\
+!          "monthsPerYear"  - print the number of months per year. \\
+!          "secondsPerDay"  - print the number of seconds in a day. \\
+!          "secondsPerYear" - print the number of seconds in a year. \\
+!          "daysPerYear"    - print the number of days per year \\
+!                             (integer and fractional parts). \\
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+  
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarPrint(calendar, options, rc)
+
+      end subroutine ESMF_CalendarPrint
+      
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
+
+! !INTERFACE:
+      function ESMF_CalendarReadRestart(name, iospec, rc)
+! 
+! !RETURN VALUE:
+      type(ESMF_Calendar) :: ESMF_CalendarReadRestart
+!
+! !ARGUMENTS:
+      character (len=*),   intent(in)            :: name
+      type(ESMF_IOSpec),   intent(in),  optional :: iospec
+      integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Restores an {\tt ESMF\_Calendar} object from the last call to
+!     {\tt ESMF\_CalendarWriteRestart()}.  (Not implemented yet).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[name]
+!          The name of the object instance to restore.
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! get length of given name for C++ validation
+      integer :: nameLen
+      nameLen = len_trim(name)
+
+!     invoke C to C++ entry point to allocate and restore calendar
+      call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
+                                      iospec, rc)
+
+      end function ESMF_CalendarReadRestart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarSet - Set a custom Calendar
+
+! !INTERFACE:
+      subroutine ESMF_CalendarSetCustom(calendar, name, daysPerMonth, &
+                                        secondsPerDay, &
+                                        daysPerYear, daysPerYearDn, &
+                                        daysPerYearDd, rc)
+! !ARGUMENTS:
+      type(ESMF_Calendar),   intent(inout)         :: calendar
+      character (len=*),     intent(in),  optional :: name
+      integer, dimension(:), intent(in),  optional :: daysPerMonth
+      integer(ESMF_KIND_I4), intent(in),  optional :: secondsPerDay
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYear   ! not implemented
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDn ! not implemented
+      integer(ESMF_KIND_I4), intent(in),  optional :: daysPerYearDd ! not implemented
+      integer,               intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets properties in a custom {\tt ESMF\_Calendar}.
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSet()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          The object instance to initialize.
+!     \item[{[name]}]
+!          The new name for this calendar.
+!     \item[{[daysPerMonth]}]
+!          Integer array of days per month, for each month of the year.
+!          The number of months per year is variable and taken from the
+!          size of the array.  If unspecified, months per year = 0,
+!          with the days array undefined.
+!     \item[{[secondsPerDay]}]
+!          Integer number of seconds per day.  Defaults to 86400 if not 
+!          specified.
+!     \item[{[daysPerYear]}]
+!          Integer number of days per year.  Use with daysPerYearDn and
+!          daysPerYearDd (see below) to specify a days-per-year calendar
+!          for any planetary body.  Default = 0.  (Not implemented yet).
+!     \item[{[daysPerYearDn]}]
+!          Integer numerator portion of fractional number of days per year
+!          (daysPerYearDn/daysPerYearDd).
+!          Use with daysPerYear (see above) and daysPerYearDd (see below) to
+!          specify a days-per-year calendar for any planetary body.
+!          Default = 0.  (Not implemented yet).
+!     \item[{[daysPerYearDd]}]
+!          Integer denominator portion of fractional number of days per year
+!          (daysPerYearDn/daysPerYearDd).
+!          Use with daysPerYear and daysPerYearDn (see above) to
+!          specify a days-per-year calendar for any planetary body.
+!          Default = 1.  (Not implemented yet).
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!     
+!EOP
+! !REQUIREMENTS:
+!     TMG2.3.4
+
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! initialize number of months per year to zero for not-present
+      !   daysPerMonth
+      integer :: monthsPerYear = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+
+      ! get size of given daysPerMonth array for C++ validation
+      if (present(daysPerMonth)) then
+        monthsPerYear = size(daysPerMonth)
+      end if
+
+!     invoke C to C++ entry point
+
+      if (present(daysPerMonth)) then
+        call c_ESMC_CalendarSetCustom1(calendar, &
+                                      nameLen, name, &
+                                      daysPerMonth(1), monthsPerYear, &
+                                      secondsPerDay, &
+                                      daysPerYear, daysPerYearDn, &
+                                      daysPerYearDd, rc)
+      else
+        call c_ESMC_CalendarSetCustom0(calendar, &
+                                      nameLen, name, &
+                                      monthsPerYear, &
+                                      secondsPerDay, &
+                                      daysPerYear, daysPerYearDn, &
+                                      daysPerYearDd, rc)
+      end if
+
+      end subroutine ESMF_CalendarSetCustom
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_CalendarSet - Set the Calendar type
+
+! !INTERFACE:
+      subroutine ESMF_CalendarSetNew(calendar, name, calendarType, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Calendar),     intent(inout)         :: calendar
+      character (len=*),       intent(in),  optional :: name
+      type(ESMF_CalendarType), intent(in)            :: calendarType
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets {\tt calendar} to the given {\tt ESMF\_CalendarType}. 
+!
+!     This is a private method; invoke via the public overloaded entry point
+!     {\tt ESMF\_CalendarSet()}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          The object instance to initialize.
+!     \item[{[name]}]
+!          The new name for this calendar.
+!     \item[calendarType]
+!          The {\tt CalendarType}.  Valid values are:
+!            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIAN}, 
+!            {\tt ESMF\_CAL\_JULIANDAY}, {\tt ESMF\_CAL\_NOLEAP},
+!            {\tt ESMF\_CAL\_360DAY}, {\tt ESMF\_CAL\_CUSTOM}, and
+!            {\tt ESMF\_CAL\_NOCALENDAR}.
+!          See the "Time Manager Reference" document for a description of
+!          each calendar type.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!    
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+      ! initialize name length to zero for non-existent name
+      integer :: nameLen = 0
+
+      ! get length of given name for C++ validation
+      if (present(name)) then
+        nameLen = len_trim(name)
+      end if
+    
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarSetNew(calendar, nameLen, name, calendarType, rc)
+    
+      end subroutine ESMF_CalendarSetNew
+    
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarValidate - Validate a Calendar's properties
+
+! !INTERFACE:
+      subroutine ESMF_CalendarValidate(calendar, options, rc)
+ 
+! !ARGUMENTS:
+      type(ESMF_Calendar), intent(in)            :: calendar
+      character (len=*),   intent(in),  optional :: options
+      integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Check whether a {\tt calendar} is valid.  The options control
+!     the type of validation.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          {\tt ESMF\_Calendar} to be validated.
+!     \item[{[options]}]
+!          Validation options.  TODO:  To be determined.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+      
+!     invoke C to C++ entry point
+      call c_ESMC_CalendarValidate(calendar, options, rc)
+
+      end subroutine ESMF_CalendarValidate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
+
+! !INTERFACE:
+      subroutine ESMF_CalendarWriteRestart(calendar, iospec, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Calendar), intent(in)            :: calendar
+      type(ESMF_IOSpec),   intent(in),  optional :: iospec
+      integer,             intent(out), optional :: rc
+
+! !DESCRIPTION:  
+!     Saves an {\tt ESMF\_Calendar} object.  Default options are to select the
+!     fastest way to save to disk.  (Not implemented yet).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[calendar]
+!          The object instance to save.  
+!     \item[{[iospec]}]
+!          The IO specification of the restart file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+!     invoke C to C++ entry point 
+      call c_ESMC_CalendarWriteRestart(calendar, iospec, rc)
+
+      end subroutine ESMF_CalendarWriteRestart
+
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE:  ESMF_CalendarEQ - Compare two Calendars for equality
 !
@@ -904,170 +1066,6 @@
 
       end function ESMF_CalendarTypeNE
 
-!------------------------------------------------------------------------------
-! 
-! This section defines the overridden Read, Write, Validate and Print methods
-! from the ESMF_Base class
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarReadRestart - Restore the contents of a Calendar (not implemented)
-
-! !INTERFACE:
-      function ESMF_CalendarReadRestart(name, iospec, rc)
-! 
-! !RETURN VALUE:
-      type(ESMF_Calendar) :: ESMF_CalendarReadRestart
-!
-! !ARGUMENTS:
-      character (len=*),   intent(in)            :: name
-      type(ESMF_IOSpec),   intent(in),  optional :: iospec
-      integer,             intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Restores an {\tt ESMF\_Calendar} object from the last call to
-!     {\tt ESMF\_CalendarWriteRestart()}.  (Not implemented yet).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[name]
-!          The name of the object instance to restore.
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-      ! get length of given name for C++ validation
-      integer :: nameLen
-      nameLen = len_trim(name)
-
-!     invoke C to C++ entry point to allocate and restore calendar
-      call c_ESMC_CalendarReadRestart(ESMF_CalendarReadRestart, nameLen, name, &
-                                      iospec, rc)
-
-      end function ESMF_CalendarReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarWriteRestart - Save the contents of a Calendar (not implemented)
-
-! !INTERFACE:
-      subroutine ESMF_CalendarWriteRestart(calendar, iospec, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
-      type(ESMF_IOSpec),   intent(in),  optional :: iospec
-      integer,             intent(out), optional :: rc
-
-! !DESCRIPTION:  
-!     Saves an {\tt ESMF\_Calendar} object.  Default options are to select the
-!     fastest way to save to disk.  (Not implemented yet).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          The object instance to save.  
-!     \item[{[iospec]}]
-!          The IO specification of the restart file.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-!     invoke C to C++ entry point 
-      call c_ESMC_CalendarWriteRestart(calendar, iospec, rc)
-
-      end subroutine ESMF_CalendarWriteRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarValidate - Validate a Calendar's properties
-
-! !INTERFACE:
-      subroutine ESMF_CalendarValidate(calendar, options, rc)
- 
-! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
-      character (len=*),   intent(in),  optional :: options
-      integer,             intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Check whether a {\tt calendar} is valid.  The options control
-!     the type of validation.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          {\tt ESMF\_Calendar} to be validated.
-!     \item[{[options]}]
-!          Validation options.  TODO:  To be determined.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-      
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarValidate(calendar, options, rc)
-
-      end subroutine ESMF_CalendarValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_CalendarPrint - Print the contents of a Calendar
-
-! !INTERFACE:
-      subroutine ESMF_CalendarPrint(calendar, options, rc)
-
-! !ARGUMENTS:
-      type(ESMF_Calendar), intent(in)            :: calendar
-      character (len=*),   intent(in),  optional :: options
-      integer,             intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Prints out an {\tt ESMF\_Calendar}'s properties, in support of testing    !     and debugging.  The options control the type of information and level     
-!     of detail. 
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[calendar]
-!          {\tt ESMF\_Calendar} to be printed out.
-!     \item[{[options]}]
-!          Print options. If none specified, prints all calendar property
-!                             values. \\
-!          "name"           - print the calendar's name. \\
-!          "calendarType"   - print the calendar's type 
-!                               (e.g. ESMF\_CAL\_GREGORIAN). \\
-!          "daysPerMonth"   - print the array of number of days for
-!                               each month. \\
-!          "monthsPerYear"  - print the number of months per year. \\
-!          "secondsPerDay"  - print the number of seconds in a day. \\
-!          "secondsPerYear" - print the number of seconds in a year. \\
-!          "daysPerYear"    - print the number of days per year \\
-!                             (integer and fractional parts). \\
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-  
-!     invoke C to C++ entry point
-      call c_ESMC_CalendarPrint(calendar, options, rc)
-
-      end subroutine ESMF_CalendarPrint
-      
 !------------------------------------------------------------------------------
 
       end module ESMF_CalendarMod

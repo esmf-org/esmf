@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeInterval.F90,v 1.50 2004/03/10 20:38:03 eschwab Exp $
+! $Id: ESMF_TimeInterval.F90,v 1.51 2004/03/16 23:03:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -67,54 +67,135 @@
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
-      public ESMF_TimeIntervalSet
-      public ESMF_TimeIntervalGet
-
-      public ESMF_TimeIntervalAbsValue
-      public ESMF_TimeIntervalNegAbsValue
-
-! Required inherited and overridden ESMF_Base class methods
-
-      public ESMF_TimeIntervalReadRestart
-      public ESMF_TimeIntervalWriteRestart
-      public ESMF_TimeIntervalValidate
-      public ESMF_TimeIntervalPrint
-
-! !PRIVATE MEMBER FUNCTIONS:
- 
-! overloaded operator functions
- 
+      public operator(+)
+      public operator(-)
       public operator(/)
       public operator(.DIV.)
       public MOD
       public operator(*)
-
-! Inherited and overloaded from ESMF_BaseTime
-
-      public operator(+)
-      public operator(-)
       public operator(==)
       public operator(/=)
       public operator(<)
       public operator(<=)
       public operator(>)
       public operator(>=)
+      public ESMF_TimeIntervalAbsValue
+      public ESMF_TimeIntervalGet
+      public ESMF_TimeIntervalNegAbsValue
+      public ESMF_TimeIntervalPrint
+      public ESMF_TimeIntervalReadRestart
+      public ESMF_TimeIntervalSet
+      public ESMF_TimeIntervalValidate
+      public ESMF_TimeIntervalWriteRestart
 !EOPI
+
+! !PRIVATE MEMBER FUNCTIONS:
+      private ESMF_TimeIntervalSum
+      private ESMF_TimeIntervalDiff
+      private ESMF_TimeIntervalRQuot
+      private ESMF_TimeIntervalQuotI
+      private ESMF_TimeIntervalQuotR
+      private ESMF_TimeIntervalFQuot
+      private ESMF_TimeIntervalRemainder
+      private ESMF_TimeIntervalProdTI
+      private ESMF_TimeIntervalProdIT
+      private ESMF_TimeIntervalProdTF
+      private ESMF_TimeIntervalProdFT
+      private ESMF_TimeIntervalProdRT
+      private ESMF_TimeIntervalProdTR
+      private ESMF_TimeIntervalEQ
+      private ESMF_TimeIntervalNE
+      private ESMF_TimeIntervalLT
+      private ESMF_TimeIntervalLE
+      private ESMF_TimeIntervalGT
+      private ESMF_TimeIntervalGE
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_TimeInterval.F90,v 1.50 2004/03/10 20:38:03 eschwab Exp $'
+      '$Id: ESMF_TimeInterval.F90,v 1.51 2004/03/16 23:03:06 eschwab Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOperator(+) - Add two TimeIntervals
+!
+! !INTERFACE:
+      interface operator(+)
+!     sum = timeInterval1 + timeInterval2
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: sum
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+! !DESCRIPTION:
+!     Overloads the (+) operator for the {\tt ESMF\_TimeInterval} class to
+!     add {\tt timeInterval1} to {\tt timeInterval2} and return the
+!     sum as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The augend.
+!     \item[timeInterval2]
+!          The addend.
+!     \end{description}
+! 
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalSum   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG5.1, TMG7.2
+!
+      end interface
+!
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide two TimeIntervals, return double precision quotient
+! !IROUTINE:  ESMF_TimeIntervalOperator(-) - Subtract one TimeInterval from another
+!
+! !INTERFACE:
+      interface operator(-)
+!     difference = timeInterval1 - timeInterval2
+!
+! !RETURN VALUE:
+!     type(ESMF_TimeInterval) :: difference
+!
+! !ARGUMENTS:
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
+!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
+!
+! !DESCRIPTION:
+!     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
+!     subtract {\tt timeInterval2} from {\tt timeInterval1} and return
+!     the difference as an {\tt ESMF\_TimeInterval}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval1]
+!          The minuend.
+!     \item[timeInterval2]
+!          The subtrahend.
+!     \end{description}
+!
+!EOP
+! !PRIVATE MEMBER FUNCTIONS:
+      module procedure ESMF_TimeIntervalDiff   ! internal implementation
+!
+! !REQUIREMENTS:
+!     TMG1.5.4, TMG5.1, TMG7.2
+
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalOperator(/) - Divide two TimeIntervals, return double precision quotient
 !
 ! !INTERFACE:
       interface operator(/)
@@ -149,7 +230,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide a TimeInterval by an integer, return TimeInterval quotient 
+! !IROUTINE:  ESMF_TimeIntervalOperator(/) - Divide a TimeInterval by an integer, return TimeInterval quotient 
 !
 ! !INTERFACE:
 !     interface operator(/)
@@ -184,7 +265,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(/) - Divide a TimeInterval by a double precision divisor, return TimeInterval quotient 
+! !IROUTINE:  ESMF_TimeIntervalOperator(/) - Divide a TimeInterval by a double precision divisor, return TimeInterval quotient 
 !
 ! !INTERFACE:
 !     interface operator(/)
@@ -221,7 +302,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(.DIV.) - Divide two TimeIntervals, return fraction quotient
+! !IROUTINE:  ESMF_TimeIntervalOperator(.DIV.) - Divide two TimeIntervals, return fraction quotient
 !
 ! !INTERFACE:
       interface operator(.DIV.)
@@ -266,7 +347,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedFunction(MOD) - Divide two TimeIntervals, return time interval remainder
+! !IROUTINE:  ESMF_TimeIntervalFunction(MOD) - Divide two TimeIntervals, return time interval remainder
 !
 ! !INTERFACE:
       interface MOD
@@ -303,7 +384,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by an integer
+! !IROUTINE:   ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by an integer
 !
 ! !INTERFACE:
       interface operator(*)
@@ -340,7 +421,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:   ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by an integer
+! !IROUTINE:   ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by an integer
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -377,7 +458,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a fraction
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -414,7 +495,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a fraction
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a fraction
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -451,7 +532,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a double precision multiplier
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -488,7 +569,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(*) - Multiply a TimeInterval by a double precision multiplier
+! !IROUTINE:  ESMF_TimeIntervalOperator(*) - Multiply a TimeInterval by a double precision multiplier
 !
 ! !INTERFACE:
 !     interface operator(*)
@@ -527,81 +608,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(+) - Add two TimeIntervals
-!
-! !INTERFACE:
-      interface operator(+)
-!     sum = timeInterval1 + timeInterval2
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: sum
-!
-! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
-!
-! !DESCRIPTION:
-!     Overloads the (+) operator for the {\tt ESMF\_TimeInterval} class to
-!     add {\tt timeInterval1} to {\tt timeInterval2} and return the
-!     sum as an {\tt ESMF\_TimeInterval}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The augend.
-!     \item[timeInterval2]
-!          The addend.
-!     \end{description}
-! 
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalSum   ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG5.1, TMG7.2
-!
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalOverloadedOperator(-) - Subtract one TimeInterval from another
-!
-! !INTERFACE:
-      interface operator(-)
-!     difference = timeInterval1 - timeInterval2
-!
-! !RETURN VALUE:
-!     type(ESMF_TimeInterval) :: difference
-!
-! !ARGUMENTS:
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval1
-!     type(ESMF_TimeInterval), intent(in) :: timeInterval2
-!
-! !DESCRIPTION:
-!     Overloads the (-) operator for the {\tt ESMF\_TimeInterval} class to
-!     subtract {\tt timeInterval2} from {\tt timeInterval1} and return
-!     the difference as an {\tt ESMF\_TimeInterval}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval1]
-!          The minuend.
-!     \item[timeInterval2]
-!          The subtrahend.
-!     \end{description}
-!
-!EOP
-! !PRIVATE MEMBER FUNCTIONS:
-      module procedure ESMF_TimeIntervalDiff   ! internal implementation
-!
-! !REQUIREMENTS:
-!     TMG1.5.4, TMG5.1, TMG7.2
-
-      end interface
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(==) - Test if TimeInterval 1 is equal to TimeInterval 2
+! !IROUTINE: ESMF_TimeIntervalOperator(==) - Test if TimeInterval 1 is equal to TimeInterval 2
 !
 ! !INTERFACE:
       interface operator(==)
@@ -640,7 +647,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(/=) - Test if TimeInterval 1 is not equal to TimeInterval 2
+! !IROUTINE: ESMF_TimeIntervalOperator(/=) - Test if TimeInterval 1 is not equal to TimeInterval 2
 !
 ! !INTERFACE:
       interface operator(/=)
@@ -679,7 +686,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(<) - Test if TimeInterval 1 is less than TimeInterval 2
+! !IROUTINE: ESMF_TimeIntervalOperator(<) - Test if TimeInterval 1 is less than TimeInterval 2
 !
 ! !INTERFACE:
       interface operator(<)
@@ -718,7 +725,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(<=) - Test if TimeInterval 1 is less than or equal to TimeInterval 2
+! !IROUTINE: ESMF_TimeIntervalOperator(<=) - Test if TimeInterval 1 is less than or equal to TimeInterval 2
 !
 ! !INTERFACE:
       interface operator(<=)
@@ -757,7 +764,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(>) - Test if TimeInterval 1 is greater than TimeInterval 2
+! !IROUTINE: ESMF_TimeIntervalOperator(>) - Test if TimeInterval 1 is greater than TimeInterval 2
 !
 ! !INTERFACE:
       interface operator(>)
@@ -796,7 +803,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalOverloadedOperator(>=) - Test if TimeInterval 1 is greater than or equal to TimeInterval 2
+! !IROUTINE: ESMF_TimeIntervalOperator(>=) - Test if TimeInterval 1 is greater than or equal to TimeInterval 2
 !
 ! !INTERFACE:
       interface operator(>=)
@@ -833,161 +840,40 @@
 
       end interface
 !
-!------------------------------------------------------------------------------
-
 !==============================================================================
 
       contains
 
 !==============================================================================
-!
-! Generic Set/Get routines which use F90 optional arguments
-!
-!------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
+! !IROUTINE:  ESMF_TimeIntervalAbsValue - Get the absolute value of a TimeInterval
 
 ! !INTERFACE:
-      subroutine ESMF_TimeIntervalSet(timeInterval, &
-                                      yy, yy_i8, &
-                                      mm, mm_i8, &
-                                      d, d_i8, &
-                                      h, m, &
-                                      s, s_i8, &
-                                      ms, us, ns, &
-                                      d_r8, h_r8, m_r8, s_r8, &
-                                      ms_r8, us_r8, ns_r8, &
-                                      sN, sD, &
-                                      startTime, endTime, calendar, rc)
+      function ESMF_TimeIntervalAbsValue(timeInterval)
+
+! !RETURN VALUE:
+      type(ESMF_TimeInterval) :: ESMF_TimeIntervalAbsValue
 
 ! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(inout)         :: timeInterval
-      integer(ESMF_KIND_I4),   intent(in),  optional :: yy
-      integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: mm
-      integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: d
-      integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: h
-      integer(ESMF_KIND_I4),   intent(in),  optional :: m
-      integer(ESMF_KIND_I4),   intent(in),  optional :: s
-      integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
-      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
-      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
-      type(ESMF_Time),         intent(in),  optional :: startTime
-      type(ESMF_Time),         intent(in),  optional :: endTime
-      type(ESMF_Calendar),     intent(in),  optional :: calendar
-      integer,                 intent(out), optional :: rc
+      type(ESMF_TimeInterval), intent(in) :: timeInterval
 
 ! !DESCRIPTION:
-!     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
-!     the user via F90 optional arguments.
+!     Returns the absolute value of {\tt timeInterval}.
 !
-!     The ESMF Time Manager represents and manipulates time internally with
-!     integers to maintain precision.  Hence, user-specified floating point
-!     values are converted internally to integers.
-!     (Fractions and reals not implemented yet).
-!
-!     Ranges are limited only by machine word size.  Numeric defaults are 0,
-!     except for sD, which is 1.
-!
-!     The arguments are:
+!     The argument is:
 !     \begin{description}
 !     \item[timeInterval]
-!          The object instance to initialize.
-!     \item[{[yy]}]
-!          Integer years (>= 32-bit).  Default = 0
-!     \item[{[yy\_i8]}]
-!          Integer years (large, >= 64-bit).  Default = 0
-!     \item[{[mm]}]
-!          Integer months (>= 32-bit).  Default = 0
-!     \item[{[mm\_i8]}]
-!          Integer months (large, >= 64-bit).  Default = 0
-!     \item[{[d]}]
-!          Integer Julian days (>= 32-bit).  Default = 0
-!     \item[{[d\_i8]}]
-!          Integer Julian days (large, >= 64-bit).  Default = 0
-!     \item[{[h]}]
-!          Integer hours.  Default = 0
-!     \item[{[m]}]
-!          Integer minutes.  Default = 0
-!     \item[{[s]}]
-!          Integer seconds (>= 32-bit).  Default = 0
-!     \item[{[s\_i8]}]
-!          Integer seconds (large, >= 64-bit).  Default = 0
-!     \item[{[ms]}]
-!          Integer milliseconds.  Default = 0.  (Not implemented yet).
-!     \item[{[us]}]
-!          Integer microseconds.  Default = 0.  (Not implemented yet).
-!     \item[{[ns]}]
-!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
-!     \item[{[d\_r8]}]
-!          Double precision days.  Default = 0.0.  (Not implemented yet).
-!     \item[{[h\_r8]}]
-!          Double precision hours.  Default = 0.0.  (Not implemented yet).
-!     \item[{[m\_r8]}]
-!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
-!     \item[{[s\_r8]}]
-!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
-!     \item[{[ms\_r8]}]
-!          Double precision milliseconds.  Default = 0.0.  (Not implemented yet).
-!     \item[{[us\_r8]}]
-!          Double precision microseconds.  Default = 0.0.  (Not implemented yet).
-!     \item[{[ns\_r8]}]
-!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
-!     \item[{[sN]}]
-!          Integer numerator portion of fractional seconds (sN/sD).
-!          Default = 0.  (Not implemented yet).
-!     \item[{[sD]}]
-!          Integer denominator portion of fractional seconds (sN/sD).
-!          Default = 1.  (Not implemented yet).
-!     \item[{[startTime]}]
-!          Starting time of an absolute calendar interval (yy, mm, and/or d);
-!          pins a calendar interval to a specific point in time.  If not set,
-!          and endTime and calendar also not set, calendar interval "floats"
-!          across all calendars and times.
-!          Mutually exclusive with calendar since it contains a calendar.
-!     \item[{[endTime]}]
-!          Ending time of an absolute calendar interval (yy, mm, and/or d);
-!          pins a calendar interval to a specific point in time.  If not set,
-!          and startTime and calendar also not set, calendar interval "floats"
-!          across all calendars and times.
-!          Mutually exclusive with calendar since it contains a calendar.
-!     \item[{[calendar]}]
-!          {\tt Calendar} used to give better definition to calendar interval
-!          (yy, mm, and/or d) for arithmetic, comparison, and conversion
-!          operations.  Allows calendar interval to "float" across all times
-!          on a specific calendar.
-!          Default = NULL; if startTime and endTime also not specified, calendar
-!          interval "floats" across all calendars and times.
-!          Mutually exclusive with startTime and endTime since they contain
-!          a calendar.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!          The object instance to take the absolute value of.
+!          Absolute value is returned as the value of the function.
 !     \end{description}
 !
 !EOP
 ! !REQUIREMENTS:
-!     TMGn.n.n
+!     TMG1.5.8
+    
+      call c_ESMC_TimeIntervalAbsValue(timeInterval, ESMF_TimeIntervalAbsValue)
 
-      ! use optional args for any subset
-      call c_ESMC_TimeIntervalSet(timeInterval, yy, yy_i8, mm, mm_i8, &
-                                  d, d_i8, h, m, s, s_i8, ms, &
-                                  us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
-                                  us_r8, ns_r8, sN, sD, &
-                                  startTime, endTime, calendar, rc)
-
-      end subroutine ESMF_TimeIntervalSet
+      end function ESMF_TimeIntervalAbsValue
 
 !------------------------------------------------------------------------------
 !BOP
@@ -1159,37 +1045,6 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeIntervalAbsValue - Get the absolute value of a TimeInterval
-
-! !INTERFACE:
-      function ESMF_TimeIntervalAbsValue(timeInterval)
-
-! !RETURN VALUE:
-      type(ESMF_TimeInterval) :: ESMF_TimeIntervalAbsValue
-
-! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in) :: timeInterval
-
-! !DESCRIPTION:
-!     Returns the absolute value of {\tt timeInterval}.
-!
-!     The argument is:
-!     \begin{description}
-!     \item[timeInterval]
-!          The object instance to take the absolute value of.
-!          Absolute value is returned as the value of the function.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMG1.5.8
-    
-      call c_ESMC_TimeIntervalAbsValue(timeInterval, ESMF_TimeIntervalAbsValue)
-
-      end function ESMF_TimeIntervalAbsValue
-
-!------------------------------------------------------------------------------
-!BOP
 ! !IROUTINE:  ESMF_TimeIntervalNegAbsValue - Get the negative absolute value of a TimeInterval
 
 ! !INTERFACE:
@@ -1219,6 +1074,302 @@
                                           ESMF_TimeIntervalNegAbsValue)
 
       end function ESMF_TimeIntervalNegAbsValue
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalPrint(timeInterval, options, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      character (len=*),       intent(in),  optional :: options
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Prints out the contents of an {\tt ESMF\_TimeInterval}, in support of
+!     testing and debugging.  The options control the type of information and
+!     level of detail.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          Time interval to be printed out.
+!     \item[{[options]}]
+!          Print options.  If none specified, prints all TimeInterval
+!          property values. \\
+!          "string" - prints TimeInterval's value in ISO 8601 format
+!                     PyYmMdDThHmMsS.  See ~\cite{ISO}. \\
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+      call c_ESMC_TimeIntervalPrint(timeInterval, options, rc)
+
+      end subroutine ESMF_TimeIntervalPrint
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implmented)
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalReadRestart(timeInterval, name, iospec, rc)
+!
+! !ARGUMENTS:      
+      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      character (len=*),       intent(in)            :: name
+      type(ESMF_IOSpec),       intent(in),  optional :: iospec
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Restores an {\tt ESMF\_TimeInterval} object from the last call to
+!     {\tt ESMF\_TimeIntervalWriteRestart()}.  (Not implemented yet).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          Restore into this {\tt ESMF\_TimeInterval}.
+!     \item[name]
+!          Restore from this object name.
+!     \item[{[iospec]}]  
+!          The IO specification of the restart file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! get length of given name for C++ validation
+      integer :: nameLen
+      nameLen = len_trim(name)
+
+!     invoke C to C++ entry point to restore timeInterval
+      call c_ESMC_TimeIntervalReadRestart(timeInterval, nameLen, name, &
+                                          iospec, rc)
+
+      end subroutine ESMF_TimeIntervalReadRestart
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_TimeIntervalSet - Initialize or set a TimeInterval
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalSet(timeInterval, &
+                                      yy, yy_i8, &
+                                      mm, mm_i8, &
+                                      d, d_i8, &
+                                      h, m, &
+                                      s, s_i8, &
+                                      ms, us, ns, &
+                                      d_r8, h_r8, m_r8, s_r8, &
+                                      ms_r8, us_r8, ns_r8, &
+                                      sN, sD, &
+                                      startTime, endTime, calendar, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(inout)         :: timeInterval
+      integer(ESMF_KIND_I4),   intent(in),  optional :: yy
+      integer(ESMF_KIND_I8),   intent(in),  optional :: yy_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: mm
+      integer(ESMF_KIND_I8),   intent(in),  optional :: mm_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: d
+      integer(ESMF_KIND_I8),   intent(in),  optional :: d_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: h
+      integer(ESMF_KIND_I4),   intent(in),  optional :: m
+      integer(ESMF_KIND_I4),   intent(in),  optional :: s
+      integer(ESMF_KIND_I8),   intent(in),  optional :: s_i8
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ms    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: us    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: ns    ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: d_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: h_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: m_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: s_r8  ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ms_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: us_r8 ! not implemented
+      real(ESMF_KIND_R8),      intent(in),  optional :: ns_r8 ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sN    ! not implemented
+      integer(ESMF_KIND_I4),   intent(in),  optional :: sD    ! not implemented
+      type(ESMF_Time),         intent(in),  optional :: startTime
+      type(ESMF_Time),         intent(in),  optional :: endTime
+      type(ESMF_Calendar),     intent(in),  optional :: calendar
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Sets the value of the {\tt ESMF\_TimeInterval} in units specified by
+!     the user via F90 optional arguments.
+!
+!     The ESMF Time Manager represents and manipulates time internally with
+!     integers to maintain precision.  Hence, user-specified floating point
+!     values are converted internally to integers.
+!     (Fractions and reals not implemented yet).
+!
+!     Ranges are limited only by machine word size.  Numeric defaults are 0,
+!     except for sD, which is 1.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          The object instance to initialize.
+!     \item[{[yy]}]
+!          Integer years (>= 32-bit).  Default = 0
+!     \item[{[yy\_i8]}]
+!          Integer years (large, >= 64-bit).  Default = 0
+!     \item[{[mm]}]
+!          Integer months (>= 32-bit).  Default = 0
+!     \item[{[mm\_i8]}]
+!          Integer months (large, >= 64-bit).  Default = 0
+!     \item[{[d]}]
+!          Integer Julian days (>= 32-bit).  Default = 0
+!     \item[{[d\_i8]}]
+!          Integer Julian days (large, >= 64-bit).  Default = 0
+!     \item[{[h]}]
+!          Integer hours.  Default = 0
+!     \item[{[m]}]
+!          Integer minutes.  Default = 0
+!     \item[{[s]}]
+!          Integer seconds (>= 32-bit).  Default = 0
+!     \item[{[s\_i8]}]
+!          Integer seconds (large, >= 64-bit).  Default = 0
+!     \item[{[ms]}]
+!          Integer milliseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[us]}]
+!          Integer microseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[ns]}]
+!          Integer nanoseconds.  Default = 0.  (Not implemented yet).
+!     \item[{[d\_r8]}]
+!          Double precision days.  Default = 0.0.  (Not implemented yet).
+!     \item[{[h\_r8]}]
+!          Double precision hours.  Default = 0.0.  (Not implemented yet).
+!     \item[{[m\_r8]}]
+!          Double precision minutes.  Default = 0.0.  (Not implemented yet).
+!     \item[{[s\_r8]}]
+!          Double precision seconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[ms\_r8]}]
+!          Double precision milliseconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[us\_r8]}]
+!          Double precision microseconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[ns\_r8]}]
+!          Double precision nanoseconds.  Default = 0.0.  (Not implemented yet).
+!     \item[{[sN]}]
+!          Integer numerator portion of fractional seconds (sN/sD).
+!          Default = 0.  (Not implemented yet).
+!     \item[{[sD]}]
+!          Integer denominator portion of fractional seconds (sN/sD).
+!          Default = 1.  (Not implemented yet).
+!     \item[{[startTime]}]
+!          Starting time of an absolute calendar interval (yy, mm, and/or d);
+!          pins a calendar interval to a specific point in time.  If not set,
+!          and endTime and calendar also not set, calendar interval "floats"
+!          across all calendars and times.
+!          Mutually exclusive with calendar since it contains a calendar.
+!     \item[{[endTime]}]
+!          Ending time of an absolute calendar interval (yy, mm, and/or d);
+!          pins a calendar interval to a specific point in time.  If not set,
+!          and startTime and calendar also not set, calendar interval "floats"
+!          across all calendars and times.
+!          Mutually exclusive with calendar since it contains a calendar.
+!     \item[{[calendar]}]
+!          {\tt Calendar} used to give better definition to calendar interval
+!          (yy, mm, and/or d) for arithmetic, comparison, and conversion
+!          operations.  Allows calendar interval to "float" across all times
+!          on a specific calendar.
+!          Default = NULL; if startTime and endTime also not specified, calendar
+!          interval "floats" across all calendars and times.
+!          Mutually exclusive with startTime and endTime since they contain
+!          a calendar.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+      ! use optional args for any subset
+      call c_ESMC_TimeIntervalSet(timeInterval, yy, yy_i8, mm, mm_i8, &
+                                  d, d_i8, h, m, s, s_i8, ms, &
+                                  us, ns, d_r8, h_r8, m_r8, s_r8, ms_r8, &
+                                  us_r8, ns_r8, sN, sD, &
+                                  startTime, endTime, calendar, rc)
+
+      end subroutine ESMF_TimeIntervalSet
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalValidate(timeInterval, options, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      character (len=*),       intent(in),  optional :: options
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:
+!     Checks whether a {\tt timeInterval} is valid.  The options control
+!     the type of validation.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          {\tt ESMF\_TimeInterval} to be validated.
+!     \item[{[options]}]
+!          Validation options.  TODO:  To be determined.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+    
+      call c_ESMC_TimeIntervalValidate(timeInterval, options, rc)
+
+      end subroutine ESMF_TimeIntervalValidate
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval (not implemented)
+
+! !INTERFACE:
+      subroutine ESMF_TimeIntervalWriteRestart(timeInterval, iospec, rc)
+
+! !ARGUMENTS:
+      type(ESMF_TimeInterval), intent(in)            :: timeInterval
+      type(ESMF_IOSpec),       intent(in),  optional :: iospec
+      integer,                 intent(out), optional :: rc
+
+! !DESCRIPTION:  
+!     Saves an {\tt ESMF\_TimeInterval} object.  Default options are to select
+!     the fastest way to save to disk.  (Not implemented yet).
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[timeInterval]
+!          The object instance to save.  
+!     \item[{[iospec]}]  
+!          The IO specification of the restart file.
+!     \item[{[rc]}]
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS:
+!     TMGn.n.n
+
+!     invoke C to C++ entry point 
+      call c_ESMC_TimeIntervalWriteRestart(timeInterval, iospec, rc)
+
+      end subroutine ESMF_TimeIntervalWriteRestart
 
 !------------------------------------------------------------------------------
 !
@@ -1710,161 +1861,6 @@
       call c_ESMC_BaseTimeGE(timeInterval1, timeInterval2, ESMF_TimeIntervalGE)
 
       end function ESMF_TimeIntervalGE
-
-!------------------------------------------------------------------------------
-!
-! This section defines the overridden Read, Write, Validate and Print methods
-! from the ESMF_Base class
-!
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalReadRestart - Restore the contents of a TimeInterval (not implmented)
-
-! !INTERFACE:
-      subroutine ESMF_TimeIntervalReadRestart(timeInterval, name, iospec, rc)
-!
-! !ARGUMENTS:      
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
-      character (len=*),       intent(in)            :: name
-      type(ESMF_IOSpec),       intent(in),  optional :: iospec
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Restores an {\tt ESMF\_TimeInterval} object from the last call to
-!     {\tt ESMF\_TimeIntervalWriteRestart()}.  (Not implemented yet).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          Restore into this {\tt ESMF\_TimeInterval}.
-!     \item[name]
-!          Restore from this object name.
-!     \item[{[iospec]}]  
-!          The IO specification of the restart file.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-      ! get length of given name for C++ validation
-      integer :: nameLen
-      nameLen = len_trim(name)
-
-!     invoke C to C++ entry point to restore timeInterval
-      call c_ESMC_TimeIntervalReadRestart(timeInterval, nameLen, name, &
-                                          iospec, rc)
-
-      end subroutine ESMF_TimeIntervalReadRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalWriteRestart - Save the contents of a TimeInterval (not implemented)
-
-! !INTERFACE:
-      subroutine ESMF_TimeIntervalWriteRestart(timeInterval, iospec, rc)
-
-! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
-      type(ESMF_IOSpec),       intent(in),  optional :: iospec
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:  
-!     Saves an {\tt ESMF\_TimeInterval} object.  Default options are to select
-!     the fastest way to save to disk.  (Not implemented yet).
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          The object instance to save.  
-!     \item[{[iospec]}]  
-!          The IO specification of the restart file.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-
-!     invoke C to C++ entry point 
-      call c_ESMC_TimeIntervalWriteRestart(timeInterval, iospec, rc)
-
-      end subroutine ESMF_TimeIntervalWriteRestart
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalValidate - Validate a TimeInterval
-
-! !INTERFACE:
-      subroutine ESMF_TimeIntervalValidate(timeInterval, options, rc)
-
-! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
-      character (len=*),       intent(in),  optional :: options
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Checks whether a {\tt timeInterval} is valid.  The options control
-!     the type of validation.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          {\tt ESMF\_TimeInterval} to be validated.
-!     \item[{[options]}]
-!          Validation options.  TODO:  To be determined.
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-    
-      call c_ESMC_TimeIntervalValidate(timeInterval, options, rc)
-
-      end subroutine ESMF_TimeIntervalValidate
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_TimeIntervalPrint - Print the contents of a TimeInterval
-
-! !INTERFACE:
-      subroutine ESMF_TimeIntervalPrint(timeInterval, options, rc)
-
-! !ARGUMENTS:
-      type(ESMF_TimeInterval), intent(in)            :: timeInterval
-      character (len=*),       intent(in),  optional :: options
-      integer,                 intent(out), optional :: rc
-
-! !DESCRIPTION:
-!     Prints out the contents of an {\tt ESMF\_TimeInterval}, in support of
-!     testing and debugging.  The options control the type of information and
-!     level of detail.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item[timeInterval]
-!          Time interval to be printed out.
-!     \item[{[options]}]
-!          Print options.  If none specified, prints all TimeInterval
-!          property values. \\
-!          "string" - prints TimeInterval's value in ISO 8601 format
-!                     PyYmMdDThHmMsS.  See ~\cite{ISO}. \\
-!     \item[{[rc]}]
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-!     TMGn.n.n
-    
-      call c_ESMC_TimeIntervalPrint(timeInterval, options, rc)
-
-      end subroutine ESMF_TimeIntervalPrint
 
 !------------------------------------------------------------------------------
 
