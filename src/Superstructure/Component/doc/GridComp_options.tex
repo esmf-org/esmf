@@ -1,0 +1,25 @@
+% $Id: GridComp_options.tex,v 1.1 2004/03/24 00:04:09 cdeluca Exp $
+
+\subsubsection{ESMF\_GridCompType}
+
+{\sf DESCRIPTION:\\}
+The {\tt ESMF\_GridCompType} flag identifies what sort of physical domain
+or computational function a particular {\tt ESMF\_GridComp} represents.
+The flag values are purely informational; they are not used anywhere 
+within the framework.  Use of this flag is optional.
+
+Valid values are:
+\begin{description}
+   \item [ESMF\_ATM] 
+         Atmospheric model.
+   \item [ESMF\_LAND]
+         Land model.
+   \item [ESMF\_OCEAN] 
+         Ocean model.
+   \item [ESMF\_SEAICE]
+         Sea ice model.
+   \item [ESMF\_RIVER] 
+         River model.
+   \item [ESMF\_OTHER]
+         Other type of model or system.
+\end{description}
