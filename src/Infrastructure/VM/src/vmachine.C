@@ -68,7 +68,6 @@ int *vmachine::cpuid;
 int *vmachine::ssiid;
 
 
-extern "C"{
 static int MPI_InitWrapper(void){
   // This wrapper is used for MPICH in order to provide argc and argv
   int pid = getpid();
@@ -108,10 +107,15 @@ static int MPI_InitWrapper(void){
   //for (i=0; i<argc; i++)
   //  printf("%s\n", argv[i]);
 
+  // prepare heap copies of argc and argv in case the MPI library uses these
+  // pointers after the MPI_Init call has returned.
+  int *p_argc = new int;
+  *p_argc = argc;
+  char ***p_argv = new char**;
+  *p_argv = argv;
   // now argc and argv can be used
-  MPI_Init(&argc, &argv);
+  MPI_Init(p_argc, p_argv);
   return 0;
-}
 }
 
 
