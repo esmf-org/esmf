@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.6 2004/10/12 16:27:51 nscollins Exp $
+! $Id: user_model2.F90,v 1.7 2004/12/03 22:46:49 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -198,7 +198,6 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status
       type(ESMF_Field) :: field
       integer :: localrc, finalrc
 
@@ -211,9 +210,9 @@
 
       ! check validity of results
       ! Get Fields from import state
-      call ESMF_StateGetField(importState, "humidity2", field, rc=status)
-      if (rc .ne. ESMF_SUCCESS) then
-        finalrc = status
+      call ESMF_StateGetField(importState, "humidity2", field, rc=localrc)
+      if (localrc .ne. ESMF_SUCCESS) then
+        finalrc = localrc
         goto 30
       endif
       call verifyResults(field, localrc)
