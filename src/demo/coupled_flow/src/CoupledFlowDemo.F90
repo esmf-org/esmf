@@ -1,4 +1,4 @@
-! $Id: CoupledFlowDemo.F90,v 1.2 2003/09/25 15:10:23 nscollins Exp $
+! $Id: CoupledFlowDemo.F90,v 1.3 2003/10/13 19:31:55 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -23,7 +23,11 @@
     
     ! User Component registration routines
     use   InjectorMod, only : Injector_register
+#ifdef CCA
+    use FlowSolver2Mod, only : FlowSolver_register
+#else
     use FlowSolverMod, only : FlowSolver_register
+#endif
     use    CouplerMod, only : Coupler_register
 
     implicit none
@@ -138,7 +142,7 @@
     integer :: counts(ESMF_MAXGRIDDIM)
     integer :: horz_gridtype, vert_gridtype
     integer :: horz_stagger, vert_stagger
-    integer :: horz_coord_system, vert_coord_system
+    type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
     integer :: halo_width = 1
 
 
@@ -242,9 +246,8 @@
                                vert_coord_system=vert_coord_system, &
                                rc=rc)
 
-    gridIN = ESMF_GridCreate(counts=counts, &
-                             x_min=mincoords(1), x_max=maxcoords(1), &
-                             y_min=mincoords(2), y_max=maxcoords(2), &
+    gridIN = ESMF_GridCreate(2, counts=counts, &
+                             min=mincoords, max=maxcoords, &
                              layout=layoutIN, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &       
@@ -256,9 +259,8 @@
 
     call ESMF_GridCompSet(INcomp, grid=gridIN, rc=rc)
 
-    gridFS = ESMF_GridCreate(counts=counts, &
-                             x_min=mincoords(1), x_max=maxcoords(1), &
-                             y_min=mincoords(2), y_max=maxcoords(2), &
+    gridFS = ESMF_GridCreate(2, counts=counts, &
+                             min=mincoords, max=maxcoords, &
                              layout=layoutFS, &
                              horz_gridtype=horz_gridtype, &
                              vert_gridtype=vert_gridtype, &       

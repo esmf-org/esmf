@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.2 2003/09/25 15:10:23 nscollins Exp $
+! $Id: CoupledFlowApp.F90,v 1.3 2003/10/13 19:31:20 nscollins Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -47,7 +47,7 @@
     ! Variables related to grid and clock
     integer :: counts(2)
     integer :: i_max, j_max
-    real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max
+    real(ESMF_KIND_R8) :: x_min, x_max, y_min, y_max, g_min(2), g_max(2)
     integer :: s_month, s_day, s_hour, s_min
     integer :: e_month, e_day, e_hour, e_min
 
@@ -205,9 +205,12 @@
 !\begin{verbatim}
       counts(1) = i_max
       counts(2) = j_max
-      grid = ESMF_GridCreate(counts = counts, &
-                             x_min=x_min, x_max=x_max, &
-                             y_min=y_min, y_max=y_max, &
+      g_min(1) = x_min
+      g_min(2) = y_min
+      g_min(1) = x_max
+      g_min(2) = y_max
+      grid = ESMF_GridCreate(2, counts = counts, &
+                             min=g_min, max=g_max, &
                              layout=layoutApp, &   
                              horz_gridtype=ESMF_GridType_XY, &
                              horz_stagger=ESMF_GridStagger_C, &
