@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.21 2004/11/19 16:14:00 theurich Exp $
+# $Id: build_rules.mk,v 1.22 2004/11/24 15:01:36 theurich Exp $
 #
 # Linux.intel.default.mk
 #
@@ -93,6 +93,13 @@ MPI_INCLUDE    = -DESMF_MPICH=1
 MPIRUN         =  mpirun $(ESMF_NODES)
 endif
 
+ifeq ($(ESMF_COMM),mpich2)
+MPI_HOME       = 
+MPI_LIB        = -lmpich
+MPI_INCLUDE    = -DESMF_MPICH=1
+MPIRUN         =  mpirun $(ESMF_NODES)
+endif
+
 ifeq ($(ESMF_COMM),mpiuni)
 # this section is set up to bypass all MPI
 MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
@@ -139,7 +146,20 @@ endif
 ifeq ($(ESMF_PREC),32)
 C_CC		   = mpicc -pthread
 CXX_CC		   = mpiCC -pthread
-C_FC		   = mpif90 -pthread
+C_FC		   = mpif90 -threads
+endif
+endif
+
+ifeq ($(ESMF_COMM),mpich2)
+ifeq ($(ESMF_PREC),64)
+C_CC		   = mpicc -size_lp64
+CXX_CC		   = mpicxx -size_lp64
+C_FC		   = mpif90 -size_lp64
+endif
+ifeq ($(ESMF_PREC),32)
+C_CC		   = mpicc -pthread
+CXX_CC		   = mpicxx -pthread
+C_FC		   = mpif90 -threads
 endif
 endif
 
