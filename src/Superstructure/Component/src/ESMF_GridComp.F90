@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.7 2003/06/27 16:46:13 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.8 2003/06/27 19:59:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -87,8 +87,8 @@
       public ESMF_GridCompFinalize
 
       ! Other routines the user might request to setup.
-      public ESMF_GridCompCheckpoint
-      public ESMF_GridCompRestore
+      public ESMF_GridCompWriteRestart
+      public ESMF_GridCompReadRestart
       !public ESMF_GridCompWrite
       !public ESMF_GridCompRead
 !EOPI
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.7 2003/06/27 16:46:13 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.8 2003/06/27 19:59:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -589,10 +589,10 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompCheckpoint -- Call the Component's checkpoint routine
+! !IROUTINE: ESMF_GridCompWriteRestart -- Call the Component's save routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompCheckpoint(component, iospec, clock, phase, rc)
+      subroutine ESMF_GridCompWriteRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -603,14 +603,14 @@
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user checkpoint code for a component.
+!  Call the associated user save code for a component.
 !
 !    
 !  The arguments are:
 !  \begin{description}
 !
 !   \item[component]
-!    Component to call Checkpoint routine for.
+!    Component to call WriteRestart routine for.
 !
 !   \item[{[iospec]}]  I/O options.
 !
@@ -627,17 +627,17 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompCheckpoint(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompWriteRestart(component%compp, iospec, clock, phase, rc)
 
-        end subroutine ESMF_GridCompCheckpoint
+        end subroutine ESMF_GridCompWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridCompRestore -- Call the Component's restore routine
+! !IROUTINE: ESMF_GridCompReadRestart -- Call the Component's restore routine
 
 ! !INTERFACE:
-      subroutine ESMF_GridCompRestore(component, iospec, clock, phase, rc)
+      subroutine ESMF_GridCompReadRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -655,7 +655,7 @@
 !  \begin{description}
 !
 !   \item[component]
-!    Component to call Restore routine for.
+!    Component to call ReadRestart routine for.
 !
 !   \item[{[iospec]}]  I/O options.
 !
@@ -672,9 +672,9 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRestore(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompReadRestart(component%compp, iospec, clock, phase, rc)
 
-        end subroutine ESMF_GridCompRestore
+        end subroutine ESMF_GridCompReadRestart
 
 
 !------------------------------------------------------------------------------

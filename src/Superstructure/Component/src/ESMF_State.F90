@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.42 2003/06/26 23:00:44 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.43 2003/06/27 19:59:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -247,8 +247,8 @@
       ! TODO: this needs to be renamed.
       !public ESMF_StateValidate          ! is import state ready to read?
  
-      public ESMF_StateCheckpoint
-      public ESMF_StateRestore
+      public ESMF_StateWriteRestart
+      public ESMF_StateReadRestart
  
       public ESMF_StatePrint, ESMF_StateValidate
 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.42 2003/06/26 23:00:44 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.43 2003/06/27 19:59:13 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -3133,10 +3133,10 @@ end function
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateCheckpoint -- Save the internal data for a State
+! !IROUTINE: ESMF_StateWriteRestart -- Save the internal data for a State
 !
 ! !INTERFACE:
-      subroutine ESMF_StateCheckpoint(state, iospec, rc)
+      subroutine ESMF_StateWriteRestart(state, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State):: state 
@@ -3155,18 +3155,18 @@ end function
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_StateCheckpoint
+        end subroutine ESMF_StateWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_StateRestore -- Restore the internal data from a State
+! !IROUTINE: ESMF_StateReadRestart -- ReadRestart the internal data from a State
 !
 ! !INTERFACE:
-      function ESMF_StateRestore(name, iospec, rc)
+      function ESMF_StateReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_State) :: ESMF_StateRestore
+      type(ESMF_State) :: ESMF_StateReadRestart
 !
 !
 ! !ARGUMENTS:
@@ -3176,7 +3176,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a State from the last call to Checkpoint.
+!      all data associated with a State from the last call to WriteRestart.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -3191,9 +3191,9 @@ end function
         a%statep => b
         nullify(a%statep)
 
-        ESMF_StateRestore = a 
+        ESMF_StateReadRestart = a 
  
-        end function ESMF_StateRestore
+        end function ESMF_StateReadRestart
 
 !------------------------------------------------------------------------------
 !BOP

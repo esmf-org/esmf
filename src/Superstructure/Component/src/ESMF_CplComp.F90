@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.5 2003/06/27 16:46:13 nscollins Exp $
+! $Id: ESMF_CplComp.F90,v 1.6 2003/06/27 19:59:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -66,9 +66,6 @@
       public ESMF_CplComp
 
 !------------------------------------------------------------------------------
-
-! !PUBLIC MEMBER FUNCTIONS:
-
       public ESMF_CplCompCreate
       public ESMF_CplCompDestroy
 
@@ -85,8 +82,8 @@
       public ESMF_CplCompFinalize
 
       ! Other routines the user might request to setup.
-      public ESMF_CplCompCheckpoint
-      public ESMF_CplCompRestore
+      public ESMF_CplCompWriteRestart
+      public ESMF_CplCompReadRestart
       !public ESMF_CplCompWrite
       !public ESMF_CplCompRead
 !EOPI
@@ -94,7 +91,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.5 2003/06/27 16:46:13 nscollins Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.6 2003/06/27 19:59:13 nscollins Exp $'
 
 !==============================================================================
 !
@@ -777,10 +774,10 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompCheckpoint -- Call the Component's checkpoint routine
+! !IROUTINE: ESMF_CplCompWriteRestart -- Call the Component's checkpoint routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompCheckpoint(component, iospec, clock, phase, rc)
+      subroutine ESMF_CplCompWriteRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -797,7 +794,7 @@
 !  \begin{description} 
 !  
 !   \item[component]
-!    Component to call Checkpoint routine for.
+!    Component to call WriteRestart routine for.
 !
 !   \item[{[iospec]}]
 !       {\tt IOSpec} object which describes I/O options.
@@ -815,17 +812,17 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompCheckpoint(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompWriteRestart(component%compp, iospec, clock, phase, rc)
 
-        end subroutine ESMF_CplCompCheckpoint
+        end subroutine ESMF_CplCompWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CplCompRestore -- Call the Component's restore routine
+! !IROUTINE: ESMF_CplCompReadRestart -- Call the Component's restore routine
 
 ! !INTERFACE:
-      subroutine ESMF_CplCompRestore(component, iospec, clock, phase, rc)
+      subroutine ESMF_CplCompReadRestart(component, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -842,7 +839,7 @@
 !  \begin{description} 
 !  
 !   \item[component]
-!    Component to call Restore routine for.
+!    Component to call ReadRestart routine for.
 !
 !   \item[{[iospec]}]
 !       {\tt IOSpec} object which describes I/O options.
@@ -860,9 +857,9 @@
 !EOP
 ! !REQUIREMENTS:
 
-        call ESMF_CompRestore(component%compp, iospec, clock, phase, rc)
+        call ESMF_CompReadRestart(component%compp, iospec, clock, phase, rc)
 
-        end subroutine ESMF_CplCompRestore
+        end subroutine ESMF_CplCompReadRestart
 
 
 !------------------------------------------------------------------------------

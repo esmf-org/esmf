@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.33 2003/06/23 16:41:10 rstaufer Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.34 2003/06/27 20:01:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,7 +110,8 @@
       sequence
       private
         ! opaque pointer to the C++ class data
-        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+        !type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+        type(ESMF_Pointer) :: this
       end type
 
 !------------------------------------------------------------------------------
@@ -147,8 +148,8 @@ ArrayAllTypeMacro()
       public ESMF_ArrayF90Deallocate
       public ESMF_ArrayConstructF90Ptr    ! needed for C++ callback only
 
-      public ESMF_ArrayCheckpoint
-      public ESMF_ArrayRestore
+      public ESMF_ArrayWriteRestart
+      public ESMF_ArrayReadRestart
       public ESMF_ArrayWrite
       public ESMF_ArrayRead
  
@@ -160,7 +161,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.33 2003/06/23 16:41:10 rstaufer Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.34 2003/06/27 20:01:10 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -990,7 +991,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       subroutine ESMF_ArrayDestroy(array, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(inout) :: array
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -1078,7 +1079,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       subroutine ESMF_ArraySetData(array, dataspec, databuf, docopy, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array 
+      type(ESMF_Array), intent(inout) :: array 
       type(ESMF_ArraySpec), intent(in) :: dataspec
       real, dimension (:), pointer :: databuf    
       type(ESMF_CopyFlag), intent(in) :: docopy 
@@ -1157,7 +1158,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
                                   decompids, redistarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(inout) :: array
       type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: rank_trans
       integer, dimension(:), intent(in) :: olddecompids
@@ -1206,7 +1207,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       subroutine ESMF_ArrayHalo(array, layout, decompids, AI_exc, AI_tot, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(inout) :: array
       type(ESMF_DELayout) :: layout
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
@@ -1271,7 +1272,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
                                      AI_exc, AI_tot, array_out, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_Array), intent(inout) :: array
       type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
@@ -1338,7 +1339,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
                                      AI_exc, AI_tot, deid, array_out, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_Array), intent(inout) :: array
       type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
@@ -1406,7 +1407,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
                                      AI_exc, AI_tot, deid, array_out, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: array
+      type(ESMF_Array), intent(inout) :: array
       type(ESMF_DELayout), intent(in) :: layout
       integer, dimension(:), intent(in) :: decompids
       type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
@@ -1473,9 +1474,9 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
       subroutine ESMF_ArrayReorder(array, newarrayspec, newarray, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array 
+      type(ESMF_Array), intent(inout) :: array 
       type(ESMF_ArraySpec), intent(in) :: newarrayspec
-      type(ESMF_Array):: newarray   
+      type(ESMF_Array), intent(out):: newarray   
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
@@ -1584,7 +1585,7 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
                                lbounds, ubounds, strides, base, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(in) :: array
       integer, intent(out), optional :: rank
       type(ESMF_DataType), intent(out), optional :: type
       type(ESMF_DataKind), intent(out), optional :: kind
@@ -1929,7 +1930,7 @@ AllocAllocateMacro(real, R8, 4, COL4, LEN4, LOC4)
      subroutine ESMF_ArrayF90Deallocate(array, rank, type, kind, rc)
 ! 
 ! !ARGUMENTS: 
-      type(ESMF_Array) :: array 
+      type(ESMF_Array), intent(inout) :: array 
       integer :: rank   
       type(ESMF_DataType) :: type
       type(ESMF_DataKind) :: kind
@@ -2079,10 +2080,10 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayCheckpoint(array, iospec, rc)
+      subroutine ESMF_ArrayWriteRestart(array, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array):: array 
+      type(ESMF_Array), intent(in) :: array 
       type(ESMF_IOSpec), intent(in), optional :: iospec
       integer, intent(out), optional :: rc            
 !
@@ -2098,16 +2099,16 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_ArrayCheckpoint
+        end subroutine ESMF_ArrayWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_ArrayRestore(name, iospec, rc)
+      function ESMF_ArrayReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Array) :: ESMF_ArrayRestore
+      type(ESMF_Array) :: ESMF_ArrayReadRestart
 !
 !
 ! !ARGUMENTS:
@@ -2117,7 +2118,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a {\tt ESMF\_Array} from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_Array} from the last call to WriteRestart.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -2134,9 +2135,9 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 ! TODO: add code here
 !
 
-        ESMF_ArrayRestore = a 
+        ESMF_ArrayReadRestart = a 
  
-        end function ESMF_ArrayRestore
+        end function ESMF_ArrayReadRestart
 
 
 !------------------------------------------------------------------------------
@@ -2145,14 +2146,14 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
       subroutine ESMF_ArrayWrite(array, iospec, filename, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(inout) :: array
       type(ESMF_IOSpec), intent(in), optional :: iospec
       character(len=*), intent(in), optional :: filename
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
 !      options specified in the IOSpec derived type. 
 !
 !
@@ -2238,7 +2239,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(in) :: array
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !
@@ -2297,7 +2298,7 @@ AllocDeallocateMacro(real, R8, 4, COL4, LEN4, LOC4)
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_Array) :: array
+      type(ESMF_Array), intent(in) :: array
       character (len = *), intent(in), optional :: options
       integer, intent(out), optional :: rc 
 !

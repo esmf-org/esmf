@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.50 2003/06/26 23:03:13 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.51 2003/06/27 19:59:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -81,11 +81,11 @@
 !------------------------------------------------------------------------------
 !     ! ESMF Entry Point Names
 
-      character(len=16), parameter :: ESMF_SETINIT        = "ESMF_Initialize"
-      character(len=16), parameter :: ESMF_SETRUN         = "ESMF_Run"
-      character(len=16), parameter :: ESMF_SETFINAL       = "ESMF_Finalize"
-      character(len=16), parameter :: ESMF_SETCHECKPOINT  = "ESMF_Checkpoint"
-      character(len=16), parameter :: ESMF_SETRESTORE     = "ESMF_Restore"
+      character(len=16), parameter :: ESMF_SETINIT         = "ESMF_Initialize"
+      character(len=16), parameter :: ESMF_SETRUN          = "ESMF_Run"
+      character(len=16), parameter :: ESMF_SETFINAL        = "ESMF_Finalize"
+      character(len=16), parameter :: ESMF_SETWRITERESTART = "ESMF_WriteRestart"
+      character(len=16), parameter :: ESMF_SETREADRESTART  = "ESMF_ReadRestart"
  
 !------------------------------------------------------------------------------
 !     ! ESMF Phase number
@@ -168,7 +168,7 @@
 
       public ESMF_CompConstruct, ESMF_CompDestruct
       public ESMF_CompInitialize, ESMF_CompRun, ESMF_CompFinalize
-      public ESMF_CompCheckpoint, ESMF_CompRestore
+      public ESMF_CompWriteRestart, ESMF_CompReadRestart
       public ESMF_CompGet, ESMF_CompSet 
 
       public ESMF_CompValidate, ESMF_CompPrint
@@ -180,7 +180,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.50 2003/06/26 23:03:13 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.51 2003/06/27 19:59:13 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -587,10 +587,10 @@ end function
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompCheckpoint -- Call the Component's checkpoint routine
+! !IROUTINE: ESMF_CompWriteRestart -- Call the Component's internal save routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompCheckpoint(compp, iospec, clock, phase, rc)
+      subroutine ESMF_CompWriteRestart(compp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -608,7 +608,7 @@ end function
 !  \begin{description}
 !
 !   \item[compp]
-!    Component to call Checkpoint routine for.
+!    Component to call WriteRestart routine for.
 !
 !   \item[{[iospec]}]  Controls for how the component's data will be written.
 !
@@ -634,7 +634,7 @@ end function
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
-        ! Checkpoint return code; assume failure until success is certain
+        ! WriteRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -662,29 +662,29 @@ end function
         compw%compp => compp
 
         ! Set up the arguments before the call     
-        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETCHECKPOINT, phase, &
+        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETWRITERESTART, phase, &
                                                 compw, iospec, clock, status)
 
         ! Call user-defined run routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETCHECKPOINT, &
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETWRITERESTART, &
                                                                phase, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component checkpoint error"
+          print *, "Component WriteRestart error"
           return
         endif
 
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_CompCheckpoint
+        end subroutine ESMF_CompWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOPI
-! !IROUTINE: ESMF_CompRestore -- Call the Component's restore routine
+! !IROUTINE: ESMF_CompReadRestart -- Call the Component's internal restart routine
 
 ! !INTERFACE:
-      subroutine ESMF_CompRestore(compp, iospec, clock, phase, rc)
+      subroutine ESMF_CompReadRestart(compp, iospec, clock, phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -695,14 +695,14 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Call the associated user restore code for a component.
+!  Call the associated user internal restart code for a component.
 !
 !    
 !  The arguments are:
 !  \begin{description}
 !
 !   \item[compp]
-!    Component to call Restore routine for.
+!    Component to call ReadRestart routine for.
 !
 !   \item[{[iospec]}]  Controls for how the component's data will be read back.
 !
@@ -728,7 +728,7 @@ end function
         character(ESMF_MAXSTR) :: cname
         type(ESMF_CWrap) :: compw
 
-        ! Restore return code; assume failure until success is certain
+        ! ReadRestart return code; assume failure until success is certain
         status = ESMF_FAILURE
         rcpresent = .FALSE.
         if (present(rc)) then
@@ -756,21 +756,21 @@ end function
         compw%compp => compp
 
         ! Set up the arguments before the call     
-        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETRESTORE, phase, &
+        call c_ESMC_FTableSetIOArgs(compp%this, ESMF_SETREADRESTART, phase, &
                                                 compw, iospec, clock, status)
 
         ! Call user-defined run routine
-        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETRESTORE, &
+        call c_ESMC_FTableCallEntryPoint(compp%this, ESMF_SETREADRESTART, &
                                                                phase, status)
         if (status .ne. ESMF_SUCCESS) then
-          print *, "Component restore error"
+          print *, "Component ReadRestart error"
           return
         endif
 
         ! Set return values
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_CompRestore
+        end subroutine ESMF_CompReadRestart
 
 
 
@@ -1171,7 +1171,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
 !      options specified in the IOSpec derived type. 
 !
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.7 2003/04/04 16:25:55 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.8 2003/06/27 19:59:13 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -61,8 +61,8 @@
       public ESMF_XformInit
       public ESMF_XformGet, ESMF_XformSet
  
-      public ESMF_XformCheckpoint
-      public ESMF_XformRestore
+      public ESMF_XformWriteRestart
+      public ESMF_XformReadRestart
  
       public ESMF_XformPrint
 !EOP
@@ -70,7 +70,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.7 2003/04/04 16:25:55 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.8 2003/06/27 19:59:13 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -214,10 +214,10 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_XformCheckpoint - Save Transform state
+! !IROUTINE: ESMF_XformWriteRestart - Save Transform state
 !
 ! !INTERFACE:
-      subroutine ESMF_XformCheckpoint(xform, iospec, rc)
+      subroutine ESMF_XformWriteRestart(xform, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Xform):: xform 
@@ -236,28 +236,28 @@
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_XformCheckpoint
+        end subroutine ESMF_XformWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_XformRestore - Restore Transform state
+! !IROUTINE: ESMF_XformReadRestart - ReadRestart Transform state
 !
 ! !INTERFACE:
-      function ESMF_XformRestore(name, iospec, rc)
+      function ESMF_XformReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Xform) :: ESMF_XformRestore
+      type(ESMF_Xform) :: ESMF_XformReadRestart
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! xform name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Xform from the last call to Checkpoint.
+!      all data associated with a Xform from the last call to WriteRestart.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -276,9 +276,9 @@
 ! TODO: add code here
 !
 
-        ESMF_XformRestore = a 
+        ESMF_XformReadRestart = a 
  
-        end function ESMF_XformRestore
+        end function ESMF_XformReadRestart
 
 
 !------------------------------------------------------------------------------
