@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.28 2003/08/15 22:53:48 jwolfe Exp $
+! $Id: ESMF_Route.F90,v 1.29 2003/08/26 22:44:25 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -74,6 +74,7 @@
       public ESMF_RoutePrecomputeHalo
       public ESMF_RoutePrecomputeRedist
       public ESMF_RoutePrecomputeRegrid
+      public ESMF_RoutePrecomputeDomainList
       public ESMF_RouteRun
  
       public ESMF_RouteValidate
@@ -86,7 +87,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.28 2003/08/15 22:53:48 jwolfe Exp $'
+      '$Id: ESMF_Route.F90,v 1.29 2003/08/26 22:44:25 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -898,6 +899,69 @@
         if (rcpresent) rc = status
 
         end subroutine ESMF_RoutePrecomputeRegrid
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_RoutePrecomputeDomainList - Precompute communication paths
+
+! !INTERFACE:
+      subroutine ESMF_RoutePrecomputeDomainList(route, rank, my_DE, &
+                                 sendDomainList, recvDomainList, rc)
+
+! !ARGUMENTS:
+      type(ESMF_Route), intent(in) :: route
+      integer, intent(in) :: rank
+      integer, intent(in) :: my_DE
+      type(ESMF_DomainList), pointer :: sendDomainList
+      type(ESMF_DomainList), pointer :: recvDomainList
+      integer, intent(out), optional :: rc
+
+!
+! !DESCRIPTION:
+!     Execute the communications a Route represents.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[route] 
+!          Route to be executed.
+!     \item[ TBDocd ]  
+!     \item[{[rc]}] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+        ! local variables
+        integer :: status                  ! local error status
+        integer :: i,j                     ! counters
+        logical :: rcpresent               ! did user specify rc?
+
+        ! Set initial values
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.   
+
+        ! Initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+        ! TODO:?  Translate AxisIndices from F90 to C++
+
+        ! Call C++  code
+        call c_ESMC_RoutePrecomputeDomainList(route, rank, my_DE, &
+                               sendDomainList, recvDomainList, status)
+        if (status .ne. ESMF_SUCCESS) then  
+          print *, "Route PrecomputeDomainList error"
+          ! don't return before adding 1 back to AIs
+        endif
+
+        ! TODO:?  Translate AxisIndices back to F90 from C++
+
+        if (rcpresent) rc = status
+
+        end subroutine ESMF_RoutePrecomputeDomainList
 
 !------------------------------------------------------------------------------
 !BOP
