@@ -102,12 +102,13 @@ by other components, compute fluxes, perform grid transformations, or
 perform inter-component transfers of data.  They {\bf are} responsible for 
 providing a description of all of the fields and data they
 can export to other components, and for similarly providing a description 
-of the fields they must import in order to run.  These descriptions are
+of the fields they require in order to run.  These descriptions are
 embodied in the {\tt ESMF\_State} class, and the kind of data that they 
 represent is identified by the {\tt type} attribute of that class, which can
-have an {\tt ESMF\_IMPORT} or {\tt ESMF\_EXPORT} value.  In addition to 
-providing an import state, gridded components are required to check that 
-initial or imported data is valid and complete.
+have an {\tt ESMF\_IMPORT} or {\tt ESMF\_EXPORT} value.  The state class
+includes metadata information as well as actual pointers to data 
+locations.  In addition to providing an import state, gridded components 
+are required to check that initial or imported data is valid and complete.
 
 The coupler component produces a specification of the sequence of 
 transforms that are necessary to effect communication between components, 
@@ -116,22 +117,23 @@ transforms to be
 called, on which DEs they should take place, any sequencing restrictions 
 on the transforms, and what data is to be acted on.  For example, the
 coupler may specify that transformations occur on either the data sending 
-or receiving end (or both), that data be sent directly between components,
-or that data be sent to the coupler for intermediate processing before 
-it is sent to its destination.  The coupler is responsible for managing
+or receiving end (or both).  It may send data directly from the DEs on
+whcih the source component is located to the DEs of the destination 
+component, or it may stage the transfer and transformations using an
+intermediate set of DEs.  The coupler is responsible for managing
 the transfer of data between components.    
 
 The application or parent component initiating the coupling manages 
 its sequencing.  It is responsible for instantiating the gridded components
-that are exchanging data as well as the coupler, for determining whether the 
-desired sequencing can be supported, and making the calls to the {\tt run} 
+that are exchanging data and the coupler, for determining whether the 
+desired sequencing can be supported, and making the calls to the  
 methods of the components and coupler that effect the coupled exchange. 
 
 \subsection{Flow of Data}
 
 The design choices we have made enable the user to configure an ESMF
 coupler so that data is transferred directly from one component to another, 
-without requiring that it first be sent via message passing to to the
+without requiring that it first be sent via message passing to the
 coupler (or even necessarily
 copied).  This is likely to be the most efficient way of performing 
 inter-component coupling when the components are instantiated on different
@@ -141,9 +143,19 @@ DEs for processing before being sent to its destination.
 
 \subsection{Examples}
 
-In our first set of examples, involving just two components, we'll call 
-the instance of the application {\tt app}, the gridded components {\tt atm} 
-and {\tt ocn}, and the coupler {\tt coupler}.
+Figure~\ref{fig:1waycoupling} shows the sequence of actions involved
+in coupling an atmosphere to an ocean.  The vertical axis is time, positive
+downward, and the horizontal axis shows the objects that are involved in the
+exchange.  In this example, the coupling is one-way, so that the ocean 
+receives data from the atmosphere but does not send any data back.  Atmosphere
+and ocean components are configured for concurrent execution.
+
+\begin{figure}
+\label{fig:1waycoupling}
+\caption[{Coupling Sequence}]{One-way coupling between an atmosphere and
+ocean executing concurrently.}
+\scalebox{0.70}{\includegraphics{OneWayCoupling.eps}}
+\end{figure}
 
 \subsection{Object Model}
 
