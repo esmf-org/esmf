@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.C,v 1.7 2003/03/27 01:56:40 eschwab Exp $
+// $Id: ESMC_Clock.C,v 1.8 2003/03/28 00:49:09 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -20,6 +20,7 @@
 //-------------------------------------------------------------------------
 //
  // higher level, 3rd party or system includes here
+ #include <iostream.h>
 
  // associated class definition file
  #include <ESMC_Clock.h>
@@ -27,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Clock.C,v 1.7 2003/03/27 01:56:40 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Clock.C,v 1.8 2003/03/28 00:49:09 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -60,13 +61,15 @@
 //EOP
 // !REQUIREMENTS:  
 
-    if (timeStep != 0) TimeStep  = *timeStep;
+    if (timeStep  != 0) TimeStep  = *timeStep;
     if (startTime != 0) StartTime = *startTime;
-    if (stopTime != 0) StopTime  = *stopTime;
-    if (refTime != 0) RefTime   = *refTime;
+    if (stopTime  != 0) StopTime  = *stopTime;
+    if (refTime   != 0) RefTime   = *refTime;
+    else RefTime = StartTime;
 
     CurrTime = StartTime;
     PrevTime = CurrTime;
+    AdvanceCount = 0;
 
     return(ESMF_SUCCESS);
 
@@ -95,6 +98,7 @@
 
     PrevTime = CurrTime;   // save current time, then
     CurrTime += TimeStep;  // advance it!
+    AdvanceCount++;
 
     // call each alarm's CheckRingTime method; compile and return a list of 
     // ringing alarms
@@ -127,6 +131,31 @@
     return(CurrTime >= StopTime);
 
  } // end ESMC_ClockIsStopTime
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_ClockGetAdvanceCount - get clock's advance count
+//
+// !INTERFACE:
+      int ESMC_Clock::ESMC_ClockGetAdvanceCount(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_IKIND_I8 *advanceCount) {      // out - advance count
+//
+// !DESCRIPTION:
+//     Get the number of times a clock has been advanced (time stepped)
+//
+//EOP
+// !REQUIREMENTS: TMG 3.5.1
+
+    if (advanceCount != 0) *advanceCount = AdvanceCount;
+
+    return(ESMF_SUCCESS);
+
+ } // end ESMC_ClockGetAdvanceCount
 
 //-------------------------------------------------------------------------
 //BOP
