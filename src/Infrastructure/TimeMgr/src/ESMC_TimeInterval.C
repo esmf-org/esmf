@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.23 2003/05/07 16:18:41 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.24 2003/05/07 20:12:49 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.23 2003/05/07 16:18:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.24 2003/05/07 20:12:49 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -385,7 +385,21 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO
+    // validate input
+    if (timeString == ESMC_NULL_POINTER) return (ESMF_FAILURE);
+
+    ESMF_IKIND_I8 D, S;
+    int H, M;
+    // TODO: use native C++ Get, not F90 entry point, when ready
+    ESMC_TimeIntervalGet(ESMC_NULL_POINTER, ESMC_NULL_POINTER, &D, &H, &M, &S);
+    //ESMC_TimeIntervalGet(&YY, &MM, &D, &H, &M, &S); // TODO: when calendar
+                                                      //  intervals implemented
+
+    // TODO: ISO 8601 format ?
+    sprintf(timeString, "P%lldDT%dH%dM%lldS\0", D, H, M, S);
+    //sprintf(timeString, "P%lldY%dM%lldDT%dH%dM%lldS\0", // TODO: when calendar
+    //        YY, MO, D, H, M, S);                    //  intervals implemented
+
     return(ESMF_SUCCESS);
 
  }  // end ESMC_TimeIntervalGetString
@@ -975,10 +989,22 @@
 // !REQUIREMENTS:  
 
     cout << "TimeInterval ---------------------------" << endl;
-    ESMC_BaseTime::ESMC_BaseTimePrint(options);
-    cout << "YY = " << YY << endl;
-    cout << "MO = " << MO << endl;
-    cout << "D  = " << D << endl;
+
+    // parse options
+    if (options != ESMC_NULL_POINTER) {
+      if (strncmp(options, "string", 6) == 0) {
+        char timeString[ESMF_MAXSTR];
+        ESMC_TimeIntervalGetString(timeString);
+        cout << timeString << endl;
+      }
+    } else {
+      // default
+      ESMC_BaseTime::ESMC_BaseTimePrint(options);
+      cout << "YY = " << YY << endl;
+      cout << "MO = " << MO << endl;
+      cout << "D  = " << D << endl;
+    }
+
     cout << "end TimeInterval -----------------------" << endl << endl;
 
     return(ESMF_SUCCESS);
