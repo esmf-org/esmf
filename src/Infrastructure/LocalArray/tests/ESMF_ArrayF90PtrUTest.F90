@@ -145,30 +145,50 @@
     
 
     call ESMF_Initialize(rc=rc)
-
+    
+    !NEX_UTest
     call c_ESMF_SizePrint(sizetest1I(1), sizetest1I(2), 1, rc)
+    !NEX_UTest
     call c_ESMF_SizePrint(sizetest2I(1), sizetest2I(2), 2, rc)
+    !NEX_UTest
     call c_ESMF_SizePrint(sizetest3I(1), sizetest3I(2), 3, rc)
+    !NEX_UTest
     call c_ESMF_SizePrint(sizetest4I(1), sizetest4I(2), 4, rc)
+    !NEX_UTest
     call c_ESMF_SizePrint(sizetest5I(1), sizetest5I(2), 5, rc)
 
 #ifdef ESMF_EXHAUSTIVE
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest1R(1), sizetest1R(2), 1, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest2R(1), sizetest2R(2), 2, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest3R(1), sizetest3R(2), 3, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest4R(1), sizetest4R(2), 4, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest5R(1), sizetest5R(2), 5, rc)
 
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest1R8(1), sizetest1R8(2), 1, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest2R8(1), sizetest2R8(2), 2, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest3R8(1), sizetest3R8(2), 3, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest4R8(1), sizetest4R8(2), 4, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest5R8(1), sizetest5R8(2), 5, rc)
 
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest1S(1), sizetest1S(2), 1, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest2S(1), sizetest2S(2), 2, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest3S(1), sizetest3S(2), 3, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest4S(1), sizetest4S(2), 4, rc)
+    !EX_UTest
     call c_ESMF_SizePrint(sizetest5S(1), sizetest5S(2), 5, rc)
 #endif
 
