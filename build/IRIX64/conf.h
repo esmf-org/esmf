@@ -1,5 +1,5 @@
 #ifdef ESMC_RCS_HEADER
-"$Id: conf.h,v 1.6 2003/02/24 05:12:50 nscollins Exp $"
+"$Id: conf.h,v 1.7 2003/07/01 23:01:40 jwolfe Exp $"
 "Defines the configuration for this machine"
 #endif
 
@@ -53,6 +53,7 @@
 
 #define ESMC_USE_DBX_DEBUGGER
 #define ESMC_HAVE_SYS_RESOURCE_H
+#define ESMC_RESTRICT __restrict
 
 #define ESMC_HAVE_RTLD_GLOBAL 1
 
