@@ -1,11 +1,42 @@
-% $Id: Regrid_design.tex,v 1.1 2003/01/23 18:18:26 nscollins Exp $
+% $Id: Regrid_design.tex,v 1.2 2003/05/07 19:05:08 pwjones Exp $
 
-%\subsection{Design}
+\subsection{Design}
 
-% <Describe strategy for overall class design.>
+Regrid is designed to be called with Field or Bundle
+arguments in order to utilize information embedded in
+these objects.  For example, Regrid requires knowledge
+of underlying grid information (both PhysGrid and DistGrid)
+and of the relative location (staggering) of Fields on
+the Grid.  In addition, Regrid uses any mask information
+that may be associated with a Field.
 
+Regrid is separated into a Create function and a
+Run function. The Create function computes
+interpolation weights and initializes communication
+requirements for performing a regridding of a Field
+from one Grid to another.  The Run function uses
+a created Regrid object to perform the actual regridding
+of Fields or Bundles.  The reason for the separation
+is that in many cases, the initial creation is
+expensive and re-used often throughout an application.
 
-%<Add more detail here>
-%
-%
-%
+Because many methods are supported for regridding,
+the main Create function branches to a specific
+creation function based on the regrid method requested
+(e.g. bilinear, conservative, spectral).  Each of
+these regrid methods are in a separate module to 
+prevent the main Regrid module from becoming too
+large.  The user is unaware of this hierarchy as the
+top-level module provides a unified API.
+
+The Regrid object created by the ... wait for it...
+Regrid Create function contains a set of ``links''
+which identify how a field at a point on the 
+destination grid is related to a field at a 
+point on the source grid.  As such, a ``link''
+consists of a source address, a destination address
+and a weight.  Because the Grids are generally
+distributed very differently, the Regrid object
+also contains communication information 
+for any data motion required for the regridding.
+ 
