@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.36 2005/03/21 17:59:31 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.37 2005/03/22 03:55:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -78,6 +78,7 @@
 // initialization of class static variables
 MPI_Group ESMC_VMK::default_mpi_g;
 MPI_Comm ESMC_VMK::default_mpi_c;
+int ESMC_VMK::mpi_thread_level;
 int ESMC_VMK::ncores;
 int *ESMC_VMK::cpuid;
 int *ESMC_VMK::ssiid;
@@ -236,9 +237,10 @@ void ESMC_VMK::vmk_init(void){
   MPI_Initialized(&initialized);
   if (!initialized){
 #ifdef ESMF_MPICH   
-    MPI_Init(&argc, &argv); // MPICH1.2 is not standard compliant and needs args
+    // MPICH1.2 is not standard compliant and needs valid args
+    MPI_Init_thread(&argc, &argv, MPI_THREAD_MULTIPLE, &mpi_thread_level);
 #else
-    MPI_Init(NULL, NULL);
+    MPI_Init_thread(NULL, NULL, MPI_THREAD_MULTIPLE, &mpi_thread_level);
 #endif
   } 
   // so now MPI is for sure initialized...
@@ -266,6 +268,8 @@ void ESMC_VMK::vmk_init(void){
   pthread_mutex_init(pth_mutex, NULL);
   pth_mutex2 = new pthread_mutex_t;
   pthread_mutex_init(pth_mutex2, NULL);
+  // the mutex flag must be reset
+  mpi_mutex_flag = 0;
   // set up the communication array
   commarray = new comminfo*[npets];
   for (int i=0; i<npets; i++){
@@ -382,6 +386,10 @@ void ESMC_VMK::vmk_construct(int mypet, pthread_t pthid, int npets, int *lpid,
   this->pth_mutex2 = pth_mutex2;
   this->pth_mutex = pth_mutex;
   this->pth_finish_count = pth_finish_count;
+  if (vmk_nthreads(mypet)>1 && mpi_thread_level<MPI_THREAD_MULTIPLE)
+    this->mpi_mutex_flag = 1; // must use muteces around mpi comms
+  else
+    this->mpi_mutex_flag = 0; // don't need to use muteces around mpi comms
   this->commarray = commarray;
   // initialize the request queue
   this->nhandles=0;
@@ -1512,6 +1520,8 @@ void ESMC_VMK::vmk_print(void){
   printf("MPI_Group_size: %d\n", size);
   MPI_Comm_size(mpi_c, &size);
   printf("MPI_Comm_size: %d\n", size);
+  printf("MPI thread level support: %d\n", mpi_thread_level);
+  printf("mpi_mutex_flag: %d\n", mpi_mutex_flag);
   for (int i=0; i<npets; i++){
     printf("  lpid[%d]=%d, pid[%d]=%d, tid[%d]=%d, ncpet[%d]=%d",
       i, lpid[i], i, pid[i], i, tid[i], i, ncpet[i]);
@@ -2046,13 +2056,15 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest){
   switch(commarray[mypet][dest].comm_type){
   case VM_COMM_TYPE_MPI1:
     // MPI-1 implementation
-    // not sure if I need to make this atomic if called multi-threaded?
-    //pthread_mutex_lock(pth_mutex);
+    // use mutex to serialize mpi comm calls if mpi thread support requires it
+    if (mpi_mutex_flag)
+      pthread_mutex_lock(pth_mutex);
     MPI_Send(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c);
 //gjt - don't use yet:    MPI_Send(message, size, MPI_BYTE, lpid[dest], 
 //gjt - don't use yet:      commarray[mypet][dest].mpitag_send, mpi_c);
 //gjt - don't use yet:    ++commarray[mypet][dest].mpitag_send;
-    //pthread_mutex_unlock(pth_mutex);
+    if (mpi_mutex_flag)
+      pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -2191,15 +2203,17 @@ void ESMC_VMK::vmk_send(void *message, int size, int dest,
     (*commhandle)->type=1;
     (*commhandle)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
-    // not sure if I need to make this atomic if called multi-threaded?
-    //pthread_mutex_lock(pth_mutex);
+    // use mutex to serialize mpi comm calls if mpi thread support requires it
+    if (mpi_mutex_flag)
+      pthread_mutex_lock(pth_mutex);
 //fprintf(stderr, "MPI_Isend: commhandle=%p\n", (*commhandle)->mpireq);
     MPI_Isend(message, size, MPI_BYTE, lpid[dest], 1000*mypet+dest, mpi_c, 
       (*commhandle)->mpireq);
 //gjt - don't use yet:    MPI_Isend(message, size, MPI_BYTE, lpid[dest],
 //gjt - don't use yet:      commarray[mypet][dest].mpitag_send, mpi_c, (*commhandle)->mpireq);
 //gjt - don't use yet:    ++commarray[mypet][dest].mpitag_send;
-    //pthread_mutex_unlock(pth_mutex);
+    if (mpi_mutex_flag)
+      pthread_mutex_unlock(pth_mutex);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -2311,15 +2325,17 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source){
   switch(commarray[source][mypet].comm_type){
   case VM_COMM_TYPE_MPI1:
     // MPI-1 implementation
-    // not sure if I need to make this atomic if called multi-threaded
-    //pthread_mutex_lock(pth_mutex2);
+    // use mutex to serialize mpi comm calls if mpi thread support requires it
+    if (mpi_mutex_flag)
+      pthread_mutex_lock(pth_mutex2);
     MPI_Status mpi_s;
     MPI_Recv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
     mpi_c, &mpi_s);
 //gjt - don't use yet:    MPI_Recv(message, size, MPI_BYTE, lpid[source],
 //gjt - don't use yet:      commarray[source][mypet].mpitag_recv, mpi_c, &mpi_s);
 //gjt - don't use yet:    ++commarray[source][mypet].mpitag_recv;
-    //pthread_mutex_unlock(pth_mutex2);
+    if (mpi_mutex_flag)
+      pthread_mutex_unlock(pth_mutex2);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation
@@ -2460,15 +2476,17 @@ void ESMC_VMK::vmk_recv(void *message, int size, int source,
     (*commhandle)->type=1;
     (*commhandle)->mpireq = new MPI_Request[1];
     // MPI-1 implementation
-    // not sure if I need to make this atomic if called multi-threaded
-    //pthread_mutex_lock(pth_mutex2);
+    // use mutex to serialize mpi comm calls if mpi thread support requires it
+    if (mpi_mutex_flag)
+      pthread_mutex_lock(pth_mutex2);
 //fprintf(stderr, "MPI_Irecv: commhandle=%p\n", (*commhandle)->mpireq);
     MPI_Irecv(message, size, MPI_BYTE, lpid[source], 1000*source+mypet, 
       mpi_c, (*commhandle)->mpireq);
 //gjt - don't use yet:    MPI_Irecv(message, size, MPI_BYTE, lpid[source],
 //gjt - don't use yet:      commarray[source][mypet].mpitag_recv, mpi_c, (*commhandle)->mpireq);
 //gjt - don't use yet:    ++commarray[source][mypet].mpitag_recv;
-    //pthread_mutex_unlock(pth_mutex2);
+    if (mpi_mutex_flag)
+      pthread_mutex_unlock(pth_mutex2);
     break;
   case VM_COMM_TYPE_PTHREAD:
     // Pthread implementation

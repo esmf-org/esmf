@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.16 2005/03/21 17:59:30 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.17 2005/03/22 03:55:51 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -135,6 +135,8 @@ class ESMC_VMK{
     pthread_mutex_t *pth_mutex2;
     pthread_mutex_t *pth_mutex;
     int *pth_finish_count;
+    // Mutex flag used to indicate that this PET must use muteces for MPI comms
+    int mpi_mutex_flag;
     // Communications array
     comminfo **commarray;   // this array is shared between pets of same pid
     // Communication requests queue
@@ -146,8 +148,10 @@ class ESMC_VMK{
     static int *ssiid; // single system inmage id to which this core belongs
   public:
     // static MPI info, MPI_COMM_WORLD Group and Comm of the default ESMC_VMK
+    // and the thread level that the MPI implementation supports.
     static MPI_Group default_mpi_g;
     static MPI_Comm default_mpi_c;
+    static int mpi_thread_level;
     // static variables that hold command line arguments
     static int argc;
     static char **argv;
