@@ -332,7 +332,7 @@ end function ESMF_LogWrite
 ! 	
 !      \item [status]
 !            Return code to check.
-!      \item [{{line]}]
+!      \item [{[line]}]
 !            Integer source line number.  Expected to be set by
 !            using the preprocessor macro {\tt \_\_LINE\_\_} macro.
 !      \item [{[file]}]
