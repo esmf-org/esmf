@@ -94,12 +94,12 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_CalendarEx_fapi}
 #endif
 
-%\subsubsection{Restrictions and Future Work}
-%#ifdef STANDALONE
-%\input{Calendar_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
-%#endif
+\subsubsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{Calendar_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Calendar_rest}
+#endif
 
 %\subsection{Design and Implementation Notes}
 %#ifdef STANDALONE
@@ -222,9 +222,9 @@
 
 \subsection{Restrictions and Future Work}
 #ifdef STANDALONE
-%\input{Clock_rest}
+\input{Clock_rest}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Clock_rest}
+\input{../Infrastructure/TimeMgr/doc/Clock_rest}
 #endif
 
 \subsection{Class API}
@@ -264,12 +264,12 @@
 \input{../Infrastructure/TimeMgr/doc/ESMF_AlarmEx_fapi}
 #endif
 
-%\subsection{Restrictions and Future Work}
-%#ifdef STANDALONE
-%\input{Alarm_rest}
-%#elif defined(CONSTITUENT)
-%\input{../Infrastructure/TimeMgr/doc/Alarm_rest}
-%#endif
+\subsection{Restrictions and Future Work}
+#ifdef STANDALONE
+\input{Alarm_rest}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/TimeMgr/doc/Alarm_rest}
+#endif
 
 %\subsection{Design and Implementation Notes}
 #ifdef STANDALONE

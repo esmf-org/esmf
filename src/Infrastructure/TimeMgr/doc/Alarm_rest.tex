@@ -1,0 +1,12 @@
+% $Id: Alarm_rest.tex,v 1.3 2004/06/15 23:54:47 cdeluca Exp $
+
+\begin{enumerate}
+
+\item {\bf Limit on number of Alarms.}  The maximum number of Alarms that 
+can be associated with a Clock is currently hard-coded at 100.  This is done
+in both F90 and C++ with a \#define for ease of modification.  This will be
+changed in a future release to an automatic dynamic memory allocation approach,
+so the number of alarms will be virtually unlimited, subject only to the amount
+of memory available to a user's process.
+
+\end{enumerate}

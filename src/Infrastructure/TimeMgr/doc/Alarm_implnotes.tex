@@ -1,8 +1,8 @@
-% $Id: Alarm_implnotes.tex,v 1.3 2003/12/19 19:14:47 eschwab Exp $
+% $Id: Alarm_implnotes.tex,v 1.4 2004/06/15 23:54:47 cdeluca Exp $
 
-\subsection{Implementation Notes}
+\subsection{Design and Implementation Notes}
 
-The ESMF\_Alarm class is designed as a deep, dynamically allocatable class,
+The Alarm class is designed as a deep, dynamically allocatable class,
 based on a pointer type.  This allows for both indirect and direct
 manipulation of alarms.  Indirect alarm manipulation is where ESMF\_Alarm API
 methods, such as ESMF\_AlarmRingerOff(), are invoked on alarm references

@@ -1,4 +1,4 @@
-% $Id: ArrayDataMap_refdoc.ctex,v 1.4 2004/06/04 12:28:48 nscollins Exp $
+% $Id: ArrayDataMap_refdoc.ctex,v 1.5 2004/06/15 23:54:46 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -58,7 +58,7 @@
 \input{../Infrastructure/ArrayDataMap/doc/ESMF_ArrayDataMapEx_fapi}
 #endif
 
-\subsubsection{Restrictions and Future Work}
+\subsection{Restrictions and Future Work}
 #ifdef STANDALONE
 \input{ArrayDataMap_rest}
 #elif defined(CONSTITUENT)
