@@ -1,0 +1,8 @@
+
+ This is where build-dependent information can be placed about
+this particular platform and compiler combination.
+
+
+ If you have problems with compiling files foo.F90, then change 
+the f95 to f90 in the makefile and use the f90 command in this directory.
+

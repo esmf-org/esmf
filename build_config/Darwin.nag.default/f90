@@ -1,0 +1,39 @@
+#!/bin/sh
+
+# This script makes use of the fact that the hfs+ file system does funny
+# things with case:     
+#    
+#    If you have a file named  a.F90, you can not have another file
+#    named a.f90.  BUT--- you can use a.f90 or a.F90 interchangeably
+#    in most cases:
+#     
+#         ls a.F90     and     ls a.f90  should give the same information.
+#         diff a.F90 b.F90    and   diff a.f90 b.F90  should give the same result
+#
+#     Now for the problem:  The NAG compiler will not compile   a.F90, but it
+#     will compile a.f90.  But when compiling a.f90, it will not automatically
+#     invoke fpp.
+#
+#     NAG's rules state that a.F90 SHOULD compile with fpp.  So our solution is:
+#
+#       1.  If the argument is a.f90, just leave it alone.
+#       2.  If an argument is a.F90, change it to a.f90 and turn on the -fpp flag.
+#
+#     Note that this is done with sed on each argument, so if any of the arguments is
+#     .F90, then -fpp will be turned on:
+#
+
+
+FPP=''
+args=''
+for arg in $*
+do
+ case $arg in
+  *\.F) FPP='-fpp'; arg2=`echo $arg | sed -e 's/F$/f/'`; args="$args $arg2";;
+  *\.F90) FPP='-fpp' ; arg2=`echo $arg | sed -e 's/F90$/f90/'` ; args="$args $arg2";;
+  *\.F95) FPP='-fpp' ; arg2=`echo $arg | sed -e 's/F95$/f95/'` ; args="$args $arg2";;
+  *) args="$args $arg";;
+ esac
+done
+f95 $FPP $args
+

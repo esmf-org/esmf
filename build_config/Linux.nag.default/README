@@ -1,0 +1,11 @@
+
+ This is where build-dependent information can be placed about
+this particular platform and compiler combination.
+
+ This is just the absoft file w/ absoft renamed to nag.  It has NOT been
+tested.  If someone with a nag compiler could test this and send us
+changes, it would be great.
+
+thanks.
+
+
