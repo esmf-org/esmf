@@ -1,4 +1,4 @@
-! $Id: ESMF_TimeIntervalUTest.F90,v 1.21 2004/04/23 00:26:40 eschwab Exp $
+! $Id: ESMF_TimeIntervalUTest.F90,v 1.22 2004/04/24 01:31:28 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_TimeIntervalUTest.F90,v 1.21 2004/04/23 00:26:40 eschwab Exp $'
+      '$Id: ESMF_TimeIntervalUTest.F90,v 1.22 2004/04/24 01:31:28 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -64,6 +64,7 @@
       type(ESMF_TimeInterval) :: absoluteTime
       integer(ESMF_KIND_I8) :: advanceCounts, year, days2, month, minute, second
       integer(ESMF_KIND_I4) :: day, hour
+      real(ESMF_KIND_R8) :: ratio
 
 
 !-------------------------------------------------------------------------------
@@ -693,7 +694,7 @@
       ! Testing the + operator
       ! resultTime = ESMF_TimeOperator(+)(time, timestep)
       write(name, *) "Gregorian Calendar Interval increment 12/31/2004 by d=1 Test"
-      write(failMsg, *) " Did not return 1/1/2005 12:17:58 or ESMF_SUCCESS"
+      write(failMsg, *) " Did not return 1/1/2005 12:17:58 and ESMF_SUCCESS"
       call ESMF_TimeSet(startTime, yy=2004, mm=12, dd=31, h=12, m=17, s=58, &
                                    calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeIntervalSet(timeStep, d=1, rc=rc)
@@ -721,7 +722,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       write(name, *) "Gregorian Calendar Interval Abs test"
-      write(failMsg, *) " Did not return mm=32, d=10 or ESMF_SUCCESS"
+      write(failMsg, *) " Did not return mm=32, d=10 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=-3, mm=4, d=-10, &
                                 calendar=gregorianCalendar, rc=rc)
       timeStep2 = ESMF_TimeIntervalAbsValue(timeStep)
@@ -734,7 +735,7 @@
       ! ----------------------------------------------------------------------------
       !NEX_UTest
       write(name, *) "Gregorian Calendar Interval Negative Abs test"
-      write(failMsg, *) " Did not return mm=-32, d=-10 or ESMF_SUCCESS"
+      write(failMsg, *) " Did not return mm=-32, d=-10 and ESMF_SUCCESS"
       call ESMF_TimeIntervalSet(timeStep, yy=3, mm=-4, d=10, &
                                 calendar=gregorianCalendar, rc=rc)
       timeStep2 = ESMF_TimeIntervalNegAbsValue(timeStep)
@@ -743,6 +744,107 @@
                       name, failMsg, result, ESMF_SRCLINE)
 
       print *, "months, days, rc = ", months, days, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval Modulus test 1"
+      write(failMsg, *) " Did not return mm=10 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, mm=4, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=2, mm=6, &
+                                calendar=gregorianCalendar, rc=rc)
+      timeStep3 = MOD(timeStep, timeStep2)
+      call ESMF_TimeIntervalGet(timeStep3, mm=months, rc=rc)
+      call ESMF_Test((months==10 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "months, rc = ", months, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval Modulus test 2"
+      write(failMsg, *) " Did not return yy=2 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=5, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=3, &
+                                calendar=gregorianCalendar, rc=rc)
+      timeStep3 = MOD(timeStep, timeStep2)
+      call ESMF_TimeIntervalGet(timeStep3, yy=years, rc=rc)
+      call ESMF_Test((years==2 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "years, rc = ", years, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval Modulus test 3"
+      write(failMsg, *) " Did not return d=7 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, d=15, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, d=8, &
+                                calendar=gregorianCalendar, rc=rc)
+      timeStep3 = MOD(timeStep, timeStep2)
+      call ESMF_TimeIntervalGet(timeStep3, d=days, rc=rc)
+      call ESMF_Test((days==7 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "days, rc = ", days, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval ratio test 1"
+      write(failMsg, *) " Did not return 0.5 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, d=5, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, d=10, &
+                                calendar=gregorianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval ratio test 2"
+      write(failMsg, *) " Did not return 0.25 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, yy=12, &
+                                calendar=gregorianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-.25) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval ratio test 3"
+      write(failMsg, *) " Did not return 0.75 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, mm=6, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, mm=8, &
+                                calendar=gregorianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-.75) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
+
+      ! ----------------------------------------------------------------------------
+      !NEX_UTest
+      write(name, *) "Gregorian Calendar Interval ratio test 4"
+      write(failMsg, *) " Did not return 1.5 and ESMF_SUCCESS"
+      call ESMF_TimeIntervalSet(timeStep, yy=3, &
+                                calendar=gregorianCalendar, rc=rc)
+      call ESMF_TimeIntervalSet(timeStep2, mm=24, &
+                                calendar=gregorianCalendar, rc=rc)
+      ratio = timeStep / timeStep2
+      call ESMF_Test((abs(ratio-1.5) < 1e-6 .and. rc==ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      print *, "ratio, rc = ", ratio, rc
 
       ! ----------------------------------------------------------------------------
       ! No Leap calendar 2004 tests
