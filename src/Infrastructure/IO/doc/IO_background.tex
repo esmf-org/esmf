@@ -1,4 +1,4 @@
-% $Id: IO_background.tex,v 1.2 2002/04/22 21:34:14 lzaslavsky Exp $
+% $Id: IO_background.tex,v 1.3 2002/04/23 01:16:58 lzaslavsky Exp $
 
 \section{Background}
 
@@ -10,6 +10,27 @@ writing of data in several standard formats as well as support
 efficient internal data representations. ESMF IO is supposed to
 provide a unified interface to input data from a file with automatic 
 detection of file-type in runtime, and to output data in a requested format.
+
+The data files  supported by ESMF are either {\em self-described} or
+{\em co-described} files.
+
+
+{\bf Self-Described Files} contain all metadata
+necessary to provide a unique interpretation of the file content
+assuming cirtain conventions. The metadata can be easily and
+strightforwardly read by a corresponding API.
+
+{\bf Co-Described Files} are accompanied by a metadata file. The
+metadata file provides a unique interpretation of the data file content
+under cirtain conventions. 
+
+
+NOTE. Some data files may contain complete description of their
+content included in the file itself in a fasion not allowing direct
+and strightforward extraction of metadata. A program, called {\em
+indexer}, can be applied to extract metadata and put them in a
+companion metadata file.
+
 
 \subsection{Gridded Data Formats}
 
@@ -37,6 +58,13 @@ are completely different and {\it not} compatible. HDF is developed
 and supported at the National Center for Supercomputing Applications,
 University of Illinois at Urbana-Champaign. See
 \cite{HDF4_tutorials}, \cite{HDF5_tutorial}.
+
+\item[\bf HDF-EOS]  The Hierarchical Data Format - Earth Observing
+System (HDF-EOS) is the scientific data format standard selected by
+NASA as the baseline standard for the Earth Observing System (EOS). HDF-EOS
+is an extension of HDF and uses HDF library calls as underlying
+basis. Version 4.1r1 of HDF is used. The library and tools are written
+in C language and a Fortran interface is provided. See \cite{HDF-EOS}.
 
 \item[\bf GRIB] GRid in Binary (GRIB) format is a gridded data
 standard from the World Meteorological Organization. NCEP uses GRIB
