@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/10 23:33:38 svasquez Exp $ 
+# $Id: makefile,v 1.5 2003/03/10 23:54:14 svasquez Exp $ 
 
 ALL:  tests
 
@@ -32,20 +32,20 @@ include ${ESMF_DIR}/makefile
 #
 #  Bundles
 #
-$(ESMC_TESTDIR)/ESMF_BundleUTest: ESMF_BundleUTest.o
-	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BundleUTest ESMF_BundleUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
-	${RM} ESMF_BundleUTest.o
+$(ESMC_TESTDIR)/ESMF_BundleTest: ESMF_BundleTest.o
+	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_BundleTest ESMF_BundleTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
+	${RM} ESMF_BundleTest.o
 
-RUN_ESMF_BundleUTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
+RUN_ESMF_BundleTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleTest.tmps
+	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleTest > $(ESMC_TESTDIR)/ESMF_BundleTest.stdout
 
-RUN_ESMF_BundleUTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
+RUN_ESMF_BundleTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_BundleTest.tmps
+	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_BundleTest > $(ESMC_TESTDIR)/ESMF_BundleTest.stdout
 
-ESMF_BundleUTest.rm:
-	echo "ESMF_BundleUTest.rm target called here."
+ESMF_BundleTest.rm:
+	echo "ESMF_BundleTest.rm target called here."
 
 #
 # Field
