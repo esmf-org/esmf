@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
+// $Id: ESMC_PEList.C,v 1.6 2003/02/05 22:08:56 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.6 2003/02/05 22:08:56 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -47,6 +47,47 @@
 // This section includes all the PEList routines
 //
 //
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_PEListCreate - Create a new PEList
+//
+// !INTERFACE:
+      ESMC_PEList *ESMC_PEListCreate(
+//
+// !RETURN VALUE:
+//     pointer to newly allocated ESMC_PEList
+//
+// !ARGUMENTS:
+      int firstpe,          // in - first PE in list
+      int lastpe,           // in - last PE in list
+      int *rc) {            // out - return code
+//
+// !DESCRIPTION:
+//      Create a new PEList from ... Allocates memory for a new PEList
+//      object and uses the internal routine ESMC\_PEListContruct to
+//      initialize it.  Define for deep classes only, for shallow classes only
+//      define and use ESMC\_PEListInit.
+//      There can be multiple overloaded methods with the same name, but
+//      different argument lists.
+//
+//EOP
+// !REQUIREMENTS:  AAAn.n.n
+
+  int numpes = lastpe - firstpe + 1;
+  ESMC_PEList *pelist = ESMC_PEListCreate(numpes, rc);
+
+  // initialize the CPU ids in the PE list to the given range
+  //   (declared as friend function to directly access internal peList)
+  if (pelist != 0 && pelist->peList != 0) {
+    for(int i=0, peid = firstpe; i<numpes; i++, peid++) {
+      pelist->peList[i].ESMC_PESetCpuID(peid);
+    }
+  }
+
+  return(pelist);
+
+ } // end ESMC_PEListCreate
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -109,46 +150,6 @@
 
  } // end ESMC_PEListCreate
 
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_PEListCreate - Create a new PEList
-//
-// !INTERFACE:
-      ESMC_PEList *ESMC_PEListCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_PEList
-//
-// !ARGUMENTS:
-      int firstpe,          // in - first PE in list
-      int lastpe,           // in - last PE in list
-      int *rc) {            // out - return code
-//
-// !DESCRIPTION:
-//      Create a new PEList from ... Allocates memory for a new PEList
-//      object and uses the internal routine ESMC\_PEListContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC\_PEListInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
-//
-//EOP
-// !REQUIREMENTS:  AAAn.n.n
-
-  int numpes = lastpe - firstpe + 1;
-  ESMC_PEList *pelist = ESMC_PEListCreate(numpes, rc);
-
-  // initialize the CPU ids in the PE list to the given range
-  //   (declared as friend function to directly access internal peList)
-  if (pelist != 0 && pelist->peList != 0) {
-    for(int i=0, peid = firstpe; i<numpes; i++, peid++) {
-      pelist->peList[i].ESMC_PESetCpuID(peid);
-    }
-  }
-
-  return(pelist);
-
- } // end ESMC_PEListCreate
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_PEListDestroy - free a PEList created with Create
