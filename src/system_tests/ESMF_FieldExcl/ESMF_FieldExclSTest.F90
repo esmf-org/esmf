@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldExclSTest.F90,v 1.16 2005/02/01 23:07:07 svasquez Exp $
+! $Id: ESMF_FieldExclSTest.F90,v 1.17 2005/02/02 21:27:05 nscollins Exp $
 !
 ! System test code FieldExcl
 !  Description on Sourceforge under System Test #79497
@@ -210,7 +210,7 @@
       ! this will be running concurrently with the second component.
       call ESMF_GridCompRun(comp1, exportState=c1exp, clock=clock, &
                             blockingFlag=ESMF_NONBLOCKING, rc=rc)
-      print *, "Comp 1 Run returned, rc =", rc
+      !print *, "Comp 1 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
  
       ! Wait for both components to finish before coupling
@@ -231,7 +231,7 @@
       ! Run the second component concurrently with the first component.
       call ESMF_GridCompRun(comp2, importState=c2imp, clock=clock, &
                             blockingFlag=ESMF_NONBLOCKING, rc=rc)
-      print *, "Comp 2 Run returned, rc =", rc
+      !print *, "Comp 2 Run returned, rc =", rc
       if (rc .ne. ESMF_SUCCESS) goto 10
 
       call ESMF_ClockAdvance(clock, rc=rc)
