@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.52 2003/10/16 23:08:31 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.53 2003/10/17 22:43:46 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -271,7 +271,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.52 2003/10/16 23:08:31 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.53 2003/10/17 22:43:46 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2360,19 +2360,19 @@
 ! !IROUTINE: ESMF_PhysGridPointInCell - Checks whether cell contains point
 !
 ! !INTERFACE:
-      function ESMF_PhysGridPointInCell(point_x, point_y, corner_x, corner_y, rc)
+      function ESMF_PhysGridPointInCell(pointX, pointY, cornerX, cornerY, rc)
 
 !
 ! !RETURN VALUE:
       logical :: ESMF_PhysGridPointInCell ! true if point located in cell
 !
 ! !ARGUMENTS:
-      real(kind=ESMF_KIND_R8), intent(in) ::  point_x   ! x coord of search point 
-      real(kind=ESMF_KIND_R8), intent(in) ::  point_y   ! y coord of search point 
+      real(kind=ESMF_KIND_R8), intent(in) ::  pointX   ! x coord of search point 
+      real(kind=ESMF_KIND_R8), intent(in) ::  pointY   ! y coord of search point 
 
-      real(kind=ESMF_KIND_R8), dimension(4), intent(in) :: &  ! TODO: unhardwire
-         corner_x,     & ! x coordinates of cell corners
-         corner_y        ! y coordinates of cell corners 
+      real(kind=ESMF_KIND_R8), dimension(:), intent(in) :: &
+         cornerX,     & ! x coordinates of cell corners
+         cornerY        ! y coordinates of cell corners 
 
       integer, intent(out), optional :: rc  ! return code
 !
@@ -2385,13 +2385,13 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[point\_x]
+!     \item[pointX]
 !          x-coordinate of search point.
-!     \item[point\_y]
+!     \item[pointY]
 !          y-coordinate of search point.
-!     \item[corner\_x]
+!     \item[cornerX]
 !          x-coordinate of grid cell corners.
-!     \item[corner\_y]
+!     \item[cornerY]
 !          y-coordinate of grid cell corners.
 !     \item[ESMF\_PhysGridPointInCell]
 !          return value = 1 if cell contains point.
@@ -2410,19 +2410,30 @@
                    num_corners       ! number of corners in each grid cell
 
    real(kind=ESMF_KIND_R8) :: &
-      vec1_x, vec1_y,  &! components of the cell side vector
-      vec2_x, vec2_y,  &! components of the vector from vertex to point
+      vec1X, vec1Y,    &! components of the cell side vector
+      vec2X, vec2Y,    &! components of the vector from vertex to point
       cross_product,   &! cross product of two vectors
       test_product,    &! 
       ref_product,     &! the cross product for first non-zero value
       sign_test,       &! test to see if cross products are same sign
       zero, one
-
+   real(kind=ESMF_KIND_R8) :: minX, maxX, minY, maxY
 !
 !     set default return value
 !
-
       ESMF_PhysGridPointInCell = .false.
+!
+!     quick and dirty screen test first
+!
+      minX = minval(cornerX)
+      maxX = maxval(cornerX)
+      minY = minval(cornerY)
+      maxY = maxval(cornerY)
+      if (pointX.lt.minX .or. pointX.gt.maxX .or. &
+          pointY.lt.minY .or. pointY.gt.maxY) then
+        if (present(rc)) rc = ESMF_SUCCESS
+        return
+      endif
 !
 !     set constants
 !
@@ -2430,62 +2441,54 @@
 !
 !     perform the cross product for each cell side
 !
-
-      num_corners = size(corner_x)
+      num_corners = size(cornerX)
 
       corner_loop: do ncorn=1,num_corners
          next_n = MOD(ncorn,num_corners) + 1
-
 !
 !        here we take the cross product of the vector making
 !        up each cell side with the vector formed by the vertex
 !        and search point.  if all the cross products are
 !        the same sign, the point is contained in the cell.
 !
-
-         vec1_x = corner_x(next_n) - corner_x(ncorn)
-         vec1_y = corner_y(next_n) - corner_y(ncorn)
-         vec2_x = point_x - corner_x(ncorn)
-         vec2_y = point_y - corner_y(ncorn)
-
+         vec1X = cornerX(next_n) - cornerX(ncorn)
+         vec1Y = cornerY(next_n) - cornerY(ncorn)
+         vec2X = pointX - cornerX(ncorn)
+         vec2Y = pointY - cornerY(ncorn)
 !
 !        if search point coincident with vertex
 !        then cell contains the point
 !
-
-         if (vec2_x == 0 .and. vec2_y == 0) then
+         if (vec2X == 0 .and. vec2Y == 0) then
             ESMF_PhysGridPointInCell = .true.
             exit corner_loop
          endif
-
 !
 !        if cell side has zero length (degenerate vertices)
 !         then skip the side and move on to the next
 !
-
-         if (vec1_x == 0 .and. vec1_y == 0) cycle corner_loop
+         if (vec1X == 0 .and. vec1Y == 0) cycle corner_loop
 
 !        compute cross product
 
-         cross_product = vec1_x*vec2_y - vec2_x*vec1_y
-
+         cross_product = vec1X*vec2Y - vec2X*vec1Y
 !
 !        if the cross product is zero, the point
 !        lies exactly on the side and is contained in the cell
+!        TODO:  talk to Phil - not exactly true since if either all
+!               three x-points or all three y-points are colinear the
+!               cross product will be zero but the point not necessarily inside
 !
-
          if (cross_product == zero) then
             ESMF_PhysGridPointInCell = .true.
             exit corner_loop
          endif
-
 !
 !        if this is the first side, set a reference cross product
 !        to the current value
 !        otherwise, if this product is a different sign than
 !        previous (reference) cross products, exit the loop
 !
-
          if (ref_product == zero) then
             ref_product = cross_product
             test_product = one
@@ -2495,11 +2498,9 @@
          if (test_product < zero) exit corner_loop ! x-prod has different sign
 
       end do corner_loop
-
 !
 !     if cross products all same sign this location contains the pt
 !
-
       if (test_product > zero)  ESMF_PhysGridPointInCell = .true.
 
       if (present(rc)) rc = ESMF_SUCCESS
@@ -2630,13 +2631,10 @@
 !
 !     initialize return code
 !
-
       if (present(rc)) rc = ESMF_SUCCESS
-
 !
 !     compute distance using the usual Cartesian formula
 !
-
       ESMF_PhysGridCompDistCartesian = sqrt( (x2-x1)**2 + (y2-y1)**2 )
 
       end function ESMF_PhysGridCompDistCartesian
