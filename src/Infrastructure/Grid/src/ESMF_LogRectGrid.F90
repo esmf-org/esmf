@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.96 2004/09/21 15:11:25 nscollins Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.97 2004/09/21 17:03:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -76,8 +76,10 @@
     public ESMF_LRGridCreateCutout
     public ESMF_LRGridCreateDiffRes
     public ESMF_LRGridCreateExchange
+    public ESMF_LRGridAddDistGridBlock
+    public ESMF_LRGridAddDistGridVect
     public ESMF_LRGridAddPhysGridBlock
-    public ESMF_LRGridAddPhysGridVector
+    public ESMF_LRGridAddPhysGridVect
     public ESMF_LRGridAddVertPhysGrid
     public ESMF_LRGridGetCoord
     public ESMF_LRGridSetCoord
@@ -111,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.96 2004/09/21 15:11:25 nscollins Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.97 2004/09/21 17:03:10 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -140,7 +142,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_LRGridDistributeBlock
-         module procedure ESMF_LRGridDistributeVector
+         module procedure ESMF_LRGridDistributeVect
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that distribute
@@ -225,7 +227,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_LRGridSetCellMaskBlock
-         module procedure ESMF_LRGridSetCellMaskVector
+         module procedure ESMF_LRGridSetCellMaskVect
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -2029,7 +2031,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridDistributeBlock"
 !BOPI
-! !IROUTINE: ESMF_LRGridDistribute - Distribute a Grid
+! !IROUTINE: ESMF_LRGridDistribute - Distribute a Grid with block storage
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LRGridDistribute()
@@ -2780,14 +2782,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridDistributeVector"
+#define ESMF_METHOD "ESMF_LRGridDistributeVect"
 !BOPI
-! !IROUTINE: ESMF_LRGridDistribute - Distribute a Grid
+! !IROUTINE: ESMF_LRGridDistribute - Distribute a Grid with vector storage
 
 ! !INTERFACE:
       ! Private name; call using ESMF_LRGridDistribute()
-      subroutine ESMF_LRGridDistributeVector(grid, delayout, myCount, &
-                                             myIndices, decompIds, name, rc)
+      subroutine ESMF_LRGridDistributeVect(grid, delayout, myCount, myIndices, &
+                                           decompIds, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
@@ -2960,17 +2962,17 @@
       physGridId = 1
       physGridName = 'cell_center'
       relloc = ESMF_CELL_CENTER
-      call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                        myCount, delayout, decompIdsUse(1:2), &
-                                        distGridName=distGridName, rc=localrc)
+      call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                      myCount, delayout, decompIdsUse(1:2), &
+                                      distGridName=distGridName, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
 
-      call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, dimCountGrid, &
-                                        decompIdsUse(1:2), coord1, coord2, &
-                                        myCount, myIndices, dimNames, dimUnits, &
-                                        physGridName, localrc)
+      call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, dimCountGrid, &
+                                      decompIdsUse(1:2), coord1, coord2, &
+                                      myCount, myIndices, dimNames, dimUnits, &
+                                      physGridName, localrc)
       if (ESMF_LogMsgFoundError(localrc, &
                                 ESMF_ERR_PASSTHRU, &
                                 ESMF_CONTEXT, rc)) return
@@ -2992,20 +2994,18 @@
           distGridName = 'cell_necorner'
           physGridName = 'cell_necorner'
           relloc = ESMF_CELL_NECORNER
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3019,20 +3019,18 @@
           distGridName = 'cell_swcorner'
           physGridName = 'cell_swcorner'
           relloc = ESMF_CELL_SWCORNER
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3046,20 +3044,18 @@
           distGridName = 'cell_secorner'
           physGridName = 'cell_secorner'
           relloc = ESMF_CELL_SECORNER
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3073,20 +3069,18 @@
           distGridName = 'cell_nwcorner'
           physGridName = 'cell_nwcorner'
           relloc = ESMF_CELL_NWCORNER
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3101,20 +3095,18 @@
           distGridName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3125,20 +3117,18 @@
           distGridName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3153,20 +3143,18 @@
           distGridName = 'cell_wface'
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3177,20 +3165,18 @@
           distGridName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3205,20 +3191,18 @@
           distGridName = 'cell_eface'
           physGridName = 'cell_eface'
           relloc = ESMF_CELL_EFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3229,20 +3213,18 @@
           distGridName = 'cell_sface'
           physGridName = 'cell_sface'
           relloc = ESMF_CELL_SFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3257,20 +3239,18 @@
           distGridName = 'cell_wface'
           physGridName = 'cell_wface'
           relloc = ESMF_CELL_WFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3281,20 +3261,18 @@
           distGridName = 'cell_nface'
           physGridName = 'cell_nface'
           relloc = ESMF_CELL_NFACE
-          call ESMF_LRGridAddDistGridVector(grid, distGridId, dimCountGrid, &
-                                            myCount, delayout, &
-                                            decompIdsUse(1:2), &
-                                            distGridName=distGridName, &
-                                            rc=localrc)
+          call ESMF_LRGridAddDistGridVect(grid, distGridId, dimCountGrid, &
+                                          myCount, delayout, decompIdsUse(1:2), &
+                                          distGridName=distGridName, rc=localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
 
-          call ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, &
-                                            dimCountGrid, decompIdsUse(1:2), &
-                                            coord1, coord2, myCount, myIndices, &
-                                            dimNames, dimUnits, physGridName, &
-                                            localrc)
+          call ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, &
+                                          dimCountGrid, decompIdsUse(1:2), &
+                                          coord1, coord2, myCount, myIndices, &
+                                          dimNames, dimUnits, physGridName, &
+                                          localrc)
           if (ESMF_LogMsgFoundError(localrc, &
                                     ESMF_ERR_PASSTHRU, &
                                     ESMF_CONTEXT, rc)) return
@@ -3401,7 +3379,7 @@
       grid%gridStatus = ESMF_GRID_STATUS_READY
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridDistributeVector
+      end subroutine ESMF_LRGridDistributeVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -3503,7 +3481,7 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridAddDistGridBlock"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddDistGrid - Add a DistGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddDistGridBlock - Add a DistGrid to a LogRectGrid with block storage
 
 ! !INTERFACE:
       subroutine ESMF_LRGridAddDistGridBlock(grid, distGridId, dimCount, &
@@ -3594,14 +3572,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridAddDistGridVector"
+#define ESMF_METHOD "ESMF_LRGridAddDistGridVect"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddDistGrid - Add a DistGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddDistGridVect - Add a DistGrid to a LogRectGrid with vector storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddDistGridVector(grid, distGridId, dimCount, &
-                                              myCount, delayout, decompIds, &
-                                              distGridName, rc)
+      subroutine ESMF_LRGridAddDistGridVect(grid, distGridId, dimCount, &
+                                            myCount, delayout, decompIds, &
+                                            distGridName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
@@ -3660,13 +3638,13 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddDistGridVector
+      end subroutine ESMF_LRGridAddDistGridVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridAddPhysGridBlock"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddPhysGrid - Add a PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddPhysGridBlock - Add a PhysGrid to a LogRectGrid with block storage
 
 ! !INTERFACE:
       subroutine ESMF_LRGridAddPhysGridBlock(grid, physGridId, relloc, &
@@ -3983,15 +3961,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridAddPhysGridVector"
+#define ESMF_METHOD "ESMF_LRGridAddPhysGridVect"
 !BOPI
-! !IROUTINE: ESMF_LRGridAddPhysGrid - Add a PhysGrid to a LogRectGrid
+! !IROUTINE: ESMF_LRGridAddPhysGridVect - Add a PhysGrid to a LogRectGrid with vector storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridAddPhysGridVector(grid, physGridId, relloc, dimCount, &
-                                              decompIds, coord1, coord2, &
-                                              myCount, myIndices, dimNames, &
-                                              dimUnits, physGridName, rc)
+      subroutine ESMF_LRGridAddPhysGridVect(grid, physGridId, relloc, dimCount, &
+                                            decompIds, coord1, coord2, &
+                                            myCount, myIndices, dimNames, &
+                                            dimUnits, physGridName, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass), target :: grid
@@ -4202,7 +4180,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridAddPhysGridVector
+      end subroutine ESMF_LRGridAddPhysGridVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6018,9 +5996,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridSetCoordComputeBlock"
 !BOPI
-! !IROUTINE: ESMF_LRGridSetCoordCompute - Compute coordinates for a Grid
+! !IROUTINE: ESMF_LRGridSetCoord - Compute coordinates for a Grid with block storage
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LRGridSetCoord()
       subroutine ESMF_LRGridSetCoordComputeBlock(grid, physGridId, dimCount, &
                                                  counts, gridBoundWidth, relloc, &
                                                  coord1, coord2, total, rc)
@@ -6499,9 +6478,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridSetCoordComputeVect"
 !BOPI
-! !IROUTINE: ESMF_LRGridSetCoordCompute - Compute coordinates for a Grid
+! !IROUTINE: ESMF_LRGridSetCoord - Compute coordinates for a Grid with vector storage
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LRGridSetCoord()
       subroutine ESMF_LRGridSetCoordComputeVect(grid, physGridId, dimCount, &
                                                   myCount, myIndices, relloc, &
                                                   coord1, coord2, rc)
@@ -6856,9 +6836,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridSetCoordCopy"
 !BOPI
-! !IROUTINE: ESMF_LRGridSetCoordCopy - Copies coordinates from one grid to another
+! !IROUTINE: ESMF_LRGridSetCoord - Copies coordinates from one grid to another
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LRGridSetCoord()
       subroutine ESMF_LRGridSetCoordCopy(grid, gridIn, id, rc)
 !
 ! !ARGUMENTS:
@@ -7426,9 +7407,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_LRGridSetCellMaskBlock"
 !BOPI
-! !IROUTINE: ESMF_LRGridSetCellMask - Compute cell identifier mask for a Grid
+! !IROUTINE: ESMF_LRGridSetCellMask - Compute cell identifier mask for a Grid with block storage
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_LRGridSetCellMask()
       subroutine ESMF_LRGridSetCellMaskBlock(grid, physGridId, dimCount, counts, &
                                              gridBoundWidth, relloc, cellType1, &
                                              cellType2, rc)
@@ -7533,13 +7515,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridSetCellMaskVector"
+#define ESMF_METHOD "ESMF_LRGridSetCellMaskVect"
 !BOPI
-! !IROUTINE: ESMF_LRGridSetCellMask - Compute cell identifier mask for a Grid
+! !IROUTINE: ESMF_LRGridSetCellMask - Compute cell identifier mask for a Grid with vector storage
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridSetCellMaskVector(grid, physGridId, dimCount, &
-                                              myCount, relloc, cellType, rc)
+      ! Private name; call using ESMF_LRGridSetCellMask()
+      subroutine ESMF_LRGridSetCellMaskVect(grid, physGridId, dimCount, &
+                                            myCount, relloc, cellType, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_GridClass) :: grid
@@ -7615,7 +7598,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridSetCellMaskVector
+      end subroutine ESMF_LRGridSetCellMaskVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD

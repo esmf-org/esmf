@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.122 2004/09/20 22:58:03 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.123 2004/09/21 17:02:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -230,7 +230,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridCreateEmpty
          module procedure ESMF_DistGridCreateBlock
-         module procedure ESMF_DistGridCreateVector
+         module procedure ESMF_DistGridCreateVect
 !        module procedure ESMF_DistGridCreateCopy
 
 ! !DESCRIPTION:
@@ -248,7 +248,7 @@
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridConstructNew
          module procedure ESMF_DistGridConstructBlock
-         module procedure ESMF_DistGridConstructVector
+         module procedure ESMF_DistGridConstructVect
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct
@@ -279,7 +279,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridSetDEBlock
-         module procedure ESMF_DistGridSetDEVector
+         module procedure ESMF_DistGridSetDEVect
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -295,7 +295,7 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_DistGridAllocateBlock
-         module procedure ESMF_DistGridAllocateVector
+         module procedure ESMF_DistGridAllocateVect
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that set
@@ -317,9 +317,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateEmpty"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateEmpty - Create a new DistGrid with no data
+! !IROUTINE: ESMF_DistGridCreate - Create a new DistGrid with no data
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_DistGridCreate()
       function ESMF_DistGridCreateEmpty(name, rc)
 !
 ! !RETURN VALUE:
@@ -374,9 +375,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridCreateBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateBlock - Create a new DistGrid internally
+! !IROUTINE: ESMF_DistGridCreate - Create a new DistGrid internally
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_DistGridCreate()
       function ESMF_DistGridCreateBlock(dimCount, counts, delayout, decompIDs, &
                                         countsPerDEDim1, countsPerDEDim2, &
                                         periodic, coversDomain, name, rc)
@@ -461,16 +463,17 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridCreateVector"
+#define ESMF_METHOD "ESMF_DistGridCreateVect"
 !BOPI
-! !IROUTINE: ESMF_DistGridCreateVector - Create a new DistGrid internally
+! !IROUTINE: ESMF_DistGridCreate - Create a new DistGrid internally
 
 ! !INTERFACE:
-      function ESMF_DistGridCreateVector(dimCount, myCount, delayout, &
-                                         decompIDs, name, rc)
+      ! Private name; call using ESMF_DistGridCreate()
+      function ESMF_DistGridCreateVect(dimCount, myCount, delayout, decompIDs, &
+                                       name, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DistGrid) :: ESMF_DistGridCreateVector
+      type(ESMF_DistGrid) :: ESMF_DistGridCreateVect
 !
 ! !ARGUMENTS:
       integer, intent(in) :: dimCount
@@ -509,7 +512,7 @@
 
 !     Initialize pointers
       nullify(dgtype)
-      nullify(ESMF_DistGridCreateVector%ptr)
+      nullify(ESMF_DistGridCreateVect%ptr)
 
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
@@ -523,10 +526,10 @@
                                   myCount, name, rc)
 
 !     Set return values.
-      ESMF_DistGridCreateVector%ptr => dgtype
+      ESMF_DistGridCreateVect%ptr => dgtype
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end function ESMF_DistGridCreateVector
+      end function ESMF_DistGridCreateVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -588,9 +591,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridConstructNew"
 !BOPI
-! !IROUTINE: ESMF_DistGridConstructNew - Construct the internals of an allocated DistGrid
+! !IROUTINE: ESMF_DistGridConstruct - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_DistGridConstruct()
       subroutine ESMF_DistGridConstructNew(dgtype, name, rc)
 !
 ! !ARGUMENTS:
@@ -686,9 +690,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridConstructBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridConstructBlock - Construct the internals of an allocated DistGrid
+! !IROUTINE: ESMF_DistGridConstruct - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_DistGridConstruct()
       subroutine ESMF_DistGridConstructBlock(dgtype, dimCount, delayout, &
                                              decompIDs, counts, &
                                              countsPerDEDim1, countsPerDEDim2, &
@@ -916,13 +921,14 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridConstructVector"
+#define ESMF_METHOD "ESMF_DistGridConstructVect"
 !BOPI
-! !IROUTINE: ESMF_DistGridConstructVector - Construct the internals of an allocated DistGrid
+! !IROUTINE: ESMF_DistGridConstruct - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridConstructVector(dgtype, dimCount, delayout, &
-                                              decompIDs, myCount, name, rc)
+      ! Private name; call using ESMF_DistGridConstruct()
+      subroutine ESMF_DistGridConstructVect(dgtype, dimCount, delayout, &
+                                            decompIDs, myCount, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -1020,7 +1026,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridConstructVector
+      end subroutine ESMF_DistGridConstructVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -1879,9 +1885,10 @@
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_DistGridSetDEBlock"
 !BOPI
-! !IROUTINE: ESMF_DistGridSetDEBlock - Set DE information for a DistGrid
+! !IROUTINE: ESMF_DistGridSetDE - Set DE information for a DistGrid
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_DistGridSetDE()
       subroutine ESMF_DistGridSetDEBlock(dgtype, rc)
 !
 ! !ARGUMENTS:
@@ -1972,12 +1979,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridSetDEVector"
+#define ESMF_METHOD "ESMF_DistGridSetDEVect"
 !BOPI
-! !IROUTINE: ESMF_DistGridSetDEVector - Set DE information for a DistGrid
+! !IROUTINE: ESMF_DistGridSetDE - Set DE information for a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridSetDEVector(dgtype, myCount, rc)
+      ! Private name; call using ESMF_DistGridSetDE()
+      subroutine ESMF_DistGridSetDEVect(dgtype, myCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype
@@ -2037,7 +2045,7 @@
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridSetDEVector
+      end subroutine ESMF_DistGridSetDEVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -2684,6 +2692,7 @@
 ! !IROUTINE: ESMF_DistGridAllocate - Allocate arrays in a DistGrid
 
 ! !INTERFACE:
+      ! Private name; call using ESMF_DistGridAllocate()
       subroutine ESMF_DistGridAllocateBlock(dgtype, nDEs, dimCount, rc)
 !
 ! !ARGUMENTS:
@@ -2767,12 +2776,13 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_DistGridAllocateVector"
+#define ESMF_METHOD "ESMF_DistGridAllocateVect"
 !BOPI
 ! !IROUTINE: ESMF_DistGridAllocate - Allocate arrays in a DistGrid
 
 ! !INTERFACE:
-      subroutine ESMF_DistGridAllocateVector(dgtype, dimCount, rc)
+      ! Private name; call using ESMF_DistGridAllocate()
+      subroutine ESMF_DistGridAllocateVect(dgtype, dimCount, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DistGridType), pointer :: dgtype 
@@ -2809,7 +2819,7 @@
 
       rc = ESMF_SUCCESS
 
-      end subroutine ESMF_DistGridAllocateVector
+      end subroutine ESMF_DistGridAllocateVect
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
