@@ -1,4 +1,4 @@
-# $Id: base,v 1.3 2002/11/26 21:45:30 jwolfe Exp $ 
+# $Id: base,v 1.4 2002/11/26 21:47:15 jwolfe Exp $ 
 #
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base_variables
 include ${ESMF_DIR}/build/common
@@ -21,7 +21,7 @@ include ${ESMF_DIR}/build/common
 	${CC} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${LOCAL_INCLUDE} $<
 
 .C.o:
-        ${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
 
 .F90.a:
 	${FC} -c ${C_FC_MOD}${ESMC_MODDIR} ${FOPTFLAGS} -qsuffix=cpp=F90 ${FFLAGS} ${FCPPFLAGS} ${LOCAL_INCLUDE} $<
@@ -49,7 +49,8 @@ include ${ESMF_DIR}/build/common
 	${RM} $*.o
 
 .C.a:
-        ${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
-        ${AR} ${AR_FLAGS} ${LIBNAME} $*.o
-        ${RM} $*.o
+	${CXX} -c ${COPTFLAGS} ${CFLAGS} ${CCPPFLAGS} ${ESMC_INCLUDE} $<
+	${AR} ${AR_FLAGS} ${LIBNAME} $*.o
+	${RM} $*.o
+
 shared:
