@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.6 2004/01/28 20:28:02 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.7 2004/02/06 18:00:54 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.6 2004/01/28 20:28:02 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.7 2004/02/06 18:00:54 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -2296,6 +2296,9 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   }
 
   cout <<  "  ni,nj,nk = " <<  ni << "," << nj << "," << nk << endl;
+#if 0
+// right now the output from here is too voluminous.  figure out
+// what info is really useful and only output that.
   for(i=0; i<ni; i++) {
     for (j=0; j<nj; j++) {
       for (k=0; k<nk; k++) {
@@ -2309,6 +2312,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   myDE.ESMC_DEPrint();
   cout << "myPE: ";
   myPE.ESMC_PEPrint();
+#endif
 
   cout << "end of DELayout Print" << endl;
   return(ESMF_SUCCESS);
