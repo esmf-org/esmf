@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.8 2004/06/07 17:06:34 slswift Exp $
+#  $Id: build_rules.mk,v 1.9 2004/09/24 22:23:25 nscollins Exp $
 #
 #  Darwin.absoft.default.mk
 #
@@ -49,28 +49,28 @@ endif
 # Location of MPI (Message Passing Interface) software
 
 # comment in one or the other, depending on whether you have
-# installed the mpich library.  (the first section assumes
+# installed the mpich or lam library.  (the first sections assume
 # it is installed under /usr/local - change MPI_HOME if other dir.)
 
 ifeq ($(ESMF_COMM),lam)
 # with lam-mpi installed in /usr/local:
-MPI_HOME       = 
-MPI_LIB        = -lmpi -llam 
-MPI_INCLUDE    = 
-MPIRUN         =  mpirun
+MPI_HOME       = /usr/local
+MPI_LIB        = -L${MPI_HOME}/lib -lmpi -llam
+MPI_INCLUDE    = -I${MPI_HOME}/include 
+MPIRUN         = ${MPI_HOME}/bin/mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpich)
 # with mpich installed in /usr/local:
-ESMC_MPIRUN      = mpirun
 MPI_HOME       =  /usr/local
 MPI_LIB        = -lmpich -lpmpich
 MPI_INCLUDE    = -I${MPI_HOME}/include -DESMF_MPICH=1
 MPIRUN         =  ${MPI_HOME}/bin/mpirun
+ESMC_MPIRUN    =  mpirun
 endif
 
 ifeq ($(ESMF_COMM),mpiuni)
-# without mpich installed:
+# without mpich or lam installed:
 MPI_HOME       = ${ESMF_DIR}/src/Infrastructure/stubs/mpiuni
 MPI_LIB        = -lmpiuni
 MPI_INCLUDE    = -I${MPI_HOME}
@@ -119,7 +119,7 @@ C_FCV              = f90fe -V    # docs say f95 -V should work but causes error
 C_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
 #C_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm  #Use /usr/lib/libf2c.a if that's what your f77 uses.
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS	   = -g 
+G_COPTFLAGS	   = -g
 G_FOPTFLAGS	   = -g 
 # ----------------------------- BOPT - O options -----------------------------
 O_COPTFLAGS	   = -O 
@@ -127,7 +127,7 @@ O_FOPTFLAGS	   = -O
 #
 # Fortran compiler
 #
-FFLAGS          = -YEXT_NAMES=LCS -s 
+FFLAGS          = -YEXT_NAMES=LCS -s
 F_FREECPP       = -ffree
 F_FIXCPP        = -ffixed
 F_FREENOCPP     = -ffree
@@ -136,7 +136,7 @@ F_FIXNOCPP      = -ffixed
 # C++ compiler 
 #
 CXX_CC		   = g++ -fPIC
-CXX_FC		   = f95 -YEXT_NAMES=LCS -s 
+CXX_FC		   = f95 -YEXT_NAMES=LCS -s
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_CLINKER	   = g++
