@@ -7,11 +7,13 @@ Section~\ref{sec:demo}.
 
 \subsubsection{Running the Demonstration}
 
-To run the demo starting from ESMF source code, type 
+To run the {\tt ESMF\_COUPLED\_FLOW} demo starting from ESMF source code, type 
 \begin{verbatim}
-
 gmake ESMF_COUPLED_FLOW
-
+\end{verbatim}
+or
+\begin{verbatim}
+gmake ESMF_COUPLED_FLOW_uni
 \end{verbatim}
 from the \$ESMF\_DIR directory.  This will compile both the 
 ESMF library and the demo and then run the demo.
@@ -19,11 +21,11 @@ ESMF library and the demo and then run the demo.
 To simply run the demo, type:
 
 \begin{verbatim}
-gmake run_demo
+gmake run_demos
 \end{verbatim}
 or
 \begin{verbatim}
-gmake run_demo_uni
+gmake run_demos_uni
 \end{verbatim}
 
 
