@@ -13,8 +13,8 @@ For a discussion of the utility layer see Section~\ref{utilclasses}.
 \subsection{Design Goals and Considerations}
 
 It is a difficult software engineering problem
-to write both flexible and efficient parallel 
-software for current multiprocessor hardware platforms
+to write efficient code which is portable across
+all current multiprocessor hardware platforms
 because the fundamental characteristics of the underlying
 systems vary so widely.
 
@@ -23,61 +23,66 @@ land or ocean model) takes a data-parallel approach when
 decomposing a large problem into smaller subproblems which can be 
 solved simultaneously.
 There is a fundamental tradeoff between a coarse decomposition
-of fewer subsets and a fine decomposition of many subsets.
-More subsets increase the potential for
-work to proceed in parallel.  But unless there is absolutely
-no communication requirements between subsets (which is
+of fewer subsets and a fine decomposition of many subsets;
+more subsets increase the potential for
+work to proceed in parallel, but unless there is 
+no communication between subsets (which is
 almost never the case), then as the
 decomposition becomes finer the communcation burden increases.
 There is typically a bend in the end-to-end performance
 curve as the number of decomposition elements is increased;
-at some point the performance drops as the number of subdivision
-increases and that point can vary widely 
-depending on the machine architecture. 
+at some point the performance drops as the number of subdivisions
+increases and the location of point can vary widely 
+depending on the machine.
 One of the fundamental design considerations for the data
 handling parts of the ESMF library is to isolate the hardware
 characteristics and the decomposition decisions from the
 user code and encapsulate them so the tradeoffs can be 
 weighed clearly and can be easily changed as the code is 
-run on other systems.
+run on different systems.
 
 Another issue in the design of the ESMF data routines is that
 many hardware platforms have asymmetric
 communications bandwidths and possibly non-uniform memory
-access times {\it NUMA architecture}.
+access times ({\it NUMA architecture}).
 Since many climate models are based on regular grids and
 have themselves non-uniform communication patterns, the
 mapping between subsets and processing elements can have
 important performance implications.  The design of the
 grid layout object allows for the user to indicate expected
-communication patterns so the library can optimize if possible.
+communication patterns so the library can optimize the
+mapping of data subsets to decomposition elements.
 
 Most simulation code involves solving numerically intensive
 equations on each point in a grid.  The data handling routines
 must supply an efficient interface for local access to a
 subset of the data, as well as interfaces for access to
-global information about the data.
+global information about the entire data set.
 
 Key features of the ESMF design which address the design goals
 mentioned above include:
 \begin{itemize}
-\item The data object layer of ESMF is called by user-supplied code
-as in a conventional software library, unlike the framework model
-of the Superstructure layer.
-The data layer provides an abstraction which
+\item The data layer provides an abstraction which
 minimizes the dependency of the user-supplied code on 
 how the decomposition maps to the underlying hardware
-capabilities.  
+capabilities.  The user code queries for how the data
+is decomposed instead of having to specify the decomposition.
 \item Communication patterns often include sending multiple
-variables from one subset to another.  The design of the Bundle object
+variables from one decomposition subset to another.  
+The design of the Bundle object
 allows these to be grouped for efficiency.
-\item The underlying computation grid and the data itself are
-logically separated into separate objects.  This allows multiple
-data item and different data mappings to share the same grid.
-\item The actual memory ordering of multidimensional data can either be
-queried by the user code and the code can adapt to what is present,
-or the memory can be reordered by the library to conform to what
-the user code expects (e.g. Fortran array order vs C order).
+\item The Field object consists of separate grid and data 
+objects to allow multiple data items and different data staggerings
+to share the same grid.  The decomposition is based solely on
+the grid, and once the decomposition is defined all corresponding
+data can be subsequently decomposed in the same manner.
+\item The interface allows the user code to get a pointer to the
+start of the data buffer, so internal computational loops can access
+the data directly without needing to go through the library.
+\item The memory ordering of multidimensional data can either be
+queried by the user code and the code can iterate the data in that
+order, or the memory can be reordered by the library to conform to what
+the user code specifies (e.g. Fortran array order vs C order).
 
 \end{itemize}
 
