@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldHaloSTest.F90,v 1.27 2004/05/24 23:04:59 jwolfe Exp $
+! $Id: ESMF_FieldHaloSTest.F90,v 1.28 2004/05/26 22:02:31 jwolfe Exp $
 !
 ! System test FieldHalo
 !  Description on Sourceforge under System Test #70385
@@ -257,11 +257,11 @@
       horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       gname = "test grid 1"
 
-      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
-                                        minGlobalCoordPerDim=min, &
-                                        maxGlobalCoordPerDim=max, &
-                                        horzStagger=horz_stagger, &
-                                        name=gname, rc=rc)
+      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
+                                       minGlobalCoordPerDim=min, &
+                                       maxGlobalCoordPerDim=max, &
+                                       horzStagger=horz_stagger, &
+                                       name=gname, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
       call ESMF_GridDistribute(grid1, delayout=delayout1, rc=rc)
       if (rc .ne. ESMF_SUCCESS) goto 30
