@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.10 2004/02/19 21:24:14 jwolfe Exp $
+! $Id: ESMF_DataMap.F90,v 1.11 2004/02/23 22:15:51 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -224,7 +224,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.10 2004/02/19 21:24:14 jwolfe Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.11 2004/02/23 22:15:51 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -940,12 +940,15 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_DataMapSet(datamap, rank, dimlist, rc)
+      subroutine ESMF_DataMapSet(datamap, rank, dimlist, horizRelloc, &
+                                 vertRelloc, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DataMap), intent(in) :: datamap 
+      type(ESMF_DataMap), intent(inout) :: datamap 
       integer, intent(in), optional :: rank    
-      integer, dimension (1:ESMF_MAXDIM), intent(in), optional :: dimlist 
+      integer, dimension (ESMF_MAXDIM), intent(in), optional :: dimlist 
+      type(ESMF_RelLoc), intent(in), optional :: horizRelloc 
+      type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
       integer, intent(out), optional :: rc    
 !
 ! !DESCRIPTION:
@@ -955,8 +958,12 @@ end function
 ! !REQUIREMENTS: 
 
 !
-! TODO: code goes here
+! TODO: This file will soon be replaced by a shallow object implementation
+!       of datamaps.  this is a bandaid for now.
 !
+        if (present(horizRelloc)) datamap%dmp%horizRelloc = horizRelloc
+        if (present(vertRelloc)) datamap%dmp%vertRelloc = vertRelloc
+
         end subroutine ESMF_DataMapSet
 
 
