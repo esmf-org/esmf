@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $
+// $Id: ESMC_XPacket.C,v 1.3 2003/03/06 14:29:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $";
+              "$Id: ESMC_XPacket.C,v 1.3 2003/03/06 14:29:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -73,6 +73,8 @@
 //  code goes here
 //
 
+    return new ESMC_XPacket;
+
  } // end ESMC_XPacketCreate
 
 //-----------------------------------------------------------------------------
@@ -101,6 +103,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_XPacketDestroy
 
@@ -132,6 +136,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_XPacketConstruct
 
 //-----------------------------------------------------------------------------
@@ -161,6 +167,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_XPacketDestruct
 
 //-----------------------------------------------------------------------------
@@ -186,6 +194,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_XPacketGetConfig
 
 //-----------------------------------------------------------------------------
@@ -210,6 +220,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_XPacketSetConfig
 
@@ -237,6 +249,8 @@
 //  code goes here
 //
 
+    //return ESMF_FAILURE;
+
  //} // end ESMC_XPacketGet
 
 //-----------------------------------------------------------------------------
@@ -263,7 +277,9 @@
 //  code goes here
 //
 
- //} // end ESMC_XPacketSet<Value>
+    //return ESMF_FAILURE;
+
+ //} // end ESMC_XPacketSet
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -288,6 +304,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_XPacketValidate
 
@@ -315,6 +333,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_XPacketPrint
 

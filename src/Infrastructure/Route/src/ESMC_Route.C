@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.3 2003/03/06 14:29:06 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.2 2003/03/05 20:58:57 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.3 2003/03/06 14:29:06 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,6 +71,8 @@
 //  code goes here
 //
 
+    return new ESMC_Route;
+
  } // end ESMC_RouteCreate
 
 //-----------------------------------------------------------------------------
@@ -99,6 +101,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_RouteDestroy
 
@@ -130,6 +134,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_RouteConstruct
 
 //-----------------------------------------------------------------------------
@@ -159,6 +165,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_RouteDestruct
 
 
@@ -185,6 +193,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_RouteGetConfig
 
 //-----------------------------------------------------------------------------
@@ -209,6 +219,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_RouteSetConfig
 
@@ -236,6 +248,8 @@
 //  code goes here
 //
 
+    //return ESMF_FAILURE;
+
  //} // end ESMC_RouteGet
 
 //-----------------------------------------------------------------------------
@@ -261,6 +275,8 @@
 //
 //  code goes here
 //
+
+    //return ESMF_FAILURE;
 
  // } // end ESMC_RouteSet
 
@@ -288,6 +304,8 @@
 //  code goes here
 //
 
+    return ESMF_FAILURE;
+
  } // end ESMC_RouteValidate
 
 
@@ -314,6 +332,8 @@
 //
 //  code goes here
 //
+
+    return ESMF_FAILURE;
 
  } // end ESMC_RoutePrint
 
