@@ -1,0 +1,49 @@
+% $Id: DistGrid_implnotes.tex,v 1.1 2003/10/14 18:10:36 nscollins Exp $
+
+\subsection{Implementation Notes}
+\begin{enumerate}
+
+\item {\bf Local verses Global Data}
+
+The primary purpose of {\tt ESMF\_DistGrid} is to encapsulate information
+about the local decomposition(s) ({\tt DE}) of the Grid on this PE.  
+This includes such information as the total 
+number of local cells, if logically rectangular the numbers of cells along 
+each dimension, and the relative location of this {\tt DE} compared to the
+overall {\tt ESMF\_Grid}.  The minimum information required would be
+to compute and store data only for the local {\tt DE}.
+
+However, at create time
+{\tt ESMF\_DistGrid} computes information not only about the local
+decomposition, but also less detailed information
+about the other decompositions for the entire Grid.
+While this duplicates some data, it avoids communication 
+when a {\tt DE} requires information to enable it to send data to 
+or receive data from other {\tt DE}s, 
+
+\item {\bf Boundary Cells}
+
+As part of the create-time computation {\tt ESMF\_DistGrid} computes sizes 
+and lengths for the local DE grid cells, and also does a secondary computation 
+of sizes and lengths taking into account a layer of boundary cells around 
+each {\tt DE}.  These boundary cells are distinct from the {\tt halo} cells
+which are specified on a per-Field basis and are visible to the user code.
+
+The boundary cells inside {\tt ESMF\_DistGrid} are only used internally
+to the Framework, for example during regridding to avoid unnecessary
+inter-DE communication and to handle exterior boundaries in a consistent 
+manner.
+
+\end{enumerate}
+
+
+
+
+
+
+
+
+
+
+
+
