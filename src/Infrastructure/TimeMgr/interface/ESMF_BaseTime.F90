@@ -1,4 +1,4 @@
-! $Id: ESMF_BaseTime.F90,v 1.1 2003/02/11 18:38:55 eschwab Exp $
+! $Id: ESMF_BaseTime.F90,v 1.2 2003/04/10 22:23:51 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,6 +20,7 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
+#include <conf.h>   ! TODO: remove when padding in type ESMF_BaseTime removed
 #include <ESMF_TimeMgr.inc>
 !
 !===============================================================================
@@ -51,6 +52,11 @@
         integer(ESMF_IKIND_I8) :: S   ! whole seconds
         integer                :: Sn  ! fractional seconds, numerator
         integer                :: Sd  ! fractional seconds, denominator
+! TODO:
+#ifdef PARCH_alpha
+        integer                :: pad1  ! to match halem C++ <vtbl> long[4]*
+        integer                :: pad2  ! to match halem C++ <vtbl> long[6]*
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -68,7 +74,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_BaseTime.F90,v 1.1 2003/02/11 18:38:55 eschwab Exp $'
+      '$Id: ESMF_BaseTime.F90,v 1.2 2003/04/10 22:23:51 eschwab Exp $'
 
 !------------------------------------------------------------------------------
 
