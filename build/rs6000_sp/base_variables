@@ -1,4 +1,4 @@
-# $Id: base_variables,v 1.18 2003/04/22 19:06:28 flanigan Exp $ 
+# $Id: base_variables,v 1.19 2003/04/23 14:11:50 nscollins Exp $ 
 #
 #     See the file build/base_variables.defs for a complete explanation of all these fields
 #
@@ -24,8 +24,8 @@ FPP_PREFIX		= -WF,
 FPPFLAGS		= $(addprefix $(FPP_PREFIX), $(FPPOPTS))
 # ######################### C and Fortran compiler ########################
 #
-C_CC			= mpcc_r -qsmp=omp -qcheck 
-C_FC			= mpxlf90_r -qcheck 
+C_CC			= mpcc_r -qsmp=omp 
+C_FC			= mpxlf90_r
 C_FC_MOD		= -I
 C_CLINKER_SLFLAG	= -L
 C_FLINKER_SLFLAG	= -L
@@ -36,8 +36,8 @@ C_CCV			= unknown
 C_FCV			= unknown
 C_SYS_LIB		= /usr/lib/libxlf.a /usr/lib/libxlf90.a  -lisode
 # ---------------------------- BOPT - g options ----------------------------
-G_COPTFLAGS		= -g  -qfullpath 
-G_FOPTFLAGS		= -g  -qfullpath 
+G_COPTFLAGS		= -g  -qfullpath -qcheck
+G_FOPTFLAGS		= -g  -qfullpath -qcheck
 # ----------------------------- BOPT - O options -----------------------------
 #O_COPTFLAGS	   = -O3 -qarch=pwr2  -qmaxmem=4000 -w -qspill=3000
 #O_FOPTFLAGS	   = -O3  -qarch=pwr2 -w
@@ -58,8 +58,8 @@ FCPPFLAGS		= ${ESMC_INCLUDE} ${PCONF} ${ESMC_PARCH} ${FPPFLAGS}
 ###  the user support problems i know this is going to cause.   nsc 4/2/2003
 ###
 ###  call mpcc_r instead of mpCC_r.   nsc  1/29/2003
-CXX_CC			= mpCC_r -qcheck 
-CXX_FC			= mpxlf_r -qcheck 
+CXX_CC			= mpCC_r 
+CXX_FC			= mpxlf_r
 CXX_CLINKER_SLFLAG	= -L
 CXX_FLINKER_SLFLAG	= -L
 CXX_CLINKER		= mpCC_r -qcheck 
@@ -94,14 +94,14 @@ C_CXXSOLIBS		= -L/usr/lpp/ppe.poe/lib/threads \
 			  -lmpi_r -lvtd_r -lxlf90 -lxlopt -lxlf -lxlomp_ser \
 			  -lpthreads -lm_r -lm -lc_r -lc -lC 
 # ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS		= -g  -qfullpath 
-GCXX_FOPTFLAGS		= -g  -qfullpath 
+GCXX_COPTFLAGS		= -g  -qfullpath  -qcheck
+GCXX_FOPTFLAGS		= -g  -qfullpath  -qcheck
 # ------------------------- BOPT - O_c++ options ------------------------------
 OCXX_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000 
 OCXX_FOPTFLAGS		= -O3  
 # -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS		= -g  -qfullpath 
-GCOMP_FOPTFLAGS		= -g  -qfullpath 
+GCOMP_COPTFLAGS		= -g  -qfullpath  -qcheck
+GCOMP_FOPTFLAGS		= -g  -qfullpath  -qcheck
 # --------------------------- BOPT - O_complex options -------------------------
 OCOMP_COPTFLAGS		= -O3  -qmaxmem=4000 -qspill=3000 
 OCOMP_FOPTFLAGS		= -O3 
