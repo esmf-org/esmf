@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.3 2004/02/11 20:09:35 nscollins Exp $
+# $Id: makefile,v 1.4 2004/03/16 18:28:45 nscollins Exp $
 
 # Leave alone.
 ALL: build_here 
@@ -36,19 +36,8 @@ include $(ESMF_DIR)/makefile
 DIRS	  = 
 
 CLEANDIRS   =
-CLEANFILES  =
+CLEANFILES  = ESMF_StateGet.F90
 CLOBBERDIRS =
 
-# The rules below work on the mac with gcc and absoft fortran.
-# The -P option prevents putting #line directives in the output, and
-# -E stops after preprocessing.  The 'tr' command substitutes one-for-one,
-# translating @s into newlines to separate multiline macros, and
-# also translate ^ into # so that other include files are ready to
-# be processed by the second runthru of the preprocessor during the 
-# actual compile. (These lines are: ^include "fred" in the
-# original source to shield them from the first preprocess pass.)
-#
-#ESMF_StateGet.F90: ESMF_StateGet_F90.cpp
-#       gcc -E -P ESMF_StateGet_F90.cpp|tr "@^" "\n#" >ESMF_StateGet.F90
-#
+ESMF_StateGet.F90: ESMF_StateGet.cpp ESMF_StateMacros.h
 

@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_StateMacros.h,v 1.2 2004/02/13 16:00:55 nscollins Exp $
+! $Id: ESMF_StateMacros.h,v 1.3 2004/03/16 18:28:45 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,81 +15,60 @@
 #if 0
 !------------------------------------------------------------------------------
 ! Macros for the State class.
-! these are defined because they contain a variable number of commas.
-! they are used as parms in macro calls, and are rescanned by the
-! preprocessor after expansion.   7 is the maximum rank supported by Fortran.
 !------------------------------------------------------------------------------
 #endif
 
-#define COL1 :
-#define COL2 :,:
-#define COL3 :,:,:
-#define COL4 :,:,:,:
-#define COL5 :,:,:,:,:
-#define COL6 :,:,:,:,:,:
-#define COL7 :,:,:,:,:,:,:
-
-#define LEN1 counts(1)
-#define LEN2 counts(1),counts(2)
-#define LEN3 counts(1),counts(2),counts(3)
-#define LEN4 counts(1),counts(2),counts(3),counts(4)
-#define LEN5 counts(1),counts(2),counts(3),counts(4),counts(5)
-#define LEN6 counts(1),counts(2),counts(3),counts(4),counts(5),counts(6)
-#define LEN7 counts(1),counts(2),counts(3),counts(4),counts(5),counts(6),counts(7)
-
-#define RNG1 lb(1):ub(1)
-#define RNG2 lb(1):ub(1),lb(2):ub(2)
-#define RNG3 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3)
-#define RNG4 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4)
-#define RNG5 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5)
-#define RNG6 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6)
-#define RNG7 lb(1):ub(1),lb(2):ub(2),lb(3):ub(3),lb(4):ub(4),lb(5):ub(5),lb(6):ub(6),lb(7):ub(7)
-
-#define LOC1 1
-#define LOC2 1,1
-#define LOC3 1,1,1
-#define LOC4 1,1,1,1
-#define LOC5 1,1,1,1,1
-#define LOC6 1,1,1,1,1,1
-#define LOC7 1,1,1,1,1,1,1
-
+#include "ESMF_StdCppMacros.h"
 
 #if 0
 !------------------------------------------------------------------------------
-! Expand a string into each of the T/K/R procedure interface blocks
+! Documentation for the general StateGetDataPointer<> macros.
 !------------------------------------------------------------------------------
 #endif
 
-#define StateInterfaceMacro(funcname) \
+#define StateGetDataPointerDoc() \
 !------------------------------------------------------------------------------ @\
-! <This section created by macro - do not edit directly> @\
-    module procedure ESMF_##funcname##I21D @\
-    module procedure ESMF_##funcname##I41D @\
-    module procedure ESMF_##funcname##I81D @\
-    module procedure ESMF_##funcname##I22D @\
-    module procedure ESMF_##funcname##I42D @\
-    module procedure ESMF_##funcname##I82D @\
-    module procedure ESMF_##funcname##I23D @\
-    module procedure ESMF_##funcname##I43D @\
-    module procedure ESMF_##funcname##I83D @\
-    module procedure ESMF_##funcname##I24D @\
-    module procedure ESMF_##funcname##I44D @\
-    module procedure ESMF_##funcname##I84D @\
-    module procedure ESMF_##funcname##I25D @\
-    module procedure ESMF_##funcname##I45D @\
-    module procedure ESMF_##funcname##I85D @\
-    module procedure ESMF_##funcname##R41D @\
-    module procedure ESMF_##funcname##R81D @\
-    module procedure ESMF_##funcname##R42D @\
-    module procedure ESMF_##funcname##R82D @\
-    module procedure ESMF_##funcname##R43D @\
-    module procedure ESMF_##funcname##R83D @\
-    module procedure ESMF_##funcname##R44D @\
-    module procedure ESMF_##funcname##R84D @\
-    module procedure ESMF_##funcname##R45D @\
-    module procedure ESMF_##funcname##R85D @\
-! < end macro - do not edit directly >  @\
-!------------------------------------------------------------------------------ @\
+! <Created by macro - do not edit directly > @\
+!BOP @\
+! !IROUTINE: ESMF_StateGetDataPointer - Retrieve Fortran pointer directly from a State @\
+! @\
+! !INTERFACE: @\
+!      subroutine ESMF_StateGetDataPointer<rank><type><kind>(state, dataname, fptr, copyflag, statename, rc) @\
+! @\
+! !ARGUMENTS: @\
+!      type(ESMF_State), intent(in) :: state @\
+!      character(len=*), intent(in) :: dataname @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
+!      character(len=*), intent(in), optional :: statename @\
+!      integer, intent(out), optional :: rc   @\
+! @\
+! !DESCRIPTION: @\
+! Retrieves data from a state, returning a direct Fortran pointer to @\
+!  the data array.  @\
+! @\
+! The arguments are: @\
+!  \begin{description} @\
+!  \item[state] @\
+!   The {\tt ESMF\_State} to query. @\
+!  \item[dataname] @\
+!   The name of the Bundle, Field, or Array to return data from. @\
+!  \item[fptr] @\
+!   An unassociated Fortran pointer of the proper Type, Kind, and Rank as the data @\
+!   in the State.  When this call returns successfully, the pointer will now reference @\
+!   the data in the State.  This is either a reference or a copy, depending on the @\
+!   setting of the following argument.  The default is to return a reference. @\
+!  \item[{[copyflag]}] @\
+!   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
+!   copy of the data will be made and the pointer will point at the copy. @\
+!  \item[{[statename]}] @\
+!   Optional.  If multiple states are present, a specific state name must be given. @\
+!  \item[{[rc]}] @\
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
+!  \end{description} @\
+! @\
+!EOP @\
+ @\
 
 #if 0
 !------------------------------------------------------------------------------
@@ -100,53 +79,14 @@
 #define StateGetDataPointerMacro(mname, mtypekind, mrank, mdim, mlen, mrng, mloc) \
 !------------------------------------------------------------------------------ @\
 ! <Created by macro - do not edit directly > @\
-!BOP @\
-! !IROUTINE: ESMF_StateGetDataPointer##mtypekind##mrank##D - Retrieve F90 pointer directly from a State @\
+      subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind(state, dataname, fptr, copyflag, statename, rc) @\
  @\
-! !INTERFACE: @\
-      subroutine ESMF_StateGetDataPointer##mtypekind##mrank##D(state, dataname, f90ptr, copyflag, statename, rc) @\
-! @\
-! !ARGUMENTS: @\
       type(ESMF_State), intent(in) :: state @\
       character(len=*), intent(in) :: dataname @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: f90ptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       character(len=*), intent(in), optional :: statename @\
       integer, intent(out), optional :: rc   @\
-! @\
-! !DESCRIPTION: @\
-! Retrieves data from a state, returning a direct F90 pointer to the start @\
-!  of the actual data array.  @\
-! @\
-! The arguments are: @\
-!  \begin{description} @\
-!  \item[state] @\
-!   The {\tt ESMF\_State} to query. @\
-! @\
-!  \item[dataname] @\
-!   The name of the Bundle, Field, or Array to return. @\
-! @\
-!  \item[f90ptr] @\
-!   An unassociated Fortran 90 pointer of the proper Type, Kind, and Rank as the data @\
-!   in the State.  When this call returns successfully, the pointer will now reference @\
-!   the data in the State.  This is either a reference or a copy, depending on the @\
-!   setting of the following argument.  The default is to return a reference. @\
-! @\
-!  \item[{[copyflag]}] @\
-!   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, a separate @\
-!   copy of the data will be made and the pointer will point at the copy. @\
-! @\
-!  \item[{[statename]}] @\
-!   Optional.  If multiple states are present, a specific state name must be given. @\
-! @\
-!  \item[{[rc]}] @\
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. @\
-!  \end{description} @\
-! @\
- @\
-! @\
-!EOP @\
-! !REQUIREMENTS: @\
  @\
         ! Local variables @\
         type (ESMF_Bundle) :: bundle        ! bundle object @\
@@ -167,11 +107,11 @@
           rc = ESMF_FAILURE @\
         endif @\
  @\
-        ! Test to see if array already allocated, and fail if so. @\
-        !if (allocated(f90arr)) then @\
-        !  print *, "Error: Data Pointer cannot already be allocated" @\
-        !  return @\
-        !endif @\
+        ! Test to see if array already associated, and fail if so. @\
+        if (associated(fptr)) then @\
+          print *, "Error: Data Pointer cannot already be associated" @\
+          return @\
+        endif @\
  @\
         ! TODO: make this check the data type, and switch based on that. @\
         ! For now, assume field only. @\
@@ -187,7 +127,7 @@
           return @\
         endif @\
  @\
-        call ESMF_ArrayGetData(array, f90ptr, copyflag, rc=status) @\
+        call ESMF_ArrayGetData(array, fptr, copyflag, rc=status) @\
         if (status .ne. ESMF_SUCCESS) then @\
           print *, "Error: ArrayGetData failed" @\
           return @\
@@ -195,8 +135,9 @@
  @\
         if (rcpresent) rc = status @\
  @\
-        end subroutine ESMF_StateGetDataPointer##mtypekind##mrank##D   @\
+        end subroutine ESMF_StateGetDataPointer##mrank##D##mtypekind   @\
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
+
 
