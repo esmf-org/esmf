@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.24 2004/04/28 23:11:53 cdeluca Exp $
+! $Id: ESMF_GridTypes.F90,v 1.25 2004/05/05 13:07:38 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -430,7 +430,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.24 2004/04/28 23:11:53 cdeluca Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.25 2004/05/05 13:07:38 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1613,7 +1613,7 @@
       end function ESMF_GridStatusEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridStructureEqual - equality of Grid structures
 !
 ! !INTERFACE:
@@ -1638,7 +1638,7 @@
 !          Two region types to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridStructureEqual = (GridStructure1%gridStructure == &
@@ -1647,7 +1647,7 @@
       end function ESMF_GridStructureEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridTypeEqual - equality of Grid types
 !
 ! !INTERFACE:
@@ -1672,7 +1672,7 @@
 !          Two region types to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridTypeEqual = (GridType1%gridType == &
@@ -1681,7 +1681,7 @@
       end function ESMF_GridTypeEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridStaggerEqual - equality of Grid staggerings
 !
 ! !INTERFACE:
@@ -1706,7 +1706,7 @@
 !          Two grid staggerings to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridStaggerEqual = (GridStagger1%stagger == &
@@ -1715,7 +1715,7 @@
       end function ESMF_GridStaggerEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordOrderEqual - equality of Grid coordinate orders
 !
 ! !INTERFACE:
@@ -1740,7 +1740,7 @@
 !          Two coordinate orders to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordOrderEqual = (CoordOrder1%order == &
@@ -1749,7 +1749,7 @@
       end function ESMF_CoordOrderEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordIndexEqual - equality of Grid coordinate indexing
 !
 ! !INTERFACE:
@@ -1774,7 +1774,7 @@
 !          Two coordinate indexings to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordIndexEqual = (CoordIndex1%index == &
@@ -1783,7 +1783,7 @@
       end function ESMF_CoordIndexEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridStatusNotEqual - non-equality of Grid statuses
 !
 ! !INTERFACE:
@@ -1808,7 +1808,7 @@
 !          Two statuses of Grids to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridStatusNotEqual = (GridStatus1%gridStatus /= &
@@ -1817,7 +1817,7 @@
       end function ESMF_GridStatusNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridStructureNotEqual - non-equality of Grid structures
 !
 ! !INTERFACE:
@@ -1842,7 +1842,7 @@
 !          Two structures of Grids to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridStructureNotEqual = (GridStructure1%gridStructure /= &
@@ -1851,7 +1851,7 @@
       end function ESMF_GridStructureNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridTypeNotEqual - non-equality of Grid kinds
 !
 ! !INTERFACE:
@@ -1876,7 +1876,7 @@
 !          Two kinds of Grids to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 
       ESMF_GridTypeNotEqual = (GridType1%gridType /= &
                                GridType2%gridType)
@@ -1884,7 +1884,7 @@
       end function ESMF_GridTypeNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridStaggerNotEqual - inequality of Grid staggerings
 !
 ! !INTERFACE:
@@ -1909,7 +1909,7 @@
 !          Two grid staggerings to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridStaggerNotEqual = (GridStagger1%stagger /= &
@@ -1918,7 +1918,7 @@
       end function ESMF_GridStaggerNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordOrderNotEqual - inequality of Grid coordinate orders
 !
 ! !INTERFACE:
@@ -1943,7 +1943,7 @@
 !          Two coordinate orders to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordOrderNotEqual = (CoordOrder1%order /= &
@@ -1952,7 +1952,7 @@
       end function ESMF_CoordOrderNotEqual
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_CoordIndexNotEqual - inequality of Grid coordinate indexing
 !
 ! !INTERFACE:
@@ -1977,7 +1977,7 @@
 !          Two coordinate indexings to compare for inequality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_CoordIndexNotEqual = (CoordIndex1%index /= &
