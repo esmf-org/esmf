@@ -1,4 +1,4 @@
-% $Id: ESMF_refdoc.ctex,v 1.18 2003/04/14 16:38:33 cdeluca Exp $
+% $Id: ESMF_refdoc.ctex,v 1.19 2003/04/17 22:43:07 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -159,14 +159,14 @@
 %include "../Infrastructure/PerfProf/doc/PerfProf_refdoc.ctex"
 
 %====================================================================================================
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
-\end{htmlonly}
-\part{Infrastructure Utilities: Log}
-\label{part:Infrastructure_Utilities:_Log}
+%\newpage
+%\begin{htmlonly}
+%\addcontentsline{toc}{part}{Infrastructure Utilities: Log}
+%\end{htmlonly}
+%\part{Infrastructure Utilities: Log}
+%\label{part:Infrastructure_Utilities:_Log}
 
-#include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
+% #include "../Infrastructure/LogErr/doc/Log_refdoc.ctex"
 
 %====================================================================================================
 %\newpage
@@ -210,16 +210,6 @@
 %include "../Infrastructure/IO/doc/IO_refdoc.ctex"
 
 %====================================================================================================
-
-\newpage
-\begin{htmlonly}
-\addcontentsline{toc}{part}{Glossary}
-\end{htmlonly}
-\part{Glossary}
-\label{part:Glossary}
-
-\section{Glossary}
-\input{ESMF_terms}
 
 \end{document}
 
