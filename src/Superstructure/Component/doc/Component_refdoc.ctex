@@ -1,4 +1,4 @@
-% $Id: Component_refdoc.ctex,v 1.5 2003/04/15 16:57:58 cdeluca Exp $
+% $Id: Component_refdoc.ctex,v 1.6 2003/04/18 17:55:15 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,11 +99,11 @@
 %% #endif
 
 %\subsection{Class API}
-#ifdef STANDALONE
-\input{ESMF_Comp_fapi}
-#elif defined(CONSTITUENT)
-\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
-#endif
+%#ifdef STANDALONE
+%\input{ESMF_Comp_fapi}
+%#elif defined(CONSTITUENT)
+%\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
+%#endif
 
 %\section{Component C++ Interface}
 
@@ -120,7 +120,6 @@
 %#elif defined(CONSTITUENT)
 %\input{../Superstructure/Component/doc/ESMC_Comp_chapi}
 %#endif
-
 
 %%%%%%%%%%%%% Application Class %%%%%%%%%
 \section{Application Component Design}
