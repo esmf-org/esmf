@@ -1,4 +1,4 @@
-! $Id: ESMF_CompCreateEx.F90,v 1.1 2003/01/09 21:45:50 nscollins Exp $
+! $Id: ESMF_CompCreateEx.F90,v 1.2 2003/01/10 21:45:11 nscollins Exp $
 !
 ! Example/test code which creates a new Component
 
@@ -69,6 +69,9 @@
 
     call ESMF_ComponentDestroy(comp1, rc)
     print *, "Comp Destroy returned"
+
+    call ESMF_LayoutDestroy(layout, rc);
+    print *, "Layout Destroy returned"
 
     print *, "Component Example 1 finished"
 
