@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.4 2004/02/05 21:52:45 nscollins Exp $
+! $Id: ESMF.F90,v 1.5 2004/02/24 14:58:41 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -71,5 +71,10 @@ module ESMF_Mod
     use ESMF_CompMod
     use ESMF_GridCompMod
     use ESMF_CplCompMod
+    
+#ifdef ESMF_ENABLE_VM
+    use ESMF_VMMod
+    use ESMF_newDELayoutMod
+#endif
 
 end module ESMF_Mod
