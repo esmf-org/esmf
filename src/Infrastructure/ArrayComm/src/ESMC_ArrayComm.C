@@ -1,3 +1,4 @@
+// $Id: ESMC_ArrayComm.C,v 1.15 2004/06/07 10:40:24 nscollins Exp $
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
 // Massachusetts Institute of Technology, Geophysical Fluid Dynamics 
@@ -8,6 +9,7 @@
 
 // ESMC Array method implementation (body) file
 
+#define ESMF_FILENAME "ESMF_ArrayComm.C"
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -30,6 +32,7 @@
 #include <assert.h>
 // associated class definition file
 #include "ESMC_Array.h"
+#include "ESMC_LogErr.h"
 #include "ESMC_DELayout.h"
 #include "ESMC_Grid.h"        // grid info
 
@@ -37,7 +40,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_ArrayComm.C,v 1.14 2004/06/02 14:24:12 nscollins Exp $";
+            "$Id: ESMC_ArrayComm.C,v 1.15 2004/06/07 10:40:24 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -49,6 +52,8 @@
 //
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayHalo"
 //BOP
 // !IROUTINE:  ESMC_ArrayHalo - update the halo of an Array
 //
@@ -76,7 +81,9 @@
 
     int rc = ESMF_FAILURE;
 
-    printf("ESMC_ArrayHalo no longer supported; use ESMF_FieldHalo instead\n");
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc,
+    "ESMC_ArrayHalo no longer supported; use ESMF_FieldHalo instead\n", &rc);
+
     return rc;
 
  } // end ESMC_ArrayHalo
@@ -84,6 +91,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayGather"
 //BOP
 // !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
 //
@@ -154,6 +163,8 @@
 
 #if 0
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_newDELayoutGatherArray"
 //BOP
 // !IROUTINE:  ESMC_DELayoutGatherArray - all gather a distributed array
 //
@@ -397,6 +408,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayScatter"
 //BOP
 // !IROUTINE:  ESMC_ArrayScatter - scatter a single Array onto N distributed DEs
 //
@@ -490,8 +503,10 @@
         }
       break;
       default:
-        printf("no code to handle data type %d yet\n", this->type);
-      break;
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                                          "unsupported data type", &rc);
+        !printf("no code to handle data type %d yet\n", this->type);
+        return (rc);
     }
 
     //scattered->ESMC_ArrayPrint();
@@ -509,6 +524,8 @@
 
 
 //-----------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMC_ArrayRedist"
 //BOP
 // !IROUTINE:  ESMC_ArrayRedist - general redistribution of an Array
 //
@@ -564,7 +581,10 @@
     // switch based on array rank
     switch (this->rank) {
       case 1:
-        printf("no code to handle array rank %d yet\n", this->rank);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                                          "unsupported data rank", &rc);
+        !printf("no code to handle array rank %d yet\n", this->rank);
+        return (rc);
       break;
       case 2:
         {
@@ -668,10 +688,16 @@
         }
       break;
       case 5:
-        printf("no code to handle array rank %d yet\n", this->rank);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                                          "unsupported data rank", &rc);
+        !printf("no code to handle array rank %d yet\n", this->rank);
+        return (rc);
       break;
       default:
-        printf("no code to handle array rank %d yet\n", this->rank);
+        ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_NOT_IMPL,
+                                          "unsupported data rank", &rc);
+        !printf("no code to handle array rank %d yet\n", this->rank);
+        return (rc);
       break;
     }
 
