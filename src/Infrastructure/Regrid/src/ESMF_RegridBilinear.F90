@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.81 2004/12/07 23:28:10 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.82 2004/12/18 00:05:53 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.81 2004/12/07 23:28:10 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.82 2004/12/18 00:05:53 nscollins Exp $'
 
 !==============================================================================
 
@@ -603,6 +603,7 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
+      weights(:) = 0.0
       zero = 0.
       half = 0.5
       one  = 1.
