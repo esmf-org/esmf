@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.19 2005/01/04 21:19:22 theurich Exp $
+#  $Id: build_rules.mk,v 1.20 2005/02/14 16:30:14 nscollins Exp $
 #
 #  Linux.nag.default.mk
 #
@@ -149,11 +149,28 @@ F_FIXNOCPP      = -fixed
 CXX_CLINKER_SLFLAG = -Wl,-rpath,
 CXX_FLINKER_SLFLAG = -Wl,-rpath,
 CXX_SYS_LIB	   = ${MPI_LIB} -ldl -lc -lg2c -lm
-CXXLIBBASE         = /soft/com/packages/intel-7/compiler70/ia32/lib
-F90LIBBASE         = /soft/com/packages/nag-f95-4.2/lib
-C_F90CXXLIBS       = ${MPI_LIB} -L${F90LIBBASE} -lnag -lrt -lf96 \
-                     -L${CXXLIBBASE} -lcxa -lunwind -lcprts ${EXTRALIBS}
-C_CXXF90LIBS       = -L${F90LIBBASE} -lnag ${MPI_LIB} -lrt -lf96 ${EXTRALIBS}
+# by default append each directory which is in LD_LIBRARY_PATH to
+# the -L flag and also to the run-time load flag.  (on systems which
+# support the 'module' command, that is how it works - by adding dirs
+# to LD_LIBRARY_PATH.)  if it is not set, default to where the pgi
+# compilers try to install themselves.  if your compiler is someplace else
+# either set LD_LIBRARY_PATH first, or make a site specific file and
+# edit the paths explicitly.
+ifeq ($(origin LD_LIBRARY_PATH), environment)
+LIB_PATHS      = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
+CXXLIB_PATHS   = 
+F90LIB_PATHS   = 
+LD_PATHS   = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
+else
+LIB_PATHS      =
+CXXLIB_PATHS   = -L/soft/com/packages/intel-8.1/lib
+F90LIB_PATHS   = -L/soft/com/packages/nag-f95-5.0/lib
+endif
+
+C_F90CXXLIBS       = ${MPI_LIB} ${LIB_PATHS} \
+                     ${F90LIB_PATHS} -lrt -lf96 \
+                     ${CXXLIB_PATHS} -lcxa -lunwind -lstdc++ ${EXTRALIBS}
+C_CXXF90LIBS       = ${LIB_PATHS} ${F90LIB_PATHS} ${MPI_LIB} -lrt -lf96 ${EXTRALIBS}
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
