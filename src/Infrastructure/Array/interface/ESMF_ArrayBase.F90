@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.10 2003/07/31 23:22:28 nscollins Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.11 2003/08/01 16:25:55 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.10 2003/07/31 23:22:28 nscollins Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.11 2003/08/01 16:25:55 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -638,14 +638,17 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_ArrayHaloDeprecated(array, layout, decompids, AI_exc, AI_tot, rc)
+      subroutine ESMF_ArrayHaloDeprecated(array, layout, &
+                                          AI_global, global_dimlens, &
+                                          decompids, periodic, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Array) :: array
       type(ESMF_DELayout) :: layout
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_global
+      integer, dimension(:), intent(in) :: global_dimlens
       integer, dimension(:), intent(in) :: decompids
-      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
-      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot
+      type(ESMF_Logical), dimension(:), intent(in) :: periodic
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -656,8 +659,7 @@
 ! !REQUIREMENTS:
         integer :: status         ! local error status
         logical :: rcpresent      ! did user specify rc?
-        integer :: size_decomp, size_AI
-        integer :: i
+        integer :: size_decomp
 
 ! initialize return code; assume failure until success is certain
         status = ESMF_FAILURE
@@ -667,32 +669,14 @@
           rc = ESMF_FAILURE
         endif
  
-! subtract one from location parts of indices to translate to C++
-        size_AI = size(AI_tot)
-        do i = 1,size_AI
-          AI_exc(i)%min = AI_exc(i)%min - 1
-          AI_exc(i)%max = AI_exc(i)%max - 1
-          AI_tot(i)%min = AI_tot(i)%min - 1
-          AI_tot(i)%max = AI_tot(i)%max - 1
-        enddo
-
 ! call c routine to halo
         size_decomp = size(decompids)
-        call c_ESMC_ArrayHalo(array, layout, decompids, size_decomp, &
-                              AI_exc, AI_tot, status)
+        call c_ESMC_ArrayHalo(array, layout, AI_global, global_dimlens, &
+                              decompids, size_decomp, periodic, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "c_ESMC_ArrayHalo returned error"
           return
         endif
-
-! add one back to location parts of indices to translate from C++
-        size_AI = size(AI_tot)
-        do i = 1,size_AI
-          AI_exc(i)%min = AI_exc(i)%min + 1
-          AI_exc(i)%max = AI_exc(i)%max + 1
-          AI_tot(i)%min = AI_tot(i)%min + 1
-          AI_tot(i)%max = AI_tot(i)%max + 1
-        enddo
 
 ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS

@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.8 2003/07/31 19:08:58 atrayanov Exp $
+// $Id: ESMC_Array_F.C,v 1.9 2003/08/01 16:25:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -132,11 +132,13 @@ extern "C" {
      }
 
      void FTN(c_esmc_arrayhalo)(ESMC_Array **ptr, ESMC_DELayout **layout,
-                                ESMC_AxisIndex *ai_global, int *global_dimlengths,
-                                int *decompids,  int *size_decomp, int *status,
-				int *periodic) {
-          *status = (*ptr)->ESMC_ArrayHalo(*layout, ai_global, global_dimlengths,
-                                decompids, *size_decomp, periodic);
+                                ESMC_AxisIndex *ai_global, 
+                                int *global_dimlengths,
+                                int *decompids,  int *size_decomp, 
+                                ESMC_Logical *periodic, int *status) {
+          *status = (*ptr)->ESMC_ArrayHalo(*layout, ai_global, 
+                                  global_dimlengths, decompids, *size_decomp, 
+                                  periodic);
      }
 
      void FTN(c_esmc_arrayallgather)(ESMC_Array **ptr, ESMC_DELayout **layout,
