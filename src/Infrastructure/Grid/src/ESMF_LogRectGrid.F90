@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.91 2004/08/16 23:07:15 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.92 2004/08/19 17:23:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.91 2004/08/16 23:07:15 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.92 2004/08/19 17:23:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1603,13 +1603,12 @@
          do i=1,dimCount
             recheck = (useMaxes(i) - minGlobalCoordPerDim(i)) / real(counts(i))
             if (recheck-useDeltas(i) .gt. 0.00001) then
-                write(msgbuf, *) "Inconsistent set of min, max, deltas, and counts specified"
-                if (ESMF_LogWrite(msgbuf, ESMF_LOG_WARNING, &
-                                 ESMF_CONTEXT)) continue
+                write(msgbuf, *) "Inconsistent set of min, max, deltas, and ",
+                                 "counts specified"
+                call ESMF_LogWrite(msgbuf, ESMF_LOG_WARNING, ESMF_CONTEXT)
                 write(msgbuf, *) "delta for dimension", i, "reset from", &
-                             useDeltas(i), "to ", recheck
-                if (ESMF_LogWrite(msgbuf, ESMF_LOG_WARNING, &
-                                 ESMF_CONTEXT)) continue
+                                 useDeltas(i), "to ", recheck
+                call ESMF_LogWrite(msgbuf, ESMF_LOG_WARNING, ESMF_CONTEXT)
               useDeltas(i) = recheck
             endif
          enddo
@@ -1939,10 +1938,9 @@
           maxGlobalCoordPerDimUse(3) = maxval(coordsUse3)
         endif
       else
-        dummy = ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+        if (ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                      "must have either coords arrays or delta arrays", &
-                     ESMF_CONTEXT, rc)
-        return
+                     ESMF_CONTEXT, rc)) return
       endif
 
       ! either way, we have the counts now
@@ -2201,8 +2199,8 @@
               return
             endif
             if (size(countsPerDEDecomp1).gt.aSize) then
-              dummy = ESMF_LogWrite("countsPerDEDecomp1 array larger than layout", &
-                                    ESMF_LOG_WARNING)
+              call ESMF_LogWrite("countsPerDEDecomp1 array larger than layout", &
+                                 ESMF_LOG_WARNING)
             endif
             countsPerDEDecomp1Use(1:aSize) = countsPerDEDecomp1(1:aSize)
           else
@@ -2222,8 +2220,8 @@
               return
             endif
             if (size(countsPerDEDecomp2).gt.aSize) then
-              dummy = ESMF_LogWrite("countsPerDEDecomp2 array larger than layout", &
-                                    ESMF_LOG_WARNING)
+              call ESMF_LogWrite("countsPerDEDecomp2 array larger than layout", &
+                                 ESMF_LOG_WARNING)
             endif
             countsPerDEDecomp2Use(1:aSize) = countsPerDEDecomp2(1:aSize)
           else
@@ -2774,8 +2772,8 @@
 
       ! If Grid is unitialized, return with warning
       if (grid%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("destroying uninitialized grid", ESMF_LOG_WARNING, &
-                          ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("destroying uninitialized grid", ESMF_LOG_WARNING, &
+                           ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -4105,9 +4103,8 @@
       ! Get the grid rank and check against size of globalAI
       gridRank = grid%ptr%dimCount
       if (size(globalAI,2).lt.gridRank) then
-        if (ESMF_LogWrite("globalAI array size smaller than grid rank", &
-                          ESMF_LOG_WARNING, &
-                          ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("globalAI array size smaller than grid rank", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
       endif
 
       ! Get the size of the AI array and allocate horz and vert temp AI arrays
@@ -4137,9 +4134,8 @@
 
       if (present(vertRelLoc)) then
         if (gridRank.le.2) then
-          !dummy = ESMF_LogWrite("vertical relloc defined on a 2D grid", &
-          !                      ESMF_LOG_WARNING, &
-          !                      ESMF_CONTEXT)
+          !call ESMF_LogWrite("vertical relloc defined on a 2D grid", &
+          !                   ESMF_LOG_WARNING, ESMF_CONTEXT)
         else
           if (vertRelLoc.ne.ESMF_CELL_UNDEFINED .AND. gridRank.eq.3) then
             call ESMF_GridGetPhysGridId(grid%ptr, vertRelLoc, vertPhysIdUse, localrc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.191 2004/08/18 19:33:03 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.192 2004/08/19 17:23:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.191 2004/08/18 19:33:03 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.192 2004/08/19 17:23:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1339,8 +1339,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+         call ESMF_LogWrite("trying to query an uninitialized grid", &
+                            ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1540,8 +1540,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1673,8 +1673,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1737,8 +1737,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1803,8 +1803,8 @@
       if (present(rc)) rc = ESMF_FAILURE
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1868,8 +1868,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1934,8 +1934,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -1997,8 +1997,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2063,8 +2063,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2127,8 +2127,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2193,8 +2193,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2257,8 +2257,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2323,8 +2323,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2378,8 +2378,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2454,8 +2454,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2540,8 +2540,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2633,8 +2633,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2768,8 +2768,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -2918,8 +2918,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif
@@ -3065,8 +3065,8 @@
 
       ! check grid status
       if (grid%ptr%gridStatus.eq.ESMF_GRID_STATUS_UNINIT) then
-        if (ESMF_LogWrite("trying to query an uninitialized grid", &
-                          ESMF_LOG_WARNING, ESMF_CONTEXT)) continue
+        call ESMF_LogWrite("trying to query an uninitialized grid", &
+                           ESMF_LOG_WARNING, ESMF_CONTEXT)
         if (present(rc)) rc = ESMF_SUCCESS
         return
       endif

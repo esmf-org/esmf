@@ -216,7 +216,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.119 2004/07/27 22:54:28 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.120 2004/08/19 17:22:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1645,7 +1645,7 @@
         if (size(localCellCountPerDim).gt.dgtype%dimCount) then
           i2 = dgtype%dimCount
           print logMsg, "size of array gt dimCount"
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         do i = 1,i2
           localCellCountPerDim(i) = me%localCellCountPerDim(i)
@@ -1657,7 +1657,7 @@
         if (size(globalStartPerDim).gt.dgtype%dimCount) then
           i2 = dgtype%dimCount
           print logMsg, "size of array gt dimCount"
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         do i = 1,i2
           globalStartPerDim(i) = me%globalStartPerDim(i)
@@ -1669,7 +1669,7 @@
         if (size(globalAIPerDim).gt.dgtype%dimCount) then
           i2 = dgtype%dimCount
           print logMsg, "size of array gt dimCount"
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         do i = 1,i2
           globalAIPerDim(i) = me%globalAIPerDim(i)

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.39 2004/07/27 15:56:38 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.40 2004/08/19 17:24:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.39 2004/07/27 15:56:38 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.40 2004/08/19 17:24:27 jwolfe Exp $'
 
 !==============================================================================
 
@@ -1310,11 +1310,11 @@
       do srcAdd = 1,srcSize
         if (srcArea(srcAdd) < -.01) then
           write(logMsg, *) "Source grid area < -0.01"
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " value is ", srcArea(srcAdd)
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " at location ", srcAdd
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
       enddo
 
@@ -1322,11 +1322,11 @@
         do iDst = 1,dstSizeX
           if (dstArea(iDst,jDst) < -.01) then
             write(logMsg, *) "Dest grid area < -0.01"
-            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
             write(logMsg, *) " value is ", dstArea(iDst,jDst)
-            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
             write(logMsg, *) " at location ", iDst, jDst
-            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
           temp2d(iDst,jDst) = 0.0d0
         enddo
@@ -1340,19 +1340,19 @@
 
         if (weightsData(n) < -.05) then
           write(logMsg, *) "Regrid weight < 0"
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " value is ", weights(1)
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " at location ", srcAdd, iDst, jDst
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         if (regridnorm /= ESMF_REGRID_NORM_NONE .AND. weights(1) > 1.05d0) then
           write(logMsg, *) "Regrid weight > 1.05"
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " value is ", weights(1)
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           write(logMsg, *) " at location ", srcAdd, iDst, jDst
-          dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+          call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
         endif
         ! sum the weight for each dest grid point
         temp2d(iDst,jDst) = temp2d(iDst,jDst) + weights(1)
@@ -1377,12 +1377,12 @@
           if (abs(temp2d(iDst,jDst)) > 1.d-12 .AND. &
               abs(temp2d(iDst,jDst)-normFactor) > .05) then
             write(logMsg, *) "Sum of weights for regrid"
-            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
             write(logMsg, *) " value is ", temp2d(iDst,jDst), &
                              " should be ", normFactor
-            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
             write(logMsg, *) " at location ", srcAdd, iDst, jDst
-            dummy = ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
+            call ESMF_LogWrite(logMsg, ESMF_LOG_WARNING)
           endif
         enddo
       enddo
