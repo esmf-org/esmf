@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.30 2003/08/29 17:52:45 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.31 2003/08/29 19:32:05 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.30 2003/08/29 17:52:45 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.31 2003/08/29 19:32:05 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -164,7 +164,7 @@
       !EX_UTest
       ! Attempt to get un-initialized year from stop time
        write(name, *) "Get Uninitialized StopTime Year Test"
-       call ESMF_TimeGet(stopTime, yr_i4=YR, rc=rc)
+       call ESMF_TimeGet(stopTime, yr=YR, rc=rc)
        write(failMsg, *) " Returned ESMF_SUCCESS"
        call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -175,7 +175,7 @@
       ! Set time to illegite month
       write(name, *) "Stop Time Initialization to illegite month (0) Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=0, dd_i4=14, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=0, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -186,7 +186,7 @@
       ! Set time to illegite month
       write(name, *) "Stop Time Initialization to illegite month (13) Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=13, dd_i4=14, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=13, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -198,7 +198,7 @@
       ! Set time to illegite day
       write(name, *) "Stop Time Initialization to  Feb. 31st. Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      call ESMF_TimeSet(stopTime, yr_i4=2003, mm_i4=2, dd_i4=31, &
+      call ESMF_TimeSet(stopTime, yr=2003, mm=2, dd=31, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -209,7 +209,7 @@
       ! Set time to lower bound of Fliegel algoritm
       write(name, *) "Test lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_SUCCESS."
-      call ESMF_TimeSet(stopTime, yr_i4=-4800, mm_i4=3, dd_i4=1, &
+      call ESMF_TimeSet(stopTime, yr=-4800, mm=3, dd=1, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -220,7 +220,7 @@
       ! Set time beyond lower bound of Fliegel algoritm
       write(name, *) "Test beyond lower bound of Fliegel algorithm Test"
       write(failMsg, *) " Should return ESMF_FAILURE."
-      call ESMF_TimeSet(stopTime, yr_i4=-4800, mm_i4=2, dd_i4=28, &
+      call ESMF_TimeSet(stopTime, yr=-4800, mm=2, dd=28, &
                                   calendar=gregorianCalendar, rc=rc)
       call ESMF_Test((rc.eq.ESMF_FAILURE), &
                       name, failMsg, result, ESMF_SRCLINE)
@@ -352,7 +352,7 @@
  
       !EX_UTest
       write(name, *) "Clock Initialization with stop time set before start time Test"
-      call ESMF_TimeSet(stopTime, yr_i4=2002, mm_i4=3, dd_i4=14, &
+      call ESMF_TimeSet(stopTime, yr=2002, mm=3, dd=14, &
                                   calendar=gregorianCalendar, rc=rc)
       write(failMsg, *) "Should return ESMF_SUCCESS"
       call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
