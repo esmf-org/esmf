@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.114 2004/12/07 23:35:25 jwolfe Exp $
+// $Id: ESMC_Route.C,v 1.115 2004/12/17 19:37:44 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.114 2004/12/07 23:35:25 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.115 2004/12/17 19:37:44 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -711,12 +711,12 @@ static int maxroutes = 10;
     void *srcmem, *rcvmem;
     int srccount, rcvcount;
     int srctcount, rcvtcount;
-    char *srcbufstart[1000], *rcvbufstart[1000]; // todo: don't hardcode
+    char *srcbufstart[5000], *rcvbufstart[5000]; // todo: don't hardcode
     char *srcbuf, *rcvbuf;
     char *srcptr, *rcvptr;
     int nbytes;
 
-    vmk_commhandle *handle[1000];// todo: don't hardcode
+    vmk_commhandle *handle[5000];// todo: don't hardcode
     
     mypet = vm->vmk_mypet();
     rc = ct->ESMC_CommTableGetCount(&ccount);
@@ -751,11 +751,6 @@ static int maxroutes = 10;
 
             // look up the corresponding send/recv xpackets in the rtables
 
-            if (xscount > 1)  {
-               sprintf(msgbuf, "cannot handle multiple (%d) send xps yet",
-                       xscount);
-               ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
-            }
             if (ixs < xscount) {
                 rc = sendRT->ESMC_RTableGetEntry(theirpet, ixs, &sendxp);
                 rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
@@ -774,11 +769,6 @@ static int maxroutes = 10;
             }
   //          printf("soffset: %d\n", soffset);
 
-            if (xrcount > 1) {
-               sprintf(msgbuf, "cannot handle multiple (%d) receive xps yet",
-                       xrcount);
-               ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
-            }
             if (ixr < xrcount) {
                 rc = recvRT->ESMC_RTableGetEntry(theirpet, ixr, &recvxp);
                 rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
@@ -920,11 +910,6 @@ static int maxroutes = 10;
 
             // look up the corresponding send/recv xpackets in the rtables
 
-            if (xscount > 1)  {
-               sprintf(msgbuf, "cannot handle multiple (%d) send xps yet",
-                       xscount);
-               ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
-            }
             if (ixs < xscount) {
                 rc = sendRT->ESMC_RTableGetEntry(theirpet, ixs, &sendxp);
                 rc = sendxp->ESMC_XPacketGet(&srank, &soffset, &scontig_length,
@@ -943,11 +928,6 @@ static int maxroutes = 10;
             }
   //          printf("soffset: %d\n", soffset);
 
-            if (xrcount > 1) {
-               sprintf(msgbuf, "cannot handle multiple (%d) receive xps yet",
-                       xrcount);
-               ESMC_LogDefault.ESMC_LogWrite(msgbuf, ESMC_LOG_WARN);
-            }
             if (ixr < xrcount) {
                 rc = recvRT->ESMC_RTableGetEntry(theirpet, ixr, &recvxp);
                 rc = recvxp->ESMC_XPacketGet(&rrank, &roffset, &rcontig_length,
@@ -1444,6 +1424,9 @@ static int maxroutes = 10;
           // load the intersecting XPacket into the receiving RTable
           recvRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
           ct->ESMC_CommTableSetPartner(theirMatchingPET);
+
+          // free XPs allocated by XPacketFromAxisIndex() routine above
+           delete [] theirXP;
         }
 
         // free the dst myXP
@@ -1463,6 +1446,278 @@ static int maxroutes = 10;
     return rc;
 
  } // end ESMC_RoutePrecomputeRedist
+
+
+//-----------------------------------------------------------------------------
+#undef  ESMC_METHOD
+#define ESMC_METHOD "ESMC_RoutePrecomputeRedistV"
+//BOP
+// !IROUTINE:  ESMC_RoutePrecomputeRedistV - initialize a Route
+//
+// !INTERFACE:
+      int ESMC_Route::ESMC_RoutePrecomputeRedistV(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int rank,                   // in  - rank of data in both Fields
+      int dstMyDE,                // in  - DE identifier in the DELayout of
+                                  //       the destination Field
+      ESMC_Logical dstVector,     // in  - ESMC_Logical identifier denoting
+                                  //       whether or not the destination
+                                  //       Field has been distributed as a vector
+      ESMC_AxisIndex *dstCompAI,  // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the destination
+                                  //       Field covering the computational
+                                  //       domain
+      ESMC_AxisIndex *dstTotalAI, // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the destination
+                                  //       Field covering the total domain
+      int dstAICount,             // in  - number of sets of AI's in the dst
+                                  //       array
+      int *dstAICountPerDE,       // in  - array of the number of AI's per DE
+                                  //       in the destination field
+      int *dstGlobalStart,        // in  - array of global starting indices
+                                  //       for all DE's in the DELayout and in
+                                  //       each direction for the destination
+                                  //       Field
+      int dstGSCount,             // in -  number of sets of global counts
+      int *dstGlobalCount,        // in  - array of global strides for each
+                                  //       direction for the receiving Field
+      ESMC_DELayout *dstdeLayout, // in  - pointer to the rcv DELayout
+      int srcMyDE,                // in  - DE identifier in the DELayout of
+                                  //       the source Field
+      ESMC_Logical srcVector,     // in  - ESMC_Logical identifier denoting
+                                  //       whether or not the source Field has
+                                  //       been distributed as a vector
+      ESMC_AxisIndex *srcCompAI,  // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the source
+                                  //       Field covering the computational
+                                  //       domain
+      ESMC_AxisIndex *srcTotalAI, // in  - array of axis indices for all DE's
+                                  //       in the DELayout for the source
+                                  //       Field covering the total domain
+      int srcAICount,             // in  - number of sets of AI's in the src
+                                  //       array
+      int *srcAICountPerDE,       // in  - array of the number of AI's per DE
+                                  //       in the source field
+      int *srcGlobalStart,        // in  - array of global starting indices
+                                  //       for all DE's in the DELayout and in
+                                  //       each direction for the source
+                                  //       Field
+      int srcGSCount,             // in -  number of sets of global counts
+      int *srcGlobalCount,        // in  - array of global strides for each
+                                  //       direction for the source Field
+      ESMC_DELayout *srcdeLayout) { // in  - pointer to the src DELayout
+//
+// !DESCRIPTION:
+//      Initializes a Route with send and receive RouteTables.
+//      This routine differs from PrecomputeRedist mostly in that there can
+//      be an array of AxisIndices per DE.
+//      Returns error code if problems are found.
+//
+//EOP
+// !REQUIREMENTS:  XXXn.n, YYYn.n
+
+    ESMC_AxisIndex myAI[ESMF_MAXDIM], myTotalAI[ESMF_MAXDIM],
+                                        theirAI[ESMF_MAXDIM];
+    ESMC_XPacket *myXP = NULL;
+    ESMC_XPacket *theirXP = NULL;
+    ESMC_XPacket intersectXP;
+    int myXPCount, theirXPCount;
+    int myGlobalStart[ESMF_MAXDIM];
+    int i, k, m, n, rc;
+    int myDEStartCount, theirDEStartCount;
+    int theirDE, theirMatchingPET, theirDECount;
+
+    // set this here, because if neither send or recv are > 0 then we
+    // do nothing here.
+    rc = ESMF_SUCCESS;
+
+    // Calculate the sending table.  If this DE is not part of the sending
+    // layout skip this loop.
+    if (srcMyDE != -1) {
+
+      // get the number of destination DEs 
+      dstdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0,  
+                                    NULL, NULL, NULL, NULL, 0); 
+
+      // get the starting count in the AI list for myDE
+      myDEStartCount = 0;
+      for (i=0; i<srcMyDE; i++) myDEStartCount += srcAICountPerDE[i];
+                                  
+      // loop over the number of AI's for my DE
+      for (n=0; n<srcAICountPerDE[srcMyDE]; n++) {  
+                                  
+        // get "my" AI out of the srcAI array
+        // TODO:  this is NOT going to work for data dims which are not
+        //  equal the grid dims, e.g. a 2d grid with 4d data.
+        for (k=0; k<rank; k++) {
+          myAI[k]          =      srcCompAI[n + myDEStartCount + k*srcAICount];
+          myTotalAI[k]     =     srcTotalAI[n + myDEStartCount + k*srcAICount];     
+          myGlobalStart[k] = srcGlobalStart[srcMyDE + k*srcGSCount];
+        }
+
+        // TODO: check that myAI is not empty -- if so, continue to the recving table
+                                        
+        // calculate "my" (local DE's) XPacket in the sense of the global data
+        rc = ESMC_XPacketFromAxisIndex(myAI, rank, srcGlobalCount,
+                                       NULL, &myXP, &myXPCount);
+    
+        // loop over DE's from receiving layout to calculate send table
+        theirDEStartCount = 0;
+        for (i=0; i<theirDECount; i++) {
+          theirDE = i;
+    
+          // get the parent PET identifier for this DE in the rcv layout
+          dstdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
+                                                  &theirMatchingPET, 1);
+          if (theirMatchingPET != theirDE)
+             cout << "theirDE = " << theirDE << ", parentDE = "
+                  << theirMatchingPET << endl;
+    
+          // loop over the number of AI's for their DE
+          for (m=0; m<dstAICountPerDE[theirDE]; m++) {
+
+            // get "their" AI out of the dstAI array
+            for (k=0; k<rank; k++) {
+              theirAI[k]     =  dstCompAI[m + theirDEStartCount + k*dstAICount];
+            }
+
+            // TODO: check that theirAI is not empty  -- if so, loop on i
+
+            // calculate "their" XPacket in the sense of the global data
+            rc = ESMC_XPacketFromAxisIndex(theirAI, rank, dstGlobalCount,
+                                           NULL, &theirXP, &theirXPCount);
+
+            // calculate the intersection
+            intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
+
+            // if there's no intersection, no need to add an entry here
+            if (intersectXP.ESMC_XPacketEmpty()) {
+              // free XPs allocated by XPacketFromAxisIndex() routine above
+              delete [] theirXP;
+            continue;         // TODO: loop on m -- is this continue
+          }
+
+            // translate from global to local data space
+            if (srcVector == ESMF_FALSE)
+              intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI,
+                                                    rank, myGlobalStart);
+            if (srcVector == ESMF_TRUE)
+              intersectXP.ESMC_XPacketSetOffset(n);
+
+            // load the intersecting XPacket into the sending RTable
+            sendRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
+            ct->ESMC_CommTableSetPartner(theirMatchingPET);
+
+            // free XPs allocated by XPacketFromAxisIndex() routine above
+            delete [] theirXP;
+          }   // next AI for theirDE
+
+          theirDEStartCount += dstAICountPerDE[theirDE];
+        }   // next DE
+
+        // free this myXP before computing the next myXP
+        delete [] myXP;
+
+      }     // next AI for myDE
+
+    }       // end of sending table
+
+            
+    // Calculate the receiving table.  If this DE is not part of the receiving
+    // layout skip this loop completely.
+    if (dstMyDE != -1) {
+
+      // get the number of source DEs
+      srcdeLayout->ESMC_DELayoutGet(&theirDECount, NULL, NULL, NULL, 0, 
+                                    NULL, NULL, NULL, NULL, 0);
+
+      // get the starting count in the AI list for myDE
+      myDEStartCount = 0;
+      for (i=0; i<dstMyDE; i++) myDEStartCount += dstAICountPerDE[i];
+
+      // loop over the number of AI's for my DE
+      for (n=0; n<dstAICountPerDE[dstMyDE]; n++) { 
+
+        // get "my" AI out of the dstAI array 
+        for (k=0; k<rank; k++) {
+          myAI[k]          =      dstCompAI[n + myDEStartCount + k*dstAICount];
+          myTotalAI[k]     =     dstTotalAI[n + myDEStartCount + k*dstAICount];     
+          myGlobalStart[k] = dstGlobalStart[dstMyDE + k*dstGSCount];
+        }   
+            
+        // calculate "my" (local DE's) XPacket in the sense of the global data
+        rc = ESMC_XPacketFromAxisIndex(myAI, rank, dstGlobalCount,
+                                       NULL, &myXP, &myXPCount);
+            
+        // TODO: check that myAI is not empty -- if so, continue to the end
+
+        // loop over DE's from sending layout to calculate receive table
+        theirDEStartCount = 0;
+        for (i=0; i<theirDECount; i++) {
+          theirDE = i;
+
+          // get the parent DE identifier for this DE in the src layout
+          srcdeLayout->ESMC_DELayoutGetDEMatchPET(theirDE, *vm, NULL,
+                                                  &theirMatchingPET, 1);
+          if (theirMatchingPET != theirDE)
+             cout << "theirDE = " << theirDE << ", parentDE = "
+                  << theirMatchingPET << endl;
+
+          // loop over the number of AI's for their DE
+          for (m=0; m<srcAICountPerDE[theirDE]; m++) {
+
+            // get "their" AI out of the srcAI array
+            for (k=0; k<rank; k++) {
+              theirAI[k]     =  srcCompAI[m + theirDEStartCount + k*srcAICount];
+            }
+
+            // TODO: check that theirAI is not empty  -- if so, loop on i
+
+            // calculate "their" XPacket in the sense of the global data
+            rc = ESMC_XPacketFromAxisIndex(theirAI, rank, srcGlobalCount,
+                                           NULL, &theirXP, &theirXPCount);
+
+            // calculate the intersection
+            intersectXP.ESMC_XPacketIntersect(&myXP[0], &theirXP[0]);
+
+            // if there's no intersection, no need to add an entry here
+            if (intersectXP.ESMC_XPacketEmpty()) {
+              // free XPs allocated by XPacketFromAxisIndex() routine above
+              delete [] theirXP;
+            continue;
+          }
+
+            // translate from global to local
+            if (dstVector==ESMF_FALSE)
+              intersectXP.ESMC_XPacketGlobalToLocal(&intersectXP, myTotalAI,
+                                                    rank, myGlobalStart);
+            if (dstVector == ESMF_TRUE)
+              intersectXP.ESMC_XPacketSetOffset(n);
+
+            // load the intersecting XPacket into the receiving RTable
+            recvRT->ESMC_RTableSetEntry(theirMatchingPET, &intersectXP);
+            ct->ESMC_CommTableSetPartner(theirMatchingPET);
+
+            // free XPs allocated by XPacketFromAxisIndex() routine above
+            delete [] theirXP;
+          }   // next AI for theirDE
+
+          theirDEStartCount += srcAICountPerDE[theirDE];
+        }   // next DE
+
+        // free this myXP before computing the next myXP
+        delete [] myXP;
+
+      }     // next AI for myDE
+
+    }       // end of recv table
+            
+    return rc;
+ } // end ESMC_RoutePrecomputeRedistV
 
 
 //-----------------------------------------------------------------------------
