@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.4 2002/03/18 10:07:54 wsawyer Exp $
+% $Id: DistGrid_req.tex,v 1.5 2002/03/25 23:01:17 vbalaji Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -145,8 +145,19 @@ Given the data dependencies of the numerics, ESMF will be capable of
 computing the connectivities required for data sharing and
 synchronization of computational domains across a distributed grid.
 
-WS:  "topology" (BLACS terminology) implies process layout.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes] WS:  "topology" (BLACS terminology) implies process layout.
 Can we use ``communication pattern''?
+
+VB: I still prefer grid topology. This only sets up connectivities:
+there may be no actual communication.
+
+\end{reqlist}
 
 \sreq{Validity of grid topology}
 
@@ -174,7 +185,7 @@ specify this as input information for grid topology generation.
 ESMF will have methods to return the data domain information required
 for allocation of data arrays.
 
-\sreq{Globally conformant data domain generation}
+\ssreq{Globally conformant data domain generation}
 
 ESMF will have methods to return the data domain information required
 for allocation of data arrays such that the numeric values of the
@@ -193,6 +204,20 @@ indices of a data point are independent of the decomposition.
   there.  WS: Why should this be F90-specific?  
   It requires an efficient mechanism to ask for (80,13) and get 
   back the associated data point.
+\end{reqlist}
+
+\ssreq{Index translation for globally non-conformant data domains}
+
+Where the data domain information is not globally-conformant, 
+ESMF will have methods to translate the local indices to
+globally-conformat indices.
+
+\begin{reqlist}
+\item[Priority]
+\item[Source]
+\item[Status]
+\item[Verification]
+\item[Notes]
 \end{reqlist}
 
 \req{Grid information retrieval}
@@ -220,9 +245,9 @@ computational domains associated with each PE of a distributed grid.
 \item[Source]
 \item[Status]
 \item[Verification]
-\item[Notes]  WS: can each PE get information about 
-computational (or data) domains on other PEs, or can it only access 
-info about its own domain?
+\item[Notes] Besides being able to retrieve one's own domain
+  information, the full list of domains is also required for certain
+  operations.
 \end{reqlist}
 
 \sreq{Data domain retrieval}
@@ -381,6 +406,15 @@ ESMF shall provide methods to declare halo points valid or invalid
   for details.  WS:  can this be simplified to halo is invalid
   if at least one point in halo is invalid?  Partial halo updates
   will complicate matters considerably.
+
+  VB: partial updates are useful. This may not necessarily support
+  arbitrary lists of halo points, but the following are useful:
+  \begin{itemize}
+  \item ``Update N and E halos only, including the NE corner.''
+  \item ``Update only 1 row/column in each direction even if the halo
+    width is 2''.
+  \item `Update only the outer row/column of a 2-width halo.''
+  \end{itemize}
 \end{reqlist}
 
 \req{Data transpose}
@@ -444,10 +478,20 @@ distribution for aggregate data transfer.
 It shall be possible to create a copy on any PE of the entire global
 array from a distributed array.
 
+\sreq{Partial gather}
+
+In a 2D decomposition, it shall be possible to perform a gather along
+either axis.
+
 \req{Scatter}
 
 It shall be possible to create a distributed array across a PElist
 from a copy on any PE of the entire global array.
+
+\sreq{Partial scatter}
+
+In a 2D decomposition, it shall be possible to perform a scatter along
+either axis.
 
 \req{Global reduction operations}
 
@@ -485,8 +529,8 @@ floating-point or complex array along either axis of decomposition.
 \ssreq{FP and complex bit-reproducible global sum}
 
 ESMF shall provide methods to compute the global sum of a
-2D-decomposed floating-point or complex array where the result is bitwise
-identical on different decompositions. 
+2D-decomposed floating-point or complex array where the result is
+bitwise identical on different decompositions.
 
 \begin{reqlist}
 \item[Priority]
@@ -595,16 +639,16 @@ retrievable.
 \req{Grid staggering}
 
 There are many possible ways to specify staggered grids.  Currently
-grid staggering are only required for logically rectilinear grids. We
+grid staggering is only required for logically rectilinear grids. We
 use the notation of \cite{ref:a1966} to specify staggering (e.g. A-,
 B-, C- and D-grids) together with a directional qualifier, e.g
 \texttt{NE} to specify a forward index offset in \texttt{X} and
 \texttt{Y}.
 
-\newcommand{\agrid}{\texttt{AGRID}{}}
-\newcommand{\bgrid}{\texttt{BGRID}{}}
-\newcommand{\cgrid}{\texttt{CGRID}{}}
-\newcommand{\dgrid}{\texttt{DGRID}{}}
+\newcommand{\agrid}{\texttt{AGRID~}}
+\newcommand{\bgrid}{\texttt{BGRID~}}
+\newcommand{\cgrid}{\texttt{CGRID~}}
+\newcommand{\dgrid}{\texttt{DGRID~}}
 
 \sreq{\agrid}
 
@@ -614,21 +658,23 @@ cell center $(i,j)$.
 
 \sreq{\bgrid}
 
-ESMF will support a \bgrid stencil: where the vector
-component array locations $u_{ij}$ and $v_{ij}$ are located at the NE
-cell corner $(i+\frac12,j+\frac12)$.
+ESMF will support a \bgrid stencil: where the vector component array
+locations $u_{ij}$ and $v_{ij}$ are located at the NE cell corner
+$(i+\frac12,j+\frac12)$. Both NE and SW flavors are supported.
 
 \sreq{\cgrid}
 
-ESMF will support a \cgrid stencil: where the vector
-component array locations $u_{ij}$ and $v_{ij}$ are located on the N
-and E faces $(i+\frac12,j)$ and $(i,j+\frac12)$ respectively.
+ESMF will support a \cgrid stencil: where the vector component array
+locations $u_{ij}$ and $v_{ij}$ are located on the N and E faces
+$(i+\frac12,j)$ and $(i,j+\frac12)$ respectively. Both NE and SW
+flavors are supported.
 
 \sreq{\dgrid}
 
-ESMF will support a \dgrid stencil: where the vector
-component array locations $u_{ij}$ and $v_{ij}$ are located on the E
-and N faces $(i,j+\frac12)$ and $(i+\frac12,j)$ respectively.
+ESMF will support a \dgrid stencil: where the vector component array
+locations $u_{ij}$ and $v_{ij}$ are located on the E and N faces
+$(i,j+\frac12)$ and $(i+\frac12,j)$ respectively. Both NE and SW
+flavors are supported.
 
 \part{Requirements for specific grid types} \label{DG:gridtypes}
 
@@ -658,11 +704,11 @@ for a single physical location. While these points are redundant, the
 data there may diverge because of FP roundoff error. ESMF will provide
 methods to enforce exact redundancy.
 
-\sreq{Validity of stencil}
+\sreq{Validity of grid}
 
-It must be possible to check if the stencil and fold are conformant:
-for instance, a southern fold with a \bgrid stencil is
-invalid.
+It must be possible to check if the grid and fold are conformant:
+for instance, a southern fold with a \bgrid~ stencil needs an extra
+vector row at the southern edge.
 
 \req{Cubed-sphere grid}
 
