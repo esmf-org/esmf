@@ -1,4 +1,4 @@
-! $Id: ESMF_StateCreate.F90,v 1.11 2004/06/15 07:09:21 nscollins Exp $
+! $Id: ESMF_StateCreate.F90,v 1.12 2004/06/15 08:23:49 nscollins Exp $
 !
 ! Test code which creates a new State.
 
@@ -81,9 +81,9 @@
     bundle1 = ESMF_BundleCreate(name=bname, rc=rc)
     P_OUT2("ESMF_BundleCreate", trim(bname))
 
-    P_IN("ESMF_StateAddData (Bundle)")
-    call ESMF_StateAddData(state2, bundle1, rc=rc)
-    P_OUT("ESMF_StateAddData (Bundle)")
+    P_IN("ESMF_StateAddBundle (Bundle)")
+    call ESMF_StateAddBundle(state2, bundle1, rc=rc)
+    P_OUT("ESMF_StateAddBundle (Bundle)")
     
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state2, rc=rc)
@@ -94,9 +94,9 @@
     bundle2 = ESMF_BundleCreate(name=bname, rc=rc)
     P_OUT2("ESMF_BundleCreate", trim(bname))
 
-    P_IN("ESMF_StateAddData (Bundle)")
-    call ESMF_StateAddData(state2, bundle2, rc=rc)
-    P_OUT("ESMF_StateAddData (Bundle)")
+    P_IN("ESMF_StateAddBundle (Bundle)")
+    call ESMF_StateAddBundle(state2, bundle2, rc=rc)
+    P_OUT("ESMF_StateAddBundle (Bundle)")
     
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state2, rc=rc)
@@ -139,9 +139,9 @@
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Downward wind"
-    P_IN("ESMF_StateAddData (Name only)")
-    call ESMF_StateAddData(state3, sname, rc=rc)
-    P_OUT2("ESMF_StateAddData (Name only)", trim(sname))
+    P_IN("ESMF_StateAddNameOnly (Name only)")
+    call ESMF_StateAddNameOnly(state3, sname, rc=rc)
+    P_OUT2("ESMF_StateAddNameOnly (Name only)", trim(sname))
     
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state3, rc=rc)
@@ -188,9 +188,9 @@
       call ESMF_BundleAddField(bundle2, field1, rc=rc) 
       P_OUT("ESMF_BundleAddFields")
 
-      P_IN("ESMF_StateAddData (Bundle)")
-      call ESMF_StateAddData(state3, bundle2, rc=rc)
-      P_OUT("ESMF_StateAddData (Bundle)")
+      P_IN("ESMF_StateAddBundle (Bundle)")
+      call ESMF_StateAddBundle(state3, bundle2, rc=rc)
+      P_OUT("ESMF_StateAddBundle (Bundle)")
     else
       P_OUT2("Data marked as *NOT* needed", trim(sname))
     endif
@@ -230,27 +230,27 @@
     P_OUT2("ESMF_StateCreate", trim(sname))
 
     sname = "Surface pressure"
-    P_IN("StateAddData (Name only)")
-    call ESMF_StateAddData(state4, sname, rc=rc)
-    P_OUT2("StateAddData (Name only)", trim(sname))
+    P_IN("StateAddNameOnly (Name only)")
+    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    P_OUT2("StateAddNameOnly (Name only)", trim(sname))
     
     P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
     P_OUT("ESMF_StateSetNeeded")
     
     sname = "Energy Flux"
-    P_IN("StateAddData (Name only)")
-    call ESMF_StateAddData(state4, sname, rc=rc)
-    P_OUT2("StateAddData (Name only)", trim(sname))
+    P_IN("StateAddNameOnly (Name only)")
+    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    P_OUT2("StateAddNameOnly (Name only)", trim(sname))
     
     P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
     P_OUT("ESMF_StateSetNeeded")
     
     sname = "Humidity"
-    P_IN("StateAddData (Name only)")
-    call ESMF_StateAddData(state4, sname, rc=rc)
-    P_OUT2("StateAddData (Name only)", trim(sname))
+    P_IN("StateAddNameOnly (Name only)")
+    call ESMF_StateAddNameOnly(state4, sname, rc=rc)
+    P_OUT2("StateAddNameOnly (Name only)", trim(sname))
     
     P_IN("ESMF_StateSetNeeded")
     call ESMF_StateSetNeeded(state4, sname, ESMF_NEEDED, rc=rc)
@@ -288,9 +288,9 @@
     P_OUT("ESMF_BundlePrint")
 
 
-    P_IN("ESMF_StateAddData (Bundle)")
-    call ESMF_StateAddData(state4, bundle2, rc=rc)
-    P_OUT("ESMF_StateAddData (Bundle)")
+    P_IN("ESMF_StateAddBundle (Bundle)")
+    call ESMF_StateAddBundle(state4, bundle2, rc=rc)
+    P_OUT("ESMF_StateAddBundle (Bundle)")
 
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state4, rc=rc)
@@ -332,18 +332,18 @@
     state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
-    P_IN("ESMF_StateAddData (State)")
-    call ESMF_StateAddData(state5, state1, rc=rc)
-    P_OUT("ESMF_StateAddData (State)")
+    P_IN("ESMF_StateAddState (State)")
+    call ESMF_StateAddState(state5, state1, rc=rc)
+    P_OUT("ESMF_StateAddState (State)")
 
     sname = "Ocean Export"
     P_IN("ESMF_StateCreate")
     state2 = ESMF_StateCreate(sname, ESMF_STATE_EXPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
-    P_IN("ESMF_StateAddData (State)")
-    call ESMF_StateAddData(state5, state2, rc=rc)
-    P_OUT("ESMF_StateAddData (State)")
+    P_IN("ESMF_StateAddState (State)")
+    call ESMF_StateAddState(state5, state2, rc=rc)
+    P_OUT("ESMF_StateAddState (State)")
 
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state5, rc=rc)
@@ -387,17 +387,17 @@
     state1 = ESMF_StateCreate(sname, ESMF_STATE_IMPORT, rc=rc)  
     P_OUT2("ESMF_StateCreate", trim(sname))
 
-    P_IN("ESMF_StateAddData (Array)")
-    call ESMF_StateAddData(state1, array1, rc=rc)
-    P_OUT("ESMF_StateAddData (Array)")
+    P_IN("ESMF_StateAddArray (Array)")
+    call ESMF_StateAddArray(state1, array1, rc=rc)
+    P_OUT("ESMF_StateAddArray (Array)")
     
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state1, rc=rc)
     P_OUT("ESMF_StatePrint")
 
-    P_IN("ESMF_StateAddData (Array)")
-    call ESMF_StateAddData(state1, array2, rc=rc)
-    P_OUT("ESMF_StateAddData (Array)")
+    P_IN("ESMF_StateAddArray (Array)")
+    call ESMF_StateAddArray(state1, array2, rc=rc)
+    P_OUT("ESMF_StateAddArray (Array)")
     
     P_IN("ESMF_StatePrint")
     call ESMF_StatePrint(state1, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_StateEx.F90,v 1.15 2004/06/12 17:17:56 cdeluca Exp $
+! $Id: ESMF_StateEx.F90,v 1.16 2004/06/15 08:23:40 nscollins Exp $
 
 
 !-------------------------------------------------------------------------
@@ -78,8 +78,8 @@
         finalrc = ESMF_FAILURE
     end if
 !BOC
-    call ESMF_StateAddData(state2, bundle1, rc)
-    print *, "StateAddData returned", rc
+    call ESMF_StateAddBundle(state2, bundle1, rc)
+    print *, "StateAddBundle returned", rc
 !EOC
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
@@ -123,16 +123,16 @@
     end if
 !BOC
     dataname = "Downward wind"
-    call ESMF_StateAddData(state3, dataname, rc)
-    print *, "StateAddData returned", rc, " name = ", trim(dataname)
+    call ESMF_StateAddNameOnly(state3, dataname, rc)
+    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
 !EOC
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
 !BOC
     dataname = "Humidity"
-    call ESMF_StateAddData(state3, dataname, rc)
-    print *, "StateAddData returned", rc, " name = ", trim(dataname)
+    call ESMF_StateAddNameOnly(state3, dataname, rc)
+    print *, "StateAddNameOnly returned", rc, " name = ", trim(dataname)
 
     ! See next example for how this is used.
 
@@ -185,8 +185,8 @@
          finalrc = ESMF_FAILURE
       end if
 !BOC
-      call ESMF_StateAddData(state3, bundle2, rc)
-      print *, "StateAddData returned", rc
+      call ESMF_StateAddBundle(state3, bundle2, rc)
+      print *, "StateAddBundle returned", rc
 !EOC
       if (rc.NE.ESMF_SUCCESS) then
          finalrc = ESMF_FAILURE
