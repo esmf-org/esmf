@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.61 2004/12/28 07:19:18 theurich Exp $
+! $Id: ESMF_LogErr.F90,v 1.62 2004/12/30 16:59:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,6 @@
 ! !USES:
     ! inherit from ESMF base class
     use ESMF_BaseTypesMod
-!    use ESMF_VMMod
 
 implicit none
 
