@@ -1,4 +1,4 @@
- $Id: README,v 1.25 2003/08/21 21:01:47 flanigan Exp $
+ $Id: README,v 1.26 2003/08/21 21:07:20 flanigan Exp $
 ================================================================================
                                    README
 
@@ -109,8 +109,7 @@ In ksh shell environment variables are set this way:
 
         export ESMF_PREC=32
 
-Environment variables can also be set on the command line of
-the gmake command.  Example:
+Example of setting variables on the gmake command line:
 
         gmake ESMF_PREC=32
 
