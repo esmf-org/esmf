@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.101 2005/03/08 16:34:20 theurich Exp $
+#  $Id: common.mk,v 1.102 2005/03/18 15:59:07 svasquez Exp $
 #===============================================================================
 #
 #  GNUmake makefile - cannot be used with standard unix make!!
@@ -189,10 +189,10 @@ OBJS		= ${OBJSC} ${OBJSF}
 
 CONFIG_TESTS    = ${ESMF_TESTDIR}/tests.config
 ESMF_TESTSCRIPTS    = ${ESMF_TOP_DIR}/scripts/test_scripts
-DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
-DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
-DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
-DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary.pl -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) 
+DO_UT_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ut_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
+DO_EX_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_ex_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_EXDIR) -b $(ESMF_BOPT)
+DO_ST_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_st_results.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -b $(ESMF_BOPT)
+DO_SUM_RESULTS	    = ${ESMF_TESTSCRIPTS}/do_summary.pl -h $(ESMF_TESTSCRIPTS) -d $(ESMF_TESTDIR) -e $(ESMF_EXDIR) -b $(ESMF_BOPT)
 
 ESMC_INCLUDE	= -I${ESMF_TOP_DIR}/${LOCDIR} \
 		  -I${ESMF_TOP_DIR}/${LOCDIR}/../include \
