@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/03/10 22:32:40 cdeluca Exp $ 
+# $Id: makefile,v 1.3 2003/03/10 23:31:29 svasquez Exp $ 
 
 ALL:  tests
 
@@ -34,7 +34,7 @@ TESTS_RM      = ESMF_FieldUTest.rm \
 include ${ESMF_DIR}/makefile
 
 #
-#  Fields
+#  Field
 #
 $(ESMC_TESTDIR)/ESMF_FieldUTest: ESMF_FieldUTest.o
 	-${F90CXXLD} -o $(ESMC_TESTDIR)/ESMF_FieldUTest ESMF_FieldUTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB}
