@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.38 2004/11/05 04:05:30 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.39 2004/11/19 00:28:32 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.38 2004/11/05 04:05:30 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.39 2004/11/19 00:28:32 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -258,7 +258,7 @@
 
     // make local copy for manipulation
     ESMC_BaseTime remainingTime = *timeToConvert;
-    remainingTime.ESMC_FractionNormalize();
+    remainingTime.ESMC_FractionSimplify();
     ESMC_BaseTime saveRemainingTime = remainingTime;  // for float units below
     ESMF_KIND_I8 remainingSeconds = remainingTime.ESMC_FractionGetw();
 
