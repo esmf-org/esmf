@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.27 2003/08/29 22:45:20 flanigan Exp $
+! $Id: ESMF_Alarm.F90,v 1.28 2003/09/01 18:28:55 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -160,7 +160,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.27 2003/08/29 22:45:20 flanigan Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.28 2003/09/01 18:28:55 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -469,7 +469,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjSetup - Initialize alarm properties
+! !IROUTINE: ESMF_AlarmObjSetup - Initialize Alarm properties
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjSetup(alarm, ringTime, ringInterval, stopTime, &
@@ -551,7 +551,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjSet - Set alarm properties
+! !IROUTINE: ESMF_AlarmObjSet - Set Alarm properties
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjSet(alarm, ringTime, ringInterval, stopTime, &
@@ -635,7 +635,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjGet - Get alarm properties
+! !IROUTINE: ESMF_AlarmObjGet - Get Alarm properties
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjGet(alarm, ringTime, prevRingTime, ringInterval, &
@@ -710,7 +710,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjEnable - Enables an alarm
+! !IROUTINE: ESMF_AlarmObjEnable - Enable an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjEnable(alarm, rc)
@@ -740,7 +740,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjDisable - Disables an alarm
+! !IROUTINE: ESMF_AlarmObjDisable - Disable an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjDisable(alarm, rc)
@@ -770,7 +770,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjIsEnabled - Check if alarm is enabled
+! !IROUTINE:  ESMF_AlarmObjIsEnabled - Check if Alarm is enabled
 
 ! !INTERFACE:
       function ESMF_AlarmObjIsEnabled(alarm, rc)
@@ -803,7 +803,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjRingerOn - Turn on an alarm
+! !IROUTINE:  ESMF_AlarmObjRingerOn - Turn on an Alarm
 
 
 ! !INTERFACE:
@@ -835,7 +835,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjRingerOff - Turn off an alarm
+! !IROUTINE:  ESMF_AlarmObjRingerOff - Turn off an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjRingerOff(alarm, rc)
@@ -865,7 +865,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjIsRinging - Check if alarm is ringing
+! !IROUTINE:  ESMF_AlarmObjIsRinging - Check if Alarm is ringing
 
 ! !INTERFACE:
       function ESMF_AlarmObjIsRinging(alarm, rc)
@@ -898,7 +898,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjSticky - Set an alarm's sticky flag
+! !IROUTINE:  ESMF_AlarmObjSticky - Set an Alarm's sticky flag
 
 
 ! !INTERFACE:
@@ -931,7 +931,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjNotSticky - Unset an alarm's sticky flag
+! !IROUTINE:  ESMF_AlarmObjNotSticky - Unset an Alarm's sticky flag
 
 
 ! !INTERFACE:
@@ -973,7 +973,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjIsSticky - Check if alarm is sticky
+! !IROUTINE:  ESMF_AlarmObjIsSticky - Check if Alarm is sticky
 
 ! !INTERFACE:
       function ESMF_AlarmObjIsSticky(alarm, rc)
@@ -1006,7 +1006,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmObjEQ - Compare two alarms for equality
+! !IROUTINE:  ESMF_AlarmObjEQ - Compare two Alarms for equality
 !
 ! !INTERFACE:
       function ESMF_AlarmObjEQ(alarm1, alarm2)
@@ -1045,7 +1045,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjReadRestart - restores an alarm
+! !IROUTINE: ESMF_AlarmObjReadRestart - Restore an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjReadRestart(alarm, ringInterval, ringDuration, &
@@ -1124,7 +1124,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmObjWriteRestart - saves an alarm
+! !IROUTINE: ESMF_AlarmObjWriteRestart - Save an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmObjWriteRestart(alarm, ringInterval, ringDuration, &
@@ -1274,7 +1274,7 @@
 ! Pointer version API
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrSetup - Initialize alarm properties
+! !IROUTINE: ESMF_AlarmPtrSetup - Initialize Alarm properties
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrSetup(alarm, ringTime, ringInterval, stopTime, &
@@ -1356,7 +1356,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrSet - Set alarm properties
+! !IROUTINE: ESMF_AlarmPtrSet - Set Alarm properties
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrSet(alarm, ringTime, ringInterval, stopTime, &
@@ -1440,7 +1440,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrGet - Get alarm properties
+! !IROUTINE: ESMF_AlarmPtrGet - Get Alarm properties
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrGet(alarm, ringTime, prevRingTime, ringInterval, &
@@ -1515,7 +1515,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrEnable - Enables an alarm
+! !IROUTINE: ESMF_AlarmPtrEnable - Enable an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrEnable(alarm, rc)
@@ -1545,7 +1545,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrDisable - Disables an alarm
+! !IROUTINE: ESMF_AlarmPtrDisable - Disable an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrDisable(alarm, rc)
@@ -1575,7 +1575,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrIsEnabled - Check if alarm is enabled
+! !IROUTINE:  ESMF_AlarmPtrIsEnabled - Check if Alarm is enabled
 
 ! !INTERFACE:
       function ESMF_AlarmPtrIsEnabled(alarm, rc)
@@ -1608,7 +1608,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrRingerOn - Turn on an alarm
+! !IROUTINE:  ESMF_AlarmPtrRingerOn - Turn on an Alarm
 
 
 ! !INTERFACE:
@@ -1640,7 +1640,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrRingerOff - Turn off an alarm
+! !IROUTINE:  ESMF_AlarmPtrRingerOff - Turn off an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrRingerOff(alarm, rc)
@@ -1670,7 +1670,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrIsRinging - Check if alarm is ringing
+! !IROUTINE:  ESMF_AlarmPtrIsRinging - Check if Alarm is ringing
 
 ! !INTERFACE:
       function ESMF_AlarmPtrIsRinging(alarm, rc)
@@ -1703,7 +1703,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrSticky - Set an alarm's sticky flag
+! !IROUTINE:  ESMF_AlarmPtrSticky - Set an Alarm's sticky flag
 
 
 ! !INTERFACE:
@@ -1736,7 +1736,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrNotSticky - Unset an alarm's sticky flag
+! !IROUTINE:  ESMF_AlarmPtrNotSticky - Unset an Alarm's sticky flag
 
 
 ! !INTERFACE:
@@ -1778,7 +1778,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_AlarmPtrIsSticky - Check if alarm is sticky
+! !IROUTINE:  ESMF_AlarmPtrIsSticky - Check if Alarm is sticky
 
 ! !INTERFACE:
       function ESMF_AlarmPtrIsSticky(alarm, rc)
@@ -1816,7 +1816,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrReadRestart - restores an alarm
+! !IROUTINE: ESMF_AlarmPtrReadRestart - Restore an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrReadRestart(alarm, ringInterval, ringDuration, &
@@ -1895,7 +1895,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_AlarmPtrWriteRestart - saves an alarm
+! !IROUTINE: ESMF_AlarmPtrWriteRestart - Save an Alarm
 
 ! !INTERFACE:
       subroutine ESMF_AlarmPtrWriteRestart(alarm, ringInterval, ringDuration, &
