@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.3 2003/04/04 23:25:17 jwolfe Exp $
+! $Id: FlowMod.F90,v 1.4 2003/04/05 00:05:21 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -81,7 +81,6 @@
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
       real :: x_min, x_max, y_min, y_max
       integer :: i_max, j_max
-      integer :: ni, nj, de_id
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
       integer :: horz_coord_system, vert_coord_system
@@ -715,6 +714,12 @@
 !
       integer :: status
       logical :: rcpresent
+      integer :: ni, nj, i, j, de_id
+      type(ESMF_Array) :: array1
+      type(ESMF_Grid) :: grid
+      type(ESMF_DELayout) :: layout
+      real, dimension(:,:), pointer :: ldata
+      type(ESMF_AxisIndex), dimension(2) :: indext, indexe
 !
 ! Set initial values
 !
@@ -727,6 +732,37 @@
         rcpresent = .TRUE.
         rc = ESMF_FAILURE
       endif
+!
+! Print out some results before finalizing
+!
+      ! Get a pointer to the data Array in the Field
+      call ESMF_FieldGetData(field_u, array1, rc=rc)
+      print *, "data back from field"
+
+      ! Get size of local array
+      call ESMF_FieldGetGrid(field_u, grid, status)
+      call ESMF_GridGetDELayout(grid, layout, status)
+      call ESMF_GridGetDE(grid, lcelltot_index=indext, &
+                          lcellexc_index=indexe, rc=rc)
+      call ESMF_DELayoutGetDEID(layout, de_id, rc)
+      ni = indext(1)%r - indext(1)%l + 1
+      nj = indext(2)%r - indext(2)%l + 1
+      print *, "allocating", ni, " by ",nj," cells on DE", de_id
+      allocate(ldata(ni,nj))
+
+      ! Get a pointer to the start of the data
+      call ESMF_ArrayGetData(array1, ldata, ESMF_NO_COPY, rc)
+
+      ! output only the exclusive cells
+      ! Print results
+      print *, "------------------------------------------------------"
+      write(*,*) 'de_id = ',de_id
+      do j = indexe(2)%r,indexe(2)%l,-1
+        write(*,10) (ldata(i,j), i=indexe(1)%l,indexe(1)%r)
+ 10     format(20(1x,1pe8.2))
+      enddo
+      print *, "------------------------------------------------------"
+
 
       call ArraysGlobalDealloc(status)
       if(status .NE. ESMF_SUCCESS) then
