@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.15 2003/07/25 22:57:54 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.16 2003/08/18 16:08:02 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.15 2003/07/25 22:57:54 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.16 2003/08/18 16:08:02 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -832,8 +832,6 @@
     cout << "Enabled = "      << Enabled << endl;
     cout << "ID = "           << ID << endl;
     cout << "end Alarm ------------------------------" << endl << endl;
-
-    // TODO print AlarmMutex ?
 
     return(ESMF_SUCCESS);
 
