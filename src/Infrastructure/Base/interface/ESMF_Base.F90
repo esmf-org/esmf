@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.17 2003/01/09 16:58:28 nscollins Exp $
+! $Id: ESMF_Base.F90,v 1.18 2003/01/09 20:59:48 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -83,8 +83,16 @@
         integer :: dkind
       end type
 
-      type(ESMF_DataKind), parameter :: ESMF_KIND_4 = ESMF_DataKind(4), &
-                                        ESMF_KIND_8 = ESMF_DataKind(8)
+      type(ESMF_DataKind), parameter :: &
+                   ESMF_KIND_I1 = ESMF_DataKind(1), &
+                   ESMF_KIND_I2 = ESMF_DataKind(2), &
+                   ESMF_KIND_I4 = ESMF_DataKind(selected_int_kind(5)), &
+                   ESMF_KIND_I8 = ESMF_DataKind(selected_int_kind(10)), &
+                   ESMF_KIND_R4 = ESMF_DataKind(selected_real_kind(3,25)), &
+                   ESMF_KIND_R8 = ESMF_DataKind(selected_real_kind(6,45)), &
+                   ESMF_KIND_C8 = ESMF_DataKind(selected_real_kind(3,25)), &
+                   ESMF_KIND_C16 = ESMF_DataKind(selected_real_kind(6,45))
+
 
       type ESMF_DataValue
       sequence
@@ -136,7 +144,8 @@
       public ESMF_DATA_INTEGER, ESMF_DATA_REAL, &
              ESMF_DATA_LOGICAL, ESMF_DATA_CHARACTER
 
-      public ESMF_KIND_4, ESMF_KIND_8
+      public ESMF_KIND_I1, ESMF_KIND_I2, ESMF_KIND_I4, ESMF_KIND_I8, & 
+             ESMF_KIND_R4, ESMF_KIND_R8, ESMF_KIND_C8, ESMF_KIND_C16
 
       public ESMF_NULL_POINTER, ESMF_BAD_POINTER
 
@@ -208,7 +217,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.17 2003/01/09 16:58:28 nscollins Exp $'
+               '$Id: ESMF_Base.F90,v 1.18 2003/01/09 20:59:48 nscollins Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
