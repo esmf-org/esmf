@@ -1,4 +1,4 @@
-! $Id: ESMF_SysTest70385.F90,v 1.29 2003/08/29 22:17:27 nscollins Exp $
+! $Id: ESMF_SysTest70385.F90,v 1.30 2003/08/29 22:31:16 nscollins Exp $
 !
 ! System test code #70385
 
@@ -443,7 +443,7 @@
       ! now edges minus corners
 
       ! bottom middle
-      if (ypos .eq. 0) then
+      if (ypos .eq. 1) then
         target = -1
       else
         target = de_id - nx 
@@ -457,7 +457,7 @@
         enddo
       enddo
       ! top middle
-      if (ypos .eq. ny-1) then
+      if (ypos .eq. ny) then
         target = -1
       else
         target = de_id + nx 
