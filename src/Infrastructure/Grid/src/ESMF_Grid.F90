@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.7 2002/11/20 22:26:39 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.8 2002/11/21 23:02:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,10 +34,10 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
+      use ESMF_ArrayMod       ! ESMF array class
       use ESMF_BaseMod        ! ESMF base class
       use ESMF_DistGridMod    ! ESMF distributed grid class
       use ESMF_PhysGridMod    ! ESMF physical grid class
-!jw   use ESMF_VertGridMod    ! ESMF base class
       implicit none
 
 !------------------------------------------------------------------------------
@@ -169,13 +169,17 @@
     public ESMF_GridCreate                 ! interface only, deep class
     public ESMF_GridDestroy                ! interface only, deep class
 
-!jw public ESMF_GridGetConfig
-!jw public ESMF_GridSetConfig
-!jw public ESMF_GridGetValue               ! Get<Value>
-!jw public ESMF_GridSetValue               ! Set<Value>
+    public ESMF_GridGetConfig
+    public ESMF_GridSetConfig
+    public ESMF_GridGetValue               ! Get<Value>
+    public ESMF_GridSetCoordinate 
+    public ESMF_GridSetLMask     
+    public ESMF_GridSetMMask    
+    public ESMF_GridSetMetric  
+    public ESMF_GridSetRegionID
  
-!jw public ESMF_GridValidate
-!jw public ESMF_GridPrint
+    public ESMF_GridValidate
+    public ESMF_GridPrint
  
 ! < list the rest of the public interfaces here >
 !
@@ -185,7 +189,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.7 2002/11/20 22:26:39 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.8 2002/11/21 23:02:28 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -198,6 +202,14 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
          module procedure ESMF_GridCreateNew
+!jw      module procedure ESMF_GridCreateEmpty
+!jw      module procedure ESMF_GridCreateInternal
+!jw      module procedure ESMF_GridCreateFile
+!jw      module procedure ESMF_GridCreateCopy
+!jw      module procedure ESMF_GridCreateCutout
+!jw      module procedure ESMF_GridCreateCoarsen
+!jw      module procedure ESMF_GridCreateRefine
+!jw      module procedure ESMF_GridCreateExchange
 
 ! !DESCRIPTION:
 !     This interface provides a single entry point for Grid create
@@ -217,6 +229,96 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for methods that construct a
 !     complete {\tt Grid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_GridSetCoordinate
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridSetCoordinateFromArray
+         module procedure ESMF_GridSetCoordinateFromBuffer
+         module procedure ESMF_GridSetCoordinateCompute
+         module procedure ESMF_GridSetCoordinateCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     coordinates as part of a {\tt Grid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_GridSetLMask
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridSetLMaskFromArray
+         module procedure ESMF_GridSetLMaskFromBuffer
+         module procedure ESMF_GridSetLMaskCompute
+         module procedure ESMF_GridSetLMaskCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     logical masks as part of a {\tt Grid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_GridSetMMask
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridSetMMaskFromArray
+         module procedure ESMF_GridSetMMaskFromBuffer
+         module procedure ESMF_GridSetMMaskCompute
+         module procedure ESMF_GridSetMMaskCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     multiplicative masks as part of a {\tt Grid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_GridSetMetric
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridSetMetricFromArray
+         module procedure ESMF_GridSetMetricFromBuffer
+         module procedure ESMF_GridSetMetricCompute
+         module procedure ESMF_GridSetMetricCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     metrics as part of a {\tt Grid}.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_GridSetRegionID
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridSetRegionIDFromArray
+         module procedure ESMF_GridSetRegionIDFromBuffer
+         module procedure ESMF_GridSetRegionIDCompute
+         module procedure ESMF_GridSetRegionIDCopy
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that set
+!     region id's as part of a {\tt Grid}.
 !
 !EOP
       end interface 
@@ -537,27 +639,36 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_GridSetValue - Set <Value> for a Grid
+!     ESMF_GridSetCoordinateFromArray - Set the coordinates of a Grid from
+!                                       an existing ESMF array
 
 ! !INTERFACE:
-      subroutine ESMF_GridSetValue(Grid, value, rc)
+      subroutine ESMF_GridSetCoordinateFromArray(Grid, array, id, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in) :: value
-      integer, intent(out), optional :: rc            
-
+      type(ESMF_Array), intent(in) :: array
+      integer, intent(in) :: id
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Set a Grid attribute with the given value.
-!     May be multiple routines, one per attribute.
+!     This version of set assumes the coordinates exist already and are being
+!     passed in through an {\tt Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid] 
-!          Class to be modified.
-!     \item[value]
-!          Value to be set.         
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[array]
+!          ESMF Array of data.         
+!     \item[[id]]
+!          Identifier for which set of coordinates are being set:
+!             1  center_x
+!             2  center_y
+!             3  corner_x
+!             4  corner_y
+!             5  face_x
+!             6  face_y 
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -568,7 +679,764 @@
 !
 !  code goes here
 !
-      end subroutine ESMF_GridSetValue
+      end subroutine ESMF_GridSetCoordinateFromArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetCoordinateFromBuffer - Set the coordinates of a Grid from
+!                                        an existing data buffer
+
+! !INTERFACE:
+      subroutine ESMF_GridSetCoordinateFromBuffer(Grid, buffer, id, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      real, dimension (:), pointer :: buffer
+      integer, intent(in) :: id            
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the coordinates exist already and are being
+!     passed in as a raw data buffer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[buffer]
+!          Raw data buffer.         
+!     \item[[id]]
+!          Identifier for which set of coordinates are being set:
+!             1  center_x
+!             2  center_y
+!             3  corner_x
+!             4  corner_y
+!             5  face_x
+!             6  face_y 
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetCoordinateFromBuffer
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetCoordinateCompute - Compute coordinates for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetCoordinateCompute(Grid, id, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      integer, intent(in) :: id
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set internally computes coordinates for a Grid via a
+!     prescribed method.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[[id]]
+!          Identifier for which set of coordinates are being set:
+!             1  center_x
+!             2  center_y
+!             3  corner_x
+!             4  corner_y
+!             5  face_x
+!             6  face_y 
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!TODO: figure out the argument list necessary to completely describe the 
+!      internal calculation of the coordinates of a simple grid.
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetCoordinateCompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetCoordinateCopy - Copies coordinates from one grid to another.
+
+! !INTERFACE:
+      subroutine ESMF_GridSetCoordinateCopy(Grid, Grid_in, id, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Grid), intent(in) :: grid_in
+      integer, intent(in) :: id
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set copies the coordinates of a Grid from another Grid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[grid_in] 
+!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item[[id]]
+!          Identifier for which set of coordinates are being set:
+!             1  center_x
+!             2  center_y
+!             3  corner_x
+!             4  corner_y
+!             5  face_x
+!             6  face_y 
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetCoordinateCopy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetLMaskFromArray - Set a logical mask in a Grid from an
+!                                  existing ESMF array
+
+! !INTERFACE:
+      subroutine ESMF_GridSetLMaskFromArray(Grid, array, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the logical mask data exists already and is
+!     being passed in through an {\tt Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[array]
+!          ESMF Array of data.
+!     \item [[name]]
+!           {\tt LMask} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetLMaskFromArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetLMaskFromBuffer - Set a logical mask in a Grid from an
+!                                   existing data buffer
+
+! !INTERFACE:
+      subroutine ESMF_GridSetLMaskFromBuffer(Grid, buffer, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      real, dimension (:), pointer :: buffer
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the logical mask data exists already and is
+!     being passed in as a raw data buffer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[buffer]
+!          Raw data buffer.         
+!     \item [[name]]
+!           {\tt LMask} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetLMaskFromBuffer
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetLMaskCompute - Compute a logical mask for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetLMaskCompute(Grid, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set internally computes a logical mask for a Grid via a
+!     prescribed method.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt LMask} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!TODO: figure out the argument list necessary to completely describe the 
+!      internal calculation of a logical mask for a simple grid.
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetLMaskCompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetLMaskCopy - Copies a logical mask from one grid to
+!                             another.
+
+! !INTERFACE:
+      subroutine ESMF_GridSetLMaskCopy(Grid, name, Grid_in, name_in, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      type(ESMF_Grid), intent(in) :: grid_in
+      character (len=*), intent(in) :: name_in  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set copies a logical mask for a Grid from another Grid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt LMask} name to be set.
+!     \item[grid_in] 
+!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item [[name_in]]
+!           {\tt LMask} name to be copied.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetLMaskCopy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMMaskFromArray - Set a multiplicative mask in a Grid from an
+!                                  existing ESMF array
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMMaskFromArray(Grid, array, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the multiplicative mask data exists already
+!     and is being passed in through an {\tt Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[array]
+!          ESMF Array of data.
+!     \item [[name]]
+!           {\tt MMask} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMMaskFromArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMMaskFromBuffer - Set a multiplicative mask in a Grid from an
+!                                   existing data buffer
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMMaskFromBuffer(Grid, buffer, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      real, dimension (:), pointer :: buffer
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the multiplicative mask data exists already
+!     and is being passed in as a raw data buffer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[buffer]
+!          Raw data buffer.         
+!     \item [[name]]
+!           {\tt MMask} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMMaskFromBuffer
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMMaskCompute - Compute a multiplicative mask for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMMaskCompute(Grid, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set internally computes a multiplicative mask for a
+!     Grid via a prescribed method.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt MMask} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!TODO: figure out the argument list necessary to completely describe the 
+!      internal calculation of a multiplicative mask for a simple grid.
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMMaskCompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMMaskCopy - Copies a multiplicative mask from one grid to
+!                             another.
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMMaskCopy(Grid, name, Grid_in, name_in, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      type(ESMF_Grid), intent(in) :: grid_in
+      character (len=*), intent(in) :: name_in  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set copies a multiplicative mask for a Grid from another
+!     Grid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt MMask} name to be set.
+!     \item[grid_in] 
+!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item [[name_in]]
+!           {\tt MMask} name to be copied.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMMaskCopy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing 
+!                                   ESMF array
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMetricFromArray(Grid, array, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the metric data exists already and is being
+!     passed in through an {\tt Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[array]
+!          ESMF Array of data.
+!     \item [[name]]
+!           {\tt Metric} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMetricFromArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing
+!                                    data buffer
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMetricFromBuffer(Grid, buffer, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      real, dimension (:), pointer :: buffer
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the metric data exists already and is being
+!     passed in as a raw data buffer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[buffer]
+!          Raw data buffer.         
+!     \item [[name]]
+!           {\tt Metric} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMetricFromBuffer
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMetricCompute - Compute a metric for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMetricCompute(Grid, name, id, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(in) :: id
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+!     This version of set internally computes a metric for a Grid via a
+!     prescribed method.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt Metric} name.
+!     \item[[id]] 
+!          Identifier for predescribed metrics.  TODO: make list
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMetricCompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetMetricCopy - Copies a metric from one grid to another.
+
+! !INTERFACE:
+      subroutine ESMF_GridSetMetricCopy(Grid, name, Grid_in, name_in, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      type(ESMF_Grid), intent(in) :: grid_in
+      character (len=*), intent(in) :: name_in  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set copies a metric for a Grid from another Grid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt Metric} name to be set.
+!     \item[grid_in] 
+!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item [[name_in]]
+!           {\tt Metric} name to be copied.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetMetricCopy
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetRegionIDFromArray - Set a region identifier in a Grid from an
+!                                     existing ESMF array
+
+! !INTERFACE:
+      subroutine ESMF_GridSetRegionIDFromArray(Grid, array, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      type(ESMF_Array), intent(in) :: array
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the region identifier data exists already
+!     and is being passed in through an {\tt Array}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[array]
+!          ESMF Array of data.
+!     \item [[name]]
+!           {\tt RegionID} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetRegionIDFromArray
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetRegionIDFromBuffer - Set a region identifier in a Grid from
+!                                      an existing data buffer
+
+! !INTERFACE:
+      subroutine ESMF_GridSetRegionIDFromBuffer(Grid, buffer, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      real, dimension (:), pointer :: buffer
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set assumes the multiplicative mask data exists already
+!     and is being passed in as a raw data buffer.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item[buffer]
+!          Raw data buffer.         
+!     \item [[name]]
+!           {\tt RegionID} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetRegionIDFromBuffer
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetRegionIDCompute - Compute a region identifier for a Grid
+
+! !INTERFACE:
+      subroutine ESMF_GridSetRegionIDCompute(Grid, name, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set internally computes a region identifier for a
+!     Grid via a prescribed method.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt RegionID} name.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!TODO: figure out the argument list necessary to completely describe the 
+!      internal calculation of a region identifier for a simple grid.
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetRegionIDCompute
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: 
+!     ESMF_GridSetRegionIDCopy - Copies a region identifier from one grid to
+!                                another.
+
+! !INTERFACE:
+      subroutine ESMF_GridSetRegionIDCopy(Grid, name, Grid_in, name_in, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Grid), intent(in) :: grid
+      character (len=*), intent(in) :: name  ! TODO: optional?
+      type(ESMF_Grid), intent(in) :: grid_in
+      character (len=*), intent(in) :: name_in  ! TODO: optional?
+      integer, intent(out), optional :: rc            
+!
+! !DESCRIPTION:
+!     This version of set copies a region identifier for a Grid from another
+!     Grid.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[grid] 
+!          Pointer to a {\tt Grid} to be modified.
+!     \item [[name]]
+!           {\tt RegionID} name to be set.
+!     \item[grid_in] 
+!          Pointer to a {\tt Grid} whose coordinates are to be copied.
+!     \item [[name_in]]
+!           {\tt RegionID} name to be copied.
+!     \item[[rc]] 
+!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!EOP
+! !REQUIREMENTS: 
+
+!
+!  code goes here
+!
+      end subroutine ESMF_GridSetRegionIDCopy
 
 !------------------------------------------------------------------------------
 !BOP
