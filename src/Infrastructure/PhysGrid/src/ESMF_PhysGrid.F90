@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.7 2002/11/22 17:05:11 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.8 2002/12/04 21:29:51 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,13 +24,20 @@
 #include <ESMF_Macros.inc>
 !==============================================================================
 !BOP
-! !MODULE: ESMF_PhysGridMod - One line general statement about this class
+! !MODULE: ESMF_PhysGridMod - contains the physical space properties of a Grid
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt PhysGrid> class ...
-!
-! < Insert a paragraph or two explaining the function of this class. >
+! The code in this file implements the {\tt PhysGrid} class, which provides a
+! discrete representation of a continuous physical space. It contains the
+! physical coordinates, sometimes as data values, but possibly as a parametric
+! description of the actual locations. The {\tt PhysGrid} class provides
+! methods for creating a variety of grid types, including both reading grid 
+! information and generating grids from parameters. It provides methods for
+! regridding, or translating one grid to another, used for example when 
+! exchanging data through the coupler. The {\tt PhysGrid} class interacts
+! closely with the {\tt DistGrid} class, which handles grid decomposition
+! issues related to distributed processing.
 !
 !------------------------------------------------------------------------------
 ! !USES:
@@ -163,7 +170,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.7 2002/11/22 17:05:11 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.8 2002/12/04 21:29:51 jwolfe Exp $'
 
 !==============================================================================
 !
