@@ -1,4 +1,4 @@
-#  $Id: build_rules.mk,v 1.7 2003/12/02 16:26:01 nscollins Exp $
+#  $Id: build_rules.mk,v 1.8 2003/12/02 16:27:58 nscollins Exp $
 #
 #  AIX.default.default.mk
 #
@@ -72,15 +72,14 @@ XLSMP_LIB      = -L/usr/lpp/xlsmp/aix51 -lxlsmp
 
 # ######################### Common compiler options #####################
 COM_MEMCHECK_FLAG      = -qcheck
-COM_FULLPATH_FLAG      = -qfullpath      
+COM_FULLPATH_FLAG      = -qfullpath
 COM_DEBUG_FLAG         = -g
 COM_ALL_DEBUG_FLAGS    = -g $(COM_MEMCHECK_FLAG) $(COM_FULLPATH_FLAG)
 COM_MAXMEM_FLAG        = -qmaxmem=4000
 COM_NOWARN_FLAG        = -w
 COM_SPILL_FLAG         = -qspill=3000
 COM_OPT_FLAG           = -O3
-COM_ALL_OPT_FLAGS      = -O3 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_F
-LAG)
+COM_ALL_OPT_FLAGS      = -O3 $(COM_MAXMEM_FLAG) $(COM_NOWARN_FLAG) $(COM_SPILL_FLAG)
 COM_PLAIN_FLAG         =
 
 
