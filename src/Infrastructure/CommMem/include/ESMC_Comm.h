@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.h,v 1.11 2003/03/24 15:45:54 cdeluca Exp $
+// $Id: ESMC_Comm.h,v 1.12 2003/03/24 16:28:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -168,8 +168,7 @@
     int ESMC_CommAlltoAll(void *sbuf, void *rbuf, int num, ESMC_Type_e type);
     int ESMC_CommAllReduce(void *sbuf, void *rbuf, int num, ESMC_Type_e type,
                            ESMC_Op_e op);
-    int ESMC_CommSendRecv(void *sbuf, void *rbuf, int num, int sde, int rde, 
-                          ESMC_Type_e type);
+    int ESMC_CommSendRecv(void *sbuf, void *rbuf, int num, int sde, int rde);
   
 // !PRIVATE MEMBER FUNCTIONS:
 //

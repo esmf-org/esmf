@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.7 2003/03/24 15:45:57 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.8 2003/03/24 16:28:15 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.7 2003/03/24 15:45:57 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.8 2003/03/24 16:28:15 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1551,6 +1551,40 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
   return rc;
 
  } // end ESMC_DELayoutGatherArray
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_DELayoutSendRecv - perform an MPI-like send and receive
+//
+// !INTERFACE:
+      int ESMC_DELayout::ESMC_DELayoutSendRecv(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      float *sarray,            // in  - send array
+      float *rarray,            // in  - receive array
+      int arraylen,            // in  - array length
+      int sde,                 // in  - send de
+      int rde) {                // in  - receive de
+
+//
+// !DESCRIPTION:
+//    Performs an MPI-like send and receive data transfer.
+//
+//EOP
+
+  int rc = ESMF_FAILURE;
+
+  rc = comm.ESMC_CommSendRecv(sarray, rarray, arraylen, sde, rde);
+  if (rc != ESMF_SUCCESS) {
+    cout << "ESMC_DELayoutSendRecv error" << endl;
+  }
+
+  return(rc);
+
+ } // end ESMC_DELayoutSendRecv
 
 //-----------------------------------------------------------------------------
 //BOP

@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.h,v 1.6 2003/03/24 15:45:55 cdeluca Exp $
+// $Id: ESMC_DELayout.h,v 1.7 2003/03/24 16:28:13 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -150,7 +150,7 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
 				 int *rcvArray, int *rcvLen, int *rcvDispls);
     int ESMC_DELayoutAllReduce(int *dataArray, int *result, int arrayLen,
 			       ESMC_Op_e op);
-    int ESMC_DELayoutSendRecv(int *sarray, int *rarray, int arraylen, 
+    int ESMC_DELayoutSendRecv(float *sarray, float *rarray, int arraylen, 
 			      int sde, int rde);
   
 // !PRIVATE MEMBER FUNCTIONS:
