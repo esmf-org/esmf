@@ -109,6 +109,8 @@ field = ESMF_FieldCreate('temp')
 
 \subsection{Special Methods}
 
+\begin{itemize}
+
 \item {\tt ESMF\_Initialize} and {\tt ESMF\_Finalize} are required 
 methods that must bracket the use of ESMF within an application.  
 They manage the resources required to run ESMF and shut it down
@@ -122,6 +124,8 @@ Gridded Components such as oceans or atmospheres, or
 them.  The content of these methods is not part of the ESMF.  
 Instead the methods call into associated Fortran subroutines within 
 user code.
+
+\end{itemize}
 
 \subsection{The ESMF Data Hierarchy}
 
