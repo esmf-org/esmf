@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.45 2003/10/09 22:57:26 jwolfe Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.46 2003/10/09 23:08:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -250,15 +250,15 @@
          ESMF_RegionKind_Ellipse      = ESMF_RegionKind( 2)
 
       ! Supported ESMF PhysGrid Mask Types
-      !   Unknown        = unknown or undefined mask type
-      !   Logical        = logical mask
-      !   Multiplicative = multiplicative mask
-      !   RegionID       = integer assigning unique ID to each point
+      !   Unknown   = unknown or undefined mask type
+      !   Logical   = logical mask
+      !   Mult      = multiplicative mask
+      !   RegionID  = integer assigning unique ID to each point
 
       type (ESMF_GridMaskKind), parameter, public :: &! types of grid masks
          ESMF_GridMaskKind_Unknown        = ESMF_GridMaskKind( 0), &
          ESMF_GridMaskKind_Logical        = ESMF_GridMaskKind( 1), &
-         ESMF_GridMaskKind_Multiplicative = ESMF_GridMaskKind( 2), &
+         ESMF_GridMaskKind_Mult           = ESMF_GridMaskKind( 2), &
          ESMF_GridMaskKind_RegionID       = ESMF_GridMaskKind( 3)
 
 !EOPI
@@ -266,7 +266,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.45 2003/10/09 22:57:26 jwolfe Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.46 2003/10/09 23:08:03 nscollins Exp $'
 
 !==============================================================================
 !
@@ -912,7 +912,7 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type (ESMF_Array), dimension(:), pointer, intent(in) :: &
+      type (ESMF_Array), dimension(:), pointer :: &
          location_array       ! array of ESMF_arrays containing location
                               ! coordinates in each physical dimension 
                               ! array dimension is assumed num_dims with
@@ -1004,7 +1004,7 @@
       integer, intent(in), optional :: &
          num_vertices         ! max number of vertices for polygonal regions
 
-      type (ESMF_Array), dimension(:,:), pointer, intent(in), optional :: &
+      type (ESMF_Array), dimension(:,:), pointer, optional :: &
          vertex_array         ! array of ESMF_arrays containing vertex
                               ! coordinates for each vertex of each polygonal
                               ! region in each physical dimension
@@ -1283,7 +1283,7 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_Array), pointer, intent(in) :: &
+      type(ESMF_Array), pointer :: &
          mask_array         ! array containing mask value for each cell
 
       type(ESMF_GridMaskKind), intent(in) :: &
