@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:53 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/04/15 20:47:05 svasquez Exp $ 
 
 ALL: 
 
@@ -41,11 +41,11 @@ ESMC_TimeMgrEx: ESMC_TimeMgrEx.o  chkopts
 	${RM} -f ESMC_TimeMgrEx.o
 
 RUN_ESMC_TimeEx:
-	${MPIRUN} -np 1 ESMC_TimeEx > ${MFLOGDIR}/ESMC_TimeEx.log
+	-${MPIRUN} -np 1 ESMC_TimeEx > ${MFLOGDIR}/ESMC_TimeEx.log
 
 RUN_ESMC_DateEx:
-	${MPIRUN} -np 1 ESMC_DateEx > ${MFLOGDIR}/ESMC_DateEx.log
+	-${MPIRUN} -np 1 ESMC_DateEx > ${MFLOGDIR}/ESMC_DateEx.log
 
 RUN_ESMC_TimeMgrEx:
-	${MPIRUN} -np 1 ESMC_TimeMgrEx > ${MFLOGDIR}/ESMC_TimeMgrEx.log
+	-${MPIRUN} -np 1 ESMC_TimeMgrEx > ${MFLOGDIR}/ESMC_TimeMgrEx.log
 

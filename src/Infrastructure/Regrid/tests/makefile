@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/04/09 23:48:44 flanigan Exp $
+# $Id: makefile,v 1.7 2003/04/15 20:42:03 svasquez Exp $
 
 ALL:  tests
 
@@ -43,10 +43,10 @@ $(ESMF_TESTDIR)/ESMC_RegridUTest: chkopts ESMC_RegridUTest.o
 	${RM} ESMC_RegridTest.o
 
 RUN_ESMC_RegridUTest:
-	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
 
 RUN_ESMC_RegridUTestUNI:
-	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMC_RegridUTest > $(ESMF_TESTDIR)/ESMC_RegridUTest.stdout
 
 ESMC_RegridUTest.rm:
 	echo "ESMC_RegridTest.rm target called here."
@@ -60,10 +60,10 @@ $(ESMF_TESTDIR)/ESMF_RegridUTest: chkopts ESMF_RegridUTest.o
 	${RM} ESMF_RegridTest.o
 
 RUN_ESMF_RegridUTest:
-	${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
+	-${MPIRUN} -np 4 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
 
 RUN_ESMF_RegridUTestUNI:
-	${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
+	-${MPIRUN} -np 1 $(ESMF_TESTDIR)/ESMF_RegridUTest > $(ESMF_TESTDIR)/ESMF_RegridUTest.stdout
 
 ESMF_RegridUTest.rm:
 	echo "ESMF_RegridTest.rm target called here."

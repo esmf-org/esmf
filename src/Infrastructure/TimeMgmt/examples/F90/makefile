@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2003/02/27 17:54:53 flanigan Exp $ 
+# $Id: makefile,v 1.3 2003/04/15 20:48:12 svasquez Exp $ 
 
 ALL: 
 
@@ -52,13 +52,13 @@ ESMF_AlarmEx: ESMF_AlarmEx.o  chkopts
 	${RM} -f ESMF_AlarmEx.o
 
 RUN_ESMF_TimeEx:
-	${MPIRUN} -np 1 ESMF_TimeEx > ${ESMC_TESTDIR}/ESMF_TimeEx.log
+	-${MPIRUN} -np 1 ESMF_TimeEx > ${ESMC_TESTDIR}/ESMF_TimeEx.log
 
 RUN_ESMF_DateEx:
-	${MPIRUN} -np 1 ESMF_DateEx > ${ESMC_TESTDIR}/ESMF_DateEx.log
+	-${MPIRUN} -np 1 ESMF_DateEx > ${ESMC_TESTDIR}/ESMF_DateEx.log
 
 RUN_ESMF_TimeMgrEx:
-	${MPIRUN} -np 1 ESMF_TimeMgrEx > ${ESMC_TESTDIR}/ESMF_TimeMgrEx.log
+	-${MPIRUN} -np 1 ESMF_TimeMgrEx > ${ESMC_TESTDIR}/ESMF_TimeMgrEx.log
 
 RUN_ESMF_AlarmEx:
-	${MPIRUN} -np 1 ESMF_AlarmEx > ${ESMC_TESTDIR}/ESMF_AlarmEx.log
+	-${MPIRUN} -np 1 ESMF_AlarmEx > ${ESMC_TESTDIR}/ESMF_AlarmEx.log

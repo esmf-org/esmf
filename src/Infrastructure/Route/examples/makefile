@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/25 00:18:25 flanigan Exp $
+# $Id: makefile,v 1.5 2003/04/15 20:43:39 svasquez Exp $
 
 # makefile template for the examples directory.
 
@@ -41,31 +41,31 @@ ESMF_RouteDir:
 	mkdir -p ${ESMC_TESTDIR}
 
 ESMF_RouteEx: ESMF_RouteEx.o  chkopts
-	${F90CXXLD} -g -o ESMF_RouteEx ESMF_RouteEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	-${F90CXXLD} -g -o ESMF_RouteEx ESMF_RouteEx.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMF_RouteEx.o
 
 RUN_ESMF_RouteEx:
 	-@rm -f testlog stdlog.* logfile.* ESMF_RouteEx.tmps
-	${MPIRUN} -np 4 ESMF_RouteEx > ESMF_RouteEx.stdout
+	-${MPIRUN} -np 4 ESMF_RouteEx > ESMF_RouteEx.stdout
 
 RUN_ESMF_RouteExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_RouteEx.tmps
-	${MPIRUN} -np 1 ESMF_RouteEx > ESMF_RouteEx.stdout
+	-${MPIRUN} -np 1 ESMF_RouteEx > ESMF_RouteEx.stdout
 
 ESMF_RouteEx.rm:
 	echo "ESMF_RouteEx.rm target called here."
 
 ESMC_RouteEx: ESMC_RouteEx.o  chkopts
-	${CXXF90LD} -g -o ESMC_RouteEx ESMC_RouteEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	-${CXXF90LD} -g -o ESMC_RouteEx ESMC_RouteEx.o -lesmf ${CXXF90LIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
 	${RM} ESMC_RouteEx.o
 
 RUN_ESMC_RouteEx:
 	-@rm -f testlog stdlog.* logfile.* ESMC_RouteEx.tmps
-	${MPIRUN} -np 4 ESMC_RouteEx > ESMC_RouteEx.stdout
+	-${MPIRUN} -np 4 ESMC_RouteEx > ESMC_RouteEx.stdout
 
 RUN_ESMC_RouteExUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_RouteEx.tmps
-	${MPIRUN} -np 1 ESMC_RouteEx > ESMC_RouteEx.stdout
+	-${MPIRUN} -np 1 ESMC_RouteEx > ESMC_RouteEx.stdout
 
 ESMC_RouteEx.rm:
 	echo "ESMC_RouteEx.rm target called here."

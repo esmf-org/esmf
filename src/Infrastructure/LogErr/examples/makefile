@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/04/15 20:21:35 nscollins Exp $ 
+# $Id: makefile,v 1.5 2003/04/15 20:39:18 svasquez Exp $ 
 
 ALL: 
 
@@ -56,11 +56,11 @@ ESMF_TestErr: ESMF_TestErr.o  chkopts
 
 RUN_ESMF_TestErr:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr.tmps
-	${MPIRUN} -np 4 ESMF_TestErr > ESMF_TestErr.stdout
+	-${MPIRUN} -np 4 ESMF_TestErr > ESMF_TestErr.stdout
 
 RUN_ESMF_TestErrUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr.tmps
-	${MPIRUN} -np 1 ESMF_TestErr > ESMF_TestErr.stdout
+	-${MPIRUN} -np 1 ESMF_TestErr > ESMF_TestErr.stdout
 
 ESMF_TestErr.rm:
 	echo "ESMF_TestErr.rm target called here."
@@ -72,11 +72,11 @@ ESMF_TestErr2: ESMF_TestErr2.o  chkopts
 
 RUN_ESMF_TestErr2:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr2.tmps
-	${MPIRUN} -np 4 ESMF_TestErr2 > ESMF_TestErr2.stdout
+	-${MPIRUN} -np 4 ESMF_TestErr2 > ESMF_TestErr2.stdout
 
 RUN_ESMF_TestErr2UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr2.tmps
-	${MPIRUN} -np 1 ESMF_TestErr2 > ESMF_TestErr2.stdout
+	-${MPIRUN} -np 1 ESMF_TestErr2 > ESMF_TestErr2.stdout
 
 ESMF_TestErr2.rm:
 	echo "ESMF_TestErr2.rm target called here."
@@ -88,11 +88,11 @@ ESMF_TestErr3: ESMF_TestErr3.o  chkopts
 
 RUN_ESMF_TestErr3:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr3.tmps
-	${MPIRUN} -np 4 ESMF_TestErr3 > ESMF_TestErr3.stdout
+	-${MPIRUN} -np 4 ESMF_TestErr3 > ESMF_TestErr3.stdout
 
 RUN_ESMF_TestErr3UNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_TestErr3.tmps
-	${MPIRUN} -np 1 ESMF_TestErr3 > ESMF_TestErr3.stdout
+	-${MPIRUN} -np 1 ESMF_TestErr3 > ESMF_TestErr3.stdout
 
 ESMF_TestErr3.rm:
 	echo "ESMF_TestErr3.rm target called here."

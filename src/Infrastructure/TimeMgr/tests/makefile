@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/04/09 23:48:44 flanigan Exp $
+# $Id: makefile,v 1.6 2003/04/15 20:51:06 svasquez Exp $
 
 ALL:  tests
 
@@ -40,11 +40,11 @@ $(ESMC_TESTDIR)/ESMF_ClockUTest: chkopts ESMF_ClockUTest.o
 
 RUN_ESMF_ClockUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ClockUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ClockUTest > $(ESMC_TESTDIR)/ESMF_ClockUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_ClockUTest > $(ESMC_TESTDIR)/ESMF_ClockUTest.stdout
 
 RUN_ESMF_ClockUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_ClockUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ClockUTest > $(ESMC_TESTDIR)/ESMF_ClockUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_ClockUTest > $(ESMC_TESTDIR)/ESMF_ClockUTest.stdout
 
 ESMF_ClockUTest.rm:
 	echo "ESMF_ClockTest.rm target called here."
@@ -58,11 +58,11 @@ $(ESMC_TESTDIR)/ESMC_ClockUTest: chkopts ESMC_ClockUTest.o
 
 RUN_ESMC_ClockUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ClockUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ClockUTest > $(ESMC_TESTDIR)/ESMC_ClockUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMC_ClockUTest > $(ESMC_TESTDIR)/ESMC_ClockUTest.stdout
 
 RUN_ESMC_ClockUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMC_ClockUTest.tmps
-	${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ClockUTest > $(ESMC_TESTDIR)/ESMC_ClockUTest.stdout
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMC_ClockUTest > $(ESMC_TESTDIR)/ESMC_ClockUTest.stdout
 
 ESMC_ClockUTest.rm:
 	echo "ESMC_ClockTest.rm target called here."
