@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.C,v 1.3 2003/03/11 14:19:54 nscollins Exp $
+// $Id: ESMC_CommTable.C,v 1.4 2003/03/11 20:20:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,8 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <ESMC.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 
  // associated class definition file
  #include <ESMC_CommTable.h>
@@ -30,7 +32,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CommTable.C,v 1.3 2003/03/11 14:19:54 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_CommTable.C,v 1.4 2003/03/11 20:20:59 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,26 +54,24 @@
 //     pointer to newly allocated ESMC_CommTable
 //
 // !ARGUMENTS:
-      int paircount,            // in
-      int *rc) {           // out - return code
+      int mypeid,               // in
+      int partnercount,         // in
+      int *rc) {                // out - return code
 //
 // !DESCRIPTION:
-//      Create a new CommTable from ... Allocates memory for a new CommTable
+//      Create a new CommTable.  Allocates memory for a new CommTable
 //      object and uses the internal routine ESMC_CommTableConstruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC_CommTableInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
+//      initialize it. 
 //
 //      Note: this is a class helper function, not a class method
 //      (see declaration in ESMC_CommTable.h)
 //
 //EOP
-// !REQUIREMENTS:  AAAn.n.n
+// !REQUIREMENTS: 
 
-//
-//  code goes here
-//
+    ESMC_CommTable *newc = new ESMC_CommTable(mypeid, partnercount, rc);
+
+    return newc;
 
  } // end ESMC_CommTableCreate
 
@@ -115,7 +115,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int paircount) {
+      int mypeid) {
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -128,9 +128,9 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    myid = mypeid;
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_CommTableConstruct
 
@@ -166,105 +166,58 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CommTableGetConfig - get configuration info from a CommTable
+// !IROUTINE:  ESMC_CommTableGetCount - get partner list count
 //
 // !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableGetConfig(
+     int ESMC_CommTable::ESMC_CommTableGetCount(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_CommTableConfig *config) const {  // out - resources
+     int *count) const {     // out - value
 //
 // !DESCRIPTION:
-//    Returns the set of resources the CommTable object was configured with.
+//     Returns the value of CommTable member count.
 //
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    *count = commcount;
+    
+    return ESMF_SUCCESS;
 
- } // end ESMC_CommTableGetConfig
+ } // end ESMC_CommTableGetCount
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_CommTableSetConfig - set configuration info for a CommTable
+// !IROUTINE:  ESMC_CommTableSetPartner - set processor id to communicate with
 //
 // !INTERFACE:
-      int ESMC_CommTable::ESMC_CommTableSetConfig(
+    int ESMC_CommTable::ESMC_CommTableSetPartner(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      const ESMC_CommTableConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the CommTable object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- } // end ESMC_CommTableSetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CommTableGet<Value> - get <Value> for a CommTable
-//
-// !INTERFACE:
-     // int ESMC_CommTable::ESMC_CommTableGet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-    //  <value type> *value) const {     // out - value
-//
-// !DESCRIPTION:
-//     Returns the value of CommTable member <Value>.
-//     Can be multiple routines, one per value
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
- // } // end ESMC_CommTableGet<Value>
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_CommTableSet<Value> - set <Value> for a CommTable
-//
-// !INTERFACE:
-   //   int ESMC_CommTable::ESMC_CommTableSet<Value>(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-    //  <value type> value) {     // in - value
+    int partner) {     // in - value
 //
 // !DESCRIPTION:
 //     Sets the CommTable member <Value> with the given value.
-//     Can be multiple routines, one per value
 //
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+      if (partner < 0 || partner >= commcount) {
+          fprintf(stderr, "value out of range, %d not >= 0 and < %d\n",
+                        partner, commcount);
+          return ESMF_FAILURE;
+      }
 
-// } // end ESMC_CommTableSet<Value>
+      commneeded[partner]++;
+      return ESMF_SUCCESS;
+
+ } // end ESMC_CommTableSetPartner
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -330,18 +283,48 @@
 //    none
 //
 // !ARGUMENTS:
-      int paircount) {
+      int mypeid,
+      int paircount,
+      int *rc) {
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS:
+ 
+    myid = mypeid;
+    commcount = paircount;
+    commpartner = new int[commcount];
+    commneeded = new int[commcount];
 
+    for(int i=0; i<commcount; i++) {
+        commpartner[i] = i;
+        commneeded[i] = 0;
+    }
+
+ } // end ESMC_CommTable
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_CommTable - native C++ constructor
 //
-//  code goes here
+// !INTERFACE:
+      ESMC_CommTable::ESMC_CommTable(void) {
 //
+// !RETURN VALUE:
+//    none
+//
+// !ARGUMENTS:
+//    none
+//
+// !DESCRIPTION:
+//
+//EOP
+// !REQUIREMENTS:
+
+    commcount = 0;
+    commpartner = NULL;
+    commneeded = NULL;
 
  } // end ESMC_CommTable
 

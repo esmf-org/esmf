@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.h,v 1.4 2003/03/11 17:12:12 jwolfe Exp $
+// $Id: ESMC_RTable.h,v 1.5 2003/03/11 20:20:57 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -77,8 +77,8 @@
  // the following methods apply to deep classes only
  // ESMC_RTableCreate and ESMC_RTableDestroy are declared below,
  // outside the ESMC_RTable declaration
-    int ESMC_RTableConstruct(int pecount);   // internal only, deep class
-    int ESMC_RTableDestruct(void);           // internal only, deep class
+    int ESMC_RTableConstruct(int mypeid, int pecount);
+    int ESMC_RTableDestruct(void);    
 
  // optional configuration methods
     int ESMC_RTableGetConfig(ESMC_RTableConfig *config) const;
@@ -87,6 +87,7 @@
  // accessor methods for class members
     //int ESMC_RTableGet<Value>(<value type> *value) const;
     //int ESMC_RTableSet<Value>(<value type>  value);
+    int ESMC_RTableSetEntry(int dst_pe, void *base_addr, ESMC_XPacket *xp); 
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RTableValidate(const char *options) const;
@@ -115,7 +116,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_RTable object.
 
- ESMC_RTable *ESMC_RTableCreate(int pecount, int *rc);// interface only, deep class
- int ESMC_RTableDestroy(ESMC_RTable *rtable); // interface only, deep class
+ ESMC_RTable *ESMC_RTableCreate(int mypeid, int pecount, int *rc);
+ int ESMC_RTableDestroy(ESMC_RTable *rtable);
 
  #endif  // ESMC_RTable_H

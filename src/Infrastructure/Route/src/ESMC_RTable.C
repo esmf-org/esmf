@@ -1,4 +1,4 @@
-// $Id: ESMC_RTable.C,v 1.3 2003/03/11 14:19:55 nscollins Exp $
+// $Id: ESMC_RTable.C,v 1.4 2003/03/11 20:21:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTable.C,v 1.3 2003/03/11 14:19:55 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTable.C,v 1.4 2003/03/11 20:21:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,6 +52,7 @@
 //     pointer to newly allocated ESMC_RTable
 //
 // !ARGUMENTS:
+      int mype,
       int pecount, 
       int *rc) {           // out - return code
 //
@@ -115,6 +116,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
+      int mype,
       int pecount) { 
 // 
 // !DESCRIPTION: 
@@ -128,9 +130,25 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    int i;
+
+    entrycount = pecount;
+    my_peid = mype;
+
+    // TODO: this is a fully instantiated table, one slot per possible
+    // destination processor.  if this table size gets too large, it can
+    // be reimplmented as a linked list of entries only for those procs
+    // which are going to be doing communication.  this is simplest to get
+    // implemented to get feedback about how well it works.
+
+    for (i=0; i<entrycount; i++) {
+        entry[i].dest_peid = i;
+        entry[i].xpcount = 0;
+        entry[i].base_addr = NULL;
+        entry[i].xp = NULL;
+    }
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RTableConstruct
 
@@ -332,15 +350,11 @@
       int pecount) {
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS:
 
-//
-//  code goes here
-//
+   // allocate space for full table here.
 
  } // end ESMC_RTable
 
@@ -358,13 +372,10 @@
 //    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS: 
 
-//
-//  code goes here
-//
+   // default destructor ok
 
  } // end ~ESMC_RTable

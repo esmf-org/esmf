@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTable.h,v 1.4 2003/03/11 17:11:52 jwolfe Exp $
+// $Id: ESMC_CommTable.h,v 1.5 2003/03/11 20:20:56 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,24 +44,21 @@
  #include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
 
 // !PUBLIC TYPES:
- class ESMC_CommTableConfig;
  class ESMC_CommTable;
 
 // !PRIVATE TYPES:
 
- // class configuration type
- class ESMC_CommTableConfig {
-   private:
- //   < insert resource items here >
- };
-
  // class declaration type
  class ESMC_CommTable : public ESMC_Base {    // inherits from ESMC_Base class
 
+   // we are going to be calling Send/Recv in a single call, so there is
+   // no need to distinguish between sender and receiver in this table.
+
    private:
-      int commcount;                 // number of pairwise send/recvs
-      int *commpartner;              // array comm ids for communication
-                                     // partners
+      int myid;            // this pe's id number
+      int commcount;       // number of pairwise send/recvs
+      int *commpartner;    // array of comm ids for communication partners
+      int *commneeded;     // array of flags set if comm needed between partners
 
 // !PUBLIC MEMBER FUNCTIONS:
 
@@ -69,16 +66,12 @@
  // the following methods apply to deep classes only
  // ESMC_CommTableCreate and ESMC_CommTableDestroy are declared below,
  // outside the ESMC_CommTable declaration
-    int ESMC_CommTableConstruct(int paircount); // internal only, deep class
-    int ESMC_CommTableDestruct(void);           // internal only, deep class
-
- // optional configuration methods
-    int ESMC_CommTableGetConfig(ESMC_CommTableConfig *config) const;
-    int ESMC_CommTableSetConfig(const ESMC_CommTableConfig *config);
+    int ESMC_CommTableConstruct(int mypeid);
+    int ESMC_CommTableDestruct(void); 
 
  // accessor methods for class members
     int ESMC_CommTableGetCount(int *count) const;
-    int ESMC_CommTableSetPair(int src, int dst);
+    int ESMC_CommTableSetPartner(int partner);
 
     //int ESMC_CommTableGet<Value>(<value type> *value) const;
     //int ESMC_CommTableSet<Value>(<value type>  value);
@@ -88,7 +81,8 @@
     int ESMC_CommTablePrint(const char *options) const;
 
  // native C++ constructors/destructors
-	ESMC_CommTable(int paircount);
+	ESMC_CommTable(int mypeid, int paircount, int *rc);
+	ESMC_CommTable();
 	~ESMC_CommTable(void);
   
  // < declare the rest of the public interface methods here >
@@ -111,7 +105,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_CommTable object.
 
- ESMC_CommTable *ESMC_CommTableCreate(int paircount, int *rc);// interface only, deep class
- int ESMC_CommTableDestroy(ESMC_CommTable *commtable); // interface only, deep class
+ ESMC_CommTable *ESMC_CommTableCreate(int myid, int partnercount, int *rc);
+ int ESMC_CommTableDestroy(ESMC_CommTable *commtable);
 
  #endif  // ESMC_CommTable_H

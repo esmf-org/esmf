@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $
+// $Id: ESMC_Route.C,v 1.6 2003/03/11 20:21:00 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,8 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <ESMC.h>
+ #include <stdio.h>
+ #include <stdlib.h>
 
  // associated class definition file
  #include <ESMC_Route.h>
@@ -29,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.6 2003/03/11 20:21:00 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -51,11 +53,11 @@
 //     pointer to newly allocated ESMC_Route
 //
 // !ARGUMENTS:
-      int arg1,            // in
+      ESMC_Layout *layout,
       int *rc) {           // out - return code
 //
 // !DESCRIPTION:
-//      Create a new Route from ... Allocates memory for a new Route
+//      Create a new Route; allocates memory for a new Route
 //      object and uses the internal routine ESMC_RouteConstruct to
 //      initialize it.
 //      There can be multiple overloaded methods with the same name, but
@@ -67,11 +69,15 @@
 //EOP
 // !REQUIREMENTS:  AAAn.n.n
 
-//
-//  code goes here
-//
 
-    return new ESMC_Route;
+    ESMC_Route *newr = new ESMC_Route;
+
+    *rc = newr->ESMC_RouteConstruct(layout);
+
+    if (*rc == ESMF_FAILURE)
+        return NULL;
+    else
+        return newr;
 
  } // end ESMC_RouteCreate
 
@@ -98,9 +104,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    // call destruct routine
 
     return ESMF_FAILURE;
 
@@ -117,7 +121,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1) {          // in
+      ESMC_Layout *layout) {          // in
 //
 // !DESCRIPTION:
 //      ESMF routine which fills in the contents of an already
@@ -130,11 +134,31 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    static int rseqnum = 1;
+    int mype, rc;
+    int pecount;         // total number of PEs in src + dst layouts
 
-    return ESMF_FAILURE;
+    //pecount = layout->ESMC_LayoutGetPECount();
+    //mype = layout->ESMC_LayoutGetPECount();
+    //TODO: what are these funcs?
+    pecount = 4;
+    mype = 1;
+
+    
+    routeid = rseqnum++;
+    sendRT = ESMC_RTableCreate(mype, pecount, &rc);
+    if (rc == ESMF_FAILURE)
+       return rc;
+
+    recvRT = ESMC_RTableCreate(mype, pecount, &rc);
+    if (rc == ESMF_FAILURE)
+       return rc;
+
+    ct = ESMC_CommTableCreate(mype, pecount, &rc);
+    if (rc == ESMF_FAILURE)
+       return rc;
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RouteConstruct
 
@@ -161,68 +185,12 @@
 //EOP
 // !REQUIREMENTS:  
 
-//
-//  code goes here
-//
+    // free both route tables and comm table by calling Destroy on them.
 
     return ESMF_FAILURE;
 
  } // end ESMC_RouteDestruct
 
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_RouteGetConfig - get configuration info from a Route
-//
-// !INTERFACE:
-      int ESMC_Route::ESMC_RouteGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_RouteConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the Route object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_RouteGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_RouteSetConfig - set configuration info for a Route
-//
-// !INTERFACE:
-      int ESMC_Route::ESMC_RouteSetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_RouteConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the Route object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-
-    return ESMF_FAILURE;
-
- } // end ESMC_RouteSetConfig
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -254,31 +222,63 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_RouteSet - set <Value> for a Route
+// !IROUTINE:  ESMC_RouteSetSend - set send work request in route table
 //
 // !INTERFACE:
-      //int ESMC_Route::ESMC_RouteSet(
+      int ESMC_Route::ESMC_RouteSetSend(
 //
 // !RETURN VALUE:
 //    int error return code
 //
 // !ARGUMENTS:
-      //<value type> value) {     // in - value
+      int dest_pe,         // in - destination pe id
+      void *base_addr,     // in - local source address
+      ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Sets the Route member <Value> with the given value.
-//     Can be multiple routines, one per value
+//     Adds an exchange packet, base address, and destination pe to the
+//     route table.
 //
 //EOP
 // !REQUIREMENTS:  
+    
+    int rc;
 
+    rc = sendRT->ESMC_RTableSetEntry(dest_pe, base_addr, xp);
+
+    return rc;
+
+ } // end ESMC_RouteSetSend
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_RouteSetRecv - set recv work request in route table
 //
-//  code goes here
+// !INTERFACE:
+      int ESMC_Route::ESMC_RouteSetRecv(
 //
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      int source_pe,       // in - sending pe id
+      void *base_addr,     // in - local source address
+      ESMC_XPacket *xp) {  // in - exchange packet
+//
+// !DESCRIPTION:
+//     Adds an exchange packet, base address, and destination pe to the
+//     route table.
+//
+//EOP
+// !REQUIREMENTS:  
+    
+    int rc;
 
-    //return ESMF_FAILURE;
+    rc = recvRT->ESMC_RTableSetEntry(source_pe, base_addr, xp);
 
- // } // end ESMC_RouteSet
+    return rc;
+
+ } // end ESMC_RouteSetRecv
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -327,13 +327,18 @@
 //      type of information and level of detail.  ESMC_Base class method.
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS:
 
-//
-//  code goes here
-//
+    int rc;
 
-    return ESMF_FAILURE;
+    printf("Route print:\n");
+    printf(" id = %d\n", routeid);
+    printf("  send table\n");
+    rc = sendRT->ESMC_RTablePrint(options);
+    printf("  recv table\n");
+    rc = recvRT->ESMC_RTablePrint(options);
+
+    return ESMF_SUCCESS;
 
  } // end ESMC_RoutePrint
 
@@ -351,15 +356,11 @@
       void) {  // in
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for initialization
-//      with default or passed-in values
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS:
 
-//
-//  code goes here
-//
+  // default constructor is fine.
 
  } // end ESMC_Route
 
@@ -377,13 +378,10 @@
 //    none
 //
 // !DESCRIPTION:
-//      Calls standard ESMF deep or shallow methods for destruction
 //
 //EOP
-// !REQUIREMENTS:  SSSn.n, GGGn.n
+// !REQUIREMENTS: 
 
-//
-//  code goes here
-//
+  // default destructor is fine.
 
  } // end ~ESMC_Route

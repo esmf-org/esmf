@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.6 2003/03/11 17:12:29 jwolfe Exp $
+// $Id: ESMC_Route.h,v 1.7 2003/03/11 20:20:58 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -42,48 +42,39 @@
 // 
 // !USES:
  #include <ESMC_Base.h>        // all classes inherit from the ESMC Base class.
+ #include <ESMC_Layout.h>
  #include <ESMC_XPacket.h>
  #include <ESMC_RTable.h>
  #include <ESMC_CommTable.h>
 
 // !PUBLIC TYPES:
- class ESMC_RouteConfig;
  class ESMC_Route;
 
 // !PRIVATE TYPES:
-
- // class configuration type
- class ESMC_RouteConfig {
-   private:
- //   < insert resource items here >
- };
 
  // class declaration type
  class ESMC_Route : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
      // name in base class
-     int routeid;
-     ESMC_RTable *SendRT;
-     ESMC_RTable *RecvRT;
-     ESMC_CommTable *ct;
+     int routeid;           // unique id, used later for cacheing
+     ESMC_Layout *layout;   // layout which includes all src + dst pe's
+     ESMC_RTable *sendRT;   // send route table
+     ESMC_RTable *recvRT;   // receive route table
+     ESMC_CommTable *ct;    // communication scheduling table
 
 // !PUBLIC MEMBER FUNCTIONS:
-//
 
   public:
  // ESMC_RouteCreate and ESMC_RouteDestroy are declared below,
  // outside the ESMC_Route declaration
-    int ESMC_RouteConstruct(int arg1);      // internal only, deep class
-    int ESMC_RouteDestruct(void);           // internal only, deep class
-
- // optional configuration methods
-    int ESMC_RouteGetConfig(ESMC_RouteConfig *config) const;
-    int ESMC_RouteSetConfig(const ESMC_RouteConfig *config);
+    int ESMC_RouteConstruct(ESMC_Layout *layout);
+    int ESMC_RouteDestruct(void);
 
  // accessor methods for class members
     //int ESMC_RouteGet(<value type> *value) const;
-    //int ESMC_RouteSet(<value type>  value);
+    int ESMC_RouteSetSend(int dst_pe, void *base_addr, ESMC_XPacket *xp);
+    int ESMC_RouteSetRecv(int src_pe, void *base_addr, ESMC_XPacket *xp);
     
  // required methods inherited and overridden from the ESMC_Base class
     int ESMC_RouteValidate(const char *options) const;
@@ -93,14 +84,10 @@
 	ESMC_Route(void);
 	~ESMC_Route(void);
   
- // < declare the rest of the public interface methods here >
-  
 // !PRIVATE MEMBER FUNCTIONS:
 //
   private: 
-//
- // < declare private interface methods here >
-//
+
 //EOP
 //-----------------------------------------------------------------------------
 
@@ -113,7 +100,7 @@
 // and delete; they perform allocation/deallocation specialized to
 // an ESMC_Route object.
 
- ESMC_Route *ESMC_RouteCreate(int arg1, int *rc);// interface only, deep class
- int ESMC_RouteDestroy(ESMC_Route *route); // interface only, deep class
+ ESMC_Route *ESMC_RouteCreate(ESMC_Layout *layout, int *rc);
+ int ESMC_RouteDestroy(ESMC_Route *route);
 
  #endif  // ESMC_Route_H
