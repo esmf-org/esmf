@@ -14,7 +14,7 @@
 
 ================================================================================
 
-README file for ESMF v2.1.1 release.
+README file for ESMF v2.1.0rp1 release.
 
 The files contained here include the ESMF source code and build system.
 
@@ -44,14 +44,9 @@ QuickStart information for the impatient.
     (or 'gmake system_tests_uni' for non-mpi machines).
  - Type 'gmake examples' to make and run the examples applications
     (or 'gmake examples_uni' for non-mpi machines).
- - Type 'gmake demos' to make and run the demos
-    (or 'gmake demos_uni' for non-mpi machines).
  - Type 'gmake ESMF_COUPLED_FLOW' to compile and run a coupled fluid flow 
    demo program.  It will run in parallel, 4-way, compute 3600 time steps, and
    produce 10 data outputs.
- - Type 'gmake ESMF_COUPLED_FLOW_uni' to compile and run a coupled fluid flow 
-   demo program on a non-mpi machine.  It will run serially, compute 3600 time
-   steps, and produce 10 data outputs.
 
 
 ================================================================================
@@ -139,12 +134,6 @@ for a debug version.
 To build and run the coupled fluid flow demo:
 
   gmake  ESMF_COUPLED_FLOW
-  gmake  ESMF_COUPLED_FLOW_uni  ! for non-mpi machines
-
-To build and run the demos:
-
-  gmake  demos 
-  gmake  demos_uni          ! for non-mpi machines
 
 To build and run the system tests:
 
@@ -220,4 +209,4 @@ documentation build procedures outlined above.
 Please contact esmf_support@ucar.edu with any questions or problems.
 
 ================================================================================
- $Id: README,v 1.55 2005/02/02 20:37:40 jwolfe Exp $
+ $Id: README,v 1.53.2.1 2005/02/08 23:43:06 nscollins Exp $
