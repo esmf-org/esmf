@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.h,v 1.41 2004/11/05 08:14:50 theurich Exp $
+// $Id: ESMC_Route.h,v 1.42 2004/12/07 21:24:23 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -103,8 +103,8 @@
  // accessor methods for class members
     //int ESMC_RouteGet(<value type> *value) const;
 
-    int ESMC_RouteSetSend(int dst_de, ESMC_XPacket *xp);
-    int ESMC_RouteSetRecv(int src_de, ESMC_XPacket *xp);
+    int ESMC_RouteSetSend(int dst_pet, ESMC_XPacket *xp);
+    int ESMC_RouteSetRecv(int src_pet, ESMC_XPacket *xp);
     
     int ESMC_RouteSetRecvItems(int nitems);
     int ESMC_RouteGetRecvItems(void);

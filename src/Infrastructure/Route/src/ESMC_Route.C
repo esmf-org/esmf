@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.110 2004/12/07 17:21:12 nscollins Exp $
+// $Id: ESMC_Route.C,v 1.111 2004/12/07 21:24:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.110 2004/12/07 17:21:12 nscollins Exp $";
+               "$Id: ESMC_Route.C,v 1.111 2004/12/07 21:24:24 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -551,23 +551,23 @@ static int maxroutes = 10;
 //    int error return code
 //
 // !ARGUMENTS:
-      int dest_de,         // in - destination de id
+      int dest_pet,        // in - destination pet id
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Adds an exchange packet and destination de to the
-//     route table, and marks this de as needed in the comm table.
+//     Adds an exchange packet and destination pet to the
+//     route table, and marks this pet as needed in the comm table.
 //
 //EOP
 // !REQUIREMENTS:  
     
     int rc;
 
-    rc = sendRT->ESMC_RTableSetEntry(dest_de, xp);
+    rc = sendRT->ESMC_RTableSetEntry(dest_pet, xp);
     if (rc != ESMF_SUCCESS)
         return rc;
 
-    rc = ct->ESMC_CommTableSetPartner(dest_de);
+    rc = ct->ESMC_CommTableSetPartner(dest_pet);
     return rc;
 
  } // end ESMC_RouteSetSend
@@ -585,23 +585,23 @@ static int maxroutes = 10;
 //    int error return code
 //
 // !ARGUMENTS:
-      int source_de,       // in - sending de id
+      int source_pet,       // in - sending pet id
       ESMC_XPacket *xp) {  // in - exchange packet
 //
 // !DESCRIPTION:
-//     Adds an exchange packet and source DE to the route table,
-//     and marks this de as needed in the comm table.
+//     Adds an exchange packet and source pet to the route table,
+//     and marks this pet as needed in the comm table.
 //
 //EOP
 // !REQUIREMENTS:  
     
     int rc;
 
-    rc = recvRT->ESMC_RTableSetEntry(source_de, xp);
+    rc = recvRT->ESMC_RTableSetEntry(source_pet, xp);
     if (rc != ESMF_SUCCESS)
         return rc;
 
-    rc = ct->ESMC_CommTableSetPartner(source_de);
+    rc = ct->ESMC_CommTableSetPartner(source_pet);
 
     return rc;
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route_F.C,v 1.30 2004/11/05 08:14:50 theurich Exp $
+// $Id: ESMC_Route_F.C,v 1.31 2004/12/07 21:24:24 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,16 +52,16 @@ extern "C" {
        //    *status = (*ptr)->ESMC_RouteGet(&value);
        //}
 
-       void FTN(c_esmc_routesetsend)(ESMC_Route **ptr, int *dest_de, 
+       void FTN(c_esmc_routesetsend)(ESMC_Route **ptr, int *dest_pet, 
                                      ESMC_XPacket *xp, int *status) {
 
-           *status = (*ptr)->ESMC_RouteSetSend(*dest_de, xp);
+           *status = (*ptr)->ESMC_RouteSetSend(*dest_pet, xp);
        }
 
-       void FTN(c_esmc_routesetrecv)(ESMC_Route **ptr, int *src_de, 
+       void FTN(c_esmc_routesetrecv)(ESMC_Route **ptr, int *src_pet, 
                                      ESMC_XPacket *xp, int *status) {
 
-           *status = (*ptr)->ESMC_RouteSetRecv(*src_de, xp);
+           *status = (*ptr)->ESMC_RouteSetRecv(*src_pet, xp);
        }
 
        void FTN(c_esmc_routesetrecvitems)(ESMC_Route **ptr, int *nitems, 

@@ -1,4 +1,4 @@
-! $Id: ESMF_Route.F90,v 1.58 2004/12/03 20:47:48 nscollins Exp $
+! $Id: ESMF_Route.F90,v 1.59 2004/12/07 21:24:24 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Route.F90,v 1.58 2004/12/03 20:47:48 nscollins Exp $'
+      '$Id: ESMF_Route.F90,v 1.59 2004/12/07 21:24:24 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1123,11 +1123,11 @@
 ! !IROUTINE: ESMF_RouteSetRecv - Set receive values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSetRecv(route, srcDE, xp, rc)
+      subroutine ESMF_RouteSetRecv(route, srcPET, xp, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(in) :: route
-      integer, intent(in) :: srcDE
+      integer, intent(in) :: srcPET
       type(ESMF_XPacket), intent(in) :: xp
       integer, intent(out), optional :: rc            
 
@@ -1139,8 +1139,8 @@
 !     \begin{description}
 !     \item[route] 
 !          {\tt ESMF\_Route} to be modified.
-!     \item[srcDE]
-!          Source DE id.
+!     \item[srcPET]
+!          Source PET id.
 !     \item[xp]
 !          Exchange packet describing the data to be received.  Note that
 !          an exchange packet only contains offsets and counts; the base
@@ -1166,7 +1166,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteSetRecv(route, srcDE, xp, status)
+        call c_ESMC_RouteSetRecv(route, srcPET, xp, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
@@ -1182,11 +1182,11 @@
 ! !IROUTINE: ESMF_RouteSetSend - Set send values in a Route
 
 ! !INTERFACE:
-      subroutine ESMF_RouteSetSend(route, destDE, xp, rc)
+      subroutine ESMF_RouteSetSend(route, destPET, xp, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Route), intent(inout) :: route
-      integer, intent(in) :: destDE
+      integer, intent(in) :: destPET
       type(ESMF_XPacket), intent(in) :: xp
       integer, intent(out), optional :: rc            
 
@@ -1198,8 +1198,8 @@
 !     \begin{description}
 !     \item[route] 
 !          {\tt ESMF\_Route} to be modified.
-!     \item[destDE]
-!          Destination DE id.
+!     \item[destPET]
+!          Destination PET id.
 !     \item[xp]
 !          Exchange packet describing the data to be sent.  Note that
 !          an exchange packet only contains offsets and counts; the base
@@ -1225,7 +1225,7 @@
         endif
 
         ! Call C++  code
-        call c_ESMC_RouteSetSend(route, destDE, xp, status)
+        call c_ESMC_RouteSetSend(route, destPET, xp, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
