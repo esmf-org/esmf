@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.78 2004/11/03 22:30:44 eschwab Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.79 2004/11/24 00:41:13 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.78 2004/11/03 22:30:44 eschwab Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.79 2004/11/24 00:41:13 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1661,20 +1661,46 @@
       !EX_UTest
       write(name, *) "Nanosecond time string test"
       call ESMF_ClockGet(clock, startTime=startTime, rc=rc)
-      call ESMF_TimeGet(startTime, timeString=timeString, rc=rc)
+      call ESMF_TimeGet(startTime, timeStringISOFrac=timeString, rc=rc)
       write(failMsg, *) "Nanosecond time string not 2004-09-28T00:00:00.000010000 or not ESMF_SUCCESS."
       call ESMF_Test((timeString=="2004-09-28T00:00:00.000010000" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, "timeString = ", timeString
+      call ESMF_TimePrint(startTime)
+      call ESMF_TimePrint(startTime, "string isofrac")
 
       call ESMF_ClockDestroy(clock, rc)
 
       ! ----------------------------------------------------------------------------
       !EX_UTest
+      write(name, *) "Nanosecond time string test 2"
+      call ESMF_TimeGet(startTime, timeString=timeString, rc=rc)
+      write(failMsg, *) "Nanosecond time string not 2004-09-28T00:00:00:1/100000 or not ESMF_SUCCESS."
+      call ESMF_Test((timeString=="2004-09-28T00:00:00:1/100000" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimePrint(startTime)
+      call ESMF_TimePrint(startTime, "string")
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
       write(name, *) "Nanosecond time interval string test"
-      call ESMF_TimeIntervalGet(timeStep, timeString=timeString, rc=rc)
+      call ESMF_TimeIntervalGet(timeStep, timeStringISOFrac=timeString, rc=rc)
       write(failMsg, *) "Nanosecond time interval string not P0Y0M0DT0H0M-0.000000001S or not ESMF_SUCCESS."
       call ESMF_Test((timeString=="P0Y0M0DT0H0M-0.000000001S" .and. &
                       rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      print *, "timeString = ", timeString
+      call ESMF_TimeIntervalPrint(timeStep)
+      call ESMF_TimeIntervalPrint(timeStep, "string isofrac")
+
+      ! ----------------------------------------------------------------------------
+      !EX_UTest
+      write(name, *) "Nanosecond time interval string test 2"
+      call ESMF_TimeIntervalGet(timeStep, timeString=timeString, rc=rc)
+      write(failMsg, *) "Nanosecond time interval string not P0Y0M0DT0H0M0:-1/1000000000S or not ESMF_SUCCESS."
+      call ESMF_Test((timeString=="P0Y0M0DT0H0M0:-1/1000000000S" .and. &
+                      rc==ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_TimeIntervalPrint(timeStep)
+      call ESMF_TimeIntervalPrint(timeStep, "string")
 
       ! ----------------------------------------------------------------------------
 
