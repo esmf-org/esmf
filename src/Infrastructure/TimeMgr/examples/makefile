@@ -1,9 +1,9 @@
-# $Id: makefile,v 1.15 2003/09/18 21:14:41 flanigan Exp $
+# $Id: makefile,v 1.16 2003/10/22 03:47:48 eschwab Exp $
 
 ALL:  examples
 #
 #  makefile for examples directory.
-# 
+#
 # All of the makefile targets and rules for building and linking
 # examples are located in the build system makefile fragments.
 # The run targets are located in this makefile.
@@ -13,11 +13,11 @@ ALL:  examples
 #
 # Targets:
 #
-#    examples:         Will first build the ESMF library, then will 
-#                      build the example applications and finally 
+#    examples:         Will first build the ESMF library, then will
+#                      build the example applications and finally
 #                      will run the examples
 #
-#    examples_uni:     Same as examples target, but runs examples on  
+#    examples_uni:     Same as examples target, but runs examples on
 #                      a single processor.
 #
 #    build_examples:   Builds example applications in $(ESMF_EXDIR)
@@ -25,7 +25,7 @@ ALL:  examples
 #    run_examples:     Runs applications built from source in this
 #                      directory.  Output is saved in file in $(ESMF_EXDIR).
 #
-#    run_examples_uni: Same as run_examples target, but runs examples on 
+#    run_examples_uni: Same as run_examples target, but runs examples on
 #                      only one processor.
 #
 
@@ -44,9 +44,9 @@ LOCDIR	  = src/Infrastructure/TimeMgr/examples
 
 #
 # Set EXAMPLES_BUILD to full path of the examples to be
-# built.  The compiling from source code to object code is 
-# handle by the same compile rules used to build the objects 
-# used in the library. The linking of the objects is done with 
+# built.  The compiling from source code to object code is
+# handle by the same compile rules used to build the objects
+# used in the library. The linking of the objects is done with
 # specific linking rules in build/common.mk.
 #
 # The examples executable files follow this naming convention:
@@ -61,10 +61,11 @@ EXAMPLES_BUILD   =  $(ESMF_EXDIR)/ESMF_TimeEx \
                     $(ESMF_EXDIR)/ESMF_CalendarEx \
                     $(ESMF_EXDIR)/ESMF_ClockEx \
 		    $(ESMF_EXDIR)/ESMC_ClockEx \
-                    $(ESMF_EXDIR)/ESMF_ClockAdvEx
+                    $(ESMF_EXDIR)/ESMF_ClockAdvEx \
+                    $(ESMF_EXDIR)/ESMF_AlarmEx
 
 #
-# List the example run targets in EXAMPLES_RUN and 
+# List the example run targets in EXAMPLES_RUN and
 # EXAMPLES_RUN_UNI.  All of the run targets should be defined
 # in this makefile.
 #
@@ -74,14 +75,16 @@ EXAMPLES_RUN     =  run_ESMF_TimeEx \
                     run_ESMF_CalendarEx \
                     run_ESMF_ClockEx \
 		    run_ESMC_ClockEx \
-                    run_ESMF_ClockAdvEx
+                    run_ESMF_ClockAdvEx \
+                    run_ESMF_AlarmEx
 
-EXAMPLES_RUN_UNI =  run_ESMF_TimeEx \
-                    run_ESMF_TimeIntervalEx \
-                    run_ESMF_CalendarEx \
-                    run_ESMF_ClockEx \
-		    run_ESMC_ClockEx \
-                    run_ESMF_ClockAdvEx
+EXAMPLES_RUN_UNI =  run_ESMF_TimeEx_uni \
+                    run_ESMF_TimeIntervalEx_uni \
+                    run_ESMF_CalendarEx_uni \
+                    run_ESMF_ClockEx_uni \
+		    run_ESMC_ClockEx_uni \
+                    run_ESMF_ClockAdvEx_uni \
+                    run_ESMF_AlarmEx_uni
 
 include ${ESMF_DIR}/makefile
 
@@ -129,5 +132,11 @@ run_ESMC_ClockEx:
 #
 run_ESMF_ClockAdvEx:
 	-$(ESMF_EXDIR)/ESMF_ClockAdvEx > $(ESMF_EXDIR)/ESMF_ClockAdvEx.stdout
+
+#
+# ESMF_AlarmEx
+#
+run_ESMF_AlarmEx:
+	-$(ESMF_EXDIR)/ESMF_AlarmEx > $(ESMF_EXDIR)/ESMF_AlarmEx.stdout
 
 
