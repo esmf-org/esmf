@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.h,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+// $Id: ESMC_Calendar.h,v 1.2 2002/09/23 20:31:02 eschwab Exp $
 #ifndef ESMC_CALENDAR_H
 #define ESMC_CALENDAR_H
 
@@ -6,6 +6,7 @@ class ESMC_TimeInstant;
 
 #define MonthsPerYear 12
 
+// (TMG 2.3.1, 2.3.2, 2.3.3, 2.3.4, 2.3.5)
 typedef enum ESMC_CalendarType {ESMC_GREGORIAN=1, ESMC_JULIAN,  ESMC_NOLEAP,
                                 ESMC_360DAY,      ESMC_GENERIC, ESMC_NOCALENDAR}
              ESMC_CalendarType_e;
@@ -54,11 +55,12 @@ class ESMC_Calendar
     int Dump(void);
 
     // conversions based on UTC: time zone offset done by client
+	//  (TMG 2.4.5, 2.5.6)
     int ConvertToTime(int YR, int MM, int DD, int32 D, int H, int M, int S,
 					  int MS, int32 US, int32 NS, int32 Sn, int32 Sd,
 					  double d, double h, double m, double s, double ms,
-					  double us, double ns, ESMC_TimeInstant *T);
-    int ConvertToDate(ESMC_TimeInstant *T,
+					  double us, double ns, ESMC_Time *T);
+    int ConvertToDate(ESMC_Time *T,
 					  int *YR, int *MM, int *DD, int32 *D, int *H, int *M,
 					  int *S, int *MS, int32 *US, int32 *NS, int32 *Sn,
 					  int32 *Sd, double *d, double *h, double *m, double *s,
