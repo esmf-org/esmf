@@ -1,4 +1,4 @@
-% $Id: ESMF_usrdoc.ctex,v 1.20 2004/06/22 20:08:55 cdeluca Exp $
+% $Id: ESMF_usrdoc.ctex,v 1.21 2004/06/23 22:21:29 cdeluca Exp $
 
 \documentclass[english]{article}
 \usepackage{babel}
@@ -72,7 +72,7 @@
 \input{ESMF_adoption}
 
 \newpage
-%\section{Glossary}
+\section{Glossary}
 \input{ESMF_terms}
 
 %\section{Bibliography}
