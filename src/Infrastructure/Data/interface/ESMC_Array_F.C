@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.18 2003/02/10 21:24:51 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.19 2003/02/13 22:44:29 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -101,10 +101,14 @@ extern "C" {
      }
 
      void FTN(c_esmc_arraysetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+        //fprintf(stderr, "interface code, setting f90 ptr to %lx, this = %lx, &this = %lx\n", 
+        //                                (long int)p, (long int)(*ptr), (long int)ptr);
           *status = (*ptr)->ESMC_ArraySetF90Ptr(p);
      }
 
      void FTN(c_esmc_arraygetf90ptr)(ESMC_Array **ptr, struct c_F90ptr *p, int *status) {
+        //fprintf(stderr, "interface code, getting f90 ptr into %lx, this = %lx, &this = %lx\n", 
+        //                                (long int)p, (long int)(*ptr), (long int)ptr);
           *status = (*ptr)->ESMC_ArrayGetF90Ptr(p);
      }
 
