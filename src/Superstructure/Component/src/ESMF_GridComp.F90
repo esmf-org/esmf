@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.47 2004/05/26 11:13:19 nscollins Exp $
+! $Id: ESMF_GridComp.F90,v 1.48 2004/05/26 14:27:16 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.47 2004/05/26 11:13:19 nscollins Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.48 2004/05/26 14:27:16 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1422,7 +1422,7 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[gridcomp] 
-!      \tt ESMF\_GridComp} to wait for.
+!      {\tt ESMF\_GridComp} to wait for.
 !     \item[{[rc]}] 
 !      Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
