@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/13 18:35:48 dneckels Exp $ 
+# $Id: base.site,v 1.2 2003/04/15 22:03:17 nscollins Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -17,7 +17,17 @@ LAPACK_LIB     = -lessl /usr/local/64/lib64/liblapack.a
 #
 # Location of MPI (Message Passing Interface) software
 #
-MPI_DIR        = ${ESMF_DIR}/src/Infrastructure/mpiuni
-MPI_LIB        = -lmpiuni
-MPI_INCLUDE    = -I${MPI_DIR}
-MPIRUN         = ${MPI_DIR}/mpirun
+# Location of MPI (Message Passing Interface) software
+#
+MPI_LIB        = 
+MPI_INCLUDE    = 
+MPIRUN         = ${ESMF_TOP_DIR}/scripts/mpirun.rs6000_sp
+MPI64_LIB      = -L/usr/local/mpi64/ppe.poe/lib -lmpi_r -lvtd_r \
+                 -L/usr/local/mpi64/ppe.poe/lib/us -lmpci_r
+HDF_INCLUDE    = -I/usr/local/include/hdf
+
+# old stuff - the mpi standin stuff
+#MPI_DIR        = ${ESMF_DIR}/src/Infrastructure/mpiuni
+#MPI_LIB        = -lmpiuni
+#MPI_INCLUDE    = -I${MPI_DIR}
+#MPIRUN         = ${MPI_DIR}/mpirun
