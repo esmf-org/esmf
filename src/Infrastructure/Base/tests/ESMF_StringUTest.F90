@@ -1,5 +1,17 @@
-! test of passing strings between F90 and C++
+! $Id: ESMF_StringUTest.F90,v 1.2 2003/05/08 14:56:40 flanigan Exp $
 !
+
+! Earth System Modeling Framework
+! Copyright 2002-2003, University Corporation for Atmospheric Research,
+! Massachusetts Institute of Technology, Geophysical Fluid Dynamics
+! Laboratory, University of Michigan, National Centers for Environmental
+! Prediction, Los Alamos National Laboratory, Argonne National Laboratory,
+! NASA Goddard Space Flight Center.
+! Licensed under the GPL.
+!
+!==============================================================================
+
+! test of passing strings between F90 and C++
 
 program StringTest
 

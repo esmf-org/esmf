@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.6 2003/04/15 20:13:42 svasquez Exp $ 
+# $Id: makefile,v 1.7 2003/05/08 14:56:41 flanigan Exp $ 
 
 ALL:  tests
 
@@ -16,16 +16,16 @@ DIRS	  =
 LOCDIR	  = src/Infrastructure/Base/tests
 
 TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BaseUTest \
-		$(ESMC_TESTDIR)/ESMF_StringTest
+		$(ESMC_TESTDIR)/ESMF_StringUTest
 
 TESTS_RUN     = RUN_ESMF_BaseUTest \
-		RUN_ESMF_StringTest
+		RUN_ESMF_StringUTest
 
 TESTS_RUN_UNI = RUN_ESMF_BaseUTestUNI \
-		RUN_ESMF_StringTestUNI
+		RUN_ESMF_StringUTestUNI
 
 TESTS_RM      = ESMF_BaseUTest.rm \
-		ESMF_StringTest.rm
+		ESMF_StringUTest.rm
 
 include ${ESMF_DIR}/makefile
 
@@ -55,21 +55,21 @@ ESMF_BaseUTest.rm:
 #
 # Special for strings passed between C++ and F90
 #
-ESMF_StringTest.o : ESMC_StringSubr.o
+ESMF_StringUTest.o : ESMC_StringSubr.o
 
-$(ESMC_TESTDIR)/ESMF_StringTest: ESMC_StringSubr.o ESMF_StringTest.o
-	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StringTest ESMF_StringTest.o ESMC_StringSubr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
-	${RM} ESMF_StringTest.o ESMC_StringSubr.o 
+$(ESMC_TESTDIR)/ESMF_StringUTest: ESMC_StringSubr.o ESMF_StringUTest.o
+	-$(SL_F_LINKER) -o $(ESMC_TESTDIR)/ESMF_StringUTest ESMF_StringUTest.o ESMC_StringSubr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} $(SL_LINKOPTS)
+	${RM} ESMF_StringUTest.o ESMC_StringSubr.o 
 
-RUN_ESMF_StringTest:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StringTest.tmps
-	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StringTest > $(ESMC_TESTDIR)/ESMF_StringTest.stdout
+RUN_ESMF_StringUTest:
+	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
 
-RUN_ESMF_StringTestUNI:
-	-@rm -f testlog stdlog.* logfile.* ESMF_StringTest.tmps
-	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StringTest > $(ESMC_TESTDIR)/ESMF_StringTest.stdout
+RUN_ESMF_StringUTestUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_StringUTest.tmps
+	-${MPIRUN} -np 1 $(ESMC_TESTDIR)/ESMF_StringUTest > $(ESMC_TESTDIR)/ESMF_StringUTest.stdout
 
-ESMF_StringTest.rm:
-	echo "ESMF_StringTest.rm target called here."
+ESMF_StringUTest.rm:
+	echo "ESMF_StringUTest.rm target called here."
 
 
