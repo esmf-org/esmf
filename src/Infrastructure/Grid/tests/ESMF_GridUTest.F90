@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.14 2003/07/17 20:15:50 nscollins Exp $
+! $Id: ESMF_GridUTest.F90,v 1.15 2003/07/29 16:26:49 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.14 2003/07/17 20:15:50 nscollins Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.15 2003/07/29 16:26:49 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -72,7 +72,7 @@
 
 
 
-      integer :: i_max, j_max
+      integer :: counts(ESMF_MAXGRIDDIM)
       integer :: nDE_i, nDE_j
       integer :: horz_gridtype, vert_gridtype
       integer :: horz_stagger, vert_stagger
@@ -97,8 +97,8 @@
       call ESMF_FrameworkInitialize(status)
 
       !------------------------------------------------------------------------
-      i_max = 10
-      j_max = 12
+      counts(1) = 10
+      counts(2) = 12
       nDE_i = 2
       nDE_j = 2
       horz_gridtype = ESMF_GridType_XY
@@ -122,17 +122,17 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), &
                       name, failMsg, result, ESMF_SRCLINE)
 
-     grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
-                             x_min=x_min, x_max=x_max, &
-			     y_min=y_min, y_max=y_max, &
-		             layout=layout, &
-                             horz_gridtype=horz_gridtype, &
-                             vert_gridtype=vert_gridtype, &
-                             horz_stagger=horz_stagger, &
-                             vert_stagger=vert_stagger, &
-                             horz_coord_system=horz_coord_system, &
-                             vert_coord_system=vert_coord_system, &
-                             name=name, rc=status)
+     grid = ESMF_GridCreate(counts=counts, &
+                            x_min=x_min, x_max=x_max, &
+                            y_min=y_min, y_max=y_max, &
+                            layout=layout, &
+                            horz_gridtype=horz_gridtype, &
+                            vert_gridtype=vert_gridtype, &
+                            horz_stagger=horz_stagger, &
+                            vert_stagger=vert_stagger, &
+                            horz_coord_system=horz_coord_system, &
+                            vert_coord_system=vert_coord_system, &
+                            name=name, rc=status)
 
       !NEX_UTest
 
@@ -146,7 +146,7 @@
 #ifdef ESMF_EXHAUSTIVE
 
       ! Test creating an internal Grid
-      ! grid2 = ESMF_GridCreateInternal(i_max=i_max, j_max=j_max, &
+      ! grid2 = ESMF_GridCreateInternal(counts=counts, &
       !                       x_min=x_min, x_max=x_max, &
       !		             layout=layout, &
       !                       horz_gridtype=horz_gridtype, &
@@ -211,7 +211,7 @@
 
       ! name = "test grid 1"
 
-      ! call ESMF_GridAddPhysGrid(grid_type, i_max=i_max, j_max=j_max, &
+      ! call ESMF_GridAddPhysGrid(grid_type, counts=counts, &
       ! 		     physgrid_id=phy_grid_id, &
       !                      y_min=y_min, y_max=y_max, &
       ! 		     physgrid_name=name, rc=status)
