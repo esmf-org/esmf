@@ -1,4 +1,4 @@
-! $Id: ESMF_CalendarEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_CalendarEx.F90,v 1.13 2003/09/10 03:30:11 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_CalendarEx.F90,v 1.12 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_CalendarEx.F90,v 1.13 2003/09/10 03:30:11 eschwab Exp $'
 !------------------------------------------------------------------------------
 
       ! instantiate calendars
@@ -74,7 +74,8 @@
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       YR = -4713
-      call ESMF_TimeSet(timeZero, yr=YR, mm=11, dd=24, rc=rc)
+      call ESMF_TimeSet(timeZero, yr=YR, mm=11, dd=24, &
+                        calendar=gregorianCalendar, rc=rc)
       print *, "Time Zero Gregorian -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 
@@ -88,7 +89,8 @@
 
       ! oldest date for which Fliegel algorithm works
       YR = -4800
-      call ESMF_TimeSet(checkTime, yr=YR, mm=3, dd=1, rc=rc)
+      call ESMF_TimeSet(checkTime, yr=YR, mm=3, dd=1, &
+                        calendar=gregorianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
       call ESMF_TimeGet(checkTime, yr=YR, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time2 Gregorian = ", &
@@ -96,7 +98,8 @@
 
       ! Fliegel algorithm breaks at 2/29/-4800
       YR = -4800 
-      call ESMF_TimeSet(checkTime, yr=YR, mm=2, dd=29, rc=rc)
+      call ESMF_TimeSet(checkTime, yr=YR, mm=2, dd=29, &
+                        calendar=gregorianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
       call ESMF_TimeGet(checkTime, yr=YR, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time3 Gregorian = ", &
@@ -109,6 +112,7 @@
       Dl = Dl + 67300   !     are 32-bit
       call ESMF_TimeSet(checkTime, d_i8=Dl, calendar=julianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
+      ! switch calendar to perform conversion
       call ESMF_TimeSet(checkTime, calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(checkTime, yr_i8=YRl, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time4 Gregorian = ", &
@@ -120,6 +124,7 @@
       Dl = Dl + 67301   !     are 32-bit
       call ESMF_TimeSet(checkTime, d_i8=Dl, calendar=julianCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
+      ! switch calendar to perform conversion
       call ESMF_TimeSet(checkTime, calendar=gregorianCalendar, rc=rc)
       call ESMF_TimeGet(checkTime, yr_i8=YRl, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time5 Gregorian = ", &
@@ -136,12 +141,14 @@
                YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       YR = -4713
-      call ESMF_TimeSet(timeZero, yr=YR, mm=11, dd=24, rc=rc)
+      call ESMF_TimeSet(timeZero, yr=YR, mm=11, dd=24, &
+                        calendar=noLeapCalendar, rc=rc)
       print *, "Time Zero No Leap -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 
       YR = 2004
-      call ESMF_TimeSet(checkTime, yr=YR, mm=5, dd=18, rc=rc)
+      call ESMF_TimeSet(checkTime, yr=YR, mm=5, dd=18, &
+                        calendar=noLeapCalendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
       call ESMF_TimeGet(checkTime, yr=YR, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time1 No Leap = ", &
@@ -158,12 +165,14 @@
                 YR, "/", MM, "/", DD, " ", H, ":", M, ":", S
 
       YR = -4713
-      call ESMF_TimeSet(timeZero, yr=YR, mm=11, dd=24, rc=rc)
+      call ESMF_TimeSet(timeZero, yr=YR, mm=11, dd=24, &
+                        calendar=day360Calendar, rc=rc)
       print *, "Time Zero 360 Day -4713/11/24 = " 
       call ESMF_TimePrint(timeZero, rc=rc)
 
       YR = 2005
-      call ESMF_TimeSet(checkTime, yr=YR, mm=6, dd=19, rc=rc)
+      call ESMF_TimeSet(checkTime, yr=YR, mm=6, dd=19, &
+                        calendar=day360Calendar, rc=rc)
       call ESMF_TimePrint(checkTime, rc=rc)
       call ESMF_TimeGet(checkTime, yr=YR, mm=MM, dd=DD, h=H, m=M, s=S, rc=rc)
       print *, "Check Time1 360 Day = ", &
