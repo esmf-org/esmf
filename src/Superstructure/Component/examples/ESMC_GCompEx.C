@@ -1,4 +1,4 @@
-// $Id: ESMC_GCompEx.C,v 1.3 2003/03/10 03:23:11 cdeluca Exp $
+// $Id: ESMC_GCompEx.C,v 1.4 2003/11/07 21:55:34 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -21,15 +21,18 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_DELayout.h"
+#include "ESMC_Clock.h"
 #include "ESMC_Comp.h"
+#include "ESMC_GridComp.h"
+#include "ESMC_CplComp.h"
+#include "ESMC_State.h"
 
 #include <stdio.h>
     
 main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, mycell;
-     char compname[32]
+     char compname[32];
      ESMC_DELayout *layout;
      ESMC_Comp *comp1, *comp2, *comp3, *comp4;
         
@@ -90,17 +93,17 @@ main(int argc, char **argv) {
 }
 
 // the actual arguments to these routines are yet to be decided.
-int ATM_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int ATM_Init(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to set up internal data for component
 }
     
 // the actual arguments to these routines are yet to be decided.
-int ATM_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int ATM_Run(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // computational code runs model timesteps here
 }
 
 // the actual arguments to these routines are yet to be decided.
-int ATM_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int ATM_Final(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to flush output, close files, release memory and shut down
 }
     

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplComp.h,v 1.3 2003/10/01 22:17:40 nscollins Exp $
+// $Id: ESMC_CplComp.h,v 1.4 2003/11/07 21:55:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -71,7 +71,7 @@
 // !PUBLIC MEMBER FUNCTIONS:
 //
   public:
-  int ESMC_CplCompSetServices(void (*)(ESMC_Comp *, int *));
+  int ESMC_CplCompSetServices(void (*)(ESMC_CplComp *, int *));
 
   int ESMC_CplCompInitialize(ESMC_State *importstate, ESMC_State *exportstate, 
                               ESMC_Clock *clock, int phase);

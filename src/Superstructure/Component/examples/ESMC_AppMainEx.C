@@ -1,7 +1,7 @@
-// $Id: ESMC_AppMainEx.C,v 1.4 2003/03/10 03:23:10 cdeluca Exp $
+// $Id: ESMC_AppMainEx.C,v 1.5 2003/11/07 21:55:34 nscollins Exp $
 //
-// Example code which creates an Application which is the main program.
-// It cannot be embedded as a Component in another Application.
+// Example code which creates a main Application program.
+// This is the cap component which creates other components below it.
 
 //-------------------------------------------------------------------------
 //-------------------------------------------------------------------------
@@ -9,9 +9,7 @@
 //BOP
 //
 // !DESCRIPTION:
-// Example code which creates an Application which is the main program.
-// It cannot be embedded as a Component in another Application.
-// Also see the Programming Model section of this document.
+// Example code which creates a main Application program.
 //
 //
 //\begin{verbatim}
@@ -21,34 +19,39 @@
 //   // See the more specific example programs for details of how
 //   // the interfaces are used under various conditions.
 
+#include <stdio.h>
 #include "ESMC.h"
 #include "ESMC_DELayout.h"
+#include "ESMC_Clock.h"
 #include "ESMC_Comp.h"
+#include "ESMC_GridComp.h"
+#include "ESMC_CplComp.h"
+#include "ESMC_State.h"
 
-#include <stdio.h>
+void ATM_SetServices(ESMC_GridComp *gc, int *rc);
     
 main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, mycell;
-     char compname[32]
+     char compname[32];
      ESMC_DELayout *layout;
-     ESMC_Comp *comp1, *comp2, *comp3, *comp4;
+     ESMC_GridComp *gcomp1, *gcomp2, *gcomp3, *comp4;
+     ESMC_CplComp *ccomp1;
+     ESMC_Grid *grid = NULL;
         
 //-------------------------------------------------------------------------
 //   // Setup:
-     // create clock, layout here.
+     rc = ESMC_Initialize();
 
 //-------------------------------------------------------------------------
 //   // Example 1:
 //   //
 
-     //comp1 = ESMC_CompCreate("Atmosphere", layout, ESMF_GRIDCOMP,
-     //                         ESMF_ATM, "/usr/local', &rc);
+     gcomp1 = ESMC_GridCompCreate("Atmosphere", layout, ESMF_ATM, grid, 
+                                  "/usr/nancy/esmf/startup.rc", &rc);
 
-     //rc = ESMC_CompRegMethod(comp1, "initialize", ATM_Init);
-     //rc = ESMC_CompRegMethod(comp1, "run", ATM_Run);
-     //rc = ESMC_CompRegMethod(comp1, "finalize", ATM_Final);
-     //printf("Comp example 1 returned\n");
+     rc = gcomp1->ESMC_GridCompSetServices(ATM_SetServices); 
+     printf("Gridded Comp example 1 complete\n");
 
 //-------------------------------------------------------------------------
 //   // Example 2:
@@ -88,20 +91,25 @@ main(int argc, char **argv) {
 
      //printf("Comp example 5 returned\n");
 
+     rc = ESMC_Finalize();
+
+}
+
+void ATM_SetServices(ESMC_GridComp *gc, int *rc) {
 }
 
 // the actual arguments to these routines are yet to be decided.
-int ATM_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+void ATM_Init(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to set up internal data for component
 }
     
 // the actual arguments to these routines are yet to be decided.
-int ATM_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+void ATM_Run(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // computational code runs model timesteps here
 }
 
 // the actual arguments to these routines are yet to be decided.
-int ATM_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+void ATM_Final(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to flush output, close files, release memory and shut down
 }
     

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.14 2003/10/22 21:00:48 cdeluca Exp $ 
+# $Id: makefile,v 1.15 2003/11/07 21:55:34 nscollins Exp $ 
 
 ALL:  examples
 
@@ -60,7 +60,6 @@ LOCDIR	  = src/Superstructure/Component/examples
 EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
                  $(ESMF_EXDIR)/ESMC_CplEx \
                  $(ESMF_EXDIR)/ESMC_GCompEx \
-                 $(ESMF_EXDIR)/ESMC_XformEx \
                  $(ESMF_EXDIR)/ESMF_AppMainEx \
                  $(ESMF_EXDIR)/ESMF_CplEx \
                  $(ESMF_EXDIR)/ESMF_GCompEx 
@@ -74,7 +73,6 @@ EXAMPLES_BUILD = $(ESMF_EXDIR)/ESMC_AppMainEx \
 EXAMPLES_RUN   = run_ESMC_AppMainEx \
                  run_ESMC_CplEx \
                  run_ESMC_GCompEx \
-                 run_ESMC_XformEx \
                  run_ESMF_AppMainEx \
                  run_ESMF_CplEx \
                  run_ESMF_GCompEx 
@@ -83,7 +81,6 @@ EXAMPLES_RUN   = run_ESMC_AppMainEx \
 EXAPMLES_RUN_UNI = run_ESMC_AppMainEx_uni \
                    run_ESMC_CplEx_uni \
                    run_ESMC_GCompEx_uni \
-                   run_ESMC_XformEx_uni \
                    run_ESMF_AppMainEx_uni \
                    run_ESMF_CplEx_uni \
                    run_ESMF_GCompEx_uni 

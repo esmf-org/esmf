@@ -1,4 +1,4 @@
-! $Id: ESMF_UserMain.F90,v 1.6 2003/09/04 18:57:57 cdeluca Exp $
+! $Id: ESMF_UserMain.F90,v 1.7 2003/11/07 21:55:34 nscollins Exp $
 !
 ! Test code which creates a new Application Component. 
 !   Expects to be compiled with ESMF_UserCComp.F90 and ESMF_UserGComp.F90
@@ -27,82 +27,82 @@
 !   ! Local variables
     integer :: rc
 
-    type(ESMF_AppComp) :: appcomp
+    type(ESMF_GridComp) :: topcomp
     type(ESMF_GridComp) :: oceangridcomp, atmgridcomp
     type(ESMF_CplComp) :: cplcomp
 
     ! instantiate a clock, a calendar, and timesteps
-    type(ESMF_Clock) :: aclock
+    type(ESMF_Clock) :: tclock
     type(ESMF_Calendar) :: gregorianCalendar
     type(ESMF_TimeInterval) :: timeStep
     type(ESMF_Time) :: startTime, stopTime
     integer(ESMF_KIND_I8) :: advanceCount
 
-    type(ESMF_Config) :: aconfig
-    type(ESMF_DELayout) :: alayout
+    type(ESMF_Config) :: tconfig
+    type(ESMF_DELayout) :: tlayout
 
     type(ESMF_Grid) :: grid1, grid2
     type(ESMF_State) :: atmimport, ocnexport, cplstates
 
-    character(ESMF_MAXSTR) :: aname, gname1, gname2, cname
+    character(ESMF_MAXSTR) :: tname, gname1, gname2, cname
     character(1024) :: configfile
         
 !-------------------------------------------------------------------------
 !   ! Test 1:
 !   !
-!   !  Create an Application which in turn creates 2 Gridded components and
+!   !  Create an top component which in turn creates 2 Gridded components and
 !   !    a Coupler component.
  
     print *, "Application Test 1:"
 
     !-------------------------------------------------------------------------
-    !  Create the Application
+    !  Create the top level Gridded Component
 
-    aname = "Test Application"
+    tname = "Test Application"
     configfile="/home/nancy/models/startup.conf"
-    appcomp = ESMF_AppCompCreate(name=aname, configfile=configfile, rc=rc)
+    topcomp = ESMF_GridCompCreate(name=tname, configfile=configfile, rc=rc)
 
     ! Query for the layout and config objects
-    call ESMF_AppGet(appcomp, layout=alayout, config=aconfig)
+    call ESMF_GridCompGet(topcomp, layout=tlayout, config=tconfig)
 
-    ! Create the application clock
+    ! Create the main application clock
 
     ! initialize calendar to be Gregorian type
-    call ESMF_CalendarSet(gregorianCalendar, ESMF_CAL_GREGORIAN, rc)
+    call ESMF_CalendarSet(gregorianCalendar, ESMF_CALENDAR_GREGORIAN, rc)
 
     ! initialize time interval to 6 hours
-    call ESMF_TimeIntervalSet(timeStep, H=6, rc=rc)
+    call ESMF_TimeIntervalSet(timeStep, h=6, rc=rc)
 
     ! initialize start time to 5/1/2003
-    call ESMF_TimeSet(startTime, YR=2003, MM=5, DD=1, &
-                      cal=gregorianCalendar, rc=rc)
+    call ESMF_TimeSet(startTime, yr=2003, mm=5, dd=1, &
+                      calendar=gregorianCalendar, rc=rc)
 
     ! initialize stop time to 5/2/2003
     call ESMF_TimeSet(stopTime, YR=2003, MM=5, DD=2, &
-                      cal=gregorianCalendar, rc=rc)
+                      calendar=gregorianCalendar, rc=rc)
 
     ! initialize the clock with the above values
-    call ESMF_ClockSet(clock, timeStep, startTime, stopTime, rc=rc)
+    clock = ESMF_ClockCreate(timeStep, startTime, stopTime, rc=rc)
 
 
-    print *, "App Comp Create completed, name = ", trim(aname)
+    print *, "Top Component Create completed, name = ", trim(tname)
 
     !-------------------------------------------------------------------------
     !  Create the 2 gridded components
 
     grid1 = ESMF_GridCreate("ocean grid", rc=rc)
     gname1 = "Ocean"
-    oceangridcomp = ESMF_GridCompCreate(name=gname1, layout=alayout, &
+    oceangridcomp = ESMF_GridCompCreate(name=gname1, layout=tlayout, &
                                     mtype=ESMF_OCEAN, grid=grid1, &
-                                    config=aconfig, rc=rc)  
+                                    config=tconfig, rc=rc)  
 
     print *, "Grid Comp Create completed, name = ", trim(gname1)
 
     grid2 = ESMF_GridCreate("atm grid", rc=rc)
     gname2 = "Atmosphere"
-    atmgridcomp = ESMF_GridCompCreate(name=gname2, layout=alayout, &
+    atmgridcomp = ESMF_GridCompCreate(name=gname2, layout=tlayout, &
                                     mtype=ESMF_ATM, grid=grid2, &
-                                    config=aconfig, rc=rc)  
+                                    config=tconfig, rc=rc)  
 
     print *, "Grid Comp Create completed, name = ", trim(gname2)
 
@@ -110,7 +110,7 @@
     !  Create the coupler
 
     cname = "Ocean2Atmosphere"
-    cplcomp = ESMF_CplCompCreate(name=cname, layout=alayout, config=aconfig, &
+    cplcomp = ESMF_CplCompCreate(name=cname, layout=tlayout, config=tconfig, &
                                  rc=rc)  
 
     print *, "Cpl Comp Create completed, name = ", trim(cname)
@@ -140,9 +140,9 @@
 
 
     call ESMF_GridCompInitialize(oceangridcomp, exportstate=ocnexport, &
-                                                    clock=aclock, rc=rc)
-    call ESMF_GridCompInitialize(atmgridcomp, atmimport, clock=aclock, rc=rc)
-    call ESMF_CplCompInitialize(cplcomp, cplstates, aclock, rc=rc)
+                                                    clock=tclock, rc=rc)
+    call ESMF_GridCompInitialize(atmgridcomp, atmimport, clock=tclock, rc=rc)
+    call ESMF_CplCompInitialize(cplcomp, cplstates, tclock, rc=rc)
     print *, "Initialization complete"
 
 
@@ -156,11 +156,11 @@
     do
    
         call ESMF_GridCompRun(oceangridcomp, exportstate=ocnexport, 
-                                                         clock=aclock, rc=rc)
+                                                         clock=tclock, rc=rc)
 
-        call ESMF_CplCompRun(cplcomp, cplstates, aclock, rc=rc)
+        call ESMF_CplCompRun(cplcomp, cplstates, tclock, rc=rc)
 
-        call ESMF_GridCompRun(atmgridcomp, atmimport, clock=aclock, rc=rc)
+        call ESMF_GridCompRun(atmgridcomp, atmimport, clock=tclock, rc=rc)
 
 
         call ESMF_ClockAdvance(aclock)
@@ -180,11 +180,11 @@
 
 
     call ESMF_GridCompFinalize(component=oceangridcomp, exportstate=ocnexport, &
-                                                    clock=aclock, rc=rc)
-    call ESMF_CplCompFinalize(cplcomp, statelist=cplstates, clock=aclock, &
+                                                    clock=tclock, rc=rc)
+    call ESMF_CplCompFinalize(cplcomp, statelist=cplstates, clock=tclock, &
                                                                    rc=rc)
     call ESMF_GridCompFinalize(component=atmgridcomp, importstate=atmimport, &
-                                                    clock=aclock, rc=rc)
+                                                    clock=tclock, rc=rc)
     print *, "Finalization complete"
 
 
@@ -192,11 +192,13 @@
     !  Destroy each component
     !
 
+    call ESMF_ClockDestroy(tclock, rc)
+
     call ESMF_GridCompDestroy(oceangridcomp, rc)
     call ESMF_GridCompDestroy(atmgridcomp, rc)
     call ESMF_CplCompDestroy(cplcomp, rc)
 
-    call ESMF_AppCompDestroy(appcomp, rc)
+    call ESMF_GridCompDestroy(topcomp, rc)
 
     print *, "Cleanup complete"
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_GCompEx.F90,v 1.6 2003/04/04 15:26:45 nscollins Exp $
+! $Id: ESMF_GCompEx.F90,v 1.7 2003/11/07 21:55:34 nscollins Exp $
 !
 ! Example/test code which shows Gridded Component calls.
 
@@ -80,7 +80,7 @@
         type(ESMF_GridComp) :: comp(:)
         type(ESMF_State) :: importstate, exportstate
         type(ESMF_Clock) :: clock
-        intger :: rc
+        integer :: rc
 
 
         print *, "Gridded Comp Run starting"
@@ -116,9 +116,6 @@
         print *, "Gridded Comp Final returning"
    
     end subroutine GComp_Final
-
-
-    print *, "Gridded Comp Example 1 finished"
 
 
     end module ESMF_GriddedCompEx

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplEx.F90,v 1.6 2003/04/04 15:26:46 nscollins Exp $
+! $Id: ESMF_CplEx.F90,v 1.7 2003/11/07 21:55:34 nscollins Exp $
 !
 ! Example/test code which shows Coupler Component calls.
 
@@ -109,8 +109,6 @@
    
     end subroutine CPL_Final
 
-
-    print *, "Coupler Example 1 finished"
 
 
     end module ESMF_CouplerEx

@@ -1,4 +1,4 @@
-// $Id: ESMC_CplEx.C,v 1.4 2003/03/10 03:23:10 cdeluca Exp $
+// $Id: ESMC_CplEx.C,v 1.5 2003/11/07 21:55:34 nscollins Exp $
 //
 // Example/test code which creates a new comp.
 
@@ -21,15 +21,18 @@
 //   // the interfaces are used under various conditions.
 
 #include "ESMC.h"
-#include "ESMC_DELayout.h"
+#include "ESMC_Clock.h"
 #include "ESMC_Comp.h"
+#include "ESMC_GridComp.h"
+#include "ESMC_CplComp.h"
+#include "ESMC_State.h"
 
 #include <stdio.h>
     
 main(int argc, char **argv) {
 //   // Local variables
      int x, y, rc, mycell;
-     char compname[32]
+     char compname[32];
      ESMC_DELayout *layout;
      ESMC_Comp *comp1, *comp2, *comp3, *comp4;
         
@@ -90,17 +93,17 @@ main(int argc, char **argv) {
 }
 
 // the actual arguments to these routines are yet to be decided.
-int CPL_Init(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int CPL_Init(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to set up internal data for coupling
 }
     
 // the actual arguments to these routines are yet to be decided.
-int CPL_Run(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int CPL_Run(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // coupling manages data exchange here
 }
 
 // the actual arguments to these routines are yet to be decided.
-int CPL_Final(ESMC_State *import, ESMC_State *export, ESMC_Clock *clock) {
+int CPL_Final(ESMC_State *importS, ESMC_State *exportS, ESMC_Clock *clock) {
      // code to flush output, close files, release memory and shut down
 }
     
