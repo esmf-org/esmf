@@ -1,4 +1,4 @@
-#  $Id: common.mk,v 1.36 2004/01/30 21:37:21 svasquez Exp $
+#  $Id: common.mk,v 1.37 2004/02/10 00:09:31 svasquez Exp $
 #===============================================================================
 #  common.mk
 #
@@ -863,7 +863,7 @@ build_shared:
 # special for the AppDriver dir. 
 %_fapi.tex : ../seq_pairwise_fdriver_spmd/%.F90
 	export PROTEX=$(PROTEX) ;\
-	$(F_PROTEX) $* $<
+	$(F_PROTEX) $* $< SeqPrF
 
 
 
