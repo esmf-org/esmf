@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.12 2004/02/13 15:36:35 nscollins Exp $
+# $Id: makefile,v 1.13 2004/10/26 21:46:09 nscollins Exp $
 
 # leave alone.
 ALL: build_here 
@@ -31,6 +31,21 @@ LOCDIR	  = src/Infrastructure/Grid/src
 
 
 include $(ESMF_DIR)/makefile
+
+# this section must be *after* the line above, and it only seems to apply
+# to absoft on mac os x, the 8.2 version.  it incorrectly optimizes
+# ESMF_LogRectGrid.F90, referencing a subroutine argument which is not
+# present (and is inside an "if (present())" statement.  if you are
+# compiling with absoft 9+, you can comment out this code if you want
+# the default level of optimization (which is -O2).
+ifeq ($(ESMF_COMPILER),absoft)
+ ifeq ($(ESMF_ARCH),Darwin)
+  ifeq ($(ESMF_BOPT),O)
+   O_FOPTFLAGS += -O1
+  endif
+ endif
+endif
+
 
 # leave the following line blank.
 DIRS	  = 
