@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.1 2003/03/10 21:54:20 cdeluca Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.2 2003/04/04 16:23:00 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -16,16 +16,9 @@
 
 !   ! Example program showing various ways to create a Field object
     program ESMF_FieldCreateEx
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! Other ESMF modules which are needed by Fields
-    use ESMF_IOMod
-    use ESMF_ArrayMod
-    use ESMF_DataMapMod
-    use ESMF_GridMod
-    use ESMF_FieldMod
+    ! ESMF Framework module
+    use ESMF_Mod
     
     implicit none
     

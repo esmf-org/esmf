@@ -1,4 +1,4 @@
-! $Id: ESMF_BundleCreateEx.F90,v 1.1 2003/03/10 21:54:20 cdeluca Exp $
+! $Id: ESMF_BundleCreateEx.F90,v 1.2 2003/04/04 16:22:58 nscollins Exp $
 !
 ! Example/test code which creates a new bundle.
 
@@ -16,18 +16,10 @@
 
 !   ! Example program showing various ways to create a Bundle object.
     program ESMF_BundleCreateEx
-    
-!   ! Some common definitions.  This requires the C preprocessor.
-#include "ESMF.h"
 
-!   ! Other ESMF modules which are needed by Bundles
-    use ESMF_IOMod
-    use ESMF_ArrayMod
-    use ESMF_DataMapMod
-    use ESMF_GridMod
-    use ESMF_FieldMod
-    use ESMF_BundleMod
-    
+    ! ESMF Framework module
+    use ESMF_Mod
+
     implicit none
     
 !   ! Local variables
