@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.18 2005/03/14 21:59:06 jwolfe Exp $
+# $Id: build_rules.mk,v 1.19 2005/03/23 02:57:45 theurich Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -172,10 +172,10 @@ C_FC    +=
 # Which compiler to call when
 C_CLINKER          = ${C_CC}
 C_FLINKER          = ${C_FC}
-CXX_FC             = ${C_FC} -mp
+CXX_FC             = ${C_FC}
 CXX_CLINKER        = ${C_CC}
 CXX_FLINKER        = ${C_CC}
-C_F90CXXLD         = ${C_FC} -mp
+C_F90CXXLD         = ${C_FC}
 C_CXXF90LD         = ${C_CC}
 C_CXXSO            = ${C_CC} -shared
 SH_LD              = ${C_CC}
