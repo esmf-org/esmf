@@ -1,4 +1,4 @@
-% $Id: ESMF_use.tex,v 1.12 2003/11/12 17:35:37 svasquez Exp $
+% $Id: ESMF_use.tex,v 1.13 2003/11/12 20:25:45 svasquez Exp $
 
 \subsection{Using the ESMF}
 \label{UsingLibrary}
@@ -80,6 +80,16 @@ and use the following CVS command:
 \begin{verbatim}
 	cvs -z3 -d:ext:$username@cvs.sourceforge.net:/cvsroot/esmfcontrib checkout ncar
 \end{verbatim}
+
+The following directories will be checked out:
+
+\begin{verbatim}
+	AIX.default.blackforest
+	AIX.default.bluesky
+	Linux.lahey.longs
+\end{verbatim}
+
+To build using these makefiles you must set the emvironment variable, ESMF_SITE, to blackforest, bluesky, or longs.
 
 At the present time, we have files for the following institutions:
 
