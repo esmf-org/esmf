@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMemEx.C,v 1.2 2003/11/04 23:46:56 jwolfe Exp $
+// $Id: ESMC_CommMemEx.C,v 1.3 2004/01/09 21:00:11 svasquez Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -12,6 +12,8 @@
 //
 // NOTE: this is prototype test code; don't write user-level code based on this!
 //
+//_____________________________________________________________________________
+//!EXAMPLE        String used by test script to count examples.
 //-----------------------------------------------------------------------------
 //
 // !DESCRIPTION:
@@ -42,6 +44,10 @@
 #define ESMC_COMM_NTHREADSPERPROC 4
 #define ESMC_COMM_NPROCS 2
 
+static const success = ESMF_SUCCESS;
+static const failure = ESMF_FAILURE;
+
+
 // pthread start function requires C-linkage
 extern "C" {
 void *do_DE(void *);
@@ -66,6 +72,8 @@ int gbuf[ESMC_COMM_NPROCS * ESMC_COMM_NTHREADSPERPROC * 3];
 
 int main(int argc, char **argv)
 {
+  // Define return codes
+  int  *threadrc, rc, finalrc=ESMF_SUCCESS;
   // allocate ESMC_Comm_tid array to share with ESMC_Comm
   ESMC_Comm_tid = new pthread_t[ESMC_COMM_NTHREADSPERPROC];
 
@@ -78,7 +86,10 @@ int main(int argc, char **argv)
   // start other DE (worker) threads
   //   note: loop starts at 1 since 0 is main thread
   for (int i=1; i<ESMC_COMM_NTHREADSPERPROC; i++) {
-    pthread_create(&ESMC_Comm_tid[i], NULL, do_DE, (void *)&t_arg);
+    rc = pthread_create(&ESMC_Comm_tid[i], NULL, do_DE, (void *)&t_arg);
+    if (rc != ESMF_SUCCESS) {
+	finalrc = ESMF_FAILURE;
+    }
     //cout << "thread " << i << " started, tid=" << ESMC_Comm_tid[i] << endl;
   }
 
@@ -96,10 +107,23 @@ int main(int argc, char **argv)
   // wait for other (DE) threads to exit
   //   note: loop starts at 1 since 0 is main thread
   for (int i=1; i<ESMC_COMM_NTHREADSPERPROC; i++) {
-    pthread_join(ESMC_Comm_tid[i], NULL);
+    rc = pthread_join(ESMC_Comm_tid[i], (void**) &threadrc);
+    if ((rc != ESMF_SUCCESS ) & (*threadrc != ESMF_SUCCESS)) {
+        finalrc = ESMF_FAILURE;
+    }
+
+   if (finalrc == ESMF_SUCCESS) {
+        cout << "PASS: ESMC_CommMemEx.C" << endl;
+        return(ESMF_SUCCESS);
+   }
+   else {
+        cout << "FAIL: ESMC_CommMemEx.C" << endl;
+        return(ESMF_FAILURE);
+   }
+
+
   }
 
-  return(0);
 }
 
 ///////////////////////
@@ -111,7 +135,8 @@ int main(int argc, char **argv)
 void *do_DE(void *t_arg)
 {
   // unpack args
-  int argc;
+  int argc, rc;
+ int finalrc = ESMF_SUCCESS;
   char **argv;
   ESMC_DEType_e detype;
   argc   = ((arg_s *) t_arg)->argc;
@@ -157,13 +182,17 @@ cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
   sendbuf[2] = mynodeid;
 
   // gather all PE IDs from all DEs
-  comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_I4);
+  rc = comm.ESMC_CommAllGather(sendbuf, gbuf, 3, ESMF_I4);
+
+  if (rc != ESMF_SUCCESS) {
+        finalrc = ESMF_FAILURE;
+  }
+
 //cout << "main: exited ESMC_CommAllGather" << endl;
 
   // create PE List from gathered IDs
 
   // create a PE list object entirely on the heap
-  int rc;
   ESMC_PEList *peList = ESMC_PEListCreate(nDEs, &rc); // assume #PEs = nDEs
                                                       //   for now
 
@@ -205,6 +234,11 @@ cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
 
   // now get rid of 'em
   rc = ESMC_PEListDestroy(peList);    // deallocates entire object
+
+  if (rc != ESMF_SUCCESS) {
+      finalrc = ESMF_FAILURE;
+  }
+
   //rc = ESMC_DELayoutDestroy(layout);
   //layout.ESMC_DELayoutDestruct();
 
@@ -232,6 +266,19 @@ cout << "mycpuid, mynodeid = " << mycpuid << ", " << mynodeid << "\n";
   }
 #endif
 //cout << "DE " << myDEid << " outa here!" << endl;
-  if (detype == ESMC_THREAD) pthread_exit(NULL); // don't exit main thread !
-  return(NULL);
+  if (detype == ESMC_THREAD) { // don't exit main thread !
+	if (finalrc == ESMF_SUCCESS) {
+		pthread_exit((void*) &success); 
+	}
+	else {
+		pthread_exit((void*) &failure); 
+        }
+   }
+
+   if (finalrc == ESMF_SUCCESS) {
+		return((void*) &success); 
+	}
+	else {
+		return((void*) &failure); 
+        }
 }
