@@ -1,4 +1,4 @@
-% $Id: ESMF_install.tex,v 1.15 2003/03/17 21:15:55 btwomack Exp $
+% $Id: ESMF_install.tex,v 1.16 2003/03/20 20:00:49 btwomack Exp $
 
 \section{Installation}
 \label{Installation}
@@ -38,38 +38,36 @@ Build the library with the command:
 
 \subsubsection{Building the ESMF Test Suites}
 \label{BuildTestSuite}
-A test suite is included with the library.  Tests are provided for both MPI
-and uniprocessor builds. 
+A test suite is included with the library. Tests are provided for both MPI
+and uniprocessor builds. Tests can be built both from the top ESMF directory and
+the local source code directories.
 
-\noindent To build and run MPI C tests:
-
+\noindent The following command builds the System Tests:
 \begin{verbatim}
-  gmake BOPT=g test_c
+  gmake BOPT=<g,O> [SYSTEM_TEST=NNNNN] build_system_tests
 \end{verbatim}
 
-\noindent To build and run MPI F90 tests:
+For example:
 \begin{verbatim}
-  gmake BOPT=g test_f90
+  gmake BOPT=O build_system_tests
+\end{verbatim}
+Will build all available system tests. Specifying a specific SYSTEM\_TEST number will build only the specified system test.
+
+\noindent The following command builds the Unit Tests:
+\begin{verbatim}
+  gmake BOPT=<g,O> [ESMF_EXHAUSTIVE=<ON,OFF>] build_tests
 \end{verbatim}
 
-\noindent To build and run non-MPI C tests:
+For example:
 \begin{verbatim}
-  gmake BOPT=g test_cuni
+  gmake BOPT=g ESMF_EXHAUSTIVE=OFF build_tests
 \end{verbatim}
-
-\noindent To build and run non-MPI F90 tests:
-\begin{verbatim}
-  gmake BOPT=g test_f90uni
-\end{verbatim}
+will build tests that verify basic correctness of the library build and installation. Turning the {\tt ESMF\_EXHAUSIVE} option {\tt ON} when building will create a more comprehensive set of tests, but, will take significantly longer to run. 
 
 Output files from the test examples will be directed to files in:
 \begin{verbatim}
-${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
+  ${ESMF_DIR}/test${BOPT}/${ESMF_ARCH}
 \end{verbatim}
-
-Exhaustive tests exist that may be activated by setting the environment variable
-{\tt ESMF\_EXHTEST} to {\tt on}.  While this activation will test the library more thoroughly,
-it will take significantly longer to complete than the basic tests.
 
 See Section~\ref{TestingProcedures} for instruction on running ESMF tests.
 
