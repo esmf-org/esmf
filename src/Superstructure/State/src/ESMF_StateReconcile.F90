@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.13 2004/12/21 17:05:09 nscollins Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.14 2004/12/22 01:16:28 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -100,7 +100,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.13 2004/12/21 17:05:09 nscollins Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.14 2004/12/22 01:16:28 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -119,7 +119,7 @@
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
 #define ESMF_METHOD "ESMF_StateReconcile"
-!BOPI
+!BOP
 ! !IROUTINE: ESMF_StateReconcile -- Reconcile the internal data from a State
 !
 ! !INTERFACE:
@@ -132,13 +132,15 @@
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
-!     Must be called on an {\tt ESMF\_State} which might contain ESMF objects
-!     that have not been created on all the {\tt PET}s on which an
-!     {\tt ESMF\_Component} runs.  
+!     Must be called for any {\tt ESMF\_State} which contains ESMF objects
+!     that have not been created on all the {\tt PET}s of the currently
+!     running {\tt ESMF\_Component}.  
 !     For example, if a coupler is operating on data
-!     which was created by another component which was running on a subset
+!     which was created by another component that ran on only a subset
 !     of the coupler's {\tt PET}s, the coupler must make this call first
 !     before operating on any data inside that {\tt ESMF\_State}.
+!     After calling {\tt ESMF\_StateReconcile} all {\tt PET}s will have
+!     a common view of all objects contained in this {\tt ESMF\_State}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -153,7 +155,7 @@
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOPI
+!EOP
     integer :: localrc
     type(ESMF_StateItemInfo), dimension(:), pointer :: stateinfo
 
