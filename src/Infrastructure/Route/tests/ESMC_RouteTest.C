@@ -1,4 +1,4 @@
-// $Id: ESMC_RouteTest.C,v 1.2 2003/03/11 03:01:05 cdeluca Exp $
+// $Id: ESMC_RouteTest.C,v 1.3 2003/03/17 17:53:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RouteTest.C,v 1.2 2003/03/11 03:01:05 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_RouteTest.C,v 1.3 2003/03/17 17:53:31 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])
@@ -46,6 +46,9 @@
 
    // individual test result code
    int rc;
+
+   // individual test name
+   char name[ESMF_MAXSTR];
 
    // individual test failure message
    char failMsg[ESMF_MAXSTR];
@@ -57,85 +60,80 @@
    //  tests default constructor; add args to test other constructors
    ESMC_Route route;
 
+   // create a layout to use below
+   ESMC_DELayout *mylayout = ESMC_DELayoutCreate(&rc);
+
    // test dynamic allocation of ESMC_Route
    //   also tests default constructor
-   route_ptr = ESMC_RouteCreate(args, &rc);
-   sprintf(failMsg, "rc = %d, route_ptr = %p, args = %f",
-           rc, route_ptr, args);
+   route_ptr = ESMC_RouteCreate(mylayout, &rc);
+   sprintf(failMsg, "rc = %d, route_ptr = %p", rc, route_ptr);
    ESMC_Test((route_ptr!=0 && rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
     
    // test internal dynamic allocation within statically allocated
    //   ESMC_Route
-   rc = route_ptr->ESMC_RouteConstruct(args);
-   sprintf(failMsg, "rc = %d, args = %f", rc, args);
+   rc = route_ptr->ESMC_RouteConstruct(mylayout);
+   sprintf(failMsg, "rc = %d", rc);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
-
-   // test initialization of members of statically allocated ESMC_Route
-   //   may want to read back values via Get methods for comparison
-   rc = route_ptr->ESMC_RouteInit(args);
-   sprintf(failMsg, "rc = %d, args = %f", rc, args);
-   ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test setting of configuration values
-   ESMC_RouteConfig config_set;
-   rc = route_ptr->ESMC_RouteSetConfig(config_set);
-   sprintf(failMsg, "rc = %d, config_set = %f", rc, config_set);
-   ESMC_Test((rc==ESMF_SUCCESS), 
-              failMsg, &result, ESMF_SRCLINE);
+   //ESMC_RouteConfig config_set;
+   //rc = route_ptr->ESMC_RouteSetConfig(config_set);
+   //sprintf(failMsg, "rc = %d, config_set = %f", rc, config_set);
+   //ESMC_Test((rc==ESMF_SUCCESS), 
+   //           name, failMsg, &result, ESMF_SRCLINE);
 
    // test getting of configuration values,
    //  compare to values set previously
-   ESMC_RouteConfig config_get;
-   rc = route_ptr->ESMC_RouteGetConfig(&config_get);
-   sprintf(failMsg, "rc = %d, config_get = %f", rc, config_get);
-   ESMC_Test((rc==ESMF_SUCCESS && config_get == config_set),
-              failMsg, &result, ESMF_SRCLINE);
+   //ESMC_RouteConfig config_get;
+   //rc = route_ptr->ESMC_RouteGetConfig(&config_get);
+   //sprintf(failMsg, "rc = %d, config_get = %f", rc, config_get);
+   //ESMC_Test((rc==ESMF_SUCCESS && config_get == config_set),
+   //           name, failMsg, &result, ESMF_SRCLINE);
 
    // test setting of ESMC_Route members values
-   <value type> value_set;
-   rc = route_ptr->ESMC_RouteSet<Value>(value_set);
-   sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
-   ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+   int value_set; //<value type> value_set;
+   //rc = route_ptr->ESMC_RouteSet<Value>(value_set);
+   //sprintf(failMsg, "rc = %d, value_set = %f", rc, value_set);
+   //ESMC_Test((rc==ESMF_SUCCESS),
+   //           name, failMsg, &result, ESMF_SRCLINE);
 
    // test getting of ESMC_Route members values,
    //   compare to values set previously
-   <value type> value_get;
-   rc = route_ptr->ESMC_RouteGet<Value>(&value_get);
-   sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
-   ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
-              failMsg, &result, ESMF_SRCLINE);
+   int value_get; //<value type> value_get;
+   //rc = route_ptr->ESMC_RouteGet<Value>(&value_get);
+   //sprintf(failMsg, "rc = %d, value_get = %f", rc, value_get);
+   //ESMC_Test((rc==ESMF_SUCCESS && value_get == value_set),
+   //           name, failMsg, &result, ESMF_SRCLINE);
     
    // test validate method via option string
    char validate_options[ESMF_MAXSTR];
    rc = route_ptr->ESMC_RouteValidate(validate_options);
    sprintf(failMsg, "rc = %d, validate_options = %s", rc, validate_options);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test print method via option string
    char print_options[ESMF_MAXSTR];
    rc = route_ptr->ESMC_RoutePrint(print_options);
    sprintf(failMsg, "rc = %d, print_options = %s", rc, print_options);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test internal dynamic deallocation within statically allocated 
    //   ESMC_Route
    rc = route_ptr->ESMC_RouteDestruct();
    sprintf(failMsg, "rc = %d", rc);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // test dynamic deallocation of ESMC_Route
    //   also tests destructor
    rc = ESMC_RouteDestroy(route_ptr);
    sprintf(failMsg, "rc = %d, route_ptr = %p", rc, route_ptr);
    ESMC_Test((rc==ESMF_SUCCESS),
-              failMsg, &result, ESMF_SRCLINE);
+              name, failMsg, &result, ESMF_SRCLINE);
 
    // return number of failures to environment; 0 = success (all pass)
    return(result);

@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.4 2003/03/14 15:25:33 nscollins Exp $
+# $Id: makefile,v 1.5 2003/03/17 17:53:29 nscollins Exp $
 
 ALL:  tests
 
@@ -37,8 +37,7 @@ TESTEXAMPLES_9  =
 
 include ${ESMF_DIR}/makefile
 
-tests test:
-	echo skipping all Route tests, this needs to be fixed.
+tests test: ESMF_RouteTest ESMC_RouteTest
 
 #tests test: ESMF_XPacketTest ESMC_XPacketTest \
 #            ESMF_RTableTest ESMC_RTableTest \
