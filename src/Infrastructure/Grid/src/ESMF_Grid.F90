@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.147 2004/03/18 22:23:57 nscollins Exp $
+! $Id: ESMF_Grid.F90,v 1.148 2004/03/19 17:21:21 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -20,7 +20,6 @@
 !
 !------------------------------------------------------------------------------
 ! INCLUDES
-!!#include "ESMF_Grid.h"   ! unnecessary?
 #include "ESMF.h"
 !==============================================================================
 !BOPI
@@ -93,7 +92,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.147 2004/03/18 22:23:57 nscollins Exp $'
+      '$Id: ESMF_Grid.F90,v 1.148 2004/03/19 17:21:21 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -269,7 +268,8 @@
       end function ESMF_GridCreateEmpty
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridCreateRead - Create a new Grid read in from a file
 
 ! !INTERFACE:
@@ -301,7 +301,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
@@ -373,7 +373,8 @@
       end function ESMF_GridCreateRead
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridCreateCopy - Create a new Grid by copying another Grid
 
 ! !INTERFACE:
@@ -402,7 +403,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
@@ -474,7 +475,8 @@
       end function ESMF_GridCreateCopy
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridCreateCutout - Create a new Grid as a subset of an existing Grid
 
 ! !INTERFACE:
@@ -509,7 +511,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
@@ -582,7 +584,8 @@
       end function ESMF_GridCreateCutout
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridCreateDiffRes - Create a new Grid by coarsening or refining an existing Grid
 
 ! !INTERFACE:
@@ -621,7 +624,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
@@ -694,7 +697,8 @@
       end function ESMF_GridCreateDiffRes
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridCreateExchange - Create a new Grid from the intersection of two existing grids
 
 ! !INTERFACE:
@@ -726,7 +730,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  TODO
 
       integer :: status                           ! Error status
@@ -1024,13 +1028,13 @@
 ! !IROUTINE: ESMF_GridGetCoord - Get the coordinates of a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetCoord(grid, physGridId, relloc, centerCoord, &
+      subroutine ESMF_GridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
                                    cornerCoord, faceCoord, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_Array), dimension(:), pointer, optional :: centerCoord
       type(ESMF_Array), dimension(:,:), pointer, optional :: cornerCoord
       type(ESMF_Array), optional :: faceCoord
@@ -1045,12 +1049,12 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be queried.
-!     \item[{[physGridId]}]
-!          Identifier for the {\tt ESMF\_PhysGrid} to be queried.
-!     \item[{[relloc]}]
-!          Relative location of the {\tt ESMF\_PhysGrid} to be queried.
-!          Note: either the physGridId or relloc must be specified.  If both
-!                are, the physGridId will take precedence.
+!     \item[{[horzRelLoc]}]
+!          Horizontal relative location of the {\tt ESMF\_PhysGrid} to be
+!          queried.
+!     \item[{[vertRelLoc]}]
+!          Vertical relative location of the {\tt ESMF\_PhysGrid} to be
+!          queried.
 !     \item[{[centerCoord]}]
 !          Coordinates of each cell center.  The dimension index should
 !          be defined first (e.g. x = coord(1,i,j), y=coord(2,i,j)).
@@ -1075,80 +1079,74 @@
 ! !REQUIREMENTS:
 !EOP
 
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: physIdUse
-      logical :: rellocIsValid, physIdIsValid
+      integer :: status                       ! Error status
+      logical :: rcpresent                    ! Return code present
 
 !     Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
-      ! Initialize other variables
-      physIdUse = -1
-      rellocIsValid = .false.
-      physIdIsValid = .false.
+!     Call GridGetCoord routines based on GridStructure
 
-      ! Either the relative location or physGridId must be present and valid
-      if (present(relloc)) then
-!        rellocIsValid = ESMF_RelLocIsValid(relloc)  TODO: assume OK if there for now
-        rellocIsValid = .true.
-      endif
-      if (present(physGridId)) then
-        if ((physGridId.ge.1) .and. (physGridId.le.grid%ptr%numPhysGrids)) then
-          physIdIsValid = .true.
-          physIdUse = physGridId
-       endif
-      endif
-      if (.not.(rellocIsValid .or. physIdIsValid)) then
-        print *, "ERROR in ESMF_GridGetCoord: need either relloc or PhysGridId"
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      ! ESMF_GridStructure_Unknown
+      case(0)
+        print *, "ERROR in ESMF_GridGetCoord: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_LogRect
+      case(1)
+        call ESMF_LRGridGetCoord(grid, horzRelLoc, vertRelLoc, centerCoord, &
+                                 cornerCoord, faceCoord, total, status)
+
+      !-------------
+      ! ESMF_GridStructure_LogRectBlock
+      case(2)
+        print *, "ERROR in ESMF_GridGetCoord: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_Unstruct
+      case(3)
+        print *, "ERROR in ESMF_GridGetCoord: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_User
+      case(4)
+        print *, "ERROR in ESMF_GridGetCoord: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridGetCoord: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridGetCoord: error in get'
         return
       endif
 
-      ! If there is a relloc but no physGrid id, then get the id from the relloc
-      if (rellocIsValid .and. .not.(physIdIsValid)) then
-        call ESMF_GridGetPhysGridID(grid%ptr, relloc, physIdUse, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGetCoord: get PhysGrid id"
-          return
-        endif
-        if (physIdUse.eq.-1) then
-          print *, "ERROR in ESMF_GridGetCoord: no PhysGrid corresponding", &
-                   " to relloc"
-          return
-        endif
-      endif
-
-      ! Call PhysGridGet with valid PhysGrid
-      if (present(centerCoord)) then
-        call ESMF_PhysGridGetLocations(grid%ptr%physGrids(physIdUse), &
-                                       locationArray=centerCoord, &
-                                       total=total, rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGetCoord: PhysGrid get locations"
-          return
-        endif
-      endif
-      if (present(cornerCoord)) then
-        call ESMF_PhysGridGetRegions(grid%ptr%physGrids(physIdUse), &
-                                     vertexArray=cornerCoord, rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGetCoord: PhysGrid get regions"
-          return
-        endif
-      endif
-      ! TODO: face coords
-
-      if (rcpresent) rc = ESMF_SUCCESS
+      if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGetCoord
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetCoordFromArray - Set the coordinates of a Grid from an existing ESMF array
 
 ! !INTERFACE:
@@ -1183,7 +1181,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -1191,7 +1189,8 @@
       end subroutine ESMF_GridSetCoordFromArray
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetCoordFromBuffer - Set the coordinates of a Grid from an existing data buffer
 
 ! !INTERFACE:
@@ -1226,7 +1225,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -1234,7 +1233,8 @@
       end subroutine ESMF_GridSetCoordFromBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetCoordCopy - Copies coordinates from one grid to another
 
 ! !INTERFACE:
@@ -1268,7 +1268,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -1277,26 +1277,25 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_GridGetDE - Get DE information for a DistGrid
+! !IROUTINE: ESMF_GridGetDE - Get Local DE information for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetDE(grid, horzDistGridId, vertDistGridId, &
-                                horzPhysGridId, vertPhysGridId, &
-                                horzRelLoc, vertRelLoc, &
+      subroutine ESMF_GridGetDE(grid, horzRelLoc, vertRelLoc, &
                                 myDE, localCellCount, localCellCountPerDim, &
+                                minLocalCoordPerDim, maxLocalCoordPerDim, &
                                 globalStartPerDim, globalAIPerDim, total, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
-      integer, intent(in), optional :: horzDistGridId
-      integer, intent(in), optional :: vertDistGridId
-      integer, intent(in), optional :: horzPhysGridId
-      integer, intent(in), optional :: vertPhysGridId
-      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
       type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer, intent(inout), optional :: myDE
       integer, intent(inout), optional :: localCellCount
       integer, dimension(:), intent(inout), optional :: localCellCountPerDim
+      real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
+                            minLocalCoordPerDim
+      real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
+                            maxLocalCoordPerDim
       integer, dimension(:), intent(inout), optional :: globalStartPerDim
       type(ESMF_AxisIndex), dimension(:), intent(inout), &
                         optional :: globalAIPerDim
@@ -1309,29 +1308,14 @@
 !     {\tt ESMF\_DistGrid} must be identified by this calling routine.  For a 3D
 !     {\tt ESMF\_Grid}, the user must supply identifiers for both the horizontal
 !     and vertical grids if querying for an array of values, like 
-!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} can be identified
-!     using one of three input variables:
-!        (1) horzDistGridId and/or vertDistGridId;
-!        (2) horzPhysGridId and/or vertPhysGridId;
-!        (3) horzRelLoc and/or vertRelLoc.
+!     localCellCountPerDim.  The {\tt ESMF\_DistGrid(s)} are identified
+!     using the set of input variables:  horzRelLoc and/or vertRelLoc.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[grid]
 !          Class to be queried.
-!     \item[{[horzDistGridId]}]
-!          Integer identifier for {\tt ESMF\_DistGrid} corresponding to the
-!          horizontal grid.
-!     \item[{[vertDistGridId]}]
-!          Integer identifier for {\tt ESMF\_DistGrid} corresponding to the
-!          vertical grid.
-!     \item[{[horzPhysGridId]}]
-!          Integer identifier for {\tt ESMF\_PhysGrid} corresponding to the
-!          horizontal grid.
-!     \item[{[vertPhysGridId]}]
-!          Integer identifier for {\tt ESMF\_PhysGrid} corresponding to the
-!          vertical grid.
-!     \item[{[horzRelLoc]}]
+!     \item[horzRelLoc]
 !          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
 !          grid.
 !     \item[{[vertRelLoc]}]
@@ -1342,7 +1326,11 @@
 !     \item[{[localCellCount]}]
 !          Local (on this {\tt ESMF\_DE}) number of cells.
 !     \item[{[localCellCountPerDim]}]
-!          Local (on this {\tt ESMF\_DE}) number of cells per axis.
+!          Local (on this {\tt ESMF\_DE}) number of cells per dimension.
+!     \item[{[minLocalCoordPerDim]}]
+!          Array of minimum local physical coordinates in each dimension.
+!     \item[{[maxLocalCoordPerDim]}]
+!          Array of maximum local physical coordinates in each dimension.
 !     \item[{[globalStartPerDim]}]
 !          Global index of starting counts for each dimension.
 !     \item[{[globalAIPerDim]}]
@@ -1382,10 +1370,9 @@
       !-------------
       ! ESMF_GridStructure_LogRect
       case(1)
-        call ESMF_LRGridGetDE(grid, horzDistGridId, vertDistGridId, &
-                              horzPhysGridId, vertPhysGridId, &
-                              horzRelLoc, vertRelLoc, &
+        call ESMF_LRGridGetDE(grid, horzRelLoc, vertRelLoc, &
                               myDE, localCellCount, localCellCountPerDim, &
+                              minLocalCoordPerDim, maxLocalCoordPerDim, &
                               globalStartPerDim, globalAIPerDim, total, status)
 
       !-------------
@@ -1789,24 +1776,19 @@
 ! !IROUTINE: ESMF_GridGet - Gets a variety of information about the grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGet(grid, distGridId, physGridId, relloc, &
-                              numDims, &
+      subroutine ESMF_GridGet(grid, horzRelLoc, vertRelLoc, &
                               horzGridKind, vertGridKind, &
                               horzStagger, vertStagger, &
                               horzCoordSystem, vertCoordSystem, &
-                              coordOrder, &
-                              minGlobalCoordPerDim, maxGlobalCoordPerDim, &
-                              minLocalCoordPerDim, maxLocalCoordPerDim, &
-                              globalCellCountPerDim, &
+                              coordOrder, dimCount, minGlobalCoordPerDim, &
+                              maxGlobalCoordPerDim, globalCellCountPerDim, &
                               globalStartPerDEPerDim, maxLocalCellCountPerDim, &
                               cellCountPerDEPerDim, periodic, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid), intent(in) :: grid
-      integer, intent(in), optional :: distGridId
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
-      integer, intent(out), optional :: numDims
+      type(ESMF_RelLoc), intent(in), optional :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       type(ESMF_GridKind), intent(out), optional :: horzGridKind
       type(ESMF_GridKind), intent(out), optional :: vertGridKind
       type(ESMF_GridStagger), intent(out), optional :: horzStagger
@@ -1814,14 +1796,11 @@
       type(ESMF_CoordSystem), intent(out), optional :: horzCoordSystem
       type(ESMF_CoordSystem), intent(out), optional :: vertCoordSystem
       type(ESMF_CoordOrder),  intent(out), optional :: coordOrder
+      integer, intent(out), optional :: dimCount
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             minGlobalCoordPerDim
       real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
                             maxGlobalCoordPerDim
-      real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
-                            minLocalCoordPerDim
-      real(ESMF_KIND_R8), intent(out), dimension(:), optional :: &
-                            maxLocalCoordPerDim
       integer, intent(out), dimension(:), optional :: globalCellCountPerDim
       integer, intent(out), dimension(:,:), optional :: globalStartPerDEPerDim
       integer, intent(out), dimension(:), optional :: maxLocalCellCountPerDim
@@ -1839,6 +1818,12 @@
 !     \begin{description}
 !     \item[grid]
 !          Pointer to a {\tt ESMF\_Grid} to be modified.
+!     \item[{[horzRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the horizontal
+!          grid.
+!     \item[{[vertRelLoc]}]
+!          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
+!          grid.
 !     \item[{[horzGridKind]}]
 !          Integer specifier to denote horizontal grid type.
 !     \item[{[vertGridKind]}]
@@ -1857,14 +1842,12 @@
 !          the vertical grid.
 !     \item[{[coordOrder]}]
 !          Integer specifier to denote coordinate ordering.
+!     \item[{[dimCount]}]
+!          Number of dimensions represented by this Grid.
 !     \item[{[minGlobalCoordPerDim]}]
 !          Array of minimum global physical coordinates in each direction.
 !     \item[{[maxGlobalCoordPerDim]}]
 !          Array of maximum global physical coordinates in each direction.
-!     \item[{[minLocalCoordPerDim]}]
-!          Array of minimum local physical coordinates in each direction.
-!     \item[{[maxLocalCoordPerDim]}]
-!          Array of maximum local physical coordinates in each direction.
 !     \item[{[globalCellCountPerDim]}]
 !          Array of numbers of global grid increments in each direction.
 !     \item[{[globalStartPerDEPerDim]}]
@@ -1886,133 +1869,72 @@
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
-      integer :: i, distGridIdUse, physGridIdUse
-      type(ESMF_GridType), pointer :: gridp
-      type(ESMF_PhysCoord) :: coord
 
 !     Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
- 
-      if (.not.associated(grid%ptr)) then
-        print *, "ERROR: ESMF_GridGet called with invalid grid object"
+
+!     Call GridGet routines based on GridStructure
+
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      !  ESMF_GridStructure_Unknown
+      case(0)
+        print *, "ERROR in ESMF_GridGet: ", &
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_LogRect
+      case(1)
+        call ESMF_LRGridGet(grid, horzRelLoc, vertRelLoc, &
+                            horzGridKind, vertGridKind, &
+                            horzStagger, vertStagger, &
+                            horzCoordSystem, vertCoordSystem, &
+                            coordOrder, dimCount, minGlobalCoordPerDim, &
+                            maxGlobalCoordPerDim, globalCellCountPerDim, &
+                            globalStartPerDEPerDim, maxLocalCellCountPerDim, &
+                            cellCountPerDEPerDim, periodic, name, status)
+
+      !-------------
+      ! ESMF_GridStructure_LogRectBlock
+      case(2)
+        print *, "ERROR in ESMF_GridGet: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_Unstruct
+      case(3)
+        print *, "ERROR in ESMF_GridGet: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_User
+      case(4)
+        print *, "ERROR in ESMF_GridGet: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridGet: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridGet: error in get'
         return
       endif
 
-      gridp => grid%ptr
-
-      ! if present, gets information from the grid derived type
-      if(present(numDims        )) numDims         = gridp%numDims
-      if(present(horzGridKind   )) horzGridKind    = gridp%horzGridKind
-      if(present(vertGridKind   )) vertGridKind    = gridp%vertGridKind
-      if(present(horzStagger    )) horzStagger     = gridp%horzStagger
-      if(present(vertStagger    )) vertStagger     = gridp%vertStagger
-      if(present(horzCoordSystem)) horzCoordSystem = gridp%horzCoordSystem
-      if(present(vertCoordSystem)) vertCoordSystem = gridp%vertCoordSystem
-      if(present(coordOrder     )) coordOrder      = gridp%coordOrder
-
-      ! get name from base obj
-      if (present(name)) then
-        call ESMF_GetName(gridp%base, name, status)
-        if(status .ne. ESMF_SUCCESS) then
-           print *, "ERROR in ESMF_GridGetName"
-           return
-        endif
-      endif
-
-      ! Get global coordinate extents
-      if(present(minGlobalCoordPerDim)) then
-        do i = 1,size(minGlobalCoordPerDim)  !TODO: check array size vs gridrank
-          minGlobalCoordPerDim(i) = gridp%minGlobalCoordPerDim(i)
-        enddo
-      endif
-      if(present(maxGlobalCoordPerDim)) then
-        do i = 1,size(maxGlobalCoordPerDim)   !TODO: check array size vs gridrank
-          maxGlobalCoordPerDim(i) = gridp%maxGlobalCoordPerDim(i)
-        enddo
-      endif
-
-      ! get the periodicity
-      if (present(periodic)) then
-         do i=1,ESMF_MAXGRIDDIM
-            if (i > size(periodic)) exit
-            periodic(i) = gridp%periodic(i)
-         enddo
-      endif
-
-      ! if DistGrid info is being queried, make sure there is a valid distGridId
-      if(present(globalCellCountPerDim)   .or. &
-         present(globalStartPerDEPerDim)  .or. &
-         present(maxLocalCellCountPerDim) .or. &
-         present(cellCountPerDEPerDim)) then
-
-! TODO: add code to get distgridId from relloc or physgridId, test for the
-!       presence of at least one of these optional arguments
-        distGridIdUse = 1            ! default
-        if (present(distGridId)) distGridIdUse = distGridId
-      endif
-
-      ! Get distgrid info with global coordinate counts
-      if (present(globalCellCountPerDim) .or. present(globalStartPerDEPerDim) &
-                                     .or. present(maxLocalCellCountPerDim)) then
-        call ESMF_DistGridGet(gridp%distgrids(distGridIdUse), &
-                              globalCellCountPerDim=globalCellCountPerDim, &
-                              globalStartPerDEPerDim=globalStartPerDEPerDim, &
-                              maxLocalCellCountPerDim=maxLocalCellCountPerDim, &
-                              rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGet: DistGrid get"
-          return
-        endif
-      endif
-      if(present(cellCountPerDEPerDim)) then
-        ! TODO: check size of cellCountPerDEPerDim
-        call ESMF_DistGridGetAllCounts(gridp%distgrids(distGridIdUse)%ptr, &
-                                       cellCountPerDEPerDim, rc=status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGet: DistGrid get all counts"
-          return
-        endif
-      endif
-
-      ! if PhysGrid info is being queried, make sure there is a valid physGridId
-      if(present(minLocalCoordPerDim) .or. present(maxLocalCoordPerDim)) then
-! TODO: add code to get physgridId from relloc, test for the presence of at least
-!       one of these optional arguments
-        physGridIdUse = 1            ! default
-        if (present(physGridId)) physGridIdUse = physGridId
-      endif
-
-      ! Get physcoord info
-      if(present(minLocalCoordPerDim)) then
-        do i = 1,size(minLocalCoordPerDim)  !TODO: check array size vs gridrank
-                                            !TODO: add query to vertical physgrid
-          coord = gridp%physgrids(physGridIdUse)%ptr%coords(i)
-          call ESMF_PhysCoordGetExtents(coord, minVal=minLocalCoordPerDim(i), &
-                                        rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridGet: physcoord get extents"
-            return
-          endif
-        enddo
-      endif
-      if(present(maxLocalCoordPerDim)) then
-        do i = 1,size(maxLocalCoordPerDim)  !TODO: check array size vs gridrank
-                                            !TODO: add query to vertical physgrid
-          coord = gridp%physgrids(physGridIdUse)%ptr%coords(i)
-          call ESMF_PhysCoordGetExtents(coord, maxVal=maxLocalCoordPerDim(i), &
-                                        rc=status)
-          if(status .NE. ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_GridGet: physcoord get extents"
-            return
-          endif
-        enddo
-      endif
-
+!     Set return values.
       if(rcpresent) rc = ESMF_SUCCESS
 
       end subroutine ESMF_GridGet
@@ -2131,13 +2053,14 @@
 ! !IROUTINE: ESMF_GridGetCellMask - Retrieves cell identifier mask for a Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridGetCellMask(grid, maskArray, physGridId, relloc, rc)
+      subroutine ESMF_GridGetCellMask(grid, maskArray, horzRelLoc, vertRelLoc, &
+                                      rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
       type(ESMF_Array), intent(inout) :: maskArray
-      integer, intent(in), optional :: physGridId
-      type(ESMF_RelLoc), intent(in), optional :: relloc
+      type(ESMF_RelLoc), intent(in) :: horzRelLoc
+      type(ESMF_RelLoc), intent(in), optional :: vertRelLoc
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
@@ -2155,10 +2078,12 @@
 !          {\tt ESMF\_Array} to contain the internally-used cell array denoting
 !          whether cells are in the computational regime, a ghost region, or a
 !          halo region.
-!     \item[{[physGridId]}]
-!          Identifier of the {\tt ESMF\_PhysGrid} to be modified.
-!     \item[{[relloc]}]
-!          Relative location in grid cell for this PhysGrid.
+!     \item[horzRelLoc]
+!          Horizontal relative location of the {\tt ESMF\_PhysGrid} to be
+!          queried.
+!     \item[{[vertRelLoc]}]
+!          Vertical relative location of the {\tt ESMF\_PhysGrid} to be
+!          queried.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -2167,59 +2092,64 @@
 ! !REQUIREMENTS:
 !EOPI
 
-      integer :: status                       ! Error status
-      logical :: rcpresent                    ! Return code present
-      integer :: physIdUse
-      logical :: rellocIsValid, physIdIsValid
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
 
 !     Initialize return code
       status = ESMF_FAILURE
       rcpresent = .FALSE.
       if(present(rc)) then
-        rcpresent = .TRUE.
+        rcpresent=.TRUE.
         rc = ESMF_FAILURE
       endif
 
-      ! Initialize other variables
-      physIdUse = -1
-      rellocIsValid = .false.
-      physIdIsValid = .false.
+!     Call GridGetCellMask routines based on GridStructure
 
-      ! Either the relative location or PhysGridId must be present and valid
-      if (present(relloc)) then
-!        rellocIsValid = ESMF_RelLocIsValid(relloc)  TODO: assume OK if there for now
-        rellocIsValid = .true.
-      endif
-      if (present(physGridId)) then
-        if ((physGridId.ge.1) .and. (physGridId.le.grid%ptr%numPhysGrids)) then
-          physIdIsValid = .true.
-          physIdUse = physGridId
-       endif
-      endif
-      if (.not.(rellocIsValid .or. physIdIsValid)) then
+      select case(grid%ptr%gridStructure%gridStructure)
+
+      !-------------
+      !  ESMF_GridStructure_Unknown
+      case(0)
         print *, "ERROR in ESMF_GridGetCellMask: ", &
-                 "need either relloc or physGridId"
-        return
-      endif
-      ! If there is a relloc but no PhysGrid id, then get the id from the relloc
-      if (rellocIsValid .and. .not.(physIdIsValid)) then
-        call ESMF_GridGetPhysGridId(grid%ptr, relloc, physIdUse, status)
-        if(status .NE. ESMF_SUCCESS) then
-          print *, "ERROR in ESMF_GridGetCellMask: get PhysGrid id"
-          return
-        endif
-        if (physIdUse.eq.-1) then
-          print *, "ERROR in ESMF_GridGetCellMask: ", &
-                   "no PhysGrid corresponding to relloc"
-          return
-        endif
-      endif
+                 "GridStructureUnknown not supported"
+        status = ESMF_FAILURE
 
-      ! call PhysGrid with the valid Id
-      call ESMF_PhysGridGetMask(grid%ptr%physGrids(physIdUse), maskArray, id=1, &
-                                rc=status)
-      if(status .NE. ESMF_SUCCESS) then
-        print *, "ERROR in ESMF_GridGetCellMask: PhysGrid get mask"
+      !-------------
+      ! ESMF_GridStructure_LogRect
+      case(1)
+        call ESMF_LRGridGetCellMask(grid, maskArray, horzRelLoc, vertRelLoc, &
+                                    rc)
+
+      !-------------
+      ! ESMF_GridStructure_LogRectBlock
+      case(2)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureLogRectBlock not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_Unstruct
+      case(3)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureUnstruct not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      ! ESMF_GridStructure_User
+      case(4)
+        print *, "ERROR in ESMF_GridGetCellMask: ", &
+                 "GridStructureUser not supported"
+        status = ESMF_FAILURE
+
+      !-------------
+      case default
+        print *, "ERROR in ESMF_GridGetCellMask: Invalid grid structure"
+        status = ESMF_FAILURE
+      end select
+
+      if (status /= ESMF_SUCCESS) then
+        rc = status
+        print *, 'ERROR in ESMF_GridGetCellMask: error in get call'
         return
       endif
 
@@ -2228,7 +2158,8 @@
       end subroutine ESMF_GridGetCellMask
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromArray - Set a mask in a Grid from an existing ESMF array
 
 ! !INTERFACE:
@@ -2257,7 +2188,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2265,7 +2196,8 @@
       end subroutine ESMF_GridSetMaskFromArray
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromBuffer - Set a mask in a Grid from an existing data buffer
 
 ! !INTERFACE:
@@ -2294,7 +2226,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2302,7 +2234,8 @@
       end subroutine ESMF_GridSetMaskFromBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMaskCopy - Copies a mask from one grid to another.
 
 ! !INTERFACE:
@@ -2333,7 +2266,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2341,7 +2274,8 @@
       end subroutine ESMF_GridSetMaskCopy
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMaskFromMask - Set a mask in a Grid from an existing mask
 
 ! !INTERFACE:
@@ -2371,7 +2305,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2379,7 +2313,8 @@
       end subroutine ESMF_GridSetMaskFromMask
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMetricFromArray - Set a metric for a Grid from an existing ESMF array
 
 ! !INTERFACE:
@@ -2408,7 +2343,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2416,7 +2351,8 @@
       end subroutine ESMF_GridSetMetricFromArray
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMetricFromBuffer - Set a metric for a Grid from an existing data buffer
 
 ! !INTERFACE:
@@ -2445,7 +2381,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2453,7 +2389,8 @@
       end subroutine ESMF_GridSetMetricFromBuffer
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMetricCompute - Compute a metric for a Grid
 
 ! !INTERFACE:
@@ -2490,7 +2427,8 @@
       end subroutine ESMF_GridSetMetricCompute
 
 !------------------------------------------------------------------------------
-!BOP
+! TODO: make BOP when filled
+!BOPI
 ! !IROUTINE: ESMF_GridSetMetricCopy - Copies a metric from one grid to another
 
 ! !INTERFACE:
@@ -2521,7 +2459,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
 !
 !  code goes here
@@ -2529,7 +2467,7 @@
       end subroutine ESMF_GridSetMetricCopy
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectRecv - Determine a DomainList covering a box
 
 ! !INTERFACE:
@@ -2577,7 +2515,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2651,7 +2589,7 @@
       end subroutine ESMF_GridBoxIntersectRecv
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridBoxIntersectSend - Determine a DomainList covering a box
 
 ! !INTERFACE:
@@ -2700,7 +2638,7 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -2954,7 +2892,7 @@
       end subroutine ESMF_GridPrint
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridComputeDistance - Compute distance between points
 !
 ! !INTERFACE:
@@ -2989,7 +2927,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
-!EOP
+!EOPI
 
       integer :: status
 !
