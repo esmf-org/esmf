@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayDataMap.F90,v 1.4 2004/05/26 18:23:24 nscollins Exp $
+! $Id: ESMF_ArrayDataMap.F90,v 1.5 2004/05/26 18:39:00 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -209,7 +209,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_ArrayDataMap.F90,v 1.4 2004/05/26 18:23:24 nscollins Exp $'
+             '$Id: ESMF_ArrayDataMap.F90,v 1.5 2004/05/26 18:39:00 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -228,8 +228,8 @@
       interface ESMF_ArrayDataMapSetDefault
 
 ! !PRIVATE MEMBER FUNCTIONS:
-       module procedure ESMF_ArrayDataMapSetDefaultIndex
-       module procedure ESMF_ArrayDataMapSetDefaultExplicit
+       module procedure ESMF_ArrayDataMapSetDefIndex
+       module procedure ESMF_ArrayDataMapSetDefExplicit
 
 ! !DESCRIPTION:
 ! This interface provides a single entry point for {\tt ESMF\_ArrayDataMap}
@@ -327,7 +327,7 @@ end function
 
 ! !INTERFACE:
       ! Private name: scCall using ESMF_ArrayDataMapSetDefault()
-      subroutine ESMF_ArrayDataMapSetDefaultIndex(datamap, dataIorder, counts, rc)
+      subroutine ESMF_ArrayDataMapSetDefIndex(datamap, dataIorder, counts, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_ArrayDataMap) :: datamap
@@ -447,13 +447,13 @@ end function
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayDataMapSetDefaultIndex
+        end subroutine ESMF_ArrayDataMapSetDefIndex
 
 
 !------------------------------------------------------------------------------
 !BOPI
 ! !INTERFACE:
-      subroutine ESMF_ArrayDataMapSetDefaultExplicit(datamap, dataRank, dataIndices, &
+      subroutine ESMF_ArrayDataMapSetDefExplicit(datamap, dataRank, dataIndices, &
                                                                    counts, rc)
 !
 ! !ARGUMENTS:
@@ -528,7 +528,7 @@ end function
         ! if user asked for it, return error code
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end subroutine ESMF_ArrayDataMapSetDefaultExplicit
+        end subroutine ESMF_ArrayDataMapSetDefExplicit
 
 
 !------------------------------------------------------------------------------
