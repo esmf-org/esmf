@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.55 2005/01/13 21:52:19 theurich Exp $
+! $Id: ESMF_VM.F90,v 1.56 2005/01/26 19:41:02 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -173,7 +173,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.55 2005/01/13 21:52:19 theurich Exp $'
+      '$Id: ESMF_VM.F90,v 1.56 2005/01/26 19:41:02 theurich Exp $'
 
 !==============================================================================
 
@@ -3108,6 +3108,7 @@ module ESMF_VMMod
 !   Send contigous data of kind {\tt ESMF\_KIND\_I4} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contigous data of kind 
 !   {\tt ESMF\_KIND\_I4} from a PET within the same {\tt ESMF\_VM} object.
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
 !
 !   The arguments are:
 !   \begin{description}
@@ -3222,6 +3223,7 @@ module ESMF_VMMod
 !   Send contigous data of kind {\tt ESMF\_KIND\_R4} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contigous data of kind 
 !   {\tt ESMF\_KIND\_R4} from a PET within the same {\tt ESMF\_VM} object.
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
 !
 !   The arguments are:
 !   \begin{description}
@@ -3336,6 +3338,7 @@ module ESMF_VMMod
 !   Send contigous data of kind {\tt ESMF\_KIND\_R8} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contigous data of kind 
 !   {\tt ESMF\_KIND\_R8} from a PET within the same {\tt ESMF\_VM} object.
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
 !
 !   The arguments are:
 !   \begin{description}
@@ -3450,6 +3453,7 @@ module ESMF_VMMod
 !   Send contigous data of type {\tt ESMF\_Logical} to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contigous data of kind 
 !   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
 !
 !   The arguments are:
 !   \begin{description}
@@ -3564,6 +3568,7 @@ module ESMF_VMMod
 !   Send contigous data of type character to a PET within the same
 !   {\tt ESMF\_VM} object while receiving contigous data of kind 
 !   {\tt ESMF\_Logical} from a PET within the same {\tt ESMF\_VM} object.
+!   The {\tt sendData} and {\tt recvData} arrays must be disjoint!
 !
 !   The arguments are:
 !   \begin{description}
