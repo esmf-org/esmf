@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysGrid.F90,v 1.62 2004/01/28 21:46:48 nscollins Exp $
+! $Id: ESMF_PhysGrid.F90,v 1.63 2004/02/19 20:55:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -337,7 +337,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysGrid.F90,v 1.62 2004/01/28 21:46:48 nscollins Exp $'
+      '$Id: ESMF_PhysGrid.F90,v 1.63 2004/02/19 20:55:39 nscollins Exp $'
 
 !==============================================================================
 !
@@ -532,11 +532,19 @@
         return
       endif
 
+      ! initialize base object in each of the types which use it
+      call ESMF_BaseCreate(physgrid%base, "PhysGrid", name, 0, status)
+      if(status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridCreate: BaseCreate"
+         return
+      endif
+
 !     Fill new physgrid with supplied variables.
 
       physgrid%numDims  = numDims
       physgrid%relloc   = relloc
       physgrid%numMasks = 0
+      nullify(physgrid%masks)
       nullify(physgrid%coords)
       
       if (present(coordSystem)) then
@@ -551,13 +559,23 @@
          physgrid%orientation = ESMF_PhysGridOrient_Unknown
       endif
       
-      if (present(name)) then
-         call ESMF_SetName(physgrid%base, name, "PhysGrid", status)
-         if (status /= ESMF_SUCCESS) then
-            print *, "ERROR in ESMF_PhysGridCreateNew: set name"
-            return
-         endif
+      ! initialize other objects which contains a base
+      call ESMF_BaseCreate(physgrid%locations%base, "PhysGridLocations", name, 0, status)
+      if(status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridCreate: Locations BaseCreate"
+         return
       endif
+      nullify(physgrid%locations%totalLocations)
+      nullify(physgrid%locations%compLocations)
+
+      call ESMF_BaseCreate(physgrid%regions%base, "PhysGridRegions", name, 0, status)
+      if(status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridCreate: Regions BaseCreate"
+         return
+      endif
+
+      nullify(physgrid%metrics)
+      physgrid%numMetrics = 0
 
 !     Set return values.
       ESMF_PhysGridCreateNew%ptr => physgrid
@@ -1466,6 +1484,7 @@
 !     if first mask, allocate mask array
 !
       if (numMaskNew == 1) then
+print *, "first mask"
          allocate(physgrid%ptr%masks(1), stat=status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysGridSetMask: mask allocate"
@@ -1475,6 +1494,7 @@
 !     if not first mask, resize mask array to make room for new mask
 !
       else
+print *, "mask", numMaskNew
          allocate(tempMask(numMaskOld), stat=status)
          if (status /= ESMF_SUCCESS) then
             print *, "ERROR in ESMF_PhysGridSetMask: tempMask allocate"
@@ -1510,6 +1530,7 @@
             print *, "ERROR in ESMF_PhysGridSetMask: tempMask deallocate"
             return
          endif
+
       endif
 !
 !     reset number of masks and add new mask
@@ -1517,12 +1538,14 @@
       if (present(id)) id = numMaskNew
       physgrid%ptr%numMasks = numMaskNew
 
-      call ESMF_SetName(physgrid%ptr%masks(numMaskNew)%base, name, &
-                        "PhysGridMask", status)
-      if (status /= ESMF_SUCCESS) then
-         print *, "ERROR in ESMF_PhysGridSetMask: error setting mask name"
+print *, "ready to call Base Create, name=", name
+      call ESMF_BaseCreate(physgrid%ptr%masks(numMaskNew)%base, &
+                                            "PhysGridMask", name, 0, status)
+      if(status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridCreate: Mask BaseCreate"
          return
       endif
+print *, "returned"
 
       physgrid%ptr%masks(numMaskNew)%maskType = maskType
       physgrid%ptr%masks(numMaskNew)%data = maskArray
@@ -1653,7 +1676,7 @@
 
       type(ESMF_PhysGrid), intent(inout) :: physgrid
 
-      type(ESMF_Array), intent(in) :: metricArray
+      type(ESMF_Array), intent(inout) :: metricArray
                                             ! array containing metric value for
                                             ! each cell
 
@@ -1760,13 +1783,11 @@
       if (present(id)) id = numMetricNew
       physgrid%ptr%numMetrics = numMetricNew
 
-      ! TODO: create Array method for SetName
-   !   call ESMF_ArraySetName(physgrid%ptr%metrics(numMetricNew), name, &
-   !                          "PhysGridMetric", status)
-   !   if (status /= ESMF_SUCCESS) then
-   !      print *, "ERROR in ESMF_PhysGridSetMetric: error setting metric name"
-   !      return
-   !   endif
+      call ESMF_ArraySetName(physgrid%ptr%metrics(numMetricNew), name, status)
+      if (status /= ESMF_SUCCESS) then
+         print *, "ERROR in ESMF_PhysGridSetMetric: error setting metric name"
+         return
+      endif
 
       physgrid%ptr%metrics(numMetricNew) = metricArray
 
