@@ -1,4 +1,4 @@
-! $Id: ESMF.F90,v 1.10 2003/08/28 20:09:19 nscollins Exp $
+! $Id: ESMF.F90,v 1.11 2003/10/07 22:37:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -15,15 +15,10 @@
 module ESMF_Mod
 
     use ESMF_BaseMod
-    use ESMF_MachineMod
-
     use ESMF_IOMod
-    use ESMF_LogErrMod
-    
-    use ESMF_ConfigMod
 
-    use ESMF_LocalArrayMod
-    use ESMF_DataMapMod
+    use ESMF_LogErrMod
+    use ESMF_MachineMod
 
     use ESMF_FractionMod
     use ESMF_BaseTimeMod
@@ -33,19 +28,29 @@ module ESMF_Mod
     use ESMF_TimeMod
     use ESMF_CalendarMod
 
-
+    use ESMF_LocalArrayMod
+    use ESMF_DataMapMod
+    
     use ESMF_DELayoutMod
+
+    use ESMF_ConfigMod
+    ! use ESMF_PerfProf
+
+    use ESMF_ArrayBaseMod
+    use ESMF_ArrayExpandMod
+
+    use ESMF_DistGridMod
+    use ESMF_PhysGridMod
+    use ESMF_GridMod
+
     use ESMF_XPacketMod
     use ESMF_CommTableMod
     use ESMF_RTableMod
     use ESMF_RouteMod
     use ESMF_RHandleMod
 
-    use ESMF_DistGridMod
-    use ESMF_PhysGridMod
-    use ESMF_GridMod
-    use ESMF_ArrayBaseMod
-    use ESMF_ArrayExpandMod
+    use ESMF_ArrayCommMod
+
     use ESMF_FieldMod
     use ESMF_BundleMod
 
