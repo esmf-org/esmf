@@ -1,9 +1,0 @@
-% $Id: ESMC_Comm_design.tex,v 1.1 2003/09/19 17:00:02 cdeluca Exp $
-
-The Comm class has an interface which looks similar to MPI.  Depending on
-whether the DE it is communicating on behalf of is a process or a thread, it
-will use MPI or pthreads to accomplish the desired communication, respectively.
-In the case of a main() thread, which is also the parent process, it will
-first perform pthreads communication within the node with its sub-threads,
-and then MPI communication across nodes with other process/thread groups.
-~
