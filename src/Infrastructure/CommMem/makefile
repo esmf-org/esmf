@@ -1,10 +1,10 @@
-# $Id: makefile,v 1.9 2003/05/07 04:34:29 cdeluca Exp $
+# $Id: makefile,v 1.10 2003/06/17 19:49:25 jwolfe Exp $
 
 LOCDIR    = src/Infrastructure/CommMem
 
 include $(ESMF_DIR)/makefile
 
-DIRS     = src interface examples doc
+DIRS     = src interface examples doc tests
 
 CLEANDIRS   =
 CLEANFILES  =
