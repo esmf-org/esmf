@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.1 2002/10/07 19:31:19 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.2 2002/10/08 18:18:01 eschwab Exp $
 #ifndef ESMC_TIME_INTERVAL_H
 #define ESMC_TIME_INTERVAL_H
 
@@ -95,7 +95,7 @@ class ESMC_TimeInterval : public ESMC_Time
 //         fractional seconds must carry the same sign (both positve or both 
 //         negative), except, of course, for zero values.
 //       - fractional math should be handled by an open-source package if
-//         available (see ESMC_Time.h also)
+//         available (see ESMC\_Time.h also)
 //       - Calendar intervals are dependent on a calendar and so represent
 //         a specialized case of a TimeInterval.  A derived class
 //         CalendarInterval will be defined to inherit from TimeInterval

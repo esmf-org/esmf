@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.1 2002/10/07 19:31:19 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.2 2002/10/08 18:18:01 eschwab Exp $
 #ifndef ESMC_TIME_H
 #define ESMC_TIME_H
 
@@ -124,7 +124,7 @@ class ESMC_Time
 //         negative), except, of course, for zero values.
 //       - conversions and other dependencies are done by interface methods
 //       - fractional math should be handled by an open-source package if
-//         available. (see ESMC_TimeInterval.h also)
+//         available. (see ESMC\_TimeInterval.h also)
 //
 //  NOTES:
 //      Core representation meets TMG 1.3, 1.4, 2.2, 5.4
