@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.19 2002/05/17 21:21:04 cdeluca Exp $
+% $Id: DistGrid_req.tex,v 1.20 2002/05/20 16:31:13 michalak Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -54,7 +54,7 @@ ESMF permits 1D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 {\bf Priority:} \\ 1
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} probably can be treated as a special case of 2D with no
@@ -80,6 +80,7 @@ etc).
            grid (transform) (T,Y,X,ZT) decomposed on ZT;
            ungridded obs (T,YX,ZT) decomposed variable blocked on YX \\
  MIT: (XYZ) blocked along X or Y. \\
+ WRF: (XY, YX, XYZ, YZX, XZY, ZXY) \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}  In CAM-FV dynamics, 4D tracer areas are XYZT or
@@ -97,7 +98,7 @@ ESMF permits 2D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} Should NOT be treated as a special case of 3D!
@@ -129,6 +130,7 @@ etc).
             grid (physics) (ZXY) decomposed cyclicaly on X and Y. \\
   NCEP-SSI: grid (T,Y,X,ZT) decomposed variable blocked on Y and X \\
   MIT: XYZ blocked in X, Y or XY, variable sizes and holes \\
+  WRF: (XY, YX, XYZ, YZX, XZY, ZXY) \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -200,7 +202,7 @@ extents.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT. \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF. \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} WS:  there will there be a fairly wide spectrum 
@@ -268,7 +270,7 @@ specify this as input information for grid topology generation.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} it is natural to treat this as a \textbf{DistGrid}
@@ -289,7 +291,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -302,7 +304,7 @@ computational domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -358,7 +360,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -371,7 +373,7 @@ data domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT \\
+{\bf Source:} CAM-FV, NSIPP, CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -448,7 +450,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} CAM-FV: the size of the global domain is known
@@ -462,7 +464,7 @@ global domain along each axis of decomposition.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CCSM-CPL, POP, CIC, MIT \\
+{\bf Source:} CCSM-CPL, POP, CIC, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} CAM-FV: the size of the global domain begin and end
@@ -504,7 +506,7 @@ distributed grid.
 
 \begin{reqlist}
 {\bf Priority:} \\ 
-{\bf Source:} CCSM-CPL, POP, MIT \\
+{\bf Source:} CCSM-CPL, POP, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} WS: which PE is it on and (optionally?) what 
@@ -580,11 +582,15 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NSIPP, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, NSIPP, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} maybe we're pre-empting design issues, but I'd want
   issues like wait-for-completion dealt with within \textbf{DistGrid}.
+\\WRF: This is only useful if we also have a way of computing separately the
+interior (those points that do not have data dependencies on the halo)
+and boundary (those around the edge that do)
+of a computational domain.
 \end{reqlist}
 
 \sreq{Blocked halo update}
@@ -594,11 +600,12 @@ data transfer is complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT \\
+{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} doesn't necessarily need separate call, same as unblocked
   + wait-for-completion.
+\\WRF: This should be default, and unblocked should be separate call.
 \end{reqlist}
 
 \sreq{Wait for completion}
@@ -608,7 +615,7 @@ issued unblocked halo update.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -673,7 +680,7 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} maybe we're pre-empting design issues, but I'd want
@@ -687,7 +694,7 @@ data transfer is complete when the call returns.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} doesn't necessarily need separate call, same as unblocked
@@ -701,7 +708,7 @@ issued unblocked data transpose.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV (2D decomposition), NSIPP, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -849,7 +856,7 @@ distribution for aggregate data transfer.
 
 \begin{reqlist}
 {\bf Priority:} \\ 1
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, POP, CICE, NCEP-GSM, NCEP-SSI, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} Note that all arrays in a bundle must share the same
@@ -862,6 +869,8 @@ distribution for aggregate data transfer.
   utility of bundles lies in aggregate data transfer methods on
   distributed grids. The other documents should derive an equivalent
   list of methods listing the ones here as source.
+
+WRF: Should the bundling have to be specified by the application?  Allow this as a hint that app can provide ESMF.
 \end{reqlist}
 
 \sreq{Initiate a bundle}
@@ -1144,6 +1153,8 @@ B-, C- and D-grids) together with a directional qualifier, e.g
 \newcommand{\bgrid}{\texttt{BGRID~}}
 \newcommand{\cgrid}{\texttt{CGRID~}}
 \newcommand{\dgrid}{\texttt{DGRID~}}
+%added by WRF
+\newcommand{\egrid}{\texttt{EGRID~}}
 
 \sreq{\agrid}
 
@@ -1153,7 +1164,7 @@ cell center $(i,j)$.
 
 \begin{reqlist}
 {\bf Priority:} 1\\ 
-{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, MIT \\
+{\bf Source:} CAM-FV, CAM-EUL, CLM, CCSM-CPL, MIT, WRF (SISL, 3DVAR) \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -1182,7 +1193,7 @@ flavors are supported.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\ 
-{\bf Source:} CAM-FV, POP, MIT \\
+{\bf Source:} CAM-FV, POP, MIT, WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
@@ -1201,6 +1212,20 @@ flavors are supported.
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:}
+\end{reqlist}
+
+\sreq{\egrid}
+
+ESMF will support a \dgrid stencil: where the vector component array
+locations $u_{ij}$ and $v_{ij}$ are (include specification of E-grid here).
+
+\begin{reqlist}
+\item[Priority]  
+\item[Source]
+WRF (MesoNH)
+\item[Status]
+\item[Verification]
+\item[Notes]
 \end{reqlist}
 
 \part{Requirements for specific grid types} \label{DG:gridtypes}
@@ -1390,7 +1415,7 @@ nested grid.
 
 \begin{reqlist}
 {\bf Priority:} \\
-{\bf Source:} \\
+{\bf Source:} WRF \\
 {\bf Status:} Proposed. \\
 {\bf Verification:} \\
 {\bf Notes:} i.e, a moving mesh-aligned nested grid may support a
