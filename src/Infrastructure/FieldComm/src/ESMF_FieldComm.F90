@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.56 2004/08/19 16:52:20 nscollins Exp $
+! $Id: ESMF_FieldComm.F90,v 1.57 2004/08/20 15:32:56 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -99,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.56 2004/08/19 16:52:20 nscollins Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.57 2004/08/20 15:32:56 nscollins Exp $'
 
 !==============================================================================
 !
@@ -369,6 +369,7 @@
       logical :: rcpresent                        ! Return code present
       integer :: htype
       logical :: allInOne
+      logical :: dummy
       type(ESMF_FieldType) :: ftypep              ! field type info
    
       ! Initialize return code   
@@ -393,7 +394,7 @@
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_HALOHANDLE) then
-          call ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                         "routehandle not defined for halo", &
                                         ESMF_CONTEXT, rc)
           return
@@ -618,6 +619,7 @@
       logical :: rcpresent                        ! Return code present
       integer :: htype
       logical :: allInOne
+      logical :: dummy
       type(ESMF_FieldType), pointer :: dstFtypep, srcFtypep
    
       ! Initialize return code   
@@ -643,7 +645,7 @@
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_REDISTHANDLE) then
-          call ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                         "routehandle not defined for redist", &
                                         ESMF_CONTEXT, rc)
           return
@@ -659,7 +661,7 @@
                               ESMF_LOG_WARNING, &
                               ESMF_CONTEXT)
         if (.not. present(parentDelayout)) then
-          call ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                         "parentDelayout needed to precompute redist", &
                                         ESMF_CONTEXT, rc)
           return
@@ -1092,6 +1094,7 @@
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
       logical :: allInOne
+      logical :: dummy
       type(ESMF_DELayout) :: srcDelayout, dstDelayout
       !type(ESMF_DELayout) :: parentDelayout
       type(ESMF_Logical) :: hasdata        ! does this DE contain localdata?
@@ -1124,7 +1127,7 @@
         if (htype .eq. ESMF_UNINITIALIZEDHANDLE) then
           allInOne = .true.
         elseif (htype .ne. ESMF_REGRIDHANDLE) then
-          call ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
+          dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_VALUE, &
                                         "routehandle not defined for regrid", &
                                         ESMF_CONTEXT, rc)
           return
