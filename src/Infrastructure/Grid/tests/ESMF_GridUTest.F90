@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.31 2004/05/21 16:21:34 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.32 2004/05/24 23:00:08 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.31 2004/05/21 16:21:34 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.32 2004/05/24 23:00:08 jwolfe Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -68,7 +68,7 @@
       integer :: nDE_i, nDE_j
       type(ESMF_GridType) :: horz_gridtype, vert_gridtype
       type(ESMF_GridType) :: Rhorz_gridtype, Rvert_gridtype
-      type(ESMF_GridStagger) :: horz_stagger, vert_stagger
+      type(ESMF_GridHorzStagger) :: horz_stagger, vert_stagger
       type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
       integer :: status
       integer :: phy_grid_id
@@ -98,9 +98,7 @@
       counts(2) = 12
       nDE_i = 2
       nDE_j = 2
-      horz_gridtype = ESMF_GridType_XY
-      horz_stagger = ESMF_GridStagger_A
-      horz_coord_system = ESMF_CoordSystem_Cartesian
+      horz_stagger = ESMF_GRID_HORZ_STAGGER_A
       grid_min(1) = 0.0
       grid_max(1) = 10.0
       grid_min(2) = 0.0
@@ -113,15 +111,13 @@
       !------------------------------------------------------------------------
       !EX_UTest
       layout = ESMF_DELayoutCreate(vm, rc=rc)
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout, &
                               name=name, rc=status)
 
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
 
       write(failMsg, *) "Returned ESMF_FAILURE"
       write(name, *) "Creating a Grid Test"
@@ -146,14 +142,13 @@
       !EX_UTest
       layout2 = ESMF_DELayoutCreate(vm, rc=rc)
       !call ESMF_DELayoutDestroy(layout2, status)
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout2, &
                               name=name, rc=status)
+
+      call ESMF_GridDistribute(grid, delayout=layout2, rc=status)
 
       write(failMsg, *) "Returned ESMF_SUCCESS"
       write(name, *) "Creating a Grid with a non created layout Test"
@@ -167,14 +162,13 @@
       grid_min(2) = 5.0
       grid_max(2) = 1.0
 
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout, &
                               name=name, rc=status)
+
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
 
       !EX_UTest
 
@@ -213,14 +207,13 @@
 
       !EX_UTest
       ! Test creating an internal Grid
-      grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
+      grid = ESMF_GridCreateHorz_XYUni(counts=counts, &
                               minGlobalCoordPerDim=grid_min, &
                               maxGlobalCoordPerDim=grid_max, &
-                              horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
-                              horzCoordSystem=horz_coord_system, &
-                              delayout=layout, &
                               name=name, rc=status)
+
+      call ESMF_GridDistribute(grid, delayout=layout, rc=status)
 
         write(failMsg, *) "Did not return ESMF_SUCCESS"
         write(name, *) "Creating an Internal Grid Test"
