@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.21 2004/03/02 06:01:29 cdeluca Exp $
+! $Id: ESMF_State.F90,v 1.22 2004/03/02 14:07:46 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -243,6 +243,7 @@
 
       public ESMF_StateCreate, ESMF_StateDestroy
 
+      public ESMF_StateAddNameOnly
       public ESMF_StateAddData, ESMF_StateGetData
       public ESMF_StateAddBundle, ESMF_StateAddField, ESMF_StateAddArray
       public ESMF_StateAddState, ESMF_StateAddDataName
@@ -283,7 +284,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.21 2004/03/02 06:01:29 cdeluca Exp $'
+      '$Id: ESMF_State.F90,v 1.22 2004/03/02 14:07:46 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -300,20 +301,20 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-        module procedure ESMF_StateAddArray
+        module procedure ESMF_StateAddOneArray
         module procedure ESMF_StateAddArrayList
-        module procedure ESMF_StateAddField
+        module procedure ESMF_StateAddOneField
         module procedure ESMF_StateAddFieldList
-        module procedure ESMF_StateAddBundle
+        module procedure ESMF_StateAddOneBundle
         module procedure ESMF_StateAddBundleList
-        module procedure ESMF_StateAddState
+        module procedure ESMF_StateAddOneState
         module procedure ESMF_StateAddStateList
-        module procedure ESMF_StateAddDataName
-        module procedure ESMF_StateAddDataNameList
+        module procedure ESMF_StateAddOneName
+        module procedure ESMF_StateAddNameList
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddArrays} functions.   
+!  types of {\tt ESMF\_StateAddData} functions.   
 !  
 !EOPI 
 end interface
@@ -372,7 +373,7 @@ end interface
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddBundles} functions.   
+!  types of {\tt ESMF\_StateAddBundle} functions.   
 !  
 !EOPI 
 end interface
@@ -412,7 +413,7 @@ end interface
 
 ! !DESCRIPTION: 
 ! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_StateAddDataNames} functions.   
+!  types of {\tt ESMF\_StateAddNameOnly} functions.   
 !  
 !EOPI 
 end interface
@@ -779,7 +780,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddFields()   
-      subroutine ESMF_StateAddField(state, field, rc)
+      subroutine ESMF_StateAddOneField(state, field, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -813,7 +814,7 @@ end function
 
       call ESMF_StateTypeAddFieldList(state%statep, 1, temp_list, rc)      
 
-      end subroutine ESMF_StateAddField
+      end subroutine ESMF_StateAddOneField
 
 !------------------------------------------------------------------------------
 !BOP
@@ -862,7 +863,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddNameOnly()   
-      subroutine ESMF_StateAddDataName(state, name, rc)
+      subroutine ESMF_StateAddOneName(state, name, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -898,9 +899,9 @@ end function
       
       temp_list(1) = name
 
-      call ESMF_StateAddDataNameList(state, 1, temp_list, rc)      
+      call ESMF_StateAddNameList(state, 1, temp_list, rc)      
 
-      end subroutine ESMF_StateAddDataName
+      end subroutine ESMF_StateAddOneName
 
 !------------------------------------------------------------------------------
 !BOP
@@ -908,7 +909,7 @@ end function
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_StateAddNameOnly()   
-      subroutine ESMF_StateAddDataNameList(state, namecount, namelist, rc)
+      subroutine ESMF_StateAddNameList(state, namecount, namelist, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_State), intent(inout) :: state
@@ -948,7 +949,7 @@ end function
 
       call ESMF_StateTypeAddDataNameList(state%statep, namecount, namelist, rc)      
 
-      end subroutine ESMF_StateAddDataNameList
+      end subroutine ESMF_StateAddNameList
 
 !------------------------------------------------------------------------------
 !BOP
