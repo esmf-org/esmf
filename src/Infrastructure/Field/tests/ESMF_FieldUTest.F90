@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.54 2004/05/26 18:29:37 nscollins Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.55 2004/05/27 11:35:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.54 2004/05/26 18:29:37 nscollins Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.55 2004/05/27 11:35:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -243,7 +243,7 @@
 
       !EX_UTest
       ! Verifing that a Grid can be created
-      grid =  ESMF_GridCreateHorz_XYUni((/ 10, 20 /), minCoord, &
+      grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
                                      name="landgrid", rc=rc)
       call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
       write(failMsg, *) ""
@@ -289,7 +289,7 @@
       !EX_UTest
       ! Verifing that recreating a created Grid is allowed.
       ! and create a valid grid which can be used below. 
-      grid =  ESMF_GridCreateHorz_XYUni((/ 10, 20 /), minCoord, &
+      grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
                                      name="landgrid", rc=rc)
       call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
       write(failMsg, *) ""
@@ -410,7 +410,7 @@
       ! It will be uncommented when the query function is written.
       ! Bug 705196 "Unable to query Grid name"
       gname="oceangrid"
-      grid =  ESMF_GridCreateHorz_XYUni((/ 10, 20 /), minCoord, &
+      grid =  ESMF_GridCreateHorzXYUni((/ 10, 20 /), minCoord, &
                                         name=gname, rc=rc)
       call ESMF_GridDistribute(grid, delayout=delayout, rc=rc)
       arr = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_FRouteUTest.F90,v 1.40 2004/05/26 18:29:37 nscollins Exp $
+! $Id: ESMF_FRouteUTest.F90,v 1.41 2004/05/27 11:35:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FRouteUTest.F90,v 1.40 2004/05/26 18:29:37 nscollins Exp $'
+      '$Id: ESMF_FRouteUTest.F90,v 1.41 2004/05/27 11:35:21 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -122,7 +122,7 @@
       gname = "test grid 1"
 
       !NEX_UTest
-      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
@@ -144,7 +144,7 @@
 #ifdef ESMF_EXHAUSTIVE
      
       !EX_UTest
-      grid1 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid1 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
@@ -164,7 +164,7 @@
       ! Second grid
       gname = "test grid 2"
       horz_stagger = ESMF_GRID_HORZ_STAGGER_D_NE
-      grid2 = ESMF_GridCreateHorz_XYUni(counts=counts, &
+      grid2 = ESMF_GridCreateHorzXYUni(counts=counts, &
                               minGlobalCoordPerDim=min, &
                               maxGlobalCoordPerDim=max, &
                               horzStagger=horz_stagger, &
