@@ -1,4 +1,4 @@
-// $Id: inter_ESMC_class_F.C,v 1.4 2003/03/22 00:03:03 eschwab Exp $
+// $Id: inter_ESMC_class_F.C,v 1.5 2003/03/28 01:34:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,40 +46,38 @@ extern "C" {
        }
 
        // keep this for shallow classes, get rid of create/destroy above
-       void FTN(c_esmc_<class>init)(ESMC_<Class> **ptr, int *arg1, int *arg2,
+       void FTN(c_esmc_<class>init)(ESMC_<Class> *ptr, int *arg1, int *arg2,
                                                    int *arg3, int *status) {
-           *status = (*ptr)->ESMC_<Class>Init(*arg1, *arg2, *arg3);
+           *status = (ptr)->ESMC_<Class>Init(*arg1, *arg2, *arg3);
        }
 
        // for either shallow or deep classes, the following are needed. 
-       void FTN(c_esmc_<class>getconfig)(ESMC_<Class> **ptr, 
+       void FTN(c_esmc_<class>getconfig)(ESMC_<Class> *ptr, 
                                          ESMC_<Class>Config *config, int *status) {
-           *status = (*ptr)->ESMC_<Class>GetConfig(&config);
+           *status = (ptr)->ESMC_<Class>GetConfig(&config);
        }
 
-       void FTN(c_esmc_<class>setconfig)(ESMC_<Class> **ptr, 
+       void FTN(c_esmc_<class>setconfig)(ESMC_<Class> *ptr, 
                                          ESMC_<Class>Config *config, int *status) {
-           *status = (*ptr)->ESMC_<Class>SetConfig(config);
+           *status = (ptr)->ESMC_<Class>SetConfig(config);
        }
 
-       void FTN(c_esmc_<class>get)(ESMC_<Class> **ptr, 
+       void FTN(c_esmc_<class>get)(ESMC_<Class> *ptr, 
                                          <value> *value, int *status) {
-           *status = (*ptr)->ESMC_<Class>Get(&value);
+           *status = (ptr)->ESMC_<Class>Get(&value);
        }
 
-       void FTN(c_esmc_<class>set)(ESMC_<Class> **ptr, 
+       void FTN(c_esmc_<class>set)(ESMC_<Class> *ptr, 
                                          <value> *value, int *status) {
-           *status = (*ptr)->ESMC_<Class>Set(value);
+           *status = (ptr)->ESMC_<Class>Set(value);
        }
 
-       void FTN(c_esmc_<class>validate)(ESMC_<Class> **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_BaseValidate(opts);
+       void FTN(c_esmc_<class>validate)(ESMC_<Class> *ptr, char *opts, int *status) {
+           *status = (ptr)->ESMC_BaseValidate(opts);
        }
 
-       void FTN(c_esmc_<class>print)(ESMC_<Class> **ptr, char *opts, int *status) {
-           *status = (*ptr)->ESMC_BasePrint(opts);
+       void FTN(c_esmc_<class>print)(ESMC_<Class> *ptr, char *opts, int *status) {
+           *status = (ptr)->ESMC_BasePrint(opts);
        }
 
 };
-
-
