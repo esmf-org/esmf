@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.8 2002/12/10 22:53:06 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.9 2002/12/20 22:02:31 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -62,7 +62,26 @@ extern "C" {
      void FTN(c_esmc_arrayconstructbyspec)() {
      }
 
-     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, int *ni, int *nj, int *status) {
+     void FTN(c_esmc_arraycreatebyptr2d)(ESMC_Array *ptr, int *status) {
+             ESMC_Array *lptr;
+             int lengths[2];
+             enum ESMC_DataType dt;
+             enum ESMC_DataKind dk;
+
+             lengths[0] = 10;
+             lengths[1] = 20;  // TODO: this needs to be a func arg 
+
+             dt = ESMF_DATA_REAL;
+             dk = ESMF_KIND_4;
+             
+             lptr = ESMC_ArrayCreate_F(2, dt, dk, NULL, NULL, lengths,
+                                      NULL, NULL, status);
+
+             *(unsigned long *)ptr = (unsigned long)lptr;
+
+     }
+ 
+     void FTN(c_esmc_arraycreatemtptr2d)(ESMC_Array *ptr, int *ni, int *nj, int *status) {
              ESMC_Array *lptr;
              int lengths[2];
              enum ESMC_DataType dt;

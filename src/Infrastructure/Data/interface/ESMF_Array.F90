@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.15 2002/12/16 22:48:07 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.16 2002/12/20 22:02:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -110,7 +110,7 @@
       !public ESMF_ArraySpecDestroy
 
       public ESMF_ArraySetData
-      !public ESMF_ArrayGetData
+      public ESMF_ArrayGetData
       public ESMF_ArrayGet
  
       public ESMF_ArrayCheckpoint
@@ -124,7 +124,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.15 2002/12/16 22:48:07 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.16 2002/12/20 22:02:32 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -140,20 +140,15 @@
 
 ! !PRIVATE MEMBER FUNCTIONS:
 !
-!        module procedure ESMF_ArrayCreateNewNoData
+!        !module procedure ESMF_ArrayCreateNewNoData
         module procedure ESMF_ArrayCreateNewBuffer
-!        module procedure ESMF_ArrayCreateNewFPtr
-!        module procedure ESMF_ArrayCreateBySpecNoData
-!        module procedure ESMF_ArrayCreateBySpecBuffer
-!        module procedure ESMF_ArrayCreateBySpecFPtr
-!        module procedure ESMF_ArrayCreateByPtr1Dr4
-!        module procedure ESMF_ArrayCreateByPtr1Dr8
-!        module procedure ESMF_ArrayCreateByPtr1Di4
-!        module procedure ESMF_ArrayCreateByPtr1Di8
+!        !module procedure ESMF_ArrayCreateNewFPtr
+!        !module procedure ESMF_ArrayCreateBySpecNoData
+!        !module procedure ESMF_ArrayCreateBySpecBuffer
+!        !module procedure ESMF_ArrayCreateBySpecFPtr
+!        !module procedure ESMF_ArrayCreateByPtr1Dr4
         module procedure ESMF_ArrayCreateByPtr2DR4
-!        module procedure ESMF_ArrayCreateByPtr2Dr8
-!        module procedure ESMF_ArrayCreateByPtr2Di4
-!        module procedure ESMF_ArrayCreateByPtr2Di8
+        module procedure ESMF_ArrayCreateMTPtr2DR4
 ! ! TODO: ...to be expanded to all types, kinds, ranks
 
 ! !DESCRIPTION: 
@@ -197,6 +192,29 @@
 !  
 !EOP 
 end interface
+
+!------------------------------------------------------------------------------
+
+!BOP
+! !IROUTINE: ESMF_ArrayGetData -- Get an F90 pointer to the data contents
+
+! !INTERFACE:
+     interface ESMF_ArrayGetData
+
+! !PRIVATE MEMBER FUNCTIONS:
+!
+!        !module procedure ESMF_ArrayGetData
+        module procedure ESMF_ArrayGetData2DR4
+! ! TODO: ...to be expanded to all types, kinds, ranks
+
+! !DESCRIPTION: 
+! This interface provides a single entry point for the various 
+!  types of {\tt ESMF\_ArrayGetData} functions.   
+!  
+!EOP 
+end interface
+
+!------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
 interface operator (.eq.)
@@ -425,10 +443,84 @@ end function
 ! !IROUTINE: ESMF_ArrayCreateByPtr2DR4 - make an ESMF array from an F90 ptr
 
 ! !INTERFACE:
-      function ESMF_ArrayCreateByPtr2DR4(f90ptr, ni, nj, rc)
+      function ESMF_ArrayCreateByPtr2DR4(f90ptr, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Array) :: ESMF_ArrayCreateByPtr2DR4
+!
+! !ARGUMENTS:
+      real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
+      integer, intent(out), optional :: rc  
+!
+! !DESCRIPTION:
+! Creates an {\tt Array} based on an existing Fortran 90 pointer which
+!   is already associated with memory.
+!
+! The function return is an ESMF\_Array type.
+!
+! The arguments are:
+!  \begin{description}
+!  \item[f90ptr]
+!   A Fortran 90 array pointer which can be queried for info about
+!    type/kind/rank and sizes.
+!
+!  \item[[rc]]
+!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!  \end{description}
+!
+
+!
+!EOP
+! !REQUIREMENTS:
+
+!       local vars
+        !type (ESMF_Pointer) :: ptr           ! what C++ is going to return
+        type (ESMF_Array), target :: thearray ! the real array
+        type (ESMF_Array), pointer :: ptr   ! what C++ is going to return
+        integer :: status=ESMF_FAILURE      ! local error status
+        logical :: rcpresent=.FALSE.        ! did user specify rc?
+
+!       TODO: need a null pointer to assign to initialize ptr
+!       ptr = NULLPTR
+        ptr => thearray
+
+!       initialize return code; assume failure until success is certain
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+
+!       call create routine
+        call c_ESMC_ArrayCreateByPtr2D(ptr, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array initial construction error"
+          return
+        endif
+
+!       set base address
+        call c_ESMC_ArraySetBaseAddr(ptr%this, f90ptr(1,1), status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "Array base address construction error"
+          return
+        endif
+
+
+!       return value set by c_ESMC func above
+        ESMF_ArrayCreateByPtr2DR4%this => ptr%this
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end function ESMF_ArrayCreateByPtr2DR4  
+
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_ArrayCreateMTPtr2DR4 - make an ESMF array from an F90 ptr
+
+! !INTERFACE:
+      function ESMF_ArrayCreateMTPtr2DR4(f90ptr, ni, nj, rc)
+!
+! !RETURN VALUE:
+      type(ESMF_Array) :: ESMF_ArrayCreateMTPtr2DR4
 !
 ! !ARGUMENTS:
       real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr
@@ -486,7 +578,7 @@ end function
         call c_ESMC_StoreAllocFunc(ESMF_Allocate2DR4, status);
 
 !       call create routine
-        call c_ESMC_ArrayCreateByPtr2D(ptr, ni, nj, status)
+        call c_ESMC_ArrayCreateMTPtr2D(ptr, ni, nj, status)
         if (status .ne. ESMF_SUCCESS) then
           print *, "Array initial construction error"
           return
@@ -507,10 +599,10 @@ end function
 
 
 !       return value set by c_ESMC func above
-        ESMF_ArrayCreateByPtr2DR4%this => ptr%this
+        ESMF_ArrayCreateMTPtr2DR4%this => ptr%this
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_ArrayCreateByPtr2DR4  
+        end function ESMF_ArrayCreateMTPtr2DR4  
 
 
 
@@ -590,6 +682,34 @@ end function
 ! TODO: code goes here
 !
         end subroutine ESMF_ArraySetData
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      function ESMF_ArrayGetData2DR4(array, docopy, rc)
+!
+! !RETURN VALUE:
+      real (selected_real_kind(6,45)), dimension(:,:), &
+                                        pointer :: ESMF_ArrayGetData2DR4
+!
+! !ARGUMENTS:
+      type(ESMF_Array), pointer :: array 
+      type(ESMF_CopyFlag), intent(in) :: docopy 
+      integer, intent(out), optional :: rc     
+!
+! !DESCRIPTION:
+!      Return an F90 pointer to the data buffer, or return an F90 pointer
+!      to a new copy of the data.
+!
+!EOP
+! !REQUIREMENTS:
+
+!
+! TODO: code goes here
+!
+        !ESMF_ArrayGetData2DR4 = what?
+
+        end function ESMF_ArrayGetData2DR4
 
 
 !------------------------------------------------------------------------------
