@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2004/02/09 17:56:01 nscollins Exp $
+! $Id: user_model2.F90,v 1.8 2004/02/19 21:32:55 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -123,8 +123,8 @@
       horz_coord_system = ESMF_CoordSystem_Cartesian
 
       grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
-                              countsPerDEDim1=countsPerDE1, &
-                              countsPerDEDim2=countsPerDE2, &
+                              countsPerDEDecomp1=countsPerDE1, &
+                              countsPerDEDecomp2=countsPerDE2, &
                               minGlobalCoordPerDim=min, &
                               delta1=delta1, delta2=delta2, &
                               layout=layout, &
