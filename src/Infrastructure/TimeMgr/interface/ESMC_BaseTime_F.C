@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime_F.C,v 1.7 2003/04/02 17:24:54 eschwab Exp $
+// $Id: ESMC_BaseTime_F.C,v 1.8 2003/04/09 21:30:45 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,6 +35,16 @@ extern "C" {
        void FTN(c_esmc_basetimeinit)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *s,
                                      int *sn, int *sd, int *status) {
            *status = (ptr)->ESMC_BaseTimeInit(*s, *sn, *sd);
+       }
+
+       void FTN(c_esmc_basetimeget)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *s,
+                                    int *sn, int *sd, int *status) {
+           *status = (ptr)->ESMC_BaseTimeGet(s, sn, sd);
+       }
+
+       void FTN(c_esmc_basetimeset)(ESMC_BaseTime *ptr, ESMF_IKIND_I8 *s,
+                                    int *sn, int *sd, int *status) {
+           *status = (ptr)->ESMC_BaseTimeSet(*s, *sn, *sd);
        }
 
        //

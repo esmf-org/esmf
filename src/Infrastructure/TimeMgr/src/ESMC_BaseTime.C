@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.13 2003/04/07 16:11:00 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.14 2003/04/09 21:30:04 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.13 2003/04/07 16:11:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.14 2003/04/09 21:30:04 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -93,6 +93,65 @@
 
 }  // end ESMC_BaseTimeInit
 
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeGet - get core values of a basetime
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeGet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_IKIND_I8 *S,    // out - integer seconds
+      int *Sn,             // out - fractional seconds, numerator
+      int *Sd ) const {    // out - fractional seconds, denominator
+//
+// !DESCRIPTION:
+//      Get core values of a {\tt BaseTime}. Primarily to support F90
+//      interface
+//
+//EOP
+// !REQUIREMENTS:  
+
+    if (S  != ESMC_NULL_POINTER) *S  = this->S;
+    if (Sn != ESMC_NULL_POINTER) *Sn = this->Sn;
+    if (Sn != ESMC_NULL_POINTER) *Sd = this->Sd;
+      
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeGet
+
+//-------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_BaseTimeSet - set core values of a basetime
+//
+// !INTERFACE:
+      int ESMC_BaseTime::ESMC_BaseTimeSet(
+//
+// !RETURN VALUE:
+//    int error return code
+//
+// !ARGUMENTS:
+      ESMF_IKIND_I8 S,    // in - integer seconds
+      int Sn,             // in - fractional seconds, numerator
+      int Sd ) {          // in - fractional seconds, denominator
+//
+// !DESCRIPTION:
+//      Sets a {\tt BaseTime} with given values. Primarily to support F90
+//      interface.
+//
+//EOP
+// !REQUIREMENTS:  
+
+    ESMC_BaseTimeInit(S, Sn, Sd);
+
+    return(ESMF_SUCCESS);
+
+}  // end ESMC_BaseTimeInit
+
+//-------------------------------------------------------------------------
 //
 // individual get/set methods which perform signed conversion
 //

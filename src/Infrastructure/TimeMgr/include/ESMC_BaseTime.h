@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.7 2003/04/02 17:24:53 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.8 2003/04/09 21:30:03 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -132,6 +132,10 @@ class ESMC_BaseTime {
 
     // BaseTime is a shallow class, so only Init methods are needed
     int ESMC_BaseTimeInit(ESMF_IKIND_I8 S, int Sn, int Sd);
+
+    // Get/Set methods (primarily to support F90 interface)
+    int ESMC_BaseTimeGet(ESMF_IKIND_I8 *S, int *Sn, int *Sd) const;
+    int ESMC_BaseTimeSet(ESMF_IKIND_I8 S, int Sn, int Sd);
 
     // ESMC_BaseTime doesn't need configuration, hence GetConfig/SetConfig
     // methods are not required
