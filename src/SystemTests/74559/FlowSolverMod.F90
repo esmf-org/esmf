@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.5 2003/04/30 21:13:25 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.6 2003/05/01 16:12:56 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -1182,21 +1182,21 @@
         write(filename, 20)  "U_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      !call ESMF_ArrayDestroy(outarray, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
       call ESMF_FieldAllGather(field_v, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "V_velocity", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      !call ESMF_ArrayDestroy(outarray, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
       call ESMF_FieldAllGather(field_sie, outarray, status)
       if (de_id .eq. 0) then
         write(filename, 20)  "SIE", file_no
         call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
       endif
-      !call ESMF_ArrayDestroy(outarray, status)
+      call ESMF_ArrayDestroy(outarray, status)
 
       if(file_no .eq. 1) then
         call ESMF_FieldAllGather(field_flag, outarray, status)
@@ -1204,7 +1204,7 @@
           write(filename, 20)  "FLAG", file_no
           call ESMF_ArrayWrite(outarray, filename=filename, rc=status)
         endif
-        !call ESMF_ArrayDestroy(outarray, status)
+        call ESMF_ArrayDestroy(outarray, status)
       endif
 
       if(rcpresent) rc = ESMF_SUCCESS
