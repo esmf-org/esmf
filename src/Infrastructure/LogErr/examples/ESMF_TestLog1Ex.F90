@@ -1,5 +1,5 @@
 program test_log_2
-#include "ESMF_LogErr.inc"
+!include "ESMF_LogErr.inc"
     use ESMF_Mod
     use ESMF_LogErrMod
     implicit none
