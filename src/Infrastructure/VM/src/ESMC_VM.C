@@ -1,4 +1,4 @@
-// $Id: ESMC_VM.C,v 1.19 2004/12/17 18:20:18 theurich Exp $
+// $Id: ESMC_VM.C,v 1.20 2004/12/23 04:34:58 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -27,6 +27,8 @@
 //-----------------------------------------------------------------------------
 
 // insert any higher level, 3rd party or system includes here
+#include <pthread.h>
+
 #include <ESMC_Start.h>
 #include <ESMC_Base.h>  
 
@@ -40,7 +42,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_VM.C,v 1.19 2004/12/17 18:20:18 theurich Exp $";
+ static const char *const version = "$Id: ESMC_VM.C,v 1.20 2004/12/23 04:34:58 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -49,6 +51,15 @@
 // The global VM will be initialized in call ESMC_VMInitialize() and wrapped up
 // calling ESMC_VMFinalize(). 
 static ESMC_VM *GlobalVM = NULL;  
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// Module arrays to hold association between tid <-> vm <-> vmID
+#define ESMC_VM_MAXTIDS 1000
+static pthread_t matchArray_tid[ESMC_VM_MAXTIDS];
+static ESMC_VM *matchArray_vm[ESMC_VM_MAXTIDS];
+static int *matchArray_vmID[ESMC_VM_MAXTIDS];
+static int matchArray_count = 0;
 //-----------------------------------------------------------------------------
 
 
@@ -82,6 +93,39 @@ ESMC_VM *ESMC_VMGetGlobal(
 //-----------------------------------------------------------------------------
   *rc = ESMF_SUCCESS;
   return GlobalVM;
+}
+//-----------------------------------------------------------------------------
+
+
+//-----------------------------------------------------------------------------
+//BOP
+// !IROUTINE:  ESMC_VMGetCurrent - Get Current VM
+//
+// !INTERFACE:
+ESMC_VM *ESMC_VMGetCurrent(
+//
+// !RETURN VALUE:
+//    Pointer to curent VM
+//
+// !ARGUMENTS:
+//
+  int *rc){   // return code
+//
+// !DESCRIPTION:
+//   Get the {\tt ESMC\_VM} object of the current context.
+//
+//EOP
+//-----------------------------------------------------------------------------
+  *rc = ESMF_FAILURE; // assume failure
+  pthread_t mytid = pthread_self();
+  int i;
+  for (i=0; i<matchArray_count; i++)
+    if (matchArray_tid[i] == mytid) break;
+  if (i == matchArray_count)
+    return NULL;
+  // found a match
+  *rc = ESMF_SUCCESS;
+  return matchArray_vm[i];
 }
 //-----------------------------------------------------------------------------
 
@@ -241,9 +285,16 @@ ESMC_VM *ESMC_VMInitialize(
   GlobalVM = new ESMC_VM;
   GlobalVM->vmk_init();      // set up default ESMC_VMK (all MPI)
   *rc = ESMF_SUCCESS;        // TODO: Do some real error handling here...
+  
+  matchArray_tid[matchArray_count]  = pthread_self();
+  matchArray_vm[matchArray_count]   = GlobalVM;
+  matchArray_vmID[matchArray_count] = 0;              // global VM's id is zero
+  matchArray_count = 1;
+
                              // totalview cannot handle events during the init
                              // call - it freezes or crashes or ignores input.
   GlobalVM->vmk_barrier();   // so for now, wait for everyone to init.
+
   return GlobalVM;
 }
 //-----------------------------------------------------------------------------
@@ -269,6 +320,30 @@ void ESMC_VMFinalize(
 //EOP
 //-----------------------------------------------------------------------------
   GlobalVM->vmk_finalize();
+  matchArray_count = 0;
   *rc = ESMF_SUCCESS;             // TODO: Do some real error handling here...
 }
 //-----------------------------------------------------------------------------
+
+
+// new stuff...
+
+
+void *ESMC_VM::ESMC_VMStartup(class ESMC_VMPlan *vmp, 
+  void *(fctp)(void *, void *), void *cargo){
+  
+  // startup the VM
+  void *info = vmk_startup(static_cast<ESMC_VMKPlan *>(vmp), fctp, NULL);
+  
+  // enter information for all threads of this new VM into the matchArray
+  // TODO: make this thread-safe for when we allow ESMF-threading!
+  for (int i=0; i<vmp->nspawn; i++){
+    matchArray_tid[matchArray_count]  = vmp->myvms[i]->vmk_mypthid(); // pthid
+    matchArray_vm[matchArray_count]   = vmp->myvms[i];
+    matchArray_vmID[matchArray_count] = 0;                // TODO: unique ID
+    ++matchArray_count;
+  }
+  
+  // return pointer to info structure
+  return info;
+}
