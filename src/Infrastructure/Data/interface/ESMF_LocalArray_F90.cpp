@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.9 2003/07/21 19:54:22 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.10 2003/07/22 19:46:22 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,7 +98,7 @@
       end type
 
       type(ESMF_DomainType), parameter :: & 
-                            ESMF_DOMAIN_LOCAL         = ESMF_DomainType(1), &
+                            ESMF_DOMAIN_TOTAL         = ESMF_DomainType(1), &
                             ESMF_DOMAIN_COMPUTATIONAL = ESMF_DomainType(2), &
                             ESMF_DOMAIN_EXCLUSIVE     = ESMF_DomainType(3)
 
@@ -145,7 +145,7 @@ ArrayAllTypeMacro()
       public ESMF_CopyFlag, ESMF_DATA_COPY, ESMF_DATA_REF, ESMF_DATA_SPACE
       public ESMF_ArraySpec, ESMF_LocalArray
       public ESMF_DomainType
-      public ESMF_DOMAIN_LOCAL, ESMF_DOMAIN_COMPUTATIONAL, ESMF_DOMAIN_EXCLUSIVE
+      public ESMF_DOMAIN_TOTAL, ESMF_DOMAIN_COMPUTATIONAL, ESMF_DOMAIN_EXCLUSIVE
 !------------------------------------------------------------------------------
 
 ! !PUBLIC MEMBER FUNCTIONS:
@@ -177,7 +177,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.9 2003/07/21 19:54:22 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.10 2003/07/22 19:46:22 nscollins Exp $'
 
 !==============================================================================
 ! 
