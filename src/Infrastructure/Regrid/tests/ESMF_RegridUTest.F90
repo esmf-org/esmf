@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridUTest.F90,v 1.11 2004/12/28 20:53:29 svasquez Exp $
+! $Id: ESMF_RegridUTest.F90,v 1.12 2005/02/07 16:37:54 rfaincht Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_RegridUTest.F90,v 1.11 2004/12/28 20:53:29 svasquez Exp $'
+      '$Id: ESMF_RegridUTest.F90,v 1.12 2005/02/07 16:37:54 rfaincht Exp $'
 !------------------------------------------------------------------------------
       type(ESMF_VM):: vm
 
@@ -185,6 +185,8 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
   
 
+      call ESMF_FieldPrint(humidity1, rc=rc)
+      call ESMF_FieldPrint(humidity2, rc=rc)
       !------------------------------------------------------------------------
       ! Up to here the tests are all part of the set up.  From here on,
       ! the tests are really regrid tests.
@@ -211,6 +213,8 @@
       write(name, *) "regrid run rc =", rc
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      call ESMF_FieldPrint(humidity1, rc=rc)
+      call ESMF_FieldPrint(humidity2, rc=rc)
       !------------------------------------------------------------------------
       !NEX_UTest_Multi_Proc_Only
       call ESMF_FieldRegridRelease(routehandle, rc=rc)
