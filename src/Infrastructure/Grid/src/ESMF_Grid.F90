@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $
+! $Id: ESMF_Grid.F90,v 1.6 2002/11/05 23:10:56 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -21,6 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_Grid.h>
+#include <ESMF_Macros.inc>
 !==============================================================================
 !BOP
 ! !MODULE: ESMF_GridMod - One line general statement about this class
@@ -33,8 +34,10 @@
 !
 !------------------------------------------------------------------------------
 ! !USES:
-      use ESMF_BaseMod    ! ESMF base class
-!     use ESMF_<XXX>Mod   ! any other dependencies
+      use ESMF_BaseMod        ! ESMF base class
+!jw   use ESMF_DistGridMod    ! ESMF base class
+!jw   use ESMF_PhysGridMod    ! ESMF base class
+!jw   use ESMF_VertGridMod    ! ESMF base class
       implicit none
 
 !------------------------------------------------------------------------------
@@ -53,16 +56,32 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_GridType
+!
+!     ! Definition for the Grid class.  A Grid
+!     ! is passed back to the user at Grid creation.
+
+      type ESMF_GridType
+      sequence
+      private
+
+        type (ESMF_Base) :: base                 ! base class object
+        type (ESMF_Status) :: gridstatus         ! uninitialized, init ok, etc
+!jw     type (ESMF_PhysGrid), dimension(:), pointer :: subgrid  !
+!jw     type (ESMF_VertGrid), pointer :: vertgrid    !
+!jw     type (ESMF_DistGrid), pointer :: distgrid    !
+
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_Grid
 !
-!     ! Description of ESMF_Grid. 
+!     ! The Grid data structure that is passed between languages.
 
       type ESMF_Grid
       sequence
       private
-!       type (ESMF_Base) :: base
-        integer :: dummy
-!       < insert other class members here >
+        type (ESMF_GridType), pointer :: ptr     ! pointer to a grid type
       end type
 
 !------------------------------------------------------------------------------
@@ -82,19 +101,17 @@
 ! the following routines apply to deep classes only
     public ESMF_GridCreate                 ! interface only, deep class
     public ESMF_GridDestroy                ! interface only, deep class
-    public ESMF_GridConstruct              ! internal only, deep class
-    public ESMF_GridDestruct               ! internal only, deep class
 
 ! the following routine applies to a shallow class
-    public ESMF_GridInit                   ! shallow class
+!jw public ESMF_GridInit                   ! shallow class
 
-    public ESMF_GridGetConfig
-    public ESMF_GridSetConfig
-    public ESMF_GridGetValue               ! Get<Value>
-    public ESMF_GridSetValue               ! Set<Value>
+!jw public ESMF_GridGetConfig
+!jw public ESMF_GridSetConfig
+!jw public ESMF_GridGetValue               ! Get<Value>
+!jw public ESMF_GridSetValue               ! Set<Value>
  
-    public ESMF_GridValidate
-    public ESMF_GridPrint
+!jw public ESMF_GridValidate
+!jw public ESMF_GridPrint
  
 ! < list the rest of the public interfaces here >
 !
@@ -104,7 +121,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.5 2002/11/04 06:13:42 cdeluca Exp $'
+      '$Id: ESMF_Grid.F90,v 1.6 2002/11/05 23:10:56 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -121,6 +138,21 @@
 ! !DESCRIPTION:
 !     This interface provides a single entry point for Grid create
 !     methods.
+!
+!EOP
+      end interface 
+!
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      interface ESMF_GridConstruct
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_GridConstructNew
+
+! !DESCRIPTION:
+!     This interface provides a single entry point for methods that construct a
+!     complete {\tt Grid}.
 !
 !EOP
       end interface 
@@ -143,25 +175,27 @@
 !     ESMF_GridCreateNew - Create a new Grid
 
 ! !INTERFACE:
-      function ESMF_GridCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_GridCreateNew(name, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Grid) :: ESMF_GridCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      character (len=*), intent(in), optional :: name
       integer, intent(out), optional :: rc               
+
+!     integer, intent(in) :: arg1                        
+!     integer, intent(in) :: arg2                        
+!     character (len = *), intent(in), optional :: arg3  
 !
 ! !DESCRIPTION:
 !     Allocates memory for a new {\tt Grid} object and constructs its
-!     internals.
+!     internals.  Return a pointer to a new {\tt Grid}.
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
+!     \item[[name]] 
+!          {\tt Grid} name.
 !     \item[arg2]
 !          Argument 2.         
 !     \item[[arg3]] 
@@ -170,12 +204,42 @@
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
+! !REQUIREMENTS:  TODO
 !EOP
-! !REQUIREMENTS:  AAAn.n.n
 
-!
-!  code goes here
-!
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new field
+      integer :: status=ESMF_FAILURE              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize pointers
+      nullify(grid)
+      nullify(ESMF_GridCreateNew%ptr)
+
+!     Initialize return code  
+      if(present(rc)) then
+        rcpresent=.TRUE.
+        rc = ESMF_FAILURE
+      endif
+
+      allocate(grid, stat=status)
+!     If error write message and return.
+!     Formal error handling will be added asap.
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateNew: Allocate"
+        return
+      endif
+
+!     Call construction method to allocate and initialize grid internals.
+      call ESMF_GridConstructNew(grid, name, status)
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridCreateNew: Grid construct"
+        return
+      endif
+
+!     Set return values.
+      ESMF_GridCreateNew%ptr => grid
+      if(rcpresent) rc = ESMF_SUCCESS
+
       end function ESMF_GridCreateNew
 
 !------------------------------------------------------------------------------
@@ -213,17 +277,15 @@
 !------------------------------------------------------------------------------
 !BOP
 ! !IROUTINE: 
-!     ESMF_GridConstruct - Construct the internals of an allocated Grid
+!     ESMF_GridConstructNew - Construct the internals of an allocated Grid
 
 ! !INTERFACE:
-      subroutine ESMF_GridConstruct(grid, arg1, arg2, arg3, rc)
+      subroutine ESMF_GridConstructNew(grid, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid   ! grid to be initialized
-      integer, intent(in) :: arg1                        ! arg1
-      integer, intent(in) :: arg2                        ! arg2
-      character (len = *), intent(in), optional :: arg3  ! arg3
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_GridType) :: grid 
+      character (len = *), intent(in), optional :: name  
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !     ESMF routine which fills in the contents of an already
@@ -236,24 +298,37 @@
 !     The arguments are:
 !     \begin{description}
 !     \item[grid] 
-!          The class to be constructed.
+!          Pointer to a {\tt Grid}
 !     \item[arg1]
 !          Argument 1.
 !     \item[arg2]
 !          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
+!     \item[[name]] 
+!          {\tt Grid} name.
 !     \item[[rc]] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
+! !REQUIREMENTS: TODO
 !EOP
-! !REQUIREMENTS: 
 
-!
-!  code goes here
-!
-      end subroutine ESMF_GridConstruct
+      integer :: status=ESMF_SUCCESS              ! Error status
+      logical :: rcpresent=.FALSE.                ! Return code present
+
+!     Initialize return code
+      if(present(rc)) then
+        rcpresent = .TRUE.
+        rc = ESMF_FAILURE
+      endif    
+
+      if(status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_GridConstructNew: Grid construct"
+        return
+      endif
+
+      if(rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_GridConstructNew
 
 !------------------------------------------------------------------------------
 !BOP
