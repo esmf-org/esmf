@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridTypes.F90,v 1.53 2004/06/08 22:37:19 cdeluca Exp $
+! $Id: ESMF_RegridTypes.F90,v 1.54 2004/06/10 17:45:54 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,6 +63,36 @@
       implicit none
 
 !------------------------------------------------------------------------------
+!     !  ESMF_RegridMethod
+!
+!     ! Description of ESMF_RegridMethod
+
+      type ESMF_RegridMethod
+      sequence
+        integer :: regridMethod
+      end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_RegridDistrbOpt
+!
+!     ! Description of ESMF_RegridDistrbOpt
+
+      type ESMF_RegridDistrbOpt
+      sequence
+        integer :: regridDistrbOpt
+      end type
+
+!------------------------------------------------------------------------------
+!     !  ESMF_RegridNormOpt
+!
+!     ! Description of ESMF_RegridNormOpt
+
+      type ESMF_RegridNormOpt
+      sequence
+        integer :: regridNormOpt
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_RegridType
 !
 !     ! Description of ESMF_RegridType.
@@ -84,11 +114,11 @@
            srcDatamap,    &! source datamap
            dstDatamap      ! destination datamap
 
-        integer ::       &
+        type (ESMF_RegridMethod) ::       &
            method         ! method used for this regridding
 
-        integer ::       &
-           redistrbOption ! option for redistributing data for regrid
+        type (ESMF_RegridDistrbOpt) ::       &
+           distrbOpt      ! option for distributing data for regrid
 
       end type
 
@@ -106,61 +136,96 @@
 !------------------------------------------------------------------------------
 ! !PUBLIC DATA MEMBERS:
 !
+      ! Supported ESMF Regrid Methods
+      !   NONE       =  no regridding or undefined regrid
+      !   BILINEAR   =  bilinear (logically-rect grids)
+      !   BICUBIC    =  bicubic  (logically-rect grids)
+      !   CONSERV1   =  1st-order conservative
+      !   CONSERV2   =  2nd-order conservative
+      !   RASTER     =  regrid by rasterizing domain
+      !   NEAR_NBR   =  nearest-neighbor dist-weighted avg
+      !   FOURIER    =  Fourier transform
+      !   LEGENDRE   =  Legendre transform
+      !   INDEX      =  index-space regrid (shift, stencil)
+      !   LINEAR     =  linear for 1-d regridding
+      !   SPLINE     =  cubic spline for 1-d regridding
+      !   REGRIDCOPY =  copy existing regrid
+      !   SHIFT      =  shift addresses of existing regrid
+      !   ADJOINT    =  create adjoint of existing regrid
+      !   FILE       =  read a regrid from a file
+      !   USER       =  user-supplied method
   
-      integer, parameter, public ::          &! supported regrid methods
-         ESMF_REGRID_METHOD_NONE       =  0, &! no regridding or undefined regrid
-         ESMF_REGRID_METHOD_BILINEAR   =  1, &! bilinear (logically-rect grids)
-         ESMF_REGRID_METHOD_BICUBIC    =  2, &! bicubic  (logically-rect grids)
-         ESMF_REGRID_METHOD_CONSERV1   =  3, &! 1st-order conservative
-         ESMF_REGRID_METHOD_CONSERV2   =  4, &! 2nd-order conservative
-         ESMF_REGRID_METHOD_RASTER     =  5, &! regrid by rasterizing domain
-         ESMF_REGRID_METHOD_NEAR_NBR   =  6, &! nearest-neighbor dist-weighted avg
-         ESMF_REGRID_METHOD_FOURIER    =  7, &! Fourier transform
-         ESMF_REGRID_METHOD_LEGENDRE   =  8, &! Legendre transform
-         ESMF_REGRID_METHOD_INDEX      =  9, &! index-space regrid (shift, stencil)
-         ESMF_REGRID_METHOD_LINEAR     = 10, &! linear for 1-d regridding
-         ESMF_REGRID_METHOD_SPLINE     = 11, &! cubic spline for 1-d regridding
-         ESMF_REGRID_METHOD_REGRIDCOPY = 51, &! copy existing regrid
-         ESMF_REGRID_METHOD_SHIFT      = 52, &! shift addresses of existing regrid
-         ESMF_REGRID_METHOD_ADJOINT    = 53, &! create adjoint of existing regrid
-         ESMF_REGRID_METHOD_FILE       = 89, &! read a regrid from a file
-         ESMF_REGRID_METHOD_USER       = 90   ! user-supplied method
+      type (ESMF_RegridMethod), parameter, public ::  &! regrid methods
+         ESMF_REGRID_METHOD_NONE       = ESMF_RegridMethod( 0), &
+         ESMF_REGRID_METHOD_BILINEAR   = ESMF_RegridMethod( 1), &
+         ESMF_REGRID_METHOD_BICUBIC    = ESMF_RegridMethod( 2), &
+         ESMF_REGRID_METHOD_CONSERV1   = ESMF_RegridMethod( 3), &
+         ESMF_REGRID_METHOD_CONSERV2   = ESMF_RegridMethod( 4), &
+         ESMF_REGRID_METHOD_RASTER     = ESMF_RegridMethod( 5), &
+         ESMF_REGRID_METHOD_NEAR_NBR   = ESMF_RegridMethod( 6), &
+         ESMF_REGRID_METHOD_FOURIER    = ESMF_RegridMethod( 7), &
+         ESMF_REGRID_METHOD_LEGENDRE   = ESMF_RegridMethod( 8), &
+         ESMF_REGRID_METHOD_INDEX      = ESMF_RegridMethod( 9), &
+         ESMF_REGRID_METHOD_LINEAR     = ESMF_RegridMethod(10), &
+         ESMF_REGRID_METHOD_SPLINE     = ESMF_RegridMethod(11), &
+         ESMF_REGRID_METHOD_REGRIDCOPY = ESMF_RegridMethod(51), &
+         ESMF_REGRID_METHOD_SHIFT      = ESMF_RegridMethod(52), &
+         ESMF_REGRID_METHOD_ADJOINT    = ESMF_RegridMethod(53), &
+         ESMF_REGRID_METHOD_FILE       = ESMF_RegridMethod(89), &
+         ESMF_REGRID_METHOD_USER       = ESMF_RegridMethod(90)
 
-      integer, parameter, public ::      &! options for field data motion
-         ESMF_REGRID_DISTRB_NONE   =  0, &! no data motion required or undefined
-         ESMF_REGRID_DISTRB_SOURCE =  1, &! redistribute source field
-         ESMF_REGRID_DISTRB_DEST   =  2, &! redistribute destination field
-         ESMF_REGRID_DISTRB_BOTH   =  3   ! redistribute both 
+      ! Supported ESMF Regrid Distribution Options
+      !   NONE       =  no data motion required or undefined
+      !   SOURCE     =  redistribute source field
+      !   DEST       =  redistribute destination field
+      !   BOTH       =  redistribute both 
 
-      integer, parameter, public ::     &! options for normalization
-         ESMF_REGRID_NORM_UNKNOWN  = 0, &! unknown or undefined normalization
-         ESMF_REGRID_NORM_NONE     = 1, &! no normalization
-         ESMF_REGRID_NORM_DSTAREA  = 2, &
-         ESMF_REGRID_NORM_FRACAREA = 3
+      type (ESMF_RegridDistrbOpt), parameter, public ::  &! distribution options
+         ESMF_REGRID_DISTRB_NONE   =  ESMF_RegridDistrbOpt(0), &
+         ESMF_REGRID_DISTRB_SOURCE =  ESMF_RegridDistrbOpt(1), &
+         ESMF_REGRID_DISTRB_DEST   =  ESMF_RegridDistrbOpt(2), &
+         ESMF_REGRID_DISTRB_BOTH   =  ESMF_RegridDistrbOpt(3)
+
+      ! Supported ESMF Regrid Normalization Options
+      !   UNKNOWN    =  unknown or undefined normalization
+      !   NONE       =  no normalization
+      !   DSTAREA    = 
+      !   FRACAREA   = 
+
+      type (ESMF_RegridNormOpt), parameter, public ::  &! normalization options
+         ESMF_REGRID_NORM_UNKNOWN  = ESMF_RegridNormOpt(0), &
+         ESMF_REGRID_NORM_NONE     = ESMF_RegridNormOpt(1), &
+         ESMF_REGRID_NORM_DSTAREA  = ESMF_RegridNormOpt(2), &
+         ESMF_REGRID_NORM_FRACAREA = ESMF_RegridNormOpt(3)
 
 !------------------------------------------------------------------------------
 ! !PUBLIC TYPES:
       public ESMF_Regrid
+      public ESMF_RegridMethod
+      public ESMF_RegridDistrbOpt
+      public ESMF_RegridNormOpt
 
 !------------------------------------------------------------------------------
 !
 ! !PUBLIC MEMBER FUNCTIONS:
 !
-    public ESMF_RegridAddLink        ! Adds address pair and weight to regrid
-    public ESMF_RegridRouteConstruct ! Constructs a Route used by Regrid to
-                                     ! gather data
-    public ESMF_RegridGet            ! returns a regrid attribute
-    public ESMF_RegridSet            ! sets    a regrid attribute
-    public ESMF_RegridCreateEmpty    ! creates an empty regrid structure
-    public ESMF_RegridConstructEmpty ! constructs an empty regrid structure
-    public ESMF_RegridDestruct       ! deallocate memory associated with a regrid
+    public ESMF_RegridAddLink         ! Adds address pair and weight to regrid
+    public ESMF_RegridRouteConstruct  ! Constructs a Route used by Regrid to
+                                      ! gather data
+    public ESMF_RegridGet             ! returns a regrid attribute
+    public ESMF_RegridSet             ! sets    a regrid attribute
+    public ESMF_RegridCreateEmpty     ! creates an empty regrid structure
+    public ESMF_RegridConstructEmpty  ! constructs an empty regrid structure
+    public ESMF_RegridDestruct        ! deallocate memory associated with a regrid
 
+    public operator(==), operator(/=) ! for overloading method and option
+                                      ! comparison functions
 !
 !EOPI
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridTypes.F90,v 1.53 2004/06/08 22:37:19 cdeluca Exp $'
+      '$Id: ESMF_RegridTypes.F90,v 1.54 2004/06/10 17:45:54 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -181,6 +246,44 @@
 
 !EOPI
       end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (==)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_RegridDistrbOptEqual
+         module procedure ESMF_RegridMethodEqual
+         module procedure ESMF_RegridNormOptEqual
+
+! !DESCRIPTION:
+!     This interface overloads the equality operator for the specific
+!     ESMF regrid method, normalization, and distribution data types.  It is
+!     provided for easy comparisons of these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
+!BOPI
+! !INTERFACE:
+      interface operator (/=)
+
+! !PRIVATE MEMBER FUNCTIONS:
+         module procedure ESMF_RegridDistrbOptNotEqual
+         module procedure ESMF_RegridMethodNotEqual
+         module procedure ESMF_RegridNormOptNotEqual
+
+! !DESCRIPTION:
+!     This interface overloads the inequality operator for the specific
+!     ESMF regrid method, normalization, and distribution data types.  It is
+!     provided for easy comparisons of these types with defined values.
+!
+!EOPI
+      end interface
+!
+!------------------------------------------------------------------------------
 !==============================================================================
 
       contains
@@ -653,7 +756,7 @@
       type (ESMF_Grid),         intent(out), optional :: dstGrid
       type (ESMF_FieldDataMap), intent(out), optional :: srcDatamap
       type (ESMF_FieldDataMap), intent(out), optional :: dstDatamap
-      integer,                  intent(out), optional :: method
+      type (ESMF_RegridMethod), intent(out), optional :: method
       integer,                  intent(out), optional :: rc
 
 !
@@ -682,7 +785,8 @@
 !     \item[{[dstDatamap]}]
 !          
 !     \item[{[method]}]
-!          Integer enum of method used in this regrid.
+!          Type {\tt ESMF\_RegridMethod} indicating the method used in this
+!          regrid.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -749,16 +853,16 @@
                                 method, name, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Regrid),        intent(inout) :: regrid
+      type (ESMF_Regrid),       intent(inout) :: regrid
       type (ESMF_Array),        intent(in   ), optional :: srcArray
       type (ESMF_Array),        intent(in   ), optional :: dstArray
       type (ESMF_Grid),         intent(in   ), optional :: srcGrid
       type (ESMF_Grid),         intent(in   ), optional :: dstGrid
       type (ESMF_FieldDataMap), intent(in   ), optional :: srcDatamap
       type (ESMF_FieldDataMap), intent(in   ), optional :: dstDatamap
-      integer,                  intent(in ), optional :: method
-      character (*),            intent(in ), optional :: name
-      integer,                  intent(out), optional :: rc
+      type (ESMF_RegridMethod), intent(in   ), optional :: method
+      character (*),            intent(in   ), optional :: name
+      integer,                  intent(  out), optional :: rc
 
 !
 ! !DESCRIPTION:
@@ -927,8 +1031,8 @@
       ! TODO: add error handling
 
       ! initialize scalars
-      regrid%method         = ESMF_REGRID_METHOD_NONE
-      regrid%redistrbOption = ESMF_REGRID_DISTRB_NONE
+      regrid%method    = ESMF_REGRID_METHOD_NONE
+      regrid%distrbOpt = ESMF_REGRID_DISTRB_NONE
 
       if (present(rc)) rc = ESMF_SUCCESS
 
@@ -970,8 +1074,8 @@
       ! Initialize return code; assume failure until success is certain
       if (present(rc)) rc = ESMF_FAILURE
 
-      regrid%ptr%method         = ESMF_REGRID_METHOD_NONE
-      regrid%ptr%redistrbOption = ESMF_REGRID_DISTRB_NONE
+      regrid%ptr%method    = ESMF_REGRID_METHOD_NONE
+      regrid%ptr%distrbOpt = ESMF_REGRID_DISTRB_NONE
 
       ! and free anything associated with the base object
       call ESMF_BaseDestroy(regrid%ptr%base, localrc)
@@ -979,6 +1083,210 @@
       if (present(rc)) rc = ESMF_SUCCESS
 
       end subroutine ESMF_RegridDestruct
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDistrbOptEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridDistrbOptEqual - equality of regrid distribution options
+!
+! !INTERFACE:
+      function ESMF_RegridDistrbOptEqual(RegridDistrbOpt1, RegridDistrbOpt2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridDistrbOptEqual
+
+! !ARGUMENTS:
+      type (ESMF_RegridDistrbOpt), intent(in) :: RegridDistrbOpt1
+      type (ESMF_RegridDistrbOpt), intent(in) :: RegridDistrbOpt2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Regrid distribution option types to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridDistrbOpt1, RegridDistrbOpt2]
+!          Two regrid distribution option types to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegridDistrbOptEqual = (RegridDistrbOpt1%regridDistrbOpt == &
+                                   RegridDistrbOpt2%regridDistrbOpt)
+
+      end function ESMF_RegridDistrbOptEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridMethodEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridMethodEqual - equality of regrid method types
+!
+! !INTERFACE:
+      function ESMF_RegridMethodEqual(RegridMethod1, RegridMethod2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridMethodEqual
+
+! !ARGUMENTS:
+      type (ESMF_RegridMethod), intent(in) :: RegridMethod1
+      type (ESMF_RegridMethod), intent(in) :: RegridMethod2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Regrid method types to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridMethod1, RegridMethod2]
+!          Two regrid method types to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegridMethodEqual = (RegridMethod1%regridMethod == &
+                                RegridMethod2%regridMethod)
+
+      end function ESMF_RegridMethodEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridNormOptEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridNormOptEqual - equality of regrid normalization options
+!
+! !INTERFACE:
+      function ESMF_RegridNormOptEqual(RegridNormOpt1, RegridNormOpt2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridNormOptEqual
+
+! !ARGUMENTS:
+      type (ESMF_RegridNormOpt), intent(in) :: RegridNormOpt1
+      type (ESMF_RegridNormOpt), intent(in) :: RegridNormOpt2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Regrid normalization option types to see if
+!     they are equivalent.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridNormOpt1, RegridNormOpt2]
+!          Two regrid normalization option types to compare for equality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegridNormOptEqual = (RegridNormOpt1%regridNormOpt == &
+                                 RegridNormOpt2%regridNormOpt)
+
+      end function ESMF_RegridNormOptEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridDistrbOptNotEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridDistrbOptNotEqual - inequality of regrid distribution options
+!
+! !INTERFACE:
+      function ESMF_RegridDistrbOptNotEqual(RegridDistrbOpt1, RegridDistrbOpt2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridDistrbOptNotEqual
+
+! !ARGUMENTS:
+      type (ESMF_RegridDistrbOpt), intent(in) :: RegridDistrbOpt1
+      type (ESMF_RegridDistrbOpt), intent(in) :: RegridDistrbOpt2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Regrid distribution option types to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridDistrbOpt1, RegridDistrbOpt2]
+!          Two regrid distribution option types to compare for inequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegridDistrbOptNotEqual = (RegridDistrbOpt1%regridDistrbOpt /= &
+                                      RegridDistrbOpt2%regridDistrbOpt)
+
+      end function ESMF_RegridDistrbOptNotEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridMethodNotEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridMethodNotEqual - inequality of regrid method types
+!
+! !INTERFACE:
+      function ESMF_RegridMethodNotEqual(RegridMethod1, RegridMethod2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridMethodNotEqual
+
+! !ARGUMENTS:
+      type (ESMF_RegridMethod), intent(in) :: RegridMethod1
+      type (ESMF_RegridMethod), intent(in) :: RegridMethod2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Regrid method types to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridMethod1, RegridMethod2]
+!          Two regrid method types to compare for inequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegridMethodNotEqual = (RegridMethod1%regridMethod /= &
+                                   RegridMethod2%regridMethod)
+
+      end function ESMF_RegridMethodNotEqual
+
+!------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_RegridNormOptNotEqual"
+!BOPI
+! !IROUTINE: ESMF_RegridNormOptNotEqual - inequality of regrid normalization options
+!
+! !INTERFACE:
+      function ESMF_RegridNormOptNotEqual(RegridNormOpt1, RegridNormOpt2)
+
+! !RETURN VALUE:
+      logical :: ESMF_RegridNormOptNotEqual
+
+! !ARGUMENTS:
+      type (ESMF_RegridNormOpt), intent(in) :: RegridNormOpt1
+      type (ESMF_RegridNormOpt), intent(in) :: RegridNormOpt2
+
+! !DESCRIPTION:
+!     This routine compares two ESMF Regrid normalization option types to see if
+!     they are unequal.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item[RegridNormOpt1, RegridNormOpt2]
+!          Two regrid normalization option types to compare for iinequality
+!     \end{description}
+!
+!EOPI
+! !REQUIREMENTS:  SSSn.n, GGGn.n
+
+      ESMF_RegridNormOptNotEqual = (RegridNormOpt1%regridNormOpt /= &
+                                    RegridNormOpt2%regridNormOpt)
+
+      end function ESMF_RegridNormOptNotEqual
 
 !------------------------------------------------------------------------------
 

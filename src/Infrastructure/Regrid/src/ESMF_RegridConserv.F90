@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.34 2004/06/08 09:27:19 nscollins Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.35 2004/06/10 17:45:37 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -75,7 +75,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.34 2004/06/08 09:27:19 nscollins Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.35 2004/06/10 17:45:37 jwolfe Exp $'
 
 !==============================================================================
 
@@ -110,7 +110,7 @@
       type(ESMF_DELayout),     intent(in ) :: parentDELayout
       type(ESMF_Mask),         intent(in ), optional :: srcMask
       type(ESMF_Mask),         intent(in ), optional :: dstMask
-      integer,                 intent(in ), optional :: regridnorm
+      type(ESMF_RegridNormOpt),intent(in ), optional :: regridnorm
       integer,                 intent(in ), optional :: order
       integer,                 intent(out), optional :: rc
 !
@@ -167,7 +167,6 @@
            aSize,                 &!
            nC,                    &!
            datarank,              &!
-           regridNormUse,         &!
            orderUse,              &!
            i,                     &! loop counter
            numDstCorners,         &!
@@ -220,6 +219,8 @@
            recvDomainList          !
       type(ESMF_Regrid) :: &
            tempRegrid              !
+      type(ESMF_RegridNormOpt) :: &
+           regridNormUse           !
       type(ESMF_RelLoc) :: &
            srcRelLoc, dstRelLoc    !
       type(ESMF_Route) :: &
@@ -1154,7 +1155,7 @@
 ! !ARGUMENTS:
       type(ESMF_TransformValues), intent(inout) :: tv
       integer, intent(in) :: order
-      integer, intent(in) :: regridnorm
+      type (ESMF_RegridNormOpt), intent(in) :: regridnorm
       integer, intent(in) :: srcSize
       integer, intent(in) :: dstSizeX
       integer, intent(in) :: dstSizeY
@@ -1270,14 +1271,17 @@
         jDst       = dstIndex((n-1)*2 + dstOrder(2))
         weights(1) = weightsData(n)            ! TODO: fix this for second order
 
-        select case (regridnorm)
-        case (ESMF_REGRID_NORM_NONE)
+        select case (regridnorm%regridNormOpt)
+        ! ESMF_REGRID_NORM_NONE
+        case (1)
           normFactor = 1.0d0
 
-        case (ESMF_REGRID_NORM_DSTAREA)
+        ! ESMF_REGRID_NORM_DSTAREA
+        case (2)
           normFactor = 1.0d0/dstArea(iDst,jDst)
 
-        case (ESMF_REGRID_NORM_FRACAREA)
+        ! ESMF_REGRID_NORM_FRACAREA
+        case (3)
           normFactor = 1.0d0/dstFracArea(iDst,jDst)
 
         case default
@@ -1346,13 +1350,16 @@
       do jDst   = 1,dstSizeY
         do iDst = 1,dstSizeX
 
-          select case(regridnorm)
-          case (ESMF_REGRID_NORM_DSTAREA)
-            normFactor = dstFracArea(iDst,jDst)
-          case (ESMF_REGRID_NORM_FRACAREA)
-            normFactor = 1.0d0
-          case (ESMF_REGRID_NORM_NONE)
+          select case(regridnorm%regridNormOpt)
+          ! ESMF_REGRID_NORM_NONE
+          case (1)
             normFactor = dstFracArea(iDst,jDst)*dstArea(iDst,jDst)
+          ! ESMF_REGRID_NORM_DSTAREA
+          case (2)
+            normFactor = dstFracArea(iDst,jDst)
+          ! ESMF_REGRID_NORM_FRACAREA
+          case (3)
+            normFactor = 1.0d0
           end select
 
           if (abs(temp2d(iDst,jDst)) > 1.d-12 .AND. &

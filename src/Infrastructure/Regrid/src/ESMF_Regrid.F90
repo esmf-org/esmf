@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.80 2004/06/08 22:37:19 cdeluca Exp $
+! $Id: ESMF_Regrid.F90,v 1.81 2004/06/10 17:45:03 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -94,7 +94,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.80 2004/06/08 22:37:19 cdeluca Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.81 2004/06/10 17:45:03 jwolfe Exp $'
 
 !==============================================================================
 
@@ -117,19 +117,19 @@
                                    regridnorm, srcmask, dstmask, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcarray
-      type(ESMF_Grid), intent(inout) :: srcgrid
-      type(ESMF_FieldDataMap), intent(in) :: srcdatamap
-      type(ESMF_Array), intent(inout) :: dstarray
-      type(ESMF_Grid), intent(inout) :: dstgrid
-      type(ESMF_FieldDataMap), intent(in) :: dstdatamap
-      type(ESMF_DELayout), intent(in) :: parentDELayout
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in) :: regridmethod
-      integer, intent(in), optional :: regridnorm
-      type(ESMF_Mask), intent(in), optional :: srcmask
-      type(ESMF_Mask), intent(in), optional :: dstmask
-      integer, intent(out), optional :: rc
+      type(ESMF_Array),         intent(in   ) :: srcarray
+      type(ESMF_Grid),          intent(inout) :: srcgrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: srcdatamap
+      type(ESMF_Array),         intent(inout) :: dstarray
+      type(ESMF_Grid),          intent(inout) :: dstgrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: dstdatamap
+      type(ESMF_DELayout),      intent(in   ) :: parentDELayout
+      type(ESMF_RouteHandle),   intent(inout) :: routehandle
+      type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
+      type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
+      type(ESMF_Mask),          intent(in   ), optional :: srcmask
+      type(ESMF_Mask),          intent(in   ), optional :: dstmask
+      integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 !     Given a source array, grid, and datamap, this routine precomputes
@@ -179,26 +179,12 @@
 !   The supported regridding methods for this create function are currently:
 !   \begin{description}
 !   \item[ESMF\_REGRID\_METHOD\_BILINEAR  ] bilinear (logically-rectangular grids)
-!   \item[ESMF\_REGRID\_METHOD\_BICUBIC   ] bicubic  (logically-rectangular grids)
 !   \item[ESMF\_REGRID\_METHOD\_CONSERV1  ] first-order conservative
-!   \item[ESMF\_REGRID\_METHOD\_CONSERV2  ] second-order conservative
-!   \item[ESMF\_REGRID\_METHOD\_RASTER    ] regrid by rasterizing domain
-!   \item[ESMF\_REGRID\_METHOD\_NEAR\_NBR ] nearest-neighbor distance-weighted
-!                                           average
-!   \item[ESMF\_REGRID\_METHOD\_FOURIER   ] Fourier transform
-!   \item[ESMF\_REGRID\_METHOD\_LEGENDRE  ] Legendre transform
-!   \item[ESMF\_REGRID\_METHOD\_INDEX     ] index-space regridding (shift, stencil)
 !   \item[ESMF\_REGRID\_METHOD\_LINEAR    ] linear for 1-d regridding
-!   \item[ESMF\_REGRID\_METHOD\_SPLINE    ] cubic spline for 1-d regridding
-!   \item[ESMF\_REGRID\_METHOD\_REGRIDCOPY] copy existing regrid
-!   \item[ESMF\_REGRID\_METHOD\_SHIFT     ] shift addresses of existing regrid
-!   \item[ESMF\_REGRID\_METHOD\_ADJOINT   ] create adjoint of existing regrid
-!   \item[ESMF\_REGRID\_METHOD\_FILE      ] read a regrid from a file
-!   \item[ESMF\_REGRID\_METHOD\_USER      ] user-supplied method
 !   \end{description}
 !
-! !REQUIREMENTS:  TODO
 !EOPI
+! !REQUIREMENTS:  TODO
 
       ! TODO: the interfaces have changed - this will no longer be called
       !  with fields, but with the grid, datamap, and array which are either
@@ -223,25 +209,28 @@
       
       ! Call the appropriate create routine based on method choice
 
-      select case(regridmethod)
+      select case(regridmethod%regridMethod)
 
       !-------------
-      case(ESMF_REGRID_METHOD_BILINEAR) ! bilinear
-          routehandle = ESMF_RegridConstructBilinear( &
+      ! ESMF_REGRID_METHOD_BILINEAR
+      case(1)
+        routehandle = ESMF_RegridConstructBilinear( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
                                               parentDELayout, srcmask, dstmask, &
                                               rc=localrc)
 
       !-------------
-      case(ESMF_REGRID_METHOD_BICUBIC)  ! bicubic
+      ! ESMF_REGRID_METHOD_BICUBIC
+      case(2)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Bicubic not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Bicubic not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_CONSERV1)
+      ! ESMF_REGRID_METHOD_CONSERV1
+      case(3)
           routehandle = ESMF_RegridConstructConserv( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
@@ -250,45 +239,52 @@
                                               rc=localrc)
 
       !-------------
-      case(ESMF_REGRID_METHOD_CONSERV2) ! 2nd-order conservative
+      ! ESMF_REGRID_METHOD_CONSERV2
+      case(4)
       !   routehandle = ESMF_RegridConstructConserv(srcarray, dstarray, &
       !                                        regrid_name, order=2, rc=localrc)
 
       !-------------
-      case(ESMF_REGRID_METHOD_RASTER) ! regrid by rasterizing domain
+      ! ESMF_REGRID_METHOD_RASTER
+      case(5)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Raster method not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Raster method not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_NEAR_NBR) ! nearest-neighbor dist-weighted avg
+      ! ESMF_REGRID_METHOD_NEAR_NBR
+      case(6)
       !   routehandle = ESMF_RegridConstructNearNbr(srcarray, dstarray, &
       !                                        regrid_name, rc=localrc)
 
       !-------------
-      case(ESMF_REGRID_METHOD_FOURIER) ! Fourier transform
+      ! ESMF_REGRID_METHOD_FOURIER
+      case(7)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Fourier transforms not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Fourier transforms not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_LEGENDRE) ! Legendre transform
+      ! ESMF_REGRID_METHOD_LEGENDRE
+      case(8)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Legendre transforms not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Legendre transforms not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_INDEX) ! index-space regridding (shift, stencil)
+      ! ESMF_REGRID_METHOD_INDEX
+      case(9)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Index-space methods not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Index-space methods not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_LINEAR) ! linear for 1-d regridding
+      ! ESMF_REGRID_METHOD_LINEAR
+      case(10)
           routehandle = ESMF_RegridConstructLinear( &
                                               srcarray, srcgrid, srcdatamap, &
                                               dstarray, dstgrid, dstdatamap, &
@@ -296,45 +292,51 @@
                                               rc=localrc)
 
       !-------------
-      case(ESMF_REGRID_METHOD_SPLINE) ! cubic spline for 1-d regridding
+      ! ESMF_REGRID_METHOD_SPLINE
+      case(11)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "1-d cubic splines not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "1-d cubic splines not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_REGRIDCOPY) ! copy existing regrid
+      ! ESMF_REGRID_METHOD_REGRIDCOPY
+      case(51)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Regrid copied from another regrid not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Regrid copied from another regrid not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_SHIFT) ! shift addresses of existing regrid
+      ! ESMF_REGRID_METHOD_SHIFT
+      case(52)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Regrid shifted from another regrid not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Regrid shifted from another regrid not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_ADJOINT) ! create adjoint of existing regrid
+      ! ESMF_REGRID_METHOD_ADJOINT
+      case(53)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Adjoint from existing regrid not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Adjoint from existing regrid not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_FILE) ! read a regrid from a file
+      ! ESMF_REGRID_METHOD_FILE
+      case(89)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "Regrid read from file not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "Regrid read from file not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
-      case(ESMF_REGRID_METHOD_USER) ! cubic spline for 1-d regridding
+      ! ESMF_REGRID_METHOD_USER
+      case(90)
         dummy=ESMF_LogMsgFoundError(ESMF_RC_ARG_RANK, &
-                                    "User-defined regridding not yet supported", &
-                                    ESMF_CONTEXT, rc)
+                   "User-defined regridding not yet supported", &
+                   ESMF_CONTEXT, rc)
         return
 
       !-------------
@@ -772,18 +774,18 @@
                                        srcmask, dstmask, rc) 
 !
 ! !ARGUMENTS:
-      type(ESMF_Array), intent(in) :: srcarray
-      type(ESMF_Grid), intent(inout) :: srcgrid
-      type(ESMF_FieldDataMap), intent(in) :: srcdatamap
-      type(ESMF_Grid), intent(inout) :: dstgrid
-      type(ESMF_FieldDataMap), intent(in) :: dstdatamap
-      type(ESMF_DELayout) :: parentDElayout
-      type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in) :: regridmethod
-      integer, intent(in), optional :: regridnorm
-      type(ESMF_Mask), intent(in), optional :: srcmask
-      type(ESMF_Mask), intent(in), optional :: dstmask
-      integer, intent(out), optional :: rc
+      type(ESMF_Array),         intent(in   ) :: srcarray
+      type(ESMF_Grid),          intent(inout) :: srcgrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: srcdatamap
+      type(ESMF_Grid),          intent(inout) :: dstgrid
+      type(ESMF_FieldDataMap),  intent(in   ) :: dstdatamap
+      type(ESMF_DELayout),      intent(in   ) :: parentDElayout
+      type(ESMF_RouteHandle),   intent(inout) :: routehandle
+      type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
+      type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
+      type(ESMF_Mask),          intent(in   ), optional :: srcmask
+      type(ESMF_Mask),          intent(in   ), optional :: dstmask
+      integer,                  intent(  out), optional :: rc
 !
 ! !DESCRIPTION:
 ! Used to Regrid data in an Array.
