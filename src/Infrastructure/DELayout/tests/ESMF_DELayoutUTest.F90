@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.7 2004/12/17 22:55:29 theurich Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.8 2004/12/20 04:36:53 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.7 2004/12/17 22:55:29 theurich Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.8 2004/12/20 04:36:53 theurich Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -52,7 +52,7 @@
 !     !LOCAL VARIABLES:
       type(ESMF_VM):: vm
       type(ESMF_DELayout):: delayout
-      integer:: npets, ndes, i, n
+      integer:: npets, ndes, i, n, nsum, isum
       integer, allocatable:: list(:)
 
 !-------------------------------------------------------------------------------
@@ -90,28 +90,33 @@
       
       allocate(list(npets)) ! cannot find more PETs than there are!
       
-    do i=0, ndes-1
-
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "DELayout Get DEMatchPET Test"
-      call ESMF_DELayoutGetDEMatchPET(delayout, i, vm, n, list, rc=rc)
+      call ESMF_DELayoutGetDEMatchPET(delayout, 0, vm, n, list, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
-      print *, i, n, list
+      nsum = 0
+      isum = 0
+      do i=0, ndes-1
+
+        call ESMF_DELayoutGetDEMatchPET(delayout, i, vm, n, list, rc=rc)
+        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+        nsum = nsum + n
+        isum = isum + (i - list(1))
+        
+      enddo  
+      deallocate(list)
+      nsum = nsum / ndes
 
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Returned wrong results"
-      write(name, *) "Verify that exactly one match is found"
-      call ESMF_Test((n.eq.1), name, failMsg, result, ESMF_SRCLINE)
+      write(name, *) "Verify matches"
+      call ESMF_Test(((nsum.eq.1).and.(isum.eq.0)), name, failMsg, result, ESMF_SRCLINE)
       
-      
-    enddo
-      
-      deallocate(list)
-
 #ifdef ESMF_EXHAUSTIVE
 #endif
 
