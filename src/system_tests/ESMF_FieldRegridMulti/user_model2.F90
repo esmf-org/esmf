@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.2 2004/02/19 21:34:31 jwolfe Exp $
+! $Id: user_model2.F90,v 1.3 2004/02/20 21:27:12 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -142,18 +142,15 @@
       call ESMF_ArraySpecInit(arrayspec, rank=3, type=ESMF_DATA_REAL, &
                               kind=ESMF_R8)
 
-      ! Create the array
-      array1 = ESMF_ArrayCreate(arrayspec, counts=(/ 4, 40, 50 /), rc=rc)
-
       ! Create a datamap
       order(1) = 0
       order(2) = 1
       order(3) = 2
-      datamap = ESMF_DataMapCreate(order, counts=counts(1:1), rc=rc)
+      datamap = ESMF_DataMapCreate(order, horizRelloc=ESMF_CELL_NFACE, &
+                                   counts=counts(1:1), rc=rc)
 
       ! Create the field 
-      humidity = ESMF_FieldCreate(grid1, array=array1, datamap=datamap, &
-                                  horizRelloc=ESMF_CELL_NFACE, &
+      humidity = ESMF_FieldCreate(grid1, arrayspec=arrayspec, datamap=datamap, &
                                   haloWidth=0, name="humidity", rc=rc)
 
       ! Get the allocated array back and get an F90 array pointer
@@ -271,14 +268,15 @@
       integer, intent(out) :: rc
 
       ! Local variables
-      integer :: status, i, j, myDE, counts(2)
+      integer :: status, i, j, k, myDE, counts(2)
       type(ESMF_RelLoc) :: relloc
       type(ESMF_Array) :: array
       type(ESMF_Array), dimension(:), pointer :: coordArray
       type(ESMF_Grid) :: grid
       real(ESMF_KIND_R8) :: pi, error, maxError, maxPerError
       real(ESMF_KIND_R8) :: minCValue, maxCValue, minDValue, maxDValue
-      real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, data, coordX, coordY
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: calc, coordX, coordY
+      real(ESMF_KIND_R8), dimension(:,:,:), pointer :: data
 
       print *, "User verifyResults starting"  
 
@@ -316,15 +314,17 @@
       minCValue   = 1000.0
       maxDValue   = 0.0
       minDValue   = 1000.0
-      do j   = 1,counts(2)
-        do i = 1,counts(1)
-          error       = abs(data(i,j)) - abs(calc(i,j))
-          minCValue   = min(minCValue, abs(calc(i,j)))
-          maxCValue   = max(maxCValue, abs(calc(i,j)))
-          minDValue   = min(minDValue, abs(data(i,j)))
-          maxDValue   = max(maxDValue, abs(data(i,j)))
-          maxError    = max(maxError, abs(error))
-          maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
+      do k     = 1,size(data,1)
+        do j   = 1,counts(2)
+          do i = 1,counts(1)
+            error       = abs(data(k,i,j)) - abs(calc(i,j))
+            minCValue   = min(minCValue, abs(calc(i,j)))
+            maxCValue   = max(maxCValue, abs(calc(i,j)))
+            minDValue   = min(minDValue, abs(data(k,i,j)))
+            maxDValue   = max(maxDValue, abs(data(k,i,j)))
+            maxError    = max(maxError, abs(error))
+            maxPerError = max(maxPerError, 100.*abs(error)/abs(calc(i,j)))
+          enddo
         enddo
       enddo
 
