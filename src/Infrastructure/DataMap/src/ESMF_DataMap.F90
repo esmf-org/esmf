@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.17 2004/03/09 19:06:23 nscollins Exp $
+! $Id: ESMF_DataMap.F90,v 1.18 2004/03/10 19:57:49 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -218,7 +218,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.17 2004/03/09 19:06:23 nscollins Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.18 2004/03/10 19:57:49 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -704,7 +704,7 @@ end function
 
         if (present(dataIorder)) then
            dimlength = size(dataIorder,1)
-           if (dimlength .lt. dataRank) then
+           if (dimlength .lt. datamap%dataRank) then
              print *, "ESMF_DataMapGet: dataIorder array too short for dataRank"
              return
            endif
@@ -806,7 +806,7 @@ end function
 
         if (present(dataIorder)) then
            dimlength = size(dataIorder,1)
-           if (dimlength .lt. dataRank) then
+           if (dimlength .lt. datamap%dataRank) then
              print *, "ESMF_DataMapSet: dataIorder array too short for dataRank"
              return
            endif
