@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.16 2004/06/17 12:58:15 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.17 2004/06/17 12:59:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -27,7 +27,6 @@
 #include "ESMF_Conf.inc"
 #include "ESMF_Version.inc"
 #include "ESMF_LogConstants.inc"
-#include "ESMF_LogMacros.inc"
 #include "ESMF_ErrReturnCodes.inc"
 
 
