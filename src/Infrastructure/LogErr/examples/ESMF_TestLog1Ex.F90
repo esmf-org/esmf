@@ -13,6 +13,6 @@ program test_log_2
     !call ESMF_Initialize(rc=rc1)
     call ESMF_LogInitialize("aLog1.txt",rc=rc1)
     call ESMF_LogWrite("Log Write 2",ESMF_LOG_INFO)
-    ret = ESMF_LogFoundError(ESMF_FAILURE,rcToReturn=rc2)
+    ret = ESMF_LogMsgFoundError(ESMF_FAILURE,"hello",rcToReturn=rc2)
     ret = ESMF_LogFoundAllocError(ESMF_FAILURE,rc2)
 end program

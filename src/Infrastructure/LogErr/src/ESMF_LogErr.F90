@@ -99,7 +99,7 @@ type ESMF_Log
 end type ESMF_Log
 
 
-   public ESMF_Log,ESMF_LogClose,ESMF_LogFinalize,,ESMF_LogFoundAllocError&
+   public ESMF_Log,ESMF_LogClose,ESMF_LogFinalize,ESMF_LogFoundAllocError,&
    ESMF_LogFoundError,ESMF_LogGet,ESMF_LogInitialize,&
    ESMF_LogMsgFoundAllocError,ESMF_LogMsgFoundError,ESMF_LogOpen,&
    ESMF_LogSet,ESMF_LogWrite
