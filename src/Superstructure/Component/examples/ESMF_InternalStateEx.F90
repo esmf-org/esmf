@@ -1,4 +1,4 @@
-! $Id: ESMF_InternalStateEx.F90,v 1.2 2004/12/13 18:55:11 nscollins Exp $
+! $Id: ESMF_InternalStateEx.F90,v 1.3 2004/12/13 18:59:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,11 +30,13 @@
 !   during the execution of a Component's Initialize, Run, or Finalize
 !   code, and retrieve the address back during a different invocation 
 !   of these routines.   See the code below for examples of use.
+!EOP
 !  
 !
 !-------------------------------------------------------------------------
 !
 ! !USES:
+!BOC
     use ESMF_Mod
     implicit none
     
@@ -99,6 +101,7 @@
     endif
 
 
+!EOC
 !-------------------------------------------------------------------------
 !   !  Destroying a component
 
