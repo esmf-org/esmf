@@ -1,4 +1,4 @@
-! $Id: ESMF_Config.F90,v 1.27 2003/05/07 19:36:26 nscollins Exp $
+! $Id: ESMF_Config.F90,v 1.28 2003/06/18 18:43:13 rstaufer Exp $
 !==============================================================================
 ! Earth System Modeling Framework
 !
@@ -26,7 +26,7 @@
 !
 ! !DESCRIPTION:
 !
-! The code in this file implements the {\tt Config} class that implements 
+! The code in this file implements the {\tt ESMF\_Config} class that implements 
 ! ESMF configuration management system.
 !
 ! \subsubsection{Package Overview}
@@ -103,9 +103,9 @@
 ! \begin{verbatim}
 !       real    r
 !       integer i
-!       call ESMF_ConfigFindLabel( cf, 'constants:', rc = rc)
-!       r = ESMF_ConfigGetFloat( cf, rc = rc )       ! results in r = 3.1415
-!       i = ESMF_ConfigGetInt( cf, rc = rc )         ! results in i = 25
+!       call {\tt ESMF\_ConfigFindLabel( cf, 'constants:', rc = rc)}
+!       r = {\tt ESMF\_ConfigGetFloat( cf, rc = rc )}       ! results in r = 3.1415
+!       i = {\tt ESMF\_ConfigGetInt( cf, rc = rc )}         ! results in i = 25
 ! \end{verbatim}
 !
 !  The file names above can be retrieved with the following
@@ -113,17 +113,17 @@
 ! \begin{verbatim}
 !       character*20 fn1, fn2, fn3
 !       integer      rc
-!       call ESMF_ConfigFindLabel ( cf, 'my_file_names:', rc = rc )
-!       call ESMF_ConfigGetString ( cf, fn1, rc = rc )  ! ==> fn1 = 'jan87.dat'
-!       call ESMF_ConfigGetString ( cf, fn2, rc = rc )  ! ==> fn1 = 'jan88.dat'
-!       call ESMF_ConfigGetString ( cf, fn3, rc = rc )  ! ==> fn1 = 'jan89.dat'
+!       call {\tt ESMF\_ConfigFindLabel ( cf, 'my_file_names:', rc = rc )}
+!       call {\tt ESMF\_ConfigGetString ( cf, fn1, rc = rc )}  ! ==> fn1 = 'jan87.dat'
+!       call {\tt ESMF\_ConfigGetString ( cf, fn2, rc = rc )}  ! ==> fn1 = 'jan88.dat'
+!       call {\tt ESMF\_ConfigGetString ( cf, fn3, rc = rc )}  ! ==> fn1 = 'jan89.dat'
 ! \end{verbatim}
 !
 ! To access the table above, the user first must use 
 ! ${\tt ESMF\_ConfigFindLabel()}$ to locate the beginning of the table, e.g.,
 !
 ! \begin{verbatim}
-!       call ESMF_ConfigFindLabel(cf, 'my_table_name::', rc = rc)
+!       call {\tt ESMF\_ConfigFindLabel(cf, 'my_table_name::', rc = rc)}
 ! \end{verbatim}
 !
 ! Subsequently, ${\tt call ESMF\_ConfigNextLine()}$ can be used to gain 
@@ -134,9 +134,9 @@
 !       real          table(7,3)
 !       character*20  word
 !       integer       rc
-!       call  ESMF_ConfigFindLabel(cf, 'my_table_name::', rc = rc)
+!       call  {\tt ESMF\_ConfigFindLabel(cf, 'my_table_name::', rc = rc)}
 !       do i = 1, 7
-!          call  call ESMF_ConfigNextLine( cf, rc = rc )
+!          call  call {\tt ESMF\_ConfigNextLine( cf, rc = rc )
 !          do j = 1, 3
 !             table(i,j) = ESMF_ConfigGetFloat( cf, rc = rc )
 !          end do                   
@@ -147,7 +147,7 @@
 ! ${\tt ESMF\_ConfigDestroy()}$:
 ! \begin{verbatim}
 !       integer rc
-!       call ESMF_ConfigDestroy( cf, rc )
+!       call {\tt ESMF\_ConfigDestroy( cf, rc )
 ! \end{verbatim}
 !
 ! {\em Common Arguments:}
