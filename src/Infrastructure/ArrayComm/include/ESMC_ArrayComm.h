@@ -1,4 +1,4 @@
-// $Id: ESMC_ArrayComm.h,v 1.3 2003/12/08 18:53:30 nscollins Exp $
+// $Id: ESMC_ArrayComm.h,v 1.4 2003/12/08 23:12:59 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -16,73 +16,7 @@
  #ifndef ESMC_ArrayComm_H
  #define ESMC_ArrayComm_H
 
-//-----------------------------------------------------------------------------
-
-#include <string.h>
-//#include <stdio.h>  // include for debug only
-
-//-----------------------------------------------------------------------------
-//BOP
-// !CLASS:  ESMC_ArrayComm - Distributed Data associated with a regular grid
-//
-// !DESCRIPTION:
-//
-// The code in this file defines the C++ Array members and declares method 
-// signatures (prototypes).  The companion file ESMC\_Array.C contains
-// the definitions (full code bodies) for the Array methods.
-//
-// 
-//
-//-----------------------------------------------------------------------------
-// 
-// !USES:
-#include <ESMC_Base.h>  // all classes inherit from the ESMC Base class.
-#include <ESMC_DELayout.h>    // communications code
-#include <ESMC_LocalArray.h>  // functions to interoperate F90/C++ arrays
-#include <ESMC_Array.h>  // functions to interoperate F90/C++ arrays
-#include <ESMC_Grid.h>        // grid info
-
-// !PUBLIC TYPES:
-
-
-// !PRIVATE TYPES:
-
-  public:
-
-    // most important array methods
-    int ESMC_ArrayRedist(ESMC_DELayout *layout, int global_start[], 
-                         int global_dimlengths[], int rank_trans[], 
-                         int size_rank_trans, int olddecompids[], 
-                         int decompids[], int size_decomp,
-                          ESMC_Array *RedistArray);
-    int ESMC_ArrayHalo(ESMC_DELayout *layout,
-                       ESMC_AxisIndex *ai_global, int global_dimlengths[],
-                       int decompids[], int size_decomp, ESMC_Logical periodic[]);
-    int ESMC_ArrayAllGather(ESMC_DELayout *layout, int decompids[],
-                            int size_decomp, int localAxisLengths[],
-                            int size_axislengths, int global_dimlengths[],
-                            int local_maxlengths[], ESMC_Array **Array_out);
-    int ESMC_ArrayGather(ESMC_DELayout *layout, int decompids[], 
-                            int size_decomp, int global_dimlengths[],
-                            int local_maxlengths[], 
-                            int deid, ESMC_Array **Array_out);
-    int ESMC_ArrayScatter(ESMC_DELayout *layout,
-                            int decompids[], int size_decomp,
-                            int deid, ESMC_Array **Array_out);
-    
- // < declare the rest of the public interface methods here >
-  
-// !PRIVATE MEMBER FUNCTIONS:
-//
-  private: 
-//
- // < declare private interface methods here >
-//
-//EOP
-//-----------------------------------------------------------------------------
-
- };   // end class ESMC_Array
-
+// unused and unincluded as of now.
 
  #endif  // ESMC_ArrayComm_H
 
