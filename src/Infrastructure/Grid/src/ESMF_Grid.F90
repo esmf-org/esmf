@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.50 2003/05/21 18:34:48 pwjones Exp $
+! $Id: ESMF_Grid.F90,v 1.51 2003/05/22 21:21:34 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -77,7 +77,7 @@
         logical, dimension(3) :: periodic   ! logical identifier to indicate
                                             ! periodic boundary conditions in
                                             ! each direction
-        type (ESMF_PhysGridType), dimension(:), pointer :: &
+        type (ESMF_PhysGrid), dimension(:), pointer :: &
            physgrids         ! grid info for all grid descriptions necessary
                              ! to define horizontal, staggered and vertical grids
         type (ESMF_DistGrid) :: distgrid    ! decomposition and other
@@ -208,7 +208,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.50 2003/05/21 18:34:48 pwjones Exp $'
+      '$Id: ESMF_Grid.F90,v 1.51 2003/05/22 21:21:34 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1295,16 +1295,15 @@
 
       integer :: status=ESMF_SUCCESS          ! Error status
       logical :: rcpresent=.FALSE.            ! Return code present
-      real :: delta1
-      real :: local_min_coord1
-      real :: local_max_coord1
-      integer :: local_nmax1
-      real :: delta2
-      real :: local_min_coord2
-      real :: local_max_coord2
-      integer :: local_nmax2
+      real(kind=ESMF_IKIND_R8) :: delta(2)
+      real(kind=ESMF_IKIND_R8) :: local_min_coord(2)
+      real(kind=ESMF_IKIND_R8) :: local_max_coord(2)
+      integer :: local_nmax(2)
+      real(kind=ESMF_IKIND_R8) :: global_min_coord(2)
+      real(kind=ESMF_IKIND_R8) :: global_max_coord(2)
+      integer :: global_nmax(2)
       integer :: i
-      type(ESMF_PhysGridType), dimension(:), allocatable, target :: temp_pgrids
+      type(ESMF_PhysGrid), dimension(:), allocatable, target :: temp_pgrids
                                              ! temporary array of physgrids
 
 !     Initialize return code
@@ -1335,38 +1334,34 @@
           print *, "ERROR in ESMF_GridAddPhysGrid: physgrids deallocate"
           return
         endif
-        grid%physgrids => temp_pgrids
       endif
       physgrid_id = grid%num_physgrids 
 
-      delta1 = (x_max - x_min) / real(i_max)
-      local_min_coord1 = delta1 * &
-                         real(grid%distgrid%ptr%MyDE%lcelltot_index(1)%l - 1)
-      local_max_coord1 = delta1 * &
-                         real(grid%distgrid%ptr%MyDE%lcelltot_index(1)%r)
-      local_nmax1 = grid%distgrid%ptr%MyDE%lcelltot_index(1)%r &
-                  - grid%distgrid%ptr%MyDE%lcelltot_index(1)%l + 1
-      delta2 = (y_max - y_min) / real(j_max)
-      local_min_coord2 = delta2 * &
-                         real(grid%distgrid%ptr%MyDE%lcelltot_index(2)%l - 1)
-      local_max_coord2 = delta2 * &
-                         real(grid%distgrid%ptr%MyDE%lcelltot_index(2)%r)
-      local_nmax2 = grid%distgrid%ptr%MyDE%lcelltot_index(2)%r &
-                  - grid%distgrid%ptr%MyDE%lcelltot_index(2)%l + 1
-      call ESMF_PhysGridConstruct(grid%physgrids(physgrid_id), &
-                                  local_min_coord1=local_min_coord1, &
-                                  local_max_coord1=local_max_coord1, &
-                                  local_nmax1=local_nmax1, &
-                                  local_min_coord2=local_min_coord2, &
-                                  local_max_coord2=local_max_coord2, &
-                                  local_nmax2=local_nmax2, &
-                                  global_min_coord1=x_min, &
-                                  global_max_coord1=x_max, &
-                                  global_nmax1=i_max, &
-                                  global_min_coord2=y_min, &
-                                  global_max_coord2=y_max, &
-                                  global_nmax2=j_max, &
-                                  name=physgrid_name, rc=status)
+      delta(1) = (x_max - x_min) / real(i_max)
+      delta(2) = (y_max - y_min) / real(j_max)
+      do i = 1,2
+        local_min_coord(i) = delta(i) * &
+                             real(grid%distgrid%ptr%MyDE%lcelltot_index(i)%l - 1)
+        local_max_coord(i) = delta(i) * &
+                             real(grid%distgrid%ptr%MyDE%lcelltot_index(i)%r)
+        local_nmax(i) = grid%distgrid%ptr%MyDE%lcelltot_index(i)%r &
+                      - grid%distgrid%ptr%MyDE%lcelltot_index(i)%l + 1
+      enddo
+      global_min_coord(1)=x_min
+      global_max_coord(1)=x_max
+      global_nmax(1)=i_max
+      global_min_coord(2)=y_min
+      global_max_coord(2)=y_max
+      global_nmax(2)=j_max
+      temp_pgrids(physgrid_id)=ESMF_PhysGridCreate(dim_num=2, &
+                                      local_min=local_min_coord, &
+                                      local_max=local_max_coord, &
+                                      local_nmax=local_nmax, &
+                                      global_min=global_min_coord, &
+                                      global_max=global_max_coord, &
+                                      global_nmax=global_nmax, &
+                                      name=physgrid_name, rc=status)
+      grid%physgrids => temp_pgrids
 
       if(rcpresent) rc = ESMF_SUCCESS
 
@@ -1903,10 +1898,10 @@
       integer, dimension(ESMF_MAXGRIDDIM) :: gcell_dim
       integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_start
       integer, dimension(ESMF_MAXGRIDDIM) :: lcellexc_end
-      real :: delta1
-      real :: delta2
-      real, dimension(ESMF_MAXGRIDDIM) :: global_min_coords
-      real, dimension(ESMF_MAXGRIDDIM) :: global_max_coords
+      real(kind=ESMF_IKIND_R8) :: delta1
+      real(kind=ESMF_IKIND_R8) :: delta2
+      real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coords
+      real(kind=ESMF_IKIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coords
       logical :: rcpresent=.FALSE.                ! Return code present
 
 !     Initialize return code
@@ -1940,9 +1935,9 @@
       endif
 
 !     Get physgrid info with global coordinate extents
-      call ESMF_PhysGridGet(grid%physgrids(physgrid_id), &
-                            global_min_coords=global_min_coords, &
-                            global_max_coords=global_max_coords, rc=status)
+      call ESMF_PhysGridGet(grid%physgrids(physgrid_id)%ptr, &
+                            global_min=global_min_coords, &
+                            global_max=global_max_coords, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_GridSetCoordCompute: PhysGrid get"
         return
@@ -1966,7 +1961,7 @@
       coord_loc(1) = 1
       coord_loc(2) = 2
       ncoord_locs = 2
-      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id), &
+      call ESMF_PhysGridSetCoord(grid%physgrids(physgrid_id)%ptr, &
                                  ncoord_locs, coord_loc, &
                                  lcellexc_start(1), lcellexc_end(1), &
                                  lcellexc_start(2), lcellexc_end(2), &
@@ -2042,8 +2037,10 @@
       integer, intent(out), optional :: horz_coord_system
       integer, intent(out), optional :: vert_coord_system
       integer, intent(out), optional :: coord_order
-      real, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_min_coords
-      real, intent(out), dimension(ESMF_MAXGRIDDIM),  optional :: global_max_coords
+      real(kind=ESMF_IKIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
+         optional :: global_min_coords
+      real(kind=ESMF_IKIND_R8), intent(out), dimension(ESMF_MAXGRIDDIM), &
+         optional :: global_max_coords
       integer, intent(out), dimension(ESMF_MAXGRIDDIM), optional :: global_nmax
       integer, intent(out), optional :: rc
 !
@@ -2112,9 +2109,9 @@
 !     Get physgrid info with global coordinate extents
       if(present(global_min_coords) .or. present(global_max_coords)) then
         physgrid_id = gridp%num_physgrids  ! TODO: fix so passed in?
-        call ESMF_PhysGridGet(gridp%physgrids(physgrid_id), &
-                              global_min_coords=global_min_coords, &
-                              global_max_coords=global_max_coords, rc=status)
+        call ESMF_PhysGridGet(gridp%physgrids(physgrid_id)%ptr, &
+                              global_min=global_min_coords, &
+                              global_max=global_max_coords, rc=status)
         if(status .NE. ESMF_SUCCESS) then
           print *, "ERROR in ESMF_GridGet: PhysGrid get"
           return
@@ -3099,11 +3096,11 @@
       function ESMF_GridComputeDistance(x1, y1, x2, y2, coord_system, rc)
 
 ! !RETURN VALUE:
-      real () :: ESMF_GridComputeDistance
+      real (kind=ESMF_IKIND_R8) :: ESMF_GridComputeDistance
 
 ! !ARGUMENTS:
 
-      real (kind=?), intent(in) :: &
+      real (kind=ESMF_IKIND_R8), intent(in) :: &
          x1,y1,      &! x,y coordinates of two points between which 
          x2,y2        !   the distance is to be computed
 
@@ -3134,14 +3131,11 @@
 !
 !     local variables
 !
-
       integer :: status
-
 !
 !     branch to appropriate PhysGrid routine to compute
 !     distance
 !
-
       status = ESMF_SUCCESS
 
       select case (coord_system)
@@ -3155,16 +3149,15 @@
          print *,'Distance in coordinate system not yet supported'
          status = ESMF_FAILURE
       end select
-
 !
 !     set return code and exit
 !
-
       if (present(rc)) then
          rc = status
       endif
+      return
 
-      end subroutine ESMF_GridComputeDistance
+      end function ESMF_GridComputeDistance
 
 !------------------------------------------------------------------------------
 !!BOP
