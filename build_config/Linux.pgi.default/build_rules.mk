@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.12.2.1 2005/03/03 17:56:39 nscollins Exp $
+# $Id: build_rules.mk,v 1.12.2.2 2005/03/08 07:11:11 theurich Exp $
 #
 #  Linux.pgi.default.mk
 #
@@ -172,9 +172,9 @@ LD_PATHS    = $(C_FLINKER_SLFLAG)/opt/pgi/pgi-5.2/linux86/5.2/lib \
               $(C_FLINKER_SLFLAG)/opt/intel/icc/icc-8.1/lib
 endif
 C_F90CXXLD         = ${CXX_FC} ${LD_PATHS}
-C_F90CXXLIBS       = ${LIB_PATHS} -lgm -lrt -lpthread -lC -lc
+C_F90CXXLIBS       = ${LIB_PATHS} -lrt -lpthread -lC -lc
 C_CXXF90LD         = ${CXX_CC}  ${LD_PATHS}
-C_CXXF90LIBS       = ${LIB_PATHS} -lgm -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
+C_CXXF90LIBS       = ${LIB_PATHS} -lrt -lpgf90 -lpgf90_rpm1 -lpgf902 -lpgf90rtl -lpgftnrtl
 C_CXXSO            = ${CXX_CC} -shared
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
