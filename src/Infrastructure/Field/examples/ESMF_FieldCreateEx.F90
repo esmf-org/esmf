@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreateEx.F90,v 1.10 2004/01/07 23:04:31 svasquez Exp $
+! $Id: ESMF_FieldCreateEx.F90,v 1.11 2004/02/11 18:10:21 svasquez Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -14,13 +14,11 @@
 !
 !
 !\begin{verbatim}
-
 !   ! Example program showing various ways to create a Field object
     program ESMF_FieldCreateEx
 
     ! ESMF Framework module
     use ESMF_Mod
-    
     implicit none
     
 !   ! Local variables
@@ -36,17 +34,13 @@
     real (selected_real_kind(6,45)), dimension(:,:), pointer :: f90ptr1, f90ptr2
 !\end{verbatim}
 !EOP
-
     integer :: finalrc       
 !   !Set finalrc to success
     finalrc = ESMF_SUCCESS
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
-
     call ESMF_Initialize(rc)
-
 !-------------------------------------------------------------------------
 !   ! Example 1:
 !   !
@@ -56,49 +50,39 @@
 !   !  by default.  The DataMap is created with defaults.
  
     grid = ESMF_GridCreate(name="atmgrid", rc=rc)
-
     allocate(f90ptr1(10,20))
     arraya = ESMF_ArrayCreate(f90ptr1, ESMF_DATA_REF, rc=rc)  
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     call ESMF_ArrayPrint(arraya, rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     field1 = ESMF_FieldCreate(grid, arraya, &
                          relloc=ESMF_CELL_CENTER, name="pressure", rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     call ESMF_FieldGetName(field1, fname, rc)
-
     print *, "Field example 1 returned, name = ", trim(fname)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -110,7 +94,6 @@
     call ESMF_ArraySpecInit(arrayspec, 2, ESMF_DATA_REAL, ESMF_R4, rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
@@ -118,15 +101,12 @@
 !\begin{verbatim}
     field2 = ESMF_FieldCreate(grid, arrayspec, relloc=ESMF_CELL_CENTER, &
                               name="rh", rc=rc)
-
     print *, "Field example 2 returned"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -140,34 +120,27 @@
     call ESMF_FieldDetachData(field1, array=arraya, rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     allocate(f90ptr2(30,15))
     arrayb = ESMF_ArrayCreate(f90ptr2, ESMF_DATA_REF, rc=rc)  
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
     call ESMF_FieldAttachData(field1, array=arrayb, rc=rc)
-
     print *, "Field example 3 returned"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
@@ -179,11 +152,9 @@
      field3 = ESMF_FieldCreateNoData("precip", rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !
@@ -191,103 +162,80 @@
      call ESMF_FieldSetGrid(field3, grid, rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !    ! ...and associate a data Array.
 !    call ESMF_FieldAttachArray(field3, arraya, rc=rc)
-
      print *, "Field example 4 returned"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
 !   ! Example 5:
 !   !
 !   ! Query a Field for number of local grid cells.
-
      call ESMF_FieldGetLocalGridInfo(field3, ncell=mycell, rc=rc)
-
      print *, "Field example 5 returned"
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
 	finalrc = ESMF_FAILURE
     end if
-
-
 !BOP
 !\begin{verbatim}
      call ESMF_FieldDestroy(field1, rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
      call ESMF_FieldDestroy(field2, rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
      call ESMF_FieldDestroy(field3,rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
      !call ESMF_FieldDestroy(field4,rc=rc)
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 !BOP
 !\begin{verbatim}
 !-------------------------------------------------------------------------
-
      call ESMF_Finalize(rc)
-
 !-------------------------------------------------------------------------
 !\end{verbatim}
 !EOP
-
     if (rc.NE.ESMF_SUCCESS) then
         finalrc = ESMF_FAILURE
     end if
-
 
     if (finalrc.EQ.ESMF_SUCCESS) then
 	print *, "PASS: ESMF_FieldCreateEx.F90"
     else
 	print *, "FAIL: ESMF_FieldCreateEx.F90"
     end if
-
 !BOP
 !\begin{verbatim}
      end program ESMF_FieldCreateEx
