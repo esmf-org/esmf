@@ -1,4 +1,4 @@
-// $Id: ESMC_Array_F.C,v 1.10 2003/08/01 22:30:56 nscollins Exp $
+// $Id: ESMC_Array_F.C,v 1.11 2003/08/04 20:21:40 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -116,8 +116,8 @@ extern "C" {
                                      ESMC_AxisIndex *global, int *nDEs,
                                      ESMC_AxisIndex *total, ESMC_AxisIndex *comp, 
                                      ESMC_AxisIndex *excl, int *status) {
-          *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, total,
-                                     comp, excl);
+          *status = (*ptr)->ESMC_ArrayGetAllAxisIndices(global, *nDEs, 
+                                     total, comp, excl);
      }
 
      void FTN(c_esmc_arrayredist)(ESMC_Array **ptr, ESMC_DELayout **layout,

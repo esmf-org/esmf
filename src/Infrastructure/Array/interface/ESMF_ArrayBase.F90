@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayBase.F90,v 1.12 2003/08/01 22:46:44 jwolfe Exp $
+! $Id: ESMF_ArrayBase.F90,v 1.13 2003/08/04 20:21:40 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayBase.F90,v 1.12 2003/08/01 22:46:44 jwolfe Exp $'
+      '$Id: ESMF_ArrayBase.F90,v 1.13 2003/08/04 20:21:40 nscollins Exp $'
 !
 !==============================================================================
 !
@@ -307,6 +307,9 @@
 
       integer :: status, nDEs, i, j
       type(ESMF_AxisIndex), dimension(:,:), pointer :: globalindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: tindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: cindex
+      type(ESMF_AxisIndex), dimension(:,:), pointer :: eindex
       type(ESMF_DELayout) :: layout
 
       ! get layout from the grid in order to get the number of DEs
@@ -317,10 +320,27 @@
       allocate(globalindex(nDEs,ESMF_MAXGRIDDIM), stat=status)
       call ESMF_GridGetAllAxisIndex(grid, globalindex, status)
 
+      if (present(totalindex)) then
+         tindex => totalindex
+      else
+         nullify(tindex)
+      endif
+
+      if (present(compindex)) then
+         cindex => compindex
+      else
+         nullify(cindex)
+      endif
+
+      if (present(exclindex)) then
+         eindex => exclindex
+      else
+         nullify(eindex)
+      endif
+
       ! call c routine to get indices
       call c_ESMC_ArrayGetAllAxisIndices(array, globalindex, nDEs, &
-                                         totalindex, &
-                                         compindex, exclindex, status)
+                                   tindex, cindex, eindex, status)
 
       ! translate from C++ to F90
       if (present(totalindex)) then
