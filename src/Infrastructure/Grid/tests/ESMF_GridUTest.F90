@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.10 2003/04/24 22:32:41 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.11 2003/04/29 01:17:10 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -45,7 +45,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.10 2003/04/24 22:32:41 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.11 2003/04/29 01:17:10 nscollins Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -93,7 +93,7 @@
 !     to OFF, then only the sanity unit tests.
 !--------------------------------------------------------------------------------
 
-
+      call ESMF_FrameworkInitialize(status)
 
       !------------------------------------------------------------------------
       i_max = 10
@@ -213,4 +213,5 @@
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
   
+      call ESMF_FrameworkFinalize(status)
       end program ESMF_GridUTest
