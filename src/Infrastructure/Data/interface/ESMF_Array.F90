@@ -1,4 +1,4 @@
-! $Id: ESMF_Array.F90,v 1.61 2003/06/19 20:01:45 nscollins Exp $
+! $Id: ESMF_Array.F90,v 1.62 2003/06/20 17:14:51 rstaufer Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -359,7 +359,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array.F90,v 1.61 2003/06/19 20:01:45 nscollins Exp $'
+      '$Id: ESMF_Array.F90,v 1.62 2003/06/20 17:14:51 rstaufer Exp $'
 
 !==============================================================================
 ! 
@@ -9608,11 +9608,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -9709,11 +9709,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -9810,11 +9810,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -9911,11 +9911,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -10012,11 +10012,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -10113,11 +10113,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -10214,11 +10214,11 @@ end function
  integer, intent(out), optional :: rc   
 ! 
 ! !DESCRIPTION: 
-! Creates an {\tt Array} based on an already allocated Fortran 90 array 
+! Creates an {\tt ESMF\_Array} based on an already allocated Fortran 90 array 
 !   pointer.  This routine can make a copy or reference the existing data 
 !   and fills in the array object with all necessary information. 
 ! 
-! The function return is an ESMF\_Array type. 
+! The function return is an {\tt ESMF\_Array} type. 
 ! 
 ! The arguments are: 
 !  \begin{description} 
@@ -16555,13 +16555,13 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Array}.
+!     Releases all resources associated with this {\tt ESMF\_Array}.
 !
 !     The arguments are:
 !     \begin{description}
 !
 !     \item[array]
-!       Destroy contents of this {\tt Array}.
+!       Destroy contents of this {\tt ESMF\_Array}.
 !
 !     \item[[rc]]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -16841,7 +16841,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
+! Used to gather a distributed Array into a global {\tt ESMF\_Array} on all {\tt ESMF\_DE}s.
 !
 !
 !EOP
@@ -16909,7 +16909,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to gather a distributed Array into a global Array on all DEs.
+! Used to gather a distributed Array into a global {\tt ESMF\_Array} on all {\tt ESMF\_DE}s.
 !
 !
 !EOP
@@ -16977,7 +16977,7 @@ end function
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-! Used to scatter a single Array into a distributed Array across all DEs.
+! Used to scatter a single {\tt ESMF\_Array} into a distributed Array across all {\tt ESMF\_DE}s.
 !
 !
 !EOP
@@ -17040,7 +17040,7 @@ end function
       integer, intent(out), optional :: rc       
 !
 ! !DESCRIPTION:
-!      Used to alter the local memory ordering (layout) of this Array.
+!      Used to alter the local memory ordering (layout) of this {\tt ESMF\_Array}.
 !
 !  !TODO: remove this note before generating user documentation
 !
@@ -17077,7 +17077,7 @@ end function
 ! !DESCRIPTION:
 !  Creates a description of the data -- the type, the dimensionality, etc.  
 !  This specification can be
-!  used in an ArrayCreate call with data to create a full Array.
+!  used in an {\tt ESMF\_ArrayCreate} call with data to create a full {\tt ESMF\_Array}.
 !    
 !  The arguments are:
 !  \begin{description}
@@ -17268,13 +17268,13 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Return information about the contents of a ArraySpec type.
+!  Return information about the contents of a {\tt ESMF\_ArraySpec} type.
 !
 !  The arguments are:
 !  \begin{description}
 !
 !  \item[as]
-!    An {\tt ArraySpec} object.
+!    An {\tt ESMF\_ArraySpec} object.
 !
 !  \item[rank]
 !    Array rank (dimensionality, 1D, 2D, etc).  Maximum allowed is 5D.
@@ -17352,13 +17352,13 @@ end function
 !     The arguments are: 
 !     \begin{description} 
 !     \item[array]  
-!          A partially created {\tt Array} object. 
+!          A partially created {\tt ESMF\_Array} object. 
 !     \item[rank]  
-!          The {\tt Array} rank.  
+!          The {\tt ESMF\_Array} rank.  
 !     \item[type]  
-!          The {\tt Array} type (integer, real/float, etc).  
+!          The {\tt ESMF\_Array} type (integer, real/float, etc).  
 !     \item[kind]  
-!          The {\tt Array} kind (short/2, long/8, etc).  
+!          The {\tt ESMF\_Array} kind (short/2, long/8, etc).  
 !     \item[counts]  
 !          An integer array, size {\tt rank}, of each dimension length. 
 !     \item[{[rc]}]  
@@ -18097,13 +18097,13 @@ end function
 !     The arguments are: 
 !     \begin{description} 
 !     \item[array]  
-!          A partially created {\tt Array} object. 
+!          A partially created {\tt ESMF\_Array} object. 
 !     \item[rank]  
-!          The {\tt Array} rank.  
+!          The {\tt ESMF\_Array} rank.  
 !     \item[type]  
-!          The {\tt Array} type (integer, real/float, etc).  
+!          The {\tt ESMF\_Array} type (integer, real/float, etc).  
 !     \item[kind]  
-!          The {\tt Array} kind (short/2, long/8, etc).  
+!          The {\tt ESMF\_Array} kind (short/2, long/8, etc).  
 !     \item[{[rc]}]  
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors. 
 !   \end{description} 
@@ -18410,7 +18410,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a Array from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_Array} from the last call to Checkpoint.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -18536,7 +18536,7 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
+!      Routine to print information about a {\tt ESMF\_Array}.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -18595,7 +18595,7 @@ end function
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!      Routine to print information about a array.
+!      Routine to print information about a {\tt ESMF\_Array}.
 !
 !EOP
 ! !REQUIREMENTS:
