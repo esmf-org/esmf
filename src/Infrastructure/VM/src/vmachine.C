@@ -3,8 +3,16 @@
 // 2003 Gerhard Theurich, NASA NCCS and SGI Professional Services
 //  < theurich@nccs.gsfc.nasa.gov > or < gtheurich@sgi.com >
 
+// On SunOS systems there are a couple of macros that need to be set
+// in order to get POSIX compliant functions IPC, pthreads, gethostid
+#ifdef __sun
+#define _POSIX_SOURCE
+#define _POSIX_C_SOURCE 199309L
+#define __EXTENSIONS__
+#define _POSIX_PTHREAD_SEMANTICS
+#endif
+
 #include <sys/types.h>
-#include <ESMC_Conf.h>  // ESMF machine-specific definitions
 
 // On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
 // prototype of gethostid() from unistd.h from within C++....
@@ -12,17 +20,6 @@
 #define _XOPEN_SOURCE_EXTENDED
 #endif
 
-// Ensure we get POSIX.4 compliant shared memory, etc.
-// (at least SunOS needs this)  TODO: unconditional for all platforms ?
-#ifdef PARCH_solaris
-#define _POSIX_SOURCE
-#define _POSIX_C_SOURCE 199309L
-#endif
-
-// On SunOS, define this to get gethostid() prototype
-#ifdef PARCH_solaris
-#define __EXTENSIONS__
-#endif
 #include <unistd.h>
 
 // On OSF1 (i.e. Tru64) systems there is a problem with picking up the 
@@ -36,11 +33,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-// On SunOS, define this to get pthread-style sigwait()
-#ifdef PARCH_solaris
-#define _POSIX_PTHREAD_SEMANTICS
-#endif
 #include <signal.h>
 
 #include <sys/mman.h>
