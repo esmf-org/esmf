@@ -1,4 +1,4 @@
-! $Id: ESMF_Time.F90,v 1.40 2003/08/29 23:08:35 eschwab Exp $
+! $Id: ESMF_Time.F90,v 1.41 2003/09/03 17:50:50 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -120,7 +120,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Time.F90,v 1.40 2003/08/29 23:08:35 eschwab Exp $'
+      '$Id: ESMF_Time.F90,v 1.41 2003/09/03 17:50:50 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -306,15 +306,12 @@
       integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Initializes a {\tt ESMF\_Time} with a set of user-specified units
+!     Initializes an {\tt ESMF\_Time} with a set of user-specified units
 !     via F90 optional arguments.
 !
 !     Time manager represents and manipulates time internally with integers
 !     to maintain precision. Hence, user-specified floating point values are
 !     converted internally to integers.
-!
-!     See {\tt ../include/ESMC\_BaseTime.h and ../include/ESMC\_Time.h} for
-!     complete description.
 !
 !     The arguments are:
 !     \begin{description}
@@ -386,7 +383,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGet - Get value in user-specified units
+! !IROUTINE: ESMF_TimeGet - Get Time value in user-specified units
 
 ! !INTERFACE:
       subroutine ESMF_TimeGet(time, yr, yr_i8, &
@@ -439,12 +436,12 @@
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Get the value of the {\tt ESMF\_Time} in units specified by the user
+!     Gets the value of the Time in units specified by the user
 !     via F90 optional arguments.
 !
-!     Time manager represents and manipulates time internally with integers
-!     to maintain precision. Hence, user-specified floating point values are
-!     converted internally from integers.
+!     The ESMF Time Manager represents and manipulates time internally with 
+!     integers to maintain precision. Hence, user-specified floating point 
+!     values are converted internally from integers.
 !
 !     Units are bound (normalized) to the next larger unit specified.  For
 !     example, if a time is defined to be 2:00 am on a particular date, then
@@ -453,13 +450,10 @@
 !     whereas {\tt ESMF\_TimeGet(s=seconds)} would return
 !       {\tt seconds = 7200}.
 !
-!     See {\tt ../include/ESMC\_BaseTime.h} and {\tt ../include/ESMC\_Time.h} 
-!     for complete description.
-!
-!     For timeString, dayOfWeek, dayOfMonth, midMonth, dayOfYear,
-!     dayOfYear\_r8, and dayOfYear\_intvl described below, valid calendars
-!     are Gregorian, Julian Date, No Leap, 360 Day and Generic calendars.
-!     Not valid for Julian day or no calendar.
+!     For {\tt timeString}, {\tt dayOfWeek}, {\tt dayOfMonth}, {\tt midMonth}, 
+!     {\tt dayOfYear}, {\tt dayOfYear\_r8}, and {\tt dayOfYear\_intvl} described 
+!     below, valid calendars are Gregorian, Julian Date, No Leap, 360 Day 
+!     and Generic calendars.  Not valid for Julian day or no calendar.
 !
 !     For timeString, convert {\tt ESMF\_Time}'s value into ISO 8601
 !     format YYYY-MM-DDThh:mm:ss.
@@ -571,7 +565,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeIsSameCalendar - Compare calendars of two time instants
+! !IROUTINE: ESMF_TimeIsSameCalendar - Compare Calendars of two Times
 
 ! !INTERFACE:
       function ESMF_TimeIsSameCalendar(time1, time2, rc)
@@ -585,15 +579,15 @@
       integer,         intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Returns true if both {\tt ESMF\_Time}'s {\tt ESMF\_Calendar}s are
+!     Returns true if the Calendars in these Times are
 !     the same, false otherwise.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          The first object instance to compare.
+!          The first Time to compare.
 !     \item[time2]
-!          The second object instance to compare.
+!          The second Time to compare.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -618,8 +612,8 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Get the system real {\tt ESMF\_Time} (wall clock time), return in
-!     given {\tt ESMF\_Time} instant.
+!     Gets the system real time (wall clock time), returns it as an
+!     {\tt ESMF_Time}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -639,7 +633,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeInc - Increment time instant with a time interval
+! !IROUTINE: ESMF_TimeInc - Increment a Time with a TimeInterval
 !
 ! !INTERFACE:
       function ESMF_TimeInc(time, timeInterval)
@@ -652,16 +646,13 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
-!     Increment {\tt ESMF\_Time} instant with a {\tt ESMF\_TimeInterval},
-!     return resulting {\tt ESMF\_Time} instant.
-!
-!     Maps overloaded (+) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Increments a {\tt time} with a {\tt timeInterval} and
+!     returns the result as an {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          The given {\tt ESMF\_Time} to increment.
+!          The {\tt ESMF\_Time} to increment.
 !     \item[timeInterval]
 !          The {\tt ESMF\_TimeInterval} to add to the given {\tt ESMF\_Time}.
 !     \end{description}
@@ -679,7 +670,7 @@
       end function ESMF_TimeInc
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeDec - Decrement time instant with a time interval
+! !IROUTINE: ESMF_TimeDec - Decrement a Time with a TimeInterval
 !
 ! !INTERFACE:
       function ESMF_TimeDec(time, timeInterval)
@@ -692,16 +683,13 @@
       type(ESMF_TimeInterval), intent(in) :: timeInterval
 !
 ! !DESCRIPTION:
-!     Decrement {\tt ESMF\_Time} instant with a {\tt ESMF\_TimeInterval},
-!     return resulting {\tt ESMF\_Time} instant.
-!
-!     Maps overloaded (-) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Decrements a {\tt time} with a {\tt timeInterval},
+!     and returns the result as an {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time]
-!          The given {\tt ESMF\_Time} to decrement.
+!          The {\tt ESMF\_Time} to decrement.
 !     \item[timeInterval]
 !          The {\tt ESMF\_TimeInterval} to subtract from the given
 !          {\tt ESMF\_Time}.
@@ -721,7 +709,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeDiff - Return the difference between two time instants
+! !IROUTINE:  ESMF_TimeDiff - Return the difference between two Times
 !
 ! !INTERFACE:
       function ESMF_TimeDiff(time1, time2)
@@ -734,18 +722,17 @@
       type(ESMF_Time), intent(in) :: time2
 
 ! !DESCRIPTION:
-!     Return the {\tt ESMF\_TimeInterval} difference between two
-!     {\tt ESMF\_Time} instants.
-!
-!     Maps overloaded (-) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Returns the difference between {\tt time1} and {\tt time2} as
+!     an {\tt ESMF\_TimeInterval}.  It is assumed that {\tt time2} is
+!     later than {\tt time1}; if not, the resulting {\tt ESMF_TimeInterval} 
+!     will have a negative value.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[time1]
-!          The first {\tt ESMF\_Time} instant.
+!          The first {\tt ESMF\_Time}.
 !     \item[time2]
-!          The second {\tt ESMF\_Time} instant.
+!          The second {\tt ESMF\_Time}.
 !     \end{description}
 !
 !EOP
@@ -759,7 +746,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeEQ - Compare two times for equality
+! !IROUTINE: ESMF_TimeEQ - Time 1 equal to Time 2?
 !
 ! !INTERFACE:
       function ESMF_TimeEQ(time1, time2)
@@ -772,9 +759,8 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if both given {\tt ESMF\_Time} instants are equal, false
-!     otherwise.  Maps overloaded (==) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt time1} and {\tt time2} are equal, false
+!     otherwise.  This method is overloaded with the = operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -795,7 +781,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeNE - Compare two times for in-equality
+! !IROUTINE: ESMF_TimeNE - Time 1 not equal to Time 2?
 !
 ! !INTERFACE:
       function ESMF_TimeNE(time1, time2)
@@ -808,9 +794,8 @@
       type(ESMF_Time), intent(in) :: time2
 
 ! !DESCRIPTION:
-!     Return true if both given {\tt ESMF\_Time} instants are not equal, false
-!     otherwise.  Maps overloaded (/=) operator interface function to
-!     {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt time1} and {\tt time2} are not equal, false
+!     otherwise.  This method is overloaded with the != operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -831,7 +816,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeLT - Time instant 1 less than time instant 2 ?
+! !IROUTINE: ESMF_TimeLT - Time 1 less than Time 2?
 !
 ! !INTERFACE:
       function ESMF_TimeLT(time1, time2)
@@ -844,9 +829,8 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first {\tt ESMF\_Time} instant is less than second
-!     {\tt ESMF\_Time} instant, false otherwise.  Maps overloaded (<)
-!     operator interface function to {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt time1} is less than {\tt time2}, false 
+!     otherwise.  This method is overloaded with the < operator.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -867,7 +851,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGT - Time instant 1 greater than time instant 2 ?
+! !IROUTINE: ESMF_TimeGT - Time 1 greater than Time 2?
 !
 ! !INTERFACE:
       function ESMF_TimeGT(time1, time2)
@@ -880,9 +864,8 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first {\tt ESMF\_Time} instant is greater than second
-!     {\tt ESMF\_Time} instant, false otherwise.  Maps overloaded (>) operator
-!     interface function to {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt time1} is greater than {\tt time2}, false
+!     otherwise.  This method is overloaded with the > operator.   
 !
 !     The arguments are:
 !     \begin{description}
@@ -903,7 +886,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeLE - Time instant 1 less than or equal to time instant 2 ?
+! !IROUTINE: ESMF_TimeLE - Time 1 less than or equal to Time 2?
 !
 ! !INTERFACE:
       function ESMF_TimeLE(time1, time2)
@@ -916,9 +899,9 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first {\tt ESMF\_Time} instant is less than or equal to
-!     second {\tt ESMF\_Time} instant, false otherwise.  Maps overloaded (<=)
-!     operator interface function to {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt time1} is less than or equal to
+!     {\tt time2}, false otherwise.  This method is overloaded with
+!     the <= operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -939,7 +922,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_TimeGE - Time instant 1 greater than or equal to time instant 2 ?
+! !IROUTINE: ESMF_TimeGE - Time 1 greater than or equal to Time 2?
 !
 ! !INTERFACE:
       function ESMF_TimeGE(time1, time2)
@@ -952,9 +935,9 @@
       type(ESMF_Time), intent(in) :: time2
 !
 ! !DESCRIPTION:
-!     Return true if first {\tt ESMF\_Time} instant is greater than or equal to
-!     second {\tt ESMF\_Time} instant, false otherwise.  Maps overloaded (>=)
-!     operator interface function to {\tt ESMF\_BaseTime} base class.
+!     Returns true if {\tt time1} is greater than or equal to
+!     {\tt time2}, false otherwise.  This method is overloaded with
+!     the >= operator.
 !
 !     The arguments are:
 !     \begin{description}
@@ -980,7 +963,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeReadRestart - Restore a time instant's properties
+! !IROUTINE:  ESMF_TimeReadRestart - Restore the attributes of a Time
 
 ! !INTERFACE:
       subroutine ESMF_TimeReadRestart(time, s, sN, sD, calendar, timeZone, rc)
@@ -995,7 +978,7 @@
       integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a restore on a {\tt ESMF\_Time}'s properties.
+!     Restores an {\tt ESMF\_Time} exactly.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1025,7 +1008,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeWriteRestart - Save a time instant's properties
+! !IROUTINE:  ESMF_TimeWriteRestart - Save the attributes of a Time
 
 ! !INTERFACE:
       subroutine ESMF_TimeWriteRestart(time, s, sN, sD, calendar, timeZone, rc)
@@ -1040,7 +1023,7 @@
       integer,                intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a save on a {\tt ESMF\_Time}'s properties.
+!     Saves the atttributes of an {\tt ESMF\_Time}.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1070,7 +1053,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimeValidate - Validate a time instant's properties
+! !IROUTINE:  ESMF_TimeValidate - Validate a Time
 
 ! !INTERFACE:
       subroutine ESMF_TimeValidate(time, options, rc)
@@ -1081,7 +1064,7 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     Perform a validation check on a {\tt ESMF\_Time}'s properties.
+!     Check whether a {\tt time} is valid.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1103,7 +1086,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE:  ESMF_TimePrint - Print out a time instant's properties
+! !IROUTINE:  ESMF_TimePrint - Print the attributes of a Time 
 
 ! !INTERFACE:
       subroutine ESMF_TimePrint(time, options, rc)
@@ -1114,8 +1097,8 @@
       integer,           intent(out), optional :: rc
 
 ! !DESCRIPTION:
-!     To support testing/debugging, print out a {\tt ESMF\_Time}'s
-!     properties.
+!     To support testing and debugging, this method prints out 
+!     the attributes of {\tt time}.
 !
 !     The arguments are:
 !     \begin{description}
