@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.72 2004/12/28 07:19:18 theurich Exp $
+! $Id: ESMF_Bundle.F90,v 1.73 2005/03/04 19:54:35 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -126,7 +126,7 @@
 #endif
         type(ESMF_Status) :: bundlestatus
         type(ESMF_Status) :: gridstatus
-        integer :: field_count
+
         type(ESMF_Grid) :: grid                  ! associated global grid
         type(ESMF_LocalBundle) :: localbundle    ! this differs per DE
         type(ESMF_Packflag) :: pack_flag         ! is packed data present?
@@ -134,7 +134,7 @@
         type(ESMF_BundleDataMap) :: mapping      ! map info
         type(ESMF_IOSpec) :: iospec              ! iospec values
         type(ESMF_Status) :: iostatus            ! if unset, inherit from gcomp
-      
+        integer :: field_count      
       end type
 
 !------------------------------------------------------------------------------

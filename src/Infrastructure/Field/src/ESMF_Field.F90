@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.202 2005/02/24 23:22:00 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.203 2005/03/04 19:54:36 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -120,12 +120,11 @@
 !     ! local DE.
 
       type ESMF_LocalField
-      sequence
-      !private
-   
+        sequence
         type (ESMF_Array) :: localdata           ! local data for this DE
-        type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
         type (ESMF_Mask) :: mask                 ! may belong in Grid
+        type (ESMF_ArraySpec) :: arrayspec       ! so field can allocate
+
         integer :: rwaccess                      ! reserved for future use
         integer :: accesscount                   ! reserved for future use
 
@@ -283,7 +282,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.202 2005/02/24 23:22:00 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.203 2005/03/04 19:54:36 jedwards Exp $'
 
 !==============================================================================
 !

@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout.F90,v 1.46 2004/12/28 07:19:19 theurich Exp $
+! $Id: ESMF_DELayout.F90,v 1.47 2005/03/04 19:54:36 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,8 +89,8 @@ module ESMF_DELayoutMod
     sequence
     private
     type(ESMF_Pointer):: this     ! C pointer to pointer vector
-    integer:: n                   ! number of pointers in pointer vector
     integer, pointer:: len(:)     ! number of elements in each element
+    integer:: n                   ! number of pointers in pointer vector
     type(ESMF_DataKind):: dtk     ! type and kind of data
   end type
 
@@ -150,7 +150,7 @@ module ESMF_DELayoutMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DELayout.F90,v 1.46 2004/12/28 07:19:19 theurich Exp $'
+      '$Id: ESMF_DELayout.F90,v 1.47 2005/03/04 19:54:36 jedwards Exp $'
 
 !==============================================================================
 ! 

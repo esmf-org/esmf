@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.123 2004/12/28 07:11:04 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.124 2005/03/04 19:54:38 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -134,28 +134,44 @@
          type(ESMF_CompType) :: ctype             ! component type
          type(ESMF_Config) :: config              ! configuration object
          type(ESMF_Clock) :: clock                ! private component clock
+
+
+         character(len=ESMF_MAXSTR) :: configFile ! resource filename
+         character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
+         type(ESMF_Grid) :: grid                  ! default grid, gcomp only
+#ifdef S64
+
+         integer            :: npetlist           ! number of PETs in petlist
+#endif
+
+         type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
+
+         type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
+         type(ESMF_CWrap)   :: compw              ! to satisfy the C interface
+         type(ESMF_VM)      :: vm                 ! component VM
+         type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
+
+         integer, pointer   :: petlist(:)         ! list of usble parent PETs 
+
+         type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlan
+         type(ESMF_Pointer) :: vm_info            ! holding pointer to info
+         type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
+
+! gjt - added these here to make things safe for non-blocking mode...
+         type(ESMF_State)   :: is, es
+#ifdef S32
+
+         integer            :: npetlist           ! number of PETs in petlist
+#endif
+
          logical :: multiphaseinit                ! multiple init, run, final
          integer :: initphasecount                ! max inits, for error check
          logical :: multiphaserun                 ! multiple init, run, final
          integer :: runphasecount                 ! max runs, for error check
          logical :: multiphasefinal               ! multiple init, run, final
          integer :: finalphasecount               ! max finals, for error check
-         character(len=ESMF_MAXSTR) :: configFile ! resource filename
-         character(len=ESMF_MAXSTR) :: dirPath    ! relative dirname, app only
-         type(ESMF_Grid) :: grid                  ! default grid, gcomp only
-         type(ESMF_GridCompType) :: gridcomptype  ! model type, gcomp only
-         type(ESMF_CompClass), pointer :: parent  ! pointer to parent comp
-         type(ESMF_CWrap)   :: compw              ! to satisfy the C interface
-         type(ESMF_VM)      :: vm                 ! component VM
-         type(ESMF_VM)      :: vm_parent          ! reference to the parent VM
-         integer            :: npetlist           ! number of PETs in petlist
-         integer, pointer   :: petlist(:)         ! list of usble parent PETs 
-         type(ESMF_VMPlan)  :: vmplan             ! reference to VMPlan
-         type(ESMF_Pointer) :: vm_info            ! holding pointer to info
-         type(ESMF_Pointer) :: vm_cargo           ! holding pointer to cargo
          logical            :: vm_released        ! flag whether vm is running
-! gjt - added these here to make things safe for non-blocking mode...
-         type(ESMF_State)   :: is, es
+
          logical            :: isdel, esdel
          integer            :: status
       end type
@@ -238,7 +254,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.123 2004/12/28 07:11:04 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.124 2005/03/04 19:54:38 jedwards Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     

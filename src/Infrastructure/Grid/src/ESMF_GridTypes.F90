@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.42 2004/11/30 21:01:30 nscollins Exp $
+! $Id: ESMF_GridTypes.F90,v 1.43 2005/03/04 19:54:37 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -62,9 +62,9 @@
 
       type ESMF_LogRectGrid
       sequence
-        integer, dimension(ESMF_MAXGRIDDIM) :: countPerDim
         real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: deltaPerDim
         type(ESMF_LocalArray), dimension(:), pointer :: coords
+        integer, dimension(ESMF_MAXGRIDDIM) :: countPerDim
       end type
 
 !------------------------------------------------------------------------------
@@ -204,7 +204,21 @@
 
         type (ESMF_Base) :: base              ! base class object
         type (ESMF_GridStatus) :: gridStatus  ! uninitialized, init ok, etc
+
+#ifdef S32
+
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: minGlobalCoordPerDim
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: maxGlobalCoordPerDim
+
         integer :: dimCount                   ! number of dimensions
+#else
+        integer :: dimCount                   ! number of dimensions
+
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: minGlobalCoordPerDim
+        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: maxGlobalCoordPerDim
+
+#endif
+
         type (ESMF_Logical) :: hasLocalData
         type (ESMF_GridStructure) :: gridStructure
                                               ! enum for structure of grid
@@ -234,7 +248,10 @@
                                               ! necessary to support
                                               ! staggering, vertical
                                               ! grids, background grids
+
+
         integer :: numPhysGridsAlloc          ! number of physgrids allocated
+
         type (ESMF_PhysGrid), dimension(:), pointer :: physgrids
                                               ! info for all grid descriptions
                                               ! necessary to define horizontal,
@@ -242,22 +259,26 @@
         integer, dimension(:), pointer :: distGridIndex
                                               ! for each physgrid, the index of
                                               ! the corresponding DistGrid
-        integer :: numDistGrids               ! number of grid descriptors
-                                              ! necessary to support
-                                              ! staggering, vertical
-                                              ! grids, background grids
-        integer :: numDistGridsAlloc          ! number of DistGrids allocated
+
+
         type (ESMF_DistGrid), dimension(:), pointer :: distgrids       
                                               ! decomposition and other
                                               ! logical space info for grid
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: minGlobalCoordPerDim
-        real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: maxGlobalCoordPerDim
+
         character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimNames
         character(len=ESMF_MAXSTR), dimension(ESMF_MAXGRIDDIM) :: dimUnits
+
         type (ESMF_LocalArray) :: boundingBoxes
                                             ! array of bounding boxes on each DE
                                             ! used for search routines
         type (ESMF_GridSpecific) :: gridSpecific
+
+        integer :: numDistGridsAlloc          ! number of DistGrids allocated
+
+        integer :: numDistGrids               ! number of grid descriptors
+                                              ! necessary to support
+                                              ! staggering, vertical
+                                              ! grids, background grids
 !       type (???) :: searchStructure
 
       end type
@@ -523,7 +544,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.42 2004/11/30 21:01:30 nscollins Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.43 2005/03/04 19:54:37 jedwards Exp $'
 
 !==============================================================================
 !

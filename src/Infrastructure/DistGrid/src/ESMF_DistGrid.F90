@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.135 2005/02/28 16:54:49 nscollins Exp $
+! $Id: ESMF_DistGrid.F90,v 1.136 2005/03/04 19:54:36 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -149,9 +149,6 @@
       !private
 
         type (ESMF_Base) :: base          ! standard ESMF base object
-        integer :: dimCount               ! Number of dimensions
-        integer :: vector                 ! identifier for vector storage
-        integer :: gridBoundaryWidth      ! # of exterior cells/edge
         type(ESMF_DELayout) :: delayout    ! the delayout for this grid
 
       ! 1 per dimension of the Grid
@@ -168,6 +165,10 @@
         type (ESMF_DistGridLocal) :: myDEComp 
         type (ESMF_DistGridGlobal) :: globalTotal
         type (ESMF_DistGridGlobal) :: globalComp
+
+        integer :: dimCount               ! Number of dimensions
+        integer :: vector                 ! identifier for vector storage
+        integer :: gridBoundaryWidth      ! # of exterior cells/edge
 
       end type
 
@@ -218,7 +219,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.135 2005/02/28 16:54:49 nscollins Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.136 2005/03/04 19:54:36 jedwards Exp $'
 
 !==============================================================================
 !

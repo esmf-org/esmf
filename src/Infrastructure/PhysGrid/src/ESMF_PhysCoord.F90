@@ -1,4 +1,4 @@
-! $Id: ESMF_PhysCoord.F90,v 1.14 2004/07/22 14:46:56 nscollins Exp $
+! $Id: ESMF_PhysCoord.F90,v 1.15 2005/03/04 19:54:37 jedwards Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -55,8 +55,7 @@
 !     ! An enum for identifying a type of coordinate
 
       type ESMF_CoordType
-      sequence
-!      private
+         sequence
         integer :: kind
       end type
 
@@ -66,16 +65,9 @@
 
       type ESMF_PhysCoordType
       sequence
-!      private
-
         type (ESMF_Base) :: base              ! contains coordinate name 
+#ifdef S32
         type (ESMF_CoordType) :: kind         ! type of coordinate
-        character (len=ESMF_MAXSTR) :: units  ! units of coord (eg 'degrees')
-
-        ! flags for special cases
-        logical :: aligned         ! coord is aligned with logical axis
-        logical :: equalSpaced     ! coord is equally spaced
-        logical :: cyclic          ! coord is cyclic
 
         ! axis extents
         real (ESMF_KIND_R8) :: minVal         ! minimum value of coordinate
@@ -83,7 +75,24 @@
         real (ESMF_KIND_R8) :: originOffset   ! use for grids in same coord
                                               ! system but differ by simple
                                               ! shift, rotation
+#else
+        ! axis extents
+        real (ESMF_KIND_R8) :: minVal         ! minimum value of coordinate
+        real (ESMF_KIND_R8) :: maxVal         ! maximum value of coordinate
+        real (ESMF_KIND_R8) :: originOffset   ! use for grids in same coord
+                                              ! system but differ by simple
+                                              ! shift, rotation
+        type (ESMF_CoordType) :: kind         ! type of coordinate
+#endif
+
+
                                  
+        ! flags for special cases
+        logical :: aligned         ! coord is aligned with logical axis
+        logical :: equalSpaced     ! coord is equally spaced
+        logical :: cyclic          ! coord is cyclic
+        character (len=ESMF_MAXSTR) :: units  ! units of coord (eg 'degrees')
+
       end type
 
 !------------------------------------------------------------------------------
@@ -221,7 +230,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_PhysCoord.F90,v 1.14 2004/07/22 14:46:56 nscollins Exp $'
+      '$Id: ESMF_PhysCoord.F90,v 1.15 2005/03/04 19:54:37 jedwards Exp $'
 
 !==============================================================================
 !
