@@ -1,28 +1,106 @@
-% $Id: LogErr_usage.tex,v 1.4 2004/06/13 00:41:31 cdeluca Exp $
+% $Id: LogErr_usage.tex,v 1.5 2004/06/15 07:21:22 cpboulder Exp $
+
+
 
 %\subsection{Use and Examples}
 
-A typical sequence of tasks associated with using the Log utility would begin
-with the user calling {\tt ESMF\_LogOpen()} to open a Log file and retrieve
-an active Log object.  The user can then set or get options on how the Log
-should be used with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.
-These are not fully implemented at this time. 
+
+A default log is created on {\ttESMF\_Initialize()} and placed in the
+
+root ESMF directory.  ESMF handles the initialization and finalization of
+
+the default log so the user can immediately start using the default log.
+
+A single default log is opened in the XXXX directory.  If one is not 
+
+present, a new one is created.  If multiple logs are desired, they must be
+
+explicitly created or opened using {\tt ESMF\_LogOpen()}.
+
+
+If a user wants to use a new or different log, the user must call
+
+{\tt ESMF\_LogOpen()} and pass in a log object and file name to open a Log 
+
+file.  
+
+
+In all cases where a log is opened, a unit number is assigned to a specific
+
+log.  A log will be assigned the lowest available unit number starting with
+
+11.  If a unit number is occupied, the next higher unit number will be 
+
+checked using the "inquire" method.  The process repeats until a free unit
+ 
+number is found or when the unit number reaches {\tt ESMF\_LOGUPPER()} in
+ 
+which case an error is returned.  As a result, the user should always check
+
+for free numbers using "inquire" to prevent potential unit number conflicts.
+
+
+The user can then set or get options on how the Log should be used 
+
+with the {\tt ESMF\_LogSet()} and {\tt ESMF\_LogGet()} methods.  These are 
+
+not fully implemented at this time. 
+
 
 Depending on how the options are set, {\tt ESMF\_LogWrite()} either writes
-user messages direstly to a Log file or writes to a buffer that can be flushed
+
+user messages directly to a Log file or writes to a buffer that can be flushed
+
 when full or by using the {\tt ESMF\_LogFlush()} method.  In the current
-implementation the Log flushes after every write.  When done writing
-messages, the Log is closed by calling {\tt ESMF\_LogClose()}.  
+
+implementation the Log flushes after every write.  
+
+
+For every {\tt ESMF\_LogWrite()}, a time and date stamp is prepended to the
+
+log entry.  The time is given in microsecond precision.
+
+
+When calling {\tt ESMF\_LogWrite()}, the user can supply an optional line,
+
+file and method.  These arguments can be passed in explicitly or with the help
+
+of cpp macros.  In the latter case, a #define for an {\tt ESMF\_FILE} must be 
+
+placed at the beginning of the code and a #define for {\tt ESMF\_METHOD} must
+
+be placed at the beginning of each method.  The user can then use the
+
+{\tt ESMF\_CONTEXT} cpp macro in place of line, file and method to insert the 
+
+parameters into the method.  The user does not have to specify line number as
+
+it is a value supplied by cpp.
+
+
+When done writing messages, the Log is closed by calling 
+
+{\tt ESMF\_LogClose()} which will release the assigned unit number.
+
 
 Some of the assumptions implicit in using the Log utility are:
 
+
 \begin{enumerate}
 
+
 \item Prior to closing, {\tt ESMF\_LogFlush} is always executed.
+
 \item Prior to halting, {\tt ESMF\_LogFlush} is always executed.
+
 \item If the number of elements in a Log exceeds {\tt maxElements}, 
+
 a message is written to file and the buffer flushes automatically.
 
+
 \end{enumerate}
+
+
+
 
 
