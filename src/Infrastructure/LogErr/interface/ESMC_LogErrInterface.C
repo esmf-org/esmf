@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErrInterface.C,v 1.3 2003/03/31 18:27:51 shep_smith Exp $
+// $Id: ESMC_LogErrInterface.C,v 1.4 2003/04/01 14:17:09 shep_smith Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,10 +33,10 @@ extern "C" {
 // !IROUTINE: ESMF_LogCloseFile - closes a file from Fortran code
 //
 // !INTERFACE 
-// subroutine ESMF\_LogCloseFile(aLog)
+// subroutine ESMF_LogCloseFile(aLog)
 //
 // !ARGUMENTS:
-//   typdef(ESMF\_Log) :: aLog
+//   typdef(ESMF_Log) :: aLog
 // 
 // !DESCRIPTION:
 // Calls the method ESMC\_LogCloseFileForWrite to close aLog's 
@@ -63,7 +63,7 @@ void FTN(esmf_loginit_c)(ESMC_Log* aLog,int* verbose, int* flush,
 //
 // !ARGUMENTS:
 //
-//  typdef(ESMF\_Log) :: aLog
+//  typdef(ESMF_Log) :: aLog
 //
 //  integer :: numFile           !! set to either ESMF_SINGLE_FILE
 //                               !! or ESMF_MULTIPLE_FILE 
@@ -99,16 +99,15 @@ void FTN(esmf_logopenfile)(ESMC_Log* aLog,int* numFiles,char name[])
 
 //-----------------------------------------------------------------------
 //BOP
-// !IROUTINE: ESMF_LogInfo -  writes miscellaneous information to 
-//             a log file
+// !IROUTINE: ESMF_LogInfo -  writes miscellaneous information to a log file
 //
 // !INTERFACE:
 //   
-//  ESMF\_LogInfo(aLog, fmt, ...)
+//  ESMF_LogInfo(aLog, fmt, ...)
 //
 // !ARGUMENTS:
 //
-//  typedef(ESMF\_LogInfo) :: aLog   ! log object
+//  typedef(ESMF_LogInfo) :: aLog   ! log object
 //  character(len=*) :: fmt         !c-style character descriptior
 //
 // !DESCRIPTION:
@@ -231,10 +230,10 @@ void FTN(esmf_loginfo)(ESMC_Log* aLog, char* fmt,...){
 //
 // !INTERFACE:
 //
-//  subroutine ESMF\_LogWarnMsg(aLog, errCode, line,file,dir,msg)
+//  subroutine ESMF_LogWarnMsg(aLog, errCode, line,file,dir,msg)
 //
 // !ARGUMENTS:
-//    typdef(ESMF\_Log)::aLog
+//    typdef(ESMF_Log)::aLog
 //
 //    integer :: errCode         !integer value for error code         
 //
@@ -279,10 +278,10 @@ void FTN(esmf_logwarnmsg_)(ESMC_Log* aLog,int* errCode, int* line,
 // !IROUTINE: ESMF_LogWarn - writes a warnng message to log file
 //
 // !INTERFACE:
-//    ESMF\_LogWarn(aLog, errCode)
+//    ESMF_LogWarn(aLog, errCode)
 //
 // !ARGUMENTS:
-//   typdef(ESMF\_Log) :: aLog
+//   typdef(ESMF_Log) :: aLog
 //   integer :: errCode
 //
 // !DESCRIPTION:
@@ -306,10 +305,10 @@ void FTN(esmf_logwarn_)(ESMC_Log* aLog,int* errCode, int* line,
 // !IROUTINE: ESMF_LogFlush - flushes output
 //
 // !INTERFACE:
-//    ESMF\_logflush(aLog)
+//    ESMF_logflush(aLog)
 //
 // !ARGUMENTS:
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This routine calls the Log method ESMC\_LogFlush() which sets a flag
@@ -327,10 +326,10 @@ void FTN(esmf_logflush)(ESMC_Log* aLog)
 // !IROUTINE: ESMF_LogNotFlush - prevents output from being flushed
 //
 // !INTERFACE:
-//    ESMF\_LogNotFlush(aLog)
+//    ESMF_LogNotFlush(aLog)
 //
 // !ARGUMENTS:
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 // !DESCRIPTION:
 //    This routine calls the Log method ESMC\_LogNotFlush() which sets a flag
 //    that turns off flushing. By default, this flag is set.
@@ -348,9 +347,9 @@ void FTN(esmf_lognotflush)(ESMC_Log* aLog)
 // !IROUTINE: ESMF_LogVerbose -  causes output to be written to the Log
 //
 // !INTERFACE:
-//   ESMF\_LogVerbose(aLog)
+//   ESMF_LogVerbose(aLog)
 // !ARGUMENTS:
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This routine sets a flag that causes all output associated with
@@ -368,9 +367,9 @@ void FTN(esmf_logverbose)(ESMC_Log* aLog)
 // !IROUTINE: ESMF_LogNotVerbose -  causes output not to be written to the Log
 //                       
 // !INTERFACE:            
-//   ESMF\_LogVerbose(aLog)
+//   ESMF_LogVerbose(aLog)
 // !ARGUMENTS:            
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This routine sets a flag that forces all output associated with
@@ -393,7 +392,7 @@ void FTN(esmf_lognotverbose)(ESMC_Log* aLog)
 // !INTERFACE:
 //    LogWrite(aLog)
 // !ARGUMENTS:
-//   typdef(ESMF\_Log) :: aLog
+//   typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This function called from with a Fortran write statement, e.g.
@@ -415,10 +414,10 @@ int  FTN(logwrite)(ESMC_Log *aLog)
 //
 // !INTERFACE:
 //
-//  subroutine ESMF\_LogErrMsg(aLog, errCode, line,file,dir,msg)
+//  subroutine ESMF_LogErrMsg(aLog, errCode, line,file,dir,msg)
 //
 // !ARGUMENTS:
-//    typdef(ESMF\_Log)::aLog
+//    typdef(ESMF_Log)::aLog
 //
 //    integer :: errCode         !integer value for error code
 //
@@ -463,10 +462,10 @@ void FTN(esmf_logerrmsg_)(ESMC_Log* aLog, int* errCode,int* line, char file[],
 // !IROUTINE: ESMF_LogErr - writes a warnng message to log file
 //
 // !INTERFACE:
-//    ESMF\_LogErr(aLog, errCode)
+//    ESMF_LogErr(aLog, errCode)
 //
 // !ARGUMENTS:
-//   typdef(ESMF\_Log) :: aLog
+//   typdef(ESMF_Log) :: aLog
 //   integer :: errCode
 //
 // !DESCRIPTION:
@@ -492,7 +491,7 @@ void FTN(esmf_logerr_)(ESMC_Log* aLog, int* errCode, int* line, char file[],
 // !INTERFACE:
 //    subroutine ESMF_LogHaltOnErr(aLog)
 // !ARGUMENTS;
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This routine calls a Log method that sets a flag to stop execution on
@@ -508,13 +507,12 @@ void FTN(esmf_loghaltonerr)(ESMC_Log* aLog)
 //---------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMF_LogNotHaltOnErr - program does not halt
-//                                   on encountering an error
+// !IROUTINE: ESMF_LogNotHaltOnErr - program does not halt on encountering an error
 //
 // !INTERFACE:
-//    subroutine ESMF\_LogNotHaltOnErr(aLog)
+//    subroutine ESMF_LogNotHaltOnErr(aLog)
 // !ARGUMENTS:
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This routine calls a Log method that sets a flag to prevent the program
@@ -533,9 +531,9 @@ void FTN(esmf_lognothaltonerr)(ESMC_Log* aLog)
 // !IROUTINE: ESMF_LogHaltOnWarn - program halts on encountering a warning
 //
 // !INTERFACE:
-//    subroutine ESMF\_LogHaltOnWarn(aLog)
+//    subroutine ESMF_LogHaltOnWarn(aLog)
 // !ARGUMENTS:
-//    typdef(ESMF\_Log) :: aLog
+//    typdef(ESMF_Log) :: aLog
 //
 // !DESCRIPTION:
 //    This routine calls a Log method that sets a flag to stop execution on
@@ -551,13 +549,12 @@ void FTN(esmf_loghaltonwarn)(ESMC_Log* aLog)
 //---------------------------------------------------------------------------
 //BOP
 //
-// !IROUTINE: ESMF_LogNotHaltOnWarn - program does not halt
-//                                   on encountering a warning
+// !IROUTINE: ESMF_LogNotHaltOnWarn - program does not halt on encountering a warning
 //
 // !INTERFACE;
-//    subroutine ESMF\_LogNotHaltOnWarn(aLog)             
+//    subroutine ESMF_LogNotHaltOnWarn(aLog)             
 // !ARGUMENTS:                                        
-//    typdef(ESMF\_Log) :: aLog                                        
+//    typdef(ESMF_Log) :: aLog                                        
 //                              
 // !DESCRIPTION:                              
 //    This routine calls a Log method that sets a flag to prevent the program
