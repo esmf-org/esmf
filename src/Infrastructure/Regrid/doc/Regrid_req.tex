@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.9 2002/05/08 14:45:00 wsawyer Exp $
+% $Id: Regrid_req.tex,v 1.10 2002/05/11 01:39:02 mjsuarez Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -35,7 +35,7 @@ Components must be able to destroy regriddings to free up memory.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM desired \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -82,7 +82,7 @@ Components may be able to read regridding information from a file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM desired \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Useful if creating regriddings is time-consuming to avoid
@@ -96,7 +96,7 @@ Components may be able to write regridding information to a file.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP, CICE, CAM desired \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Useful if creating regriddings is time-consuming - compute once
@@ -157,7 +157,7 @@ fields and grids on which the fields are placed.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} POP, CICE, CAM desired \\
+{\bf Source:} POP, CICE, CAM desired, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} A rudimentary error check, but would probably rely on
@@ -230,7 +230,7 @@ required have been so noted within their own respective decriptions.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} PSAS \\
+{\bf Source:} PSAS, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Needed by PSAS, but not milestone
@@ -246,7 +246,7 @@ the use of a mask.  Note that use of a mask is inappropriate for some methods
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} CCSM required \\
-              WRF required \\
+              WRF required, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -262,7 +262,7 @@ be determined (eg source grid is ``master'').
 \begin{reqlist}
 {\bf Priority:} 1 \\
 {\bf Source:} CCSM required \\
-              WRF required \\
+              WRF required, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -324,7 +324,7 @@ defined.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:} POP,CICE,CAM required \\
+{\bf Source:} POP,CICE,CAM required, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Methods exist for both first and second-order
@@ -403,7 +403,7 @@ inferred by the grid type or specified by user.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  POP, CICE, CAM required. \\
+{\bf Source:}  POP, CICE, CAM required, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} In spherical coordinates, meridional velocity components
@@ -422,7 +422,7 @@ coordinate singularities such as the poles in spherical coordinates.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  POP, CICE (CCSM) desired. \\
+{\bf Source:}  POP, CICE (CCSM) desired, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Currently working on whether it is even possible to do this
@@ -440,7 +440,7 @@ no physical grid information is required for creating the regridding.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  WRF required \\
+{\bf Source:}  WRF required, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} Will need a general way to specify stencils
@@ -478,7 +478,7 @@ reduced grids, spectral elements, etc.).
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-GSM, NCEP-SSI (milestone) \\
+{\bf Source:}  NCEP-GSM, NCEP-SSI (milestone), NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -525,7 +525,7 @@ data must be located at appropriate quadrature points).
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-GSM, NCEP-SSI (milestone) \\
+{\bf Source:}  NCEP-GSM, NCEP-SSI (milestone), NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:}
@@ -573,7 +573,7 @@ with the functional transform being applied.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-SSI (milestone) \\
+{\bf Source:}  NCEP-SSI (milestone), NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} MI - The NCEP-SSI transforms between vertical EOF space
@@ -589,7 +589,7 @@ Adjoints shall be supplied for interpolation TO ungridded data.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
-{\bf Source:}  NCEP-SSI (milestone), PSAS (not milestone)  \\
+{\bf Source:}  NCEP-SSI (milestone), PSAS (not milestone), NSIPP  \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} 
@@ -620,7 +620,7 @@ strongly dependent on model fields.
 
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:}  CAM-FV \\
+{\bf Source:}  CAM-FV, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
 {\bf Notes:} The implementation report will examine use of

@@ -1,4 +1,4 @@
-$Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
+$Id: PhysGrid_req.tex,v 1.11 2002/05/11 01:39:01 mjsuarez Exp $
 %cnh m%titude
 %cnh ===============================================================================
 %cnh \req{Initialization of a Physical Grids}
@@ -851,7 +851,7 @@ $Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
 %cnh independent of them.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL-MOM4 (required) \\
+%cnh {\bf Source:} GFDL-MOM4, NSIPP (required) \\
 %cnh {\bf Status:} Proposed \\
 %cnh {\bf Verification:} Code inspection\\
 %cnh {\bf Notes:} This is necessary to support, for example, partial cells in
@@ -1051,7 +1051,7 @@ $Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
 %cnh distributed grid.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 2 \\
-%cnh {\bf Source:} GFDL, MIT (required) \\
+%cnh {\bf Source:} GFDL, MIT, NSIPP (required) \\
 %cnh {\bf Status:} Proposed \\
 %cnh {\bf Verification:} Code inspection\\
 %cnh {\bf Notes:} Standard requirement of a staggered grid.
@@ -1151,7 +1151,7 @@ $Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
 %cnh inverse transform, and the adjoint transform.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} NCEP \\
+%cnh {\bf Source:} NCEP, NSIPP \\
 %cnh {\bf Status:} Proposed \\
 %cnh {\bf Verification:} Code inspection \\
 %cnh {\bf Notes:} 
@@ -1323,7 +1323,7 @@ $Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
 %cnh stored in arrays that omit those dimensions.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} ? \\
-%cnh {\bf Source:} GFDL/HIM currently uses this. \\
+%cnh {\bf Source:} NSIPP, GFDL/HIM currently uses this. \\
 %cnh {\bf Status:} Proposed \\
 %cnh {\bf Verification:} Unit test \\
 %cnh {\bf Notes:} This may be necessary for adequate cache/register performance.  This may
@@ -1345,7 +1345,7 @@ $Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
 %cnh Cell areas shall be available for each of the 4 related subgrids.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} GFDL (required) \\
+%cnh {\bf Source:} GFDL (required), NSIPP \\
 %cnh {\bf Status:} Proposed \\
 %cnh {\bf Verification:} Code inspection \\
 %cnh {\bf Notes:} 
@@ -1447,7 +1447,7 @@ $Id: PhysGrid_req.tex,v 1.10 2002/05/08 22:47:27 rhallberg Exp $
 %cnh intended for use with models for which this quantity varies with time.
 %cnh \begin{reqlist}
 %cnh {\bf Priority:} 1 \\
-%cnh {\bf Source:} GFDL/MOM, MIT (required) \\
+%cnh {\bf Source:} GFDL/MOM, MIT (required), NSIPP \\
 %cnh {\bf Status:} Proposed \\
 %cnh {\bf Verification:} Code inspection \\
 %cnh {\bf Notes:} 
@@ -1738,7 +1738,7 @@ the responsibility of user-provided software.
 horizontal corners of a region.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} MIT \\
+{\bf Source:} MIT, NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
 {\bf Notes:} 
@@ -2220,7 +2220,7 @@ Vertical grid locations may be functions of the horizontal coordinates, or may b
 independent of them.
 \begin{reqlist}
 {\bf Priority:} 2 \\
-{\bf Source:} GFDL-MOM4 (required) \\
+{\bf Source:} GFDL-MOM4 (required), NSIPP \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection\\
 {\bf Notes:} This is necessary to support, for example, partial cells in

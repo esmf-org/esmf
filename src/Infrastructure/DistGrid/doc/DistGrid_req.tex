@@ -1,4 +1,4 @@
-% $Id: DistGrid_req.tex,v 1.12 2002/05/08 13:51:13 wsawyer Exp $
+% $Id: DistGrid_req.tex,v 1.13 2002/05/11 01:39:01 mjsuarez Exp $
 
 This part covers all the requirements for defining, querying and
 relating grid distributions or domain decompositions. The PElist and
@@ -26,7 +26,7 @@ ESMF permits 1D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] probably can be treated as a special case of 2D with no
@@ -60,7 +60,7 @@ ESMF permits 2D domain decomposition, i.e. the distribution of a
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] should NOT be treated as a special case of 3D!
@@ -93,7 +93,7 @@ distributed along a single axis of distribution.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] i.e given a 2D decompsition in \texttt{(i,j)}, it must be
@@ -232,7 +232,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -245,7 +245,7 @@ computational domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -288,7 +288,7 @@ along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -301,7 +301,7 @@ data domain along each axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -443,7 +443,7 @@ global domain.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -479,7 +479,7 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
@@ -560,7 +560,7 @@ data transfer may not be complete when the call returns.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] maybe we're pre-empting design issues, but I'd want
@@ -588,7 +588,7 @@ issued unblocked data transpose.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -628,7 +628,7 @@ PElist of the entire global array from a distributed array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -641,7 +641,7 @@ either axis.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -667,7 +667,7 @@ either axis.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -756,7 +756,7 @@ integer array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] 
@@ -770,7 +770,7 @@ floating-point or complex array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -797,7 +797,7 @@ floating-point or complex array along either axis of decomposition.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV (2D decomposition)
+\item[Source] CAM-FV (2D decomposition), NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] required for computing zonal means.
@@ -900,7 +900,7 @@ distributed integer or FP array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -914,7 +914,7 @@ retrievable.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -928,7 +928,7 @@ distributed integer or FP array.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -942,7 +942,7 @@ retrievable.
 
 \begin{reqlist}
 \item[Priority] 1
-\item[Source] CAM-FV
+\item[Source] CAM-FV, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes]
@@ -1166,7 +1166,7 @@ grids and ungridded location streams.
 
 \begin{reqlist}
 \item[Priority] 3
-\item[Source] PSAS
+\item[Source] PSAS, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] The method to generate the background grid requires
@@ -1181,7 +1181,7 @@ grids and ungridded location streams, using the background grid.
 
 \begin{reqlist}
 \item[Priority] 3
-\item[Source] PSAS
+\item[Source] PSAS, NSIPP
 \item[Status] 
 \item[Verification]
 \item[Notes]  Needed for PSAS, but not a milestone.
@@ -1195,7 +1195,7 @@ streams, using the background grid.
 
 \begin{reqlist}
 \item[Priority] 3
-\item[Source] PSAS
+\item[Source] PSAS, NSIPP
 \item[Status]
 \item[Verification]
 \item[Notes] Needed for PSAS, but not a milestone.
