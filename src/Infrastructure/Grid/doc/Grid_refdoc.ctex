@@ -1,4 +1,4 @@
-% $Id: Grid_refdoc.ctex,v 1.7 2003/11/14 21:03:31 jwolfe Exp $
+% $Id: Grid_refdoc.ctex,v 1.8 2003/11/18 00:23:46 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -98,6 +98,13 @@ e
 \input{../../PhysGrid/doc/PhysGrid_implnotes}
 #elif defined(CONSTITUENT)
 \input{../Infrastructure/PhysGrid/doc/PhysGrid_implnotes}
+#endif
+
+%\subsubsection{Object Model}
+#ifdef STANDALONE
+\input{Grid_obj.tex}
+#elif defined(CONSTITUENT)
+\input{../Infrastructure/Grid/doc/Grid_obj.tex}
 #endif
 
 %\subsection{Parameters and Definitions}
