@@ -1,4 +1,4 @@
-% $Id: Regrid_req.tex,v 1.2 2002/03/16 22:20:47 pwjones Exp $
+% $Id: Regrid_req.tex,v 1.3 2002/03/19 00:13:01 pwjones Exp $
 
 %===============================================================================
 % Requirements may be itemized under a main topic:
@@ -7,7 +7,8 @@
 \req{General Regridding Requirements}
 %-------------------------------------------------------------------------------
 
-The following are general requirements for regridding operations.
+The following are general requirements for regridding operations and are in
+addition to the applicable general ESMF requirements.
 
 %-------------------------------------------------------------------------------
 \sreq{Creation}
@@ -35,7 +36,7 @@ Applications must be able to destroy regriddings to free up memory.
 {\bf Source:} POP, CICE, CAM desired \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test \\
-{\bf Notes:}  
+{\bf Notes:} 
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
@@ -88,9 +89,11 @@ grid systems.
 %-------------------------------------------------------------------------------
 \sreq{Independence of field}
 
-Regridding will be independent of the field being regridded.  For
-higher-order regridding schemes which might require such information
-(eg field gradients), the information must be passed as arguments.
+At least one regridding method must be completely independent of
+field information.  Whenever possible, regridding should formulated to be 
+independent of the field being regridded.  For regridding schemes which might 
+require field information (eg gradients of the field or a velocity for 
+upwind regridding), the required field information must be passed as arguments.
 
 \begin{reqlist}
 {\bf Priority:} 1 \\
@@ -98,7 +101,7 @@ higher-order regridding schemes which might require such information
 {\bf Status:} Proposed \\
 {\bf Verification:} Code inspection  \\
 {\bf Notes:} If a way of passing user-defined functions
-             were available, this requirement could be relaxed.
+             were available, this requirement could be relaxed substantially.
 \end{reqlist}
 
 %===============================================================================
@@ -162,6 +165,39 @@ regridded fields.
 \end{reqlist}
 
 %-------------------------------------------------------------------------------
+\sreq{Vector fields in physical space}
+
+At least one regridding method must be available for regridding a horizontal
+vector field with components aligned with physical directions 
+(eg zonal-meridional or x-y), where the physical direction may be
+inferred by the grid type or specified by user.
+
+\begin{reqlist}
+{\bf Priority:} 1 \\
+{\bf Source:}  POP, CICE, CAM required. \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} 
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
+\sreq{Vector fields in logical space}
+
+At least one regridding method must be available for regridding a horizontal
+vector field with components aligned along grid logical directions.
+Logical directions here refer to directions parallel and perpendicular
+to cell sides.
+
+\begin{reqlist}
+{\bf Priority:}  \\
+{\bf Source:}  POP, CICE, CAM desired. \\
+{\bf Status:} Proposed \\
+{\bf Verification:} Unit test \\
+{\bf Notes:} Currently working on whether it is even possible to do this
+             in all cases, but willing to make the attempt.
+\end{reqlist}
+
+%-------------------------------------------------------------------------------
 \sreq{Spectral transforms}
 
 Methods shall be supplied for regridding from physical space to
@@ -182,7 +218,7 @@ spectral space.
 \req{Other utilities}
 %-------------------------------------------------------------------------------
 
-The following are utilities required for regridding and could be made
+The following are utilities related to regridding which should be made
 public.
 
 %-------------------------------------------------------------------------------
@@ -202,7 +238,7 @@ cells of two grids shall be available.
 %-------------------------------------------------------------------------------
 \sreq{Grid search}
 
-Methods must be supplied which searches a grid to find the cell
+Methods must be supplied for searching a grid to find the cell
 containing a point or set of points.
 
 \begin{reqlist}
