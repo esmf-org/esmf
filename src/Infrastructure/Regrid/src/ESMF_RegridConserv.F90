@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridConserv.F90,v 1.9 2003/09/04 18:57:56 cdeluca Exp $
+! $Id: ESMF_RegridConserv.F90,v 1.10 2003/09/09 22:43:42 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -56,7 +56,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridConserv.F90,v 1.9 2003/09/04 18:57:56 cdeluca Exp $'
+      '$Id: ESMF_RegridConserv.F90,v 1.10 2003/09/09 22:43:42 nscollins Exp $'
 
 !==============================================================================
 !
@@ -1176,6 +1176,11 @@
 !EOP
 
       !TODO: Insert code here
+      type (ESMF_RegridType) :: temp
+
+      ! prevent compiler errors on some architectures which
+      ! insist functions have a return value
+      ESMF_RegridConsByBundleConserv = temp
  
       end function ESMF_RegridConsByBundleConserv
 
