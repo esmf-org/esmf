@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.15 2004/04/21 17:22:59 nscollins Exp $
+! $Id: user_model1.F90,v 1.16 2004/04/27 15:16:38 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -90,27 +90,35 @@
 
        ! Local variables
         type(ESMF_Field) :: humidity
+        type(ESMF_VM) :: vm
         type(ESMF_newDELayout) :: delayout
         type(ESMF_DataMap) :: datamap
-        integer :: i, x, y, n
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
-        type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
         real(ESMF_KIND_R8), dimension(:,:,:), pointer :: idata
-        integer :: nDE_i, nDE_j
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(3), order(3)
-        integer :: ni, nj, nk, de_id
-        type(ESMF_GridType) :: horz_gridtype, vert_gridtype
-        type(ESMF_GridStagger) :: horz_stagger, vert_stagger
-        type(ESMF_CoordSystem) :: horz_coord_system, vert_coord_system
-        integer :: status, myde
+        integer :: de_id, npets
+        type(ESMF_GridType) :: horz_gridtype
+        type(ESMF_GridStagger) :: horz_stagger
+        type(ESMF_CoordSystem) :: horz_coord_system
+        integer :: status
 
         print *, "User Comp Init starting"
 
-        ! query comp for layout
-        call ESMF_GridCompGet(comp, delayout=delayout, rc=status)
+        ! Query component for VM and create a layout with the right breakdown
+        call ESMF_GridCompGet(comp, vm=vm, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_VMGet(vm, petCount=npets, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        delayout = ESMF_newDELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+
+        ! and get our local de number
+        call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+
 
         ! Add a "humidity" field to the export state.
         counts(1) = 4
@@ -132,13 +140,12 @@
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
-
-        ! Figure out our local processor id
-        call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 3D real array
         call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
                                 kind=ESMF_R8)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a datamap to tell the framework which of the 2 axes
         ! correspond to the grid, and which one is multiple scalar
@@ -146,26 +153,32 @@
         order(1) = 0
         order(2) = 1
         order(3) = 2
-        call ESMF_DataMapInit(datamap, 3, order, counts=counts(1:1), rc=rc)
+        call ESMF_DataMapInit(datamap, 3, order, counts=counts(1:1), rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Create the field 
         humidity = ESMF_FieldCreate(grid1, arrayspec=arrayspec, datamap=datamap, &
                                     horzRelloc=ESMF_CELL_CENTER, &
-                                    haloWidth=0, name="humidity", rc=rc)
+                                    haloWidth=0, name="humidity", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetArray(humidity, array1, rc)
-        call ESMF_ArrayGetData(array1, idata, rc=rc)
+        call ESMF_FieldGetArray(humidity, array1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_ArrayGetData(array1, idata, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole array to our de id
         idata(:,:,:) = real(de_id)
 
-        call ESMF_StateAddData(exportState, humidity, rc)
-     !   call ESMF_StatePrint(exportState, rc=rc)
+        call ESMF_StateAddData(exportState, humidity, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        ! call ESMF_StatePrint(exportState, rc=status)
 
         print *, "User Comp Init returning"
    
-        rc = ESMF_SUCCESS
+10 continue
+        rc = status
 
     end subroutine user_init
 
@@ -205,22 +218,31 @@
 
         ! Get the Field and Bundle data from the State
         call ESMF_StateGetData(exportState, "humidity", humidity, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+
       
         ! get the grid and coordinates
         allocate(coordArray(2))
         call ESMF_FieldGet(humidity, grid=grid, horzRelloc=relloc, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
                                centerCoord=coordArray, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
+        if (status .ne. ESMF_SUCCESS) goto 10
         call ESMF_ArrayGetData(coordArray(2), coordY, ESMF_DATA_REF, status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! update field values here
-        ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=rc)
-        call ESMF_FieldGetArray(humidity, array1, rc=rc) 
+        ! call ESMF_StateGetDataPointer(exportState, "humidity", idata, rc=status)
+        call ESMF_FieldGetArray(humidity, array1, rc=status) 
+        if (status .ne. ESMF_SUCCESS) goto 10
         ! get size of local array
-        call ESMF_ArrayGet(array1, counts=counts, rc=rc)
+        call ESMF_ArrayGet(array1, counts=counts, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
         ! Get a pointer to the start of the data
-        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, rc)
+        call ESMF_ArrayGetData(array1, idata, ESMF_DATA_REF, status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! increment data values in place - where do i get the third dim?
         do j = 1,counts(3)
@@ -238,6 +260,7 @@
  
         print *, "User Comp Run returning"
 
+10 continue
         rc = status
 
     end subroutine user_run

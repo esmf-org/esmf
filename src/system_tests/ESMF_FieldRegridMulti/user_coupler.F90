@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.5 2004/04/15 21:43:19 nscollins Exp $
+! $Id: user_coupler.F90,v 1.6 2004/04/27 15:16:38 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -66,6 +66,7 @@
       ! Local variables
       integer :: itemcount
       type(ESMF_Field) :: humidity1, humidity2
+      type(ESMF_VM) :: vm
       type(ESMF_newDELayout) :: cpllayout
 
 
@@ -76,15 +77,19 @@
        
       ! Get input data
       call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
       call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_FieldPrint(humidity2, rc=rc)
 
-      ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=rc)
-
+      ! Query component for VM and create a layout 
+      call ESMF_CplCompGet(comp, vm=vm, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
+      cpllayout = ESMF_newDELayoutCreate(vm, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure
@@ -93,11 +98,19 @@
                                  routehandle, &
                                  regridtype=ESMF_RegridMethod_Bilinear, &
                                  rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
 
       print *, "User Coupler Init returning"
    
       rc = ESMF_SUCCESS
+      return
+
+      ! only get here on error
+10 continue
+      rc = ESMF_FAILURE
+  
+
 
     end subroutine user_init
 
@@ -114,34 +127,38 @@
 
       ! Local variables
       type(ESMF_Field) :: humidity1, humidity2
-      type(ESMF_newDELayout) :: cpllayout
-      integer :: status
 
       print *, "User Coupler Run starting"
 
       ! Get input data
       call ESMF_StateGetField(importState, "humidity", humidity1, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_FieldPrint(humidity1, rc=rc)
 
       ! Get location of output data
       call ESMF_StateGetField(exportState, "humidity", humidity2, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
       ! call ESMF_FieldPrint(humidity2, rc=rc)
-
-      ! Get layout from coupler component
-      call ESMF_CplCompGet(comp, delayout=cpllayout, rc=status)
 
       ! These are fields on different Grids - call Regrid to rearrange
       !  the data.   The communication pattern was computed at init,
       !  this simply has to execute the send and receive equivalents.
 
-      call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=status)
+      call ESMF_FieldRegrid(humidity1, humidity2, routehandle, rc=rc)
+      if (rc .ne. ESMF_SUCCESS) goto 10
 
       ! Data is moved directly to the field in the output state, so no
       ! "put" is needed here.
  
       print *, "User Coupler Run returning"
 
-      rc = status
+      rc = ESMF_SUCCESS
+      return
+
+      ! only come here on error
+10 continue
+      rc = ESMF_FAILURE
+ 
 
     end subroutine user_run
 
@@ -157,7 +174,6 @@
       integer :: rc
 
       ! Local variables
-      type(ESMF_State) :: state1, state2
 
       print *, "User Coupler Final starting"
    
