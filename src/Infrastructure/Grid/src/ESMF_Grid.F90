@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.187 2004/08/12 21:48:33 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.188 2004/08/16 00:10:50 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -104,7 +104,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.187 2004/08/12 21:48:33 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.188 2004/08/16 00:10:50 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -1152,11 +1152,37 @@
 !     \item[delayout]
 !         {\tt ESMF\_DELayout} on which the {\tt grid} is to be decomposed.
 !     \item[{[countsPerDEDim1]}]
-!          Array of number of grid increments per DE in the x-direction.
+!          Array denoting the number of grid cells per DE in the first
+!          decomposition axis.  By default, the number of grid cells per DE
+!          in a decomposition is calculated internally by an algorithm
+!          designed to distribute the cells as evenly as possible.
+!          This optional argument is available to allow users to instead
+!          specify the decompostion of a grid axis by a related delayout
+!          axis.  The number of elements in this array must be greater than
+!          or equal to the number of DE's along the first axis of the
+!          attached {\tt delayout}.  The sum of this array must equal exactly
+!          the number of grid cells along related grid axis, which is the
+!          first axis by default but can also be set by the [{[decompIds]}]
+!          argument in this call.
 !     \item[{[countsPerDEDim2]}]
-!          Array of number of grid increments per DE in the y-direction.
+!          Array denoting the number of grid cells per DE in the second
+!          decomposition axis.  Please see the description of
+!          [{[countsPerDEDim1]}] above for more deatils
 !     \item[{[decompIds]}]
-!          Identifier for which {\tt grid} axes are decomposed.
+!          Integer array of identifiers for which {\tt grid} axes are decomposed.
+!          This array describes the relationship between the {\tt grid} and the
+!          {\tt delayout}.  The elements of this array contains decompostion
+!          information for the corresponding grid axis.  If this element is:
+!                  0   the grid axis is not distributed;
+!                  1   the grid axis is distributed by the first decomposition
+!                      axis in the {\tt delayout];
+!                  2   the grid axis is distributed by the second decomposition
+!                      axis in the {\tt delayout];
+!          The number of array elements should be greater or equal to the number
+!          of grid dimensions.  The default is that the first grid axis is
+!          distributed by the first decompostion axis, the second grid axis is
+!          distributed by the second decomposition axis, and the third grid axis
+!          (if applicable) is not distributed.
 !     \item[{[name]}]
 !          {\tt ESMF\_Grid} name.
 !     \item[{[rc]}]
@@ -2579,9 +2605,11 @@
 !          be numbered consistently with corners.  For example, face 1 should
 !          correspond to the face between corners 1,2.
 !     \item[{[reorder]}]
-!          Logical.  If TRUE, reorder any results using the GridOrder before
-!          returning.  If FALSE do not reorder.  The default value is TRUE
-!          and users should not need to reset this for most applications.
+!          Logical flag.  If TRUE, reorder any results using a previously set
+!          CoordOrder before returning.  If FALSE do not reorder.  The default
+!          value is TRUE and users should not need to reset this for most
+!          applications.  This optional argument is available mostly for
+!          internal use.
 !     \item[{[total]}]
 !          Logical. If TRUE, return the total coordinates including internally
 !          generated boundary cells. If FALSE return the
@@ -2713,9 +2741,11 @@
 !     \item[{[globalStartPerDim]}]
 !          Global index of starting counts for each dimension.
 !     \item[{[reorder]}]
-!          Logical.  If TRUE, reorder any results using the GridOrder before
-!          returning.  If FALSE do not reorder.  The default value is TRUE
-!          and users should not need to reset this for most applications.
+!          Logical flag.  If TRUE, reorder any results using a previously set 
+!          CoordOrder before returning.  If FALSE do not reorder.  The default
+!          value is TRUE and users should not need to reset this for most
+!          applications.  This optional argument is available mostly for
+!          internal use.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
 !          The default is the computational regime.
@@ -4979,9 +5009,11 @@
 !          {\tt ESMF\_RelLoc} identifier corresponding to the vertical
 !          grid.
 !     \item[{[reorder]}]
-!          Logical.  If TRUE, reorder any results using the GridOrder before
-!          returning.  If FALSE do not reorder.  The default value is TRUE
-!          and users should not need to reset this for most applications.
+!          Logical flag.  If TRUE, reorder any results using a previously set
+!          CoordOrder before returning.  If FALSE do not reorder.  The default
+!          value is TRUE and users should not need to reset this for most
+!          applications.  This optional argument is available mostly for
+!          internal use.
 !     \item[{[total]}]
 !          Logical flag to indicate getting DistGrid information for total cells.
 !          The default is the computational regime.
