@@ -1,4 +1,4 @@
-! $Id: InjectorMod.F90,v 1.12 2004/04/15 22:05:13 nscollins Exp $
+! $Id: InjectorMod.F90,v 1.13 2004/04/15 22:14:02 nscollins Exp $
 !
 
 !-------------------------------------------------------------------------
@@ -170,7 +170,7 @@ subroutine injector_init(gcomp, importState, exportState, clock, rc)
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
-                             layout=layout, &
+                             delayout=layout, &
                              horzGridType=horz_gridtype, &
                              horzStagger=horz_stagger, &
                              horzCoordSystem=horz_coord_system, &

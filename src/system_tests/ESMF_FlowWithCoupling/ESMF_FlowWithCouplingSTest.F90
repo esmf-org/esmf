@@ -1,4 +1,4 @@
-! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.14 2004/04/15 22:05:12 nscollins Exp $
+! $Id: ESMF_FlowWithCouplingSTest.F90,v 1.15 2004/04/15 22:14:02 nscollins Exp $
 !
 ! ESMF Coupled Flow Demo
 !  Description on Sourceforge under System Test #74559
@@ -92,7 +92,7 @@
     if (rc .ne. ESMF_SUCCESS) goto 10
 
     ! Sanity check the number of DEs we were started on.
-    call ESMF_newDELayoutGet(layoutDef, deCount=ndes, rc)
+    call ESMF_newDELayoutGet(layoutDef, deCount=ndes, rc=rc)
     if (rc .ne. ESMF_SUCCESS) goto 10
     if ((ndes .lt. 4) .or. (ndes .gt. 16)) then
         print *, "This test needs to run at least 4-way and no more than 16-way."

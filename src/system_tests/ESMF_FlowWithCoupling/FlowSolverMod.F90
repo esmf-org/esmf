@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.9 2004/04/15 22:05:13 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.10 2004/04/15 22:14:02 nscollins Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -161,7 +161,7 @@
       grid = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                              minGlobalCoordPerDim=g_min, &
                              maxGlobalCoordPerDim=g_max, &
-                             layout=layout, &
+                             delayout=layout, &
                              horzGridType=horz_gridtype, &
                              horzStagger=horz_stagger, &
                              horzCoordSystem=horz_coord_system, &
@@ -247,7 +247,7 @@
 !
       integer :: status
       logical :: rcpresent
-      integer :: i, j, n, x, y, nx, ny
+      integer :: i, j, n, x, y, nx, ny, de_id, ncounts(2), pos(2)
       integer, dimension(1,2) :: local, global
       double precision :: s_
       type(ESMF_Grid) :: grid
@@ -307,16 +307,23 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      call ESMF_DELayoutGetSize(layout, nx, ny, status)
+      !call ESMF_DELayoutGetSize(layout, nx, ny, status)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, deCountPerDim=ncounts, &
+                               rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
       endif
-      call ESMF_DELayoutGetDEPosition(layout, x, y, status)
+      nx = ncounts(1)
+      ny = ncounts(2)
+      !call ESMF_DELayoutGetDEPosition(layout, x, y, status)
+      call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"
         return
       endif
+      x = pos(1)
+      y = pos(2)
 !
 ! Set all cells to 0 by default
 !
@@ -1357,7 +1364,7 @@
 ! Collect results on DE 0 and output to a file
 !
       call ESMF_GridCompGet(gcomp, delayout=layout, rc=status)
-      call ESMF_newDELayoutGet(layout, localDe=de_id, status)
+      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
 !
 ! Frame number from computation
 !
