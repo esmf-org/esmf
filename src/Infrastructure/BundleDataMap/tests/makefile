@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.2 2004/05/14 22:34:25 slswift Exp $
+# $Id: makefile,v 1.3 2004/06/07 21:19:39 svasquez Exp $
 
 ALL:  build_tests
 
@@ -14,17 +14,21 @@ MANSEC	  =
 LIBBASE	  = 
 LOCDIR	  = src/Infrastructure/BundleDataMap/tests
 
-TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest \
-	        $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest 
+TESTS_BUILD   = $(ESMC_TESTDIR)/ESMF_BundleDataMapUTest 
+#	        $(ESMC_TESTDIR)/ESMC_BundleDataMapUTest 
+# Comment out temporarily
 
 TESTS_RUN     = RUN_ESMF_BundleDataMapUTest \
-		RUN_ESMC_BundleDataMapUTest 
+#		RUN_ESMC_BundleDataMapUTest 
+# Comment out temporarily
 
 TESTS_RUN_UNI = RUN_ESMF_BundleDataMapUTestUNI \
-		RUN_ESMC_BundleDataMapUTestUNI 
+#		RUN_ESMC_BundleDataMapUTestUNI 
+# Comment out temporarily
 
 TESTS_RM      = ESMF_BundleDataMapUTest.rm \
-                ESMC_BundleDataMapUTest.rm
+#                ESMC_BundleDataMapUTest.rm
+# Comment out temporarily
 
 
 include ${ESMF_DIR}/makefile
