@@ -1,4 +1,4 @@
-// $Id: ESMC_newDELayout.C,v 1.6 2004/03/19 16:11:05 theurich Exp $
+// $Id: ESMC_newDELayout.C,v 1.7 2004/04/01 15:15:16 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_newDELayout.C,v 1.6 2004/03/19 16:11:05 theurich Exp $";
+ static const char *const version = "$Id: ESMC_newDELayout.C,v 1.7 2004/04/01 15:15:16 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -461,6 +461,7 @@ int ESMC_newDELayout::ESMC_newDELayoutPrint(){
 //-----------------------------------------------------------------------------
   // print info about the vmachine object
   printf("--- ESMC_newDELayoutPrint start ---\n");
+  printf("myvm = %p\n", myvm);
   printf("ndes = %d\n", ndes);
   for (int i=0; i<ndes; i++){
     printf("  des[%d]: deid=%d, petid=%d, nconnect=%d\n", i, 
