@@ -1,4 +1,4 @@
-! $Id: ESMF_Base.F90,v 1.53 2003/08/26 22:40:09 jwolfe Exp $
+! $Id: ESMF_Base.F90,v 1.54 2003/08/27 23:10:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -187,7 +187,8 @@
       type ESMF_DomainList
       sequence
           integer :: num_domains     ! number of domains stored
-          integer :: current_size    ! size of buffer
+          integer :: current_size    ! size of buffer, used in linked list
+          integer :: total_size      ! total size of domain (number of points)
           type(ESMF_Domain), dimension(:), pointer :: domains
       end type
 
@@ -352,7 +353,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version = &
-               '$Id: ESMF_Base.F90,v 1.53 2003/08/26 22:40:09 jwolfe Exp $'
+               '$Id: ESMF_Base.F90,v 1.54 2003/08/27 23:10:43 jwolfe Exp $'
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 
@@ -1052,7 +1053,7 @@ end function
 
       print *, "DomainListPrint"
       print *, "Number stored domains:", domainlist%num_domains
-      print *, "Buffer size:", domainlist%current_size
+      print *, "Total size:", domainlist%total_size
 
 ! Now loop through domains and print them out
 
