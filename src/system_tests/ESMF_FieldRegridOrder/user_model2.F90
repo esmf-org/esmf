@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.8 2004/04/21 17:23:01 nscollins Exp $
+! $Id: user_model2.F90,v 1.9 2004/04/27 15:25:44 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,9 +83,9 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_VM) :: vm
+      type(ESMF_newDELayout) :: delayout
       type(ESMF_DataMap) :: datamap
-      integer :: i, x, y
       type(ESMF_Grid) :: grid1
       type(ESMF_Array) :: array1
       type(ESMF_ArraySpec) :: arrayspec
@@ -93,18 +93,26 @@
       real(ESMF_KIND_R8) :: min(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
       integer :: countsPerDE1(3), countsPerDE2(2)
-      integer :: de_id
+      integer :: npets, de_id
       type(ESMF_GridType) :: horzGridtype
       type(ESMF_GridStagger) :: horzStagger
       type(ESMF_CoordSystem) :: horzCoordSystem
       type(ESMF_CoordOrder) :: coordOrder
-      integer :: status, myde
+      integer :: status
 
 
-      ! Initially import state contains a field with a grid but no data.
-      call ESMF_GridCompGet(comp, delayout=layout, rc=status)
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
-
+      ! Query component for VM and create a layout with the right breakdown
+      call ESMF_GridCompGet(comp, vm=vm, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_VMGet(vm, petCount=npets, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10 
+      delayout = ESMF_newDELayoutCreate(vm, (/ npets/2, 2 /), rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      
+      ! and get our local de number
+      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      
       print *, de_id, "User Comp 2 Init starting"
 
       ! Add a "humidity" field to the import state.
@@ -128,21 +136,20 @@
       coordOrder      = ESMF_CoordOrder_YXZ
 
       call ESMF_DataMapInit(datamap, ESMF_INDEX_IJ, rc=rc)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       grid1 = ESMF_GridCreateLogRect(2, counts=(/ 40, 50 /), &
                                      countsPerDEDecomp1=countsPerDE1, &
                                      countsPerDEDecomp2=countsPerDE2, &
                                      minGlobalCoordPerDim=min, &
                                      delta1=delta1, delta2=delta2, &
-                                     delayout=layout, &
+                                     delayout=delayout, &
                                      horzGridType=horzGridtype, &
                                      horzStagger=horzStagger, &
                                      horzCoordSystem=horzCoordSystem, &
                                      coordOrder=coordOrder, &
                                      name="source grid", rc=status)
-
-      ! Figure out our local processor id
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Set up a 2D real array
       call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
@@ -151,17 +158,22 @@
       ! Create the field and have it create the array internally
       humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                   horzRelloc=ESMF_CELL_NFACE, datamap=datamap, &
-                                  haloWidth=0, name="humidity", rc=rc)
+                                  haloWidth=0, name="humidity", rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       ! Get the allocated array back and get an F90 array pointer
-      call ESMF_FieldGetArray(humidity, array1, rc)
-      call ESMF_ArrayGetData(array1, idata, rc=rc)
+      call ESMF_FieldGetArray(humidity, array1, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
+      call ESMF_ArrayGetData(array1, idata, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
-      call ESMF_StateAddData(importState, humidity, rc)
+      call ESMF_StateAddData(importState, humidity, rc=status)
+      if (status .ne. ESMF_SUCCESS) goto 10
 
       print *, de_id, "User Comp 2 Init returning"
    
-      rc = ESMF_SUCCESS
+10 continue
+      rc = status
 
     end subroutine user_init
 

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.6 2004/04/21 17:23:00 nscollins Exp $
+! $Id: user_model1.F90,v 1.7 2004/04/27 15:25:44 nscollins Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -90,25 +90,27 @@
 
        ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_newDELayout) :: layout
-        integer :: i, x, y
+        type(ESMF_VM) :: vm
+        type(ESMF_newDELayout) :: delayout
         type(ESMF_Grid) :: grid1
         type(ESMF_Array) :: array1
         type(ESMF_ArraySpec) :: arrayspec
-        type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
         real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
-        integer :: nDE_i, nDE_j
         real(ESMF_KIND_R8) :: min(2), max(2)
         integer :: counts(ESMF_MAXGRIDDIM)
-        integer :: ni, nj, de_id
+        integer :: npets, de_id
         type(ESMF_GridType) :: horzGridtype
         type(ESMF_GridStagger) :: horzStagger
         type(ESMF_CoordSystem) :: horzCoordSystem
-        integer :: status, myde
+        integer :: status
 
-        ! query comp for layout
-        call ESMF_GridCompGet(comp, delayout=layout, rc=status)
-        call ESMF_newDELayoutGet(layout, localDe=de_id, rc=status)
+        ! Query component for VM and create a layout with the right breakdown
+        call ESMF_GridCompGet(comp, vm=vm, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_VMGet(vm, petCount=npets, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        delayout = ESMF_newDELayoutCreate(vm, (/ 2, npets/2 /), rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         print *, de_id, "User Comp 1 Init starting"
 
@@ -126,14 +128,12 @@
         grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts, &
                                               minGlobalCoordPerDim=min, &
                                               maxGlobalCoordPerDim=max, &
-                                              delayout=layout, &
+                                              delayout=delayout, &
                                               horzGridType=horzGridtype, &
                                               horzStagger=horzStagger, &
                                               horzCoordSystem=horzCoordSystem, &
                                               name="source grid", rc=status)
-
-        ! Figure out our local processor id
-        call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set up a 2D real array
         call ESMF_ArraySpecSet(arrayspec, rank=2, type=ESMF_DATA_REAL, &
@@ -142,21 +142,26 @@
         ! Create the field and have it create the array internally
         humidity = ESMF_FieldCreate(grid1, arrayspec, &
                                     horzRelloc=ESMF_CELL_CENTER, &
-                                    haloWidth=0, name="humidity", rc=rc)
+                                    haloWidth=0, name="humidity", rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Get the allocated array back and get an F90 array pointer
-        call ESMF_FieldGetArray(humidity, array1, rc)
-        call ESMF_ArrayGetData(array1, idata, rc=rc)
+        call ESMF_FieldGetArray(humidity, array1, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
+        call ESMF_ArrayGetData(array1, idata, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
 
         ! Set initial data values over whole array to our de id
         idata = real(de_id)
 
-        call ESMF_StateAddData(exportState, humidity, rc)
+        call ESMF_StateAddData(exportState, humidity, rc=status)
+        if (status .ne. ESMF_SUCCESS) goto 10
      !   call ESMF_StatePrint(exportState, rc=rc)
 
         print *, de_id, "User Comp 1 Init returning"
    
-        rc = ESMF_SUCCESS
+10 continue
+        rc = status
 
     end subroutine user_init
 
