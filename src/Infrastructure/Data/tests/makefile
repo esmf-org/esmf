@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/02/13 22:02:58 nscollins Exp $ 
+# $Id: makefile,v 1.6 2003/02/21 14:53:19 nscollins Exp $ 
 
 ALL:  tests
 
@@ -18,20 +18,39 @@ LOCDIR	  = src/Infrastructure/Data/tests
 
 TESTEXAMPLES_3  = \
 	ESMF_ArrayTest RUN_ESMF_ArrayTest ESMF_ArrayTest.rm \
+	ESMF_ArrayF90Ptr RUN_ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.rm \
 	ESMF_ArrayBasic RUN_ESMF_ArrayBasic ESMF_ArrayBasic.rm
 
 TESTEXAMPLES_9  = \
 	ESMF_ArrayTest RUN_ESMF_ArrayTestUNI ESMF_ArrayTest.rm \
+	ESMF_ArrayF90Ptr RUN_ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.rm \
 	ESMF_ArrayBasic RUN_ESMF_ArrayBasicUNI ESMF_ArrayBasic.rm
 
-TESTSF       = ESMF_ArrayTest.F90 ESMF_ArrayBasic.F90
+TESTSF       = ESMF_ArrayTest.F90 ESMF_ArrayBasic.F90 ESMF_ArrayF90Ptr.F90
 
-test tests: chkdir_tests ESMF_ArrayTest ESMF_ArrayBasic
+test tests: chkdir_tests ESMF_ArrayF90Ptr ESMF_ArrayBasic ESMF_ArrayTest
 
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 
 ##
+
+ESMF_ArrayF90Ptr: ESMF_ArrayF90Ptr.o  
+	${F90CXXLD} -g -o ESMF_ArrayF90Ptr ESMF_ArrayF90Ptr.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
+	${RM} ESMF_ArrayF90Ptr.o
+
+RUN_ESMF_ArrayF90Ptr:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayF90Ptr.tmps
+	${MPIRUN} -np 4 ESMF_ArrayF90Ptr > ESMF_ArrayF90Ptr.stdout
+
+RUN_ESMF_ArrayF90PtrUNI:
+	-@rm -f testlog stdlog.* logfile.* ESMF_ArrayF90Ptr.tmps
+	${MPIRUN} -np 1 ESMF_ArrayF90Ptr > ESMF_ArrayF90Ptr.stdout
+
+ESMF_ArrayF90Ptr.rm:
+	-@echo "ESMF_ArrayF90Ptr.rm target called here."
+##
+
 
 ESMF_ArrayTest: ESMF_ArrayTest.o  
 	${F90CXXLD} -g -o ESMF_ArrayTest ESMF_ArrayTest.o -lesmf ${F90CXXLIBS} ${MPI_LIB} ${MP_LIB} ${THREAD_LIB} ${PCL_LIB} 
