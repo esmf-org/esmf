@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.11 2004/03/23 20:48:56 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.12 2004/04/05 21:53:49 jwolfe Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -277,6 +277,10 @@
     call ESMF_FieldDestroy(field2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_FieldDestroy(field3, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid1, rc)
+    if (rc .ne. ESMF_SUCCESS) goto 20
+    call ESMF_GridDestroy(grid2, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
     call ESMF_DELayoutDestroy(layout1, rc)
     if (rc .ne. ESMF_SUCCESS) goto 20
