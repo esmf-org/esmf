@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.7 2004/12/03 22:46:49 nscollins Exp $
+! $Id: user_model2.F90,v 1.8 2004/12/08 20:41:32 nscollins Exp $
 !
 ! System test for Exclusive Components, user-written component 2.
 
@@ -72,7 +72,7 @@
       real(ESMF_KIND_R8), dimension(:,:), pointer :: idata
       real(ESMF_KIND_R8) :: min(2)
       real(ESMF_KIND_R8) :: delta1(40), delta2(50)
-      integer :: countsPerDE1(4), countsPerDE2(1)
+      integer :: countsPerDE1(3), countsPerDE2(1)
       integer :: npets, pet_id
       type(ESMF_GridHorzStagger) :: horz_stagger
       integer :: status
@@ -85,13 +85,13 @@
       if (status .ne. ESMF_SUCCESS) goto 10
       call ESMF_VMGet(vm, petCount=npets, localPET=pet_id, rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
-      delayout = ESMF_DELayoutCreate(vm, (/ 4, 1 /), rc=status)
+      delayout = ESMF_DELayoutCreate(vm, (/ 3, 1 /), rc=status)
       if (status .ne. ESMF_SUCCESS) goto 10
 
       print *, pet_id, "User Comp 2 Init starting"
 
       ! Add a "humidity2" field to the import state.
-      countsPerDE1 = (/ 10, 6, 12, 12 /)
+      countsPerDE1 = (/ 10, 6, 24 /)
       countsPerDE2 = (/ 50 /)
       min(1) = 0.0
       delta1 = (/ 1.0, 1.0, 1.0, 1.1, 1.1, 1.1, 1.2, 1.2, 1.3, 1.4, &
@@ -171,14 +171,10 @@
       print *, "User Comp Run starting"
 
       ! Get information from the component.
-  !    call ESMF_StatePrint(importState, rc=status)
       call ESMF_StateGetField(importState, "humidity2", humidity2, rc=status)
-  !    call ESMF_FieldPrint(humidity2, "", rc=status)
     
       ! This is where the model specific computation goes.
       call ESMF_FieldGetArray(humidity2, array1, rc=status)
-      print *, "Imported Array in user model 2:"
-  !    call ESMF_ArrayPrint(array1, "", rc=status)
 
       print *, "User Comp Run returning"
 

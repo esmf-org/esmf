@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.7 2004/12/07 23:36:32 jwolfe Exp $
+! $Id: user_model1.F90,v 1.8 2004/12/08 20:41:32 nscollins Exp $
 !
 ! System test for Exclusive Components.  User-code, component 1.
 
@@ -140,23 +140,7 @@
 
         call ESMF_StateAddField(exportState, humidity1, rc=status)
         if (status .ne. ESMF_SUCCESS) goto 10
-     !   call ESMF_StatePrint(exportState, rc=status)
 
-        ! for debugging Reconcile only, add some other objects to the state.
-        ! they will not be used in the coupler, but will be grist to debug
-        ! the reconcile code.
-        state1 = ESMF_StateCreate(rc=status)
-        call ESMF_StateAddState(exportState, state1, rc=status)
-        temp1 = ESMF_FieldCreateNoData(rc=status)
-        bundle1 = ESMF_BundleCreate(rc=status)
-        call ESMF_BundleSetAttribute(bundle1, "Region", "Artic", rc=status)
-        call ESMF_BundleSetAttribute(bundle1, "Cover", "World", rc=status)
-        call ESMF_BundleSetAttribute(bundle1, "Scale Factor", 1.0, rc=status)
-        call ESMF_BundleAddField(bundle1, temp1, rc=status)
-        call ESMF_StateAddBundle(exportState, bundle1, rc=status)
-        call ESMF_StateAddArray(exportState, array1, rc=status)
-
-  
         call ESMF_StatePrint(exportState, rc=status)
      
         print *, pet_id, "User Comp 1 Init returning"

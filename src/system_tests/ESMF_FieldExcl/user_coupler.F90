@@ -1,4 +1,4 @@
-! $Id: user_coupler.F90,v 1.11 2004/12/07 23:36:04 jwolfe Exp $
+! $Id: user_coupler.F90,v 1.12 2004/12/08 20:41:32 nscollins Exp $
 !
 ! System test of Exclusive components, user-written Coupler component.
 
@@ -79,32 +79,29 @@
       call ESMF_CplCompGet(comp, vm=vm, rc=status)
       call ESMF_VMGet(vm, localPET=pet_id, rc=status)
 
-      ! Since we are planning to use a communication call, we must
-      ! reconcile the object lists in the State objects.
+      ! Since the components we are coupling between are running concurrently,
+      ! they have each separately created ESMF objects.   We are planning to
+      ! use a communications call (Regrid) here, so first we must make a new
+      ! call to reconcile the object lists in all the import and export states.
  
       ! New routine:
-      ! must be called on each state which is going to be accessed from
-      ! this coupler.  when the call returns, all objects which were not
-      ! in existance on all PETs now have an object which represents them.
+      ! Must be called on each state which is going to be accessed from
+      ! this coupler.  When the call returns all objects which were not
+      ! in existence on all PETs now have an object which represents them.
       call ESMF_StateReconcile(importState, vm, rc=status)
-      print *, "i am", pet_id, "this is my import state after reconcile"
       call ESMF_StatePrint(importState, rc=status)
 
       call ESMF_StateReconcile(exportState, vm, rc=status)
-      print *, "i am", pet_id, "this is my export state after reconcile"
       call ESMF_StatePrint(exportState, rc=status)
-      print *, "done with both reconcile calls"
 
       call ESMF_StateGet(importState, itemcount=itemcount, rc=status)
       print *, "Import State contains ", itemcount, " items."
 
       ! Get input data
       call ESMF_StateGetField(importState, "humidity1", humidity1, rc=status)
-      ! call ESMF_FieldPrint(humidity1, rc=status)
 
       ! Get location of output data
       call ESMF_StateGetField(exportState, "humidity2", humidity2, rc=status)
-      ! call ESMF_FieldPrint(humidity2, rc=status)
 
       ! These are fields on different Grids - call RegridStore to set
       ! up the Regrid structure
