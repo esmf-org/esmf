@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.5 2003/01/24 00:12:54 flanigan Exp $ 
+# $Id: makefile,v 1.6 2003/01/27 20:46:55 flanigan Exp $ 
 ALL: lib 
 
 CFLAGS    =
@@ -31,13 +31,9 @@ USERDOC_FILES = ESMF_usrdoc.tex ESMF_desc.tex ESMF_install.tex ESMF_usage.tex
 include ${ESMF_DIR}/build/${ESMF_ARCH}/base
 
 # Dvi files
-${ESMC_DOCDIR}/ESMF_reqdoc.dvi: ESMF_req.tex build_req.tex
+${ESMC_DOCDIR}/ESMF_reqdoc.dvi: ESMF_req.tex ESMF_buildreq.tex
 	${DO_LATEX} ESMF req
 	mv -f ESMF_reqdoc.dvi ${ESMC_DOCDIR}
-
-${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi: ESMF_buildreqdoc.tex build_req.tex
-	${DO_LATEX} ESMF buildreq
-	mv -f ESMF_buildreqdoc.dvi ${ESMC_DOCDIR}
 
 ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USERDOC_FILES)
 	${DO_LATEX} ESMF usr
@@ -48,21 +44,14 @@ ${ESMC_DOCDIR}/ESMF_usrdoc.dvi: $(USERDOC_FILES)
 ${ESMC_DOCDIR}/ESMF_reqdoc.pdf: ${ESMC_DOCDIR}/ESMF_reqdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/ESMF_reqdoc.dvi ${ESMC_DOCDIR}/ESMF_reqdoc.pdf
 
-${ESMC_DOCDIR}/ESMF_buildreqdoc.pdf: ${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi
-	dvipdf ${ESMC_DOCDIR}/ESMF_buildreqdoc.dvi ${ESMC_DOCDIR}/ESMF_buildreqdoc.pdf
-
 ${ESMC_DOCDIR}/ESMF_usrdoc.pdf: ${ESMC_DOCDIR}/ESMF_usrdoc.dvi
 	dvipdf ${ESMC_DOCDIR}/ESMF_usrdoc.dvi ${ESMC_DOCDIR}/ESMF_usrdoc.pdf
 
 
 # Html Files
-${ESMC_DOCDIR}/ESMF_reqdoc: 
+${ESMC_DOCDIR}/ESMF_reqdoc: ESMF_req.tex ESMF_buildreq.tex
 	${DOL2H} ESMF req
 	mv -f ESMF_reqdoc ${ESMC_DOCDIR}
-
-$(ESMC_DOCDIR)/ESMF_buildreqdoc:
-	$(DOL2H) ESMF buildreq
-	mv -f ESMF_buildreqdoc $(ESMC_DOCDIR)
 
 ${ESMC_DOCDIR}/ESMF_usrdoc: 
 	${DOL2H} ESMF usr
