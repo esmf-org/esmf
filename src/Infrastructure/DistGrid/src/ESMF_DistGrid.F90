@@ -212,7 +212,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.111 2004/04/19 20:25:19 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.112 2004/04/19 21:51:09 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -725,10 +725,10 @@
         print *, "ERROR in ESMF_DistGridConstructInternal: not a 1-to-1 layout"
         return
       endif
-      if (ndim .ne. 2) then               ! ensure this is 2D Layout
-        print *, "ERROR in ESMF_DistGridConstructInternal: not a 2D layout"
-        return
-      endif
+      ! if (ndim .ne. 2) then               ! ensure this is 2D Layout
+      !   print *, "ERROR in ESMF_DistGridConstructInternal: not a 2D layout"
+      !   return
+      ! endif
       ! if (lrFlag .ne. ESMF_TRUE) then     ! ensure this is logical rect layout
       !   print *, "ERROR in ESMF_DistGridConstructInternal: ", &
       !            "not a logically rectangular layout"
