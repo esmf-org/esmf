@@ -1,4 +1,4 @@
-! $Id: ESMF_State.F90,v 1.32 2003/04/14 15:53:57 nscollins Exp $
+! $Id: ESMF_State.F90,v 1.33 2003/04/14 16:18:47 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -258,7 +258,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_State.F90,v 1.32 2003/04/14 15:53:57 nscollins Exp $'
+      '$Id: ESMF_State.F90,v 1.33 2003/04/14 16:18:47 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -2471,7 +2471,7 @@ end function
       type(ESMF_StateType), pointer :: stypep
       type(ESMF_StateData), pointer :: nextitem
 
-      stypep = state%statep
+      stypep => state%statep
       if (.not.associated(stypep)) then
         if (present(rc)) rc=ESMF_FAILURE
         return
