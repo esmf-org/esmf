@@ -1,4 +1,4 @@
-// $Id: ESMC_LogErr.C,v 1.47 2004/05/14 08:14:47 cpboulder Exp $
+// $Id: ESMC_LogErr.C,v 1.48 2004/05/14 09:34:28 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ char listOfFortFileNames[20][32];
 //-----------------------------------------------------------------------------
 // leave the following line as-is; it will insert the cvs ident string
 // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_LogErr.C,v 1.47 2004/05/14 08:14:47 cpboulder Exp $";
+ static const char *const version = "$Id: ESMC_LogErr.C,v 1.48 2004/05/14 09:34:28 nscollins Exp $";
 //----------------------------------------------------------------------------
 //
 // This section includes all the Log routines
@@ -1151,22 +1151,22 @@ void ESMC_Log:: ESMC_LogPrint(
 {
  switch (errCode)
  {
-  case ESMF_ERR_FILE_OPEN:
+  case ESMF_RC_FILE_OPEN:
            strcpy(msg,"Error opening file");
            break;
-  case ESMF_ERR_FILE_READ:
+  case ESMF_RC_FILE_READ:
            strcpy(msg,"Unable to read from file");
            break;
-  case ESMF_ERR_FILE_WRITE:
+  case ESMF_RC_FILE_WRITE:
            strcpy(msg,"Unable to write to file.");
            break;
-  case ESMF_ERR_FILE_CLOSE:
+  case ESMF_RC_FILE_CLOSE:
            strcpy(msg,"Unable to close file.");
            break;
-  case ESMF_ERR_INIT:
+  case ESMF_RC_INIT:
            strcpy(msg,"Init method not called.");
            break;
-  case ESMF_ERR_FILE_ACTIVE:
+  case ESMF_RC_FILE_ACTIVE:
            strcpy(msg,"Instrumented region still active.");
            break;
   case ESMF_FATAL:
