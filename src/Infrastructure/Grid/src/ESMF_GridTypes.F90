@@ -1,4 +1,4 @@
-! $Id: ESMF_GridTypes.F90,v 1.21 2004/03/22 23:51:55 jwolfe Exp $
+! $Id: ESMF_GridTypes.F90,v 1.22 2004/04/09 17:44:43 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -430,14 +430,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridTypes.F90,v 1.21 2004/03/22 23:51:55 jwolfe Exp $'
+      '$Id: ESMF_GridTypes.F90,v 1.22 2004/04/09 17:44:43 jwolfe Exp $'
 
 !==============================================================================
 !
 ! INTERFACE BLOCKS
 !
 !==============================================================================
-!BOP
+!BOPI
 ! !INTERFACE:
       interface operator (==)
 
@@ -454,11 +454,11 @@
 !     ESMF Grid ids (enums).  It is provided for easy comparisons of 
 !     these types with defined values.
 !
-!EOP
+!EOPI
       end interface
 !
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !INTERFACE:
       interface operator (/=)
 
@@ -475,7 +475,7 @@
 !     ESMF Grid ids (enums).  It is provided for easy comparisons of 
 !     these types with defined values.
 !
-!EOP
+!EOPI
       end interface
 !
 !==============================================================================
@@ -947,7 +947,7 @@
       end subroutine ESMF_GridGetAttributes
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAddDistGrid - adds a complete DistGrid to Grid type
 
 ! !INTERFACE:
@@ -974,7 +974,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1112,7 +1112,7 @@
      end subroutine ESMF_GridMakeDistGridSpace
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridAddPhysGrid - adds a complete PhysGrid to Grid type
 
 ! !INTERFACE:
@@ -1139,7 +1139,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: status                           ! Error status
       logical :: rcpresent                        ! Return code present
@@ -1298,7 +1298,7 @@
      end subroutine ESMF_GridMakePhysGridSpace
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetPhysGrid - retrieves complete PhysGrid from Grid type
 
 ! !INTERFACE:
@@ -1332,7 +1332,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: n                    ! search loop index
       integer :: status               ! Error status
@@ -1400,7 +1400,7 @@
       end subroutine ESMF_GridGetPhysGrid
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetPhysGridID - Get PhysGrid Id for a given relative location
 
 ! !INTERFACE:
@@ -1430,7 +1430,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                              ! Error status
       logical :: rcpresent                           ! Return code present
@@ -1463,7 +1463,7 @@
       end subroutine ESMF_GridGetPhysGridID
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetDistGrid - retrieves complete DistGrid from Grid type
 
 ! !INTERFACE:
@@ -1492,7 +1492,7 @@
 !   \end{description}
 !
 ! !REQUIREMENTS:  TODO
-!EOP
+!EOPI
 
       integer :: n                    ! search loop index
       integer :: status               ! Error status
@@ -1532,7 +1532,7 @@
       end subroutine ESMF_GridGetDistGrid
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridGetBoundingBoxes - Get the array of bounding boxes per DE
 
 ! !INTERFACE:
@@ -1558,7 +1558,7 @@
 !     \end{description}
 !
 ! !REQUIREMENTS:
-!EOP
+!EOPI
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
@@ -1579,7 +1579,7 @@
       end subroutine ESMF_GridGetBoundingBoxes
 
 !------------------------------------------------------------------------------
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_GridStatusEqual - equality of Grid statuses
 !
 ! !INTERFACE:
@@ -1604,7 +1604,7 @@
 !          Two grid statuses to compare for equality
 !     \end{description}
 !
-!EOP
+!EOPI
 ! !REQUIREMENTS:  SSSn.n, GGGn.n
 
       ESMF_GridStatusEqual = (GridStatus1%gridStatus == &

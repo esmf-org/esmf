@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.158 2004/04/08 22:04:52 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.159 2004/04/09 17:44:06 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -95,7 +95,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.158 2004/04/08 22:04:52 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.159 2004/04/09 17:44:06 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2735,7 +2735,7 @@
       end function ESMF_GridComputeDistance
 
 !------------------------------------------------------------------------------
-!!BOP
+!!BOPI
 !! !IROUTINE: ESMF_GridSearchPoint - Search the grid for a cell containing point
 !
 ! !INTERFACE:
@@ -2781,7 +2781,7 @@
 !!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !!     \end{description}
 !!
-!!EOP
+!!EOPI
 !
 !      integer :: status                           ! Error status
 !      logical :: rcpresent                        ! Return code present
