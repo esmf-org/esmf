@@ -1,4 +1,4 @@
-// $Id: ESMC_Calendar.C,v 1.66 2004/05/25 21:11:37 eschwab Exp $
+// $Id: ESMC_Calendar.C,v 1.67 2004/05/26 20:39:17 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Calendar.C,v 1.66 2004/05/25 21:11:37 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Calendar.C,v 1.67 2004/05/26 20:39:17 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 // array of calendar type names
@@ -556,7 +556,10 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
-    int rc; // return code 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarSet(built-in)"
+
+    int rc = ESMF_SUCCESS; // return code 
 
     // save current values to restore in case of failure;
     ESMC_Calendar saveCalendar = *this;
@@ -568,9 +571,16 @@ int ESMC_Calendar::count=0;
           strncpy(this->name, name, nameLen);
           this->name[nameLen] = '\0';  // null terminate
         } else {
-          // error, restore previous state and return ESMF_FAILURE
-          *this = saveCalendar;
-          return(ESMF_FAILURE);
+          // truncate
+          strncpy(this->name, name, ESMF_MAXSTR-1);
+          this->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+          char logMsg[ESMF_MAXSTR];
+          sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
+                  name);
+          ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+          // TODO: return ESMF_WARNING when defined
+          // rc = ESMF_WARNING;
         }
       }
     }
@@ -637,13 +647,17 @@ int ESMC_Calendar::count=0;
             //   Set() (custom) instead
             // restore original calendar
             *this = saveCalendar;
-            rc = ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+                 ", must call CalendarSet(custom) for custom calendars.", &rc);
             break;
 
         default:
             // unknown calendar type; restore original
             *this = saveCalendar; 
-            rc = ESMF_FAILURE;
+            char logMsg[ESMF_MAXSTR];
+            sprintf(logMsg, "; unknown calendar type %d.", calendarType);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
+                                                  &rc);
             break;
     }
     return(rc);
@@ -676,6 +690,11 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarSet(custom)"
+
+    int rc = ESMF_SUCCESS; // return code 
+
     // save current values to restore in case of failure;
     ESMC_Calendar saveCalendar = *this;
 
@@ -688,7 +707,16 @@ int ESMC_Calendar::count=0;
         } else {
           // error, restore previous state and return ESMF_FAILURE
           *this = saveCalendar;
-          return(ESMF_FAILURE);
+          // truncate
+          strncpy(this->name, name, ESMF_MAXSTR-1);
+          this->name[ESMF_MAXSTR-1] = '\0';  // null terminate
+
+          char logMsg[ESMF_MAXSTR];
+          sprintf(logMsg, "calendar name %s, length >= ESMF_MAXSTR; truncated.",
+                  name);
+          ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+          // TODO: return ESMF_WARNING when defined
+          // rc = ESMF_WARNING;
         }
       }
     }
@@ -701,7 +729,11 @@ int ESMC_Calendar::count=0;
     } else {
       // error, restore previous state and return ESMF_FAILURE
       *this = saveCalendar;
-      return(ESMF_FAILURE);
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "; monthsPerYear %d > MONTHS_PER_YEAR %d.",
+                      monthsPerYear, MONTHS_PER_YEAR);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, logMsg, &rc);
+      return(rc);
     }
 
     if (daysPerMonth != ESMC_NULL_POINTER) {
@@ -767,6 +799,11 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarGet()"
+
+    int rc = ESMF_SUCCESS; // return code 
+
     // TODO: replace MONTHS_PER_YEAR with monthsPerYear
 
     // must have at least one non-null pointer
@@ -778,9 +815,9 @@ int ESMC_Calendar::count=0;
         daysPerYear    == ESMC_NULL_POINTER &&
         daysPerYeardN  == ESMC_NULL_POINTER &&
         daysPerYeardD  == ESMC_NULL_POINTER) {
-        cout << "ESMC_Calendar::ESMC_CalendarGet():  no valid "
-             << "pointer passed in." << endl;
-      return (ESMF_FAILURE);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_BAD, 
+                  ", no valid pointer passed in.", &rc);
+      return(rc);
     }
 
     // TODO: use inherited methods from ESMC_Base
@@ -792,7 +829,13 @@ int ESMC_Calendar::count=0;
         // TODO: copy what will fit and return ESMF_FAILURE ?
         strncpy(tempName, this->name, nameLen-1);
         tempName[nameLen] = '\0';  // null terminate
-        return(ESMF_FAILURE);
+
+        char logMsg[ESMF_MAXSTR];
+        sprintf(logMsg, "For calendar name %s, "
+                "length >= given character array; truncated.", this->name);
+        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_WARN);
+        // TODO: return ESMF_WARNING when defined
+        // rc = ESMF_WARNING;
       }
       // report how many characters were copied
       *tempNameLen = strlen(tempName);
@@ -862,6 +905,11 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarConvertToTime()"
+
+    int rc = ESMF_SUCCESS; // return code 
+
     switch (this->calendarType)
     {
         // convert Gregorian Date => Time
@@ -871,11 +919,21 @@ int ESMC_Calendar::count=0;
             // Validate inputs 
             //
             if (yy < -4800 || mm < 1 || mm > 12 || dd < 1) {
-              return (ESMF_FAILURE);
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; Gregorian %d/%d/%ld (1-12/>=1/>=-4800).",
+                      mm, dd, yy); 
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
             }
             // invalid before 3/1/-4800
             if (yy == -4800 && mm < 3) {
-              return (ESMF_FAILURE);
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; Gregorian %d/%d/%ld is before 3/1/-4800.",
+                      mm, dd, yy); 
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
             }
 
             // TODO: upper bounds date range check dependent on machine
@@ -884,14 +942,25 @@ int ESMC_Calendar::count=0;
 
             // check day of the month for any month except February
             if (mm != 2 && dd > daysPerMonth[mm-1]) {
-              return (ESMF_FAILURE);
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; Gregorian: for month %d, dd=%d > %d days "
+                      "in the month.", mm, dd, daysPerMonth[mm-1]);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
             }
             // if February, take leap year into account before checking
             //   day of the month
             if (mm == 2) {
               int leapDay = ESMC_IS_LEAP_YEAR(yy) ? 1 : 0;
               if (dd > (daysPerMonth[1] + leapDay)) {
-                return (ESMF_FAILURE);
+                char logMsg[ESMF_MAXSTR];
+                sprintf(logMsg, "; Gregorian: for February %ld, dd=%d > %d "
+                        "days in the month.", yy, dd,
+                        (daysPerMonth[mm-1]+leapDay));
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+                return(rc);
               }
             }
 
@@ -912,11 +981,21 @@ int ESMC_Calendar::count=0;
         {
             // Validate inputs. TODO: determine lowpoint year, month & day
             if (mm < 1 || mm > 12 || dd < 1) {
-              return (ESMF_FAILURE);
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; NoLeap mm=%d (1-12), dd=%d (>=1).",
+                      mm, dd);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
             }
             // check day of the month
             if (dd > daysPerMonth[mm-1]) {
-              return (ESMF_FAILURE);
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; NoLeap: for month %d, dd=%d > %d days "
+                              "in the month.", mm, dd, daysPerMonth[mm-1]);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
             }
             // TODO: upper bounds date range check dependent on machine
             //  word size
@@ -935,7 +1014,11 @@ int ESMC_Calendar::count=0;
         {
             // Validate inputs. TODO: determine lowpoint year, month & day
             if (mm < 1 || mm > 12 || dd < 1 || dd > 30) {
-              return (ESMF_FAILURE);
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; 360 Day: mm=%d (1-12), dd=%d (1-30).", mm, dd);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
             }
             // TODO: upper bounds date range check dependent on machine
             //  word size
@@ -953,7 +1036,14 @@ int ESMC_Calendar::count=0;
             // Validate input
             // From Fliegel algorithm:  lower limit of 3/1/-4800 Gregorian
             //    equals -32044 Julian days
-            if (d < -32044) return(ESMF_FAILURE);
+            if (d < -32044) {
+              char logMsg[ESMF_MAXSTR];
+              sprintf(logMsg, "; Julian Day: d=%ld < -32044.", d);
+              ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                                    logMsg, &rc);
+              return(rc);
+            }
+
             // TODO: upper bounds date range check dependent on machine
             //  word size
 
@@ -967,15 +1057,21 @@ int ESMC_Calendar::count=0;
             break;
         case ESMC_CAL_NOCALENDAR:
             // need real calendar type
-            return(ESMF_FAILURE);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+                                                  ", need real calendar.", &rc);
+            return(rc);
             break;
         default:
             // unknown calendar type
-            return(ESMF_FAILURE);
+            char logMsg[ESMF_MAXSTR];
+            sprintf(logMsg, "; unknown calendar type %d.", this->calendarType);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
+                                                  &rc);
+            return(rc);
             break;
     }
 
-    return(ESMF_SUCCESS);
+    return(rc);
 
 }  // end ESMC_CalendarConvertToTime
 
@@ -1012,6 +1108,9 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5, 2.5.6
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarConvertToDate()"
+
 // TODO: validate core values before conversion as they can go out-of-range
 //       during arithmetic operations
 
@@ -1037,7 +1136,11 @@ int ESMC_Calendar::count=0;
                 if (t->s % secondsPerDay < 0) (*d)--;
               } else {
                 // too large to fit in given int
-                rc = ESMF_FAILURE;
+                char logMsg[ESMF_MAXSTR];
+                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                                "d integer.", jdays);
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                      logMsg, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1073,7 +1176,11 @@ int ESMC_Calendar::count=0;
                   *yy = (ESMF_KIND_I4) year;  // >= 32-bit
                 } else {
                   // too large to fit in given int
-                  rc = ESMF_FAILURE;
+                  char logMsg[ESMF_MAXSTR];
+                  sprintf(logMsg, "; year value %ld won't fit in given "
+                                  "yy integer.", year);
+                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                        logMsg, &rc);
                 }
               }
               if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1098,7 +1205,11 @@ int ESMC_Calendar::count=0;
                   if (tmpS % secondsPerYear < 0) (*yy)--;
               } else {
                   // too large to fit in given int
-                  rc = ESMF_FAILURE;
+                  char logMsg[ESMF_MAXSTR];
+                  sprintf(logMsg, "; year value %ld won't fit in given "
+                                  "yy integer.", year);
+                  ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                        logMsg, &rc);
               }
             }
             if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1131,7 +1242,11 @@ int ESMC_Calendar::count=0;
                 if (tmpS % secondsPerDay < 0) (*d)--;
               } else {
                 // too large to fit in given int
-                rc = ESMF_FAILURE;
+                char logMsg[ESMF_MAXSTR];
+                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                                "d integer.", day);
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                      logMsg, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1160,7 +1275,11 @@ int ESMC_Calendar::count=0;
                 if (tmpS % secondsPerYear < 0) (*yy)--;
               } else {
                 // too large to fit in given int
-                rc = ESMF_FAILURE;
+                char logMsg[ESMF_MAXSTR];
+                sprintf(logMsg, "; year value %ld won't fit in given "
+                                "yy integer.", year);
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                      logMsg, &rc);
               }
             }
             if (yy_i8 != ESMC_NULL_POINTER) {
@@ -1189,7 +1308,11 @@ int ESMC_Calendar::count=0;
                 if (tmpS % secondsPerDay < 0) (*d)--;
               } else {
                 // too large to fit in given int
-                rc = ESMF_FAILURE;
+                char logMsg[ESMF_MAXSTR];
+                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                                "d integer.", day);
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                      logMsg, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1215,7 +1338,11 @@ int ESMC_Calendar::count=0;
                 if (t->s % secondsPerDay < 0) (*d)--;
               } else {
                 // too large to fit in given int
-                rc = ESMF_FAILURE;
+                char logMsg[ESMF_MAXSTR];
+                sprintf(logMsg, "; Julian days value %ld won't fit in given "
+                                "d integer.", day);
+                ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_SIZE,
+                                                      logMsg, &rc);
               }
             }
             if (d_i8 != ESMC_NULL_POINTER) {
@@ -1233,12 +1360,15 @@ int ESMC_Calendar::count=0;
             break;
         case ESMC_CAL_NOCALENDAR:
             // need real calendar type
-            rc = ESMF_FAILURE;
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_WRONG,
+                                                  ", need real calendar.", &rc);
             break;
         default:
             // unknown calendar type
-            rc = ESMF_FAILURE;
-            break;
+            char logMsg[ESMF_MAXSTR];
+            sprintf(logMsg, "; unknown calendar type %d.", this->calendarType);
+            ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, logMsg,
+                                                  &rc);
     }
 
     return(rc);
@@ -1268,8 +1398,13 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarIncrement()"
+
 // TODO: share common code with Decrement method
 // TODO: check for overflow/underflow, return 0 with LogErr message
+
+    int rc = ESMF_SUCCESS;
 
     // intialize result to given time to prepare for the case of
     //   only a non-calendar (h,m,s) increment
@@ -1308,19 +1443,21 @@ int ESMC_Calendar::count=0;
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
-                time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   &h, &m, &s,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
-                                   &timeZone);
+                rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        &h, &m, &s,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, &cal,
+                                        ESMC_NULL_POINTER, &timeZone);
                                    // TODO: use native C++ interface when
                                    //   ready
+                if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, 
+                            ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(sum);
             
                 // do the calendar increment!
                 mm += timeinterval.mm % monthsPerYear;  // months increment
@@ -1343,19 +1480,21 @@ int ESMC_Calendar::count=0;
 
                 // convert resulting calendar sum back to base time, while also
                 // restoring time-of-day units and properties from given time
-                sum.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 &h, &m, &s,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                 ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
-                                 &timeZone);
+                rc = sum.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      &h, &m, &s,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                      ESMC_NULL_POINTER, &cal,
+                                      ESMC_NULL_POINTER, &timeZone);
                                  // TODO: use native C++ interface when
                                  //   ready
+                if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, 
+                            ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(sum);
             }
         }
         default:
@@ -1401,6 +1540,11 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS:   TMG 2.4.5
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarDecrement()"
+
+    int rc = ESMF_SUCCESS;
+
 // TODO: share common code with Increment method
 // TODO: check for overflow/underflow, return 0 with LogErr message
 
@@ -1441,19 +1585,21 @@ int ESMC_Calendar::count=0;
 
                 // get calendar units from given time, while saving time-of-day
                 //   units and calendar & timezone properties
-                time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   &h, &m, &s,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                   ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
-                                   &timeZone);
+                rc = time->ESMC_TimeGet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        &h, &m, &s,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                        ESMC_NULL_POINTER, &cal,
+                                        ESMC_NULL_POINTER, &timeZone);
                                    // TODO: use native C++ interface when
                                    //   ready
+                if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, 
+                            ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(diff);
 
                 // do the calendar decrement!
                 mm -= timeinterval.mm % monthsPerYear;  // months decrement
@@ -1476,19 +1622,21 @@ int ESMC_Calendar::count=0;
 
                 // convert resulting calendar diff back to base time, while also
                 // restoring time-of-day units and properties from given time
-                diff.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  &h, &m, &s,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, ESMC_NULL_POINTER,
-                                  ESMC_NULL_POINTER, &cal, ESMC_NULL_POINTER,
-                                  &timeZone);
+                rc = diff.ESMC_TimeSet(ESMC_NULL_POINTER, &yy_i8, &mm, &dd,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       &h, &m, &s,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, ESMC_NULL_POINTER,
+                                       ESMC_NULL_POINTER, &cal,
+                                       ESMC_NULL_POINTER, &timeZone);
                                   // TODO: use native C++ interface when
                                   //   ready
+                if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, 
+                            ESMF_ERR_PASSTHRU, ESMC_NULL_POINTER)) return(diff);
             }
         }
         default:
@@ -1636,10 +1784,21 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS: 
 
-    if (this->calendarType < 1 ||
-        this->calendarType > CALENDAR_TYPE_COUNT) return(ESMF_FAILURE);
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_CalendarValidate()"
 
-    return(ESMF_SUCCESS);
+    int rc = ESMF_SUCCESS;
+
+    if (this->calendarType < 1 ||
+        this->calendarType > CALENDAR_TYPE_COUNT) {
+      char logMsg[ESMF_MAXSTR];
+      sprintf(logMsg, "; calendarType %d (1-%d).", this->calendarType,
+              CALENDAR_TYPE_COUNT);
+      ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_OUTOFRANGE,
+                                            logMsg, &rc);
+    }
+
+    return(rc);
 
 }  // end ESMC_CalendarValidate
 
@@ -1790,8 +1949,15 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS: 
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Calendar(built-in) constructor"
+
+    int rc = ESMF_SUCCESS;
+
     ESMC_Calendar();  // invoke default constructor
-    ESMC_CalendarSet(strlen(name), name, calendarType);
+    rc = ESMC_CalendarSet(strlen(name), name, calendarType);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU,
+                                          ESMC_NULL_POINTER);
 
 }   // end ESMC_Calendar
 
@@ -1821,10 +1987,17 @@ int ESMC_Calendar::count=0;
 //EOP
 // !REQUIREMENTS: 
 
+ #undef  ESMC_METHOD
+ #define ESMC_METHOD "ESMC_Calendar(custom) constructor"
+
+    int rc = ESMF_SUCCESS;
+
     ESMC_Calendar();  // invoke default constructor
-    ESMC_CalendarSet(strlen(name), name, 
-                     daysPerMonth, monthsPerYear, secondsPerDay, 
-                     daysPerYear, daysPerYeardN, daysPerYeardD);
+    rc = ESMC_CalendarSet(strlen(name), name, 
+                          daysPerMonth, monthsPerYear, secondsPerDay, 
+                          daysPerYear, daysPerYeardN, daysPerYeardD);
+    ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU,
+                                          ESMC_NULL_POINTER);
 }  // end ESMC_Calendar
 
 //-------------------------------------------------------------------------
