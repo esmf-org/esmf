@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.6 2004/03/16 22:10:48 nscollins Exp $
+# $Id: build_rules.mk,v 1.7 2004/04/28 20:32:13 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -120,10 +120,10 @@ CXX_CCV		   = ${CXX_CC} -V -c -w -x c++
 CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 #CXX_SYS_LIB	   = -ldl -lc /usr/lib/libf2c.a -lm
 C_F90CXXLIBS       = -Wl,-rpath,/opt/intel_cc_80/lib -L/opt/intel_cc_80/lib \
-                     -lcprts
+                     -lcprts -lrt
 #C_F90CXXLIBS       = -lcprts
-C_CXXF90LIBS       = 
-#C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins
+C_CXXF90LIBS       =  -lrt
+#C_CXXF90LIBS       = -lCEPCF90 -lIEPCF90 -lF90 -lintrins 
 # ------------------------- BOPT - g_c++ options ------------------------------
 GCXX_COPTFLAGS	   = -g 
 GCXX_FOPTFLAGS	   = -g
