@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRedistSTest.F90,v 1.17 2004/04/14 22:44:57 jwolfe Exp $
+! $Id: ESMF_FieldRedistSTest.F90,v 1.18 2004/04/16 15:50:25 nscollins Exp $
 !
 ! System test FieldRedist
 !  Description on Sourceforge under System Test #XXXXX
@@ -40,7 +40,7 @@
     integer, dimension(2) :: decompids1, decompids2, counts, localCounts
     integer, dimension(:), allocatable :: delist
     logical :: match
-    real(ESMF_KIND_R8) :: pi
+    real(ESMF_KIND_R8) :: pi, compval
     real(ESMF_KIND_R8), dimension(2) :: min, max
     real(ESMF_KIND_R8), dimension(:,:), pointer :: coordX, coordY
     real(ESMF_KIND_R8), dimension(:,:), pointer :: srcdata, resdata
@@ -177,12 +177,12 @@
     srcdata = 0.0
     resdata = 0.0
 
-    ! set data array to a function of coordinates (just in the computational part
-    ! of the array)
-    do j    = 1,localCounts(2)
-       do i = 1,localCounts(1)
-           srcdata(i+hWidth,j+hWidth) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
-                                             + 2.0*sin(coordY(i,j)/50.0*pi) 
+    ! set data array to a function of coordinates (in the computational part
+    ! of the array only, not the halo region)
+    do j    = hWidth+1,localCounts(2)-hWidth
+       do i = hWidth+1,localCounts(1)-hWidth
+           srcdata(i,j) = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                               + 2.0*sin(coordY(i,j)/50.0*pi) 
       enddo
     enddo
 
@@ -242,11 +242,15 @@
 
     match    = .true.
     miscount = 0
-    do i     = 1,size(resdata,1)
-      do j   = 1,size(resdata,2)
-        if (srcdata(i,j) .ne. resdata(i,j)) then
+    do j   = hWidth+1,size(resdata,2)-hWidth
+      do i = hWidth+1,size(resdata,1)-hWidth
+        compval = 10.0 + 5.0*sin(coordX(i,j)/60.0*pi) &
+                       + 2.0*sin(coordY(i,j)/50.0*pi)
+        if (resdata(i,j) .ne. compval) then
+        !if (srcdata(i,j) .ne. resdata(i,j)) then
           print *, "array contents do not match at: (", i,j, ") on DE ", &
-                   deId, ".  src=", srcdata(i,j), "dst=", resdata(i,j)
+                   deId, ".  src=", srcdata(i,j), "dst=", resdata(i,j), &
+                   "realval=", compval
           match = .false.
           miscount = miscount + 1
           if (miscount .gt. 40) then
