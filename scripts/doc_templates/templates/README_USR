@@ -1,4 +1,4 @@
-% $Id: README_USR,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: README_USR,v 1.2 2002/10/11 22:51:02 eschwab Exp $
 
 ================================================================================
                                  README_USR
@@ -18,11 +18,11 @@ describes.
 --------------------------------------------------------------------------------
 Part		Template File	    Description
 --------------------------------------------------------------------------------
-document	<comp>_usrdoc.tex   Document shell with software release number
+document	<comp>_usrdoc.ctex   Document shell with software release number
 --------------------------------------------------------------------------------
 
 To create a new user's guide, fill in the template file.  In 
-<comp>_usrdoc.tex, be sure to comment out the \input of any files you aren't 
+<comp>_usrdoc.ctex, be sure to comment out the \input of any files you aren't 
 including and specify the \input filenames of files that you are including.
 
 Build a dvi file from LaTeX documents:

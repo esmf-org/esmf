@@ -1,4 +1,4 @@
-% $Id: README_PHYS,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: README_PHYS,v 1.2 2002/10/11 22:51:02 eschwab Exp $
 
 ================================================================================
                                  README_PHYS
@@ -13,7 +13,7 @@ and so only a shell is included.  Brackets [] indicate that a part is optional.
 --------------------------------------------------------------------------------
 Part		Template File	    Description
 --------------------------------------------------------------------------------
-document	<comp>_physdoc.tex  Document shell 
+document	<comp>_physdoc.ctex  Document shell 
 
 [references]    <comp>.bib          References
 

@@ -1,4 +1,4 @@
-% $Id: README_ARCH,v 1.1 2001/12/13 20:03:39 cdeluca Exp $
+% $Id: README_ARCH,v 1.2 2002/10/11 22:51:02 eschwab Exp $
 
 ================================================================================
                             README_ARCH
@@ -13,7 +13,7 @@ indicate that a part is optional.
 --------------------------------------------------------------------------------
 Part		Template File       Description
 --------------------------------------------------------------------------------
-document	<comp>_archdoc.tex  Document shell, includes review status
+document	<comp>_archdoc.ctex  Document shell, includes review status
 
 synopsis        <comp>_syn.tex	    Brief description of the software 
                                     function 
@@ -34,7 +34,7 @@ architecture    <comp>_arch.tex     Description of the computational
 --------------------------------------------------------------------------------
 
 To create a new architecture document, fill in the template files.  In 
-<comp>_archdoc.tex, be sure to comment out the \input of any files you 
+<comp>_archdoc.ctex, be sure to comment out the \input of any files you 
 aren't including and specify the \input filenames of files that you are
 including.
 

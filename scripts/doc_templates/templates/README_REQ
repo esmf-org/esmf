@@ -1,4 +1,4 @@
-% $Id: README_REQ,v 1.2 2002/02/22 21:43:46 cdeluca Exp $
+% $Id: README_REQ,v 1.3 2002/10/11 22:51:02 eschwab Exp $
 
 ================================================================================
                                  README_REQ
@@ -13,7 +13,7 @@ indicate that a part is optional.
 --------------------------------------------------------------------------------
 Part		Template File      	Description
 --------------------------------------------------------------------------------
-document	<comp>_reqdoc.tex  	Document shell, includes review status
+document	<comp>_reqdoc.ctex  	Document shell, includes review status
 
 synopsis        <comp>_background.tex	Brief description of the software 
                                    	function 
@@ -31,7 +31,7 @@ requirements	<comp>_req.tex	   	Itemized software requirements
 --------------------------------------------------------------------------------
 
 To create a new requirements document, fill in the template files.  In 
-<comp>_reqdoc.tex, be sure to comment out the \input of any files you 
+<comp>_reqdoc.ctex, be sure to comment out the \input of any files you 
 aren't including and specify the \input filenames of files that you are
 including.
 
