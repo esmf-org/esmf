@@ -22,9 +22,6 @@ type:: ESMF_Log
     integer oneLogErrFile     !An ESMF_Log object will write to one file if
 			      !oneLogErrFile is set to ESMF_LOG_TRUE.
 
-    integer standardOut       !An ESMF_Log object will write to the screen if
-			      !standardOut is set to ESMF_LOG_TRUE.
-
     integer fortIsOpen        !If fortIsOpen is set to ESMF_LOG_TRUE, an 
 			      !ESMF_Log object has a fortran file open.
 
@@ -57,12 +54,12 @@ contains
 ! !IROUTINE: ESMF_LogInit - initialize an error object.
 !
 ! !INTERFACE:
-subroutine ESMF_LogInit(aLog,verbose, flush,standardOut,haltOnErr,haltOnWarn)
+subroutine ESMF_LogInit(aLog,verbose,flush,haltOnErr,haltOnWarn)
 !
 ! !ARGUMENTS:
 !
  type(ESMF_Log), intent(in) :: aLog
- integer, intent(inout),optional::verbose, flush, standardOut,haltOnErr,haltOnWarn 
+ integer, intent(inout),optional::verbose, flush, haltOnErr,haltOnWarn 
 !
 ! !DESCRIPTION:
 !   Most of the Fortran wrapper routines for the C/C++ ESMC\_Log class are
@@ -78,7 +75,6 @@ subroutine ESMF_LogInit(aLog,verbose, flush,standardOut,haltOnErr,haltOnWarn)
 
  if (.not. present(verbose)) verbose=ESMF_LOG_TRUE
  if (.not. present(flush)) flush=ESMF_LOG_FALSE
- if (.not. present(standardOut)) standardOut=ESMF_LOG_TRUE
  if (.not. present(haltOnErr)) haltOnErr=ESMF_LOG_TRUE
  if (.not. present(haltOnWarn)) haltOnWarn=ESMF_LOG_FALSE
  call esmf_loginit_c(aLog,verbose,flush,haltOnErr,haltOnWarn)
