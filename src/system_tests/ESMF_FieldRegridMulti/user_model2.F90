@@ -1,4 +1,4 @@
-! $Id: user_model2.F90,v 1.14 2004/04/15 22:05:12 nscollins Exp $
+! $Id: user_model2.F90,v 1.15 2004/04/19 20:35:18 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -83,7 +83,7 @@
 
 !   ! Local variables
       type(ESMF_Field) :: humidity
-      type(ESMF_newDELayout) :: layout
+      type(ESMF_newDELayout) :: delayout
       type(ESMF_DataMap) :: datamap
       integer :: i, x, y
       type(ESMF_Grid) :: grid1
@@ -102,7 +102,7 @@
       print *, "User Comp Init starting"
 
       ! Initially import state contains a field with a grid but no data.
-      call ESMF_GridCompGet(comp, delayout=layout, rc=status)
+      call ESMF_GridCompGet(comp, delayout=delayout, rc=status)
 
       ! Add a "humidity" field to the import state.
       countsPerDE1 = (/ 10, 18, 12 /)
@@ -129,14 +129,14 @@
                               countsPerDEDecomp2=countsPerDE2, &
                               minGlobalCoordPerDim=min, &
                               delta1=delta1, delta2=delta2, &
-                              delayout=layout, &
+                              delayout=delayout, &
                               horzGridType=horz_gridtype, &
                               horzStagger=horz_stagger, &
                               horzCoordSystem=horz_coord_system, &
                               name="source grid", rc=status)
 
       ! Figure out our local processor id
-      call ESMF_newDELayoutGet(layout, localDe=de_id, rc=rc)
+      call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
 
       ! Set up a 3D real array
       call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &

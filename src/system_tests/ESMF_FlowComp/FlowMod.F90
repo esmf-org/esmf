@@ -1,4 +1,4 @@
-! $Id: FlowMod.F90,v 1.7 2004/04/15 22:05:12 nscollins Exp $
+! $Id: FlowMod.F90,v 1.8 2004/04/19 20:36:20 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -201,14 +201,13 @@
         return
       endif
       !call ESMF_DELayoutGetSize(layout, nx, ny, rc)
-      call ESMF_newDELayoutGet(layout, localde=de_id, deCountPerDim=ncounts, rc=rc)
+      call ESMF_newDELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
         return
       endif
       nx = ncounts(1)
       ny = ncounts(2)
-      !call ESMF_DELayoutGetDEPosition(layout, x, y, rc)
       call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=rc)
       if(rc .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"

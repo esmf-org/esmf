@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.9 2004/04/15 22:05:12 nscollins Exp $
+! $Id: ESMF_FieldRegridMultiSTest.F90,v 1.10 2004/04/19 20:34:15 jwolfe Exp $
 !
 ! System test code FieldRegridMulti
 !  Description on Sourceforge under System Test #xxxxx
@@ -42,7 +42,7 @@
     implicit none
     
     ! Local variables
-    integer :: i, de_id, ndes, mid, rc, delist(64), pid, cid
+    integer :: i, de_id, ndes, mid, rc, pid, cid
     character(len=ESMF_MAXSTR) :: cname1, cname2, cplname
     type(ESMF_newDELayout) :: layout1, layout2, layout3
     type(ESMF_VM) :: vm
@@ -100,9 +100,6 @@
 
     ! Create the 2 model components and coupler
     cname1 = "user model 1"
-    !delist = (/ (i, i=0, ndes-1) /)
-    !layout2 = ESMF_DELayoutCreate(layout1, 2, (/ 2, mid /), (/ 0, 0 /), &
-    !                              de_indices=delist, rc=rc)
     layout2 = ESMF_newDELayoutCreate(vm, (/ 2, mid /), rc=rc)
     comp1 = ESMF_GridCompCreate(cname1, delayout=layout2, rc=rc)
     print *, "Created component ", trim(cname1), "rc =", rc
@@ -110,9 +107,6 @@
 
 
     cname2 = "user model 2"
-    !delist = (/ (i, i=0, ndes-1) /)
-    !layout3 = ESMF_DELayoutCreate(layout1, 2, (/ mid, 2 /), (/ 0, 0 /), &
-    !                              de_indices=delist, rc=rc)
     layout3 = ESMF_newDELayoutCreate(vm, (/ mid, 2 /), rc=rc)
 
     comp2 = ESMF_GridCompCreate(cname2, delayout=layout3, rc=rc)

@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.10 2004/04/15 22:14:02 nscollins Exp $
+! $Id: FlowSolverMod.F90,v 1.11 2004/04/19 20:37:09 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -307,8 +307,7 @@
         print *, "ERROR in Flowinit:  grid comp get"
         return
       endif
-      !call ESMF_DELayoutGetSize(layout, nx, ny, status)
-      call ESMF_newDELayoutGet(layout, localDe=de_id, deCountPerDim=ncounts, &
+      call ESMF_newDELayoutGet(layout, localDE=de_id, deCountPerDim=ncounts, &
                                rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get size"
@@ -316,7 +315,6 @@
       endif
       nx = ncounts(1)
       ny = ncounts(2)
-      !call ESMF_DELayoutGetDEPosition(layout, x, y, status)
       call ESMF_newDELayoutGetDE(layout, de_id, coord=pos, rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in Flowinit:  layout get position"

@@ -1,4 +1,4 @@
-! $Id: user_model1.F90,v 1.13 2004/04/15 21:43:20 nscollins Exp $
+! $Id: user_model1.F90,v 1.14 2004/04/19 20:34:51 jwolfe Exp $
 !
 ! Example/test code which shows User Component calls.
 
@@ -90,7 +90,7 @@
 
        ! Local variables
         type(ESMF_Field) :: humidity
-        type(ESMF_newDELayout) :: layout
+        type(ESMF_newDELayout) :: delayout
         type(ESMF_DataMap) :: datamap
         integer :: i, x, y, n
         type(ESMF_Grid) :: grid1
@@ -110,7 +110,7 @@
         print *, "User Comp Init starting"
 
         ! query comp for layout
-        call ESMF_GridCompGet(comp, delayout=layout, rc=status)
+        call ESMF_GridCompGet(comp, delayout=delayout, rc=status)
 
         ! Add a "humidity" field to the export state.
         counts(1) = 4
@@ -127,14 +127,14 @@
         grid1 = ESMF_GridCreateLogRectUniform(2, counts=counts(2:3), &
                                 minGlobalCoordPerDim=min, &
                                 maxGlobalCoordPerDim=max, &
-                                delayout=layout, &
+                                delayout=delayout, &
                                 horzGridType=horz_gridtype, &
                                 horzStagger=horz_stagger, &
                                 horzCoordSystem=horz_coord_system, &
                                 name="source grid", rc=status)
 
         ! Figure out our local processor id
-        call ESMF_DELayoutGetDEID(layout, de_id, rc)
+        call ESMF_newDELayoutGet(delayout, localDE=de_id, rc=rc)
 
         ! Set up a 3D real array
         call ESMF_ArraySpecSet(arrayspec, rank=3, type=ESMF_DATA_REAL, &
@@ -210,7 +210,6 @@
         allocate(coordArray(2))
         call ESMF_FieldGetRelLoc(humidity, horzRelloc=relloc, rc=status)
         call ESMF_FieldGet(humidity, grid=grid, rc=status)
-        !call ESMF_GridGetDE(grid, localCellCountPerDim=counts, rc=status)
         call ESMF_GridGetCoord(grid, horzRelloc=relloc, &
                                centerCoord=coordArray, rc=status)
         call ESMF_ArrayGetData(coordArray(1), coordX, ESMF_DATA_REF, status)
