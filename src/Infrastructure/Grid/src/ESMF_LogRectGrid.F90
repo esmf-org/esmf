@@ -101,7 +101,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.62 2004/04/23 17:27:20 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.63 2004/04/27 23:10:37 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -2614,13 +2614,14 @@
       ! set coordinates using computational cell count
       counts(1) = countsPerDEDim1(myDE(1))
       counts(2) = countsPerDEDim2(myDE(2))
-      i1 = localStart(1) + 1 + gridBoundWidth
-      i2 = i1 + counts(1)
-      j1 = localStart(2) + 1 + gridBoundWidth
-      j2 = j1 + counts(2)
-      call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, 0, relloc, &
-                               coordUse1(i1:i2), coordUse2(j1:j2), total=.false., &
-                               rc=status)
+      i1 = localStart(1) + 1
+      i2 = i1 + countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+      j1 = localStart(2) + 1
+      j2 = j1 + countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+      call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
+                               gridBoundWidth, relloc, &
+                               coordUse1(i1:i2), coordUse2(j1:j2), &
+                               total=.false., rc=status)
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridAddPhysGrid: Grid set coord"
         return
@@ -4281,7 +4282,7 @@
 
       integer :: status                       ! Error status
       logical :: rcpresent                    ! Return code present
-      integer :: i, j
+      integer :: i, j, i1, j1, offsetI, offsetJ, hWidth
       integer, dimension(:), allocatable :: cornerCounts
       real(ESMF_KIND_R8) :: centerUse1, centerUse2
       real(ESMF_KIND_R8) :: cornerUse11, cornerUse12, cornerUse21, cornerUse22
@@ -4313,15 +4314,23 @@
       do i = 1,size(counts)
         cornerCounts(i+1) = counts(i)
       enddo
+     ! create ESMF_Arrays
+      hWidth  = 0
+      offsetI = gridBoundWidth
+      offsetJ = gridBoundWidth
+      if (total) then
+        hWidth  = gridBoundWidth
+        offsetI = 0
+        offsetJ = 0
+      endif
 
-      ! create ESMF_Arrays
       kind = ESMF_R8
       type = ESMF_DATA_REAL
       do i = 1,dimCount
         centerArray(i) = ESMF_ArrayCreate(dimCount, type, kind, counts, &
-                                          haloWidth=gridBoundWidth, rc=status)
+                                          haloWidth=hWidth, rc=status)
         cornerArray(i) = ESMF_ArrayCreate(dimCount+1, type, kind, cornerCounts, &
-                                          haloWidth=gridBoundWidth, rc=status)
+                                          haloWidth=hWidth, rc=status)
       enddo
 
       select case (dimCount)
@@ -4341,7 +4350,6 @@
             corner(1,i) = coord1(i  )
             corner(2,i) = coord1(i+1)
           enddo
-
         elseif (relloc .eq. ESMF_CELL_TOPFACE) then   ! TODO: check bottom or top
           do i = 1,counts(1)
             center(  i) = coord1(i+1)
@@ -4371,15 +4379,24 @@
 
         elseif (relloc .eq. ESMF_CELL_CENTER) then
           do i = 1,counts(1)
-            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
-            cornerUse11 = coord1(i  )
-            cornerUse12 = coord1(i+1)
+            i1 = i + offsetI
+            centerUse1  = 0.5d0*(coord1(i1)+coord1(i1+1))
             do j = 1,counts(2)
-              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
-              cornerUse21 = coord2(j  )
-              cornerUse22 = coord2(j+1)
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = 0.5d0*(coord2(j1)+coord2(j1+1))
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = coord1(i1  )
+            cornerUse12 = coord1(i1+1)
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = coord2(j1  )
+              cornerUse22 = coord2(j1+1)
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4390,18 +4407,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_NFACE) then
           do i = 1,counts(1)
-            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
-            cornerUse11 = coord1(i  )
-            cornerUse12 = coord1(i+1)
+            i1 = i + offsetI
+            centerUse1  = 0.5d0*(coord1(i1)+coord1(i1+1))
             do j = 1,counts(2)
-              centerUse2  = coord2(j+1)
-              cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
-              cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = coord2(j1+1)
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = coord1(i1  )
+            cornerUse12 = coord1(i1+1)
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = 0.5d0*(coord2(j1  )+coord2(j1+1))
+              cornerUse22 = 0.5d0*(coord2(j1+1)+coord2(j1+2))
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4412,18 +4439,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_SFACE) then
           do i = 1,counts(1)
-            centerUse1  = 0.5d0*(coord1(i)+coord1(i+1))
-            cornerUse11 = coord1(i  )
-            cornerUse12 = coord1(i+1)
+            i1 = i + offsetI
+            centerUse1  = 0.5d0*(coord1(i1)+coord1(i1+1))
             do j = 1,counts(2)
-              centerUse2  = coord2(j)
-              cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
-              cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = coord2(j1)
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = coord1(i1  )
+            cornerUse12 = coord1(i1+1)
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = 0.5d0*(coord2(j1-1)+coord2(j1  ))
+              cornerUse22 = 0.5d0*(coord2(j1  )+coord2(j1+1))
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4434,18 +4471,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_EFACE) then
           do i = 1,counts(1)
-            centerUse1  = coord1(i+1)
-            cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
-            cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
+            i1 = i + offsetI
+            centerUse1  = coord1(i1+1)
             do j = 1,counts(2)
-              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
-              cornerUse21 = coord2(j  )
-              cornerUse22 = coord2(j+1)
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = 0.5d0*(coord2(j1)+coord2(j1+1))
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = 0.5d0*(coord1(i1  )+coord1(i1+1))
+            cornerUse12 = 0.5d0*(coord1(i1+1)+coord1(i1+2))
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = coord2(j1  )
+              cornerUse22 = coord2(j1+1)
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4456,18 +4503,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_WFACE) then
           do i = 1,counts(1)
-            centerUse1  = coord1(i)
-            cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
-            cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
+            i1 = i + offsetI
+            centerUse1  = coord1(i1)
             do j = 1,counts(2)
-              centerUse2  = 0.5d0*(coord2(j)+coord2(j+1))
-              cornerUse21 = coord2(j  )
-              cornerUse22 = coord2(j+1)
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = 0.5d0*(coord2(j1)+coord2(j1+1))
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = 0.5d0*(coord1(i1-1)+coord1(i1  ))
+            cornerUse12 = 0.5d0*(coord1(i1  )+coord1(i1+1))
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = coord2(j1  )
+              cornerUse22 = coord2(j1+1)
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4478,18 +4535,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_NECORNER) then
           do i = 1,counts(1)
-            centerUse1  = coord1(i+1)
-            cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
-            cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
+            i1 = i + offsetI
+            centerUse1  = coord1(i1+1)
             do j = 1,counts(2)
-              centerUse2  = coord2(j+1)
-              cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
-              cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = coord2(j1+1)
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = 0.5d0*(coord1(i1  )+coord1(i1+1))
+            cornerUse12 = 0.5d0*(coord1(i1+1)+coord1(i1+2))
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = 0.5d0*(coord2(j1  )+coord2(j1+1))
+              cornerUse22 = 0.5d0*(coord2(j1+1)+coord2(j1+2))
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4500,18 +4567,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_SWCORNER) then
           do i = 1,counts(1)
-            centerUse1  = coord1(i)
-            cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
-            cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
+            i1 = i + offsetI
+            centerUse1  = coord1(i1)
             do j = 1,counts(2)
-              centerUse2  = coord2(j)
-              cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
-              cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = coord2(j1)
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = 0.5d0*(coord1(i1-1)+coord1(i1  ))
+            cornerUse12 = 0.5d0*(coord1(i1  )+coord1(i1+1))
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = 0.5d0*(coord2(j1-1)+coord2(j1  ))
+              cornerUse22 = 0.5d0*(coord2(j1  )+coord2(j1+1))
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4522,40 +4599,28 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
 
         elseif (relloc .eq. ESMF_CELL_SECORNER) then
           do i = 1,counts(1)
-            centerUse1  = coord1(i+1)
-            cornerUse11 = 0.5d0*(coord1(i  )+coord1(i+1))
-            cornerUse12 = 0.5d0*(coord1(i+1)+coord1(i+2))
+            i1 = i + offsetI
+            centerUse1  = coord1(i1+1)
             do j = 1,counts(2)
-              centerUse2  = coord2(j)
-              cornerUse21 = 0.5d0*(coord2(j-1)+coord2(j  ))
-              cornerUse22 = 0.5d0*(coord2(j  )+coord2(j+1))
-              center1(  i,j) = centerUse1 
+              j1 = j + offsetJ
+              centerUse2  = coord2(j1)
+              center1(  i,j) = centerUse1
               center2(  i,j) = centerUse2
-              corner1(1,i,j) = cornerUse11
-              corner1(2,i,j) = cornerUse12
-              corner1(3,i,j) = cornerUse12
-              corner1(4,i,j) = cornerUse11
-              corner2(1,i,j) = cornerUse21
-              corner2(2,i,j) = cornerUse21
-              corner2(3,i,j) = cornerUse22
-              corner2(4,i,j) = cornerUse22
             enddo
           enddo
-
-        elseif (relloc .eq. ESMF_CELL_NWCORNER) then
+          if (.not.total) then
           do i = 1,counts(1)
-            centerUse1  = coord1(i)
-            cornerUse11 = 0.5d0*(coord1(i-1)+coord1(i  ))
-            cornerUse12 = 0.5d0*(coord1(i  )+coord1(i+1))
+            i1 = i + offsetI
+            cornerUse11 = 0.5d0*(coord1(i1  )+coord1(i1+1))
+            cornerUse12 = 0.5d0*(coord1(i1+1)+coord1(i1+2))
             do j = 1,counts(2)
-              centerUse2  = coord2(j+1)
-              cornerUse21 = 0.5d0*(coord2(j  )+coord2(j+1))
-              cornerUse22 = 0.5d0*(coord2(j+1)+coord2(j+2))
-              center1(  i,j) = centerUse1 
-              center2(  i,j) = centerUse2
+              j1 = j + offsetJ
+              cornerUse21 = 0.5d0*(coord2(j1-1)+coord2(j1  ))
+              cornerUse22 = 0.5d0*(coord2(j1  )+coord2(j1+1))
               corner1(1,i,j) = cornerUse11
               corner1(2,i,j) = cornerUse12
               corner1(3,i,j) = cornerUse12
@@ -4566,6 +4631,39 @@
               corner2(4,i,j) = cornerUse22
             enddo
           enddo
+          endif
+
+       elseif (relloc .eq. ESMF_CELL_NWCORNER) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            centerUse1  = coord1(i1)
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              centerUse2  = coord2(j1+1)
+              center1(  i,j) = centerUse1
+              center2(  i,j) = centerUse2
+            enddo
+          enddo
+          if (.not.total) then
+          do i = 1,counts(1)
+            i1 = i + offsetI
+            cornerUse11 = 0.5d0*(coord1(i1-1)+coord1(i1  ))
+            cornerUse12 = 0.5d0*(coord1(i1  )+coord1(i1+1))
+            do j = 1,counts(2)
+              j1 = j + offsetJ
+              cornerUse21 = 0.5d0*(coord2(j1  )+coord2(j1+1))
+              cornerUse22 = 0.5d0*(coord2(j1+1)+coord2(j1+2))
+              corner1(1,i,j) = cornerUse11
+              corner1(2,i,j) = cornerUse12
+              corner1(3,i,j) = cornerUse12
+              corner1(4,i,j) = cornerUse11
+              corner2(1,i,j) = cornerUse21
+              corner2(2,i,j) = cornerUse21
+              corner2(3,i,j) = cornerUse22
+              corner2(4,i,j) = cornerUse22
+            enddo
+          enddo
+          endif
 
         else
           print *, "This relative location not yet supported in ", &
@@ -4587,6 +4685,18 @@
       if (status .NE. ESMF_SUCCESS) then
         print *, "ERROR in ESMF_LRGridSetCoordCompute: PhysGrid set locations"
         return
+      endif
+
+      ! set the region array in PhysGrid
+      if (.not.total) then
+      call ESMF_PhysGridSetRegions(grid%physGrids(physGridId), &
+                                   regionType=ESMF_RegionType_Polygon, &
+                                   vertexArray=cornerArray, rc=status)
+            ! TODO: add name to set call
+      if (status .NE. ESMF_SUCCESS) then
+        print *, "ERROR in ESMF_LRGridSetCoordCompute: PhysGrid set regions"
+        return
+      endif
       endif
 
       deallocate(cornerCounts)
