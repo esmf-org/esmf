@@ -1,4 +1,4 @@
-! $Id: ESMF_StateUTest.F90,v 1.1 2003/03/20 23:57:12 svasquez Exp $
+! $Id: ESMF_StateUTest.F90,v 1.2 2003/03/21 18:59:14 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,25 +30,35 @@
 ! !USES:
       use ESMF_TestMod     ! test methods
       use ESMF_StateMod  ! the class to test
+      use ESMF_IOMod
+      use ESMF_ArrayMod
+      use ESMF_FieldMod
+      use ESMF_BundleMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_StateUTest.F90,v 1.1 2003/03/20 23:57:12 svasquez Exp $'
+      '$Id: ESMF_StateUTest.F90,v 1.2 2003/03/21 18:59:14 svasquez Exp $'
 !------------------------------------------------------------------------------
+
+      ! Some common definitions.  This requires the C preprocessor.
+      #include "ESMF.h"
+
+
+!     ! Local variables
+      integer :: x, y, rc
+      character(ESMF_MAXSTR) :: compname, statename, bundlename, dataname
+      type(ESMF_Field) :: field1
+      type(ESMF_Bundle) :: bundle1, bundle2
+      type(ESMF_State) :: state1, state2, state3, state4
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
-      ! individual test result code
-      integer :: rc
-
-      ! individual test name
-      character(ESMF_MAXSTR) :: name
-
       ! individual test failure messages
       character(ESMF_MAXSTR*2) :: failMsg
+      character(ESMF_MAXSTR) :: name
 
       ! local variables needed to pass into function/subroutine calls
       character(ESMF_MAXSTR) :: validate_options
@@ -162,9 +172,48 @@ print *, "StateUnitTest EXHAUSTIVE"
 #else
 
       ! perform non-exhaustive tests here;
-      !   use same templates as above
-print *, "StateUnitTest NON-EXHAUSTIVE"
+      print *, "******************STATE NON-EXHAUSTIVE UNIT TESTS****************************"
+      print *
 
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an empty import State 
+      compname = "Atmosphere"
+      state1 = ESMF_StateCreate(compname, ESMF_STATEIMPORT, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty input State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test Creation of an empty export State 
+      state1 = ESMF_StateCreate(compname, ESMF_STATEEXPORT, rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating an empty export State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test adding Bundle to State
+      bundlename = "Temperature"
+      bundle1 = ESMF_BundleCreate(bundlename, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Creating a Bundle Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      call ESMF_StateAddData(state1, bundle1, rc)
+      write(name, *) "Adding a Bundle to a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
+
+      ! Test Destruction of State
+      call  ESMF_StateDestroy(state1, rc)
+      write(failMsg, *) ""
+      write(name, *) "Destruction of a State Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 #endif
 
       ! return number of failures to environment; 0 = success (all pass)
