@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArrayUTest.F90,v 1.17 2004/06/15 13:00:04 nscollins Exp $
+! $Id: ESMF_LocalArrayUTest.F90,v 1.18 2004/06/15 20:08:06 svasquez Exp $
 !
 ! Example/test code which creates new arrays.
 
@@ -87,12 +87,11 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1b create returned"
 
-    !EX_UTest
-    write(failMsg, *) "Did not return ESMF_SUCCESS"
-    write(name, *) "Printing a Local Array with Integer 1D Data Test"
-    call ESMF_LocalArrayPrint(array1, "", rc)
-    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
-    print *, "array 1b print returned"
+    !write(failMsg, *) "Did not return ESMF_SUCCESS"
+    !write(name, *) "Printing a Local Array with Integer 1D Data Test"
+    !call ESMF_LocalArrayPrint(array1, "", rc)
+    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    !print *, "array 1b print returned"
 
     !EX_UTest
     write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -158,7 +157,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1c create returned"
 
-    call ESMF_LocalArrayPrint(array1, "", rc)
+    !call ESMF_LocalArrayPrint(array1, "", rc)
     print *, "array 1c print returned"
 
     !EX_UTest
@@ -218,7 +217,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 1d create returned"
 
-    call ESMF_LocalArrayPrint(array1, "", rc)
+    !call ESMF_LocalArrayPrint(array1, "", rc)
     print *, "array 1d print returned"
 
     !EX_UTest
@@ -263,16 +262,16 @@
     enddo
     print *, "partial print of realptr data = ", realptr(3:6,7:9)
 
-   !EX_UTest
-    !write(failMsg, *) "Did not return ESMF_SUCCESS"
-    !write(name, *) "Creating Local Array with 2D Real Data Test"
-    !array2 = ESMF_LocalArrayCreate(realptr, ESMF_DATA_REF, rc)
-    !call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+    write(failMsg, *) "Did not return ESMF_SUCCESS"
+    write(name, *) "Creating Local Array with 2D Real Data Test"
+    print *, "Creating array2"
+    array2 = ESMF_LocalArrayCreate(realptr, ESMF_DATA_REF, rc)
+    call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     !print *, "array 2a create returned"
-    print *, "array 2a create BYPASSED"
+    !print *, "array 2a create BYPASSED"
 
-    call ESMF_LocalArrayPrint(array2, "", rc)
-    print *, "array 2a print returned"
+    !call ESMF_LocalArrayPrint(array2, "", rc)
+    !print *, "array 2a print returned"
 
     do i=3,ni+3
      do j=7,nj+7
@@ -355,7 +354,7 @@
     write(name, *) "Compare Local Array 2D Real Data Test"
     call ESMF_Test((result.eq.0), name, failMsg, result, ESMF_SRCLINE)
 
-    call ESMF_LocalArrayPrint(array2, "", rc)
+    !call ESMF_LocalArrayPrint(array2, "", rc)
     print *, "array 2b print returned"
 
     call ESMF_LocalArrayDestroy(array2, rc)
@@ -387,7 +386,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 2c create returned"
 
-    call ESMF_LocalArrayPrint(array2, "", rc)
+    !call ESMF_LocalArrayPrint(array2, "", rc)
     print *, "array 2c print returned"
 
     do i=1,ni
@@ -524,7 +523,7 @@
     ! with do copy, the original can go now
     deallocate(real3dptr)
 
-    call ESMF_LocalArrayPrint(array4, "", rc)
+    !call ESMF_LocalArrayPrint(array4, "", rc)
     print *, "array 4a print returned"
 
     call ESMF_LocalArrayDestroy(array4, rc)
@@ -547,7 +546,7 @@
 
     print *, "array 4b create returned"
 
-    call ESMF_LocalArrayPrint(array4, "", rc)
+    !call ESMF_LocalArrayPrint(array4, "", rc)
     print *, "array 4b print returned"
 
     ! this deletes the space
@@ -572,9 +571,9 @@
     print *, "array 4c failed create returned"
 
     !This print of array4 is commented out becauses it crashes
-    !Bug report 791282 has been filed.
+    !Bug report 972679 has been filed.
     !This print statement will be uncommented when the bug is fixed
-    call ESMF_LocalArrayPrint(array4, "", rc)
+    !call ESMF_LocalArrayPrint(array4, "", rc)
     print *, "array 4c print of bad array returned"
 
     !This test is commented out becauses it crashes
@@ -596,7 +595,7 @@
 
     print *, "array 4d create returned"
 
-    call ESMF_LocalArrayPrint(array4, "", rc)
+    !call ESMF_LocalArrayPrint(array4, "", rc)
     print *, "array 4d print returned"
 
     ! this does not delete the space, we have to do it ourselves
@@ -617,7 +616,7 @@
     call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
     print *, "array 4e create returned"
 
-    call ESMF_LocalArrayPrint(array4, "", rc)
+    !call ESMF_LocalArrayPrint(array4, "", rc)
     print *, "array 4e print returned"
 
     ! this does not delete the space, we have to do it ourselves
