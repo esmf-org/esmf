@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.C,v 1.1 2003/01/29 00:01:12 nscollins Exp $
+// $Id: ESMC_Xform.C,v 1.2 2003/02/03 17:10:47 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -24,13 +24,23 @@
  // insert any higher level, 3rd party or system includes here
  #include <ESMC.h>
 
+//-----------------------------------------------------------------------------
+//BOP
+// !CLASS: Transform object
+//
+// !DESCRIPTION:
+//  Transform class which provides interfaces to the Fortran implementation
+//    of Transforms.
+//EOP
+//-----------------------------------------------------------------------------
+
  // associated class definition file
  #include <ESMC_Xform.h>
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Xform.C,v 1.1 2003/01/29 00:01:12 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Xform.C,v 1.2 2003/02/03 17:10:47 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //

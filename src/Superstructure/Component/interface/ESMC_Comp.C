@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.1 2003/01/29 00:01:07 nscollins Exp $
+// $Id: ESMC_Comp.C,v 1.2 2003/02/03 17:10:46 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -26,6 +26,16 @@
 #include <stdio.h>
 #include "ESMC.h"
 
+//-----------------------------------------------------------------------------
+//BOP
+// !CLASS: Component object
+//
+// !DESCRIPTION:
+//  Component class which provides interfaces to the Fortran implementation
+//    of Components.
+//EOP
+//-----------------------------------------------------------------------------
+
  // associated class definition file
 #include "ESMC_Comp.h"
 
@@ -36,7 +46,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.1 2003/01/29 00:01:07 nscollins Exp $";
+           "$Id: ESMC_Comp.C,v 1.2 2003/02/03 17:10:46 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
