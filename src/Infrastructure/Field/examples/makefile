@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.8 2003/09/18 16:29:59 flanigan Exp $ 
+# $Id: makefile,v 1.9 2003/09/18 16:36:25 flanigan Exp $ 
 
 ALL:  examples
 
@@ -28,9 +28,10 @@ include $(ESMF_DIR)/makefile
 
 DIRS	  = 
 
-CLEANDIRS   =
-CLEANFILES  = *.o *.mod ESMF_FieldCreateEx ESMC_FieldCreateEx
+CLEANDIRS   = coredir.*
+CLEANFILES  = *.o *.mod *.txt *.stdout NULL core $(EXAMPLES_BUILD)
 CLOBBERDIRS =
+
 
 #
 # ESMC_FieldCreateEx
