@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.41 2004/01/08 23:38:38 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.42 2004/01/20 23:13:55 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -59,7 +59,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.41 2004/01/08 23:38:38 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.42 2004/01/20 23:13:55 jwolfe Exp $'
 
 !==============================================================================
 
@@ -252,13 +252,13 @@
    !              is used internal to this routine to get coordinate 
    !              information locally to calculate the regrid weights
 
-      route = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, srcRelLoc, dstRelLoc, &
-                                        recvDomainList, total=.false., rc=status)
+      route = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, recvDomainList, &
+                                        total=.false., rc=status)
       call ESMF_RouteHandleSet(rh, route1=route, rc=status)
 
-      tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, srcRelLoc, &
-                                            dstRelLoc, recvDomainListTot, &
-                                            total=.true., rc=status)
+      tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
+                                            recvDomainListTot, total=.true., &
+                                            rc=status)
 
       ! Now use temporary route to gather necessary coordinates
       ! Create arrays for gathered coordinates 
