@@ -1,4 +1,4 @@
- $Id: README,v 1.30 2003/08/29 22:17:46 flanigan Exp $
+ $Id: README,v 1.31 2003/09/02 16:15:15 flanigan Exp $
 ================================================================================
                                    README
 
@@ -198,9 +198,6 @@ shared object library.  This is a file called libesmf.so that is
 located in the following directory:
 
 ${ESMF_DIR}/lib/lib${ESMF_BOPT}/${ESMF_ARCH}.$(ESMF_PREC).$(ESMF_SITE)
-
-The details of how to link on specific platforms are included in the
-next section.
 
 There is a single ESMF module, called ESMF_Mod, that should be
 included in applications with the Fortran USE statement.  It is not

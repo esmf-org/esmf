@@ -1,4 +1,4 @@
- $Id: README,v 1.7 2003/09/02 16:09:10 flanigan Exp $
+ $Id: README,v 1.8 2003/09/02 16:10:18 flanigan Exp $
 
 README file for esmf_build_config directory.
 
@@ -50,8 +50,9 @@ ESMF_SITE may also be used to define makefile settings for different
 compilers on the same architecture or machine.  ESMF_SITE can be set
 to a machine's name, a compiler's name or both.  An example ESMF_SITE
 value using both the machine name and the compiler name would be
-jazz_lahey.  The following site file contains settings for compiling
-with the Lahey Fortran90 compiler on a linux machine named jazz:
+jazz_lahey.  The following example site file contains settings for
+compiling with the Lahey Fortran90 compiler on a linux machine named
+jazz:
 
 
       build_config/Linux.jazz_lahey.mk
