@@ -1,4 +1,4 @@
-% $Id: PhysGrid_req.tex,v 1.4 2002/04/02 01:23:52 rhallberg Exp $
+% $Id: PhysGrid_req.tex,v 1.5 2002/04/15 18:36:02 pwjones Exp $
 %===============================================================================
 \req{Physical locations}
 %-------------------------------------------------------------------------------
@@ -88,23 +88,27 @@ the responsibility of user-provided software.
 \end{reqlist}
 
 
-\ssreq{Paths between region vertices may be specified} 
+\ssreq{Paths between grid locations may be specified} 
 
-The faces of polygonal regions in spherical coordinates may be linear in
-latitude-longitude space or may follow great-circle routes between vertices, or
-may follow user-defined curves.  There must be an exact definition of control
-volumes for calculating horizontal areas and ensuring that the surface is tiled
-by horizontal regions. The former is traditionally used in spherical
-coordinates and is particularly simple for analytically calculating the areas
-of regions, but may be ill defined near the poles.  The grid associated with a
-component model may require some other specification for optimal numerical
-performance.
-
-SOMEHOW THE OVERLAPS MUST BE CALCULATED, AND WITH GREAT ACCURACY...  DISCUSSION IS
-NEEDED ON EXACTLY HOW TO DO THIS...
+A method for determining the path connecting grid locations 
+is required.  This path would be used to accurately compute
+intersections for regridding, lengths of cell sides, grid
+cell areas and a variety of other grid metrics.  A linear 
+approximation between points is a proper assumption for 
+cartesian grids and for computing sides of latitude/longitude
+or reduced grid cells.  A linear approximation is also 
+adequate in many other cases and would be a logical default choice. 
+The most accurate solution would permit users to pass a 
+subroutine which provides analytic or highly-accurate discrete 
+forms of the grid Jacobian (the matrix of partial derivatives of 
+the physical coordinates with respect to logical coordinates).  An 
+additional possibility might internally support analytic forms like 
+great circles or higher-order approximations (eg quadratic
+approximation to the cell side given a midpoint in addition
+to the two endpoints).
 
 \begin{reqlist}
-{\bf Priority:} 2 \\
+{\bf Priority:} 1 \\
 {\bf Source:} General Req. 8.0.3 \\
 {\bf Status:} Proposed \\
 {\bf Verification:} Unit test\\
