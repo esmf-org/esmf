@@ -1,5 +1,5 @@
 #if 0
-$Id: ESMF.h,v 1.2 2003/09/09 20:07:17 nscollins Exp $
+$Id: ESMF.h,v 1.3 2003/09/09 20:42:10 nscollins Exp $
 
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -23,11 +23,6 @@ macros in order to provide uniform error messages and exit codes.
 #endif
 
 #include "ESMF_Macros.inc"
+#include "ESMF_Conf.inc"
 #include "ESMF_Version.inc"
 
-#if 0
-the PGI compiler is strict F90, which does not allow members of a type
-to have initializers.  this allows all other architectures to have them
-by letting us write conditional code.
-#endif
-#define ESMF_NO_INITIALIZERS 1
