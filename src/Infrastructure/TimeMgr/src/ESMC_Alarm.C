@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.C,v 1.13 2003/06/07 00:42:00 eschwab Exp $
+// $Id: ESMC_Alarm.C,v 1.14 2003/06/11 19:05:40 rstaufer Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,8 +14,8 @@
 //
 // !DESCRIPTION:
 //
-// The code in this file implements the C++ {\tt Alarm} methods declared
-// in the companion file {\tt ESMC_Alarm.h)
+// The code in this file implements the C++ {\tt ESMC\_Alarm} methods declared
+// in the companion file {\tt ESMC\_Alarm.h)
 //
 //-------------------------------------------------------------------------
 //
@@ -28,7 +28,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Alarm.C,v 1.13 2003/06/07 00:42:00 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Alarm.C,v 1.14 2003/06/11 19:05:40 rstaufer Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -56,7 +56,7 @@
       bool               enabled) {     // in
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes {\tt Alarm} values; it does not
+//      ESMF routine which only initializes {\tt ESMC\_Alarm} values; it does not
 //      allocate any resources.  
 //
 //EOP
@@ -91,7 +91,7 @@
       ESMC_TimeInterval *ringInterval) const {    // out - ring interval
 //
 // !DESCRIPTION:
-//      Gets an {\tt Alarm}'s ring interval
+//      Gets an {\tt ESMC\_Alarm}'s ring interval
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -118,7 +118,7 @@
       ESMC_TimeInterval *ringInterval) {    // in - ring interval
 //
 // !DESCRIPTION:
-//      Sets an {\tt Alarm}'s ring interval
+//      Sets an {\tt ESMC\_Alarm}'s ring interval
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -145,7 +145,7 @@
       ESMC_Time *ringTime) const {    // out - ring time
 //
 // !DESCRIPTION:
-//      Gets an {\tt Alarm}'s ring time
+//      Gets an {\tt ESMC\_Alarm}'s ring time
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -172,7 +172,7 @@
       ESMC_Time *ringTime) {    // in - ring time
 //
 // !DESCRIPTION:
-//      Sets an {\tt Alarm}'s ring time
+//      Sets an {\tt ESMC\_Alarm}'s ring time
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -199,7 +199,7 @@
       ESMC_Time *prevRingTime) const {    // out - previous ring time
 //
 // !DESCRIPTION:
-//      Gets an {\tt Alarm}'s previous ring time
+//      Gets an {\tt ESMC\_Alarm}'s previous ring time
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -226,7 +226,7 @@
       ESMC_Time *prevRingTime) {    // in - previous ring time
 //
 // !DESCRIPTION:
-//      Sets an {\tt Alarm}'s previous ring time
+//      Sets an {\tt ESMC\_Alarm}'s previous ring time
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -253,7 +253,7 @@
       ESMC_Time *stopTime) const {    // out - stop time
 //
 // !DESCRIPTION:
-//      Gets an {\tt Alarm}'s stop time
+//      Gets an {\tt ESMC\_Alarm}'s stop time
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -280,7 +280,7 @@
       ESMC_Time *stopTime) {    // in - stop time
 //
 // !DESCRIPTION:
-//      Sets an {\tt Alarm}'s stop time
+//      Sets an {\tt ESMC\_Alarm}'s stop time
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
@@ -307,7 +307,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which enables an {\tt Alarm} object to function
+//      ESMF routine which enables an {\tt ESMC\_Alarm} object to function
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -332,7 +332,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which disables an {\tt Alarm} object from functioning
+//      ESMF routine which disables an {\tt ESMC\_Alarm} object from functioning
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -358,7 +358,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which sets an {\tt Alarm} object to the ringing state
+//      ESMF routine which sets an {\tt ESMC\_Alarm} object to the ringing state
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -385,7 +385,7 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which turns off an {\tt Alarm}'s ringing state
+//      ESMF routine which turns off an {\tt ESMC\_Alarm}'s ringing state
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
@@ -410,7 +410,7 @@
       int  *rc) const {        // out - error return code
 //
 // !DESCRIPTION:
-//    checks if {\tt Alarm}'s ringing state is set.
+//    checks if {\tt ESMC\_Alarm}'s ringing state is set.
 //
 //EOP
 // !REQUIREMENTS:
@@ -467,8 +467,8 @@
       const ESMC_Alarm &alarm) const {   // in - ESMC_Alarm to compare
 //
 // !DESCRIPTION:
-//      Compare for equality the current object's (this) {\tt Alarm} with
-//      given {\tt Alarm}, return result
+//      Compare for equality the current object's (this) {\tt ESMC\_Alarm} with
+//      given {\tt ESMC\_Alarm}, return result
 //
 //EOP
 // !REQUIREMENTS:
@@ -498,7 +498,7 @@
 
 //
 // !DESCRIPTION:
-//      Restore information about an {\tt Alarm}. For persistence/checkpointing
+//      Restore information about an {\tt ESMC\_Alarm}. For persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -543,7 +543,7 @@
 
 //
 // !DESCRIPTION:
-//      Save information about an {\tt Alarm}. For persistence/checkpointing
+//      Save information about an {\tt ESMC\_Alarm}. For persistence/checkpointing
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -584,7 +584,7 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a {\tt Alarm} is internally consistent.
+//      Validates that a {\tt ESMC\_Alarm} is internally consistent.
 //      Returns error code if problems are found.  {\tt ESMC\_Base}
 //      class method.
 //
@@ -617,7 +617,7 @@
       const char *options) const {    // in - print options
 //
 // !DESCRIPTION:
-//      Print information about an {\tt Alarm}.  For testing/debugging
+//      Print information about an {\tt ESMC\_Alarm}.  For testing/debugging
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
