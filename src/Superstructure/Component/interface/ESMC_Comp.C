@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.10 2003/03/11 03:01:08 cdeluca Exp $
+// $Id: ESMC_Comp.C,v 1.11 2003/04/28 17:37:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.10 2003/03/11 03:01:08 cdeluca Exp $";
+           "$Id: ESMC_Comp.C,v 1.11 2003/04/28 17:37:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -91,7 +91,8 @@
 
     //f_esmf_compcreate(&comp, name, layout, ctype, mtype, filepath, rc)
 
-    return comp;
+    *rc = ESMF_FAILURE;
+    return NULL;
 
  } // end ESMC_CompCreate
 
