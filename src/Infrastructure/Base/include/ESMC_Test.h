@@ -1,4 +1,4 @@
-// $Id: ESMC_Test.h,v 1.1 2003/02/28 01:10:01 eschwab Exp $
+// $Id: ESMC_Test.h,v 1.2 2003/03/11 03:00:39 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 // signatures (prototypes).  The companion file ESMC_Test.C contains
 // the definitions (full code bodies) for the Test methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //

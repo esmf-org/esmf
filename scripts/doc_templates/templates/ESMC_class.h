@@ -1,4 +1,4 @@
-// $Id: ESMC_class.h,v 1.13 2002/11/08 00:41:47 eschwab Exp $
+// $Id: ESMC_class.h,v 1.14 2003/03/11 03:00:36 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // signatures (prototypes).  The companion file ESMC_<Class>.C contains
 // the definitions (full code bodies) for the <Class> methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 // 

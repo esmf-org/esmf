@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.h,v 1.3 2002/12/10 03:49:15 eschwab Exp $
+// $Id: ESMC_Machine.h,v 1.4 2003/03/11 03:00:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // signatures (prototypes).  The companion file ESMC\_Machine.C contains
 // the definitions (full code bodies) for the Machine methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 // 

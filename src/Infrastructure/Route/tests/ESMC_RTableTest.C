@@ -1,4 +1,4 @@
-// $Id: ESMC_RTableTest.C,v 1.1 2003/03/10 23:21:12 nscollins Exp $
+// $Id: ESMC_RTableTest.C,v 1.2 2003/03/11 03:01:04 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // The companion files ESMC\_RTable.h and ESMC\_RTable.C contain
 // the declarations and definitions for the RTable methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_RTableTest.C,v 1.1 2003/03/10 23:21:12 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_RTableTest.C,v 1.2 2003/03/11 03:01:04 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])

@@ -1,4 +1,4 @@
-// $Id: ESMC_Bundle.C,v 1.1 2003/03/10 21:54:21 cdeluca Exp $
+// $Id: ESMC_Bundle.C,v 1.2 2003/03/11 03:00:50 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ Bundle methods declared
 // in the companion file ESMC_Bundle.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-             "$Id: ESMC_Bundle.C,v 1.1 2003/03/10 21:54:21 cdeluca Exp $";
+             "$Id: ESMC_Bundle.C,v 1.2 2003/03/11 03:00:50 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -77,7 +77,7 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //      ESMC_BundleConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -107,7 +107,7 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //      ESMC_BundleDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -133,7 +133,7 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //    Returns the set of resources the Bundle object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -158,7 +158,7 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //    Configures the Bundle object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -184,7 +184,7 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -210,7 +210,7 @@ int ESMC_BundleDestroy(ESMC_Bundle *f) {
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

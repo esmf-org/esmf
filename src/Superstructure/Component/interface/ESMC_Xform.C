@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.C,v 1.6 2003/02/19 18:50:50 nscollins Exp $
+// $Id: ESMC_Xform.C,v 1.7 2003/03/11 03:01:09 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ Xform methods declared
 // in the companion file ESMC\_Xform.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -41,7 +41,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Xform.C,v 1.6 2003/02/19 18:50:50 nscollins Exp $";
+               "$Id: ESMC_Xform.C,v 1.7 2003/03/11 03:01:09 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------
@@ -104,7 +104,7 @@
 //    Returns the set of resources the Xform object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -130,7 +130,7 @@
 //    Configures the Xform object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -157,7 +157,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -184,7 +184,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

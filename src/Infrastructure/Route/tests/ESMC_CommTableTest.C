@@ -1,4 +1,4 @@
-// $Id: ESMC_CommTableTest.C,v 1.1 2003/03/10 23:21:09 nscollins Exp $
+// $Id: ESMC_CommTableTest.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // The companion files ESMC\_CommTable.h and ESMC\_CommTable.C contain
 // the declarations and definitions for the CommTable methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CommTableTest.C,v 1.1 2003/03/10 23:21:09 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_CommTableTest.C,v 1.2 2003/03/11 03:01:03 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])

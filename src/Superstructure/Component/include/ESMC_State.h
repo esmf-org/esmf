@@ -1,4 +1,4 @@
-// $Id: ESMC_State.h,v 1.3 2003/01/29 15:59:53 nscollins Exp $
+// $Id: ESMC_State.h,v 1.4 2003/03/11 03:01:08 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 // signatures (prototypes).  The companion file ESMC_State.C contains
 // the definitions (full code bodies) for the State methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 // 

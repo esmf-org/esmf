@@ -1,4 +1,4 @@
-// $Id: ESMC_classTest.C,v 1.3 2003/03/06 17:31:14 eschwab Exp $
+// $Id: ESMC_classTest.C,v 1.4 2003/03/11 03:00:36 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -18,7 +18,7 @@
 // The companion files ESMC\_<Class>.h and ESMC\_<Class>.C contain
 // the declarations and definitions for the <Class> methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //EOP
 //-----------------------------------------------------------------------------
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_classTest.C,v 1.3 2003/03/06 17:31:14 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_classTest.C,v 1.4 2003/03/11 03:00:36 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
  int main(int argc, char *argv[])

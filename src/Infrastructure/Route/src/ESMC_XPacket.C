@@ -1,4 +1,4 @@
-// $Id: ESMC_XPacket.C,v 1.4 2003/03/10 05:14:22 cdeluca Exp $
+// $Id: ESMC_XPacket.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ XPacket methods declared
 // in the companion file ESMC_XPacket.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -31,7 +31,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-              "$Id: ESMC_XPacket.C,v 1.4 2003/03/10 05:14:22 cdeluca Exp $";
+              "$Id: ESMC_XPacket.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -98,7 +98,7 @@
 //      (see declaration in ESMC_XPacket.h)
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -130,7 +130,7 @@
 //      ESMC_XPacketConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -161,7 +161,7 @@
 //      ESMC_XPacketDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -188,7 +188,7 @@
 //    Returns the set of resources the XPacket object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -215,7 +215,7 @@
 //    Configures the XPacket object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -243,7 +243,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -271,7 +271,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

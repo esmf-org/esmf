@@ -1,4 +1,4 @@
-// $Id: ESMC_HWMonitor.C,v 1.4 2002/11/20 15:24:05 ekluz Exp $
+// $Id: ESMC_HWMonitor.C,v 1.5 2003/03/11 03:01:00 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.4 2002/11/20 15:24:05 ekluz Exp $";
+ static const char *const version = "$Id: ESMC_HWMonitor.C,v 1.5 2003/03/11 03:01:00 cdeluca Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -62,7 +62,7 @@
 //      allocate any resources.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

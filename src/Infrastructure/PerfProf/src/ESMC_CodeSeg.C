@@ -1,4 +1,4 @@
-// $Id: ESMC_CodeSeg.C,v 1.2 2003/03/10 05:14:21 cdeluca Exp $
+// $Id: ESMC_CodeSeg.C,v 1.3 2003/03/11 03:00:59 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ CodeSeg methods declared
 // in the companion file ESMC_CodeSeg.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_CodeSeg.C,v 1.2 2003/03/10 05:14:21 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_CodeSeg.C,v 1.3 2003/03/11 03:00:59 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -98,7 +98,7 @@
 //      (see declaration in ESMC_CodeSeg.h)
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -130,7 +130,7 @@
 //      ESMC_CodeSegConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -159,7 +159,7 @@
 //      ESMC_CodeSegDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -189,7 +189,7 @@
 //      Construct/Destruct.  Can be overloaded like ESMC_CodeSegCreate.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -214,7 +214,7 @@
 //    Returns the set of resources the CodeSeg object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -239,7 +239,7 @@
 //    Configures the CodeSeg object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -265,7 +265,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -291,7 +291,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

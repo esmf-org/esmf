@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $
+// $Id: ESMC_Machine.C,v 1.6 2003/03/11 03:00:46 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Machine.C,v 1.5 2002/12/17 02:23:45 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Machine.C,v 1.6 2003/03/11 03:00:46 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -83,7 +83,7 @@
 //      allocate any resources. 
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   numNodes = nodes;
   numCPUs = cpus;
@@ -118,7 +118,7 @@
 //    Returns the set of resources the Machine object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -143,7 +143,7 @@
 //    Configures the Machine object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -169,7 +169,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -195,7 +195,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -321,7 +321,7 @@
 //     Returns the Cpu ID of the calling process/thread
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 #ifdef alpha
   long curr_cpu;
@@ -354,7 +354,7 @@
 //     Returns the Node ID of the calling process/thread
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 #ifdef alpha
   char hname[32];
@@ -386,7 +386,7 @@
 //     Returns the maximum number of cpus per node
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 #ifdef alpha
   int max_cpu;

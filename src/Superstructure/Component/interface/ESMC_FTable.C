@@ -1,4 +1,4 @@
-// $Id: ESMC_FTable.C,v 1.4 2003/03/07 18:19:48 nscollins Exp $
+// $Id: ESMC_FTable.C,v 1.5 2003/03/11 03:01:09 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_FTable.C,v 1.4 2003/03/07 18:19:48 nscollins Exp $";
+           "$Id: ESMC_FTable.C,v 1.5 2003/03/11 03:01:09 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -74,7 +74,7 @@
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     // TODO: allocate space for N items, rounded up?
     if (nfuncp > funcalloc) {
@@ -110,7 +110,7 @@
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     // fill in values
     *nfuncp = funccount;
@@ -141,7 +141,7 @@
 //    Sets the named function pointer
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 
  // TODO: test this code
@@ -181,7 +181,7 @@
 //    Sets the named function pointer
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 
  // TODO: test this code
@@ -221,7 +221,7 @@
 //    Sets the named data pointer
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
  // TODO: test this code
     if (datacount >= dataalloc) {
@@ -259,7 +259,7 @@
 //    Returns the named function pointer
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     int i;
 
@@ -296,7 +296,7 @@
 //    Returns the named data pointer
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     int i;
 
@@ -334,7 +334,7 @@
 //    Calls the named function pointer
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     int i;
 

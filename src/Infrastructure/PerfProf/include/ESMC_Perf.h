@@ -1,4 +1,4 @@
-// $Id: ESMC_Perf.h,v 1.1 2002/11/14 18:14:36 cdeluca Exp $
+// $Id: ESMC_Perf.h,v 1.2 2003/03/11 03:00:55 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // signatures (prototypes).  The companion file ESMC_Perf.C contains
 // the definitions (full code bodies) for the Perf methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 // 

@@ -1,4 +1,4 @@
-// $Id: ESMC_Route.C,v 1.4 2003/03/10 05:14:22 cdeluca Exp $
+// $Id: ESMC_Route.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -29,7 +29,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.4 2003/03/10 05:14:22 cdeluca Exp $";
+               "$Id: ESMC_Route.C,v 1.5 2003/03/11 03:01:03 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -96,7 +96,7 @@
 //      (see declaration in ESMC_Route.h)
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -128,7 +128,7 @@
 //      ESMC_RouteConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -159,7 +159,7 @@
 //      ESMC_RouteDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -187,7 +187,7 @@
 //    Returns the set of resources the Route object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -214,7 +214,7 @@
 //    Configures the Route object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -242,7 +242,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -270,7 +270,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.10 2003/02/21 05:19:05 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.11 2003/03/11 03:00:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ Comm methods declared
 // in the companion file ESMC_Comm.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.10 2003/02/21 05:19:05 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.11 2003/03/11 03:00:44 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -112,7 +112,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      allocate any resources.  Define for shallow classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   //  initialize with default configuration values TODO: ??
   ESMC_CommInit(argc, argv, de, nThreadsPerProc, nProcs, lbufSize, lbufType);
@@ -145,7 +145,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      allocate any resources.  Define for shallow classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // save DE pointer
   DE = de;
@@ -314,7 +314,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //      necessary clean-up.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   pthread_mutex_lock(&finalMutex);
     if (!commFinal) {
@@ -346,7 +346,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //    Returns the set of resources the Comm object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -371,7 +371,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //    Configures the Comm object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -397,7 +397,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -423,7 +423,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -448,7 +448,7 @@ pthread_t *ESMC_Comm_tid = 0; // array of tid's shared with
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // TODO: mutex protect if numDEs changes during run time?
   *ndes = numDEs;

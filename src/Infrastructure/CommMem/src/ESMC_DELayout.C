@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.3 2003/03/10 05:14:21 cdeluca Exp $
+// $Id: ESMC_DELayout.C,v 1.4 2003/03/11 03:00:46 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ DELayout methods declared
 // in the companion file ESMC_DELayout.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DELayout.C,v 1.3 2003/03/10 05:14:21 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DELayout.C,v 1.4 2003/03/11 03:00:46 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -172,7 +172,7 @@
 //      via an ESMC\_DELayoutCreate routine.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //cout << "ESMC_DELayoutDestroy, layout = " << layout << endl;
   if (layout != 0) {
@@ -211,7 +211,7 @@
 //      ESMC\_DELayoutConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -316,7 +316,7 @@
 //      ESMC\_DELayoutConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // Initialize comm, PE, DE, Machine
   ESMC_DELayoutInit();
@@ -457,7 +457,7 @@
 //      ESMC\_DELayoutDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -507,7 +507,7 @@
 //      Construct/Destruct.  Can be overloaded like ESMC\_DELayoutCreate.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // initialize to an empty layout 
   layout = 0;
@@ -563,7 +563,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    Returns the set of resources the DELayout object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -588,7 +588,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    Configures the DELayout object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -614,7 +614,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -640,7 +640,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -667,7 +667,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    returns overall x,y dimensions of 2D DELayout
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   *nx = nxDELayout;
   *ny = nyDELayout;
@@ -695,7 +695,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    returns overall x,y,z dimensions of DELayout
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   *nx = nxDELayout;
   *ny = nyDELayout;
@@ -723,7 +723,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    returns (x,y) position of my DE in 2D layout
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // linear search for DE TODO: compute once on initialization ?
   for (int i=0; i<nxDELayout; i++) {
@@ -762,7 +762,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //    returns (x,y,z) position of given DE in layout
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   // linear search for DE
   for (int i=0; i<nxDELayout; i++) {
@@ -800,7 +800,7 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 // !DESCRIPTION:
 //    Returns our DE id
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   myDE.ESMC_DEGetESMFID(deid);
 

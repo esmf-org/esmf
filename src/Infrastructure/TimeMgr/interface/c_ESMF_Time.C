@@ -1,4 +1,4 @@
-// $Id: c_ESMF_Time.C,v 1.5 2003/02/11 18:38:59 eschwab Exp $
+// $Id: c_ESMF_Time.C,v 1.6 2003/03/11 03:01:06 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -11,7 +11,7 @@
 //
 // !DESCRIPTION:
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //

@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.C,v 1.9 2003/03/10 05:14:22 cdeluca Exp $
+// $Id: ESMC_Comp.C,v 1.10 2003/03/11 03:01:08 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_Comp.C,v 1.9 2003/03/10 05:14:22 cdeluca Exp $";
+           "$Id: ESMC_Comp.C,v 1.10 2003/03/11 03:01:08 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -116,7 +116,7 @@
 //      (see declaration in ESMC\_Comp.h)
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     int rc;
 
@@ -145,7 +145,7 @@
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  TODO: add call to f_esmf_compinit() here
@@ -171,7 +171,7 @@
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  TODO: add call to f_esmf_comprun() here
@@ -197,7 +197,7 @@
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  TODO: add call to f_esmf_compfinal() here
@@ -224,7 +224,7 @@
 //    Returns the set of resources the Component object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -250,7 +250,7 @@
 //    Configures the Component object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -277,7 +277,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -303,7 +303,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

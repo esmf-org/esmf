@@ -1,4 +1,4 @@
-// $Id: ESMC_State.C,v 1.6 2003/03/10 05:14:22 cdeluca Exp $
+// $Id: ESMC_State.C,v 1.7 2003/03/11 03:01:09 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -39,7 +39,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_State.C,v 1.6 2003/03/10 05:14:22 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_State.C,v 1.7 2003/03/11 03:01:09 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -110,7 +110,7 @@
 //      (see declaration in ESMC\_State.h)
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -141,7 +141,7 @@
 //      ESMC\_StateConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -171,7 +171,7 @@
 //      ESMC\_StateDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -200,7 +200,7 @@
 //      Construct/Destruct.  Can be overloaded like ESMC\_StateCreate.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -226,7 +226,7 @@
 //    Returns the set of resources the State object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -252,7 +252,7 @@
 //    Configures the State object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -279,7 +279,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -306,7 +306,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

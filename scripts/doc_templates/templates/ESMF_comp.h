@@ -1,4 +1,4 @@
-! $Id: ESMF_comp.h,v 1.4 2002/10/16 22:50:08 nscollins Exp $
+! $Id: ESMF_comp.h,v 1.5 2003/03/11 03:00:38 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 !
 ! The code in this file implements constants and macros for the <Comp>...
 !
-! < insert a paragraph or two explaining what you'll find in this file >
+! 
 !
 ! (all lines below between the !BOP and !EOP markers will be included in 
 !  the automated document processing.)

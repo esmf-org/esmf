@@ -1,4 +1,4 @@
-// $Id: ESMC_CommMem.h,v 1.1 2002/10/25 19:21:33 cdeluca Exp $
+// $Id: ESMC_CommMem.h,v 1.2 2003/03/11 03:00:43 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,7 @@
 //
 // The code in this file implements constants and macros for the CommMem...
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 // (all lines below between the !BOP and !EOP markers will be included in 
 //  the automated document processing.)

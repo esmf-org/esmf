@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.7 2003/03/10 05:14:21 cdeluca Exp $
+// $Id: ESMC_PEList.C,v 1.8 2003/03/11 03:00:47 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ PEList methods declared
 // in the companion file ESMC_PEList.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -37,7 +37,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.7 2003/03/10 05:14:21 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.8 2003/03/11 03:00:47 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -168,7 +168,7 @@
 //      via an ESMC\_PEListCreate routine.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   if (pelist != 0) {
     pelist->ESMC_PEListDestruct();
@@ -203,7 +203,7 @@
 //      ESMC\_PEListConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 #if 0
 // use this section if exception handling not supported
@@ -264,7 +264,7 @@
 //      ESMC\_PEListDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //cout << "ESMC_PEListDestruct() invoked\n";
   delete[] peList;
@@ -325,7 +325,7 @@
 //    Returns the set of resources the PEList object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -350,7 +350,7 @@
 //    Configures the PEList object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -376,7 +376,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -402,7 +402,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -429,7 +429,7 @@
 //     Returns a pointer to the ith PE in the list.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   if (i<0 || i>=numPEs) {
     *pe = 0;

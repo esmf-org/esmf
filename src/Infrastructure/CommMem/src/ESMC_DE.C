@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.6 2003/03/10 05:40:47 cdeluca Exp $
+// $Id: ESMC_DE.C,v 1.7 2003/03/11 03:00:45 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ DE methods declared
 // in the companion file ESMC_DE.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -34,7 +34,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.6 2003/03/10 05:40:47 cdeluca Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.7 2003/03/11 03:00:45 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -69,7 +69,7 @@
 //      Construct/Destruct.  Can be overloaded like ESMC\_DECreate.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   esmfID = esmfid;
   pID = pid;
@@ -100,7 +100,7 @@
 //    Returns the set of resources the DE object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -125,7 +125,7 @@
 //    Configures the DE object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -151,7 +151,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -177,7 +177,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -203,7 +203,7 @@
 //     Sets the ESMF ID for this DE to given value.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   esmfID = esmfid;
 
@@ -228,7 +228,7 @@
 //     Sets the DE member PE with the given pe value.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   PE = pe;
 
@@ -252,7 +252,7 @@
 // !DESCRIPTION:
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   *esmfid = esmfID;
 
@@ -278,7 +278,7 @@
 //     Get's the DE's platform-specific process ID (e.g. MPI rank)
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   *pid = pID;
 
@@ -304,7 +304,7 @@
 //     Sets the DE's type: process or thread
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   deType = detype; 
 
@@ -330,7 +330,7 @@
 //     Get's the DE's type: process or thread
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
   *detype = deType;
 

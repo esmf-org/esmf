@@ -1,4 +1,4 @@
-// $Id: ESMC_PE.C,v 1.5 2003/01/09 02:16:35 eschwab Exp $
+// $Id: ESMC_PE.C,v 1.6 2003/03/11 03:00:46 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -17,7 +17,7 @@
 // The code in this file implements the C++ PE methods declared
 // in the companion file ESMC_PE.h
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 //
@@ -33,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PE.C,v 1.5 2003/01/09 02:16:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PE.C,v 1.6 2003/03/11 03:00:46 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize peCount (class static)
@@ -132,7 +132,7 @@ int ESMC_PE::peCount = 0;
 //    Returns the set of resources the PE object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -157,7 +157,7 @@ int ESMC_PE::peCount = 0;
 //    Configures the PE object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here

@@ -1,4 +1,4 @@
-// $Id: ESMC_Regrid.h,v 1.2 2003/03/05 20:35:25 nscollins Exp $
+// $Id: ESMC_Regrid.h,v 1.3 2003/03/11 03:01:02 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // signatures (prototypes).  The companion file ESMC_Regrid.C contains
 // the definitions (full code bodies) for the Regrid methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 // 

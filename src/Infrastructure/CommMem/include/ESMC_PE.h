@@ -1,4 +1,4 @@
-// $Id: ESMC_PE.h,v 1.4 2003/03/10 03:22:59 cdeluca Exp $
+// $Id: ESMC_PE.h,v 1.5 2003/03/11 03:00:44 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
 // signatures (prototypes).  The companion file ESMC\_PE.C contains
 // the definitions (full code bodies) for the PE methods.
 //
-// < insert a paragraph or two explaining what you'll find in this file >
+// 
 //
 //-----------------------------------------------------------------------------
 // 

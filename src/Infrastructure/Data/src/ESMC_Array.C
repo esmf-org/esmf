@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.35 2003/03/10 03:23:05 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.36 2003/03/11 03:00:48 cdeluca Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.35 2003/03/10 03:23:05 cdeluca Exp $";
+            "$Id: ESMC_Array.C,v 1.36 2003/03/11 03:00:48 cdeluca Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -126,7 +126,7 @@
 //      via an ESMC_ArrayCreate routine.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -251,7 +251,7 @@
 //      ESMC_ArrayConstruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -280,7 +280,7 @@
 //      ESMC_ArrayDestruct.  Define for deep classes only.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -309,7 +309,7 @@
 //    Returns the set of resources the Array object was configured with.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -336,7 +336,7 @@
 //    Configures the Array object with set of resources given.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -365,7 +365,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -391,7 +391,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -419,7 +419,7 @@
 //     Return a stored F90 pointer block.  The size may vary with rank.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -455,7 +455,7 @@
 //     Can be multiple routines, one per value
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
     int i, rank = this->rank;
     int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -489,7 +489,7 @@
 //     Sets the Array member AxisIndex with the given value.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
@@ -521,7 +521,7 @@
 //     Gets the Array member AxisIndex with the given value.
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  
 
 //
 //  code goes here
