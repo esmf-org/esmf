@@ -1,4 +1,4 @@
-! $Id: ESMF_GridUTest.F90,v 1.5 2003/04/11 22:55:26 svasquez Exp $
+! $Id: ESMF_GridUTest.F90,v 1.6 2003/04/16 22:17:25 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,13 +39,13 @@
       use ESMF_IOMod
       use ESMF_FieldMod
       use ESMF_StateMod
-      use ArraysGlobalMod
+!      use ArraysGlobalMod
       implicit none
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridUTest.F90,v 1.5 2003/04/11 22:55:26 svasquez Exp $'
+      '$Id: ESMF_GridUTest.F90,v 1.6 2003/04/16 22:17:25 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -203,8 +203,8 @@
       y_max = 12.0
       name = "test grid 1"
       halo_width = 1
+      layout = ESMF_DELayoutCreate(rc=rc)
 
-     ! The following code crashes bug 719963 filed.
      grid = ESMF_GridCreate(i_max=i_max, j_max=j_max, &
                              x_min=x_min, x_max=x_max, &
 			     y_min=y_min, y_max=y_max, &
@@ -224,25 +224,32 @@
                       name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-!      call  ESMF_GridDestroy(grid, rc=rc)
-!      write(failMsg, *) ""
-!      write(name, *) "Destroying a Grid Test"
-!      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
-!                      name, failMsg, result, ESMF_SRCLINE)
-!      print *, "rc = ", rc
+      ! Printing a Grid
+      call ESMF_GridPrint(grid, "", rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Printing a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
-!      name = "test grid 1"
+      call  ESMF_GridDestroy(grid, rc=rc)
+      write(failMsg, *) ""
+      write(name, *) "Destroying a Grid Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      print *, "rc = ", rc
+      !------------------------------------------------------------------------
 
-!      call ESMF_GridAddPhysGrid(grid_type, i_max=i_max, j_max=j_max, &
-!			     physgrid_id=phy_grid_id, &
-!                             y_min=y_min, y_max=y_max, &
-!			     physgrid_name=name, rc=status)
-!
-!      write(failMsg, *) ""
-!      write(name, *) "Adding a Physical Grid Test"
-!      call ESMF_Test((status.eq.ESMF_SUCCESS), &
-!                      name, failMsg, result, ESMF_SRCLINE)
+      name = "test grid 1"
+
+      call ESMF_GridAddPhysGrid(grid_type, i_max=i_max, j_max=j_max, &
+		     physgrid_id=phy_grid_id, &
+                             y_min=y_min, y_max=y_max, &
+			     physgrid_name=name, rc=status)
+
+      write(failMsg, *) ""
+      write(name, *) "Adding a Physical Grid Test"
+      call ESMF_Test((status.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 #endif
 
