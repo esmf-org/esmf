@@ -28,15 +28,14 @@
 #include <string.h>
 #include <assert.h>
 // associated class definition file
-#include "ESMC_Array.h"
-#include "ESMC_Alloc.h"
+#include "ESMC_LocalArray.h"
 #include "ESMC_DELayout.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_LocalArray.C,v 1.1 2003/07/10 18:48:19 nscollins Exp $";
+            "$Id: ESMC_LocalArray.C,v 1.2 2003/07/10 23:02:57 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -52,7 +51,7 @@
 // !IROUTINE:  ESMC_ArrayCreate - Create a new Array
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreate(
+      ESMC_LocalArray *ESMC_ArrayCreate(
 //
 // !RETURN VALUE:
 //     pointer to newly allocated ESMC_Array
@@ -95,29 +94,29 @@
 //
 //   The return from this routine is a pointer to the new Array data.
 //
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
 
 
-     status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
-                                     ESMC_FROM_CPLUSPLUS,
-                                     NULL, ESMC_ARRAY_DO_ALLOCATE, 
-                                     docopy, ESMF_TF_TRUE, 
-                                     NULL, NULL, NULL, NULL); 
+     status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+                                          ESMC_FROM_CPLUSPLUS,
+                                          NULL, ESMC_ARRAY_DO_ALLOCATE, 
+                                          docopy, ESMF_TF_TRUE, 
+                                          NULL, NULL, NULL, NULL); 
      
      if (rc != NULL)
          *rc = status;
 
      return a;
 
- } // end ESMC_ArrayCreate
+ } // end ESMC_LocalArrayCreate
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayDestroy - free a Array created with Create
+// !IROUTINE:  ESMC_LocalArrayDestroy - free a LocalArray created with Create
 //
 // !INTERFACE:
-      int ESMC_ArrayDestroy(ESMC_Array *array) {
+      int ESMC_LocalArrayDestroy(ESMC_LocalArray *array) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -126,29 +125,30 @@
 //    none
 //
 // !DESCRIPTION:
-//      ESMF routine which destroys a Array object previously allocated
-//      via an {\tt ESMC\_ArrayCreate} routine.  Define for deep classes only.
+//      ESMF routine which destroys a LocalArray object previously allocated
+//      via an {\tt ESMC\_LocalArrayCreate} routine.  Define for deep classes
+//      only.
 //
 //EOP
 // !REQUIREMENTS:  
 
-    array->ESMC_ArrayDestruct();
+    array->ESMC_LocalArrayDestruct();
 
     delete array;
 
     return 0;
 
- } // end ESMC_ArrayDestroy
+ } // end ESMC_LocalArrayDestroy
 
 //-----------------------------------------------------------------------------
 //BOPI
-// !IROUTINE:  ESMC_ArrayCreateNoData - internal routine for fortran use
+// !IROUTINE:  ESMC_LocalArrayCreateNoData - internal routine for fortran use
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreateNoData(
+      ESMC_LocalArray *ESMC_LocalArrayCreateNoData(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
+//     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
@@ -158,19 +158,20 @@
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This version of Create is only intended for internal use by
-//      the {\tt ESMF\_ArrayCreate} fortran routine.  It creates a partially
+//      This version of Create is only intended for internal use by the
+//      {\tt ESMF\_LocalArrayCreate} fortran routine.  It creates a partially
 //      constructed array, then depends on the caller to come back and
-//      complete the array with the {\tt ESMF\_ArraySetInfo} call.  
+//      complete the array with the {\tt ESMF\_LocalArraySetInfo} call.  
 //      (It is broken up this way to try to minimize the amount of
-//      macro-generated code needed in the {\tt ESMF\_Array.F90} source file.)
+//      macro-generated code needed in the {\tt ESMF\_LocalArray.F90} source
+//      file.)
 //
 //EOPI
 
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
 
-     status = a->ESMC_ArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
+     status = a->ESMC_LocalArrayConstruct(rank, dt, dk, NULL, NULL, oflag,
                             NULL, ESMC_ARRAY_NO_ALLOCATE, 
                             ESMC_DATA_NONE, ESMF_TF_FALSE, 
                             NULL, NULL, NULL, NULL);
@@ -180,17 +181,17 @@
 
      return a;
 
- } // end ESMC_ArrayCreateNoData
+ } // end ESMC_LocalArrayCreateNoData
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayCreate_F - internal routine for fortran use
+// !IROUTINE:  ESMC_LocalArrayCreate_F - internal routine for fortran use
 //
 // !INTERFACE:
-      ESMC_Array *ESMC_ArrayCreate_F(
+      ESMC_LocalArray *ESMC_LocalArrayCreate_F(
 //
 // !RETURN VALUE:
-//     pointer to newly allocated ESMC_Array
+//     pointer to newly allocated ESMC_LocalArray
 //
 // !ARGUMENTS:
     int rank,                  // dimensionality
@@ -207,10 +208,10 @@
     int *rc) {                 // return code
 //
 // !DESCRIPTION:
-//      This version of Create is only intended for internal use by
-//      the {\tt ESMF\_ArrayCreate} fortran routine.  This routine works in a
-//      similar manner as the regular {\tt ESMC\_ArrayCreate} routine, but the
-//      differences include:  it gets a real fortran 90 array pointer as
+//      This version of Create is only intended for internal use by the
+//      {\tt ESMF\_LocalArrayCreate} fortran routine.  This routine works in a
+//      similar manner as the regular {\tt ESMC\_LocalArrayCreate} routine, but
+//      the differences include:  it gets a real fortran 90 array pointer as
 //      one of the arguments; instead of calling malloc to make space for
 //      the array contents, it passes the f90 pointer back to a fortran
 //      routine to do the allocation.  This is so the fortran routine
@@ -238,37 +239,37 @@
 //   (also called the dope vector), so that it can be returned to any 
 //   fortran routine on demand. 
 // 
-//   The return from this routine is a pointer to the new Array data.
+//   The return from this routine is a pointer to the new LocalArray data.
 //
-     ESMC_Array *a = new ESMC_Array;
+     ESMC_LocalArray *a = new ESMC_LocalArray;
      int status;
 
      if (base == NULL) 
-         status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
-                                     ESMC_FROM_FORTRAN, f90ptr, 
-                                     ESMC_ARRAY_DO_ALLOCATE,
-                                     ESMC_DATA_NONE, ESMF_TF_TRUE, 
-                                     lbounds, ubounds, strides, offsets); 
+         status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+                                              ESMC_FROM_FORTRAN, f90ptr, 
+                                              ESMC_ARRAY_DO_ALLOCATE,
+                                              ESMC_DATA_NONE, ESMF_TF_TRUE, 
+                                              lbounds, ubounds, strides, offsets); 
      else
-         status = a->ESMC_ArrayConstruct(rank, dt, dk, icounts, base, 
-                                     ESMC_FROM_FORTRAN, f90ptr, 
-                                     ESMC_ARRAY_NO_ALLOCATE, 
-                                     docopy, ESMF_TF_FALSE, 
-                                     lbounds, ubounds, strides, offsets); 
+         status = a->ESMC_LocalArrayConstruct(rank, dt, dk, icounts, base, 
+                                              ESMC_FROM_FORTRAN, f90ptr, 
+                                              ESMC_ARRAY_NO_ALLOCATE, 
+                                              docopy, ESMF_TF_FALSE, 
+                                              lbounds, ubounds, strides, offsets); 
 
      if (rc != NULL)
          *rc = status;
 
      return a;
 
- } // end ESMC_ArrayCreate_F
+ } // end ESMC_LocalArrayCreate_F
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayConstruct - fill in an already allocated Array
+// !IROUTINE:  ESMC_LocalArrayConstruct - fill in an already allocated LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayConstruct(
+      int ESMC_LocalArray::ESMC_LocalArrayConstruct(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -290,17 +291,17 @@
     int *offsets) {            // offset in bytes to start of each dim
 //
 // !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated {\tt ESMF\_Array} object.  May need to do additional allocations
-//      as needed.  Must call the corresponding {\tt ESMC\_ArrayDestruct}
+//      ESMF routine which fills in the contents of an already allocated
+//      {\tt ESMF\_LocalArray} object.  May need to do additional allocations
+//      as needed.  Must call the corresponding {\tt ESMC\_LocalArrayDestruct}
 //      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use {\tt ESMC\_ArrayCreate}, which calls
-//      {\tt ESMC\_ArrayConstruct}.  Define for deep classes only.
+//      ESMF use only; end-users use {\tt ESMC\_LocalArrayCreate}, which calls
+//      {\tt ESMC\_LocalArrayConstruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
     int i, status;
-    ESMC_Array *aptr;
+    ESMC_LocalArray *aptr;
 
     rank = irank;
     type = dt;
@@ -326,11 +327,11 @@
     needs_dealloc = dflag;
 
     if (f90ptr != NULL)
-        ESMC_ArraySetF90Ptr(f90ptr);
+        ESMC_LocalArraySetF90Ptr(f90ptr);
  
     if (aflag == ESMC_ARRAY_DO_ALLOCATE) {
             aptr = this;
-            FTN(f_esmf_arrayf90allocate)(&aptr, &rank, &type, &kind, 
+            FTN(f_esmf_localarrayf90allocate)(&aptr, &rank, &type, &kind, 
                                                       counts, &status);
     } 
 
@@ -342,14 +343,14 @@
 
 
 
- } // end ESMC_ArrayConstruct
+ } // end ESMC_LocalArrayConstruct
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayDestruct - release resources associated w/a Array
+// !IROUTINE:  ESMC_LocalArrayDestruct - release resources associated w/a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayDestruct(void) {
+      int ESMC_LocalArray::ESMC_LocalArrayDestruct(void) {
 //
 // !RETURN VALUE:
 //    int error return code
@@ -359,16 +360,16 @@
 //
 // !DESCRIPTION:
 //      ESMF routine which deallocates any space allocated by
-//      {\tt ESMF\_ArrayConstruct}, does any additional cleanup before the
-//      original {\tt ESMC\_Array} object is freed.  Intended for internal ESMF
-//      use only; end-users use {\tt ESMC\_ArrayDestroy}, which calls
-//      {\tt ESMC\_ArrayDestruct}.  Define for deep classes only.
+//      {\tt ESMF\_LocalArrayConstruct}, does any additional cleanup before the
+//      original {\tt ESMC\_LocalArray} object is freed.  Intended for internal
+//      ESMF use only; end-users use {\tt ESMC\_LocalArrayDestroy}, which calls
+//      {\tt ESMC\_LocalArrayDestruct}.  Define for deep classes only.
 //
 //EOP
 // !REQUIREMENTS:  
 
     int rc = ESMF_FAILURE;
-    ESMC_Array *aptr = this;
+    ESMC_LocalArray *aptr = this;
 
     // check origin and alloc flag, and call dealloc routine if needed 
     if (needs_dealloc != ESMF_TF_TRUE)
@@ -379,74 +380,19 @@
     // then this code needs to be calling malloc/free or new/delete and
     // needs conditional code to pick the fortran or C++ mem mgt system.
 
-    FTN(f_esmf_arrayf90deallocate)(&aptr, &rank, &type, &kind, &rc);
+    FTN(f_esmf_localarrayf90deallocate)(&aptr, &rank, &type, &kind, &rc);
 
     return rc;
 
- } // end ESMC_ArrayDestruct
+ } // end ESMC_LocalArrayDestruct
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayGetConfig - get configuration info from a Array
+// !IROUTINE:  ESMC_LocalArrayGet<Value> - get <Value> for a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_ArrayConfig *config) const {  // out - resources
-//
-// !DESCRIPTION:
-//    Returns the set of resources the {\tt ESMC\_Array} object was configured with.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    int rc = ESMF_FAILURE;
-
-    return rc;
- } // end ESMC_ArrayGetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArraySetConfig - set configuration info for a Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetConfig(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      const ESMC_ArrayConfig *config) {     // in - resources
-//
-// !DESCRIPTION:
-//    Configures the {\tt ESMC\_Array} object with set of resources given.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-    int rc = ESMF_FAILURE;
-
-    return rc;
-
- } // end ESMC_ArraySetConfig
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayGet<Value> - get <Value> for a Array
-//
-// !INTERFACE:
-      //int ESMC_Array::ESMC_ArrayGet<Value>(
+      //int ESMC_LocalArray::ESMC_LocalArrayGet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -455,7 +401,7 @@
       //<value type> *value) const {     // out - value
 //
 // !DESCRIPTION:
-//     Returns the value of {\tt ESMC\_Array} member <Value>.
+//     Returns the value of {\tt ESMC\_LocalArray} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -465,14 +411,14 @@
 //  code goes here
 //
 
- //} // end ESMC_ArrayGet<Value>
+ //} // end ESMC_LocalArrayGet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArraySet<Value> - set <Value> for a Array
+// !IROUTINE:  ESMC_LocalArraySet<Value> - set <Value> for a LocalArray
 //
 // !INTERFACE:
-      //int ESMC_Array::ESMC_ArraySet<Value>(
+      //int ESMC_LocalArray::ESMC_LocalArraySet<Value>(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -481,7 +427,7 @@
       //const <value type> *value) {     // in - value
 //
 // !DESCRIPTION:
-//     Sets the value of {\tt ESMC\_Array} member <Value>.
+//     Sets the value of {\tt ESMC\_LocalArray} member <Value>.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -494,14 +440,14 @@
 
     //return rc;
 
- //} // end ESMC_ArraySet<Value>
+ //} // end ESMC_LocalArraySet<Value>
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArraySetInfo - Set the most common F90 needs
+// !IROUTINE:  ESMC_LocalArraySetInfo - Set the most common F90 needs
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetInfo(
+      int ESMC_LocalArray::ESMC_LocalArraySetInfo(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -557,14 +503,14 @@
 
     return ESMF_SUCCESS; 
 
- } // end ESMC_ArraySetInfo
+ } // end ESMC_LocalArraySetInfo
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayGetF90Ptr - get F90Ptr for a Array
+// !IROUTINE:  ESMC_LocalArrayGetF90Ptr - get F90Ptr for a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetF90Ptr(
+      int ESMC_LocalArray::ESMC_LocalArrayGetF90Ptr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -592,14 +538,14 @@
 
     return ESMF_SUCCESS; 
 
- } // end ESMC_ArrayGetF90Ptr
+ } // end ESMC_LocalArrayGetF90Ptr
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArraySetF90Ptr - set F90Ptr for a Array
+// !IROUTINE:  ESMC_LocalArraySetF90Ptr - set F90Ptr for a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetF90Ptr(
+      int ESMC_LocalArray::ESMC_LocalArraySetF90Ptr(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -608,7 +554,7 @@
       const struct c_F90ptr *p) {     // in - f90 pointer block
 //
 // !DESCRIPTION:
-//     Sets the {\tt ESMC\_Array} member F90ptr with the given value.
+//     Sets the {\tt ESMC\_LocalArray} member F90ptr with the given value.
 //     Can be multiple routines, one per value
 //
 //EOP
@@ -627,856 +573,14 @@
 
     return ESMF_SUCCESS; 
 
- } // end ESMC_ArraySetF90Ptr
+ } // end ESMC_LocalArraySetF90Ptr
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArraySetAxisIndex - set annotation on Arrays for local/global
+// !IROUTINE:  ESMC_LocalArrayValidate - internal consistency check for a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArraySetAxisIndex(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DomainType dt,                     // in - domain type, C or F90
-      struct ESMC_AxisIndex *indexlist) {     // in - values to set
-//
-// !DESCRIPTION:
-//     Sets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-     int i;
-
-     for (i=0; i<this->rank; i++) {
-         this->ai_comp[i] = indexlist[i];  // TODO: set all?
-     }
-
-     return ESMF_SUCCESS;
-
- } // end ESMC_ArraySetAxisIndex
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayGetAxisIndex - get annotation on Arrays for local/global
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGetAxisIndex(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DomainType dt,                        // out - domain type, C or F90
-      struct ESMC_AxisIndex *indexlist) const {  // out - values to get
-//
-// !DESCRIPTION:
-//     Gets the {\tt ESMC\_Array} member {\tt ESMC\_AxisIndex} with the given value.
-//
-//EOP
-// !REQUIREMENTS:  
-
-//
-//  code goes here
-//
-     int i;
-
-     for (i=0; i<this->rank; i++) {
-         indexlist[i] = this->ai_comp[i];   // TODO: interface to get any ai
-     }
-
-     return ESMF_SUCCESS;
-
- } // end ESMC_ArrayGetAxisIndex
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayHalo - update the halo of an Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayHalo(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout,     // in  - layout (temporarily)
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the Array
-      int size_decomp) {         // in  - size of decomp array
-//
-// !DESCRIPTION:
-//      
-//     
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;     // general counter vars
-    int i_exc, j_exc;
-    float *fp, *fp0;
-    int *ip, *ip0;
-
-//  allocate global-sized array on each DE and fill with distributed data
-//  from current Array
-    int gsize=1;
-    int lsize=1;
-    for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
-      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-    }
-
-    // switch based on datatype  TODO: this might be a good place to use templates
-    switch (this->type) {
-      case ESMF_DATA_REAL:
-        // allocate global array from this size
-        fp = new float[gsize];
-
-        // call layoutgather to fill this array
-        fp0 = (float *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                          ai_comp, ai_local, fp);
-
-        // switch based on array rank
-        switch (this->rank) {
-          case 1:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-          case 2:
-            {
-              //  copy total domain of Array from global array
-              int gmax[2];
-              int lmax[2];
-              int lstart[2];
-              gmax[0] = 1;
-              for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = ai_local[i].min - ai_local[i].min + 1;
-                lstart[i] = ai_comp[i].gstart + ai_local[i].min;
-              }
-              int local, global;
-              for (j=0; j<lmax[1]; j++) {
-                j_exc = j + lstart[1] - ai_comp[1].min;
-                if (j_exc>=0 && j_exc<ai_comp[1].max) {
-                  for (i=0; i<lmax[0]; i++) {
-                    i_exc = i + lstart[0] - ai_comp[0].min;
-                    if (i_exc>=0 && i_exc<ai_comp[0].max) {
-                      local  = lmax[0]*j + i;
-                      global = gmax[1]*j_exc +
-                               gmax[0]*i_exc;
-                      fp0[local] = fp[global];
-                    }
-                  }
-                }
-              }
-            }
-          break;
-          case 3:
-            {
-              //  copy total domain of Array from global array
-              int gmax[3];
-              int lmax[3];
-              int lstart[3];
-              gmax[0] = 1;
-              for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
-              }
-              int local, global;
-              for (k=0; k<lmax[2]; k++) {
-                for (j=0; j<lmax[1]; j++) {
-                  for (i=0; i<lmax[0]; i++) {
-                    local  = lmax[1]*lmax[0]*k +
-                             lmax[0]*j + i;
-                    global = gmax[2]*gmax[1]*(k+lstart[2]) + 
-                             gmax[1]*(j+lstart[1]) +
-                             gmax[0]*(i+lstart[0]);
-                    fp0[local] = fp[global];
-                  }
-                }
-              }
-            }
-          break;
-          case 4:
-            {
-              //  copy total domain of Array from global array
-              int gmax[4];
-              int lmax[4];
-              int lstart[4];
-              gmax[0] = 1;
-              for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = ai_local[i].min - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
-              }
-              int local, global;
-              for (l=0; l<lmax[3]; l++) {
-                for (k=0; k<lmax[2]; k++) {
-                  for (j=0; j<lmax[1]; j++) {
-                    for (i=0; i<lmax[0]; i++) {
-                      local  = lmax[2]*lmax[1]*lmax[0]*l +
-                               lmax[1]*lmax[0]*k + 
-                               lmax[0]*j + i;
-                      global = gmax[3]*gmax[2]*gmax[1]*(l+lstart[3]) +
-                               gmax[2]*gmax[1]*(k+lstart[2]) + 
-                               gmax[1]*(j+lstart[1]) +
-                               gmax[0]*(i+lstart[0]);
-                      fp0[local] = fp[global];
-                    }
-                  }
-                }
-              }
-            }
-          break;
-          case 5:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-          default:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-        }
-
-        // deallocate global array
-        delete [] fp;
-      break;
-
-      case ESMF_DATA_INTEGER:
-        // allocate global array from this size
-        ip = new int[gsize];
-
-        // call layoutgather to fill this array
-        ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                          ai_comp, ai_local, ip);
-
-        // switch based on array rank
-        switch (this->rank) {
-          case 1:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-          case 2:
-            {
-              //  copy total domain of Array from global array
-              int gmax[2];
-              int lmax[2];
-              int lstart[2];
-              gmax[0] = 1;
-              for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_comp[i].gstart + ai_local[i].min;
-              }
-              int local, global;
-              for (j=0; j<lmax[1]; j++) {
-                j_exc = j + lstart[1] - ai_comp[1].min;
-                if (j_exc>=0 && j_exc<ai_comp[1].max) {
-                  for (i=0; i<lmax[0]; i++) {
-                    i_exc = i + lstart[0] - ai_comp[0].min;
-                    if (i_exc>=0 && i_exc<ai_comp[0].max) {
-                      local  = lmax[0]*j + i;
-                      global = gmax[1]*j_exc +
-                               gmax[0]*i_exc;
-                      ip0[local] = ip[global];
-                    }
-                  }
-                }
-              }
-            }
-          break;
-          case 3:
-            {
-              //  copy total domain of Array from global array
-              int gmax[3];
-              int lmax[3];
-              int lstart[3];
-              gmax[0] = 1;
-              for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
-              }
-              int local, global;
-              for (k=0; k<lmax[2]; k++) {
-                for (j=0; j<lmax[1]; j++) {
-                  for (i=0; i<lmax[0]; i++) {
-                    local  = lmax[1]*lmax[0]*k +
-                             lmax[0]*j + i;
-                    global = gmax[2]*gmax[1]*(k+lstart[2]) + 
-                             gmax[1]*(j+lstart[1]) +
-                             gmax[0]*(i+lstart[0]);
-                    ip0[local] = ip[global];
-                  }
-                }
-              }
-            }
-          break;
-          case 4:
-            {
-              //  copy total domain of Array from global array
-              int gmax[4];
-              int lmax[4];
-              int lstart[4];
-              gmax[0] = 1;
-              for (i=1; i<this->rank; i++) {
-                gmax[i] = ai_comp[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = ai_local[i].max - ai_local[i].min + 1;
-                lstart[i] = ai_local[i].gstart + ai_local[i].min;
-              }
-              int local, global;
-              for (l=0; l<lmax[3]; l++) {
-                for (k=0; k<lmax[2]; k++) {
-                  for (j=0; j<lmax[1]; j++) {
-                    for (i=0; i<lmax[0]; i++) {
-                      local  = lmax[2]*lmax[1]*lmax[0]*l +
-                               lmax[1]*lmax[0]*k + 
-                               lmax[0]*j + i;
-                      global = gmax[3]*gmax[2]*gmax[1]*(l+lstart[3]) +
-                               gmax[2]*gmax[1]*(k+lstart[2]) + 
-                               gmax[1]*(j+lstart[1]) +
-                               gmax[0]*(i+lstart[0]);
-                      ip0[local] = ip[global];
-                    }
-                  }
-                }
-              }
-            }
-          break;
-          case 5:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-          default:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-        }
-
-        // deallocate global array
-        delete [] ip;
-      break;
-      default:
-        printf("no code to handle data type %d yet\n", this->type);
-      break;
-    }
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- } // end ESMC_ArrayHalo
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayAllGather - gather a distributed Array onto all DE's
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayAllGather(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout,     // in  - layout (temporarily)
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the Array
-      int size_decomp,           // in  - size of decomp array
-      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
-//
-// !DESCRIPTION:
-//      
-//     
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;     // general counter vars
-    int i_exc, j_exc;
-    float *fp, *fp0;
-    int *ip, *ip0;
-    int counts[ESMF_MAXDIM];
-    ESMC_Array *gathered;
-
-//  allocate global-sized array on each DE and fill with distributed data
-//  from current Array
-    int gsize=1;
-    int lsize=1;
-    for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
-      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-      counts[i] = ai_comp[i].max;
-    }
-
-    // switch based on datatype  TODO: this might be a good place to use templates
-    switch (this->type) {
-      case ESMF_DATA_REAL:
-        // create array with global data buffer
-        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-        // allocate global array from this size
-        fp = (float *)(gathered->base_addr);
-
-        // call layoutgather to fill this array
-        fp0 = (float *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                          ai_comp, ai_local, fp);
-
-      break;
-
-      case ESMF_DATA_INTEGER:
-        // create array with global data
-        gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-        // allocate global array from this size
-        ip = (int *)(gathered->base_addr);
-
-        // call layoutgather to fill this array
-        ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                          ai_comp, ai_local, ip);
-
-      break;
-      default:
-        printf("no code to handle data type %d yet\n", this->type);
-      break;
-    }
-
-    //gathered->ESMC_ArrayPrint();
-
-    *Array_out = gathered;
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- } // end ESMC_ArrayAllGather
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayGather - gather a distributed Array onto 1 DE
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayGather(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout,     // in  - layout (temporarily)
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the Array
-      int size_decomp,           // in  - size of decomp array
-      int deid,                  // in  - the DE to collect the data on
-      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
-//
-// !DESCRIPTION:
-//      
-//     
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;     // general counter vars
-    int thisde;
-    int i_exc, j_exc;
-    float *fp, *fp0;
-    int *ip, *ip0;
-    int counts[ESMF_MAXDIM];
-    ESMC_Array *gathered;
-
-//  allocate global-sized array on 1 DE and fill with distributed data
-//  from each current Array
-    int gsize=1;
-    int lsize=1;
-    for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
-      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-      counts[i] = ai_comp[i].max;
-    }
-
-    layout->ESMC_DELayoutGetDEID(&thisde);
-
-    // switch based on datatype  TODO: this might be a good place to use templates
-    switch (this->type) {
-      case ESMF_DATA_REAL:
-        // create array with global data buffer
-        if (thisde == deid) {
-          gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-          // allocate global array from this size
-          fp = (float *)(gathered->base_addr);
-
-          // call layoutgather to fill this array
-          fp0 = (float *)this->base_addr;
-
-          // call something which will do a receive
-          layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                            ai_comp, ai_local, fp);
-        } else {
-          // call something which will do a send
-          layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
-                                            ai_comp, ai_local, fp);
-        } 
-
-      break;
-
-      case ESMF_DATA_INTEGER:
-        // create array with global data
-        if (thisde == deid) {
-          gathered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-          // allocate global array from this size
-          ip = (int *)(gathered->base_addr);
-
-          // call layoutgather to fill this array
-
-          // call something which will do a receive
-          ip0 = (int *)this->base_addr;
-          layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                            ai_comp, ai_local, ip);
-        } else {
-          // call something which will do a send
-          layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
-                                            ai_comp, ai_local, ip);
-        }
-      break;
-      default:
-        printf("no code to handle data type %d yet\n", this->type);
-      break;
-    }
-
-    //gathered->ESMC_ArrayPrint();
-
-    if (thisde == deid)
-       *Array_out = gathered;
-    else
-       *Array_out = NULL;
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- } // end ESMC_ArrayGather
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayScatter - scatter a single Array onto N distributed DEs
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayScatter(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout,     // in  - layout (temporarily)
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the Array
-      int size_decomp,           // in  - size of decomp array
-      int deid,                  // in  - the DE the original Array is on
-      ESMC_Array **Array_out) {  // out - new Array on all DE's with the global data
-//
-// !DESCRIPTION:
-//      
-//     
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;     // general counter vars
-    int thisde;
-    int i_exc, j_exc;
-    float *fp, *fp0;
-    int *ip, *ip0;
-    int counts[ESMF_MAXDIM];
-    ESMC_Array *scattered;
-
-#if 0
-    // TODO: this is simply a copy of gather - it needs to be fleshed out
-    // and completed.
-
-//  allocate global-sized array on 1 DE and fill with distributed data
-//  from each current Array
-    int gsize=1;
-    int lsize=1;
-    for (i=0; i<rank; i++) {
-      gsize = gsize * ai_comp[i].max;
-      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);
-      counts[i] = ai_comp[i].max;
-    }
-
-    layout->ESMC_DELayoutGetDEID(&thisde);
-
-    // switch based on datatype  TODO: this might be a good place to use templates
-    switch (this->type) {
-      case ESMF_DATA_REAL:
-        // create array with global data buffer
-        if (thisde == deid) {
-          scattered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-          // allocate global array from this size
-          fp = (float *)(scattered->base_addr);
-
-          // call layoutscatter to fill this array
-          fp0 = (float *)this->base_addr;
-
-          // call something which will do a receive
-          layout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
-                                            ai_comp, ai_local, fp);
-        } else {
-          // call something which will do a send
-          layout->ESMC_DELayoutScatterArrayF(fp0, decompids, size_decomp, 
-                                            ai_comp, ai_local, fp);
-        } 
-
-      break;
-
-      case ESMF_DATA_INTEGER:
-        // create array with global data
-        if (thisde == deid) {
-          scattered = ESMC_ArrayCreate(this->rank, this->type, this->kind, counts);
-          // allocate global array from this size
-          ip = (int *)(scattered->base_addr);
-
-          // call layoutscatter to fill this array
-
-          // call something which will do a receive
-          ip0 = (int *)this->base_addr;
-          layout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
-                                            ai_comp, ai_local, ip);
-        } else {
-          // call something which will do a send
-          layout->ESMC_DELayoutScatterArrayI(ip0, decompids, size_decomp, 
-                                            ai_comp, ai_local, ip);
-        }
-      break;
-      default:
-        printf("no code to handle data type %d yet\n", this->type);
-      break;
-    }
-
-    //scattered->ESMC_ArrayPrint();
-
-    *Array_out = scattered;
-    rc = ESMF_SUCCESS;
-#endif
-
-    *Array_out = NULL;
-    rc = ESMF_FAILURE;
-
-    return rc;
-
- } // end ESMC_ArrayScatter
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayRedist - general redistribution of an Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayRedist(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_DELayout *layout,     // in  - layout (temporarily)
-      int rank_trans[],          // in  - translation of old ranks to new
-                                 //       Array
-      int size_rank_trans,       // in  - size of rank_trans array
-      int olddecompids[],        // in  - decomposition identifier for each
-                                 //       axis for the original Array
-      int decompids[],           // in  - decomposition identifier for each
-                                 //       axis for the redistributed Array
-      int size_decomp,           // in  - size of decomp arrays
-      ESMC_Array *RedistArray) { // out - Redistributed Array
-//
-// !DESCRIPTION:
-//      
-//     
-//
-//EOP
-// !REQUIREMENTS:  XXXn.n, YYYn.n
-
-    int rc = ESMF_FAILURE;
-    int i, j, k, l, m;     // general counter vars
-    float *fp;
-    int *ip, *ip0;
-
-//  allocate global-sized array on each DE and fill with distributed data
-//  from current Array
-    int gsize=1;
-    int lsize=1;
-    for (i=0; i<rank; i++) {
-      gsize = gsize * ai_global[i].stride;  // jw?  needs to be size of global array
-      lsize = lsize * (ai_comp[i].max - ai_comp[i].min+1);  // jw?
-    }
-
-    // switch based on datatype
-    switch (this->type) {
-      case ESMF_DATA_REAL:
-        // allocate global array from this size
-        fp = new float[gsize];
-        delete [] fp;
-      break;
-      case ESMF_DATA_INTEGER:
-        // allocate global array from this size
-        ip = new int[gsize];
-
-        // call layoutgather to fill this array
-        ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, olddecompids, size_decomp, 
-                                          this->ai_comp, this->ai_comp, ip);
-
-        // switch based on array rank
-        switch (this->rank) {
-          case 1:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-          case 2:
-            {
-             //  copy decomposed piece of global array into new Array
-              int gmax[2];
-              int lmax[2];
-              int lstart[2];
-              gmax[rank_trans[0]-1] = 1;
-              for (i=1; i<this->rank; i++) {
-                int i_new = rank_trans[i]-1;
-                gmax[i_new] = ai_comp[i-1].max;  // jw?
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = RedistArray->ai_comp[i].max 
-                        - RedistArray->ai_comp[i].min + 1;
-                lstart[i] = RedistArray->ai_comp[i].gstart  // jw nasty
-                          + RedistArray->ai_comp[i].min;
-              }
-              int *ip2 = (int *)RedistArray->base_addr;
-              int local, global;
-              for (j=0; j<lmax[1]; j++) {
-                for (i=0; i<lmax[0]; i++) {
-                  local  = lmax[0]*j + i;
-                  global = gmax[1]*(j+lstart[1]) +
-                           gmax[0]*(i+lstart[0]);
-                  ip2[local] = ip[global];
-                }
-              }
-            }
-          break;
-          case 3:
-            {
-              //  copy decomposed piece of global array into new Array
-              int gmax[3];
-              int lmax[3];
-              int lstart[3];
-              gmax[rank_trans[0]-1] = 1;
-              for (i=1; i<this->rank; i++) {
-                int i_new = rank_trans[i]-1;
-                gmax[i_new] = ai_local[i-1].max;  // jw?
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = RedistArray->ai_local[i].max
-                        - RedistArray->ai_local[i].min + 1;
-                lstart[i] = RedistArray->ai_local[i].gstart
-                          + RedistArray->ai_local[i].min;
-              }
-              int *ip2 = (int *)RedistArray->base_addr;
-              int local, global;
-              for (k=0; k<lmax[2]; k++) {
-                for (j=0; j<lmax[1]; j++) {
-                  for (i=0; i<lmax[0]; i++) {
-                    local  = lmax[1]*lmax[0]*k +
-                             lmax[0]*j + i;
-                    global = gmax[2]*gmax[1]*(k+lstart[2]) + 
-                             gmax[1]*(j+lstart[1]) +
-                             gmax[0]*(i+lstart[0]);
-                    ip2[local] = ip[global];
-                  }
-                }
-              }
-            }
-          break;
-          case 4:
-            {
-              // call allgatherv to fill this array or if Earl works out a method
-
-              //  copy decomposed piece of global array into new Array
-              int gmax[4];
-              int lmax[4];
-              int lstart[4];
-              gmax[rank_trans[0]] = 1;
-              for (i=1; i<this->rank; i++) {
-                int i_new = rank_trans[i];
-                gmax[i_new] = ai_local[i-1].max;
-              }
-              for (i=0; i<this->rank; i++) {
-                lmax[i] = RedistArray->ai_local[i].max
-                        - RedistArray->ai_local[i].min + 1;
-                lstart[i] = RedistArray->ai_local[i].gstart
-                          + RedistArray->ai_local[i].min;
-              }
-              int *ip2 = (int *)RedistArray->base_addr;
-              int local, global;
-              for (l=0; l<lmax[3]; l++) {
-                for (k=0; k<lmax[2]; k++) {
-                  for (j=0; j<lmax[1]; j++) {
-                    for (i=0; i<lmax[0]; i++) {
-                      local  = lmax[2]*lmax[1]*lmax[0]*l +
-                               lmax[1]*lmax[0]*k + 
-                               lmax[0]*j + i;
-                      global = gmax[3]*gmax[2]*gmax[1]*(l+lstart[3]) +
-                               gmax[2]*gmax[1]*(k+lstart[2]) + 
-                               gmax[1]*(j+lstart[1]) +
-                               gmax[0]*(i+lstart[0]);
-                      ip2[local] = ip[global];
-                    }
-                  }
-                }
-              }
-            }
-          break;
-          case 5:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-          default:
-            printf("no code to handle array rank %d yet\n", this->rank);
-          break;
-        }
-
-        // deallocate global array
-        delete [] ip;
-      break;
-      default:
-        printf("no code to handle data type %d yet\n", this->type);
-      break;
-    }
-
-    rc = ESMF_SUCCESS;
-    return rc;
-
- } // end ESMC_ArrayRedist
-
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_ArrayValidate - internal consistency check for a Array
-//
-// !INTERFACE:
-      int ESMC_Array::ESMC_ArrayValidate(
+      int ESMC_LocalArray::ESMC_LocalArrayValidate(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1485,7 +589,7 @@
       const char *options) const {    // in - validate options
 //
 // !DESCRIPTION:
-//      Validates that a {\tt ESMC\_Array} is internally consistent.
+//      Validates that a {\tt ESMC\_LocalArray} is internally consistent.
 //      Returns error code if problems are found.  {\tt ESMC\_Base} class method.
 //
 //EOP
@@ -1498,15 +602,15 @@
 
     return rc;
 
- } // end ESMC_ArrayValidate
+ } // end ESMC_LocalArrayValidate
 
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayPrint - print contents of a Array
+// !IROUTINE:  ESMC_LocalArrayPrint - print contents of a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayPrint(
+      int ESMC_LocalArray::ESMC_LocalArrayPrint(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1515,8 +619,9 @@
       const char *options) const {     //  in - print options
 //
 // !DESCRIPTION:
-//      Print information about a {\tt ESMC\_Array}.  The options control the
-//      type of information and level of detail.  {\tt ESMC\_Base} class method.
+//      Print information about a {\tt ESMC\_LocalArray}.  The options control
+//      the type of information and level of detail.  {\tt ESMC\_Base} class
+//      method. 
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -1732,14 +837,14 @@
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_ArrayPrint
+ } // end ESMC_LocalArrayPrint
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_ArrayWrite - write contents of a Array
+// !IROUTINE:  ESMC_LocalArrayWrite - write contents of a LocalArray
 //
 // !INTERFACE:
-      int ESMC_Array::ESMC_ArrayWrite(
+      int ESMC_LocalArray::ESMC_LocalArrayWrite(
 //
 // !RETURN VALUE:
 //    int error return code
@@ -1749,7 +854,7 @@
       const char *filename) const {    // in - file name
 //
 // !DESCRIPTION:
-//      Write the contents of an {\tt ESMC\_Array} to disk.
+//      Write the contents of an {\tt ESMC\_LocalArray} to disk.
 //
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
@@ -1881,17 +986,17 @@
     rc = ESMF_SUCCESS;
     return rc;
 
- } // end ESMC_ArrayWrite
+ } // end ESMC_LocalArrayWrite
 
 
 
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ESMC_Array - native C++ constructor
+// !IROUTINE:  ESMC_LocalArray - native C++ constructor
 //
 // !INTERFACE:
-      ESMC_Array::ESMC_Array(
+      ESMC_LocalArray::ESMC_LocalArray(
 //
 // !RETURN VALUE:
 //    none
@@ -1910,14 +1015,14 @@
 //  code goes here
 //
 
- } // end ESMC_Array
+ } // end ESMC_LocalArray
 
 //-----------------------------------------------------------------------------
 //BOP
-// !IROUTINE:  ~ESMC_Array - native C++ destructor
+// !IROUTINE:  ~ESMC_LocalArray - native C++ destructor
 //
 // !INTERFACE:
-      ESMC_Array::~ESMC_Array(void) {
+      ESMC_LocalArray::~ESMC_LocalArray(void) {
 //
 // !RETURN VALUE:
 //    none
@@ -1935,6 +1040,6 @@
 //  code goes here
 //
 
- } // end ~ESMC_Array
+ } // end ~ESMC_LocalArray
 
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray.h,v 1.1 2003/07/10 18:52:02 nscollins Exp $
+// $Id: ESMC_LocalArray.h,v 1.2 2003/07/10 23:02:40 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -94,14 +94,15 @@ typedef enum {
 
 // private static data - address of fortran callback funcs
 extern "C" {
- void FTN(f_esmf_arrayf90allocate)(ESMC_LocalArray**, int *, ESMC_DataType*, 
+ void FTN(f_esmf_localarrayf90allocate)(ESMC_LocalArray**, int *, ESMC_DataType*, 
                                        ESMC_DataKind*, int*, int*);
- void FTN(f_esmf_arrayf90deallocate)(ESMC_LocalArray**, int*, ESMC_DataType*, 
+ void FTN(f_esmf_localarrayf90deallocate)(ESMC_LocalArray**, int*, ESMC_DataType*, 
                                        ESMC_DataKind *, int*);
 }
 
 
 // class declaration type
+class ESMC_LocalArray : public ESMC_Base {    // inherits from ESMC_Base class
 
    private:
     int rank;                      // dimensionality
@@ -221,20 +222,20 @@ extern "C" {
 
 
 // these are functions, but not class methods.
-ESMC_Array *ESMC_ArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+ESMC_LocalArray *ESMC_ArrayCreate(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
                     int *counts = NULL, void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *rc = NULL);
-int ESMC_ArrayDestroy(ESMC_Array *array);
-ESMC_Array *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
+int ESMC_ArrayDestroy(ESMC_LocalArray *array);
+ESMC_LocalArray *ESMC_ArrayCreate_F(int rank, ESMC_DataType dt, ESMC_DataKind dk, 
                     int *icounts = NULL, struct c_F90ptr *f90ptr = NULL, 
                     void *base = NULL, 
                     ESMC_DataCopy docopy = ESMC_DATA_REF,
                     int *lbounds = NULL, int *ubounds = NULL, 
                     int *strides = NULL, int *offsets = NULL, int *rc = NULL);
-ESMC_Array *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
+ESMC_LocalArray *ESMC_ArrayCreateNoData(int rank, ESMC_DataType dt, 
                                    ESMC_DataKind dk, ESMC_ArrayOrigin oflag,
                                    int *rc = NULL);
 
 
- #endif  // ESMC_Array_H
+ #endif  // ESMC_LocalArray_H
