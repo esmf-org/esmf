@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.40 2004/11/09 21:53:07 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.41 2004/11/15 16:56:55 theurich Exp $
 !
 ! Earth System Modeling Frameworkls
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -588,7 +588,10 @@ end subroutine ESMF_LogGet
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
 	
     if (present(rc)) rc=ESMF_FAILURE
-    if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
+    ESMF_LogDefault%logNone = ESMF_FALSE !default is to log
+    if (present(lognone)) then
+      if (lognone .eq. ESMF_LOG_NONE) ESMF_LogDefault%logNone = ESMF_TRUE 
+    endif
     ESMF_LogDefault%FileIsOpen=ESMF_FALSE
     ESMF_LogDefault%nameLogErrFile=filename
     ESMF_LogDefault%halt=ESMF_LOG_HALTNEVER
