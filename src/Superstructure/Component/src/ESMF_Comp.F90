@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.5 2003/02/04 20:20:23 nscollins Exp $
+! $Id: ESMF_Comp.F90,v 1.6 2003/02/04 21:15:35 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -143,7 +143,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.5 2003/02/04 20:20:23 nscollins Exp $'
+      '$Id: ESMF_Comp.F90,v 1.6 2003/02/04 21:15:35 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -277,7 +277,7 @@ end interface
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_CompCreateNoData
+! !IROUTINE: ESMF_CompCreateNoData - Create a Component with no initial data
 
 ! !INTERFACE:
       function ESMF_CompCreateNoData(rc)
