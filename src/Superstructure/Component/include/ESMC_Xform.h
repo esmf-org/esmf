@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.h,v 1.2 2003/01/23 21:05:50 nscollins Exp $
+// $Id: ESMC_Xform.h,v 1.3 2003/02/05 03:50:04 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,6 @@
  // Put any constants or macros which apply to the whole component in this file.
  // Anything public or esmf-wide should be up higher at the top level
  // include files.
- #include <ESMC_Comp.h> 
 
 //-----------------------------------------------------------------------------
 //BOP
@@ -49,7 +48,6 @@
 // !PUBLIC TYPES:
  class ESMC_XformConfig;
  class ESMC_Xform;
- class ESMC_State;
 
 // !PRIVATE TYPES:
 
@@ -69,8 +67,7 @@
 //
 
   public:
-    int ESMC_XformInit(void);
-    int ESMC_XformApply(ESMC_State *state);
+    int ESMC_XformInit(char *name, void *funcp);
 
  // optional configuration methods
     int ESMC_XformGetConfig(ESMC_XformConfig *config) const;
@@ -84,12 +81,9 @@
     int ESMC_XformValidate(const char *options) const;
     int ESMC_XformPrint(const char *options) const;
 
- // secondary construct/destruct methods
-    int ESMC_XformConstruct(void);
-    int ESMC_XformDestruct(void);
 
  // native C++ constructors/destructors
-	ESMC_Xform(void);
+ 	ESMC_Xform(void);
 	~ESMC_Xform(void);
   
  // < declare the rest of the public interface methods here >
@@ -105,14 +99,5 @@
 
  };   // end class ESMC_Xform
 
-// Create and Destroy are declared as class helper functions (not methods)
-// since they create and destroy an ESMC_Xform object itself. E.g. if Create
-// were a method, the ESMC_Xform object on whose behalf it was being invoked
-// would need to already exist!  These functions are supersets of C++ new
-// and delete; they perform allocation/deallocation specialized to
-// an ESMC_Xform object.
-
- ESMC_Xform *ESMC_XformCreate(int *rc);// interface only, deep class
- int ESMC_XformDestroy(ESMC_Xform *xform); // interface only, deep class
 
  #endif  // ESMC_Xform_H

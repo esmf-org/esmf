@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform_F.C,v 1.1 2003/01/07 21:38:18 nscollins Exp $
+// $Id: ESMC_Xform_F.C,v 1.2 2003/02/05 03:49:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,6 +22,7 @@
 #include "ESMC.h"
 #include "ESMC_Base.h"
 #include "ESMC_Xform.h"
+
 //------------------------------------------------------------------------------
 //BOP
 // !DESCRIPTION:
@@ -35,13 +36,10 @@
 // the interface subroutine names MUST be in lower case
 extern "C" {
 
-     void FTN(c_esmc_xformcreate)(ESMC_Xform *ptr, int *status) {
-         ptr = ESMC_XformCreate(status);
+     void FTN(c_esmc_xforminit)(ESMC_Xform *ptr, char *name, void *funcp, int *status) {
+         *status = ptr->ESMC_XformInit(name, funcp);
      }
 
-     void FTN(c_esmc_xformdestroy)(ESMC_Xform *ptr, int *status) {
-         *status = ESMC_XformDestroy(ptr);
-     }
 
      void FTN(c_esmc_xformprint)(ESMC_Xform *ptr, char *opts, int *status) {
          *status = ptr->ESMC_XformPrint(opts);

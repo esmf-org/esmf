@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.C,v 1.3 2003/02/03 18:41:19 nscollins Exp $
+// $Id: ESMC_Xform.C,v 1.4 2003/02/05 03:49:34 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,14 +35,14 @@
 //-----------------------------------------------------------------------------
 
  // associated class definition file
- #include <ESMC_Xform.h>
+ #include "ESMC_Xform.h"
 
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Xform.C,v 1.3 2003/02/03 18:41:19 nscollins Exp $";
+ static const char *const version = 
+               "$Id: ESMC_Xform.C,v 1.4 2003/02/05 03:49:34 nscollins Exp $";
 //-----------------------------------------------------------------------------
-
 //
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
@@ -53,132 +53,7 @@
 
 //-----------------------------------------------------------------------------
 //BOP
-// !ROUTINE:  ESMC_XformCreate - Create a new Xform
-//
-// !INTERFACE:
-      ESMC_Xform *ESMC_XformCreate(
-//
-// !RETURN VALUE:
-//     pointer to newly allocated ESMC_Xform
-//
-// !ARGUMENTS:
-      int *rc) {           // out - return code
-//
-// !DESCRIPTION:
-//      Create a new Xform from ... Allocates memory for a new Xform
-//      object and uses the internal routine ESMC\_XformContruct to
-//      initialize it.  Define for deep classes only, for shallow classes only
-//      define and use ESMC\_XformInit.
-//      There can be multiple overloaded methods with the same name, but
-//      different argument lists.
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC\_Xform.h)
-//
-//EOP
-// !REQUIREMENTS:  AAAn.n.n
-
-//
-//  code goes here
-//
-    return new ESMC_Xform;
-
- } // end ESMC_XformCreate
-
-//-----------------------------------------------------------------------------
-//BOP
-// !ROUTINE:  ESMC_XformDestroy - free a Xform created with Create
-//
-// !INTERFACE:
-      int ESMC_XformDestroy(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      ESMC_Xform *xform) {    // in - xform object to destroy
-//
-// !DESCRIPTION:
-//      ESMF routine which destroys a Xform object previously allocated
-//      via an ESMC\_XformCreate routine.  Define for deep classes only.
-//
-//      Note: this is a class helper function, not a class method
-//      (see declaration in ESMC\_Xform.h)
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_XformDestroy
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XformConstruct - fill in an already allocated Xform
-//
-// !INTERFACE:
-      int ESMC_Xform::ESMC_XformConstruct(
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-      void) { 
-//
-// !DESCRIPTION:
-//      ESMF routine which fills in the contents of an already
-//      allocated Xform object.  May need to do additional allocations
-//      as needed.  Must call the corresponding ESMC\_XformDestruct
-//      routine to free the additional memory.  Intended for internal
-//      ESMF use only; end-users use ESMC\_XformCreate, which calls
-//      ESMC\_XformConstruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_XformConstruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XformDestruct - release resources associated w/a Xform
-//
-// !INTERFACE:
-      int ESMC_Xform::ESMC_XformDestruct(void) {
-//
-// !RETURN VALUE:
-//    int error return code
-//
-// !ARGUMENTS:
-//    none
-//
-// !DESCRIPTION:
-//      ESMF routine which deallocates any space allocated by
-//      ESMF\_XformConstruct, does any additional cleanup before the
-//      original Xform object is freed.  Intended for internal ESMF
-//      use only; end-users use ESMC\_XformDestroy, which calls
-//      ESMC\_XformDestruct.  Define for deep classes only.
-//
-//EOP
-// !REQUIREMENTS:  developer's guide for classes
-
-//
-//  code goes here
-//
-    return ESMF_FAILURE;
-
- } // end ESMC_XformDestruct
-
-//-----------------------------------------------------------------------------
-//BOP
-// !IROUTINE:  ESMC_XformInit - initializes a Xform object
+// !ROUTINE:  ESMC_XformInit - Initialize a new Xform
 //
 // !INTERFACE:
       int ESMC_Xform::ESMC_XformInit(
@@ -187,23 +62,25 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      void) { 
+      char *name,          // in - xform name
+      void *funcp) {       // in - xform function to execute
 //
 // !DESCRIPTION:
-//      ESMF routine which only initializes Xform values; it does not
-//      allocate any resources.  Define for shallow classes only,
-//      for deep classes define and use routines Create/Destroy and
-//      Construct/Destruct.  Can be overloaded like ESMC\_XformCreate.
+//      Initialize a new Xform object.   This is a shallow class.
+//
 //
 //EOP
-// !REQUIREMENTS:  developer's guide for classes
+// !REQUIREMENTS:  AAAn.n.n
 
 //
 //  code goes here
 //
+    // this->name = name;
+    // this->funcp = funcp;
     return ESMF_FAILURE;
 
  } // end ESMC_XformInit
+
 
 //-----------------------------------------------------------------------------
 //BOP
