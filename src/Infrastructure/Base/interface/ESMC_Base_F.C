@@ -1,4 +1,4 @@
-// $Id: ESMC_Base_F.C,v 1.29 2004/11/18 20:45:40 nscollins Exp $
+// $Id: ESMC_Base_F.C,v 1.30 2004/11/30 23:43:55 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -30,7 +30,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base_F.C,v 1.29 2004/11/18 20:45:40 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base_F.C,v 1.30 2004/11/30 23:43:55 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -185,7 +185,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  c_ESMC_BaseSerialize - Serialize Base object 
 //
 // !INTERFACE:
@@ -204,7 +204,7 @@ extern "C" {
 // !DESCRIPTION:
 //     Serialize the contents of a base object.
 //
-//EOP
+//EOPI
 
   int i, status;
 
@@ -223,7 +223,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  c_ESMC_BaseDeserialize - Deserialize Base object 
 //
 // !INTERFACE:
@@ -241,7 +241,7 @@ extern "C" {
 // !DESCRIPTION:
 //     Deserialize the contents of a base object.
 //
-//EOP
+//EOPI
 
   int i, status;
 
@@ -309,7 +309,89 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
+// !IROUTINE:  c_ESMC_StringSerialize - Serialize String object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_stringserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      char *string,             // in/out - string object
+      char *buf,                // in/out - really a byte stream
+      int *length,              // in/out - number of allocated bytes
+      int *offset,              // in/out - current offset in the stream
+      int *rc,                  // out - return code
+      int clen) {               // in, hidden - string length
+// 
+// !DESCRIPTION:
+//     Serialize the contents of a string object.
+//
+//EOPI
+
+  char *cp;
+
+  if (!string) {
+    //printf("uninitialized String object\n");
+    ESMC_LogDefault.ESMC_LogWrite("String object uninitialized", ESMC_LOG_INFO);
+    if (rc) *rc = ESMF_SUCCESS;
+    return;
+  }
+
+  cp = buf + *offset;
+  memcpy(cp, string, clen);
+  cp += clen;
+  
+  *offset = cp - buf;
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_StringSerialize
+
+
+//-----------------------------------------------------------------------------
+//BOPI
+// !IROUTINE:  c_ESMC_StringDeserialize - Deserialize String object 
+//
+// !INTERFACE:
+      void FTN(c_esmc_stringdeserialize)(
+//
+// !RETURN VALUE:
+//    none.  return code is passed thru the parameter list
+// 
+// !ARGUMENTS:
+      char *string,             // in/out - string object
+      char *buf,                // in/out - really a byte stream
+      int *offset,              // in/out - current offset in the stream
+      int *rc,                  // out - return code
+      int clen) {               // in, hidden - string length
+// 
+// !DESCRIPTION:
+//     Deserialize the contents of a base object.
+//
+//EOPI
+
+  char *cp;
+
+  cp = buf + *offset;
+  memcpy(string, cp, clen);
+  cp += clen;
+  
+  *offset = cp - buf;
+
+  if (rc) *rc = ESMF_SUCCESS;
+
+  return;
+
+}  // end c_ESMC_StringDeserialize
+
+
+//-----------------------------------------------------------------------------
+//BOPI
 // !IROUTINE:  c_ESMC_GetName - return the object name to a Fortran caller
 //
 // !INTERFACE:
@@ -327,7 +409,7 @@ extern "C" {
 // !DESCRIPTION:
 //     return the name to a Fortran caller.
 //
-//EOP
+//EOPI
 
   int i, status;
 
@@ -345,7 +427,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  c_ESMC_SetName - set the object name from an F90 caller
 //
 // !INTERFACE:
@@ -365,7 +447,7 @@ extern "C" {
 // !DESCRIPTION:
 //     set the name from an F90 caller.
 //
-//EOP
+//EOPI
 
   int i, status;
   char *oname = NULL;
@@ -405,7 +487,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  c_ESMC_GetClassName - return the object name to a Fortran caller
 //
 // !INTERFACE:
@@ -423,7 +505,7 @@ extern "C" {
 // !DESCRIPTION:
 //     return the name to a Fortran caller.
 //
-//EOP
+//EOPI
 
   int i, status;
 
@@ -441,7 +523,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  c_ESMC_GetID - return the object id to the caller
 //
 // !INTERFACE:
@@ -458,7 +540,7 @@ extern "C" {
 // !DESCRIPTION:
 //     return the object ID to a Fortran caller.
 //
-//EOP
+//EOPI
 
   int i, status;
 
@@ -477,7 +559,7 @@ extern "C" {
 
 
 //-----------------------------------------------------------------------------
-//BOP
+//BOPI
 // !IROUTINE:  c_ESMC_SetID - set an object id 
 //
 // !INTERFACE:
@@ -494,7 +576,7 @@ extern "C" {
 // !DESCRIPTION:
 //     set an object ID from a Fortran caller.
 //
-//EOP
+//EOPI
 
   int i, status;
 
