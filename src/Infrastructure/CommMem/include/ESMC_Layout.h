@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.h,v 1.4 2003/01/09 02:15:54 eschwab Exp $
+// $Id: ESMC_Layout.h,v 1.5 2003/01/09 19:55:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -102,7 +102,7 @@ enum ESMC_CommHint_e {ESMC_NOHINT, ESMC_XFAST, ESMC_YFAST, ESMC_ZFAST};
                              ESMC_CommHint_e commhint); 
                                              // internal only, deep class
     int ESMC_LayoutDestruct(void);           // internal only, deep class
-//    int ESMC_LayoutInit(args);
+    int ESMC_LayoutInit(void);
 
  // optional configuration methods
 //    int ESMC_LayoutGetConfig(ESMC_LayoutConfig *config) const;

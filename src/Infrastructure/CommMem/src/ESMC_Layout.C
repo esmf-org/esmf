@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.7 2003/01/09 19:55:10 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.6 2003/01/09 02:16:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.7 2003/01/09 19:55:10 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -213,24 +213,8 @@ cout << "ESMC_LayoutDestroy() successful\n";
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-  //
-  // initialize my DE, PE, Comm, and Machine model
-  //
-  int argc = 0;    // pass into LayoutCreate ?
-  char **argv = 0; // pass into LayoutCreate ?
-  int myDEid=0, mypeid=0, mycpuid=0, mynodeid=0;
-  myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: pass into LayoutCreate ?
-  comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
-  myPE.ESMC_PEInit(&Mach);        // gets cpu, node ids from machine
-  myDE.ESMC_DEGetESMFID(&myDEid);
-  myPE.ESMC_PESetEsmfID(myDEid);  // assume 1-to-1 DE-to-PE for now TODO: ?
-//cout << "myDEid = " << myDEid << "\n";
-
-  myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
-  myPE.ESMC_PEGetCpuID(&mycpuid);
-  myPE.ESMC_PEGetNodeID(&mynodeid);
-//cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
-//       << mynodeid << "\n";
+  // Initialize comm, PE, DE, Machine
+  ESMC_LayoutInit();
 
   //
   // construct 2D array of ESMC_DE's
@@ -333,6 +317,9 @@ cout << "ESMC_LayoutDestroy() successful\n";
 //
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
+
+  // Initialize comm, PE, DE, Machine
+  ESMC_LayoutInit();
 
   // construct 3D array of ESMC_DE's
 
@@ -500,7 +487,6 @@ cout << "ESMC_LayoutDestroy() successful\n";
 
  } // end ESMC_LayoutDestruct
 
-#if 0
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LayoutInit - initializes a Layout object
@@ -512,9 +498,7 @@ cout << "ESMC_LayoutDestroy() successful\n";
 //    int error return code
 //
 // !ARGUMENTS:
-      int arg1,            // in
-      int arg2,            // in
-      const char *arg3) {  // in
+      void) {
 //
 // !DESCRIPTION:
 //      ESMF routine which only initializes Layout values; it does not
@@ -525,12 +509,42 @@ cout << "ESMC_LayoutDestroy() successful\n";
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//
-//  code goes here
-//
+  // initialize to an empty layout 
+  layout = 0;
+  nxLayout = 0;
+  nyLayout = 0;
+  nzLayout = 0;
+  peList = 0;
+  commHint = ESMC_NOHINT;
+
+  //
+  // initialize my DE, PE, Comm, and Machine model
+  //
+  int argc = 0;    // pass into LayoutCreate ?
+  char **argv = 0; // pass into LayoutCreate ?
+  int myDEid=0;
+
+  myDE.ESMC_DESetType(ESMC_PROCESS); // TODO: pass into LayoutCreate ?
+  comm.ESMC_CommInit(&argc, &argv, &myDE); // computes unique ESMF DE id
+  myPE.ESMC_PEInit(&Mach);        // gets cpu, node ids from machine
+  myDE.ESMC_DEGetESMFID(&myDEid);
+  myPE.ESMC_PESetEsmfID(myDEid);  // assume 1-to-1 DE-to-PE for now TODO: ?
+//cout << "myDEid = " << myDEid << "\n";
+
+#if 0
+  int mypeid=0, mycpuid=0, mynodeid=0;
+  myPE.ESMC_PEGetEsmfID(&mypeid); //   (mypeid = myDEid)
+  myPE.ESMC_PEGetCpuID(&mycpuid);
+  myPE.ESMC_PEGetNodeID(&mynodeid);
+cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
+       << mynodeid << "\n";
+#endif
+
+  return(ESMF_SUCCESS);
 
  } // end ESMC_LayoutInit
 
+#if 0
 //-----------------------------------------------------------------------------
 //BOP
 // !IROUTINE:  ESMC_LayoutGetConfig - get configuration info from a Layout
@@ -906,13 +920,8 @@ cout << "ESMC_LayoutDestroy() successful\n";
 
 //cout << "ESMC_Layout() invoked\n";
 
-  // initialize to an empty layout
-  layout = 0;
-  nxLayout = 0;
-  nyLayout = 0;
-  nzLayout = 0;
-  peList = 0;
-  commHint = ESMC_NOHINT;
+  // Initialize comm, PE, DE, Machine
+  ESMC_LayoutInit();
 
  } // end ESMC_Layout
 
