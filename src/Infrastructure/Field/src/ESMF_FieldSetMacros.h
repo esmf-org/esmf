@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.7 2004/06/23 10:45:28 nscollins Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.8 2004/09/17 22:08:21 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -105,7 +105,6 @@
         type (ESMF_Array) :: array          ! array object @\
         integer :: status                   ! local error status @\
         logical :: rcpresent                ! did user specify rc? @\
-        integer, dimension(ESMF_MAXDIM) :: counts, lbounds, ubounds @\
  @\
         ! Initialize return code; assume failure until success is certain @\
         status = ESMF_FAILURE @\
@@ -117,20 +116,21 @@
           rc = ESMF_FAILURE @\
         endif @\
  @\
-        ! Test to see if pointer already associated, and fail if so. @\
-        if (associated(dataPointer)) then @\
+        ! Test to see if pointer already associated, and fail if not so. @\
+        if (.not.associated(dataPointer)) then @\
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
-                              "Data Pointer cannot already be associated", & @\
+                              "Data Pointer must already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_ArrayCreate(dataPointer, counts, haloWidth, & @\
-                lbounds, ubounds, rc=status) @\
+        array = ESMF_ArrayCreate(dataPointer, copyflag, haloWidth, & @\
+                                 rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        ! TODO: set array as data in field. @\
+        ! set array as data in field. @\
+        ! TODO: if grid present, call valiate to verify sizes match. @\
         field%ftypep%localfield%localdata = array @\
         field%ftypep%datastatus = ESMF_STATUS_READY @\
  @\
@@ -140,12 +140,4 @@
  @\
 ! < end macro - do not edit directly >  @\
 !------------------------------------------------------------------------------ @\
-
-
-
-
-
-
-
-
 
