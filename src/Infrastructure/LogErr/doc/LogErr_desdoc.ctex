@@ -1,4 +1,4 @@
-% $Id: LogErr_desdoc.ctex,v 1.7 2003/10/10 06:25:15 cdeluca Exp $
+% $Id: LogErr_desdoc.ctex,v 1.8 2003/10/14 20:45:36 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -93,12 +93,12 @@
 \input{../Infrastructure/LogErr/doc/LogErr_def}
 #endif
 
-\subsubsection{Restrictions}
-#ifdef STANDALONE
-\input{LogErr_rest}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/LogErr/doc/LogErr_rest}
-#endif
+%\subsubsection{Restrictions}
+%#ifdef STANDALONE
+%\input{LogErr_rest}
+%#elif defined(CONSTITUENT)
+%\input{../Infrastructure/LogErr/doc/LogErr_rest}
+%#endif
 
 \section{LogErr Fortran Interface}
 
