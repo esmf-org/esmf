@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.33 2003/06/27 19:52:32 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.34 2003/06/27 21:18:01 flanigan Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.33 2003/06/27 19:52:32 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.34 2003/06/27 21:18:01 flanigan Exp $'
 
 !==============================================================================
 !
@@ -2239,7 +2239,7 @@
 !           It must be the size of the entire undecomposed grid.
 !     \item [source\_de]
 !           Integer {\tt ESMF\_DE} number where the data to be Scattered is located.  The
-!           {\tt ESMF\_Array} input is ignored on all other ESMF\_DE}s.
+!           {\tt ESMF\_Array} input is ignored on all other {\tt ESMF\_DE}s.
 !     \item [field] 
 !           Empty Field containing {\tt ESMF\_Grid} which will correspond to the data 
 !           in the array which will be scattered.  When this routine returns
