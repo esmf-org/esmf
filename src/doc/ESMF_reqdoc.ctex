@@ -104,7 +104,7 @@
 \renewcommand{\thesubsection}{\shortname\arabic{section}.\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\shortname\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}
 
-#include "../Superstructure/Coupler/doc/Coupler_reqdoc.ctex"
+#include "../Superstructure/Component/doc/Coupler_reqdoc.ctex"
 
 \newpage
 \begin{htmlonly}

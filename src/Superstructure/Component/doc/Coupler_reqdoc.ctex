@@ -1,4 +1,4 @@
-% $Id: Coupler_reqdoc.ctex,v 1.1 2003/02/24 22:59:05 cdeluca Exp $
+% $Id: Coupler_reqdoc.ctex,v 1.2 2003/02/25 00:01:30 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[english]{article}
@@ -69,7 +69,7 @@
 #ifdef STANDALONE
 \input{Coupler_auth}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Coupler/doc/Coupler_auth}
+\input{../Superstructure/Component/doc/Coupler_auth}
 #endif
 
 #ifdef STANDALONE
@@ -81,14 +81,14 @@
 #ifdef STANDALONE
 \input{Coupler_background}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Coupler/doc/Coupler_background}
+\input{../Superstructure/Component/doc/Coupler_background}
 #endif
 
 %\section{\longname Terms}
 #ifdef STANDALONE
 \input{Coupler_terms}
 #elif defined(CONSTITUENT)
-%\input{../Superstructure/Coupler/doc/Coupler_terms}
+%\input{../Superstructure/Component/doc/Coupler_terms}
 #endif
 
 #ifdef STANDALONE
@@ -103,7 +103,7 @@
 #ifdef STANDALONE
 \input{Coupler_abbr}
 #elif defined(CONSTITUENT)
-%\input{../Superstructure/Coupler/doc/Coupler_abbr}
+%\input{../Superstructure/Component/doc/Coupler_abbr}
 #endif
 
 \newpage
@@ -120,7 +120,7 @@
 #ifdef STANDALONE
 \input{Coupler_req}
 #elif defined(CONSTITUENT)
-\input{../Superstructure/Coupler/doc/Coupler_req}
+\input{../Superstructure/Component/doc/Coupler_req}
 #endif
 
 #ifdef STANDALONE
