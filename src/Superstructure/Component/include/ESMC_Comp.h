@@ -1,4 +1,4 @@
-// $Id: ESMC_Comp.h,v 1.6 2003/03/11 03:01:07 cdeluca Exp $
+// $Id: ESMC_Comp.h,v 1.7 2003/03/21 17:58:01 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -45,7 +45,7 @@ enum ESMC_ModelType { ESMF_ATM=1, ESMF_LAND, ESMF_OCEAN, ESMF_SEAICE,
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Component members and declares method 
-// signatures (prototypes).  The companion file ESMC_Comp.C contains
+// signatures (prototypes).  The companion file ESMC\_Comp.C contains
 // the definitions (full code bodies) for the Component methods.
 //
 // 

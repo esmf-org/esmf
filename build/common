@@ -1,4 +1,4 @@
-# $Id: common,v 1.21 2003/03/20 20:32:31 flanigan Exp $ 
+# $Id: common,v 1.22 2003/03/21 17:57:55 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -316,8 +316,25 @@ tex:
 	export PROTEX=$(PROTEX) ;\
 	$(CC_PROTEX) $* $<
 
+%_fapi.tex : ../examples/%.F 
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
 
+%_fapi.tex : ../examples/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
 
+%_fapi.tex : ../examples/%.f
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../examples/%.f90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_ccapi.tex : ../examples/%.C
+	export PROTEX=$(PROTEX) ;\
+	$(CC_PROTEX) $* $<
 
 
 

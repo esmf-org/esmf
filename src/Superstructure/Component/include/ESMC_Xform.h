@@ -1,4 +1,4 @@
-// $Id: ESMC_Xform.h,v 1.4 2003/03/11 03:01:08 cdeluca Exp $
+// $Id: ESMC_Xform.h,v 1.5 2003/03/21 17:58:01 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Xform members and declares method 
-// signatures (prototypes).  The companion file ESMC_Xform.C contains
+// signatures (prototypes).  The companion file ESMC\_Xform.C contains
 // the definitions (full code bodies) for the Xform methods.
 //
 // 

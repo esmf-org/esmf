@@ -1,4 +1,4 @@
-// $Id: ESMC_Cpl.h,v 1.3 2003/03/11 03:01:07 cdeluca Exp $
+// $Id: ESMC_Cpl.h,v 1.4 2003/03/21 17:58:01 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,7 +34,7 @@
 // !DESCRIPTION:
 //
 // The code in this file defines the C++ Cpl members and declares method 
-// signatures (prototypes).  The companion file ESMC_Cpl.C contains
+// signatures (prototypes).  The companion file ESMC\_Cpl.C contains
 // the definitions (full code bodies) for the Cpl methods.
 //
 // 

@@ -1,4 +1,4 @@
-% $Id: Component_desdoc.ctex,v 1.5 2003/02/05 03:51:17 nscollins Exp $
+% $Id: Component_desdoc.ctex,v 1.6 2003/03/21 17:58:01 flanigan Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -49,14 +49,14 @@
 #ifdef STANDALONE
 \input{Component_syn}
 #elif defined(CONSTITUENT)
-\input{comppath/Component_syn}
+\input{../Superstructure/Component/doc/Component_syn}
 #endif
 
 \section{Object Model}
 #ifdef STANDALONE
 \input{Component_obj}
 #elif defined(CONSTITUENT)
-\input{comppath/Component_obj}
+\input{../Superstructure/Component/doc/Component_obj}
 #endif
 
 
@@ -67,53 +67,53 @@
 #ifdef STANDALONE
 \input{comp_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/comp_desc}
+\input{../Superstructure/Component/doc/comp_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{comp_design}
 #elif defined(CONSTITUENT)
-\input{comppath/comp_design}
+\input{../Superstructure/Component/doc/comp_design}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{comp_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/comp_rest}
+\input{../Superstructure/Component/doc/comp_rest}
 #endif
 
 \section{Component F90 Interface}
 
 \subsection{Use and Examples}
-#ifdef STANDALONE
-\input{compex_fapi}
-#elif defined(CONSTITUENT)
-\input{comppath/compex_fapi}
-#endif
+% #ifdef STANDALONE
+% \input{compex_fapi}
+% #elif defined(CONSTITUENT)
+% \input{../Superstructure/Component/doc/compex_fapi}
+% #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{comp_fapi}
+\input{ESMF_Comp_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/comp_fapi}
+\input{../Superstructure/Component/doc/ESMF_Comp_fapi}
 #endif
 
 \section{Component C++ Interface}
 
 \subsection{Use and Examples}
-#ifdef STANDALONE
-\input{compex_ccapi}
-#elif defined(CONSTITUENT)
-\input{comppath/compex_ccapi}
-#endif
+% #ifdef STANDALONE
+% \input{compex_ccapi}
+% #elif defined(CONSTITUENT)
+% \input{../Superstructure/Component/doc/compex_ccapi}
+% #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{comp_ccapi}
+\input{ESMC_Comp_chapi}
 #elif defined(CONSTITUENT)
-\input{comppath/comp_ccapi}
+\input{../Superstructure/Component/doc/ESMC_Comp_chapi}
 #endif
 
 
@@ -124,39 +124,39 @@
 #ifdef STANDALONE
 \input{app_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/app_desc}
+\input{../Superstructure/Component/doc/app_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{app_design}
 #elif defined(CONSTITUENT)
-\input{comppath/app_design}
+\input{../Superstructure/Component/doc/app_design}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{app_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/app_rest}
+\input{../Superstructure/Component/doc/app_rest}
 #endif
 
 \subsection{Application F90 Use and Examples}
 #ifdef STANDALONE
-\input{appmainex_fapi}
-\input{appcompex_fapi}
+\input{ESMF_AppMainEx_fapi}
+\input{ESMF_AppCompEx_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/appmainex_fapi}
-\input{comppath/appcompex_fapi}
+\input{../Superstructure/Component/doc/ESMF_AppMainEx_fapi}
+\input{../Superstructure/Component/doc/ESMF_AppCompEx_fapi}
 #endif
 
 \subsection{Application C++ Use and Examples}
 #ifdef STANDALONE
-\input{appmainex_ccapi}
-\input{appcompex_ccapi}
+\input{ESMC_AppMainEx_ccapi}
+\input{ESMC_AppCompEx_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/appmainex_ccapi}
-\input{comppath/appcompex_ccapi}
+\input{../Superstructure/Component/doc/ESMC_AppMainEx_ccapi}
+\input{../Superstructure/Component/doc/ESMC_AppCompEx_ccapi}
 #endif
 
 
@@ -169,35 +169,35 @@
 #ifdef STANDALONE
 \input{gcomp_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/gcomp_desc}
+\input{../Superstructure/Component/doc/gcomp_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{gcomp_design}
 #elif defined(CONSTITUENT)
-\input{comppath/gcomp_design}
+\input{../Superstructure/Component/doc/gcomp_design}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{gcomp_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/gcomp_rest}
+\input{../Superstructure/Component/doc/gcomp_rest}
 #endif
 
 \subsection{Gridded Component F90 Use and Examples}
 #ifdef STANDALONE
-\input{gcompex_fapi}
+\input{ESMF_GCompEx_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/gcompex_fapi}
+\input{../Superstructure/Component/doc/ESMF_GCompEx_fapi}
 #endif
 
 \subsection{Gridded Component C++ Use and Examples}
 #ifdef STANDALONE
-\input{gcompex_ccapi}
+\input{ESMC_GCompEx_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/gcompex_ccapi}
+\input{../Superstructure/Component/doc/ESMC_GCompEx_ccapi}
 #endif
 
 
@@ -209,35 +209,35 @@
 #ifdef STANDALONE
 \input{cpl_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/cpl_desc}
+\input{../Superstructure/Component/doc/cpl_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{cpl_design}
 #elif defined(CONSTITUENT)
-\input{comppath/cpl_design}
+\input{../Superstructure/Component/doc/cpl_design}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{cpl_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/cpl_rest}
+\input{../Superstructure/Component/doc/cpl_rest}
 #endif
 
 \subsection{Coupler F90 Use and Examples}
 #ifdef STANDALONE
-\input{cplex_fapi}
+\input{ESMF_CplEx_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/cplex_fapi}
+\input{../Superstructure/Component/doc/ESMF_CplEx_fapi}
 #endif
 
 \subsection{Coupler C++ Use and Examples}
 #ifdef STANDALONE
-\input{cplex_ccapi}
+\input{ESMC_CplEx_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/cplex_ccapi}
+\input{../Superstructure/Component/doc/ESMC_CplEx_ccapi}
 #endif
 
 
@@ -251,53 +251,53 @@
 #ifdef STANDALONE
 \input{state_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/state_desc}
+\input{../Superstructure/Component/doc/state_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{state_design}
 #elif defined(CONSTITUENT)
-\input{comppath/state_design}
+\input{../Superstructure/Component/doc/state_design}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{state_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/state_rest}
+\input{../Superstructure/Component/doc/state_rest}
 #endif
 
 \section{State F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{stateex_fapi}
+\input{ESMF_StateEx_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/stateex_fapi}
+\input{../Superstructure/Component/doc/ESMF_StateEx_fapi}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{state_fapi}
+\input{ESMF_State_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/state_fapi}
+\input{../Superstructure/Component/doc/ESMF_State_fapi}
 #endif
 
 \section{State C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{stateex_ccapi}
+\input{ESMC_StateEx_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/stateex_ccapi}
+\input{../Superstructure/Component/doc/ESMC_StateEx_ccapi}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{state_ccapi}
+\input{ESMC_State_chapi}
 #elif defined(CONSTITUENT)
-\input{comppath/state_ccapi}
+\input{../Superstructure/Component/doc/ESMC_State_chapi}
 #endif
 
 
@@ -309,53 +309,53 @@
 #ifdef STANDALONE
 \input{xform_desc}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_desc}
+\input{../Superstructure/Component/doc/xform_desc}
 #endif
 
 \subsection{Design}
 #ifdef STANDALONE
 \input{xform_design}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_design}
+\input{../Superstructure/Component/doc/xform_design}
 #endif
 
 \subsubsection{Restrictions}
 #ifdef STANDALONE
 \input{xform_rest}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_rest}
+\input{../Superstructure/Component/doc/xform_rest}
 #endif
 
 \section{Transform F90 Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{xformex_fapi}
+\input{ESMF_XformEx_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/xformex_fapi}
+\input{../Superstructure/Component/doc/ESMF_XformEx_fapi}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{xform_fapi}
+\input{ESMF_Xform_fapi}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_fapi}
+\input{../Superstructure/Component/doc/ESMF_Xform_fapi}
 #endif
 
 \section{Transform C++ Interface}
 
 \subsection{Use and Examples}
 #ifdef STANDALONE
-\input{xformex_ccapi}
+\input{ESMC_XformEx_ccapi}
 #elif defined(CONSTITUENT)
-\input{comppath/xformex_ccapi}
+\input{../Superstructure/Component/doc/ESMC_XformEx_ccapi}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{xform_ccapi}
+\input{ESMC_Xform_chapi}
 #elif defined(CONSTITUENT)
-\input{comppath/xform_ccapi}
+\input{../Superstructure/Component/doc/ESMC_Xform_ccapi}
 #endif
 
 
