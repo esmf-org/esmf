@@ -1,4 +1,4 @@
-! $Id: ESMF_Alarm.F90,v 1.28 2003/09/01 18:28:55 cdeluca Exp $
+! $Id: ESMF_Alarm.F90,v 1.29 2003/09/09 20:09:31 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -21,6 +21,7 @@
 !------------------------------------------------------------------------------
 ! INCLUDES
 #include <ESMF_TimeMgr.inc>
+#include "ESMF.h"
 
 !===============================================================================
 !BOPI
@@ -70,9 +71,15 @@
         integer                 :: nRingDurationTimeSteps
         integer                 :: nTimeStepsRinging
         integer                 :: id
+#ifndef ESMF_NO_INITIALIZERS
         logical                 :: ringing = .false.
         logical                 :: enabled = .true.
         logical                 :: sticky  = .true.
+#else
+        logical                 :: ringing
+        logical                 :: enabled
+        logical                 :: sticky
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -160,7 +167,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Alarm.F90,v 1.28 2003/09/01 18:28:55 cdeluca Exp $'
+      '$Id: ESMF_Alarm.F90,v 1.29 2003/09/09 20:09:31 nscollins Exp $'
 
 !==============================================================================
 !
