@@ -1,9 +1,7 @@
 
     program test
     
-    use ESMF_BaseMod
-    use ESMF_IOMod
-    use ESMF_LocalArrayMod
+    use ESMF_Mod
     implicit none
 
     type PtrWrap1  
