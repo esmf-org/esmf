@@ -1,4 +1,4 @@
-! $Id: FlowSolverMod.F90,v 1.3 2003/10/23 17:35:59 jwolfe Exp $
+! $Id: FlowSolverMod.F90,v 1.4 2003/10/23 21:56:17 jwolfe Exp $
 !-------------------------------------------------------------------------
 !-------------------------------------------------------------------------
 
@@ -165,8 +165,8 @@
       type(ESMF_DELayout) :: layout
       type(ESMF_Grid) :: grid
       type(ESMF_AxisIndex), dimension(ESMF_MAXGRIDDIM) :: index
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coords
-      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coords
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_min_coord
+      real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: global_max_coord
       real :: x_min, x_max, y_min, y_max
       integer, dimension(ESMF_MAXGRIDDIM) :: global_nmax
       integer :: counts(2)
@@ -258,17 +258,17 @@
       call ESMF_GridCompGet(gcomp, layout=layout, grid=grid, rc=rc)
 
       call ESMF_GridGet(grid, global_cell_dim=global_nmax, &
-                              global_min_coords=global_min_coords, &
-                              global_max_coords=global_max_coords, rc=rc)
+                              global_min_coord=global_min_coord, &
+                              global_max_coord=global_max_coord, rc=rc)
 !
 ! Extract and calculate some other quantities
 !
       counts(1) = global_nmax(1)
       counts(2) = global_nmax(2)
-      x_min = global_min_coords(1)
-      y_min = global_min_coords(2)
-      x_max = global_max_coords(1)
-      y_max = global_max_coords(2)
+      x_min = global_min_coord(1)
+      y_min = global_min_coord(2)
+      x_max = global_max_coord(1)
+      y_max = global_max_coord(2)
       dx = (x_max - x_min)/counts(1)  ! Should be calls to PhysGrid eventually
       dy = (y_max - y_min)/counts(2)
 !
