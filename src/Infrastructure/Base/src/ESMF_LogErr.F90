@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.53 2004/12/07 22:12:07 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.54 2004/12/07 23:22:57 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -670,10 +670,27 @@ end subroutine ESMF_LogGet
 	if (ESMF_LogDefault%petCount .eq. 1) then
 	    ESMF_LogDefault%LOG_ARRAY(1)%nameLogErrFile=trim(filename)
         else
-	    write(fnum,*) i
+	    if (ESMF_LogDefault%petCount .le. 9) then
+	        write(fnum,10) i
+            else if (ESMF_LogDefault%petCount .le. 99) then
+	        write(fnum,20) i
+            else if (ESMF_LogDefault%petCount .le. 9999) then
+	        write(fnum,30) i
+            else if (ESMF_LogDefault%petCount .le. 99999) then
+	        write(fnum,40) i
+            else if (ESMF_LogDefault%petCount .le. 999999) then
+	        write(fnum,50) i
+            else 
+	        write(fnum,*) i
+	    endif
 	    fname = "pet" // trim(fnum) // "." // trim(filename)
 	    ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile=fname
 	endif
+ 10     format(I1.1)
+ 20     format(I2.2)
+ 30     format(I3.3)
+ 40     format(I4.4)
+ 50     format(I5.5)
     if (len(ESMF_LogDefault%LOG_ARRAY(i)%nameLogErrFile) .gt. 32) then
         print *, "filename exceeded 32 characters"
         if (present(rc)) rc = ESMF_FAILURE
