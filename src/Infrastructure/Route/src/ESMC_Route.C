@@ -1,4 +1,4 @@
-//$Id: ESMC_Route.C,v 1.128 2005/03/01 00:07:09 jwolfe Exp $
+//$Id: ESMC_Route.C,v 1.129 2005/03/01 18:06:04 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -33,7 +33,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-               "$Id: ESMC_Route.C,v 1.128 2005/03/01 00:07:09 jwolfe Exp $";
+               "$Id: ESMC_Route.C,v 1.129 2005/03/01 18:06:04 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 
@@ -961,6 +961,11 @@
       // loop over each destination in the comm table
       for (i=0; i<commCount; i++) {
 
+        // Find out theirPET id for this entry in the comm table.  If it's not
+        // needed then no communication is necessary -- go to the next entry.
+        rc = ct->ESMC_CommTableGetPartner(i, &theirPET, &needed);
+        if (!needed) continue;
+
         // some sanity checking to be sure we have enough async buffers
         if (req > xpCount) {
           sprintf(msgbuf, "not enough async bufs; have %d and index now %d (must be < %d)\n",
@@ -968,11 +973,6 @@
           ESMC_LogDefault.ESMC_LogMsgFoundError(ESMC_RC_ARG_VALUE, msgbuf, &rc);
           return (rc);
         }
-
-        // Find out theirPET id for this entry in the comm table.  If it's not
-        // needed then no communication is necessary -- go to the next entry.
-        rc = ct->ESMC_CommTableGetPartner(i, &theirPET, &needed);
-        if (!needed) continue;
 
         // find number of xpackets to be communicated with this PET
 	rc = recvRT->ESMC_RTableGetCount(theirPET, &recvXPCount);
