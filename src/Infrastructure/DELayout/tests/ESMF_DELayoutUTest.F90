@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayoutUTest.F90,v 1.8 2004/12/20 04:36:53 theurich Exp $
+! $Id: ESMF_DELayoutUTest.F90,v 1.9 2004/12/20 20:38:50 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,14 +36,14 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_DELayoutUTest.F90,v 1.8 2004/12/20 04:36:53 theurich Exp $'
+      '$Id: ESMF_DELayoutUTest.F90,v 1.9 2004/12/20 20:38:50 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
 
       ! individual test result code
-      integer :: rc = 1
+      integer :: rc_loop, rc = 1
 
       ! individual test failure message
       character(ESMF_MAXSTR) :: failMsg
@@ -69,12 +69,13 @@
       call ESMF_VMGet(vm, petCount=npets, rc=rc)
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "1D default DELayout Create Test"
       delayout = ESMF_DELayoutCreate(vm, rc=rc)
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+#ifdef ESMF_EXHAUSTIVE
       !------------------------------------------------------------------------
       !EX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
@@ -99,15 +100,21 @@
 
       nsum = 0
       isum = 0
+      rc=ESMF_SUCCESS
       do i=0, ndes-1
 
-        call ESMF_DELayoutGetDEMatchPET(delayout, i, vm, n, list, rc=rc)
-        call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+        call ESMF_DELayoutGetDEMatchPET(delayout, i, vm, n, list, rc=rc_loop)
+        if (rc_loop.ne.ESMF_SUCCESS) rc=rc_loop
 
         nsum = nsum + n
         isum = isum + (i - list(1))
         
       enddo  
+      !EX_UTest
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "DELayout Get DEMatchPET Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
       deallocate(list)
       nsum = nsum / ndes
 
@@ -117,11 +124,10 @@
       write(name, *) "Verify matches"
       call ESMF_Test(((nsum.eq.1).and.(isum.eq.0)), name, failMsg, result, ESMF_SRCLINE)
       
-#ifdef ESMF_EXHAUSTIVE
 #endif
 
       !------------------------------------------------------------------------
-      !EX_UTest
+      !NEX_UTest
       write(failMsg, *) "Did not return ESMF_SUCCESS"
       write(name, *) "1D default DELayout Destroy Test"
       call ESMF_DELayoutDestroy(delayout, rc=rc)
