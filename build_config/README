@@ -54,6 +54,7 @@ settings for its architecture.
 Current build files for supported platforms:
 
       build_config/AIX.default.default
+                   Darwin.xlf.default
                    IRIX64.default.default
                    Linux.absoft.default
                    Linux.intel.default
@@ -68,6 +69,7 @@ Current build files for unsupported platforms:
       build_config/Darwin.absoft.default
                    Darwin.nag.default
                    SunOS.default.default
+                   Unicos.default.default
 
 Notice that there is no default compiler value for Linux or Darwin
 (Mac) machines.  This is because there are a number of Fortran90 Linux
@@ -166,7 +168,7 @@ provided only for the supported platforms.
 
 
 ================================================================================
- $Id: README,v 1.16 2004/06/21 15:38:30 nscollins Exp $
+ $Id: README,v 1.17 2004/12/30 18:31:07 nscollins Exp $
 Earth System Modeling Framework
 Copyright 2002-2003, University Corporation for Atmospheric Research,
 Massachusetts Institute of Technology, Geophysical Fluid Dynamics
