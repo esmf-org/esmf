@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.C,v 1.55 2004/04/23 00:24:41 eschwab Exp $
+// $Id: ESMC_TimeInterval.C,v 1.56 2004/04/24 01:30:27 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,7 +34,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.55 2004/04/23 00:24:41 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_TimeInterval.C,v 1.56 2004/04/24 01:30:27 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -986,17 +986,150 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMF_KIND_R8 quotient;
+    // TODO: fractional interval parts
 
-    // TODO: fractional & calendar interval parts
+    // TODO: use some form of polymorphism to share logic with operator% and
+    //       Compare method ?
 
-    if (timeInterval.s != 0) {
-      quotient = (ESMF_KIND_R8) this->s / (ESMF_KIND_R8) timeInterval.s;
+    // calendars must be defined
+    if (this->calendar == ESMC_NULL_POINTER ||
+        timeInterval.calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeInterval calendar undefined)
+      return(0.0);
     }
-    // TODO:  else throw exception ?
 
-    return(quotient);
+    // create local copies to manipulate and divide 
+    ESMC_TimeInterval ti1 = *this;
+    ESMC_TimeInterval ti2 = timeInterval;
 
+    // Reduce both time interval's units to the smallest and least number
+    // of units possible
+    ti1.calendar->ESMC_CalendarIntervalMagnitude(ti1);
+    ti2.calendar->ESMC_CalendarIntervalMagnitude(ti2);
+
+    // if both absolute, simply divide baseTime seconds and return
+    if (ti1.yy == 0 && ti2.yy == 0 &&
+        ti1.mm == 0 && ti2.mm == 0 &&
+        ti1.d  == 0 && ti2.d  == 0) {
+      if (ti2.s != 0) {  // TODO: fractions
+        return((ESMF_KIND_R8) ti1.s / (ESMF_KIND_R8) ti2.s);
+      } else {
+        // TODO: write LogErr message (divide by zero timeInterval)
+        return(0.0);
+      }
+    }
+
+    // calendars must be the same for divide on relative parts
+    // TODO: relax this restriction (e.g. 10 days Gregorian % 3 days 360-day)
+    if (ti1.calendar->calendarType != ti2.calendar->calendarType) {
+      // TODO: write LogErr message (timeInterval calendars not the same)
+      return(0.0);
+    }
+
+    // Perform relative division based on calendar type
+    // TODO:  fractional seconds
+    switch (ti1.calendar->calendarType)  
+    {
+      case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_NOLEAP:
+        if (ti1.yy != 0 || ti2.yy != 0 ||
+            ti1.d  != 0 || ti2.d  != 0) {
+          // shouldn't be here - yy and d already reduced in Magnitude call
+          // above TODO: write LogErr message (internal error)
+          return(0.0);
+
+        // all relative case (yy (reduced to mm), mm, no seconds)
+        } else if (ti1.s == 0 && ti2.s == 0) { // TODO: fractions (sN == 0)
+          if (ti2.mm != 0) {
+            return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(0.0);
+          }
+
+        // below here are mixed (relative, absolute) cases
+
+        // dividend zero
+        } else if (ti1.mm == 0 && ti1.s == 0) {
+          return(0.0); // ok
+
+        // divisor zero
+        } else if (ti2.mm == 0 && ti2.s == 0) {
+          // TODO: write LogErr message (divide by zero timeInterval)
+          return(0.0);
+
+        // all other combinations
+        } else {
+          // TODO: write LogErr message (can't divide w/o time instant)
+          return(0.0);
+        }
+        break;
+      case ESMC_CAL_360DAY:
+        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // TODO: write LogErr message (internal error)
+        return(0.0);
+        break;
+      case ESMC_CAL_JULIANDAY:
+        if (ti1.yy != 0 || ti2.yy != 0 ||
+            ti1.mm != 0 || ti2.mm != 0) {
+          // TODO: write LogErr message (years and months not defined!)
+          return(0.0);
+        }
+        if (ti1.d != 0 || ti2.d != 0) {
+          // shouldn't be here - days already reduced in Magnitude call above
+          // TODO: write LogErr message (internal error)
+          return(0.0);
+        }
+        break;
+      case ESMC_CAL_NOCALENDAR:
+        // can divide like units only
+        if ( (ti1.yy != 0 || ti2.yy != 0) &&
+              ti1.mm == 0 && ti2.mm == 0  &&
+              ti1.d  == 0 && ti2.d  == 0  &&
+              ti1.s  == 0 && ti2.s  == 0) {
+          // divide years only
+          if (ti2.yy != 0) {
+            return((ESMF_KIND_R8) ti1.yy / (ESMF_KIND_R8) ti2.yy);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(0.0);
+          }
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                   (ti1.mm != 0 || ti2.mm != 0) &&
+                    ti1.d  == 0 && ti2.d  == 0  &&
+                    ti1.s  == 0 && ti2.s  == 0) {
+          // divide months only
+          if (ti2.mm != 0) {
+            return((ESMF_KIND_R8) ti1.mm / (ESMF_KIND_R8) ti2.mm);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(0.0);
+          }
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                    ti1.mm == 0 && ti2.mm == 0  &&
+                   (ti1.d  != 0 || ti2.d  != 0) &&
+                    ti1.s  == 0 && ti2.s  == 0) {
+          // divide days only
+          if (ti2.d != 0) {
+            return((ESMF_KIND_R8) ti1.d / (ESMF_KIND_R8) ti2.d);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(0.0);
+          }
+        } else {
+          // TODO: write LogErr message (can't divide mixed units)
+          return(0.0);
+        }
+        break;
+      case ESMC_CAL_CUSTOM:
+        // TODO:
+        return(0.0);
+        break;
+      default:
+        // TODO: write LogErr message (unknown calendar type)
+        return(0.0);
+        break;
+    };
 }  // end ESMC_TimeInterval::operator/
 
 //-------------------------------------------------------------------------
@@ -1175,16 +1308,163 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // TODO: fractional interval parts
+
+    // TODO: use some form of polymorphism to share logic with
+    //       operator/ (by real) and Compare method ?
+
+    // initialize result to zero
     ESMC_TimeInterval remainder;
 
-    // TODO: fractional & calendar interval parts
+    // copy calendar, startTime, endTime from this time interval
+    remainder.calendar  = this->calendar;
+    remainder.startTime = this->startTime;
+    remainder.endTime   = this->endTime;
 
-    if (timeInterval.s != 0) {
-      remainder.s = this->s % timeInterval.s;
+    // calendars must be defined
+    if (this->calendar == ESMC_NULL_POINTER ||
+        timeInterval.calendar == ESMC_NULL_POINTER) {
+      // TODO: write LogErr message (timeInterval calendar undefined)
+      return(remainder);
     }
-    // TODO:  else throw exception ?
 
-    return(remainder);
+    // create local copies to manipulate and modulus 
+    ESMC_TimeInterval ti1 = *this;
+    ESMC_TimeInterval ti2 = timeInterval;
+
+    // Reduce both time interval's units to the smallest and least number
+    // of units possible
+    ti1.calendar->ESMC_CalendarIntervalMagnitude(ti1);
+    ti2.calendar->ESMC_CalendarIntervalMagnitude(ti2);
+
+    // if both absolute, simply modulus baseTime seconds and return
+    if (ti1.yy == 0 && ti2.yy == 0 &&
+        ti1.mm == 0 && ti2.mm == 0 &&
+        ti1.d  == 0 && ti2.d  == 0) {
+      if (ti2.s != 0) {  // TODO: fractions
+        remainder.s = ti1.s % ti2.s;
+        return(remainder);
+      } else {
+        // TODO: write LogErr message (divide by zero timeInterval)
+        return(remainder);
+      }
+    }
+
+    // calendars must be the same for modulus on relative parts
+    // TODO: relax this restriction (e.g. 10 days Gregorian % 3 days 360-day)
+    if (ti1.calendar->calendarType != ti2.calendar->calendarType) {
+      // TODO: write LogErr message (timeInterval calendars not the same)
+      return(remainder);
+    }
+
+    // Perform relative modulus based on calendar type
+    // TODO:  fractional seconds
+    switch (ti1.calendar->calendarType)  
+    {
+      case ESMC_CAL_GREGORIAN:
+      case ESMC_CAL_NOLEAP:
+        if (ti1.yy != 0 || ti2.yy != 0 ||
+            ti1.d  != 0 || ti2.d  != 0) {
+          // shouldn't be here - yy and d already reduced in Magnitude call
+          // above TODO: write LogErr message (internal error)
+          return(remainder);
+
+        // all relative case (yy (reduced to mm), mm, no seconds)
+        } else if (ti1.s == 0 && ti2.s == 0) { // TODO: fractions (sN == 0)
+          if (ti2.mm != 0) {
+            remainder.mm = ti1.mm % ti2.mm;
+            return(remainder);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(remainder);
+          }
+
+        // below here are mixed (relative, absolute) cases
+
+        // dividend zero
+        } else if (ti1.mm == 0 && ti1.s == 0) {
+          return(remainder); // ok
+
+        // divisor zero
+        } else if (ti2.mm == 0 && ti2.s == 0) {
+          // TODO: write LogErr message (divide by zero timeInterval)
+          return(remainder);
+
+        // all other combinations
+        } else {
+          // TODO: write LogErr message (can't modulus w/o time instant)
+          return(remainder);
+        }
+        break;
+      case ESMC_CAL_360DAY:
+        // shouldn't be here - yy, mm, d already reduced in Magnitude call above
+        // TODO: write LogErr message (internal error)
+        return(remainder);
+        break;
+      case ESMC_CAL_JULIANDAY:
+        if (ti1.yy != 0 || ti2.yy != 0 ||
+            ti1.mm != 0 || ti2.mm != 0) {
+          // TODO: write LogErr message (years and months not defined!)
+          return(remainder);
+        }
+        if (ti1.d != 0 || ti2.d != 0) {
+          // shouldn't be here - days already reduced in Magnitude call above
+          // TODO: write LogErr message (internal error)
+          return(remainder);
+        }
+        break;
+      case ESMC_CAL_NOCALENDAR:
+        // can modulus like units only
+        if ( (ti1.yy != 0 || ti2.yy != 0) &&
+              ti1.mm == 0 && ti2.mm == 0  &&
+              ti1.d  == 0 && ti2.d  == 0  &&
+              ti1.s  == 0 && ti2.s  == 0) {
+          // modulus years only
+          if (ti2.yy != 0) {
+            remainder.yy = ti1.yy % ti2.yy;
+            return(remainder);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(remainder);
+          }
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                   (ti1.mm != 0 || ti2.mm != 0) &&
+                    ti1.d  == 0 && ti2.d  == 0  &&
+                    ti1.s  == 0 && ti2.s  == 0) {
+          // modulus months only
+          if (ti2.mm != 0) {
+            remainder.mm = ti1.mm % ti2.mm;
+            return(remainder);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(remainder);
+          }
+        } else if ( ti1.yy == 0 && ti2.yy == 0  &&
+                    ti1.mm == 0 && ti2.mm == 0  &&
+                   (ti1.d  != 0 || ti2.d  != 0) &&
+                    ti1.s  == 0 && ti2.s  == 0) {
+          // modulus days only
+          if (ti2.d != 0) {
+            remainder.d = ti1.d % ti2.d;
+            return(remainder);
+          } else {
+            // TODO: write LogErr message (divide by zero timeInterval)
+            return(remainder);
+          }
+        } else {
+          // TODO: write LogErr message (can't modulus mixed units)
+          return(remainder);
+        }
+        break;
+      case ESMC_CAL_CUSTOM:
+        // TODO:
+        return(remainder);
+        break;
+      default:
+        // TODO: write LogErr message (unknown calendar type)
+        return(remainder);
+        break;
+    };
 
 }  // end ESMC_TimeInterval::operator%
 
@@ -1208,14 +1488,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional & calendar interval parts
-
-    if (timeInterval.s != 0) {
-      this->s %= timeInterval.s;
-    }
-    // TODO:  else throw exception ?
-
-    return(*this);
+    return(*this = *this % timeInterval);
 
 }  // end ESMC_TimeInterval::operator%=
 
@@ -1239,18 +1512,19 @@
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval product;
+    // copy calendar, startTime, endTime from this time interval
+    ESMC_TimeInterval product = *this;
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // multiply relative yy, mm, d parts
-    product.yy = this->yy * multiplier;
-    product.mm = this->mm * multiplier;
-    product.d  = this->d  * multiplier;
+    product.yy *= multiplier;
+    product.mm *= multiplier;
+    product.d  *= multiplier;
 
-    // multiply absolute s part
-    product.s = this->s * multiplier;
+    // multiply absolute s part  // TODO: fractions
+    product.s *= multiplier;
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -1275,28 +1549,13 @@
 //
 // !DESCRIPTION:
 //     Multiply a {\tt ESMC\_TimeInterval} by an integer, return product as a
-//    {\tt ESMC\_TimeInterval}
+//    {\tt ESMC\_TimeInterval}.  Commutative complement to member operator*
 //
 //EOP
 // !REQUIREMENTS:  
 
-    ESMC_TimeInterval product;
-
-    // TODO: fractional interval parts
-    // TODO: check for overflow/underflow, return 0 with LogErr message
-
-    // multiply relative yy, mm, d parts
-    product.yy = multiplier * ti.yy;
-    product.mm = multiplier * ti.mm;
-    product.d  = multiplier * ti.d;
-
-    // multiply absolute s part
-    product.s = multiplier * ti.s;
-
-    // note: result not normalized here -- it is done during a Get() or use
-    // in an arithmetic or comparison operation.
-
-    return(product);
+    // use commutative complement
+    return(ti * multiplier);
 
 }  // end operator*
 
@@ -1319,21 +1578,7 @@
 //EOP
 // !REQUIREMENTS:  
 
-    // TODO: fractional interval parts
-    // TODO: check for overflow/underflow, return 0 with LogErr message
-
-    // multiply relative yy, mm, d parts
-    this->yy *= multiplier;
-    this->mm *= multiplier;
-    this->d  *= multiplier;
-
-    // multiply absolute s part
-    this->s *= multiplier;
-
-    // note: result not normalized here -- it is done during a Get() or use
-    // in an arithmetic or comparison operation.
-
-    return(*this);
+    return(*this = *this * multiplier);
 
 }  // end ESMC_TimeInterval::operator*=
 
@@ -1529,18 +1774,19 @@
 //EOP
 // !REQUIREMENTS:
 
-    ESMC_TimeInterval sum;
+    // copy calendar, startTime, endTime from this time interval
+    ESMC_TimeInterval sum = *this;
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // add relative yy, mm, d parts
-    sum.yy = this->yy + timeInterval.yy;
-    sum.mm = this->mm + timeInterval.mm;
-    sum.d  = this->d  + timeInterval.d;
+    sum.yy += timeInterval.yy;
+    sum.mm += timeInterval.mm;
+    sum.d  += timeInterval.d;
 
     // add absolute seconds part using ESMC_BaseTime operator
-    sum = ESMC_BaseTime::operator+(timeInterval);
+    sum.ESMC_BaseTime::operator+=(timeInterval);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -1570,18 +1816,19 @@
 //EOP
 // !REQUIREMENTS:
 
-    ESMC_TimeInterval diff;
+    // copy calendar, startTime, endTime from this time interval
+    ESMC_TimeInterval diff = *this;
 
     // TODO: fractional interval parts
     // TODO: check for overflow/underflow, return 0 with LogErr message
 
     // subtract relative yy, mm, d parts
-    diff.yy = this->yy - timeInterval.yy;
-    diff.mm = this->mm - timeInterval.mm;
-    diff.d  = this->d  - timeInterval.d;
+    diff.yy -= timeInterval.yy;
+    diff.mm -= timeInterval.mm;
+    diff.d  -= timeInterval.d;
 
     // subtract absolute seconds part using ESMC_BaseTime operator
-    diff = ESMC_BaseTime::operator-(timeInterval);
+    diff.ESMC_BaseTime::operator-=(timeInterval);
 
     // note: result not normalized here -- it is done during a Get() or use
     // in an arithmetic or comparison operation.
@@ -1637,6 +1884,8 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // TODO: define as !(*this == timeInterval) ?
 
     return(ESMC_TimeIntervalCompare(timeInterval, ESMC_NE));
 
@@ -1716,6 +1965,8 @@
 //EOP
 // !REQUIREMENTS:  
 
+    // TODO: define as !(*this > timeInterval) ?
+
     return(ESMC_TimeIntervalCompare(timeInterval, ESMC_LE));
 
 }  // end ESMC_TimeInterval::operator<=
@@ -1741,6 +1992,8 @@
 //
 //EOP
 // !REQUIREMENTS:  
+
+    // TODO: define as !(*this < timeInterval) ?
 
     return(ESMC_TimeIntervalCompare(timeInterval, ESMC_GE));
 
@@ -1769,6 +2022,9 @@
 
     // TODO: use function pointer table instead of switch to perform comparison
     //       type?  or some other form of polymorphism ?
+
+    // TODO: use some form of polymorphism to share logic with operator% and
+    //       operator/ (by real) ?
 
     // calendars must be defined
     if (this->calendar == ESMC_NULL_POINTER ||
@@ -1883,7 +2139,7 @@
           // TODO: write LogErr message (years and months not defined!)
           return(false);
         }
-        if (ti1.d  != 0 || ti2.d  != 0) {
+        if (ti1.d != 0 || ti2.d != 0) {
           // shouldn't be here - days already reduced in Magnitude call above
           // TODO: write LogErr message (internal error)
           return(false);
