@@ -1,4 +1,4 @@
-# $Id: base.site,v 1.1 2001/11/15 23:10:20 dneckels Exp $ 
+# $Id: base.site,v 1.2 2001/11/16 17:05:36 dneckels Exp $ 
 
 #
 #  This file contains site-specific information.  The definitions below
@@ -14,7 +14,7 @@ ESMC_MPIRUN      = mprun
 MPI_HOME       =
 MPI_LIB        = -lmpi
 MPI_INCLUDE    = 
-MPIRUN         =  mprun -np 2
+MPIRUN         =  mprun 
 
 # Location of the OpenMP library
 MP_LIB         = 
