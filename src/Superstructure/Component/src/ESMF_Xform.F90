@@ -1,4 +1,4 @@
-! $Id: ESMF_Xform.F90,v 1.4 2003/02/03 21:45:50 nscollins Exp $
+! $Id: ESMF_Xform.F90,v 1.5 2003/02/04 20:19:58 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -52,7 +52,7 @@
       sequence
       private
         character(len=ESMF_MAXSTR) :: name
-        type(ESMF_Pointer) :: funcptr
+        type(ESMF_Pointer) :: subrptr
       end type
 
 !------------------------------------------------------------------------------
@@ -62,12 +62,8 @@
 
 ! !PUBLIC MEMBER FUNCTIONS:
 
-      public ESMF_XformCreate
-      public ESMF_XformDestroy
- 
-      !public ESMF_XformInit
-      !public ESMF_XformRun
-      !public ESMF_XformFinalize
+      public ESMF_XformInit
+      public ESMF_XformGet, ESMF_XformSet
  
       public ESMF_XformCheckpoint
       public ESMF_XformRestore
@@ -78,7 +74,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Xform.F90,v 1.4 2003/02/03 21:45:50 nscollins Exp $'
+      '$Id: ESMF_Xform.F90,v 1.5 2003/02/04 20:19:58 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -86,36 +82,6 @@
 !
 !==============================================================================
 
-!BOP
-! !IROUTINE: ESMF_XformCreate -- Generic interface to create a Transform.
-
-! !INTERFACE:
-     interface ESMF_XformCreate
-
-! !PRIVATE MEMBER FUNCTIONS:
-!
-        module procedure ESMF_XformCreateNew
-
-! !DESCRIPTION: 
-! This interface provides a single entry point for the various 
-!  types of {\tt ESMF\_XformCreate} functions.   
-!
-!  \begin{description}
-!  \item[xxx]
-!    Description of xxx.
-!  \item[yyy]
-!    Description of yyy.
-!  \item[{[zzz]}]
-!    Description of optional arg zzz.
-!  \item[rc]
-!    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!  \end{description}
-!
-!  
-!EOP 
-end interface
-
-!------------------------------------------------------------------------------
 
 
 !==============================================================================
@@ -128,28 +94,35 @@ end interface
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes the Transform Create and Destroy methods.
+! This section includes the Transform Init method
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_XformCreateNew -- Create a new Xform specifying all options.
+! !IROUTINE: ESMF_XformInit -- Fill in an Xform's data
 
 ! !INTERFACE:
-      function ESMF_XformCreateNew(rc)
-!
-! !RETURN VALUE:
-      type(ESMF_Xform) :: ESMF_XformCreateNew
+      subroutine ESMF_XformInit(xform, name, subr, rc)
 !
 ! !ARGUMENTS:
+      type(ESMF_Xform), intent(inout) :: xform
+      character(len=*), intent(in) :: name
+      integer, intent(in) :: subr 
       integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
-!  Create a new Xform and set the decomposition characteristics.
+!  Fill in the values for an Xform.
 !
-!  The return value is a new Xform.
-!    
 !  The arguments are:
 !  \begin{description}
+!   \item[xform]
+!    The {\tt Transform} object to be initialized.
+!
+!   \item[name]
+!     The name of the {\tt Transform}.
+!
+!   \item[subr]
+!     The subroutine to be called when executing this {\tt Transform}.
+!     It must be declared as returning an integer return code value.
 !
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -161,12 +134,8 @@ end interface
 
 
 !       local vars
-        !type (ESMF_XformType), target :: newxform 
         integer :: status=ESMF_FAILURE      ! local error status
         logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       Initialize the pointer to null.
-        !nullify(ESMF_XformCreateNew%xformp)
 
 !       Initialize return code; assume failure until success is certain
         if (present(rc)) then
@@ -174,78 +143,31 @@ end interface
           rc = ESMF_FAILURE
         endif
 
-!       !TODO : insert code here
+!       !TODO : figure out how to coerce an integer into a pointer
+        xform%name = name
+        !xform%subrptr = subr
 
 !       set return values
-        !ESMF_XformCreateNew%xformp => newxform
         if (rcpresent) rc = ESMF_SUCCESS
 
-        end function ESMF_XformCreateNew
-
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE:  ESMF_XformDestroy - Destroy a Transform object
-!
-! !INTERFACE:
-      subroutine ESMF_XformDestroy(xform, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Xform) :: xform
-      integer, intent(out), optional :: rc
-!
-! !DESCRIPTION:
-!     Releases all resources associated with this {\tt Xform}.
-!
-!     The arguments are:
-!     \begin{description}
-!
-!     \item[xform]
-!       Destroy contents of this {\tt Xform}.
-!
-!     \item[{[rc]}]
-!       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!
-!     \end{description}
-!
-!EOP
-! !REQUIREMENTS:
-
-!       local vars
-        integer :: status=ESMF_FAILURE      ! local error status
-        logical :: rcpresent=.FALSE.        ! did user specify rc?
-
-!       initialize return code; assume failure until success is certain
-        if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-        endif
-
-!       ! TODO: insert code here
-        !nullify(xform%xformp)
-
-!       set return code if user specified it
-        if (rcpresent) rc = ESMF_SUCCESS
-
-        end subroutine ESMF_XformDestroy
+        end subroutine ESMF_XformInit
 
 
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_XformSetData - Set information in a Transform
+! !IROUTINE: ESMF_XformSet - Set information in a Transform
 !
 ! !INTERFACE:
-      subroutine ESMF_XformSetData(xform, rc)
+      subroutine ESMF_XformSet(xform, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Xform) :: xform 
       integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
-!      Used only with the version of XformCreate which creates an empty 
-!      Xform and allows the Data to be specified later. 
+!      Update or overwrite data inside a {\tt Transform}.
 !
 !EOP
 ! !REQUIREMENTS:
@@ -253,7 +175,7 @@ end interface
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_XformSetData
+        end subroutine ESMF_XformSet
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
@@ -262,13 +184,15 @@ end interface
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_XformGetData - Get information from a Transform
+! !IROUTINE: ESMF_XformGet - Get information from a Transform
 !
 ! !INTERFACE:
-      subroutine ESMF_XformGet(xform, rc)
+      subroutine ESMF_XformGet(xform, name, subr, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Xform) :: xform
+      type(ESMF_Xform), intent(in) :: xform
+      character(len=*), intent(out), optional :: name
+      integer, intent(out), optional :: subr
       integer, intent(out), optional :: rc             
 
 !
@@ -394,10 +318,10 @@ end interface
 !      ! TODO: Add Print code  here
        if(present(options)) then
            ! decode options - long, short, whatever
-           print *, "Transform object" !!, xform%xformp%xformcount
+           print *, "Transform object", trim(xform%name)
  	   status = ESMF_SUCCESS
        else
-           print *, "Transform object" !!, xform%xformp%xformcount
+           print *, "Transform object", trim(xform%name)
  	   status = ESMF_SUCCESS
        endif
 
