@@ -1,4 +1,4 @@
-// $Id: ESMC_Comm.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $
+// $Id: ESMC_Comm.C,v 1.4 2002/12/13 21:13:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,8 @@
 //
  // insert any higher level, 3rd party or system includes here
 #include <iostream>
+//using std::cout;  // TODO: use when namespaces consistently implemented
+//using std::endl;
 #include <ESMC.h>
 #include <string.h>  // memset TODO:  ?? remove -test only
 #include <mpi.h>
@@ -39,7 +41,7 @@ extern pthread_t ESMC_Comm_tid[];
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Comm.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Comm.C,v 1.4 2002/12/13 21:13:38 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -106,7 +108,7 @@ extern pthread_t ESMC_Comm_tid[];
 
     // get my unique DE process group ID
     MPI_Comm_rank(MPI_COMM_WORLD, &(DE->pID));
-    //std::cout << "pID = " << DE->pID << "\n";
+    //cout << "pID = " << DE->pID << "\n";
 
     // share it with all sub-threads to calculate unique DE ids
     pthread_mutex_lock(&initMutex);
@@ -114,16 +116,16 @@ extern pthread_t ESMC_Comm_tid[];
       pthread_cond_broadcast(&initCV);
     pthread_mutex_unlock(&initMutex);
 
-    // initialize ESMC data type map to MPI types
+    // initialize ESMC data type map to MPI types TODO: ??
     ESMC_TypeToMPI[ESMC_INT] = MPI_INT;
     ESMC_TypeToMPI[ESMC_LONG] = MPI_LONG;
     ESMC_TypeToMPI[ESMC_FLOAT] = MPI_FLOAT;
     ESMC_TypeToMPI[ESMC_DOUBLE] = MPI_DOUBLE;
 
-    // initialize ESMC operation type map to MPI types
+    // initialize ESMC operation type map to MPI types TODO: ??
     ESMC_OpToMPI[ESMC_SUM] = MPI_SUM;
-    ESMC_OpToMPI[ESMC_MIN] = MPI_MIN;
-    ESMC_OpToMPI[ESMC_MAX] = MPI_MAX;
+    //ESMC_OpToMPI[ESMC_MIN] = MPI_MIN;
+    //ESMC_OpToMPI[ESMC_MAX] = MPI_MAX;
   }
 
   // determine thread index
@@ -131,7 +133,7 @@ extern pthread_t ESMC_Comm_tid[];
   for(int i=0; i<ESMC_COMM_NTHREADS; i++) {
     if (mytid == ESMC_Comm_tid[i]) {
       DE->tID = i;
-//std::cout << "tid, i = " << ESMC_Comm_tid[i] << ", " << i << std::endl;
+//cout << "tid, i = " << ESMC_Comm_tid[i] << ", " << i << endl;
       break;
     }
   }
@@ -350,7 +352,7 @@ extern pthread_t ESMC_Comm_tid[];
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  //std::cout << "ESMC_Comm numDEs = " << numDEs << std::endl;
+  //cout << "ESMC_Comm numDEs = " << numDEs << endl;
 
   return(ESMF_SUCCESS);
 
@@ -506,7 +508,7 @@ static int count = 0;
   pthread_mutex_lock(&barrierMutex);
 
 count++;
-//std::cout << "count = " << count << std::endl;
+//cout << "count = " << count << endl;
 
     // if this counter still in use by previous barrier, switch to partner
     if (*threadCount >= ESMC_COMM_NTHREADS) {
@@ -525,9 +527,9 @@ count++;
     if (*threadCount == ESMC_COMM_NTHREADS) {
 #if 0
 if (count == 4 || count == 8) {
-for(int i=0; i<12; i++) std::cout << rbuf[i] << " ";
+for(int i=0; i<12; i++) cout << rbuf[i] << " ";
   memset(rbuf, 0, 12*sizeof(int));
-for(int i=0; i<12; i++) std::cout << rbuf[i] << " ";
+for(int i=0; i<12; i++) cout << rbuf[i] << " ";
 }
 //for(int i=0; i<12; i++) rbuf[i] = 0;
 #endif
@@ -546,7 +548,7 @@ for(int i=0; i<12; i++) std::cout << rbuf[i] << " ";
       // use while loop to guard against spurious/erroneous wake-ups
       while (*threadCount < ESMC_COMM_NTHREADS) {
         pthread_cond_wait(&barrierCV, &barrierMutex);
-//std::cout << "threadCount = " << *threadCount << std::endl;
+//cout << "threadCount = " << *threadCount << endl;
       }
     }
 
@@ -649,7 +651,7 @@ for(int i=0; i<12; i++) std::cout << rbuf[i] << " ";
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-std::cout << "entered ESMC_CommAllGather(), tidx = " << DE->tID << std::endl;
+cout << "entered ESMC_CommAllGather(), tidx = " << DE->tID << endl;
 
   // copy our data into common buffer
   switch (type)
@@ -672,7 +674,7 @@ std::cout << "entered ESMC_CommAllGather(), tidx = " << DE->tID << std::endl;
 
     pthread_mutex_lock(&barrierMutex);
 
-std::cout << "entered process barrier, threadCount = " << *threadCount << "\n";
+cout << "entered process barrier, threadCount = " << *threadCount << "\n";
 
       // if this counter still in use by previous barrier, switch to partner
       if (*threadCount >= ESMC_COMM_NTHREADS) {
@@ -682,9 +684,9 @@ std::cout << "entered process barrier, threadCount = " << *threadCount << "\n";
 
       // use while loop to guard against spurious/erroneous wake-ups
       while (*threadCount < ESMC_COMM_NTHREADS-1) {
-std::cout << "main waiting for sub-threads with threadCount = " << *threadCount << std::endl;
+cout << "main waiting for sub-threads with threadCount = " << *threadCount << endl;
         pthread_cond_wait(&mainProcBarrierCV, &barrierMutex);
-std::cout << "main wokeup with threadCount = " << *threadCount << std::endl;
+cout << "main wokeup with threadCount = " << *threadCount << endl;
       }
 
     pthread_mutex_unlock(&barrierMutex);
@@ -695,12 +697,12 @@ std::cout << "main wokeup with threadCount = " << *threadCount << std::endl;
                   MPI_COMM_WORLD);
   }
 
-std::cout << "ESMC_CommAllGather(), final barrier, tidx = " << DE->tID << std::endl;
+cout << "ESMC_CommAllGather(), final barrier, tidx = " << DE->tID << endl;
 
   // wait for all threads to finish copying their data
   ESMC_CommBarrier();
 
-std::cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << std::endl;
+cout << "leaving ESMC_CommAllGather(), tidx = " << DE->tID << endl;
   return(ESMF_SUCCESS);
 
  } // end ESMC_CommAllGather

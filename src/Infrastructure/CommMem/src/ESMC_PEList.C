@@ -1,4 +1,4 @@
-// $Id: ESMC_PEList.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $
+// $Id: ESMC_PEList.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,7 +23,11 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <iostream>
- #include <cstdlib>   // qsort
+//using std::cout;  // TODO: use when namespaces consistently implemented
+//using std::cerr;
+ #include <stdlib.h>   // qsort
+// #include <cstdlib>   // qsort
+ #include <new>       // new, bad_alloc
  #include <ESMC.h>
 
  // associated class definition file
@@ -32,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_PEList.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_PEList.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -70,18 +74,32 @@
 
   ESMC_PEList *pelist;
 
-  try {
-    pelist = new ESMC_PEList;
-//std::cout << "ESMC_PEListCreate() succesful\n";
-    *rc = pelist->ESMC_PEListConstruct(numpes);
-    return(pelist);
-  }
-  catch (std::bad_alloc) {
+  if ((pelist = new (nothrow) ESMC_PEList) == 0) {
 // TODO:  call ESMF log/err handler
-    std::cerr << "ESMC_PEListCreate() memory allocation failed\n";
+    cerr << "ESMC_PEListCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
     return(0);
   }
+
+//cout << "ESMC_PEListCreate() succesful\n";
+  *rc = pelist->ESMC_PEListConstruct(numpes);
+  return(pelist);
+
+// TODO: ?? use exception handling when universally supported (pgCC doesn't)
+#if 0
+  try {
+    pelist = new ESMC_PEList;
+//cout << "ESMC_PEListCreate() succesful\n";
+    *rc = pelist->ESMC_PEListConstruct(numpes);
+    return(pelist);
+  }
+  catch (bad_alloc) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_PEListCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(0);
+  }
+#endif
 
  } // end ESMC_PEListCreate
 
@@ -148,7 +166,7 @@
   if (pelist != 0) {
     pelist->ESMC_PEListDestruct();
     delete pelist;
-//std::cout << "ESMC_PEListDestroy() successful\n";
+//cout << "ESMC_PEListDestroy() successful\n";
     return(ESMF_SUCCESS);
   } else {
     return(ESMF_FAILURE);
@@ -181,18 +199,35 @@
 // !REQUIREMENTS:  developer's guide for classes
 
   if (numpes > 0) {
+    if ((peList = new (nothrow) ESMC_PE[numpes]) == 0) {
+  // TODO:  call ESMF log/err handler
+      cerr << "ESMC_PEListConstruct() memory allocation failed\n";
+      return(ESMF_FAILURE);
+    }
+
+  //cout << "ESMC_PEListConstruct() successful\n";
+    numPEs = numpes;
+    return(ESMF_SUCCESS);
+  }
+
+  return(ESMF_FAILURE);
+
+// TODO: ?? use exception handling when universally supported (pgCC doesn't)
+#if 0
+  if (numpes > 0) {
     try {
       peList = new ESMC_PE[numpes];
       numPEs = numpes;
-  //std::cout << "ESMC_PEListConstruct() successful\n";
+  //cout << "ESMC_PEListConstruct() successful\n";
       return(ESMF_SUCCESS);
     }
-    catch(std::bad_alloc) {
+    catch(bad_alloc) {
   // TODO:  call ESMF log/err handler
-      std::cerr << "ESMC_PEListConstruct() memory allocation failed\n";
+      cerr << "ESMC_PEListConstruct() memory allocation failed\n";
       return(ESMF_FAILURE);
     }
   } else return(ESMF_FAILURE);
+#endif
 
  } // end ESMC_PEListConstruct
 
@@ -219,7 +254,7 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-//std::cout << "ESMC_PEListDestruct() invoked\n";
+//cout << "ESMC_PEListDestruct() invoked\n";
   delete[] peList;
   peList = 0;
   numPEs = 0;
@@ -443,7 +478,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  //std::cout << "number of PEs in list = " << numPEs << "\n";
+  //cout << "number of PEs in list = " << numPEs << "\n";
 
   // walk list and print each element via PE class Print method
   for(int i=0; i<numPEs; i++) {
@@ -474,7 +509,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//std::cout << "ESMC_PEList() invoked\n";
+//cout << "ESMC_PEList() invoked\n";
 
   // initialize to an empty list
   peList = 0;
@@ -501,7 +536,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//std::cout << "~ESMC_PEList() invoked\n";
+//cout << "~ESMC_PEList() invoked\n";
   ESMC_PEListDestruct();
 
  } // end ~ESMC_PEList
@@ -527,7 +562,7 @@
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
   if (peList != 0 && numPEs > 0) {
-    std::qsort(peList, numPEs, sizeof(ESMC_PE), ESMC_PEListPECompare);
+    qsort(peList, numPEs, sizeof(ESMC_PE), ESMC_PEListPECompare);
     return(ESMF_SUCCESS);
   }
 

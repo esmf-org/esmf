@@ -1,4 +1,4 @@
-// $Id: ESMC_Layout.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $
+// $Id: ESMC_Layout.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -22,7 +22,11 @@
 //-----------------------------------------------------------------------------
 //
  // insert any higher level, 3rd party or system includes here
-#include <iostream>
+#include <iostream>  // cout
+//using std::cout;  // TODO: use when namespaces consistently implemented
+//using std::cerr;
+//using std::endl;
+#include <new>       // new, bad_alloc
 #include <ESMC.h>
 
  // associated class definition file
@@ -31,7 +35,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Layout.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Layout.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -71,18 +75,32 @@
 
   ESMC_Layout *layout;
 
-  try {
-    layout = new ESMC_Layout;
-//std::cout << "ESMC_LayoutCreate() succesful\n";
-    *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
-    return(layout);
-  }
-  catch (std::bad_alloc) {
+  if ((layout = new (nothrow) ESMC_Layout) == 0) {
 // TODO:  call ESMF log/err handler
-    std::cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
     *rc = ESMF_FAILURE;
     return(0);
   }
+
+//cout << "ESMC_LayoutCreate() succesful\n";
+  *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
+  return(layout);
+
+// TODO: ?? use exception handling when universally supported (pgCC doesn't)
+#if 0
+  try {
+    layout = new ESMC_Layout;
+//cout << "ESMC_LayoutCreate() succesful\n";
+    *rc = layout->ESMC_LayoutConstruct(nx, ny, nz, pelist, commhint);
+    return(layout);
+  }
+  catch (bad_alloc) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_LayoutCreate() memory allocation failed\n";
+    *rc = ESMF_FAILURE;
+    return(0);
+  }
+#endif
 
  } // end ESMC_LayoutCreate
 
@@ -109,7 +127,7 @@
   if (layout != 0) {
     layout->ESMC_LayoutDestruct();
     delete layout;
-//std::cout << "ESMC_LayoutDestroy() successful\n";
+//cout << "ESMC_LayoutDestroy() successful\n";
     return(ESMF_SUCCESS);
   } else {
     return(ESMF_FAILURE);
@@ -145,6 +163,35 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
+  // construct 3D array of ESMC_DE's
+
+  // first, create array of (nx) pointers to ESMC_DE pointers
+  if((layout = new (nothrow) ESMC_DE**[nx]) == 0) {
+// TODO:  call ESMF log/err handler
+    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    return(ESMF_FAILURE);
+  }
+
+  // then allocate an array of (ny) ESMC_DE pointers for each x pointer
+  for (int i=0; i<nx; i++) {
+    if ((layout[i] = new (nothrow) ESMC_DE*[ny]) == 0) {
+  // TODO:  call ESMF log/err handler
+      cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+      return(ESMF_FAILURE);
+    }
+
+    // finally allocate an array of (nz) ESMC_DE's for each y pointer
+    for (int j=0; j<ny; j++) {
+      if ((layout[i][j] = new (nothrow) ESMC_DE[nz]) == 0) {
+    // TODO:  call ESMF log/err handler
+        cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+        return(ESMF_FAILURE);
+      }
+    }
+  }
+
+// TODO: ?? use exception handling when universally supported (pgCC doesn't)
+#if 0
   try {
     // construct 2D array of ESMC_DE's
 
@@ -160,11 +207,12 @@
       }
     }
   }
-  catch(std::bad_alloc) {
+  catch(bad_alloc) {
 // TODO:  call ESMF log/err handler
-    std::cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
+    cerr << "ESMC_LayoutConstruct() memory allocation failed\n";
     return(ESMF_FAILURE);
   }
+#endif
 
   nxLayout = nx;
   nyLayout = ny;
@@ -200,8 +248,8 @@
       break;
   }
 
-//std::cout << "ESMC_LayoutConstruct() ni, nj, nk: "
-          //<< ni << ", " << nj << ", " << nk << std::endl;
+//cout << "ESMC_LayoutConstruct() ni, nj, nk: "
+          //<< ni << ", " << nj << ", " << nk << endl;
 
   int PEix=0;
   ESMC_PE *pe;
@@ -213,14 +261,14 @@
         peList->ESMC_PEListGetPE(PEix++, &pe);
 
         // then assign it to this DE
-//std::cout << "ESMC_LayoutConstruct(): " << i << ", " << j << ", " << k << "\n";
-//std::cout << "ESMC_LayoutConstruct(): " << *x<< ", " << *y<< ", " << *z<< "\n";
+//cout << "ESMC_LayoutConstruct(): " << i << ", " << j << ", " << k << "\n";
+//cout << "ESMC_LayoutConstruct(): " << *x<< ", " << *y<< ", " << *z<< "\n";
         layout[*x][*y][*z].ESMC_DESetPE(pe);
       }
     }
   }
 
-//std::cout << "ESMC_LayoutConstruct() successful\n";
+//cout << "ESMC_LayoutConstruct() successful\n";
   return(ESMF_SUCCESS);
 
  } // end ESMC_LayoutConstruct
@@ -251,7 +299,7 @@
 //
 //  code goes here
 //
-//std::cout << "ESMC_LayoutDestruct() invoked\n";
+//cout << "ESMC_LayoutDestruct() invoked\n";
 
   // first delete each array of (ny) ESMC_DE's for each x pointer
   for (int i=0; i<nxLayout; i++) {
@@ -526,8 +574,8 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  //std::cout << "nxLayout, nyLayout, nzLayout = " << nxLayout << "," << nyLayout << "," << nzLayout << std::endl;
-  //std::cout << "commHint = " << commHint << "\n";
+  //cout << "nxLayout, nyLayout, nzLayout = " << nxLayout << "," << nyLayout << "," << nzLayout << endl;
+  //cout << "commHint = " << commHint << "\n";
 
   int i,j,k;
   int ni,nj,nk;
@@ -542,27 +590,27 @@
       ni = nzLayout; z = &i;
       nj = nyLayout; y = &j;
       nk = nxLayout; x = &k;
-      //std::cout << "i=z, j=y, k=x \n";
+      //cout << "i=z, j=y, k=x \n";
       break;
     case (ESMC_YFAST):
       ni = nzLayout; z = &i;
       nj = nxLayout; x = &j;
       nk = nyLayout; y = &k;
-      //std::cout << "i=z, j=x, k=y \n";
+      //cout << "i=z, j=x, k=y \n";
       break;
     case (ESMC_ZFAST):
       ni = nyLayout; y = &i;
       nj = nxLayout; x = &j;
       nk = nzLayout; z = &k;
-      //std::cout << "i=y, j=x, k=z \n";
+      //cout << "i=y, j=x, k=z \n";
       break;
   }
 
   for(i=0; i<ni; i++) {
     for (j=0; j<nj; j++) {
       for (k=0; k<nk; k++) {
-        //std::cout << "layout[" << i << "][" << j << "][" << k << "] = ";
-        std::cout << "layout[" << *x<< "][" << *y<< "][" << *z<< "] = ";
+        //cout << "layout[" << i << "][" << j << "][" << k << "] = ";
+        cout << "layout[" << *x<< "][" << *y<< "][" << *z<< "] = ";
         layout[*x][*y][*z].ESMC_DEPrint();
       }
     }
@@ -592,7 +640,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//std::cout << "ESMC_Layout() invoked\n";
+//cout << "ESMC_Layout() invoked\n";
 
   // initialize to an empty layout
   layout = 0;
@@ -623,7 +671,7 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-//std::cout << "~ESMC_Layout() invoked\n";
+//cout << "~ESMC_Layout() invoked\n";
   ESMC_LayoutDestruct();
 
  } // end ~ESMC_Layout

@@ -1,6 +1,6 @@
-# $Id: makefile,v 1.1 2002/10/22 18:59:24 nscollins Exp $
+# $Id: makefile,v 1.2 2002/12/13 21:13:38 eschwab Exp $
 
-DIRS      = 
+DIRS      = src examples
 #DIRS     = src interface examples doc
 LOCDIR    = src/Infrastructure/CommMem
 

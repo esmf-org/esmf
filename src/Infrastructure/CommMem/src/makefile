@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/10/25 19:21:33 cdeluca Exp $
+# $Id: makefile,v 1.2 2002/12/13 21:13:40 eschwab Exp $
 
 # leave alone.
 ALL: lib 
@@ -6,11 +6,12 @@ ALL: lib
 # don't set these unless absolutely necessary - they've got to be
 #  architecture and compiler independent and should be inherited
 #  from the upper level makefile if possible.
-CFLAGS    =
+#  TODO:  move platform define to central esmf/build
+CFLAGS    = -D${ESMF_ARCH} ${MPI_INCLUDE}
 FFLAGS    =
 
 # if you have C files in this directory, list them all on the line below.
-SOURCEC	  = 
+SOURCEC	  = ESMC_Machine.C ESMC_PE.C ESMC_DE.C ESMC_PEList.C ESMC_Layout.C ESMC_Comm.C
 # if you have F90 files in this directory, list them all on the line below.
 SOURCEF	  = 
 # if you have .h include files in this dir, list them all on the line below.
@@ -30,7 +31,7 @@ DIRS	  =
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/CommMem/<subdir>
+LOCDIR	  = src/Infrastructure/CommMem/src
 
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))

@@ -1,4 +1,4 @@
-// $Id: ESMC_DE.C,v 1.2 2002/12/10 03:48:51 eschwab Exp $
+// $Id: ESMC_DE.C,v 1.3 2002/12/13 21:13:38 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -23,6 +23,8 @@
 //
  // insert any higher level, 3rd party or system includes here
  #include <iostream>
+//using std::cout;  // TODO: use when namespaces consistently implemented
+//using std::endl;
  #include <ESMC.h>
 
  // associated class definition file
@@ -31,7 +33,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_DE.C,v 1.2 2002/12/10 03:48:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_DE.C,v 1.3 2002/12/13 21:13:38 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -354,17 +356,17 @@
 //EOP
 // !REQUIREMENTS:  SSSn.n, GGGn.n
 
-  std::cout << "esmfID = " << esmfID << std::endl;
-  std::cout << "pID = " << pID << std::endl;
-  std::cout << "tID = " << tID << std::endl;
-  std::cout << "process = " << process << std::endl;
-  std::cout << "thread = " << thread << std::endl;
+  cout << "esmfID = " << esmfID << endl;
+  cout << "pID = " << pID << endl;
+  cout << "tID = " << tID << endl;
+  cout << "process = " << process << endl;
+  cout << "thread = " << thread << endl;
 
-  std::cout << "PE = ";
+  cout << "PE = ";
   if (PE != 0) {
     PE->ESMC_PEPrint();
   } else {
-    std::cout << "unassigned" << std::endl;
+    cout << "unassigned" << endl;
   }
 
   return(ESMF_SUCCESS);

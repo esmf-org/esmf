@@ -1,4 +1,4 @@
-// $Id: ESMC_Machine.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $
+// $Id: ESMC_Machine.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -25,7 +25,7 @@
 //
  // insert any higher level, 3rd party or system includes here
 
-#ifdef ESMF_ARCH_ALPHA
+#ifdef alpha
 #include <unistd.h>               // gethostname
 #include <sys/sysinfo.h>          // getsysinfo
 #include <machine/hal_sysinfo.h>  // getsysinfo
@@ -34,6 +34,7 @@
 #endif
 
  #include <iostream>
+//using std::cout;  // TODO: use when namespaces consistently implemented
  #include <ESMC.h>
 
  // associated class definition file
@@ -42,7 +43,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Machine.C,v 1.3 2002/12/10 03:48:51 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Machine.C,v 1.4 2002/12/13 21:13:39 eschwab Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -321,13 +322,13 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-#ifdef ESMF_ARCH_ALPHA
+#ifdef alpha
   long curr_cpu;
   int start = 0;
 
   // get cpu id we're on now (transient & relative, e.g. 0-3 on halem)
   getsysinfo(GSI_CURRENT_CPU, (char *)&curr_cpu, sizeof(long), &start);
-//std::cout << "curr_cpu = " << curr_cpu << "\n";
+//cout << "curr_cpu = " << curr_cpu << "\n";
   *cpuid = (int) curr_cpu;
 #endif
  
@@ -354,12 +355,12 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-#ifdef ESMF_ARCH_ALPHA
+#ifdef alpha
   char hname[32];
 
   // get node id we're on (absolute, e.g. 0-347 on halem)
   gethostname(hname, 128);
-//std::cout << "hostname = " << hname << "\n";
+//cout << "hostname = " << hname << "\n";
   *nodeid = atol(strpbrk(hname, "0123456789"));
 #endif
  
@@ -386,13 +387,13 @@
 //EOP
 // !REQUIREMENTS:  developer's guide for classes
 
-#ifdef ESMF_ARCH_ALPHA
+#ifdef alpha
   int max_cpu;
   int start = 0;
 
   // get max cpus on a node
   getsysinfo(GSI_MAX_CPU, (char *)&max_cpu, sizeof(int), &start);
-//std::cout << "max_cpu = " << max_cpu << "\n";
+//cout << "max_cpu = " << max_cpu << "\n";
   *maxcpus = max_cpu;
 #endif
  
