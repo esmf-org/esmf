@@ -1,4 +1,4 @@
-% $Id: CommMem_refdoc.ctex,v 1.2 2003/04/02 19:51:42 flanigan Exp $
+% $Id: CommMem_refdoc.ctex,v 1.3 2003/04/11 04:30:11 cdeluca Exp $
 %
 % Earth System Modeling Framework
 % Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,124 +68,99 @@
 \input{../Infrastructure/CommMem/doc/CommMem_param}
 #endif
 
-\section{Machine Class Design}
+%\section{Machine Class Design}
 
-\subsection{Description}
+%\subsection{Description}
 #ifdef STANDALONE
-\input{ESMC_Machine_desc}
+%\input{ESMC_Machine_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Machine_desc}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_desc}
 #endif
 
-\subsection{Design}
+%\subsection{Design}
 #ifdef STANDALONE
-\input{ESMC_Machine_design}
+%\input{ESMC_Machine_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Machine_design}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_design}
 #endif
 
-\subsubsection{Class Definition}
+%\subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{ESMC_Machine_def}
+%\input{ESMC_Machine_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Machine_def}
+%\input{../Infrastructure/CommMem/doc/ESMC_Machine_def}
 #endif
 
-\subsubsection{Restrictions}
+%\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_Machine_rest}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_Machine_rest}
 #endif
 
-\section{Machine Class F90 Interface}
+%\section{Machine Class F90 Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-%\input{ESMC_Machine_fex}
+%\input{ESMF_Machine_fex}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_Machine_fex}
+%\input{../Infrastructure/CommMem/doc/ESMF_Machine_fex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
-%\input{ESMC_Machine_fparam}
+%\input{ESMF_Machine_fparam}
 #elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_Machine_fparam}
-#endif
-
-%\subsection{Class API}
-#ifdef STANDALONE
-%\input{ESMC_Machine_fapi}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_Machine_fapi}
-#endif
-
-\section{Machine Class C++ Interface}
-
-\subsection{Use and Examples}
-#ifdef STANDALONE
-\input{ESMC_Machine_ccex}
-#elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Machine_ccex}
-#endif
-
-\subsection{Parameters and Definitions}
-#ifdef STANDALONE
-%\input{ESMC_Machine_ccparam}
-#elif defined(CONSTITUENT)
-%\input{../Infrastructure/CommMem/doc/ESMC_Machine_ccparam}
+%\input{../Infrastructure/CommMem/doc/ESMF_Machine_fparam}
 #endif
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Machine_chapi}
-\input{ESMC_Machine_ccapi}
+%\input{ESMF_Mach_fapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Machine_chapi}
-\input{../Infrastructure/CommMem/doc/ESMC_Machine_ccapi}
+%\input{../Infrastructure/CommMem/doc/ESMF_Mach_fapi}
 #endif
 
-\section{PE Class Design}
+%\section{PE Class Design}
 
-\subsection{Description}
+%\subsection{Description}
 #ifdef STANDALONE
-\input{ESMC_PE_desc}
+%\input{ESMC_PE_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PE_desc}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_desc}
 #endif
 
-\subsection{Design}
+%\subsection{Design}
 #ifdef STANDALONE
-\input{ESMC_PE_design}
+%\input{ESMC_PE_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PE_design}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_design}
 #endif
 
-\subsubsection{Class Definition}
+%\subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{ESMC_PE_def}
+%\input{ESMC_PE_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PE_def}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_def}
 #endif
 
-\subsubsection{Restrictions}
+%\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_PE_rest}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_PE_rest}
 #endif
 
-\section{PE Class F90 Interface}
+%\section{PE Class F90 Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{ESMC_PE_fex}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_PE_fex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PE_fparam}
 #elif defined(CONSTITUENT)
@@ -199,16 +174,16 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_PE_fapi}
 #endif
 
-\section{PE Class C++ Interface}
+%\section{PE Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_PE_ccex}
+%\input{ESMC_PE_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PE_ccex}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PE_ccparam}
 #elif defined(CONSTITUENT)
@@ -217,53 +192,53 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_PE_chapi}
-\input{ESMC_PE_ccapi}
+%\input{ESMC_PE_chapi}
+%\input{ESMC_PE_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PE_chapi}
-\input{../Infrastructure/CommMem/doc/ESMC_PE_ccapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_chapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_PE_ccapi}
 #endif
 
-\section{DE Class Design}
+%\section{DE Class Design}
 
-\subsection{Description}
+%\subsection{Description}
 #ifdef STANDALONE
-\input{ESMC_DE_desc}
+%\input{ESMC_DE_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DE_desc}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_desc}
 #endif
 
-\subsection{Design}
+%\subsection{Design}
 #ifdef STANDALONE
-\input{ESMC_DE_design}
+%\input{ESMC_DE_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DE_design}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_design}
 #endif
 
-\subsubsection{Class Definition}
+%\subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{ESMC_DE_def}
+%\input{ESMC_DE_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DE_def}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_def}
 #endif
 
-\subsubsection{Restrictions}
+%\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_DE_rest}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_DE_rest}
 #endif
 
-\section{DE Class F90 Interface}
+%\section{DE Class F90 Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{ESMC_DE_fex}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_DE_fex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DE_fparam}
 #elif defined(CONSTITUENT)
@@ -277,16 +252,16 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_DE_fapi}
 #endif
 
-\section{DE Class C++ Interface}
+%\section{DE Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_DE_ccex}
+%\input{ESMC_DE_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DE_ccex}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DE_ccparam}
 #elif defined(CONSTITUENT)
@@ -295,53 +270,53 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_DE_chapi}
-\input{ESMC_DE_ccapi}
+%\input{ESMC_DE_chapi}
+%\input{ESMC_DE_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DE_chapi}
-\input{../Infrastructure/CommMem/doc/ESMC_DE_ccapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_chapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_DE_ccapi}
 #endif
 
-\section{PEList Class Design}
+%\section{PEList Class Design}
 
-\subsection{Description}
+%\subsection{Description}
 #ifdef STANDALONE
-\input{ESMC_PEList_desc}
+%\input{ESMC_PEList_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PEList_desc}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_desc}
 #endif
 
-\subsection{Design}
+%\subsection{Design}
 #ifdef STANDALONE
-\input{ESMC_PEList_design}
+%\input{ESMC_PEList_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PEList_design}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_design}
 #endif
 
-\subsubsection{Class Definition}
+%\subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{ESMC_PEList_def}
+%\input{ESMC_PEList_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PEList_def}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_def}
 #endif
 
-\subsubsection{Restrictions}
+%\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_PEList_rest}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_PEList_rest}
 #endif
 
-\section{PEList Class F90 Interface}
+%\section{PEList Class F90 Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{ESMC_PEList_fex}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_PEList_fex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PEList_fparam}
 #elif defined(CONSTITUENT)
@@ -355,16 +330,16 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_PEList_fapi}
 #endif
 
-\section{PEList Class C++ Interface}
+%\section{PEList Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_PEList_ccex}
+%\input{ESMC_PEList_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccex}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_PEList_ccparam}
 #elif defined(CONSTITUENT)
@@ -373,11 +348,11 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_PEList_chapi}
-\input{ESMC_PEList_ccapi}
+%\input{ESMC_PEList_chapi}
+%\input{ESMC_PEList_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_PEList_chapi}
-\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_chapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_PEList_ccapi}
 #endif
 
 \section{DELayout Class Design}
@@ -433,16 +408,16 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_DELayout_fapi}
 #endif
 
-\section{DELayout Class C++ Interface}
+%\section{DELayout Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_DELayout_ccex}
+%\input{ESMC_DELayout_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccex}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_DELayout_ccparam}
 #elif defined(CONSTITUENT)
@@ -451,53 +426,53 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_DELayout_chapi}
-\input{ESMC_DELayout_ccapi}
+%\input{ESMC_DELayout_chapi}
+%\input{ESMC_DELayout_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_DELayout_chapi}
-\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_chapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_DELayout_ccapi}
 #endif
 
-\section{Comm Class Design}
+%\section{Comm Class Design}
 
-\subsection{Description}
+%\subsection{Description}
 #ifdef STANDALONE
-\input{ESMC_Comm_desc}
+%\input{ESMC_Comm_desc}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Comm_desc}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_desc}
 #endif
 
-\subsection{Design}
+%\subsection{Design}
 #ifdef STANDALONE
-\input{ESMC_Comm_design}
+%\input{ESMC_Comm_design}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Comm_design}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_design}
 #endif
 
-\subsubsection{Class Definition}
+%\subsubsection{Class Definition}
 #ifdef STANDALONE
-\input{ESMC_Comm_def}
+%\input{ESMC_Comm_def}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Comm_def}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_def}
 #endif
 
-\subsubsection{Restrictions}
+%\subsubsection{Restrictions}
 #ifdef STANDALONE
 %\input{ESMC_Comm_rest}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_Comm_rest}
 #endif
 
-\section{Comm Class F90 Interface}
+%\section{Comm Class F90 Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
 %\input{ESMC_Comm_fex}
 #elif defined(CONSTITUENT)
 %\input{../Infrastructure/CommMem/doc/ESMC_Comm_fex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_Comm_fparam}
 #elif defined(CONSTITUENT)
@@ -511,16 +486,16 @@
 %\input{../Infrastructure/CommMem/doc/ESMC_Comm_fapi}
 #endif
 
-\section{Comm Class C++ Interface}
+%\section{Comm Class C++ Interface}
 
-\subsection{Use and Examples}
+%\subsection{Use and Examples}
 #ifdef STANDALONE
-\input{ESMC_Comm_ccex}
+%\input{ESMC_Comm_ccex}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccex}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccex}
 #endif
 
-\subsection{Parameters and Definitions}
+%\subsection{Parameters and Definitions}
 #ifdef STANDALONE
 %\input{ESMC_Comm_ccparam}
 #elif defined(CONSTITUENT)
@@ -529,25 +504,25 @@
 
 %\subsection{Class API}
 #ifdef STANDALONE
-\input{ESMC_Comm_chapi}
-\input{ESMC_Comm_ccapi}
+%\input{ESMC_Comm_chapi}
+%\input{ESMC_Comm_ccapi}
 #elif defined(CONSTITUENT)
-\input{../Infrastructure/CommMem/doc/ESMC_Comm_chapi}
-\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_chapi}
+%\input{../Infrastructure/CommMem/doc/ESMC_Comm_ccapi}
 #endif
 
 #ifdef STANDALONE
-\section{Review Status}
-\input{CommMem_desrev}
+%\section{Review Status}
+%\input{CommMem_desrev}
 #endif
 
 #ifdef STANDALONE
-\section{Glossary}
-\input{CommMem_glos}
+%\section{Glossary}
+%\input{CommMem_glos}
 #endif
 
 #ifdef STANDALONE
-%\section{Bibliography}
+\section{Bibliography}
 \bibliography{comp} 
 \bibliographystyle{plain}
 \addcontentsline{toc}{section}{Bibliography}
