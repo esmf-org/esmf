@@ -1,4 +1,4 @@
-! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.4 2004/11/18 00:34:46 svasquez Exp $
+! $Id: ESMF_VMSendVMRecvUTest.F90,v 1.5 2004/11/18 16:33:02 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.4 2004/11/18 00:34:46 svasquez Exp $'
+      '$Id: ESMF_VMSendVMRecvUTest.F90,v 1.5 2004/11/18 16:33:02 svasquez Exp $'
 !------------------------------------------------------------------------------
       ! cumulative result: count failures; no failures equals "all pass"
       integer :: result = 0
@@ -50,7 +50,7 @@
       integer:: i, rc
       type(ESMF_VM):: vm
       integer:: localPet, petCount
-      integer:: count, src, dst, answer
+      integer:: count, src, dst, lData
       integer, allocatable:: localData(:)
      
       integer :: status, myde, npets
@@ -91,8 +91,11 @@
       ! Send local data from src to dst
       write(failMsg, *) "Did not RETURN ESMF_SUCCESS"
       write(name, *) "Sending local data Test"
-      if (localPet==src) &
-      call ESMF_VMSend(vm, sendData=localData, count=count, dst=dst, rc=rc)
+      if (localPet==src) then
+      	call ESMF_VMSend(vm, sendData=localData, count=count, dst=dst, rc=rc)
+      else
+      	rc = ESMF_SUCCESS
+      endif
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
       !------------------------------------------------------------------------
@@ -122,8 +125,8 @@
       write(name, *) "Verify local data Test"
       if (localPet==dst) then
         print *, "LocalData is ", localData(1)
-        answer = 100
-      	call ESMF_Test((answer.eq.100), name, failMsg, result, ESMF_SRCLINE)
+        lData = localData(1)
+      	call ESMF_Test((lData.eq.100), name, failMsg, result, ESMF_SRCLINE)
       else
       	call ESMF_Test((localData(1).eq.(localPet+100)), name, failMsg, result, ESMF_SRCLINE)
       endif
