@@ -1,4 +1,4 @@
-! $Id: ESMF_StateReconcile.F90,v 1.16 2004/12/28 07:19:25 theurich Exp $
+! $Id: ESMF_StateReconcile.F90,v 1.17 2005/01/13 22:31:54 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -68,11 +68,12 @@
       private
         type(ESMF_StateItemInfo), dimension(:), pointer :: childList
         type(ESMF_StateItemInfo), dimension(:), pointer :: attrList
-    ! TODO: these need to be integrated in a better fashion.
-    integer(ESMF_KIND_I4) :: mycount, theircount
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: idsend, idrecv
-    integer(ESMF_KIND_I4), pointer, dimension(:) :: objsend, objrecv
-    integer(ESMF_KIND_I4), pointer, dimension(:,:) :: blindsend, blindrecv
+        ! TODO: these need to be integrated in a better fashion.
+        integer(ESMF_KIND_I4) :: mycount, theircount
+        integer(ESMF_KIND_I4), pointer, dimension(:) :: idsend, idrecv
+        type(ESMF_VMId), pointer, dimension(:) :: vmidsend, vmidrecv
+        integer(ESMF_KIND_I4), pointer, dimension(:) :: objsend, objrecv
+        integer(ESMF_KIND_I4), pointer, dimension(:,:) :: blindsend, blindrecv
         ! TODO: longer term, build a linked list or tree of objects.
         !type(ESMF_StateItemInfo), pointer :: originalObject
         !integer :: blockType   ! new obj, dup, or end marker
@@ -98,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_StateReconcile.F90,v 1.16 2004/12/28 07:19:25 theurich Exp $'
+      '$Id: ESMF_StateReconcile.F90,v 1.17 2005/01/13 22:31:54 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -238,6 +239,7 @@
     type(ESMF_StateItemInfo), pointer :: si
     type(ESMF_State) :: wrapper
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
+    type(ESMF_VMId) :: temp_vmid
     integer :: offset
 
     ! make some initial space
@@ -263,6 +265,10 @@
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local ID list", &
                                        ESMF_CONTEXT, rc)) return
+        allocate(si%vmidsend(si%mycount), stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local VM ID list", &
+                                       ESMF_CONTEXT, rc)) return
         allocate(si%objsend(si%mycount), stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local obj list", &
@@ -280,6 +286,7 @@
         select case (stateitem%otype%ot)
            case (ESMF_STATEITEM_BUNDLE%ot)
              call c_ESMC_GetID(stateitem%datap%bp%btypep, si%idsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%bp%btypep, si%vmidsend(i), localrc)
              si%objsend(i) = ESMF_ID_BUNDLE%objectID
              bptr => si%blindsend(:,i)
              call ESMF_BundleSerialize(stateitem%datap%bp, bptr, bufsize, &
@@ -288,6 +295,7 @@
 
            case (ESMF_STATEITEM_FIELD%ot)
              call c_ESMC_GetID(stateitem%datap%fp%ftypep, si%idsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%fp%ftypep, si%vmidsend(i), localrc)
              si%objsend(i) = ESMF_ID_FIELD%objectID
              bptr => si%blindsend(:,i)
              call ESMF_FieldSerialize(stateitem%datap%fp, bptr, &
@@ -296,6 +304,7 @@
 
            case (ESMF_STATEITEM_ARRAY%ot)
              call c_ESMC_GetID(stateitem%datap%ap, si%idsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%ap, si%vmidsend(i), localrc)
              si%objsend(i) = ESMF_ID_ARRAY%objectID
              bptr => si%blindsend(:,i)
              call c_ESMC_ArraySerializeNoData(stateitem%datap%ap, bptr(1), &
@@ -304,6 +313,7 @@
 
            case (ESMF_STATEITEM_STATE%ot)
              call c_ESMC_GetID(stateitem%datap%spp, si%idsend(i), localrc)
+             call c_ESMC_GetVMId(stateitem%datap%spp, si%vmidsend(i), localrc)
              si%objsend(i) = ESMF_ID_STATE%objectID
              bptr => si%blindsend(:,i)
              wrapper%statep => stateitem%datap%spp
@@ -313,6 +323,8 @@
            case (ESMF_STATEITEM_NAME%ot)
             !print *, "placeholder name"
              si%idsend(i) = -1
+             ! TODO: decide what this should be.
+             !si%vmidsend(i) = ESMF_NULL_POINTER || VMCurrentId
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
@@ -321,6 +333,7 @@
            case (ESMF_STATEITEM_INDIRECT%ot)
             !print *, "field inside a bundle"
              si%idsend(i) = -2
+             !si%vmidsend(i) = ESMF_NULL_POINTER || VMCurrentId
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
@@ -329,6 +342,7 @@
            case (ESMF_STATEITEM_UNKNOWN%ot)
             !print *, "unknown type"
              si%idsend(i) = -3
+             !si%vmidsend(i) = ESMF_NULL_POINTER || VMCurrentId
              si%objsend(i) = 0
              bptr => si%blindsend(:,i)
              call c_ESMC_StringSerialize(stateitem%namep, bptr(1), bufsize, offset, localrc)
@@ -389,6 +403,10 @@
         deallocate(si%idsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
                                  "Deallocating buffer for local ID list", &
+                                       ESMF_CONTEXT, rc)) return
+        deallocate(si%vmidsend, stat=localrc)
+        if (ESMF_LogMsgFoundAllocError(localrc, &
+                                 "Deallocating buffer for local VM ID list", &
                                        ESMF_CONTEXT, rc)) return
         deallocate(si%objsend, stat=localrc)
         if (ESMF_LogMsgFoundAllocError(localrc, &
@@ -468,6 +486,7 @@
     character(len=bufsize) :: thisname
     integer(ESMF_KIND_I4), pointer, dimension(:) :: bptr
     logical :: ihave
+    type(ESMF_VMId) :: temp_vmid
     type(ESMF_StateItemInfo), pointer :: si
     integer :: offset
 
@@ -514,6 +533,13 @@
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
                                              ESMF_CONTEXT, rc)) return
+                   do k = 1, si%mycount
+                       temp_vmid = si%vmidsend(k)
+                       call ESMF_VMSendVMId(vm, temp_vmid, i, rc=localrc)
+                       if (ESMF_LogMsgFoundError(localrc, &
+                                                 ESMF_ERR_PASSTHRU, &
+                                                 ESMF_CONTEXT, rc)) return
+                   enddo
                    call ESMF_VMSend(vm, si%objsend, si%mycount, i, rc=localrc)
                    if (ESMF_LogMsgFoundError(localrc, &
                                              ESMF_ERR_PASSTHRU, &
@@ -562,6 +588,10 @@
                if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local ID list", &
                                    ESMF_CONTEXT, rc)) return
+               allocate(si%vmidrecv(si%theircount), stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                                   "Allocating buffer for local VM ID list", &
+                                   ESMF_CONTEXT, rc)) return
                allocate(si%objrecv(si%theircount), stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
                                    "Allocating buffer for local obj list", &
@@ -576,6 +606,14 @@
                if (ESMF_LogMsgFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &
                                          ESMF_CONTEXT, rc)) return
+               do k = 1, si%theircount
+                   call ESMF_VMIdCreate(temp_vmid)
+                   call ESMF_VMRecvVMId(vm, temp_vmid, j, rc=localrc)
+                   if (ESMF_LogMsgFoundError(localrc, &
+                                             ESMF_ERR_PASSTHRU, &
+                                             ESMF_CONTEXT, rc)) return
+                   si%vmidrecv(k) = temp_vmid
+               enddo
                call ESMF_VMRecv(vm, si%objrecv, si%theircount, j, rc=localrc)
                if (ESMF_LogMsgFoundError(localrc, &
                                          ESMF_ERR_PASSTHRU, &
@@ -611,7 +649,8 @@
            do k=1, si%theircount
              ihave = .false.
              do l=1, si%mycount
-                 if (si%idrecv(k) .eq. si%idsend(l)) then 
+                 if ((si%idrecv(k) .eq. si%idsend(l)) .and. &
+                 (ESMF_VMIdCompare(si%vmidrecv(k), si%vmidsend(l)) .eq. ESMF_TRUE)) then 
                      ihave = .true.
                      exit
                  endif
@@ -623,24 +662,28 @@
                    ! print *, "need to create proxy bundle, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     bundle = ESMF_BundleDeserialize(vm, bptr, offset, localrc)
+                    call c_ESMC_SetVMId(bundle%btypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAddBundle(state, bundle, rc=localrc)
 
                    case (ESMF_ID_FIELD%objectID)
                    ! print *, "need to create proxy field, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     field = ESMF_FieldDeserialize(vm, bptr, offset, localrc)
+                    call c_ESMC_SetVMId(field%ftypep, si%vmidrecv(k), localrc)
                     call ESMF_StateAddField(state, field, rc=localrc)
 
                    case (ESMF_ID_ARRAY%objectID)
                    ! print *, "need to create proxy array, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     call c_ESMC_ArrayDeserializeNoData(array, bptr, offset, localrc)
+                    call c_ESMC_SetVMId(array, si%vmidrecv(k), localrc)
                     call ESMF_StateAddArray(state, array, rc=localrc)
 
                    case (ESMF_ID_STATE%objectID)
                    ! print *, "need to create proxy state, id=", si%idrecv(k)
                     bptr => si%blindrecv(:,k)
                     substate = ESMF_StateDeserialize(vm, bptr, offset, localrc)
+                    call c_ESMC_SetVMId(substate%statep, si%vmidrecv(k), localrc)
                     call ESMF_StateAddState(state, substate, rc=localrc)
 
                    case (ESMF_STATEITEM_NAME%ot)
@@ -671,6 +714,13 @@
                deallocate(si%idrecv, stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
                               "Deallocating buffer for local ID list", &
+                               ESMF_CONTEXT, rc)) return
+               do k = 1, si%theircount
+                   call ESMF_VMIdDestroy(si%vmidrecv(k))
+               enddo
+               deallocate(si%vmidrecv, stat=localrc)
+               if (ESMF_LogMsgFoundAllocError(localrc, &
+                              "Deallocating buffer for local VM ID list", &
                                ESMF_CONTEXT, rc)) return
                deallocate(si%objrecv, stat=localrc)
                if (ESMF_LogMsgFoundAllocError(localrc, &
