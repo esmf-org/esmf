@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.4 2004/10/28 19:20:26 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.5 2004/11/01 16:57:37 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -59,10 +59,9 @@
 #define VM_TID_MPI_TAG        (10)      // mpi tag used to send/recv TID
 #ifdef SIGRTMIN
 #define VM_SIG1               (SIGRTMIN)
-#define VM_SIG2               (SIGRTMIN+1)
 #else
-#define VM_SIG1               (SIGUSR1)
-#define VM_SIG2               (SIGUSR2)
+#define VM_SIG1               (SIGUSR2)
+// Note that SIGUSR1 interferes with MPICH's CH_P4 device!
 #endif
 // - communication identifiers
 #define VM_COMM_TYPE_MPI1     (0)
@@ -192,21 +191,14 @@ static int MPI_InitWrapper(void){
 void ESMC_VMK::vmk_init(void){
   // initialize the physical machine and a default (all MPI) virtual machine
   // initialize signal handling -> this MUST happen before MPI_Init is called!!
-#ifndef VM_DONT_SPAWN_PTHREADS
-  // Note that SIGUSR1 interferes with MPICH's CH_P4 device! Hence if you are
-  // planning on using CH_P4 you need to compile with VM_DONT_SPAWN_PTHREADS
-  // otherwise you will get stuck in MPI_Init.
   struct sigaction action;
   action.sa_handler = SIG_DFL;
   sigemptyset (&(action.sa_mask));
-  sigaction(VM_SIG1, &action, NULL);  // restore default handle for USR1
-  sigaction(VM_SIG2, &action, NULL);  // restore default handle for USR2
+  sigaction(VM_SIG1, &action, NULL);  // restore default handle for VM_SIG1
   sigset_t sigs_to_block;
   sigemptyset(&sigs_to_block);
   sigaddset(&sigs_to_block, VM_SIG1);
-  sigaddset(&sigs_to_block, VM_SIG2);
-  sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block USR1 and USR2
-#endif
+  sigprocmask(SIG_BLOCK, &sigs_to_block, NULL); // block VM_SIG1
   // next check is whether MPI has been initialized yet
   // actually we need to indicate an error if MPI has been initialized before
   // because signal blocking might not reach all of the threads again...
@@ -674,7 +666,6 @@ static void *vmk_sigcatcher(void *arg){
     " and I'll wake up blocker thread with &vmkt: %p\n", getpid(),
     blocker_vmkt);
 #endif
-//  pthread_kill(thread_wake, VM_SIG2);
   
   pthread_mutex_lock(&(blocker_vmkt->mut_extra1));
   pthread_cond_signal(&(blocker_vmkt->cond_extra1));
@@ -727,26 +718,13 @@ static void *vmk_block(void *arg){
 
   // This blocker thread is responsible for staying alive until resources,
   // i.e. cores, become available to the contributing pet. The contributing
-  // pet is blocked (asynchonously) via pthread_join(). This means it is o.k.
-  // for the blocker thread to exit before the contributing pet ever makes it
-  // to pthread_join()... 
-  ///pthread_t pthid;
-  // spawn of an independent sigcatcher that listens to other processes
-  ///pthread_create(&pthid, NULL, vmk_sigcatcher, (void *)NULL);
-  ///pthread_detach(pthid);  // the sigcatcher is independet of the blocker thread
-  // now set up and install USR2 signal to be catched by this blocker thread
-//  int caught;
-//  sigset_t sigs_to_catch;
-//  sigemptyset(&sigs_to_catch);
-//  sigaddset(&sigs_to_catch, VM_SIG2);
-  // suspend this thread until awoken by one of the sigcatcher threads
+  // pet is blocked (asynchonously) via pthread_cond_wait().
 #if (VERBOSITY > 9)
   fprintf(stderr, "I am a blocker for pid %d, my tid is %d and going to sleep...\n",
     getpid(), pthread_self());
 #endif
 
-//  sigwait(&sigs_to_catch, &caught);
-  
+  // suspend this thread until awoken by one of the sigcatcher threads  
   pthread_cond_wait(&(vmkt->cond_extra1), &(vmkt->mut_extra1));
 
 #if (VERBOSITY > 9)
@@ -771,16 +749,6 @@ static void *vmk_block(void *arg){
 
 void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp, 
   void *(fctp)(void *, void *), void *cargo){
-#ifdef VM_DONT_SPAWN_PTHREADS
-  // Ensure that ESMC_VMKPlan does not indicate multi-threading or multi-PE PET
-  for (int i=0; i<npets; i++){
-    if (vmp.spawnflag[i]!=1){
-      fprintf(stderr, "VM_ERROR: Cannot use multi-threaded or multi-PE PETs"
-        " in VM_DONT_SPAWN_PTHREADS mode.\n");
-      MPI_Abort(MPI_COMM_WORLD, 0);
-    }
-  }
-#endif
   // enter a vm derived from current vm according to the ESMC_VMKPlan
   // need as many spawn_args as there are threads to be spawned from this pet
   // this is so that each spawned thread does not have to be worried about this
@@ -1238,14 +1206,9 @@ void *ESMC_VMK::vmk_startup(class ESMC_VMKPlan &vmp,
     sarg[i].pref_intra_ssi = vmp.pref_intra_ssi;
     // cargo
     sarg[i].cargo = cargo;
-#ifdef VM_DONT_SPAWN_PTHREADS
-    // use a simple function call
-    vmk_spawn((void *)&sarg[i]);
-#else
     // finally spawn threads from this pet...
     //pthread_create(&(sarg[i].pthid), NULL, vmk_spawn, (void *)&sarg[i]);
     vmkt_create(&(sarg[i].vmkt), vmk_spawn, (void *)&sarg[i]);
-#endif
   }
   // free all the temporary arrays.... (not sarg array!!!)
   delete [] new_lpid;
@@ -1342,10 +1305,8 @@ void ESMC_VMK::vmk_shutdown(class ESMC_VMKPlan &vmp, void *arg){
   }
   // pets that spawned will be blocked by pthread_join() call...
   for (int i=0; i<vmp.spawnflag[mypet]; i++){
-#ifndef VM_DONT_SPAWN_PTHREADS
     //pthread_join(sarg[i].pthid, NULL);
     vmkt_join(&(sarg[i].vmkt));
-#endif
     // free arrays in sarg[i[ 
     delete [] sarg[i].lpid;
     delete [] sarg[i].pid;
