@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.59 2004/12/22 21:52:19 cpboulder Exp $
+! $Id: ESMF_LogErr.F90,v 1.60 2004/12/23 19:45:06 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -916,7 +916,7 @@ end subroutine ESMF_LogMsgSetError
 !      \end{description}
 ! 
 !EOP
-    integer 				       :: status, i, j, rc2	
+    integer 				       :: status, j, rc2	
     type(ESMF_LOGENTRY), dimension(:), pointer :: localbuf
     character(len=32)                          :: fname
     character(len=4)                           :: fnum
