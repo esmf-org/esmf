@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.32 2003/06/27 17:51:03 rstaufer Exp $
+! $Id: ESMF_Field.F90,v 1.33 2003/06/27 19:52:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -202,8 +202,8 @@
    public ESMF_FieldValidate           ! Check internal consistency
    public ESMF_FieldPrint              ! Print contents of a Field
 
-!  !subroutine ESMF_FieldCheckpoint(field, iospec, rc)
-!  !function ESMF_FieldRestore(name, iospec, rc)
+!  !subroutine ESMF_FieldWriteRestart(field, iospec, rc)
+!  !function ESMF_FieldReadRestart(name, iospec, rc)
 !  !subroutine ESMF_FieldWrite(field, subset, iospec, rc)
 !  !function ESMF_FieldRead(fname, gname, dnames, iospec, rc)
 !
@@ -213,7 +213,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.32 2003/06/27 17:51:03 rstaufer Exp $'
+      '$Id: ESMF_Field.F90,v 1.33 2003/06/27 19:52:32 nscollins Exp $'
 
 !==============================================================================
 !
@@ -2993,15 +2993,15 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldCheckpoint - Save Field in the quickest manner possible
+! !IROUTINE: ESMF_FieldWriteRestart - Save Field in the quickest manner possible
 !
 ! !INTERFACE:
-      subroutine ESMF_FieldCheckpoint(field, iospec, rc)
+      subroutine ESMF_FieldWriteRestart(field, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field                ! field to save
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      type(ESMF_Field), intent(in) :: field 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Used to save all data to disk as quickly as possible.  
@@ -3015,28 +3015,29 @@
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_FieldCheckpoint
+        end subroutine ESMF_FieldWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_FieldRestore - Read back in a Checkpointed Field
+! !IROUTINE: ESMF_FieldReadRestart - Read back in a saved Field
 !
 ! !INTERFACE:
-      function ESMF_FieldRestore(name, iospec, rc)
+      function ESMF_FieldReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Field) :: ESMF_FieldRestore
+      type(ESMF_Field) :: ESMF_FieldReadRestart
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! field name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a {\tt ESMF\_Field} from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_Field} from the 
+!      last call to WriteRestart.
 !
 ! !REQUIREMENTS: FLD1.6.8
 !EOP
@@ -3048,9 +3049,9 @@
      
         nullify(a%ftypep)
 
-        ESMF_FieldRestore = a
+        ESMF_FieldReadRestart = a
 
-        end function ESMF_FieldRestore
+        end function ESMF_FieldReadRestart
 
 
 !------------------------------------------------------------------------------
@@ -3062,14 +3063,14 @@
                                  iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field                ! field to save
-!!      type(ESMF_Subset), intent(in), optional :: subset    ! subset on write
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      type(ESMF_Field), intent(in) :: field 
+!     type(ESMF_Subset), intent(in), optional :: subset
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc  
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
 !      options specified in the IOSpec derived type. 
 !
 !

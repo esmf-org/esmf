@@ -1,4 +1,4 @@
-! $Id: ESMF_Bundle.F90,v 1.12 2003/06/26 21:17:14 rstaufer Exp $
+! $Id: ESMF_Bundle.F90,v 1.13 2003/06/27 19:52:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -162,8 +162,8 @@
 
 !  !subroutine ESMF_BundleGetDataMap
 !
-!  !subroutine ESMF_BundleCheckpoint(bundle, iospec, rc)
-!  !function ESMF_BundleRestore(name, iospec, rc)
+!  !subroutine ESMF_BundleWriteRestart(bundle, iospec, rc)
+!  !function ESMF_BundleReadRestart(name, iospec, rc)
 !  !subroutine ESMF_BundleWrite(bundle, subarray, iospec, rc)
 !  !function ESMF_BundleRead(name, iospec, rc)
 
@@ -1937,15 +1937,15 @@ end function
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleCheckpoint - Save Bundle in the quickest manner possible
+! !IROUTINE: ESMF_BundleWriteRestart - Save Bundle in the quickest manner possible
 !
 ! !INTERFACE:
-      subroutine ESMF_BundleCheckpoint(bundle, iospec, rc)
+      subroutine ESMF_BundleWriteRestart(bundle, iospec, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_Bundle), intent(in) :: bundle              ! bundle to save
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      type(ESMF_Bundle), intent(in) :: bundle 
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc     
 !
 ! !DESCRIPTION:
 !      Used to save all data to disk as quickly as possible.  
@@ -1959,26 +1959,27 @@ end function
 !
 !  TODO: code goes here
 !
-      end subroutine ESMF_BundleCheckpoint
+      end subroutine ESMF_BundleWriteRestart
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: ESMF_BundleRestore - Read back in a Checkpointed Bundle
+! !IROUTINE: ESMF_BundleReadRestart - Read back a saved Bundle
 !
 ! !INTERFACE:
-      function ESMF_BundleRestore(name, iospec, rc)
+      function ESMF_BundleReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_Bundle) :: ESMF_BundleRestore
+      type(ESMF_Bundle) :: ESMF_BundleReadRestart
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! bundle name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name     
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc         
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a {\t ESMF\_Bundle} from the last call to Checkpoint.
+!      all data associated with a {\t ESMF\_Bundle} 
+!      from the last call to WriteRestart.
 !
 ! !REQUIREMENTS:  FLD2.5.10
 !EOP
@@ -1990,9 +1991,9 @@ end function
 
       b%btypep%bundlestatus = ESMF_STATE_UNINIT
 
-      ESMF_BundleRestore = b
+      ESMF_BundleReadRestart = b
 
-      end function ESMF_BundleRestore
+      end function ESMF_BundleReadRestart
 
 !------------------------------------------------------------------------------
 !BOP
@@ -2009,7 +2010,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)
+!      (see WriteRestart/ReadRestart for quick data dumps.)
 !
 ! !REQUIREMENTS:  FLD3.1, FLD3.2, FLD3.3, FLD3.4, FLD3.5
 !EOP

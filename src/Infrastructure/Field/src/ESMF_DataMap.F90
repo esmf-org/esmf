@@ -1,4 +1,4 @@
-! $Id: ESMF_DataMap.F90,v 1.9 2003/06/26 21:17:48 rstaufer Exp $
+! $Id: ESMF_DataMap.F90,v 1.10 2003/06/27 19:52:32 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -191,7 +191,7 @@
 
       public ESMF_DataMapGet, ESMF_DataMapSet
 
-      public ESMF_DataMapCheckpoint, ESMF_DataMapRestore
+      public ESMF_DataMapWriteRestart, ESMF_DataMapReadRestart
       public ESMF_DataMapWrite, ESMF_DataMapRead 
       public ESMF_DataMapValidate, ESMF_DataMapPrint
 
@@ -206,7 +206,7 @@
 ! leave the following line as-is; it will insert the cvs ident string
 ! into the object file for tracking purposes.
       character(*), parameter, private :: version =  &
-             '$Id: ESMF_DataMap.F90,v 1.9 2003/06/26 21:17:48 rstaufer Exp $'
+             '$Id: ESMF_DataMap.F90,v 1.10 2003/06/27 19:52:32 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 
@@ -902,7 +902,7 @@ end function
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      subroutine ESMF_DataMapCheckpoint(datamap, iospec, rc)
+      subroutine ESMF_DataMapWriteRestart(datamap, iospec, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_DataMap), intent(in) :: datamap                ! datamap to save
@@ -921,26 +921,27 @@ end function
 !
 ! TODO: code goes here
 !
-        end subroutine ESMF_DataMapCheckpoint
+        end subroutine ESMF_DataMapWriteRestart
 
 
 !------------------------------------------------------------------------------
 !BOP
 ! !INTERFACE:
-      function ESMF_DataMapRestore(name, iospec, rc)
+      function ESMF_DataMapReadRestart(name, iospec, rc)
 !
 ! !RETURN VALUE:
-      type(ESMF_DataMap) :: ESMF_DataMapRestore
+      type(ESMF_DataMap) :: ESMF_DataMapReadRestart
 !
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! datamap name to restore
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to reinitialize
-!      all data associated with a {\tt ESMF\_DataMap} from the last call to Checkpoint.
+!      all data associated with a {\tt ESMF\_DataMap} 
+!      from the last call to WriteRestart.
 !
 !EOP
 ! !REQUIREMENTS: FLD1.6.8
@@ -953,9 +954,9 @@ end function
         allocate(dmp)
         dmp%datarank = 0
 
-        ESMF_DataMapRestore%dmp => dmp
+        ESMF_DataMapReadRestart%dmp => dmp
 
-        end function ESMF_DataMapRestore
+        end function ESMF_DataMapReadRestart
 
 
 !------------------------------------------------------------------------------
@@ -970,7 +971,7 @@ end function
 !
 ! !DESCRIPTION:
 !      Used to write data to persistent storage in a variety of formats.  
-!      (see Checkpoint/Restore for quick data dumps.)  Details of I/O 
+!      (see WriteRestart/ReadRestart for quick data dumps.)  Details of I/O 
 !      options specified in the IOSpec derived type. 
 !
 !
@@ -992,9 +993,9 @@ end function
       type(ESMF_DataMap) :: ESMF_DataMapRead
 !
 ! !ARGUMENTS:
-      character (len = *), intent(in) :: name              ! datamap name to read
-      type(ESMF_IOSpec), intent(in), optional :: iospec    ! file specs
-      integer, intent(out), optional :: rc                 ! return code
+      character (len = *), intent(in) :: name
+      type(ESMF_IOSpec), intent(in), optional :: iospec
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Used to read data from persistent storage in a variety of formats.
@@ -1022,9 +1023,9 @@ end function
       subroutine ESMF_DataMapValidate(datamap, options, rc)
 !
 ! !ARGUMENTS:
-      type(ESMF_DataMap), intent(in) :: datamap        ! what to check
-      character (len = *), intent(in) :: options       ! select validate options
-      integer, intent(out), optional :: rc             ! return code
+      type(ESMF_DataMap), intent(in) :: datamap
+      character (len = *), intent(in) :: options
+      integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
 !      Routine to validate the internal state of a {\tt ESMF\_DataMap}.
@@ -1046,9 +1047,9 @@ end function
 !
 !
 ! !ARGUMENTS:
-      type(ESMF_DataMap), intent(in) :: datamap          ! what to print
-      character (len = *), intent(in) :: options         ! select print options
-      integer, intent(out), optional :: rc               ! return code
+      type(ESMF_DataMap), intent(in) :: datamap
+      character (len = *), intent(in) :: options
+      integer, intent(out), optional :: rc 
 !
 ! !DESCRIPTION:
 !      Routine to print information about a {\tt ESMF\_DataMap}.
