@@ -1,6 +1,6 @@
 #!/bin/csh -f
 #
-# $Id: do_newcomp,v 1.1 2002/10/07 16:35:08 eschwab Exp $
+# $Id: do_newcomp,v 1.2 2002/10/08 23:05:42 eschwab Exp $
 #
 #===============================================================================
 # do_newcomp
@@ -43,6 +43,7 @@ endif
     endif 
   end
 
+  set compdir=$cwd/$comp
   set srcdir=$cwd/$comp/src
   set intfdir=$cwd/$comp/interface
   set exdir=$cwd/$comp/examples
@@ -50,6 +51,16 @@ endif
   set DOCT_DIR=$DOC_DIR/templates
 
 # Fill the source directories with template files
+
+# makefiles
+  if(!(-r $compdir/makefile)) cat $DOCT_DIR/makefile.comp | \
+      sed 's/<Comp>/'$comp'/g' > $compdir/makefile
+  if(!(-r $exdir/makefile)) cat $DOCT_DIR/makefile.examp | \
+      sed 's/<Comp>/'$comp'/g' > $exdir/makefile
+  if(!(-r $srcdir/makefile)) cat $DOCT_DIR/makefile.srcinter | \
+      sed 's/<Comp>/'$comp'/g' > $srcdir/makefile
+  if(!(-r $intfdir/makefile)) cat $DOCT_DIR/makefile.srcinter | \
+      sed 's/<Comp>/'$comp'/g' > $intfdir/makefile
 
 # include files
   if(!(-r $incdir/ESMF_$comp.h)) cat $DOCT_DIR/ESMF_comp.h | \
