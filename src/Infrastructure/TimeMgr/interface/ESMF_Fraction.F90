@@ -1,4 +1,4 @@
-! $Id: ESMF_Fraction.F90,v 1.4 2003/04/23 21:39:34 cdeluca Exp $
+! $Id: ESMF_Fraction.F90,v 1.5 2003/04/25 09:13:47 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -10,62 +10,78 @@
 !
 ! ESMF Fraction Module
 !
-! (all lines below between the !BOP and !EOP markers will be included in
-!  the automated document processing.)
-!------------------------------------------------------------------------------
-
-!------------------------------------------------------------------------------
-! put any constants or macros which apply to the whole component in this
-!  include file.  anything public or esmf-wide should be up higher at
-!  the top level include files.
-
-#include <ESMF_TimeMgr.inc>
-
-!------------------------------------------------------------------------------
-! module definition
-
+!==============================================================================
+!
+!     ESMF Fraction Module
       module ESMF_FractionMod
+!
+!==============================================================================
+!
+! This file contains the Fraction class definition and all Fraction
+! class methods.
+!
+!------------------------------------------------------------------------------
+! INCLUDES
+!
 !===============================================================================
 !BOPI
 !
 ! !MODULE: ESMF_FractionMod
 !
 ! !DESCRIPTION:
+! Part of ESMF F90 API wrapper of C++ implemenation
 !
+! Defines F90 wrapper entry points for corresponding
+! C++ implementaion of class {\tt ESMC\_Fraction}
 !
-!
-!
-!
-!
-! !USES:
 !------------------------------------------------------------------------------
+! !USES:
 
-!
-! !PUBLIC TYPES:
       implicit none
+!
+!------------------------------------------------------------------------------
+! !PRIVATE TYPES:
+      private
+!------------------------------------------------------------------------------
+!     ! ESMF_Fraction
+!
+!     ! F90 class type to match C++ Fraction class in size only;
+!     !  all dereferencing within class is performed by C++ implementation
 
       type ESMF_Fraction
       sequence
       private
-        integer :: n    ! fractional numerator
-        integer :: d    ! fractional denominator
+        integer :: n    ! Integer fraction (exact) n/d; numerator
+        integer :: d    ! Integer fraction (exact) n/d; denominator
       end type
 !
+!------------------------------------------------------------------------------
+! !PUBLIC TYPES:
+      public ESMF_Fraction
+!------------------------------------------------------------------------------
+!
 ! !PUBLIC MEMBER FUNCTIONS:
-!
-! !PUBLIC DATA MEMBERS:
-!
-! !DESCRIPTION:
-!     Part of Time Manager F90 API wrapper of C++ implemenation
 
-!------------------------------------------------------------------------------
-
-!     contains
-
-!------------------------------------------------------------------------------
-
-      ! wrappers to C++ fraction routines
+! !PRIVATE MEMBER FUNCTIONS:
 
 !EOPI
-!===============================================================================
+
+!------------------------------------------------------------------------------
+! The following line turns the CVS identifier string into a printable variable.
+      character(*), parameter, private :: version = &
+      '$Id: ESMF_Fraction.F90,v 1.5 2003/04/25 09:13:47 eschwab Exp $'
+
+!==============================================================================
+
+!      contains
+
+!==============================================================================
+!
+! Wrappers to C++ fraction routines
+!
+!------------------------------------------------------------------------------
+!
+
+!------------------------------------------------------------------------------
+
       end module ESMF_FractionMod
