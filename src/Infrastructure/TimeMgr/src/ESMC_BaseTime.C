@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.29 2004/02/09 18:28:47 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.30 2004/03/05 00:44:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -35,7 +35,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.29 2004/02/09 18:28:47 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.30 2004/03/05 00:44:57 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -168,7 +168,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMF_KIND_I8 timeToDivide,   // in  - the time to divide into 
+      ESMF_KIND_I8 timeToConvert,  // in  - the time to convert (divide) into 
                                    //         requested units
       ESMF_KIND_I4 *h,             // out - integer hours
       ESMF_KIND_I4 *m,             // out - integer minutes
@@ -198,45 +198,46 @@
 
     // TODO: fractional seconds
 
-    ESMF_KIND_I8 remainder = timeToDivide;
+    ESMF_KIND_I8 remainingTime = timeToConvert;
 
     if (h != ESMC_NULL_POINTER) {
-      ESMF_KIND_I8 hours = remainder / SECONDS_PER_HOUR;
+      ESMF_KIND_I8 hours = remainingTime / SECONDS_PER_HOUR;
       if (hours < INT_MIN || hours > INT_MAX) return(ESMF_FAILURE);
       *h = hours;
-      remainder %= SECONDS_PER_HOUR;
+      remainingTime %= SECONDS_PER_HOUR;  // remove hours
     }
     if (m != ESMC_NULL_POINTER) {
-      ESMF_KIND_I8 minutes = remainder / SECONDS_PER_MINUTE;
+      ESMF_KIND_I8 minutes = remainingTime / SECONDS_PER_MINUTE;
       if (minutes < INT_MIN || minutes > INT_MAX) return(ESMF_FAILURE);
       *m = minutes;
-      remainder %= SECONDS_PER_MINUTE;
+      remainingTime %= SECONDS_PER_MINUTE;  // remove minutes
     }
     if (s != ESMC_NULL_POINTER) {
-      if (remainder < INT_MIN || remainder > INT_MAX) return(ESMF_FAILURE);
-      *s = remainder;    // >= 32 bit
+      if (remainingTime < INT_MIN || remainingTime > INT_MAX)
+                                                     return(ESMF_FAILURE);
+      *s = remainingTime;    // >= 32 bit
     }
     if (s_i8 != ESMC_NULL_POINTER) {
-      *s_i8 = remainder;   // >= 64 bit
+      *s_i8 = remainingTime;   // >= 64 bit
     }
 
     //
     // floating point units
     //
 
-    // reset remainder
-    remainder = timeToDivide;
+    // reset remainingTime for floating point conversion
+    remainingTime = timeToConvert;
 
     if (h_r8 != ESMC_NULL_POINTER) {
-      *h_r8 = (ESMF_KIND_R8) remainder / (ESMF_KIND_R8) SECONDS_PER_HOUR;
-      remainder %= SECONDS_PER_HOUR;
+      *h_r8 = (ESMF_KIND_R8) remainingTime / (ESMF_KIND_R8) SECONDS_PER_HOUR;
+      remainingTime %= SECONDS_PER_HOUR;  // remove hours
     }
     if (m_r8 != ESMC_NULL_POINTER) {
-      *m_r8 = (ESMF_KIND_R8) remainder / (ESMF_KIND_R8) SECONDS_PER_MINUTE;
-      remainder %= SECONDS_PER_MINUTE;
+      *m_r8 = (ESMF_KIND_R8) remainingTime / (ESMF_KIND_R8) SECONDS_PER_MINUTE;
+      remainingTime %= SECONDS_PER_MINUTE;  // remove minutes
     }
     if (s_r8 != ESMC_NULL_POINTER) {
-      *s_r8 = (ESMF_KIND_R8) remainder;
+      *s_r8 = (ESMF_KIND_R8) remainingTime;
     }
 
     return(rc);

@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.h,v 1.21 2004/02/09 07:06:06 eschwab Exp $
+// $Id: ESMC_BaseTime.h,v 1.22 2004/03/05 00:44:57 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -149,7 +149,7 @@ class ESMC_BaseTime {
 
     int ESMC_BaseTimeSet(ESMF_KIND_I8 S, int sN, int sD);
 
-    int ESMC_BaseTimeGet(ESMF_KIND_I8 timeToDivide,
+    int ESMC_BaseTimeGet(ESMF_KIND_I8 timeToConvert,
                          ESMF_KIND_I4 *h=0, ESMF_KIND_I4 *m=0,
                          ESMF_KIND_I4 *s=0, ESMF_KIND_I8 *s_i8=0,
                          ESMF_KIND_I4 *ms=0, ESMF_KIND_I4 *us=0,
