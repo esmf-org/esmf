@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.18 2003/04/25 22:13:21 nscollins Exp $ 
+# $Id: makefile,v 1.19 2003/05/01 16:02:59 svasquez Exp $ 
 
 ALL:  tests
 
@@ -47,7 +47,7 @@ $(ESMC_TESTDIR)/ESMF_BundleUTest: ESMF_BundleUTest.o
 
 RUN_ESMF_BundleUTest:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
-	${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
+	-${MPIRUN} -np 4 $(ESMC_TESTDIR)/ESMF_BundleUTest > $(ESMC_TESTDIR)/ESMF_BundleUTest.stdout
 
 RUN_ESMF_BundleUTestUNI:
 	-@rm -f testlog stdlog.* logfile.* ESMF_BundleUTest.tmps
