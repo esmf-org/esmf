@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.32 2004/02/13 21:16:06 nscollins Exp $
+// $Id: ESMC_Base.C,v 1.33 2004/02/18 20:44:13 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -28,7 +28,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.32 2004/02/13 21:16:06 nscollins Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.33 2004/02/18 20:44:13 nscollins Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -107,6 +107,9 @@ static int globalCount = 0;
 //
 //EOP
 // !REQUIREMENTS:  XXXn.n, YYYn.n
+
+  if (baseStatus != ESMF_STATE_READY) 
+    return ESMF_FAILURE;
 
   return ESMF_SUCCESS;
 
