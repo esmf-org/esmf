@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.80 2004/06/14 22:35:46 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.81 2004/06/15 22:52:31 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -81,10 +81,10 @@
     public ESMF_LRGridSetCoord
     public ESMF_LRGridGetDELocalInfo   ! access DistGrid from above
     public ESMF_LRGridGetAllAxisIndex  ! access DistGrid from above
-    public ESMF_LRGridGlobalToLocalIndex
-    public ESMF_LRGridLocalToGlobalIndex
-    public ESMF_LRGridGlobalToLocalAI
-    public ESMF_LRGridLocalToGlobalAI
+    public ESMF_LRGridGlobalToDELocalIndex
+    public ESMF_LRGridDELocalToGlobalIndex
+    public ESMF_LRGridGlobalToDELocalAI
+    public ESMF_LRGridDELocalToGlobalAI
     public ESMF_LRGridGet
     public ESMF_LRGridSet
     public ESMF_LRGridGetCellMask
@@ -109,7 +109,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.80 2004/06/14 22:35:46 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.81 2004/06/15 22:52:31 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3938,15 +3938,15 @@
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridGlobalToLocalIndex"
+#define ESMF_METHOD "ESMF_LRGridGlobalToDELocalIndex"
 !BOPI
-! !IROUTINE: ESMF_LRGridGlobalToLocalIndex - translate global indexing to local
+! !IROUTINE: ESMF_LRGridGlobalToDELocalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGlobalToLocalIndex(grid, horzRelLoc, vertRelLoc, &
-                                               global1D, local1D, &
-                                               global2D, local2D, &
-                                               dimOrder, rc)
+      subroutine ESMF_LRGridGlobalToDELocalIndex(grid, horzRelLoc, vertRelLoc, &
+                                                 global1D, local1D, &
+                                                 global2D, local2D, &
+                                                 dimOrder, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -4152,18 +4152,18 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridGlobalToLocalIndex
+      end subroutine ESMF_LRGridGlobalToDELocalIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridLocalToGlobalIndex"
+#define ESMF_METHOD "ESMF_LRGridDELocalToGlobalIndex"
 !BOPI
-! !IROUTINE: ESMF_LRGridLocalToGlobalIndex - translate global indexing to local
+! !IROUTINE: ESMF_LRGridDELocalToGlobalIndex - translate global indexing to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridLocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
-                                               local1D, global1D, &
-                                               local2D, global2D, rc)
+      subroutine ESMF_LRGridDELocalToGlobalIndex(grid, horzRelLoc, vertRelLoc, &
+                                                 local1D, global1D, &
+                                                 local2D, global2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -4344,19 +4344,19 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridLocalToGlobalIndex
+      end subroutine ESMF_LRGridDELocalToGlobalIndex
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridGlobalToLocalAI"
+#define ESMF_METHOD "ESMF_LRGridGlobalToDELocalAI"
 !BOPI
-! !IROUTINE: ESMF_LRGridGlobalToLocalAI - translate global axis index to local
+! !IROUTINE: ESMF_LRGridGlobalToDELocalAI - translate global axis index to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridGlobalToLocalAI(grid, horzRelLoc, vertRelLoc, &
-                                            globalAI1D, localAI1D, &
-                                            globalAI2D, localAI2D, &
-                                            dimOrder, rc)
+      subroutine ESMF_LRGridGlobalToDELocalAI(grid, horzRelLoc, vertRelLoc, &
+                                              globalAI1D, localAI1D, &
+                                              globalAI2D, localAI2D, &
+                                              dimOrder, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -4557,18 +4557,18 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridGlobalToLocalAI
+      end subroutine ESMF_LRGridGlobalToDELocalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
-#define ESMF_METHOD "ESMF_LRGridLocalToGlobalAI"
+#define ESMF_METHOD "ESMF_LRGridDELocalToGlobalAI"
 !BOPI
-! !IROUTINE: ESMF_LRGridLocalToGlobalAI - translate global axis indices to local
+! !IROUTINE: ESMF_LRGridDELocalToGlobalAI - translate global axis indices to local
 
 ! !INTERFACE:
-      subroutine ESMF_LRGridLocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
-                                            localAI1D, globalAI1D, &
-                                            localAI2D, globalAI2D, rc)
+      subroutine ESMF_LRGridDELocalToGlobalAI(grid, horzRelLoc, vertRelLoc, &
+                                              localAI1D, globalAI1D, &
+                                              localAI2D, globalAI2D, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Grid) :: grid
@@ -4745,7 +4745,7 @@
 
       if (present(rc)) rc = ESMF_SUCCESS
 
-      end subroutine ESMF_LRGridLocalToGlobalAI
+      end subroutine ESMF_LRGridDELocalToGlobalAI
 
 !------------------------------------------------------------------------------
 #undef  ESMF_METHOD
@@ -6539,9 +6539,9 @@
                                       rc=localrc)
 
       ! translate the AIs from global to local
-      call ESMF_LRGridGlobalToLocalAI(grid, horzRelLoc=ESMF_CELL_CENTER, &
-                                      globalAI2D=grid_ai, &
-                                      localAI2D=localAI, rc=localrc)
+      call ESMF_LRGridGlobalToDELocalAI(grid, horzRelLoc=ESMF_CELL_CENTER, &
+                                        globalAI2D=grid_ai, &
+                                        localAI2D=localAI, rc=localrc)
 
       ! loop through bounding boxes, looking for overlap with our "box"
       ! TODO: a better algorithm
@@ -6710,9 +6710,9 @@
                                      ESMF_CONTEXT, rc)) return
 
       ! translate myAI to local index
-      call ESMF_LRGridGlobalToLocalAI(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
-                                      globalAI1D=myAI, localAI1D=myLocalAI, &
-                                      rc=localrc)
+      call ESMF_LRGridGlobalToDELocalAI(srcGrid, horzRelLoc=ESMF_CELL_CENTER, &
+                                        globalAI1D=myAI, localAI1D=myLocalAI, &
+                                        rc=localrc)
 
       ! get pointer to the actual bounding boxes data
       call ESMF_LocalArrayGetData(array, boxes, rc=localrc)
