@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.4 2003/02/11 19:03:32 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.5 2003/03/24 17:40:13 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -74,7 +74,6 @@
  class ESMC_TimeInterval;
 
 // !PRIVATE TYPES:
- // class configuration type:  not needed for TimeInterval
 
  // class definition type
 class ESMC_TimeInterval : public ESMC_BaseTime { 
@@ -91,9 +90,6 @@ class ESMC_TimeInterval : public ESMC_BaseTime {
     // TimeInterval is a shallow class, so only Init methods are needed
     // TODO:  use default argument for calendar (NULL)
     int ESMC_TimeIntervalInit(ESMC_Calendar *Cal, const char *TimeList, ...);
-
-    // TimeInstant doesn't need configuration, hence GetConfig/SetConfig
-    // methods are not required
 
     // accessor methods
 
