@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.h,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+// $Id: ESMC_Time.h,v 1.2 2002/09/23 20:29:17 eschwab Exp $
 #ifndef ESMC_TIME_H
 #define ESMC_TIME_H
 
@@ -48,6 +48,7 @@ class ESMC_Time
     int Write_Sd(int32  Sd);
 
     // individual get/set methods which perform signed conversion
+	//  (TMG 1.1, 1.2, 2.1)
 	int Get_D(int *D);
 	int Set_D(int  D);
 
@@ -96,7 +97,7 @@ class ESMC_Time
     int Get_ns(double *ns);
     int Set_ns(double  ns);
 
-    // comparison methods
+    // comparison methods (TMG 1.5.3, 2.4.3, 7.2)
     bool operator==(const ESMC_Time &) const; 
     bool operator!=(const ESMC_Time &) const; 
     bool operator< (const ESMC_Time &) const; 
@@ -104,7 +105,8 @@ class ESMC_Time
     bool operator<=(const ESMC_Time &) const; 
     bool operator>=(const ESMC_Time &) const; 
 
-    // increment, decrement methods
+    // increment, decrement methods (TMG 1.5.4, 2.4.4, 2.4.5, 2.4.6, 5.1, 5.2,
+    //                                   7.2)
     ESMC_Time& operator+=(ESMC_Time &);
     ESMC_Time  operator+ (ESMC_Time &);
     ESMC_Time& operator-=(ESMC_Time &);
@@ -120,6 +122,8 @@ class ESMC_Time
 //       - conversions and other dependencies are done by interface methods
 //
 //  NOTES:
+//      Core representation meets TMG 1.3, 1.4, 2.2, 5.4
+//
 //      TMG 1.5.2, 2.4.2: Copy from one object to another is handled
 //      via the class default memberwise assignment method, which uses
 //      the overloaded equals (=) operator.  E.g.  *obj1 = *obj2 which
@@ -145,7 +149,7 @@ class ESMC_Time
     int32 Sn;	// Integer fractional seconds (exact) n/d; numerator
     int32 Sd;  	// Integer fractional seconds (exact) n/d; denominator
 
-    pthread_mutex_t TimeMutex;
+    pthread_mutex_t TimeMutex; // (TMG 7.5)
 };
 
 #endif // ESMC_TIME_H

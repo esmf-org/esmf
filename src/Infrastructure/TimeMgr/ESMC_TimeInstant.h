@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInstant.h,v 1.2 2002/09/20 18:03:38 eschwab Exp $
+// $Id: ESMC_TimeInstant.h,v 1.3 2002/09/23 20:29:17 eschwab Exp $
 #ifndef ESMC_TIME_INSTANT_H
 #define ESMC_TIME_INSTANT_H
 
@@ -53,29 +53,33 @@ class ESMC_TimeInstant : public ESMC_Time
     // generic interface -- via variable argument lists
     //   can map to F90 named-optional-arguments interface
 
+	// (TMG 2.1, 2.5.1)
     int Get(const char *TimeList, ...);    // e.g. Get("YR:MM:DD", (int *)YR,
                                            //         (int *)MM, (int *)DD);
     int Set(const char *TimeList, ...);    // e.g. Set("s" , (double) s);
 
+	// Timezone (TMG 2.5.1)
     int Get_O(int *O);
     int Set_O(int  O);
 
-    int GetCalendar(ESMC_Calendar *Calendar);
-    int GetDayOfYear(double *DayOfYear);  // frequent need ?? make property
+    int GetCalendar(ESMC_Calendar *Calendar);	// (TMG 2.5.1)
+    int GetDayOfYear(double *DayOfYear);	// (TMG 2.5.2)
+	 // frequent need ?? make property
 
-    int GetDayOfWeek(int *DayOfWeek);     // frequent need ?? make property
-
+    int GetDayOfWeek(int *DayOfWeek);	// (TMG 2.5.3)
     // frequent need ?? make property
-    int GetMiddleOfMonth(ESMC_TimeInstant *MiddleOfMonth);
+
+    int GetMiddleOfMonth(ESMC_TimeInstant *MiddleOfMonth);	// (TMG 2.5.4)
+    // frequent need ?? make property
 
     // standalone method, not class method
     //  (see ESMC_Clock::SyncToWallClock() ) ??
-    int GetRealTime(ESMC_TimeInstant *RealTime);
+    int GetRealTime(ESMC_TimeInstant *RealTime);	// (TMG 2.5.7)
 
-    // return in string format
+    // return in string format (TMG 2.4.7)
     int GetString(char *Ts);
 
-    // shortcut interfaces
+    // shortcut interfaces (TMG 2.1, 2.4.1, 2.5.1)
     int Get_YR_MM_DD_S(int32 *YR, int *MM, int *DD, int *S);
     int Set_YR_MM_DD_S(int32  YR, int  MM, int  DD, int  S);
 

@@ -1,4 +1,4 @@
-// $Id: ESMC_TimeInterval.h,v 1.2 2002/09/20 18:03:38 eschwab Exp $
+// $Id: ESMC_TimeInterval.h,v 1.3 2002/09/23 20:29:17 eschwab Exp $
 #ifndef ESMC_TIME_INTERVAL_H
 #define ESMC_TIME_INTERVAL_H
 
@@ -46,6 +46,7 @@ class ESMC_TimeInterval : public ESMC_Time
     //            no arg type checking -- user may pass-in bad args.
 	//   
 
+	// (TMG 1.1)
     int Get(const char *TimeList, ...);   // e.g. Get("D:S",(int *)D, (int *)S);
     int Set(const char *TimeList, ...);   // e.g. Set("s" , (double) s);
 
@@ -54,7 +55,7 @@ class ESMC_TimeInterval : public ESMC_Time
     //             args type checked
     //   disadv: limited combinations, must modify source to add more
 
-    // shortcut interfaces
+    // shortcut interfaces (TMG 1.1, 1.2, 1.5.1)
     int Get_S_nd(int64 *S, int32 *Sn, int32 *Sd);
     int Set_S_nd(int64  S, int32  Sn, int32  Sd);
 
@@ -64,15 +65,15 @@ class ESMC_TimeInterval : public ESMC_Time
     int Get_D_H_M_S_MS(int32 *D, int *H, int *M, int *S, int *MS);
     int Set_D_H_M_S_MS(int32  D, int  H, int  M, int  S, int  MS);
 
-    // division
+    // division (TMG 1.5.5)
      // return fraction _nd ??
     ESMC_Fraction& operator/(ESMC_TimeInterval &);
 
-    // subdivision
+    // subdivision (TMG 1.5.6, 5.3, 7.2)
     ESMC_TimeInterval& operator/=(int &);
     ESMC_TimeInterval& operator/ (int &);
 
-    // multiplication
+    // multiplication (TMG 1.5.7, 7.2)
     ESMC_TimeInterval& operator*=(int &);
     ESMC_TimeInterval& operator* (int &);
     ESMC_TimeInterval& operator*=(ESMC_Fraction &);
@@ -80,11 +81,11 @@ class ESMC_TimeInterval : public ESMC_Time
     ESMC_TimeInterval& operator*=(double &);
     ESMC_TimeInterval& operator* (double &);
 
-    // return in string format
+    // return in string format (TMG 1.5.9)
     int GetString(char *Ts);
 
     // magnitude (scalar int or double -- not with S_nd) ??
-    //   return positive value
+    //   return positive value (TMG 1.5.8)
     int GetAbsValue(ESMC_TimeInterval *);
 
 // !DESCRIPTION:

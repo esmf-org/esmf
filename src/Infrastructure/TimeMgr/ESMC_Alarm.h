@@ -1,4 +1,4 @@
-// $Id: ESMC_Alarm.h,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+// $Id: ESMC_Alarm.h,v 1.2 2002/09/23 20:29:17 eschwab Exp $
 #ifndef ESMC_ALARM_H
 #define ESMC_ALARM_H
 
@@ -31,6 +31,7 @@ class ESMC_Alarm
     ESMC_Alarm(void);
     ~ESMC_Alarm(void);
 
+	// (TMG 4.1, 4.7)
     int Init(ESMC_TimeInterval *RingInterval,
              ESMC_TimeInstant  *RingTime,
              ESMC_TimeInstant  *StopTime,
@@ -66,6 +67,9 @@ class ESMC_Alarm
 
 // !DESCRIPTION:
 //
+//    TMG 4.1, 4.2:  Multiple alarms may be instantiated and associated
+//                   with a clock via clock methods
+//
 // !BUGS:
 //
 // !SEE ALSO:
@@ -78,19 +82,19 @@ class ESMC_Alarm
 //-------------------------------------------------------------------------
 
   private:
-    ESMC_TimeInterval RingInterval;
-    ESMC_TimeInstant  RingTime;    // StartTime ??
+    ESMC_TimeInterval RingInterval;	// (TMG 4.5.2)
+    ESMC_TimeInstant  RingTime;    // (TMG 4.5.1) (StartTime ??)
     ESMC_TimeInstant  NextRingTime;
     ESMC_TimeInstant  PrevRingTime;
     ESMC_TimeInstant  StopTime;
 
-    bool              Ringing;
-    bool              Enabled;    // able to ring
+    bool              Ringing;	  // (TMG 4.4)
+    bool              Enabled;    // able to ring (TMG 4.5.3)
 	
 	int               ID;		  // used to distinguish among
                                   //   multiple clock alarms
 
-    pthread_mutex_t   AlarmMutex;
+    pthread_mutex_t   AlarmMutex;	// (TMG 7.5)
 };
 
 #endif // ESMC_ALARM_H

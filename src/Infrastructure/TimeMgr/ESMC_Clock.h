@@ -1,4 +1,4 @@
-// $Id: ESMC_Clock.h,v 1.1 2002/08/18 23:22:49 eschwab Exp $
+// $Id: ESMC_Clock.h,v 1.2 2002/09/23 20:29:17 eschwab Exp $
 #ifndef ESMC_CLOCK_H
 #define ESMC_CLOCK_H
 
@@ -37,13 +37,14 @@ class ESMC_Clock
     ESMC_Clock(void);
     ~ESMC_Clock(void);
 
+	// (TMG 3.1, 3.4.4)
     int Init(ESMC_TimeInterval *TimeStep,
              ESMC_TimeInstant  *StartTime,
              ESMC_TimeInstant  *StopTime,
              ESMC_TimeInstant  *RefTime);
 
-    int AddAlarm(ESMC_Alarm *Alarm);
-    int GetAlarmList(ESMC_Alarm *AlarmList);
+    int AddAlarm(ESMC_Alarm *Alarm);	// (TMG 4.1, 4.2)
+    int GetAlarmList(ESMC_Alarm *AlarmList);	// (TMG 4.3)
 
     int SyncToWallClock(); // TMG3.4.5 (see ESMC_TimeInstant::GetRealTime() ??
 
@@ -69,6 +70,10 @@ class ESMC_Clock
     int GetPrevSimTime(ESMC_TimeInterval *PrevSimTime);    //TMG3.5.5
 
 // !DESCRIPTION:
+//    TMG 3.2:  Create multiple clocks by simply instantiating this class
+//              multiple times
+//
+//    TMG 3.3:  Component's responsibility
 //
 // !BUGS:
 //
@@ -92,7 +97,7 @@ class ESMC_Clock
     uint32     		  AdvanceCount;
     ESMC_Alarm *AlarmList[MAX_ALARMS];    // associated alarms
 
-    pthread_mutex_t ClockMutex;
+    pthread_mutex_t ClockMutex; // (TMG 7.5)
 };
 
 #endif // ESMC_CLOCK_H
