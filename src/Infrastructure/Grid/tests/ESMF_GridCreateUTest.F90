@@ -1,4 +1,4 @@
-! $Id: ESMF_GridCreateUTest.F90,v 1.15 2004/05/26 22:24:16 jwolfe Exp $
+! $Id: ESMF_GridCreateUTest.F90,v 1.16 2004/06/07 17:30:35 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -19,7 +19,7 @@
 !
 !==============================================================================
 !BOP
-! !PROGRAM: ESMF_GridUTest - One line general statement about this test
+! !PROGRAM: ESMF_GridUTest - These tests verifies Grid functionalities.
 !
 ! !DESCRIPTION:
 !
@@ -38,7 +38,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_GridCreateUTest.F90,v 1.15 2004/05/26 22:24:16 jwolfe Exp $'
+      '$Id: ESMF_GridCreateUTest.F90,v 1.16 2004/06/07 17:30:35 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -181,57 +181,13 @@
 
       !------------------------------------------------------------------------
       !EX_UTest
-      ! Get the Grid horzGridType
-      call ESMF_GridGet(grid, horzGridType=Rhorz_gridtype, rc=rc)
-      write(name, *) "Get the Grid horzGridType Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS or the horzGridType is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rhorz_gridtype.eq.ESMF_GridType_XY), &
-		      name, failMsg, result, ESMF_SRCLINE)
-  
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get the Grid vertGridType
-      call ESMF_GridGet(grid, vertGridType=Rvert_gridtype, rc=rc)
-      write(name, *) "Get the Grid vertGridType Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS or the vertGridType is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rvert_gridtype.eq.ESMF_GridType_XY), &
-                      name, failMsg, result, ESMF_SRCLINE)
-  
-      !------------------------------------------------------------------------
-      !EX_UTest
       ! Get the Grid horzStagger
-      call ESMF_GridGet(grid, horzStagger=Rhorz_Stagger, rc=rc)
+      call ESMF_GridGet(grid, horzStagger=Rhorz_stagger, rc=rc)
       write(name, *) "Get the Grid horzStagger Test"
       write(failMsg, *) "Did not return ESMF_SUCCESS or the horzStagger is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rhorz_Stagger.eq.ESMF_GridStagger_A), &
+      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rhorz_Stagger.eq.horz_stagger), &
                       name, failMsg, result, ESMF_SRCLINE)
   
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get the Grid vertStagger
-      call ESMF_GridGet(grid, vertStagger=Rvert_Stagger, rc=rc)
-      write(name, *) "Get the Grid vertStagger Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS or the vertStagger is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rvert_Stagger.eq.ESMF_GridStagger_VertCenter), &
-                      name, failMsg, result, ESMF_SRCLINE)
-  
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get the Grid horzCoordSystem
-      call ESMF_GridGet(grid, horzCoordSystem=Rhorz_coord_system, rc=rc)
-      write(name, *) "Get the Grid horzCoordSystem Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS or the horzCoordSystem is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rhorz_coord_system.eq.ESMF_CoordSystem_Cartesian), &
-                      name, failMsg, result, ESMF_SRCLINE)
-  
-      !------------------------------------------------------------------------
-      !EX_UTest
-      ! Get the Grid vertCoordSystem
-      call ESMF_GridGet(grid, vertCoordSystem=Rvert_coord_system, rc=rc)
-      write(name, *) "Get the Grid vertCoordSystem Test"
-      write(failMsg, *) "Did not return ESMF_SUCCESS or the vertCoordSystem is not correct"
-      call ESMF_Test((rc.eq.ESMF_SUCCESS .and. Rvert_coord_system.eq.ESMF_CoordSystem_Cartesian), &
-                       name, failMsg, result, ESMF_SRCLINE)
   
       !------------------------------------------------------------------------
       !EX_UTest
