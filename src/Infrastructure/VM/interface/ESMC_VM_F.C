@@ -1,4 +1,4 @@
-// $Id: ESMC_VM_F.C,v 1.13 2004/05/21 19:02:47 theurich Exp $
+// $Id: ESMC_VM_F.C,v 1.14 2004/05/21 20:28:19 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -89,6 +89,13 @@ extern "C" {
   void FTN(c_esmc_vmrecv)(ESMC_VM **ptr, void *message, int *size, int *source,
     int *rc){
     (*ptr)->vmachine_recv(message, *size, *source);
+    *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
+  }
+
+  void FTN(c_esmc_vmsendrecv)(ESMC_VM **ptr, void *sendData, int *sendSize, 
+    int *dst, void *recvData, int *recvSize, int *src, int *rc){
+    (*ptr)->vmachine_sendrecv(sendData, *sendSize, *dst, 
+      recvData, *recvSize, *src);
     *rc = ESMF_SUCCESS;       // TODO: finish error handling when vmachine done
   }
 

@@ -157,6 +157,8 @@ class vmachine{
     void vmachine_barrier(void);
     
     // newly written communication calls
+    void vmachine_sendrecv(void *sendData, int sendSize, int dst,
+      void *recvData, int recvSize, int src);
     void vmachine_threadbarrier(void);
     void vmachine_allreduce(void *in, void *out, int len, vmType type, vmOp op);
     void vmachine_allglobalreduce(void *in, void *out, int len, vmType type,

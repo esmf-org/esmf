@@ -1777,6 +1777,25 @@ void vmachine::vmachine_barrier(void){
 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 // newly written communication calls
 
+void vmachine::vmachine_sendrecv(void *sendData, int sendSize, int dst,
+  void *recvData, int recvSize, int src){
+  // p2p sendrecv
+  // A unique order of the send and receive is given by the PET index.
+  // This very simplistic implementation establishes a unique order by
+  // first transfering data to the smallest receiver PET and then to the
+  // other one. A sendrecv has two receiver PETs, one is the local PET and
+  // the other is rcv.
+  if (mypet<=dst){
+    // mypet is the first receiver
+    vmachine_recv(recvData, recvSize, src);
+    vmachine_send(sendData, sendSize, dst);
+  }else{
+    // dst is first receiver
+    vmachine_send(sendData, sendSize, dst);
+    vmachine_recv(recvData, recvSize, src);
+  }
+}
+  
 void vmachine::vmachine_threadbarrier(void){
   // collective barrier over all PETs in thread group with mypet 
   int myp = pid[mypet];
