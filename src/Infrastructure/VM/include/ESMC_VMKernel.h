@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.h,v 1.12 2005/02/01 00:38:59 theurich Exp $
+// $Id: ESMC_VMKernel.h,v 1.13 2005/02/01 18:06:08 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -139,10 +139,10 @@ class ESMC_VMK{
     static int ncores; // total number of cores in the physical machine
     static int *cpuid; // cpuid associated with certain core (multi-core cpus)
     static int *ssiid; // single system inmage id to which this core belongs
+  public:
     // static MPI info, MPI_COMM_WORLD Group and Comm of the default ESMC_VMK
     static MPI_Group default_mpi_g;
     static MPI_Comm default_mpi_c;
-  public:
     // static variables that hold command line arguments
     static int argc;
     static char **argv;
@@ -215,9 +215,6 @@ class ESMC_VMK{
     void vmk_wait(vmk_commhandle **commhandle);
     void vmk_waitqueue(void);
 
-  // friend functions
-  friend void *vmk_spawn(void *arg);
-  friend void *vmk_sigcatcher(void *arg);
   // friend classes
   friend class ESMC_VMKPlan;
 };
