@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.34 2003/10/15 23:17:07 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.35 2003/10/16 23:15:27 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -60,7 +60,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.34 2003/10/15 23:17:07 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.35 2003/10/16 23:15:27 jwolfe Exp $'
 
 !==============================================================================
 
@@ -127,16 +127,16 @@
       logical :: rcpresent                        ! Return code present
       logical :: hassrcdata        ! does this DE contain localdata from src?
       logical :: hasdstdata        ! does this DE contain localdata from dst?
-      integer :: start, stop, my_DE
+      integer :: start, stop, startComp, stopComp, my_DE, indexMod(2)
       integer :: srcSizeX, srcSizeY, size
       integer :: i, j, num_domains, dstCounts(3), srcCounts(3), ij
       logical, dimension(:), pointer :: srcUserMask, dstUserMask
       logical, dimension(:,:), pointer :: found
-      integer, dimension(:,:), pointer :: foundCount
-      integer, dimension(:), pointer :: srcGatheredMask, srcLocalMask
+      integer, dimension(:,:), pointer :: foundCount, srcLocalMask
+      integer, dimension(:), pointer :: srcGatheredMask
       real(ESMF_KIND_R8), dimension(:), pointer :: srcGatheredCoordX, srcGatheredCoordY
-      real(ESMF_KIND_R8), dimension(:), pointer :: srcLocalCoordX, srcLocalCoordY
-      real(ESMF_KIND_R8), dimension(:), pointer :: dstLocalCoordX, dstLocalCoordY
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: srcLocalCoordX, srcLocalCoordY
+      real(ESMF_KIND_R8), dimension(:,:), pointer :: dstLocalCoordX, dstLocalCoordY
       real(ESMF_KIND_R8), dimension(:), pointer :: tempCrud
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: dstMin, dstMax
       real(ESMF_KIND_R8), dimension(ESMF_MAXGRIDDIM) :: srcMin, srcMax
@@ -260,7 +260,8 @@
 
       allocate(srcLocalCoordArray(2))   ! TODO
       call ESMF_GridGetCoord(srcGrid, relloc=srcRelLoc, &
-                             centerCoord=srcLocalCoordArray, rc=status)
+                             centerCoord=srcLocalCoordArray, &
+                             total=.true., rc=status)
       if(status .NE. ESMF_SUCCESS) then
         print *, "ERROR in RegridConstructBilinear: GridGetCoord ", &
                  "returned failure"
@@ -373,11 +374,11 @@
       ! Execute Route now to gather grid center coordinates from source
       ! These arrays are just wrappers for the local coordinate data
       srcLocalCoordXArray = ESMF_LocalArrayCreate(srcLocalCoordX, &
-                                                  ESMF_DATA_REF, status)
+                                                  ESMF_DATA_COPY, status)
       srcLocalCoordYArray = ESMF_LocalArrayCreate(srcLocalCoordY, &
-                                                  ESMF_DATA_REF, status)
+                                                  ESMF_DATA_COPY, status)
       srcLocalMaskArray   = ESMF_LocalArrayCreate(srcLocalMask, &
-                                                  ESMF_DATA_REF, status)
+                                                  ESMF_DATA_COPY, status)
       call ESMF_RouteRun(tempRoute, srcLocalCoordXArray, &
                          srcGatheredCoordXArray, status)
       call ESMF_RouteRun(tempRoute, srcLocalCoordYArray, &
@@ -390,7 +391,7 @@
       ! Create a Transform Values object
       tv = ESMF_TransformValuesCreate(rc)
 
-      ! TODO: the *4 is to guarentee the max allocation possible is enough
+      ! TODO: the *4 is to guarantee the max allocation possible is enough
       !  for bilinear interpolation.  eventually the addlinks routine should
       !  grow the arrays internally.
       size = ((dstCounts(1)*dstCounts(2)) + 1) * 4
@@ -428,8 +429,15 @@
       ! Loop through domains for the search routine
       call ESMF_GridGet(srcGrid, horz_coord_system=coordSystem, rc=status)
       num_domains = recvDomainListTot%num_domains
+      indexMod = -1
       start = 1
+      startComp = 1
       do i = 1,num_domains
+        srcSizeX = recvDomainList%domains(i)%ai(1)%max &
+                 - recvDomainList%domains(i)%ai(1)%min + 1
+        srcSizeY = recvDomainList%domains(i)%ai(2)%max &
+                 - recvDomainList%domains(i)%ai(2)%min + 1
+        stopComp  = startComp + srcSizeX*srcSizeY - 1
         srcSizeX = recvDomainListTot%domains(i)%ai(1)%max &
                  - recvDomainListTot%domains(i)%ai(1)%min + 1
         srcSizeY = recvDomainListTot%domains(i)%ai(2)%max &
@@ -437,15 +445,16 @@
         stop  = start + srcSizeX*srcSizeY - 1
         call ESMF_RegridBilinearSearch(tv, recvDomainListTot%domains(i), &
                                        coordSystem, &
-                                       srcSizeX, srcSizeY, start-1, &
+                                       srcSizeX, srcSizeY, startComp-1, &
                                        dstCounts(1), dstCounts(2), &
-                                       found, foundCount, &
+                                       indexMod, found, foundCount, &
                                        srcGatheredCoordX(start:stop), &
                                        srcGatheredCoordY(start:stop), &
                                        dstLocalCoordX, dstLocalCoordY, &
                                        srcGatheredMask(start:stop), &
                                        srcUserMask(start:stop), dstUserMask, status)
         start = stop + 1 
+        startComp = stopComp + 1 
       enddo 
 
       call ESMF_RouteHandleSet(rh, tdata=tv, rc=status)
@@ -470,7 +479,7 @@
 ! !INTERFACE:
       subroutine ESMF_RegridBilinearSearch(tv, domain, coordSystem, &
                                            srcSizeX, srcSizeY, srcStart, &
-                                           dstSizeX, dstSizeY, &
+                                           dstSizeX, dstSizeY, indexMod, &
                                            found, foundCount, &
                                            srcCenterX, srcCenterY, &
                                            dstCenterX, dstCenterY, &
@@ -486,6 +495,7 @@
       integer, intent(in) :: srcStart  ! when it goes to use them as dims
       integer, intent(in) :: dstSizeX  ! in the lines below.
       integer, intent(in) :: dstSizeY
+      integer, dimension(:), intent(in) :: indexMod
       logical, dimension(dstSizeX,dstSizeY), intent(inout) :: found
       integer, dimension(dstSizeX,dstSizeY), intent(inout) :: foundCount
       real(ESMF_KIND_R8), dimension(srcSizeX,srcSizeY), intent(in) :: srcCenterX
@@ -799,25 +809,29 @@
             if (srcUserMask(iii,jjj) .and. (srcGridMask(iii,jjj).eq.0)) then
               dstAdd(1) = i
               dstAdd(2) = j
-              srcAdd = (jjj-1)*srcICount + iii + srcStart
+              srcAdd = (jjj-1+indexMod(2))*srcICount + (iii+indexMod(1)) &
+                     + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(1), rc)
             endif
             if (srcUserMask(ip1,jjj) .and. (srcGridMask(ip1,jjj).eq.0)) then
               dstAdd(1) = i
               dstAdd(2) = j
-              srcAdd = (jjj-1)*srcICount + ip1 + srcStart
+              srcAdd = (jjj-1+indexMod(2))*srcICount + (ip1+indexMod(1)) &
+                     + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(2), rc)
             endif
             if (srcUserMask(ip1,jp1) .and. (srcGridMask(ip1,jp1).eq.0)) then
               dstAdd(1) = i
               dstAdd(2) = j
-              srcAdd = (jp1-1)*srcICount + ip1 + srcStart
+              srcAdd = (jp1-1+indexMod(2))*srcICount + (ip1+indexMod(1)) &
+                     + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(3), rc)
             endif
             if (srcUserMask(iii,jp1) .and. (srcGridMask(iii,jp1).eq.0)) then
               dstAdd(1) = i
               dstAdd(2) = j
-              srcAdd = (jp1-1)*srcICount + iii + srcStart
+              srcAdd = (jp1-1+indexMod(2))*srcICount + (iii+indexMod(1)) &
+                     + srcStart
               call ESMF_RegridAddLink(tv, srcAdd, dstAdd, weights(4), rc)
             endif
 
