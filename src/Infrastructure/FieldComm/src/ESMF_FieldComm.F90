@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldComm.F90,v 1.41 2004/06/09 23:17:53 jwolfe Exp $
+! $Id: ESMF_FieldComm.F90,v 1.42 2004/06/10 17:44:26 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -55,6 +55,7 @@
       use ESMF_FieldDataMapMod
       use ESMF_FieldMod
       use ESMF_RegridMod
+      use ESMF_RegridTypesMod
       implicit none
 
 !------------------------------------------------------------------------------
@@ -98,7 +99,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldComm.F90,v 1.41 2004/06/09 23:17:53 jwolfe Exp $'
+      '$Id: ESMF_FieldComm.F90,v 1.42 2004/06/10 17:44:26 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -919,14 +920,13 @@
                                   parentDelayout, regridmethod, regridnorm, &
                                   srcMask, dstMask, blockingflag, commhandle, rc)
 !
-!
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: srcField                 
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      type(ESMF_DELayout) :: parentDelayout
-      integer, intent(in), optional :: regridmethod
-      integer, intent(in), optional :: regridnorm
+      type(ESMF_DELayout), intent(in) :: parentDelayout
+      type(ESMF_RegridMethod), intent(in), optional :: regridmethod
+      type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcMask                 
       type(ESMF_Mask), intent(in), optional :: dstMask                 
       type(ESMF_BlockingFlag), intent(in), optional :: blockingflag
@@ -1153,8 +1153,8 @@
       type(ESMF_Field), intent(inout) :: dstField                 
       type(ESMF_DELayout), intent(in) :: parentDelayout
       type(ESMF_RouteHandle), intent(inout) :: routehandle
-      integer, intent(in) :: regridmethod
-      integer, intent(in), optional :: regridnorm
+      type(ESMF_RegridMethod), intent(in) :: regridmethod
+      type(ESMF_RegridNormOpt), intent(in), optional :: regridnorm
       type(ESMF_Mask), intent(in), optional :: srcMask                 
       type(ESMF_Mask), intent(in), optional :: dstMask                 
       integer, intent(out), optional :: rc               
