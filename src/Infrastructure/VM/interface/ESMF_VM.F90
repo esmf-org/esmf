@@ -1,4 +1,4 @@
-! $Id: ESMF_VM.F90,v 1.10 2004/05/07 19:14:02 cdeluca Exp $
+! $Id: ESMF_VM.F90,v 1.11 2004/05/07 19:21:44 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -122,7 +122,7 @@ module ESMF_VMMod
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_VM.F90,v 1.10 2004/05/07 19:14:02 cdeluca Exp $'
+      '$Id: ESMF_VM.F90,v 1.11 2004/05/07 19:21:44 cdeluca Exp $'
 
 !==============================================================================
 
@@ -285,7 +285,7 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Gather for ESMF_KIND_I4
+!   MPI-like VM wide Gather for ESMF\_KIND\_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -349,7 +349,7 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Gather for ESMF_KIND_R4
+!   MPI-like VM wide Gather for ESMF\_KIND\_R4
 !
 !   The arguments are:
 !   \begin{description}
@@ -413,7 +413,7 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Gather for ESMF_KIND_R8
+!   MPI-like VM wide Gather for ESMF\_KIND\_R8
 !
 !   The arguments are:
 !   \begin{description}
@@ -666,7 +666,7 @@ module ESMF_VMMod
     integer,               intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide receive for ESMF_KIND_I4
+!   VM wide receive for ESMF\_KIND\_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -726,7 +726,7 @@ module ESMF_VMMod
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide receive for ESMF_KIND_R4
+!   VM wide receive for ESMF\_KIND\_R4
 !
 !   The arguments are:
 !   \begin{description}
@@ -786,7 +786,7 @@ module ESMF_VMMod
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide receive for ESMF_KIND_R8
+!   VM wide receive for ESMF\_KIND\_R8
 !
 !   The arguments are:
 !   \begin{description}
@@ -847,7 +847,7 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Scatter for ESMF_KIND_I4
+!   MPI-like VM wide Scatter for ESMF\_KIND\_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -911,7 +911,7 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Scatter for ESMF_KIND_R4
+!   MPI-like VM wide Scatter for ESMF\_KIND\_R4
 !
 !   The arguments are:
 !   \begin{description}
@@ -975,7 +975,7 @@ module ESMF_VMMod
 !         
 !
 ! !DESCRIPTION:
-!   MPI-like VM wide Scatter for ESMF_KIND_R8
+!   MPI-like VM wide Scatter for ESMF\_KIND\_R8
 !
 !   The arguments are:
 !   \begin{description}
@@ -1038,7 +1038,7 @@ module ESMF_VMMod
     integer,               intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide send for ESMF_KIND_I4
+!   VM wide send for ESMF\_KIND\_I4
 !
 !   The arguments are:
 !   \begin{description}
@@ -1098,7 +1098,7 @@ module ESMF_VMMod
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide send for ESMF_KIND_R4
+!   VM wide send for ESMF\_KIND\_R4
 !
 !   The arguments are:
 !   \begin{description}
@@ -1158,7 +1158,7 @@ module ESMF_VMMod
     integer,            intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!   VM wide send for ESMF_KIND_R8
+!   VM wide send for ESMF\_KIND\_R8
 !
 !   The arguments are:
 !   \begin{description}
