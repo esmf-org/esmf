@@ -1,4 +1,4 @@
-# $Id: makefile,v 1.1 2002/10/25 19:21:33 cdeluca Exp $
+# $Id: makefile,v 1.2 2002/12/30 21:58:59 nscollins Exp $
 
 # leave alone.
 ALL: lib 
@@ -12,7 +12,7 @@ FFLAGS    =
 # if you have C files in this directory, list them all on the line below.
 SOURCEC	  = 
 # if you have F90 files in this directory, list them all on the line below.
-SOURCEF	  = 
+SOURCEF	  = ESMF_Layout.F90
 # if you have .h include files in this dir, list them all on the line below.
 SOURCEH	  = 
 
@@ -30,7 +30,7 @@ DIRS	  =
 
 # the following line must be set to the current subdir name relative
 # to the top level esmf directory. (e.g. Base/src, TimeMgr/interface, etc)
-LOCDIR	  = src/Infrastructure/CommMem/<subdir>
+LOCDIR	  = src/Infrastructure/CommMem/interface
 
 # leave these alone 
 CLEANFILES = $(LIBNAME) $(addprefix doc/, $(addsuffix .tex, $(basename $(SOURCEF))))
