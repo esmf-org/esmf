@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.122 2004/03/17 02:04:49 cdeluca Exp $
+! $Id: ESMF_Field.F90,v 1.123 2004/03/17 02:12:05 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -217,7 +217,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.122 2004/03/17 02:04:49 cdeluca Exp $'
+      '$Id: ESMF_Field.F90,v 1.123 2004/03/17 02:12:05 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -412,6 +412,427 @@
       contains
 !
 !==============================================================================
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set an integer Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddIntAttr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(inout) :: field  
+      character (len = *), intent(in) :: name
+      integer(ESMF_KIND_I4), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an integer attribute to a {\tt ESMF\_Field}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [value]
+!           The integer value of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddIntAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddIntListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      integer(ESMF_KIND_I4), dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an integer list attribute to a {\tt ESMF\_Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The integer values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+  
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldAddAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_INTEGER, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddIntListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set a real Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddRealAttr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      real(ESMF_KIND_R8), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a real attribute to a {\tt ESMF\_Field}.
+! 
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [value]
+!           The real value of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddRealAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set a real list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddRealListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      real(ESMF_KIND_R8), dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a real list attribute to a {\tt ESMF\_Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The real values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldAddAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_REAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddRealListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set a logical Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddLogicalAttr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      type(ESMF_Logical), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an logical attribute to a {\tt ESMF\_Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [value]
+!           The logical true/false value of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, 1, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddLogicalAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddLogicalListAttr(field, name, count, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      integer, intent(in) :: count   
+      type(ESMF_Logical), dimension(:), intent(in) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches an logical list attribute to a {\tt ESMF\_Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [count]
+!           The number of values to be set.
+!     \item [value]
+!           The logical true/false values of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+      integer :: limit
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      limit = size(value)
+      if (count > limit) then
+          print *, "ESMF_FieldAddAttribute: count longer than value list"
+          return
+      endif
+
+      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
+                                    ESMF_DATA_LOGICAL, count, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddLogicalListAttr
+
+!------------------------------------------------------------------------------
+!BOP
+! !IROUTINE: ESMF_FieldAddAttribute - Set a character Attribute
+!
+! !INTERFACE:
+      ! Private name; call using ESMF_FieldAddAttribute()
+      subroutine ESMF_FieldAddCharAttr(field, name, value, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Field), intent(in) :: field  
+      character (len = *), intent(in) :: name
+      character (len = *), intent(out) :: value
+      integer, intent(out), optional :: rc   
+
+!
+! !DESCRIPTION:
+!      Attaches a character attribute to a {\tt ESMF\_Field}.
+!
+!     The arguments are:
+!     \begin{description}
+!     \item [field]
+!           A {\tt ESMF\_Field} object.
+!     \item [name]
+!           The name of the Attribute to set.
+!     \item [value]
+!           The character value of the Attribute.
+!     \item [{[rc]}] 
+!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
+!     \end{description}
+!
+!
+!EOP
+! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
+
+      integer :: status                           ! Error status
+      logical :: rcpresent                        ! Return code present
+
+      ! Initialize return code; assume failure until success is certain
+      status = ESMF_FAILURE
+      rcpresent = .FALSE.
+      if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+      endif
+
+      call c_ESMC_AttributeAddChar(field%ftypep%base, name, value, status)
+      if(status .ne. ESMF_SUCCESS) then 
+        print *, "ERROR in ESMF_FieldAddAttribute"
+        return
+      endif 
+
+      if (rcpresent) rc = ESMF_SUCCESS
+
+      end subroutine ESMF_FieldAddCharAttr
+
+!------------------------------------------------------------------------------
 !BOPI
 ! !IROUTINE:  ESMF_FieldAttachData - Associate an Array object with a Field
 
@@ -2828,427 +3249,6 @@
 ! TODO: code goes here
 !
         end subroutine ESMF_FieldSetDataValues
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set an integer Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddIntAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(inout) :: field  
-      character (len = *), intent(in) :: name
-      integer(ESMF_KIND_I4), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer attribute to a {\tt ESMF\_Field}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The integer value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddIntAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set an integer list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddIntListAttr(field, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      integer(ESMF_KIND_I4), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an integer list attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The integer values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-  
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_FieldAddAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_INTEGER, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddIntListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a real Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddRealAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      real(ESMF_KIND_R8), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real attribute to a {\tt ESMF\_Field}.
-! 
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The real value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddRealAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a real list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddRealListAttr(field, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      real(ESMF_KIND_R8), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a real list attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The real values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_FieldAddAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_REAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddRealListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a logical Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddLogicalAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      type(ESMF_Logical), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The logical true/false value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, 1, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddLogicalAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a logical list Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddLogicalListAttr(field, name, count, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      integer, intent(in) :: count   
-      type(ESMF_Logical), dimension(:), intent(in) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches an logical list attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [count]
-!           The number of values to be set.
-!     \item [value]
-!           The logical true/false values of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-      integer :: limit
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      limit = size(value)
-      if (count > limit) then
-          print *, "ESMF_FieldAddAttribute: count longer than value list"
-          return
-      endif
-
-      call c_ESMC_AttributeSetValue(field%ftypep%base, name, &
-                                    ESMF_DATA_LOGICAL, count, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddLogicalListAttr
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: ESMF_FieldAddAttribute - Set a character Attribute
-!
-! !INTERFACE:
-      ! Private name; call using ESMF_FieldAddAttribute()
-      subroutine ESMF_FieldAddCharAttr(field, name, value, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: field  
-      character (len = *), intent(in) :: name
-      character (len = *), intent(out) :: value
-      integer, intent(out), optional :: rc   
-
-!
-! !DESCRIPTION:
-!      Attaches a character attribute to a {\tt ESMF\_Field}.
-!
-!     The arguments are:
-!     \begin{description}
-!     \item [field]
-!           A {\tt ESMF\_Field} object.
-!     \item [name]
-!           The name of the Attribute to set.
-!     \item [value]
-!           The character value of the Attribute.
-!     \item [{[rc]}] 
-!           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!     \end{description}
-!
-!
-!EOP
-! !REQUIREMENTS: FLD1.5.1, FLD1.7.1
-
-      integer :: status                           ! Error status
-      logical :: rcpresent                        ! Return code present
-
-      ! Initialize return code; assume failure until success is certain
-      status = ESMF_FAILURE
-      rcpresent = .FALSE.
-      if (present(rc)) then
-          rcpresent = .TRUE.
-          rc = ESMF_FAILURE
-      endif
-
-      call c_ESMC_AttributeAddChar(field%ftypep%base, name, value, status)
-      if(status .ne. ESMF_SUCCESS) then 
-        print *, "ERROR in ESMF_FieldAddAttribute"
-        return
-      endif 
-
-      if (rcpresent) rc = ESMF_SUCCESS
-
-      end subroutine ESMF_FieldAddCharAttr
 
 !------------------------------------------------------------------------------
 !BOP
