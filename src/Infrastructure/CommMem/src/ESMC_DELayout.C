@@ -1,4 +1,4 @@
-// $Id: ESMC_DELayout.C,v 1.21 2003/04/08 23:05:28 nscollins Exp $
+// $Id: ESMC_DELayout.C,v 1.22 2003/04/09 15:30:38 flanigan Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -44,7 +44,7 @@ static int verbose = 1;
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-           "$Id: ESMC_DELayout.C,v 1.21 2003/04/08 23:05:28 nscollins Exp $";
+           "$Id: ESMC_DELayout.C,v 1.22 2003/04/09 15:30:38 flanigan Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -1556,8 +1556,8 @@ cout << "mypeid, mycpuid, mynodeid = " << mypeid << "," << mycpuid << ", "
 //
 
 // !DESCRIPTION:
-//   If current PE is part of this given layout, returns ESMF_SUCCESS.
-//   If not, returns ESMF_FAILURE for no without printing an error message.
+//   If current PE is part of this given layout, returns ESMF\_SUCCESS.
+//   If not, returns ESMF\_FAILURE for no without printing an error message.
 
 //EOP
 // !REQUIREMENTS:  
