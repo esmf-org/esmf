@@ -1,4 +1,4 @@
-# $Id: common,v 1.38 2003/04/09 23:48:41 flanigan Exp $ 
+# $Id: common,v 1.39 2003/04/10 21:45:50 flanigan Exp $ 
 #
 #-------------------------------------------------------------------------------
 # Checks that ESMF_DIR variable is set and creates library directory
@@ -377,11 +377,31 @@ tree_html:chkdir_doc ${HTMLFILES}
 	export PROTEX=$(PROTEX) ;\
 	$(F_PROTEX) $* $<
 
+%_fapi.tex : ../interface/%.F 
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../interface/%.F90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../interface/%.f
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
+%_fapi.tex : ../interface/%.f90
+	export PROTEX=$(PROTEX) ;\
+	$(F_PROTEX) $* $<
+
 %_chapi.tex : ../include/%.h
 	export PROTEX=$(PROTEX) ;\
 	$(CH_PROTEX) $* $<
 
 %_ccapi.tex : ../src/%.C
+	export PROTEX=$(PROTEX) ;\
+	$(CC_PROTEX) $* $<
+
+%_ccapi.tex : ../interface/%.C
 	export PROTEX=$(PROTEX) ;\
 	$(CC_PROTEX) $* $<
 
