@@ -1,4 +1,4 @@
-// $Id: ESMC_VMKernel.C,v 1.35 2005/03/21 17:43:01 theurich Exp $
+// $Id: ESMC_VMKernel.C,v 1.36 2005/03/21 17:59:31 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -40,7 +40,11 @@
 #undef _XOPEN_SOURCE_EXTENDED
 #endif
 
+#ifdef VMK_STANDALONE
+#include <pthread.h>
+#else
 #include "ESMF_Pthread.h"
+#endif
 
 #include <stdio.h>
 #include <stdlib.h>
