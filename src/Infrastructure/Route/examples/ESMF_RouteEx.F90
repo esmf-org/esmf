@@ -1,4 +1,4 @@
-! $Id: ESMF_RouteEx.F90,v 1.22 2004/10/25 22:25:04 nscollins Exp $
+! $Id: ESMF_RouteEx.F90,v 1.23 2004/11/03 23:34:31 nscollins Exp $
 !
 ! Example/test code which creates a new field.
 
@@ -26,7 +26,7 @@
     implicit none
     
 !   ! Local variables
-    integer :: x, y, rc, mycell, finalrc, numdes
+    integer :: x, y, rc, mycell, finalrc, npets
     integer :: i, j
     integer :: lb(2), ub(2), halo
     type(ESMF_Grid) :: srcgrid, dstgrid
@@ -57,12 +57,15 @@
     call ESMF_VMGetGlobal(vm, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    layout1 = ESMF_DELayoutCreate(vm, rc=rc)
-    call ESMF_DELayoutGet(layout1, deCount=numdes, rc=rc)
-    layout2 = ESMF_DELayoutCreate(vm, (/ numdes, 1 /), rc=rc)
+    ! Get number of PETs we are running with
+    call ESMF_VMGet(vm, petCount=npets, rc=rc)
+    if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
+
+    layout1 = ESMF_DELayoutCreate(vm, (/ 1, npets /), rc=rc)
+    layout2 = ESMF_DELayoutCreate(vm, (/ npets, 1 /), rc=rc)
 
     mincoords = (/  0.0,  0.0 /)
-    mincoords = (/ 20.0, 30.0 /)
+    maxcoords = (/ 20.0, 30.0 /)
     srcgrid = ESMF_GridCreateHorzXYUni((/ 90, 180 /), &
                    mincoords, maxcoords, &
                    horzStagger=ESMF_GRID_HORZ_STAGGER_A, &
@@ -144,7 +147,7 @@
     redist_rh = ESMF_RouteHandleCreate(rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldRedistStore(field1, field2, layout1, &
+    call ESMF_FieldRedistStore(field1, field2, layout2, &
                                                 routehandle=redist_rh, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
@@ -168,7 +171,7 @@
     regrid_rh = ESMF_RouteHandleCreate(rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
 
-    call ESMF_FieldRegridStore(field1, field2, layout1, &
+    call ESMF_FieldRegridStore(field1, field2, layout2, &
                                routehandle=regrid_rh, &
                                regridmethod=ESMF_REGRID_METHOD_BILINEAR, rc=rc)
     if (rc.NE.ESMF_SUCCESS) finalrc = ESMF_FAILURE
