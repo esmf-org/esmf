@@ -1,4 +1,4 @@
-! $Id: ESMF_DELayout_FEx2.F90,v 1.4 2003/03/13 22:56:10 cdeluca Exp $
+! $Id: ESMF_DELayout_FEx2.F90,v 1.5 2003/07/23 02:13:38 eschwab Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -24,25 +24,44 @@
 
 program ESMF_DELayout_FEx2
 
-  use ESMF_DELayoutMod
+  use ESMF_Mod
 
   type(ESMF_DELayout) :: layout
   integer, dimension(6) :: delist
+  integer, dimension(2) :: layoutDims, layoutCommTypes
   integer :: nx, ny, x, y, id, rc
-  integer, dimension(20) :: sArray1, sArray2, sArray3, sArray4, sArray5, sArray6
-  integer, dimension(180) :: rArray
+  integer(ESMF_IKIND_I4), dimension(20) :: sArray1I4, sArray2I4, sArray3I4, &
+                                           sArray4I4, sArray5I4, sArray6I4
+  integer(ESMF_IKIND_I4), dimension(180) :: rArrayI4
+
+  real(ESMF_IKIND_R4), dimension(20) :: sArray1R4, sArray2R4, sArray3R4, &
+                                        sArray4R4, sArray5R4, sArray6R4
+  real(ESMF_IKIND_R4), dimension(180) :: rArrayR4
+
+  real(ESMF_IKIND_R8), dimension(20) :: sArray1R8, sArray2R8, sArray3R8, &
+                                        sArray4R8, sArray5R8, sArray6R8
+  real(ESMF_IKIND_R8), dimension(180) :: rArrayR8
+
   integer, dimension(6) :: rlen, rdispls
   integer :: i, slen
 
   ! 6 DEs: DE 0 - DE 5
   delist = (/ 0, 1, 2, 3, 4, 5 /)
   
+  ! 2x3 DE layout
+  layoutDims = (/ 2, 3 /)
+
+  ! layout comm types
+  layoutCommTypes = (/ ESMF_COMMTYPE_SHR, ESMF_COMMTYPE_SHR /)
+
   ! number of data elements per DE
   slen = 20
 
   ! initialize rArray to zero
   do i=1,180
-    rArray(i) = 0
+    rArrayI4(i) = 0
+    rArrayR4(i) = 0
+    rArrayR8(i) = 0
   end do
 
   ! fill-in rlen and rdispl arrays
@@ -51,8 +70,11 @@ program ESMF_DELayout_FEx2
     rdispls(i) = (i-1) * (slen + 10)
   end do
 
+  ! Initialize ESMF
+  call ESMF_FrameworkInitialize(rc)
+
   ! create 2x3 layout of DEs in X-direction
-  layout = ESMF_DELayoutCreate(2, 3, delist, ESMF_XFAST, rc)
+  layout = ESMF_DELayoutCreate(delist, 2, layoutDims, layoutCommTypes, rc)
 
   ! verify size of layout
   call ESMF_DELayoutGetSize(layout, nx, ny, rc)
@@ -69,69 +91,122 @@ program ESMF_DELayout_FEx2
   ! each DE populates its send array and sends it 
   if (id .eq. 0) then
     do i=1,slen
-      sArray1(i) = i
+      sArray1I4(i) = i
+      sArray1R4(i) = i
+      sArray1R8(i) = i
     end do
 
     ! verify
-    print *, "sArray1() = ", sArray1
+    print *, "sArray1I4() = ", sArray1I4
+    print *, "sArray1R4() = ", sArray1R4
+    print *, "sArray1R8() = ", sArray1R8
 
-    call ESMF_DELayoutAllGatherVI(layout, sArray1, slen, &
-                                        rArray,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray1I4, slen, &
+                                         rArrayI4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray1R4, slen, &
+                                         rArrayR4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray1R8, slen, &
+                                         rArrayR8,  rlen, rdispls, rc)
   else if (id .eq. 1) then
     do i=1,slen
-      sArray2(i) = i * 2
+      sArray2I4(i) = i * 2
+      sArray2R4(i) = i * 2
+      sArray2R8(i) = i * 2
     end do
 
     ! verify
-    print *, "sArray2() = ", sArray2
+    print *, "sArray2I4() = ", sArray2I4
+    print *, "sArray2R4() = ", sArray2R4
+    print *, "sArray2R8() = ", sArray2R8
 
-    call ESMF_DELayoutAllGatherVI(layout, sArray2, slen, &
-                                        rArray,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray2I4, slen, &
+                                         rArrayI4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray2R4, slen, &
+                                         rArrayR4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray2R8, slen, &
+                                         rArrayR8,  rlen, rdispls, rc)
   else if (id .eq. 2) then
     do i=1,slen
-      sArray3(i) = i * 3
+      sArray3I4(i) = i * 3
+      sArray3R4(i) = i * 3
+      sArray3R8(i) = i * 3
     end do
 
     ! verify
-    print *, "sArray3() = ", sArray3
+    print *, "sArray3I4() = ", sArray3I4
+    print *, "sArray3R4() = ", sArray3R4
+    print *, "sArray3R8() = ", sArray3R8
 
-    call ESMF_DELayoutAllGatherVI(layout, sArray3, slen, &
-                                        rArray,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray3I4, slen, &
+                                         rArrayI4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray3R4, slen, &
+                                         rArrayR4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray3R8, slen, &
+                                         rArrayR8,  rlen, rdispls, rc)
   else if (id .eq. 3) then
     do i=1,slen
-      sArray4(i) = i * 4
+      sArray4I4(i) = i * 4
+      sArray4R4(i) = i * 4
+      sArray4R8(i) = i * 4
     end do
 
     ! verify
-    print *, "sArray4() = ", sArray4
+    print *, "sArray4I4() = ", sArray4I4
+    print *, "sArray4R4() = ", sArray4R4
+    print *, "sArray4R8() = ", sArray4R8
 
-    call ESMF_DELayoutAllGatherVI(layout, sArray4, slen, &
-                                        rArray,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray4I4, slen, &
+                                         rArrayI4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray4R4, slen, &
+                                         rArrayR4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray4R8, slen, &
+                                         rArrayR8,  rlen, rdispls, rc)
   else if (id .eq. 4) then
     do i=1,slen
-      sArray5(i) = i * 5
+      sArray5I4(i) = i * 5
+      sArray5R4(i) = i * 5
+      sArray5R8(i) = i * 5
     end do
 
     ! verify
-    print *, "sArray5() = ", sArray5
+    print *, "sArray5I4() = ", sArray5I4
+    print *, "sArray5R4() = ", sArray5R4
+    print *, "sArray5R8() = ", sArray5R8
 
-    call ESMF_DELayoutAllGatherVI(layout, sArray5, slen, &
-                                        rArray,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray5I4, slen, &
+                                         rArrayI4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray5R4, slen, &
+                                         rArrayR4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray5R8, slen, &
+                                         rArrayR8,  rlen, rdispls, rc)
   else if (id .eq. 5) then
     do i=1,slen
-      sArray6(i) = i * 6
+      sArray6I4(i) = i * 6
+      sArray6R4(i) = i * 6
+      sArray6R8(i) = i * 6
     end do
 
     ! verify
-    print *, "sArray6() = ", sArray6
+    print *, "sArray6I4() = ", sArray6I4
+    print *, "sArray6R4() = ", sArray6R4
+    print *, "sArray6R8() = ", sArray6R8
 
-    call ESMF_DELayoutAllGatherVI(layout, sArray6, slen, &
-                                        rArray,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray6I4, slen, &
+                                         rArrayI4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray6R4, slen, &
+                                         rArrayR4,  rlen, rdispls, rc)
+    call ESMF_DELayoutAllGatherV(layout, sArray6R8, slen, &
+                                         rArrayR8,  rlen, rdispls, rc)
   endif
 
   ! ... and the result is ...
-  print *, "DE ", id, " rArray() = ", rArray
+  print *, "DE ", id, " rArrayI4() = ", rArrayI4
+  print *, "DE ", id, " rArrayR4() = ", rArrayR4
+  print *, "DE ", id, " rArrayR8() = ", rArrayR8
 
   call ESMF_DELayoutDestroy(layout, rc)
+
+  ! Finalize ESMF
+  call ESMF_FrameworkFinalize(rc)
 
 end program ESMF_DELayout_FEx2
