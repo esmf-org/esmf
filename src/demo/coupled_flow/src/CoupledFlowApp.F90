@@ -1,4 +1,4 @@
-! $Id: CoupledFlowApp.F90,v 1.4 2003/10/23 17:33:55 jwolfe Exp $
+! $Id: CoupledFlowApp.F90,v 1.5 2003/10/23 21:55:03 jwolfe Exp $
 !
 !------------------------------------------------------------------------------
 !BOP
@@ -183,7 +183,8 @@
 !     With the time interval, start time, and stop time set above, the Clock can
 !     now be created:
 !\begin{verbatim}
-      call ESMF_ClockSetup(clock, timeStep, startTime, stopTime, rc=rc)
+      clock = ESMF_ClockCreate(timeStep=timeStep, startTime=startTime, &
+                               stopTime=stopTime, rc=rc)
 !\end{verbatim}
 !     Subsequent calls to ESMF\_ClockAdvance with this clock will increment the
 !     current time from the start time by the timestep.
