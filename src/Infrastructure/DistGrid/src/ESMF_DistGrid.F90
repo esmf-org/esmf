@@ -1,4 +1,4 @@
-! $Id: ESMF_DistGrid.F90,v 1.22 2003/01/15 21:04:34 jwolfe Exp $
+! $Id: ESMF_DistGrid.F90,v 1.23 2003/01/15 23:29:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -199,7 +199,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_DistGrid.F90,v 1.22 2003/01/15 21:04:34 jwolfe Exp $'
+      '$Id: ESMF_DistGrid.F90,v 1.23 2003/01/15 23:29:20 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -294,8 +294,7 @@
 !
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridCreateEmpty - Create a new DistGrid with no data
+! !IROUTINE: ESMF_DistGridCreateEmpty - Create a new DistGrid with no data
 
 ! !INTERFACE:
       function ESMF_DistGridCreateEmpty(name, rc)
@@ -359,8 +358,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridCreateInternal - Create a new DistGrid internally
+! !IROUTINE: ESMF_DistGridCreateInternal - Create a new DistGrid internally
 
 ! !INTERFACE:
       function ESMF_DistGridCreateInternal(nDE_i, nDE_j, i_max, j_max, &
@@ -438,8 +436,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridDestroy - Free all resources associated with a DistGrid 
+! !IROUTINE: ESMF_DistGridDestroy - Free all resources associated with a DistGrid 
 
 ! !INTERFACE:
       subroutine ESMF_DistGridDestroy(distgrid, rc)
@@ -478,8 +475,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridConstructNew - Construct the internals of an allocated DistGrid
+! !IROUTINE: ESMF_DistGridConstructNew - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridConstructNew(distgrid, name, rc)
@@ -584,8 +580,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
+! !IROUTINE: ESMF_DistGridConstructInternal - Construct the internals of an allocated DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridConstructInternal(distgrid, nDE_i, nDE_j, &
@@ -743,8 +738,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridDestruct - Free any DistGrid memory allocated internally
+! !IROUTINE: ESMF_DistGridDestruct - Free any DistGrid memory allocated internally
 
 ! !INTERFACE:
       subroutine ESMF_DistGridDestruct(distgrid, rc)
@@ -758,7 +752,7 @@
 !    {\tt  ESMF\_DistGridConstruct}, does any additional cleanup before the
 !     original DistGrid object is freed.  Intended for internal ESMF
 !     use only; end-users use {\tt ESMF\_DistGridDestroy}, which calls
-!     {\tt ESMF_DistGridDestruct}.  
+!     {\tt ESMF\_DistGridDestruct}.  
 !
 !     The arguments are:
 !     \begin{description}
@@ -778,8 +772,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridGetInfo - Get information from a DistGrid
+! !IROUTINE: ESMF_DistGridGetInfo - Get information from a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGetInfo(distgrid, &
@@ -846,8 +839,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridSetInfo - Set information about a DistGrid
+! !IROUTINE: ESMF_DistGridSetInfo - Set information about a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetInfo(distgrid, gsize_dir1, gsize_dir2, &
@@ -914,8 +906,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridGetConfig - Get configuration information from a DistGrid
+! !IROUTINE: ESMF_DistGridGetConfig - Get configuration information from a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGetConfig(distgrid, config, rc)
@@ -948,8 +939,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridSetConfig - Set configuration information for a DistGrid
+! !IROUTINE: ESMF_DistGridSetConfig - Set configuration information for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetConfig(distgrid, config, rc)
@@ -983,8 +973,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridGetValue - Get <Value> for a DistGrid
+! !IROUTINE: ESMF_DistGridGetValue - Get <Value> for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGetValue(distgrid, value, rc)
@@ -1019,8 +1008,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridSetValue - Set <Value> for a DistGrid
+! !IROUTINE: ESMF_DistGridSetValue - Set <Value> for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetValue(DistGrid, value, rc)
@@ -1055,8 +1043,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridGetCounts - Get extent counts for a DistGrid for a given DE
+! !IROUTINE: ESMF_DistGridGetCounts - Get extent counts for a DistGrid for a given DE
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGetCounts(distgrid, DE_id, &
@@ -1135,8 +1122,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
+! !IROUTINE: ESMF_DistGridSetCountsInternal - Set extent counts for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetCountsInternal(distgrid, nDE_i, nDE_j, &
@@ -1233,8 +1219,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridGetDE - Get DE information for a DistGrid
+! !IROUTINE: ESMF_DistGridGetDE - Get DE information for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGetDE(distgrid, MyDE, MyDEx, MyDEy, &
@@ -1368,8 +1353,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridSetDEInternal - Set DE information for a DistGrid
+! !IROUTINE: ESMF_DistGridSetDEInternal - Set DE information for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetDEInternal(distgrid, rc)
@@ -1440,8 +1424,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridSetDecompInternal - Set decomposition for a DistGrid
+! !IROUTINE: ESMF_DistGridSetDecompInternal - Set decomposition for a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridSetDecompInternal(distgrid, nDE_i, nDE_j, rc)
@@ -1498,8 +1481,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridGlobalToLocalIndex - translate global indexing to local
+! !IROUTINE: ESMF_DistGridGlobalToLocalIndex - translate global indexing to local
 
 ! !INTERFACE:
       subroutine ESMF_DistGridGlobalToLocalIndex(distgrid, global, local, rc)
@@ -1545,8 +1527,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridLocalToGlobalIndex - translate local indexing to global
+! !IROUTINE: ESMF_DistGridLocalToGlobalIndex - translate local indexing to global
 
 ! !INTERFACE:
       subroutine ESMF_DistGridLocalToGlobalIndex(distgrid, local, global, rc)
@@ -1592,8 +1573,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridValidate - Check internal consistency of a DistGrid
+! !IROUTINE: ESMF_DistGridValidate - Check internal consistency of a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridValidate(distgrid, opt, rc)
@@ -1626,8 +1606,7 @@
 
 !------------------------------------------------------------------------------
 !BOP
-! !IROUTINE: 
-!     ESMF_DistGridPrint - Print the contents of a DistGrid
+! !IROUTINE: ESMF_DistGridPrint - Print the contents of a DistGrid
 
 ! !INTERFACE:
       subroutine ESMF_DistGridPrint(distgrid, opt, rc)
