@@ -1,4 +1,4 @@
-// $Id: ESMC_Base.C,v 1.53 2005/01/12 17:50:03 theurich Exp $
+// $Id: ESMC_Base.C,v 1.54 2005/01/12 18:38:27 theurich Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 //-----------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Base.C,v 1.53 2005/01/12 17:50:03 theurich Exp $";
+ static const char *const version = "$Id: ESMC_Base.C,v 1.54 2005/01/12 18:38:27 theurich Exp $";
 //-----------------------------------------------------------------------------
 
 // initialize class-wide instance counter
@@ -3616,8 +3616,7 @@ extern "C" {
 //EOPI
   int rc;
   
-  // get the vmID and fold that into the object ID
-  vmID = ESMC_VMGetCurrentID(&rc);
+  vmID = ESMC_VMGetCurrentID(&rc);  // get the vmID of the current VM context
 //  ESMC_VMIdPrint(vmID);
   ID = ++globalCount;
   refCount = 1;
@@ -3655,8 +3654,7 @@ extern "C" {
 //EOPI
   int rc;
   
-  // get the vmID and fold that into the object ID
-  vmID = ESMC_VMGetCurrentID(&rc);
+  vmID = ESMC_VMGetCurrentID(&rc);  // get the vmID of the current VM context
 //  ESMC_VMIdPrint(vmID);
   ID = ++globalCount;
   refCount = 1;
