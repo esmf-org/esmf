@@ -1,4 +1,4 @@
-! $Id: ESMF_Array_F90.cpp,v 1.22 2003/04/17 20:37:14 nscollins Exp $
+! $Id: ESMF_Array_F90.cpp,v 1.23 2003/04/17 21:32:30 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -156,7 +156,7 @@
 
       public ESMF_ArraySetData, ESMF_ArrayGetData
       public ESMF_ArraySetAxisIndex, ESMF_ArrayGetAxisIndex
-      public ESMF_ArrayRedist, ESMF_ArrayHalo
+      public ESMF_ArrayRedist, ESMF_ArrayHalo, ESMF_ArrayAllGather
       public ESMF_ArrayGet, ESMF_ArrayGetName
  
       public ESMF_ArrayCheckpoint
@@ -171,7 +171,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Array_F90.cpp,v 1.22 2003/04/17 20:37:14 nscollins Exp $'
+      '$Id: ESMF_Array_F90.cpp,v 1.23 2003/04/17 21:32:30 jwolfe Exp $'
 
 !==============================================================================
 ! 
@@ -1248,6 +1248,72 @@ ArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_ArrayHalo
+
+!------------------------------------------------------------------------------
+!BOP
+! !INTERFACE:
+      subroutine ESMF_ArrayAllGather(array, layout, decompids, &
+                                     AI_exc, AI_tot, array_out, rc)
+!
+! !ARGUMENTS:
+      type(ESMF_Array) :: array
+      type(ESMF_DELayout) :: layout
+      integer, dimension(:), intent(in) :: decompids
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_exc
+      type(ESMF_AxisIndex), dimension(:), intent(inout) :: AI_tot
+      type(ESMF_Array), intent(out) :: array_out
+      integer, intent(out), optional :: rc
+!
+! !DESCRIPTION:
+! Used to gather a distributed Array into a global Array on all DE's.
+!
+!
+!EOP
+! !REQUIREMENTS:
+        integer :: status         ! local error status
+        logical :: rcpresent      ! did user specify rc?
+        integer :: size_decomp, size_AI
+        integer :: i
+
+! initialize return code; assume failure until success is certain
+        status = ESMF_FAILURE
+        rcpresent = .FALSE.
+        if (present(rc)) then
+          rcpresent = .TRUE.
+          rc = ESMF_FAILURE
+        endif
+ 
+! subtract one from location parts of indices to translate to C++
+        size_AI = size(AI_tot)
+        do i = 1,size_AI
+          AI_exc(i)%l = AI_exc(i)%l - 1
+          AI_exc(i)%r = AI_exc(i)%r - 1
+          AI_tot(i)%l = AI_tot(i)%l - 1
+          AI_tot(i)%r = AI_tot(i)%r - 1
+        enddo
+
+! call c routine to allgather
+        size_decomp = size(decompids)
+        call c_ESMC_ArrayAllGather(array, layout, decompids, size_decomp, &
+                                   AI_exc, AI_tot, array_out, status)
+        if (status .ne. ESMF_SUCCESS) then
+          print *, "c_ESMC_ArrayAllGather returned error"
+          return
+        endif
+
+! add one back to location parts of indices to translate from C++
+        size_AI = size(AI_tot)
+        do i = 1,size_AI
+          AI_exc(i)%l = AI_exc(i)%l + 1
+          AI_exc(i)%r = AI_exc(i)%r + 1
+          AI_tot(i)%l = AI_tot(i)%l + 1
+          AI_tot(i)%r = AI_tot(i)%r + 1
+        enddo
+
+! set return code if user specified it
+        if (rcpresent) rc = ESMF_SUCCESS
+
+        end subroutine ESMF_ArrayAllGather
 
 !------------------------------------------------------------------------------
 !BOP
