@@ -1,4 +1,4 @@
-% $Id: comp_desdoc.tex,v 1.2 2001/12/14 22:08:06 cdeluca Exp $
+% $Id: comp_desdoc.tex,v 1.3 2002/07/25 17:16:38 eschwab Exp $
 
 \documentclass[]{article}
 
@@ -21,7 +21,9 @@
 \vspace{.25in}
 {\Large {\bf <Module, Library, Component or Model Name> Design}} \\
 \vspace{.25in}
-{\large {\it Authors}}
+{\large {\it Authors}} \\
+\vspace{.25in}
+{Month DD, CCYY}
 \vspace{.5in}
 \end{center}
 
@@ -29,8 +31,8 @@
 \vspace{5.5in}
 \begin{tabular}{p{5in}p{.9in}}
 \hrulefill \\
-\noindent {\bf NASA High Performance Computing and Communications Program} \\
-\noindent Earth and Space Sciences Project \\
+\noindent {\bf NASA Earth Science Technology Office} \\
+\noindent Computational Technologies Project \\
 \noindent CAN 00-OES-01 \\
 \noindent http://www.esmf.ucar.edu \\
 \end{tabular}
@@ -41,7 +43,7 @@
 \tableofcontents
 
 \newpage
-%\section{Synopsis}
+\section{Synopsis}
 \input{comp_syn}
 
 %\section{Algorithmic Description}
@@ -50,7 +52,7 @@
 %\section{Requirements}
 %\input{comp_req}
 
-%\section{Architecture}
+\section{Architecture}
 \input{comp_arch}
 
 \section{<Name1> Design}
@@ -58,34 +60,40 @@
 \subsection{Description}
 \input{class_desc}
 
-%\subsection{Design}
+\subsection{Design}
 \input{class_design}
 
-%\section{<Name1> F90 Interface}
+\subsubsection{Class Definition}
+\input{class_def}
 
-%\subsection{Use and Examples}
-\input{class_ex}
+\subsubsection{Restrictions}
+\input{class_rest}
 
-%\subsection{Parameters and Definitions}
-\input{class_param}
+\section{<Name1> F90 Interface}
 
-%\subsection{Class API}
-\input{class_api}
+\subsection{Use and Examples}
+\input{class_fex}
 
-%\section{<Name1> C/C++ Interface}
-
-%\subsection{Use and Examples}
-\input{class_ex}
-
-%\subsection{Parameters and Definitions}
-\input{class_param}
+\subsection{Parameters and Definitions}
+\input{class_fparam}
 
 %\subsection{Class API}
-\input{class_api}
+\input{class_fapi}
 
-\section{<Name2> Class}
+\section{<Name1> C++ Interface}
 
-% Subsections same as <Name1> Class ...
+\subsection{Use and Examples}
+\input{class_ccex}
+
+\subsection{Parameters and Definitions}
+\input{class_ccparam}
+
+%\subsection{Class API}
+\input{class_ccapi}
+
+\section{<Name2> Design}
+
+% Subsections same as <Name1> Design ...
 
 \section{Review Status}
 
