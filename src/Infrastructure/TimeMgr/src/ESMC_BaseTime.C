@@ -1,4 +1,4 @@
-// $Id: ESMC_BaseTime.C,v 1.39 2004/11/19 00:28:32 eschwab Exp $
+// $Id: ESMC_BaseTime.C,v 1.40 2004/11/24 22:41:31 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -39,7 +39,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_BaseTime.C,v 1.39 2004/11/19 00:28:32 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_BaseTime.C,v 1.40 2004/11/24 22:41:31 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -258,7 +258,7 @@
 
     // make local copy for manipulation
     ESMC_BaseTime remainingTime = *timeToConvert;
-    remainingTime.ESMC_FractionSimplify();
+    remainingTime.ESMC_FractionSimplify(); // ensure maximum whole seconds
     ESMC_BaseTime saveRemainingTime = remainingTime;  // for float units below
     ESMF_KIND_I8 remainingSeconds = remainingTime.ESMC_FractionGetw();
 
@@ -322,20 +322,10 @@
     if (ms != ESMC_NULL_POINTER) {
       // convert remaining time to milliseconds
       ESMC_Fraction msRemainingTime = remainingTime;
-      msRemainingTime.ESMC_FractionConvert(1000);
-
-      // get total milliseconds
-      ESMF_KIND_I8 millisec = (remainingSeconds * 1000) +
-                                           msRemainingTime.ESMC_FractionGetn();
-      if (millisec < INT_MIN || millisec > INT_MAX) {
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "For milliseconds=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
-                        millisec, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
-        return (ESMF_FAILURE);
-      }
-      *ms = millisec;
+      int rc = msRemainingTime.ESMC_FractionConvert(1000);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *ms = msRemainingTime.ESMC_FractionGetn();
 
       // remove total milliseconds from remainingTime
       ESMC_Fraction milliseconds(0, *ms, 1000);
@@ -344,21 +334,10 @@
     if (us != ESMC_NULL_POINTER) {
       // convert remaining time to microseconds
       ESMC_Fraction usRemainingTime = remainingTime;
-      usRemainingTime.ESMC_FractionConvert(1000000);
-
-      // get total microseconds
-      remainingSeconds = usRemainingTime.ESMC_FractionGetw();
-      ESMF_KIND_I8 microsec = (remainingSeconds * 1000000) +
-                                           usRemainingTime.ESMC_FractionGetn();
-      if (microsec < INT_MIN || microsec > INT_MAX) {
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "For microseconds=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
-                        microsec, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
-        return (ESMF_FAILURE);
-      }
-      *us = microsec;
+      int rc = usRemainingTime.ESMC_FractionConvert(1000000);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *us = usRemainingTime.ESMC_FractionGetn();
 
       // remove total microseconds from remainingTime
       ESMC_Fraction microseconds(0, *us, 1000000);
@@ -367,21 +346,10 @@
     if (ns != ESMC_NULL_POINTER) {
       // convert remaining time to nanoseconds
       ESMC_Fraction nsRemainingTime = remainingTime;
-      nsRemainingTime.ESMC_FractionConvert(1000000000);
-
-      // get total nanoseconds
-      remainingSeconds = nsRemainingTime.ESMC_FractionGetw();
-      ESMF_KIND_I8 nanosec = (remainingSeconds * 1000000000) +
-                                           nsRemainingTime.ESMC_FractionGetn();
-      if (nanosec < INT_MIN || nanosec > INT_MAX) {
-        char logMsg[ESMF_MAXSTR];
-        sprintf(logMsg, "For nanoseconds=%lld out-of-range with respect to "
-                        "machine limits (INT_MIN=%d to INT_MAX=%d).",
-                        nanosec, INT_MIN, INT_MAX);
-        ESMC_LogDefault.ESMC_LogWrite(logMsg, ESMC_LOG_ERROR);
-        return (ESMF_FAILURE);
-      }
-      *ns = nanosec;
+      int rc = nsRemainingTime.ESMC_FractionConvert(1000000000);
+      if (ESMC_LogDefault.ESMC_LogMsgFoundError(rc, ESMF_ERR_PASSTHRU, &rc))
+        return(rc);
+      *ns = nsRemainingTime.ESMC_FractionGetn();
     }
 
     //
@@ -394,15 +362,15 @@
     remainingSeconds = remainingTime.ESMC_FractionGetw();
 
     if (h_r8 != ESMC_NULL_POINTER) {
-      *h_r8 = (ESMF_KIND_R8)remainingSeconds / (ESMF_KIND_R8)SECONDS_PER_HOUR;
+      *h_r8 = (ESMF_KIND_R8) remainingSeconds / SECONDS_PER_HOUR;
       remainingSeconds %= SECONDS_PER_HOUR;    // remove hours
     }
     if (m_r8 != ESMC_NULL_POINTER) {
-      *m_r8 = (ESMF_KIND_R8)remainingSeconds / (ESMF_KIND_R8)SECONDS_PER_MINUTE;
+      *m_r8 = (ESMF_KIND_R8) remainingSeconds / SECONDS_PER_MINUTE;
       remainingSeconds %= SECONDS_PER_MINUTE;  // remove minutes
     }
     if (s_r8 != ESMC_NULL_POINTER) {
-      *s_r8 = (ESMF_KIND_R8)remainingSeconds;
+      *s_r8 = (ESMF_KIND_R8) remainingSeconds;
       remainingSeconds = 0;   // remove seconds
     }
 
@@ -412,10 +380,14 @@
     if (ms_r8 != ESMC_NULL_POINTER) {
       // convert remaining time to milliseconds
       ESMC_Fraction msRemainingTime = remainingTime;
-      msRemainingTime.ESMC_FractionConvert(1000);
+
+      // TODO: use ESMC_FractionConvert() when n/d changed to ESMF_KIND_I8 ?
 
       // get total milliseconds
-      *ms_r8 = (remainingSeconds * 1000) + msRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 w = msRemainingTime.ESMC_FractionGetw();
+      ESMF_KIND_R8 n = msRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 d = msRemainingTime.ESMC_FractionGetd();
+      *ms_r8 = w * 1000 + (n * 1000) / d;
 
       // remove total milliseconds from remainingTime
       ESMC_Fraction milliseconds(0, (ESMF_KIND_I4)*ms_r8, 1000);
@@ -424,12 +396,14 @@
     if (us_r8 != ESMC_NULL_POINTER) {
       // convert remaining time to microseconds
       ESMC_Fraction usRemainingTime = remainingTime;
-      usRemainingTime.ESMC_FractionConvert(1000000);
+
+      // TODO: use ESMC_FractionConvert() when n/d changed to ESMF_KIND_I8 ?
 
       // get total microseconds
-      remainingSeconds = usRemainingTime.ESMC_FractionGetw();
-      *us_r8 = (remainingSeconds * 1000000) +
-                                           usRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 w = usRemainingTime.ESMC_FractionGetw();
+      ESMF_KIND_R8 n = usRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 d = usRemainingTime.ESMC_FractionGetd();
+      *us_r8 = w * 1000000 + (n * 1000000) / d;
 
       // remove total microseconds from remainingTime
       ESMC_Fraction microseconds(0, (ESMF_KIND_I4)*us_r8, 1000000);
@@ -438,12 +412,14 @@
     if (ns_r8 != ESMC_NULL_POINTER) {
       // convert remaining time to nanoseconds
       ESMC_Fraction nsRemainingTime = remainingTime;
-      nsRemainingTime.ESMC_FractionConvert(1000000000);
+
+      // TODO: use ESMC_FractionConvert() when n/d changed to ESMF_KIND_I8 ?
 
       // get total nanoseconds
-      remainingSeconds = nsRemainingTime.ESMC_FractionGetw();
-      *ns_r8 = (remainingSeconds * 1000000000) +
-                                           nsRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 w = nsRemainingTime.ESMC_FractionGetw();
+      ESMF_KIND_R8 n = nsRemainingTime.ESMC_FractionGetn();
+      ESMF_KIND_R8 d = nsRemainingTime.ESMC_FractionGetd();
+      *ns_r8 = w * 1000000000 + (n * 1000000000) / d;
     }
 
     return(rc);
