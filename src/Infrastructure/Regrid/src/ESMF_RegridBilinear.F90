@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridBilinear.F90,v 1.80 2004/11/23 00:43:14 jwolfe Exp $
+! $Id: ESMF_RegridBilinear.F90,v 1.81 2004/12/07 23:28:10 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -64,7 +64,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridBilinear.F90,v 1.80 2004/11/23 00:43:14 jwolfe Exp $'
+      '$Id: ESMF_RegridBilinear.F90,v 1.81 2004/12/07 23:28:10 jwolfe Exp $'
 
 !==============================================================================
 
@@ -83,7 +83,7 @@
 ! !INTERFACE:
       function ESMF_RegridConstructBilinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
                                             dstArray, dstGrid, dstDataMap, hasDstData, &
-                                            parentDELayout, srcMask, dstMask, rc)
+                                            parentVM, srcMask, dstMask, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructBilinear
@@ -97,7 +97,7 @@
       type(ESMF_Grid),         intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap), intent(in   ) :: dstDataMap
       logical,                 intent(in   ) :: hasDstData
-      type(ESMF_DELayout),     intent(in   ) :: parentDELayout
+      type(ESMF_VM),           intent(in   ) :: parentVM
       type(ESMF_Mask),         intent(in   ), optional :: srcMask
       type(ESMF_Mask),         intent(in   ), optional :: dstMask
       integer,                 intent(  out), optional :: rc
@@ -273,7 +273,7 @@
    !              information locally to calculate the regrid weights
 
       route = ESMF_RegridRouteConstruct(dataRank, srcGrid, dstGrid, &
-                         recvDomainList, parentDELayout, &
+                         recvDomainList, parentVM, &
                          srcArray=srcArray, srcDataMap=srcDataMap, &
                          dstArray=dstArray, dstDataMap=dstDataMap, &
                          hasSrcData=hasSrcData, hasDstData=hasDstData, &
@@ -287,7 +287,7 @@
       ! just do this to get a recDomainList with the right rank -- could be
       ! different using arrays
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                             recvDomainList, parentDELayout, &
+                             recvDomainList, parentVM, &
                              srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
                              hasSrcData=hasSrcData, hasDstData=hasDstData, &
                              reorder=.false., total=.false., rc=localrc)
@@ -297,7 +297,7 @@
 
       ! but this is the one we want to use for gathering grid data
       tempRoute = ESMF_RegridRouteConstruct(2, srcGrid, dstGrid, &
-                             recvDomainListTot, parentDELayout, &
+                             recvDomainListTot, parentVM, &
                              srcDataMap=srcDataMap, dstDataMap=dstDataMap, &
                              hasSrcData=hasSrcData, hasDstData=hasDstData, &
                              reorder=.false., total=.true., rc=localrc)

@@ -1,4 +1,4 @@
-! $Id: ESMF_RegridLinear.F90,v 1.27 2004/10/05 22:52:31 jwolfe Exp $
+! $Id: ESMF_RegridLinear.F90,v 1.28 2004/12/07 23:28:57 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_RegridLinear.F90,v 1.27 2004/10/05 22:52:31 jwolfe Exp $'
+      '$Id: ESMF_RegridLinear.F90,v 1.28 2004/12/07 23:28:57 jwolfe Exp $'
 
 !==============================================================================
 
@@ -82,7 +82,7 @@
 ! !INTERFACE:
       function ESMF_RegridConstructLinear(srcArray, srcGrid, srcDataMap, hasSrcData, &
                                           dstArray, dstGrid, dstDataMap, hasDstData, &
-                                          parentDELayout, srcMask, dstMask, rc) 
+                                          parentVM, srcMask, dstMask, rc) 
 !
 ! !RETURN VALUE:
       type(ESMF_RouteHandle) :: ESMF_RegridConstructLinear
@@ -96,7 +96,7 @@
       type(ESMF_Grid),         intent(in ) :: dstGrid
       type(ESMF_FieldDataMap), intent(in ) :: dstDataMap
       logical,                 intent(in ) :: hasDstData
-      type(ESMF_DELayout),     intent(in ) :: parentDELayout
+      type(ESMF_VM),           intent(in ) :: parentVM
       type(ESMF_Mask),         intent(in ), optional :: srcMask
       type(ESMF_Mask),         intent(in ), optional :: dstMask
       integer,                 intent(out), optional :: rc
@@ -237,14 +237,14 @@
    !              information locally to calculate the regrid weights
 
       route = ESMF_RegridRouteConstruct(3, srcGrid, dstGrid, &
-                                        recvDomainList, parentDELayout, &
+                                        recvDomainList, parentVM, &
                                         srcDataMap=srcDataMap, &
                                         dstDataMap=dstDataMap, &
                                         total=.false., rc=localrc)
       call ESMF_RouteHandleSet(rh, route1=route, rc=localrc)
 
 !      tempRoute = ESMF_RegridRouteConstruct(srcGrid, dstGrid, &
-!                                            recvDomainListTot, &parentDELayout, 
+!                                            recvDomainListTot, parentVM, &
 !                                            srcDataMap=srcDataMap, &
 !                                            dstDataMap=dstDataMap, &
 !                                            total=.true., rc=localrc)

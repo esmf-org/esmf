@@ -1,4 +1,4 @@
-! $Id: ESMF_Regrid.F90,v 1.88 2004/12/03 20:47:48 nscollins Exp $
+! $Id: ESMF_Regrid.F90,v 1.89 2004/12/07 23:29:20 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -96,7 +96,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-         '$Id: ESMF_Regrid.F90,v 1.88 2004/12/03 20:47:48 nscollins Exp $'
+         '$Id: ESMF_Regrid.F90,v 1.89 2004/12/07 23:29:20 jwolfe Exp $'
 
 !==============================================================================
 
@@ -115,7 +115,7 @@
 ! !INTERFACE:
       subroutine ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, &
                                    dstArray, dstGrid, dstDatamap, hasDstData, &
-                                   parentDELayout, routehandle, regridmethod, &
+                                   parentVM, routehandle, regridmethod, &
                                    regridNorm, srcMask, dstMask, rc)
 !
 ! !ARGUMENTS:
@@ -127,7 +127,7 @@
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
       logical,                  intent(in   ) :: hasDstData
-      type(ESMF_DELayout),      intent(in   ) :: parentDELayout
+      type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridNorm
@@ -227,7 +227,7 @@
         routehandle = ESMF_RegridConstructBilinear( &
                                  srcArray, srcGrid, srcDatamap, hasSrcData, &
                                  dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentDELayout, srcMask, dstMask, rc=localrc)
+                                 parentVM, srcMask, dstMask, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_BICUBIC
@@ -243,7 +243,7 @@
         routehandle = ESMF_RegridConstructConserv( &
                                  srcArray, srcGrid, srcDatamap, hasSrcData, &
                                  dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentDELayout, srcMask, dstMask, &
+                                 parentVM, srcMask, dstMask, &
                                  regridnorm=regridNorm, order=1, rc=localrc)
 
       !-------------
@@ -296,7 +296,7 @@
         routehandle = ESMF_RegridConstructLinear( &
                                  srcArray, srcGrid, srcDatamap, hasSrcData, &
                                  dstArray, dstGrid, dstDatamap, hasDstData, &
-                                 parentDELayout, srcMask, dstMask, rc=localrc)
+                                 parentVM, srcMask, dstMask, rc=localrc)
 
       !-------------
       ! ESMF_REGRID_METHOD_SPLINE
@@ -1063,7 +1063,7 @@
 ! !INTERFACE:
       subroutine ESMF_ArrayRegridStore(srcArray, srcGrid, srcDatamap, hasSrcData, &
                                        dstArray, dstGrid, dstDatamap, hasDstData, &
-                                       parentDElayout, routehandle, &
+                                       parentVM, routehandle, &
                                        regridmethod, regridnorm, &
                                        srcmask, dstmask, rc) 
 !
@@ -1076,7 +1076,7 @@
       type(ESMF_Grid),          intent(in   ) :: dstGrid
       type(ESMF_FieldDataMap),  intent(in   ) :: dstDatamap
       logical,                  intent(in   ) :: hasDstData
-      type(ESMF_DELayout),      intent(in   ) :: parentDElayout
+      type(ESMF_VM),            intent(in   ) :: parentVM
       type(ESMF_RouteHandle),   intent(inout) :: routehandle
       type(ESMF_RegridMethod),  intent(in   ) :: regridmethod
       type(ESMF_RegridNormOpt), intent(in   ), optional :: regridnorm
@@ -1108,12 +1108,11 @@
 !           the specified destination grid.
 !     \item [hasDstData]
 !           Logical specifier for whether or not this DE has destination data.
-!     \item [parentDElayout]
-!           {\tt ESMF\_DELayout} which encompasses both {\tt ESMF\_Field}s,
-!           most commonly the layout
-!           of the Coupler if the regridding is inter-component, but could
-!           also be the individual layout for a component if the
-!           regridding is intra-component.
+!     \item [parentVM]
+!           {\tt ESMF\_VM} which encompasses both {\tt ESMF\_Field}s,
+!           most commonly the vm of the Coupler if the regridding is
+!           inter-component, but could also be the individual vm for a
+!           component if the regridding is intra-component.
 !     \item [routehandle]
 !           Returned value which identifies the precomputed Route and other
 !           necessary information.
@@ -1147,7 +1146,7 @@
 
       call ESMF_RegridCreate(srcArray, srcGrid, srcDatamap, hasSrcData, &   
                              dstArray, dstGrid, dstDatamap, hasDstData, &
-                             parentDELayout, routehandle, regridmethod, &
+                             parentVM, routehandle, regridmethod, &
                              regridnorm=regridnorm, &
                              srcmask=srcmask, dstmask=dstmask, rc=localrc)
       if (ESMF_LogMsgFoundError(localrc, &
