@@ -1,4 +1,4 @@
-// $Id: ESMC_Array.C,v 1.36 2003/03/11 03:00:48 cdeluca Exp $
+// $Id: ESMC_Array.C,v 1.37 2003/04/04 23:23:32 jwolfe Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -37,7 +37,7 @@
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
  static const char *const version = 
-            "$Id: ESMC_Array.C,v 1.36 2003/03/11 03:00:48 cdeluca Exp $";
+            "$Id: ESMC_Array.C,v 1.37 2003/04/04 23:23:32 jwolfe Exp $";
 //-----------------------------------------------------------------------------
 
 //
@@ -547,7 +547,7 @@
 //    int error return code
 //
 // !ARGUMENTS:
-      ESMC_DELayout *layout,       // in  - layout (temporarily)
+      ESMC_DELayout *layout,     // in  - layout (temporarily)
       int decompids[],           // in  - decomposition identifier for each
                                  //       axis for the Array
       int size_decomp,           // in  - size of decomp array
@@ -578,21 +578,135 @@
       lsize = lsize * (AI_exc[i].r - AI_exc[i].l+1);
     }
 
-    // switch based on datatype
+    // switch based on datatype  TODO: this might be a good place to use templates
     switch (this->type) {
       case ESMF_DATA_REAL:
         // allocate global array from this size
         fp = new float[gsize];
+
+        // call layoutgather to fill this array
+        fp0 = (float *)this->base_addr;
+        layout->ESMC_DELayoutGatherArrayF(fp0, decompids, size_decomp, 
+                                          AI_exc, AI_tot, fp);
+
+        // switch based on array rank
+        switch (this->rank) {
+          case 1:
+            printf("no code to handle array rank %d yet\n", this->rank);
+          break;
+          case 2:
+            {
+              //  copy total domain of Array from global array
+              int gmax[2];
+              int lmax[2];
+              int lstart[2];
+              gmax[0] = 1;
+              for (i=1; i<this->rank; i++) {
+                gmax[i] = AI_exc[i-1].max;
+              }
+              for (i=0; i<this->rank; i++) {
+                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
+                lstart[i] = AI_exc[i].gstart + AI_tot[i].l;
+              }
+              int local, global;
+              for (j=0; j<lmax[1]; j++) {
+                j_exc = j + lstart[1] - AI_exc[1].l;
+                if (j_exc>=0 && j_exc<AI_exc[1].max) {
+                  for (i=0; i<lmax[0]; i++) {
+                    i_exc = i + lstart[0] - AI_exc[0].l;
+                    if (i_exc>=0 && i_exc<AI_exc[0].max) {
+                      local  = lmax[0]*j + i;
+                      global = gmax[1]*j_exc +
+                               gmax[0]*i_exc;
+                      fp0[local] = fp[global];
+                    }
+                  }
+                }
+              }
+            }
+          break;
+          case 3:
+            {
+              //  copy total domain of Array from global array
+              int gmax[3];
+              int lmax[3];
+              int lstart[3];
+              gmax[0] = 1;
+              for (i=1; i<this->rank; i++) {
+                gmax[i] = AI_exc[i-1].max;
+              }
+              for (i=0; i<this->rank; i++) {
+                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
+                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
+              }
+              int local, global;
+              for (k=0; k<lmax[2]; k++) {
+                for (j=0; j<lmax[1]; j++) {
+                  for (i=0; i<lmax[0]; i++) {
+                    local  = lmax[1]*lmax[0]*k +
+                             lmax[0]*j + i;
+                    global = gmax[2]*gmax[1]*(k+lstart[2]) + 
+                             gmax[1]*(j+lstart[1]) +
+                             gmax[0]*(i+lstart[0]);
+                    fp0[local] = fp[global];
+                  }
+                }
+              }
+            }
+          break;
+          case 4:
+            {
+              //  copy total domain of Array from global array
+              int gmax[4];
+              int lmax[4];
+              int lstart[4];
+              gmax[0] = 1;
+              for (i=1; i<this->rank; i++) {
+                gmax[i] = AI_exc[i-1].max;
+              }
+              for (i=0; i<this->rank; i++) {
+                lmax[i] = AI_tot[i].r - AI_tot[i].l + 1;
+                lstart[i] = AI_tot[i].gstart + AI_tot[i].l;
+              }
+              int local, global;
+              for (l=0; l<lmax[3]; l++) {
+                for (k=0; k<lmax[2]; k++) {
+                  for (j=0; j<lmax[1]; j++) {
+                    for (i=0; i<lmax[0]; i++) {
+                      local  = lmax[2]*lmax[1]*lmax[0]*l +
+                               lmax[1]*lmax[0]*k + 
+                               lmax[0]*j + i;
+                      global = gmax[3]*gmax[2]*gmax[1]*(l+lstart[3]) +
+                               gmax[2]*gmax[1]*(k+lstart[2]) + 
+                               gmax[1]*(j+lstart[1]) +
+                               gmax[0]*(i+lstart[0]);
+                      fp0[local] = fp[global];
+                    }
+                  }
+                }
+              }
+            }
+          break;
+          case 5:
+            printf("no code to handle array rank %d yet\n", this->rank);
+          break;
+          default:
+            printf("no code to handle array rank %d yet\n", this->rank);
+          break;
+        }
+
+        // deallocate global array
         delete [] fp;
       break;
+
       case ESMF_DATA_INTEGER:
         // allocate global array from this size
         ip = new int[gsize];
 
         // call layoutgather to fill this array
         ip0 = (int *)this->base_addr;
-        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, 
-                                        size_decomp, AI_exc, AI_tot, ip);
+        layout->ESMC_DELayoutGatherArrayI(ip0, decompids, size_decomp, 
+                                          AI_exc, AI_tot, ip);
 
         // switch based on array rank
         switch (this->rank) {
