@@ -1,4 +1,4 @@
-! $Id: ESMF_LogErr.F90,v 1.1 2004/06/08 09:27:15 nscollins Exp $
+! $Id: ESMF_LogErr.F90,v 1.2 2004/06/08 17:50:39 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -108,6 +108,8 @@ end type ESMF_Log
    ESMF_LogFoundError,ESMF_LogGet,ESMF_LogInitialize,&
    ESMF_LogMsgFoundAllocError,ESMF_LogMsgFoundError,ESMF_LogOpen,&
    ESMF_LogSet,ESMF_LogWrite
+
+   public ESMF_LOG_INFO, ESMF_LOG_WARNING, ESMF_LOG_ERROR
 
 type(ESMF_Log),SAVE::ESMF_LogDefault	
 !----------------------------------------------------------------------------
