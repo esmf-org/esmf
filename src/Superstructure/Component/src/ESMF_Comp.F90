@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.74 2004/03/10 18:22:30 svasquez Exp $
+! $Id: ESMF_Comp.F90,v 1.75 2004/03/10 19:54:52 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -201,7 +201,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.74 2004/03/10 18:22:30 svasquez Exp $'
+      '$Id: ESMF_Comp.F90,v 1.75 2004/03/10 19:54:52 svasquez Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -1540,7 +1540,7 @@ end function
 ! !DESCRIPTION:
 !     Finalize the ESMF Framework.
 !
-!     The arguments are:
+!     The argument is:
 !     \begin{description}
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
