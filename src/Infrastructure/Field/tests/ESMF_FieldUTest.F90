@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldUTest.F90,v 1.57 2004/06/09 19:44:26 svasquez Exp $
+! $Id: ESMF_FieldUTest.F90,v 1.58 2004/06/14 21:22:22 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -36,7 +36,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_FieldUTest.F90,v 1.57 2004/06/09 19:44:26 svasquez Exp $'
+      '$Id: ESMF_FieldUTest.F90,v 1.58 2004/06/14 21:22:22 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -138,7 +138,23 @@
       write(name, *) "Getting name of Field with no data Test"
       call ESMF_Test((fname.ne.""), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
-      
+
+      !EX_UTest
+      ! Getting Attrubute count from a Field
+      call ESMF_FieldGetAttributeCount(f1, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute count from a Field "
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify Attribute Count Test
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a Field "
+      call ESMF_Test((count.eq.0), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! default names unique
       f2 = ESMF_FieldCreateNoData(rc=rc)
@@ -149,7 +165,7 @@
       !call ESMF_FieldPrint(f1)
       !call ESMF_FieldPrint(f2)
       write(failMsg, *) "default name not unique"
-      write(name, *) "Getting name of field created with default name"
+      write(name, *) "Verifing uniqueness of fields created default name"
       call ESMF_Test((fname1.ne.fname2), name, failMsg, result, ESMF_SRCLINE)
 
       !EX_UTest
@@ -331,7 +347,31 @@
       call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
       !------------------------------------------------------------------------
 
+      !EX_UTest
+      f4 = ESMF_FieldCreateNoData(rc=rc) 
+      write(failMsg, *) ""
+      write(name, *) "Creating a Field with no data Test Req. FLD1.1.3"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Setting a data Array associated with Field
+      call ESMF_FieldSetArray(f4, arr, rc=rc) 
+      write(failMsg, *) "Did not retirn ESMF_SUCCESS"
+      write(name, *) "Setting a data Array associated with Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Setting a Grid associated with Field
+      call ESMF_FieldSetGrid(f4, grid, rc=rc) 
+      write(failMsg, *) "Did not retirn ESMF_SUCCESS"
+      write(name, *) "Setting a Grid associated with Field Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !EX_UTest
       ! Verifing that recreating a created Array is allowed
       allocate(f90ptr1(10,20))
@@ -464,6 +504,41 @@
       f3 = ESMF_FieldCreate(grid, arr, ESMF_DATA_REF, ESMF_CELL_CENTER, &
                             ESMF_CELL_CELL, 1, dm, "Field 0", ios, rc)
       call ESMF_FieldAddAttribute(f3, "Scale Factor", 4, rc)
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting Attribute count from a Field
+      call ESMF_FieldGetAttributeCount(f1, count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute count from a Field "
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify Attribute Count Test
+      write(failMsg, *) "Incorrect count"
+      write(name, *) "Verify Attribute count from a Field "
+      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Getting Attrubute Info from a Field
+      call ESMF_FieldGetAttributeInfo(f1, name="Scale Factor", count=count, rc=rc)
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Getting Attribute info from a Field "
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
+
+      !EX_UTest
+      ! Verify Attribute Count Test
+      write(failMsg, *) "Did not return ESMF_SUCCESS"
+      write(name, *) "Verify Attribute count from a Field "
+      call ESMF_Test((count.eq.1), name, failMsg, result, ESMF_SRCLINE)
+
+      !------------------------------------------------------------------------
       !Commented out because it crashes
       ! Bug Report 969760 opened.
       !call ESMF_FieldPrint(f3, rc=rc)
@@ -473,6 +548,7 @@
       write(name, *) "Getting an Integer Attribute back from a Field"
       call ESMF_Test((intattr.eq.4), name, failMsg, result, ESMF_SRCLINE)
  
+      !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a second attribute
       call ESMF_FieldAddAttribute(f3, "Invalid Data Tag", -999, rc)
@@ -485,6 +561,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a second Integer Attribute back from a Field"
       call ESMF_Test((intattr2.eq.-999), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       ! getting a non-existant attribute
       !call ESMF_FieldGetAttribute(f3, "No such attribute", intattr, rc)
@@ -492,6 +569,7 @@
       !write(name, *) "Getting an non-existant Integer Attribute from a Field"
       !call ESMF_Test((rc.eq.ESMF_FAILURE), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       ! setting an integer list
       !call ESMF_FieldAddAttribute(f3, "Multiple Scale Factors", 4, (/4,3,2,1/), rc)
       !Commented out because it crashes
@@ -505,6 +583,7 @@
       !write(name, *) "Getting an Integer List Attribute back from a Field"
       !call ESMF_Test((intattrlist(1).eq.4), name, failMsg, result, ESMF_SRCLINE)
  
+      !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a real attribute
       rattr = 3.14159
@@ -518,6 +597,7 @@
       write(failMsg, *) ""
       write(name, *) "Getting a real Attribute back from a Field"
       call ESMF_Test((rattr-3.14159.lt.0.00001), name, failMsg, result, ESMF_SRCLINE)
+      !------------------------------------------------------------------------
 
       !EX_UTest
       ! test setting a real list
@@ -535,6 +615,7 @@
       write(name, *) "Getting a real list Attribute back from a Field"
       call ESMF_Test((rattrlist(1).eq.1.1), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a logical attribute
       call ESMF_FieldAddAttribute(f3, "Sky is Blue", ESMF_TRUE, rc)
@@ -549,6 +630,7 @@
       write(name, *) "Getting a logical Attribute back from a Field"
       call ESMF_Test((lattr.eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a logical list
       call ESMF_FieldAddAttribute(f3, "FlipFlop", 3, (/ESMF_TRUE,ESMF_FALSE,ESMF_TRUE/), rc)
@@ -568,6 +650,7 @@
       write(name, *) "Getting a logical Attribute back from a Field"
       call ESMF_Test((lattrlist(1).eq.ESMF_TRUE), name, failMsg, result, ESMF_SRCLINE)
 
+      !------------------------------------------------------------------------
       !EX_UTest
       ! test setting a character attribute
       cattr = "It was a dark and stormy night"
