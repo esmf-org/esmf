@@ -1,4 +1,4 @@
-# $Id: build_rules.mk,v 1.24 2005/02/02 23:08:50 theurich Exp $
+# $Id: build_rules.mk,v 1.25 2005/02/07 22:38:53 nscollins Exp $
 #
 # Linux.intel.default.mk
 #
@@ -108,7 +108,6 @@ MPI_INCLUDE    = -I${MPI_HOME}
 MPIRUN         =  ${MPI_HOME}/mpirun
 endif
 
-
 # MP_LIB is for openMP
 MP_LIB          = 
 # For pthreads (or omp)
@@ -124,45 +123,58 @@ SHELL		   = /bin/sh
 SED		   = /bin/sed
 # ################## Compilers, Linkers, and Loaders ########################
 #
+
+# the default is to use the intel C and C++ compilers.
+# if you want gcc and g++, set ESMF_C_COMPILER to gcc before building.
+
 ifneq ($(ESMF_COMM),mpich)
-ifeq ($(ESMF_PREC),64)
-C_CC		   = icc -pthread -size_lp64
-CXX_CC		   = icpc -pthread
-C_FC		   = ifort -threads -size_lp64
-endif
-ifeq ($(ESMF_PREC),32)
-C_CC		   = icc -pthread
-CXX_CC		   = icpc -pthread
-C_FC		   = ifort -threads
+ifeq ($(ESMF_C_COMPILER),gcc)
+C_CC	   = gcc
+CXX_CC	   = g++
+C_FC	   = ifort
+else
+C_CC	   = icc
+CXX_CC	   = icpc
+C_FC	   = ifort
 endif
 endif
 
+# if you are using mpich, then however the mpich wrappers have been built
+# will determine which compilers you are using.
 ifeq ($(ESMF_COMM),mpich)
-ifeq ($(ESMF_PREC),64)
-C_CC		   = mpicc -pthread -size_lp64
-CXX_CC		   = mpiCC -pthread -size_lp64
-C_FC		   = mpif90 -threads -size_lp64
+C_CC	   = mpicc
+CXX_CC	   = mpiCC
+C_FC	   = mpif90
 endif
-ifeq ($(ESMF_PREC),32)
-C_CC		   = mpicc -pthread
-CXX_CC		   = mpiCC -pthread
-C_FC		   = mpif90 -threads
+
+ifeq ($(ESMF_PREC),64)
+C_CC	   += -size_lp64
+CXX_CC	   += -size_lp64
+C_FC	   += -size_lp64
+endif
+
+# the default is to link with the intel C and C++ libraries unless you have
+# already set ESMF_C_COMPILER to gcc.  if you want to still compile with intel
+# but link with the gcc libs anyway, set ESMF_C_LIBRARY to gcc before building.
+ifeq ($(ESMF_C_COMPILER),gcc)
+INTEL_C_LIB_FLAG = 
+INTEL_C_LIB_NEEDED = -lstdc++
+else
+ifeq ($(ESMF_C_LIBRARY),gcc)
+INTEL_C_LIB_FLAG = -cxxlib-gcc
+INTEL_C_LIB_NEEDED = -lstdc++
+else
+INTEL_C_LIB_FLAG = -cxxlib-icc
+INTEL_C_LIB_NEEDED = -lcprts
 endif
 endif
 
-ifeq ($(ESMF_COMM),mpich2)
-ifeq ($(ESMF_PREC),64)
-C_CC		   = mpicc -pthread -size_lp64
-CXX_CC		   = mpicxx -pthread -size_lp64
-C_FC		   = mpif90 -threads -size_lp64
-endif
-ifeq ($(ESMF_PREC),32)
-C_CC		   = mpicc -pthread
-CXX_CC		   = mpicxx -pthread
-C_FC		   = mpif90 -threads
-endif
-endif
+# add standard flags
+C_CC    +=  -pthread $(INTEL_C_LIB_FLAG)
+CXX_CC  +=  -pthread $(INTEL_C_LIB_FLAG)
+C_FC    +=  -threads 
 
+# Which compiler to call when
 C_CLINKER	   = ${C_CC}
 C_FLINKER	   = ${C_FC}
 CXX_FC		   = ${C_FC} -mp
@@ -174,31 +186,50 @@ C_CXXSO            = ${C_CC} -shared
 SH_LD              = ${C_CC}
 
 #
-# C and Fortran compiler flags 
+# C, C++, and Fortran compiler flags 
 #
-C_FC_MOD           = -I
 C_CLINKER_SLFLAG   = -Wl,-rpath,
 C_FLINKER_SLFLAG   = -Wl,-rpath,
+CXX_CLINKER_SLFLAG = -Wl,-rpath,
+CXX_FLINKER_SLFLAG = -Wl,-rpath,
+
+# version stuff
 C_CCV		   = ${C_CC} -V -v
 C_FCV              = ${C_FC} -V -v
+CXX_CCV		   = ${CXX_CC} -V -v
+
+# default system libs
 C_SYS_LIB	   = -ldl -lc -lg2c -lm
-F_FREECPP          = -cpp -FR
-F_FIXCPP           = -cpp
-F_FREENOCPP        = -cpp0 -FR
-F_FIXNOCPP         = -cpp0
+CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+
+# fortran flags
+C_FC_MOD           = -I
+F_FREECPP          = -fpp -FR
+F_FIXCPP           = -fpp 
+F_FREENOCPP        = -fpp0 -FR
+F_FIXNOCPP         = -fpp0
+
+# compile time debugging or optimization flags
 # ---------------------------- BOPT - g options ----------------------------
 G_COPTFLAGS	   = -g 
 G_FOPTFLAGS	   = -g
 # ----------------------------- BOPT - O options -----------------------------
-O_COPTFLAGS	   = -O
+O_COPTFLAGS	   = -O 
 O_FOPTFLAGS	   = -O
-#
-# C++ compiler flags 
-#
-CXX_CLINKER_SLFLAG = -Wl,-rpath,
-CXX_FLINKER_SLFLAG = -Wl,-rpath,
-CXX_CCV		   = ${CXX_CC} -V -v
-CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
+# ------------------------- BOPT - g_c++ options ------------------------------
+GCXX_COPTFLAGS	   = -g 
+GCXX_FOPTFLAGS	   = -g
+# ------------------------- BOPT - O_c++ options ------------------------------
+OCXX_COPTFLAGS	   = -O 
+OCXX_FOPTFLAGS	   = -O
+# -------------------------- BOPT - g_complex options ------------------------
+GCOMP_COPTFLAGS	   = -g
+GCOMP_FOPTFLAGS	   = -g
+# --------------------------- BOPT - O_complex options -------------------------
+OCOMP_COPTFLAGS	   = -O
+OCOMP_FOPTFLAGS	   = -O
+
+
 # by default append each directory which is in LD_LIBRARY_PATH to
 # the -L flag and also to the run-time load flag.  (on systems which
 # support the 'module' command, that is how it works - by adding dirs
@@ -206,6 +237,7 @@ CXX_SYS_LIB	   = -ldl -lc -lg2c -lm
 # compilers try to install themselves.  if your compiler is someplace else
 # either set LD_LIBRARY_PATH first, or make a site specific file and
 # edit the paths explicitly.
+
 ifeq ($(origin LD_LIBRARY_PATH), environment)
 LIB_PATHS   = $(addprefix -L, $(subst :, ,$(LD_LIBRARY_PATH)))
 LD_PATHS    = $(addprefix $(C_FLINKER_SLFLAG), $(subst :, ,$(LD_LIBRARY_PATH)))
@@ -218,27 +250,10 @@ LIB_PATHS       = -L/opt/intel_cc_81/lib
 LD_PATHS        = $(C_FLINKER_SLFLAG)/opt/intel_cc_81/lib
 endif
 endif
-ifeq ($(ESMF_COMPILER_VERSION),80)
-C_LIB_NEEDED = -lcprts
-else
-C_LIB_NEEDED = -lstdc++
-#C_LIB_NEEDED = -L/usr/lib/gcc-lib/ia64-redhat-linux/3.2.3 -lstdc++
-endif
-C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lrt -ldl
-C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) $(C_LIB_NEEDED) -lifcoremt -lrt -ldl
-# ------------------------- BOPT - g_c++ options ------------------------------
-GCXX_COPTFLAGS	   = -g 
-GCXX_FOPTFLAGS	   = -g
-# ------------------------- BOPT - O_c++ options ------------------------------
-OCXX_COPTFLAGS	   = -O
-OCXX_FOPTFLAGS	   = -O
-# -------------------------- BOPT - g_complex options ------------------------
-GCOMP_COPTFLAGS	   = -g
-GCOMP_FOPTFLAGS	   = -g
-# --------------------------- BOPT - O_complex options -------------------------
-OCOMP_COPTFLAGS	   = -O
-OCOMP_FOPTFLAGS	   = -O
-##################################################################################
+
+C_F90CXXLIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lrt -ldl
+C_CXXF90LIBS    = $(LD_PATHS) $(LIB_PATHS) $(INTEL_C_LIB_NEEDED) -lifcoremt -lrt -ldl
+###############################################################################
 
 PARCH		   = linux_intel
 
