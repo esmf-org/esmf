@@ -1,4 +1,4 @@
-// $Id: ESMC_Time.C,v 1.27 2003/04/29 05:57:35 eschwab Exp $
+// $Id: ESMC_Time.C,v 1.28 2003/04/29 08:01:11 eschwab Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -31,7 +31,7 @@
 //-------------------------------------------------------------------------
  // leave the following line as-is; it will insert the cvs ident string
  // into the object file for tracking purposes.
- static const char *const version = "$Id: ESMC_Time.C,v 1.27 2003/04/29 05:57:35 eschwab Exp $";
+ static const char *const version = "$Id: ESMC_Time.C,v 1.28 2003/04/29 08:01:11 eschwab Exp $";
 //-------------------------------------------------------------------------
 
 //
@@ -754,6 +754,8 @@
     if (Calendar == ESMC_NULL_POINTER) return (ESMF_FAILURE);
     if (Calendar->Type == ESMC_CAL_JULIAN ||
         Calendar->Type == ESMC_CAL_NOCALENDAR) return (ESMF_FAILURE);
+
+    // TODO: use table lookup per calendar type (14, 14.5, 15, 15.5 days) ?
 
     // TODO: use native C++ Get()/Set() when ready
 
