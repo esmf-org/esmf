@@ -1,4 +1,4 @@
-! $Id: ESMF_Comp.F90,v 1.93 2004/04/30 14:01:16 theurich Exp $
+! $Id: ESMF_Comp.F90,v 1.94 2004/05/17 16:04:01 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -14,7 +14,8 @@
       module ESMF_CompMod
 !
 !==============================================================================
-! A blank line to keep protex happy.
+! A blank line to keep protex happy because there are no public entry
+! points in this file, only internal ones.
 !BOP
 
 !EOP
@@ -39,7 +40,6 @@
 ! !USES:
       use ESMF_BaseMod
       use ESMF_IOSpecMod
-      !use ESMF_MachineMod
       use ESMF_VMMod
       use ESMF_ConfigMod
       use ESMF_CalendarMod
@@ -215,7 +215,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Comp.F90,v 1.93 2004/04/30 14:01:16 theurich Exp $'
+      '$Id: ESMF_Comp.F90,v 1.94 2004/05/17 16:04:01 nscollins Exp $'
 !------------------------------------------------------------------------------
 
 ! overload .eq. & .ne. with additional derived types so you can compare     
@@ -280,6 +280,8 @@ end function
 ! This section includes Component Create/Destroy, Construct/Destruct methods.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompConstruct"
 !BOPI
 ! !IROUTINE: ESMF_CompConstruct - Internal routine to fill in a comp struct
 
@@ -315,8 +317,8 @@ end function
 !   \item[{[name]}]
 !    Component name.
 !   \item[{[gridcomptype]}]
-!    Component Model Type, where model includes ESMF\_ATM, ESMF\_LAND,
-!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER.  
+!    Component Model Type, where model includes {\tt ESMF\_ATM, ESMF\_LAND,
+!    ESMF\_OCEAN, ESMF\_SEAICE, ESMF\_RIVER}.  
 !   \item[{[dirPath]}]
 !    Directory where component-specfic configuration or data files
 !    are located.
@@ -340,9 +342,6 @@ end function
 !   \end{description}
 !
 !EOPI
-! !REQUIREMENTS:
-
-
         ! Local vars
         integer :: status                            ! local error status
         logical :: rcpresent                         ! did user specify rc?
@@ -363,6 +362,7 @@ end function
 
         ! initialize base class, including component name
         call ESMF_BaseCreate(compp%base, "Component", name, 0, status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CompConstruct: Base create error"
           return
@@ -371,7 +371,6 @@ end function
         ! parent VM
         if (present(vm)) then
           compp%vm_parent = vm
-!          print *, 'ESMF_CompConstruct, setting up compp%vm_parent'
         else
           ! if parent specified, use their vm, else use global.
           if (present(parent)) then
@@ -414,6 +413,8 @@ end function
               ! try again with the dirPath concatinated on front
               fullpath = trim(dirPath) // '/' // trim(configFile)
               call ESMF_ConfigLoadFile(compp%config, fullpath, rc=status)
+              ! TODO: construct a msg string and then call something here.
+              ! if (ESMF_LogMsgFoundError(status, msgstr, rc)) return
               if (status .ne. 0) then
                   print *, "ERROR: loading config file, unable to open either"
                   print *, " name = ", trim(configFile), " or name = ", trim(fullpath)
@@ -448,7 +449,6 @@ end function
           compp%npetlist = size(petlist)
           allocate(compp%petlist(size(petlist)))
           compp%petlist = petlist
-!         print *, 'ESMF_CompConstruct, setting up compp%petlist', size(petlist)
         else
           compp%npetlist = 0
           allocate(compp%petlist(0))
@@ -460,6 +460,7 @@ end function
 
         ! Create an empty subroutine/internal state table.
         call c_ESMC_FTableCreate(compp%this, status) 
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CompConstruct: Table create error"
           return
@@ -472,6 +473,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompDestruct"
 !BOPI
 ! !IROUTINE: ESMF_CompDestruct - Internal routine for freeing resources
 
@@ -542,6 +545,8 @@ end function
 ! This section includes the Component Init, Run, and Finalize methods
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompInitialize"
 !BOPI
 ! !IROUTINE: ESMF_CompInitialize -- Call the Component's init routine
 
@@ -676,6 +681,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompWriteRestart"
 !BOPI
 ! !IROUTINE: ESMF_CompWriteRestart -- Call the Component's internal save routine
 
@@ -752,6 +759,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompReadRestart"
 !BOPI
 ! !IROUTINE: ESMF_CompReadRestart -- Call the Component's internal restart routine
 
@@ -829,6 +838,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompFinalize"
 !BOPI
 ! !IROUTINE: ESMF_CompFinalize -- Call the Component's finalize routine
 
@@ -963,6 +974,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompRun"
 !BOPI
 ! !IROUTINE: ESMF_CompRun -- Call the Component's run routine
 
@@ -1103,6 +1116,8 @@ end function
 ! Query/Set information from/in the component.
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompGet"
 !BOPI
 ! !IROUTINE: ESMF_CompGet -- Query a component for various information
 !
@@ -1189,6 +1204,8 @@ end function
 
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSet"
 !BOPI
 ! !IROUTINE: ESMF_CompSet -- Query a component for various information
 !
@@ -1275,6 +1292,8 @@ end function
 ! This section is I/O for Components
 !
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompWrite"
 !BOPI
 ! !IROUTINE: ESMF_CompWrite - Write a Component to disk
 !
@@ -1304,6 +1323,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompRead"
 !BOPI
 ! !IROUTINE: ESMF_CompRead - Read a Component from disk
 !
@@ -1341,6 +1362,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompValidate"
 !BOPI
 ! !IROUTINE: ESMF_CompValidate -- Ensure the Component internal data is valid.
 !
@@ -1393,6 +1416,8 @@ end function
        end subroutine ESMF_CompValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompPrint"
 !BOPI
 ! !IROUTINE:  ESMF_CompPrint -- Print the contents of a Component
 !
@@ -1448,6 +1473,8 @@ end function
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSetVMMaxThreads"
 !BOPI
 ! !IROUTINE: ESMF_CompSetVMMaxThreads - Define a VM for this Component
 
@@ -1512,6 +1539,8 @@ end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSetVMMinThreads"
 !BOPI
 ! !IROUTINE: ESMF_CompSetVMMinThreads - Define a VM for this Component
 
@@ -1575,6 +1604,8 @@ end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompSetVMMaxPEs"
 !BOPI
 ! !IROUTINE: ESMF_CompSetVMMaxPEs - Define a VM for this Component
 
@@ -1639,6 +1670,8 @@ end function
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CompWait"
 !BOPI
 ! !IROUTINE: ESMF_CompWait - Wait for component to return
 

@@ -1,4 +1,4 @@
-! $Id: ESMF_CplComp.F90,v 1.31 2004/04/30 14:49:20 theurich Exp $
+! $Id: ESMF_CplComp.F90,v 1.32 2004/05/17 16:04:02 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -86,7 +86,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CplComp.F90,v 1.31 2004/04/30 14:49:20 theurich Exp $'
+      '$Id: ESMF_CplComp.F90,v 1.32 2004/05/17 16:04:02 nscollins Exp $'
 
 !==============================================================================
 !
@@ -137,10 +137,11 @@
 
 
 !------------------------------------------------------------------------------
-
-!BOP
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompCreateNew"
+!BOPI
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp
-
+!
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
       function ESMF_CplCompCreateNew(name, config, clock, rc)
@@ -172,8 +173,7 @@
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
-!EOP
-! !REQUIREMENTS:
+!EOPI
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
@@ -202,6 +202,7 @@
         ! Call construction method to initialize cplcomp internals
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                     config=config, clock=clock, rc=status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
           return
@@ -215,13 +216,14 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompCreateConf"
 !BOP
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp from a Config file
-
+!
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
-      function ESMF_CplCompCreateConf(name, config, configFile, &
-                                      clock, rc)
+      function ESMF_CplCompCreateConf(name, config, configFile, clock, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateConf
@@ -243,7 +245,7 @@
 !   \item[{[name]}]
 !    CplComp name.
 !   \item[{[config]}]
-!    Already created {\tt Config} object.  If specified, takes
+!    Already created {\tt ESMF\_Config} object.  If specified, takes
 !    priority over config filename.
 !   \item[{[configFile]}]
 !    CplComp-specific configuration filename. 
@@ -254,7 +256,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
@@ -284,6 +285,7 @@
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, rc=status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
           return
@@ -297,13 +299,15 @@
     
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompCreateVM"
 !BOP
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp with VM enabled
-
+!
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
       function ESMF_CplCompCreateVM(vm, &
-        name, config, configFile, clock, petList, rc)
+                                  name, config, configFile, clock, petList, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CplComp) :: ESMF_CplCompCreateVM
@@ -325,10 +329,11 @@
 !  The arguments are:
 !  \begin{description}
 !   \item[vm]
-!    VM of the component out of which this ESMF\_CplCompCreate call is issued.
-!    This will become the parent VM of the created Coupler Component.
+!    VM of the component out of which this {\tt ESMF\_CplCompCreate()}
+!    call is issued.
+!    This will become the parent VM of the newly created Coupler Component.
 !   \item[{[name]}]
-!    CplComp name.
+!    Name of the new Coupler Component.
 !   \item[{[config]}]
 !    Already created {\tt Config} object.  If specified, takes
 !    priority over config filename.
@@ -345,7 +350,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
@@ -375,6 +379,7 @@
         call ESMF_CompConstruct(compclass, ESMF_COMPTYPE_CPL, name, &
                                 configFile=configFile, config=config, &
                                 clock=clock, vm=vm, petList=petList, rc=status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
           return
@@ -388,9 +393,11 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompCreateGPar"
 !BOPI
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp from a Parent Component
-
+!
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
       function ESMF_CplCompCreateGPar(parent, name, config, &
@@ -436,7 +443,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
@@ -467,6 +473,7 @@
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
           return
@@ -480,9 +487,11 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompCreateCPar"
 !BOPI
 ! !IROUTINE: ESMF_CplCompCreate - Create a new CplComp from a Parent Component
-
+!
 ! !INTERFACE:
       ! Private name; call using ESMF_CplCompCreate()      
       function ESMF_CplCompCreateCPar(parent, name, config, &
@@ -528,7 +537,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! local vars
         type (ESMF_CompClass), pointer :: compclass      ! generic comp
@@ -559,6 +567,7 @@
                                 configFile=configFile, config=config, &
                                 parent=parent%compp, &
                                 vm=vm, petList=petList, clock=clock, rc=status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp construction error"
           return
@@ -572,6 +581,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompDestroy"
 !BOP
 ! !IROUTINE: ESMF_CplCompDestroy - Release resources for a CplComp
 
@@ -583,18 +594,17 @@
       integer, intent(out), optional :: rc
 !
 ! !DESCRIPTION:
-!     Releases all resources associated with this {\tt CplComp}.
+!     Releases all resources associated with this {\tt ESMF\_CplComp}.
 !
 !     The arguments are:
 !     \begin{description}
 !     \item[cplcomp]
-!       Destroy contents of this {\tt CplComp}.
+!       Destroy contents of this {\tt ESMF\_CplComp}.
 !     \item[{[rc]}]
 !       Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         ! local vars
         integer :: status                       ! local error status
@@ -616,6 +626,7 @@
 
         ! call Destruct to release resources
         call ESMF_CompDestruct(cplcomp%compp, status)
+        ! if (ESMF_LogPassFoundError(status, rc)) return
         if (status .ne. ESMF_SUCCESS) then
           print *, "CplComp contents destruction error"
           return
@@ -623,6 +634,7 @@
 
         ! Deallocate the cplcomp struct itself
         deallocate(cplcomp%compp, stat=status)
+        ! if (ESMF_LogFoundAllocError(status, "deallocating cplcomp", rc)) return
         if (status .ne. 0) then
           print *, "CplComp contents destruction error"
           return
@@ -635,9 +647,11 @@
         end subroutine ESMF_CplCompDestroy
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompFinalize"
 !BOP
 ! !IROUTINE: ESMF_CplCompFinalize - Call the CplComp's finalize routine
-
+!
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompFinalize(cplcomp, importState, &
                                               exportState, clock, phase, rc)
@@ -671,7 +685,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompFinalize(cplcomp%compp, importState=importState, &
                       exportState=exportState, clock=clock, phase=phase, rc=rc)
@@ -680,6 +693,8 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompGet"
 !BOP
 ! !IROUTINE: ESMF_CplCompGet - Query a CplComp for information
 !
@@ -698,7 +713,8 @@
 
 !
 ! !DESCRIPTION:
-!      Returns information about the cplcomp.  For queries where the caller
+!      Returns information about the coupler component.  
+!      For queries where the caller
 !      only wants a single value, specify the argument by name.
 !      All the arguments after the cplcomp input are optional 
 !      to facilitate this.
@@ -721,7 +737,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompGet(cplcomp%compp, name, vm=vm, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
@@ -729,9 +744,11 @@
         end subroutine ESMF_CplCompGet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompInitialize"
 !BOP
 ! !IROUTINE: ESMF_CplCompInitialize - Call the CplComp's initialize routine
-
+!
 ! !INTERFACE:
       recursive subroutine ESMF_CplCompInitialize(cplcomp, importState, &
                                                   exportState, clock, phase, rc)
@@ -747,25 +764,23 @@
 !
 ! !DESCRIPTION:
 !  Call the associated user initialization code for a cplcomp.
-!
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
 !    CplComp to call Initialization routine for.
 !   \item[{[importState]}]  
-!       ESMF\_State containing source data for coupling.
+!       {\tt ESMF\_State} containing source data for coupling.
 !   \item[{[exportState]}]  
-!       ESMF\_State containing destination data for coupling.
+!       {\tt ESMF\_State} containing destination data for coupling.
 !   \item[{[clock]}]  External clock for passing in time information.
 !   \item[{[phase]}]  If multiple-phase init, which phase number this is.
-!      Pass in 0 or {\tt ESMF\_SINGLEPHASE} for non-multiples.
+!      Pass in {\tt 0} or {\tt ESMF\_SINGLEPHASE} for non-multiples.
 !   \item[{[rc]}]
 !    Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompInitialize(cplcomp%compp, importState=importState, &
                                  exportState=exportState, clock=clock,     &
@@ -775,12 +790,13 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompPrint"
 !BOP
 ! !IROUTINE:  ESMF_CplCompPrint - Print the contents of a CplComp
 !
 ! !INTERFACE:
       subroutine ESMF_CplCompPrint(cplcomp, options, rc)
-!
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp) :: cplcomp
@@ -801,7 +817,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
        print *, "Coupler CplComp:"
        call ESMF_CompPrint(cplcomp%compp, options, rc)
@@ -809,12 +824,14 @@
        end subroutine ESMF_CplCompPrint
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompReadRestart"
 !BOP
 ! !IROUTINE: ESMF_CplCompReadRestart -- Call the CplComp's restore routine
-
-! !INTERFACE:
-     recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, phase, rc)
 !
+! !INTERFACE:
+     recursive subroutine ESMF_CplCompReadRestart(cplcomp, iospec, clock, &
+                                                                    phase, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp), intent(inout) :: cplcomp
@@ -842,20 +859,20 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompReadRestart(cplcomp%compp, iospec, clock, phase, rc)
 
         end subroutine ESMF_CplCompReadRestart
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompRun"
 !BOP
 ! !IROUTINE: ESMF_CplCompRun - Call CplComp run routine with two States
-
+!
 ! !INTERFACE:
     recursive subroutine ESMF_CplCompRun(cplcomp, importState, exportState, &
-                                                                  clock, phase, rc)
-!
+                                                              clock, phase, rc)
 !
 ! !ARGUMENTS:
       type (ESMF_CplComp) :: cplcomp
@@ -867,16 +884,15 @@
 !
 ! !DESCRIPTION:
 !  Call the associated user run code for a cplcomp.
-!
 !    
 !  The arguments are: 
 !  \begin{description} 
 !   \item[cplcomp]
 !    CplComp to call Run routine for.
 !   \item[{[importState]}]
-!     ESMF\_State containing import data for coupling.
+!     {\tt ESMF\_State} containing import data for coupling.
 !   \item[{[exportState]}]
-!     ESMF\_State containing export data for coupling.
+!     {\tt ESMF\_State} containing export data for coupling.
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
 !   \item[{[phase]}]  
@@ -887,7 +903,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompRun(cplcomp%compp, importState=importState,  &
                       exportState=exportState, clock=clock, phase=phase, rc=rc)
@@ -896,12 +911,13 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSet"
 !BOP
 ! !IROUTINE: ESMF_CplCompSet - Set or reset information about the CplComp
 !
 ! !INTERFACE:
-      subroutine ESMF_CplCompSet(cplcomp, name, clock, &
-                                                       configFile, config, rc)
+      subroutine ESMF_CplCompSet(cplcomp, name, clock, configFile, config, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_CplComp), intent(inout) :: cplcomp
@@ -917,7 +933,6 @@
 !      only wants to set a single value specify the argument by name.
 !      All the arguments after the cplcomp input are optional 
 !      to facilitate this.
-!
 !
 !  The arguments are:
 !  \begin{description}
@@ -937,7 +952,6 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompSet(cplcomp%compp, name, clock=clock, &
                           configFile=configFile, config=config, rc=rc)
@@ -945,6 +959,8 @@
         end subroutine ESMF_CplCompSet
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompValidate"
 !BOP
 ! !IROUTINE: ESMF_CplCompValidate -- Ensure the CplComp is internally consistent
 !
@@ -970,18 +986,20 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
        call ESMF_CompValidate(cplcomp%compp, options, rc)
  
        end subroutine ESMF_CplCompValidate
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompWriteRestart"
 !BOP
 ! !IROUTINE: ESMF_CplCompWriteRestart -- Call the CplComp's checkpoint routine
 
 ! !INTERFACE:
-    recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, phase, rc)
+    recursive subroutine ESMF_CplCompWriteRestart(cplcomp, iospec, clock, &
+                                                                     phase, rc)
 !
 !
 ! !ARGUMENTS:
@@ -1000,7 +1018,7 @@
 !   \item[cplcomp]
 !    CplComp to call WriteRestart routine for.
 !   \item[{[iospec]}]
-!    {\tt IOSpec} object which describes I/O options.
+!    {\tt ESMF\_IOSpec} object which describes I/O options.
 !   \item[{[clock]}]  
 !     External clock for passing in time information.
 !   \item[{[phase]}]  
@@ -1011,21 +1029,21 @@
 !   \end{description}
 !
 !EOP
-! !REQUIREMENTS:
 
         call ESMF_CompWriteRestart(cplcomp%compp, iospec, clock, phase, rc)
 
         end subroutine ESMF_CplCompWriteRestart
 
 
-
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMMaxThreads"
 !BOPI
 ! !IROUTINE: ESMF_CplCompSetVMMaxThreads - Define a VM for this CplComp
-
+!
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxThreads(cplcomp, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+                     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
@@ -1036,7 +1054,7 @@
     integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Set characteristics of the VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1069,7 +1087,8 @@
 
     ! call CompClass method
     call ESMF_CompSetVMMaxThreads(cplcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_CompSetVMMaxThreads error"
       return
@@ -1081,12 +1100,14 @@
   end subroutine ESMF_CplCompSetVMMaxThreads
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMMinThreads"
 !BOPI
 ! !IROUTINE: ESMF_CplCompSetVMMinThreads - Define a VM for this CplComp
-
+!
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMinThreads(cplcomp, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+                        pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
@@ -1097,7 +1118,7 @@
     integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Set characteristics of the VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1130,7 +1151,8 @@
 
     ! call CompClass method
     call ESMF_CompSetVMMinThreads(cplcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+                  pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_CompSetVMMinThreads error"
       return
@@ -1143,12 +1165,14 @@
 !------------------------------------------------------------------------------
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompSetVMMaxPEs"
 !BOPI
 ! !IROUTINE: ESMF_CplCompSetVMMaxPEs - Define a VM for this CplComp
-
+!
 ! !INTERFACE:
   subroutine ESMF_CplCompSetVMMaxPEs(cplcomp, max, &
-    pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
+                       pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
     type(ESMF_CplComp),  intent(in)            :: cplcomp
@@ -1159,7 +1183,7 @@
     integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
-!     Print VM internals
+!     Set characteristics of the VM for this component.
 !
 !     The arguments are:
 !     \begin{description}
@@ -1192,7 +1216,8 @@
 
     ! call CompClass method
     call ESMF_CompSetVMMaxPEs(cplcomp%compp, max, &
-      pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+                   pref_intra_process, pref_intra_ssi, pref_inter_ssi, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_CompSetVMMaxPEs error"
       return
@@ -1206,9 +1231,11 @@
 
 
 !------------------------------------------------------------------------------
+#undef  ESMF_METHOD
+#define ESMF_METHOD "ESMF_CplCompWait"
 !BOP
 ! !IROUTINE: ESMF_CplCompWait - Wait for a CplComp to return
-
+!
 ! !INTERFACE:
   subroutine ESMF_CplCompWait(cplcomp, rc)
 !
@@ -1242,6 +1269,7 @@
 
     ! call CompClass method
     call ESMF_CompWait(cplcomp%compp, status)
+    ! if (ESMF_LogPassFoundError(status, rc)) return
     if (status .ne. ESMF_SUCCESS) then
       print *, "ESMF_CompWait error"
       return
