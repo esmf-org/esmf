@@ -1,4 +1,4 @@
-! $Id: ESMF_CommTable.F90,v 1.7 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_CommTable.F90,v 1.8 2005/02/28 16:38:34 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -85,7 +85,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_CommTable.F90,v 1.7 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_CommTable.F90,v 1.8 2005/02/28 16:38:34 nscollins Exp $'
 
 !==============================================================================
 !
@@ -125,15 +125,14 @@
 ! !IROUTINE: ESMF_CommTableCreateNew - Create a new CommTable
 
 ! !INTERFACE:
-      function ESMF_CommTableCreateNew(arg1, arg2, arg3, rc)
+      function ESMF_CommTableCreateNew(mypet, petcount, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_CommTable) :: ESMF_CommTableCreateNew
 !
 ! !ARGUMENTS:
-      integer, intent(in) :: arg1                        
-      integer, intent(in) :: arg2                        
-      character (len = *), intent(in), optional :: arg3  
+      integer, intent(in) :: mypet
+      integer, intent(in) :: petcount
       integer, intent(out), optional :: rc               
 !
 ! !DESCRIPTION:
@@ -142,12 +141,10 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[{[arg3]}] 
-!          Argument 3.
+!     \item[mypet] 
+!          The local PET number.
+!     \item[petcount]
+!          The total PET count in this VM.
 !     \item[{[rc]}] 
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
 !     \end{description}
@@ -171,7 +168,7 @@
         endif
 
         ! Call C++ create code
-        call c_ESMC_CommTableCreate(arg1, arg2, arg3, status)
+        call c_ESMC_CommTableCreate(commtable, mypet, petcount, status)
         if (ESMF_LogMsgFoundError(status, &
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
