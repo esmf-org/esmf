@@ -70,8 +70,8 @@ overloaded for all cases where the item can be manipulated as a
 name/value pair.  If identifying the item requires more than a 
 name, or if the object is of sufficient complexity that overloading
 in this way would result in an overwhelming number of options, we 
-define specific {\tt Set<Something>} and {\tt Get<Something>} 
-interfaces.
+define specific {\tt <Class>\_Set<Something>} and 
+{\tt <Class>\_Get<Something>} interfaces.
 
 \item {\tt <Class>\_Add()}, {\tt <Class>\_Get()}, and 
 {\tt <Class>\_Remove()} for manipulating 
@@ -108,6 +108,11 @@ field = ESMF_FieldCreate('temp')
 \end{verbatim}
 
 \subsection{Special Methods}
+
+The following methods are special methods which, in one case,
+are required by any application using ESMF, and in the 
+other case must be called by any application that is using 
+ESMF Components.
 
 \begin{itemize}
 
@@ -263,5 +268,7 @@ These are:
 \begin{itemize}
 \item {\tt TimeMgr}, for calendar, date, clock and alarm functions.
 \item {\tt LogErr}, for logging and error handling.
+\item {\tt Config}, for creating resource files that can replace namelists
+as a consistent way of setting configuration parameters.
 \end{itemize}
 
