@@ -1,4 +1,4 @@
-// $Id: ESMC_LocalArray_F.C,v 1.11 2004/06/17 15:41:01 nscollins Exp $
+// $Id: ESMC_LocalArray_F.C,v 1.12 2004/06/17 16:03:45 nscollins Exp $
 //
 // Earth System Modeling Framework
 // Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -34,6 +34,8 @@
 
 #ifdef ESMC_DATA_ADDR_NEEDS_INDIR
 #define XD *
+#else
+#define XD
 #endif
 
 // the interface subroutine names MUST be in lower case
@@ -307,7 +309,7 @@ char *name = NULL;
              delete[] filetemp;
      }
 
-     void FTN(c_esmf_sizeprint)(char *p1, char *p2, int *rank) {
+     void FTN(c_esmf_sizeprint)(char *p1, char *p2, int *rank, int *rc) {
          int psize = (int)(p2 - p1);
 
          int bytes = ESMF_F90_PTR_BASE_SIZE;
@@ -324,10 +326,14 @@ char *name = NULL;
                              ESMF_F90_PTR_BASE_SIZE);
             printf("  increment per rank ESMF_F90_PTR_PLUS_RANK = %d\n",
                              ESMF_F90_PTR_PLUS_RANK);
+
+            *rc = ESMF_FAILURE;
 ;
-         } else
-            printf("rank %d Fortran 90 pointer is %d bytes, matches computed size ok\n", 
+         } else {
+            printf("PASS: rank %d Fortran 90 pointer is %d bytes, matches computed size ok\n", 
                           *rank, psize);
+            *rc = ESMF_SUCCESS;
+         } 
      }
 
 
