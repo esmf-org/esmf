@@ -1,4 +1,4 @@
-! $Id: ESMF_Grid.F90,v 1.6 2002/11/05 23:10:56 jwolfe Exp $
+! $Id: ESMF_Grid.F90,v 1.7 2002/11/20 22:26:39 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -35,8 +35,8 @@
 !------------------------------------------------------------------------------
 ! !USES:
       use ESMF_BaseMod        ! ESMF base class
-!jw   use ESMF_DistGridMod    ! ESMF base class
-!jw   use ESMF_PhysGridMod    ! ESMF base class
+      use ESMF_DistGridMod    ! ESMF distributed grid class
+      use ESMF_PhysGridMod    ! ESMF physical grid class
 !jw   use ESMF_VertGridMod    ! ESMF base class
       implicit none
 
@@ -56,6 +56,57 @@
       end type
 
 !------------------------------------------------------------------------------
+!     !  ESMF_PhysGridSpec
+!
+!     ! Definition for a PhysGridSpec class.
+
+      type ESMF_PhysGridSpec
+      sequence
+      private
+        
+        type (ESMF_Base) :: base         ! base class object
+        integer :: num_corners           ! number of corners for
+                                         ! each grid cell
+        integer :: num_faces             ! likely assume same as num_corners
+                                         ! but might specify storage of only
+                                         ! 2 of 4 faces, for example
+        integer :: num_metrics           ! a counter for the number of
+                                         ! metrics for this subgrid
+        integer :: num_lmasks            ! a counter for the number of
+                                         ! logical masks for this subgrid
+        integer :: num_mmasks            ! a counter for the number of
+                                         ! multiplicative masks for this
+                                         ! subgrid
+        integer :: num_region_ids        ! a counter for the number of
+                                         ! region identifiers for this
+                                         ! subgrid
+        real, dimension(:), pointer :: center_x   ! x-coord of center of
+                                                  ! each cell
+        real, dimension(:), pointer :: center_y   ! y-coord of center of
+                                                  ! each cell
+        real, dimension(:,:), pointer :: corner_x ! x-coord of each corner
+                                                  ! of each cell
+        real, dimension(:,:), pointer :: corner_y ! y-coord of each corner
+                                                  ! of each cell
+        real, dimension(:,:), pointer :: face_x   ! x-coord of each face
+                                                  ! center of each cell
+        real, dimension(:,:), pointer :: face_y   ! y-coord of each face
+                                                  ! center of each cell
+        real, dimension(:,:), pointer :: metrics  ! an array of defined metrics
+                                                  ! for each cell
+        character (len=ESMF_MAXSTR), dimension(:), pointer :: metric_names
+        logical, dimension(:,:), pointer :: lmask ! an array of defined logical
+                                                  ! masks for each cell
+        real, dimension(:,:), pointer :: mmask    ! an array of defined 
+                                                  ! multiplicative masks for
+                                                  ! each cell
+        integer, dimension(:,:), pointer :: region_id ! an array of defined
+                                                      ! region identifiers
+                                                      ! for each cell
+
+      end type
+
+!------------------------------------------------------------------------------
 !     !  ESMF_GridType
 !
 !     ! Definition for the Grid class.  A Grid
@@ -65,11 +116,27 @@
       sequence
       private
 
-        type (ESMF_Base) :: base                 ! base class object
-        type (ESMF_Status) :: gridstatus         ! uninitialized, init ok, etc
-!jw     type (ESMF_PhysGrid), dimension(:), pointer :: subgrid  !
+        type (ESMF_Base) :: base                     ! base class object
+        type (ESMF_Status) :: gridstatus             ! uninitialized, init ok, etc
+        character (len=ESMF_MAXSTR) :: gridtype      ! identifier for type of grid
+        character (len=ESMF_MAXSTR) :: stagger       ! grid staggering
+        character (len=ESMF_MAXSTR) :: coord_system  ! physical coordinate system
+        character (len=ESMF_MAXSTR) :: coord_order   ! mapping of xyz to ijk
+!jw     integer :: gridtype                          ! TODO better as an enum?
+!jw     integer :: stagger                           ! TODO better as an enum?
+!jw     integer :: coord_system                      ! TODO better as an enum?
+!jw     integer :: coord_order                       ! TODO better as an enum?
+        integer :: num_subgrids                      ! number of grid descriptors
+                                                     ! necessary to support
+                                                     ! staggering
+        real :: global_min_x                         ! global extents
+        real :: global_max_x                         ! global extents
+        real :: global_min_y                         ! global extents
+        real :: global_max_y                         ! global extents
+        type (ESMF_PhysGridSpec), dimension(:), pointer :: subgrid  !
+        type (ESMF_PhysGrid), pointer :: physgrid  !
 !jw     type (ESMF_VertGrid), pointer :: vertgrid    !
-!jw     type (ESMF_DistGrid), pointer :: distgrid    !
+        type (ESMF_DistGrid), pointer :: distgrid    !
 
       end type
 
@@ -102,9 +169,6 @@
     public ESMF_GridCreate                 ! interface only, deep class
     public ESMF_GridDestroy                ! interface only, deep class
 
-! the following routine applies to a shallow class
-!jw public ESMF_GridInit                   ! shallow class
-
 !jw public ESMF_GridGetConfig
 !jw public ESMF_GridSetConfig
 !jw public ESMF_GridGetValue               ! Get<Value>
@@ -121,7 +185,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Grid.F90,v 1.6 2002/11/05 23:10:56 jwolfe Exp $'
+      '$Id: ESMF_Grid.F90,v 1.7 2002/11/20 22:26:39 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -207,7 +271,7 @@
 ! !REQUIREMENTS:  TODO
 !EOP
 
-      type(ESMF_GridType), pointer :: grid        ! Pointer to new field
+      type(ESMF_GridType), pointer :: grid        ! Pointer to new grid
       integer :: status=ESMF_FAILURE              ! Error status
       logical :: rcpresent=.FALSE.                ! Return code present
 
@@ -364,50 +428,6 @@
 !  code goes here
 !
       end subroutine ESMF_GridDestruct
-
-!------------------------------------------------------------------------------
-!BOP
-! !IROUTINE: 
-!     ESMF_GridInit - Initialize a Grid 
-
-! !INTERFACE:
-      subroutine ESMF_GridInit(grid, arg1, arg2, arg3, rc)
-!
-! !ARGUMENTS:
-      type(ESMF_Grid), intent(in) :: grid   
-      integer, intent(in) :: arg1                       
-      integer, intent(in) :: arg2                       
-      character (len = *), intent(in), optional :: arg3 
-      integer, intent(out), optional :: rc              
-!
-! !DESCRIPTION:
-!     ESMF routine which only initializes {\tt Grid} values; it does not
-!     allocate any resources.  Define for shallow classes only, 
-!     for deep classes define and use routines Create/Destroy and 
-!     Construct/Destruct.  Can be overloaded like ESMF_GridCreate
-!     via interface blocks.
-!
-!  The arguments are:
-!     \begin{description}
-!     \item[grid]
-!          Class to be initialized.
-!     \item[arg1] 
-!          Argument 1.
-!     \item[arg2]
-!          Argument 2.         
-!     \item[[arg3]] 
-!          Argument 3.
-!     \item[[rc]] 
-!          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
-!   \end{description}
-!
-!EOP
-! !REQUIREMENTS: 
-
-!
-!  code goes here
-!
-      end subroutine ESMF_GridInit
 
 !------------------------------------------------------------------------------
 !BOP
