@@ -1,4 +1,4 @@
-! $Id: ESMF_Calendar.F90,v 1.65 2004/06/08 09:27:20 nscollins Exp $
+! $Id: ESMF_Calendar.F90,v 1.66 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -63,7 +63,7 @@
       type ESMF_CalendarType
       sequence
       private
-        integer :: calendarType
+        integer :: calendartype
       end type
 
       type(ESMF_CalendarType), parameter :: &
@@ -133,7 +133,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Calendar.F90,v 1.65 2004/06/08 09:27:20 nscollins Exp $'
+      '$Id: ESMF_Calendar.F90,v 1.66 2004/06/08 18:39:15 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -182,16 +182,16 @@
 !
 ! !INTERFACE:
 !     interface operator(==)
-!     if (calendarType1 == calendarType2) then ... endif
+!     if (calendartype1 == calendartype2) then ... endif
 !                  OR
-!     result = (calendarType1 == calendarType2)
+!     result = (calendartype1 == calendartype2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:
-!     type(ESMF_CalendarType), intent(in) :: calendarType1
-!     type(ESMF_CalendarType), intent(in) :: calendarType2
+!     type(ESMF_CalendarType), intent(in) :: calendartype1
+!     type(ESMF_CalendarType), intent(in) :: calendartype2
 !
 ! !DESCRIPTION:
 !     Overloads the (==) operator for the {\tt ESMF\_Calendar} class.
@@ -200,9 +200,9 @@
 !
 !     The arguments are:
 !     \begin{description}   
-!     \item[calendarType1]
+!     \item[calendartype1]
 !          The first {\tt ESMF\_CalendarType} in comparison.
-!     \item[calendarType2]
+!     \item[calendartype2]
 !          The second {\tt ESMF\_CalendarType} in comparison.
 !     \end{description}
 !
@@ -258,16 +258,16 @@
 !
 ! !INTERFACE:
 !     interface operator(/=)
-!     if (calendarType1 /= calendarType2) then ... endif
+!     if (calendartype1 /= calendartype2) then ... endif
 !                  OR
-!     result = (calendarType1 /= calendarType2)
+!     result = (calendartype1 /= calendartype2)
 !
 ! !RETURN VALUE:
 !     logical :: result
 !
 ! !ARGUMENTS:
-!     type(ESMF_CalendarType), intent(in) :: calendarType1
-!     type(ESMF_CalendarType), intent(in) :: calendarType2
+!     type(ESMF_CalendarType), intent(in) :: calendartype1
+!     type(ESMF_CalendarType), intent(in) :: calendartype2
 !
 ! !DESCRIPTION:
 !     Overloads the (/=) operator for the {\tt ESMF\_Calendar} class.
@@ -276,9 +276,9 @@
 !
 !     The arguments are:
 !     \begin{description}   
-!     \item[calendarType1]
+!     \item[calendartype1]
 !          The first {\tt ESMF\_CalendarType} in comparison.
-!     \item[calendarType2]
+!     \item[calendartype2]
 !          The second {\tt ESMF\_CalendarType} in comparison.
 !     \end{description}
 !
@@ -356,14 +356,14 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarCreate()
-      function ESMF_CalendarCreateBuiltIn(name, calendarType, rc)
+      function ESMF_CalendarCreateBuiltIn(name, calendartype, rc)
 
 ! !RETURN VALUE:
       type(ESMF_Calendar) :: ESMF_CalendarCreateBuiltIn
 
 ! !ARGUMENTS:
       character (len=*),       intent(in),  optional :: name
-      type(ESMF_CalendarType), intent(in)            :: calendarType
+      type(ESMF_CalendarType), intent(in)            :: calendartype
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -379,7 +379,7 @@
 !          The name for the newly created calendar.  If not specified, a
 !          default unique name will be generated: "CalendarNNN" where NNN
 !          is a unique sequence number from 001 to 999.
-!     \item[calendarType]
+!     \item[calendartype]
 !          The built-in {\tt ESMF\_CalendarType}.  Valid values are:
 !            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIANDAY},
 !            {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, and
@@ -404,7 +404,7 @@
     
 !     invoke C to C++ entry point
       call c_ESMC_CalendarCreateBuiltIn(ESMF_CalendarCreateBuiltIn, nameLen, &
-                                        name, calendarType, rc)
+                                        name, calendartype, rc)
     
       end function ESMF_CalendarCreateBuiltIn
     
@@ -609,7 +609,7 @@
 ! !IROUTINE: ESMF_CalendarGet - Get Calendar properties
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarGet(calendar, name, calendarType, &
+      subroutine ESMF_CalendarGet(calendar, name, calendartype, &
                                   daysPerMonth, monthsPerYear, &
                                   secondsPerDay, secondsPerYear, &
                                   daysPerYear, &
@@ -617,7 +617,7 @@
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(in)            :: calendar
       character (len=*),       intent(out), optional :: name
-      type(ESMF_CalendarType), intent(out), optional :: calendarType
+      type(ESMF_CalendarType), intent(out), optional :: calendartype
       integer, dimension(:),   intent(out), optional :: daysPerMonth
       integer,                 intent(out), optional :: monthsPerYear
       integer(ESMF_KIND_I4),   intent(out), optional :: secondsPerDay
@@ -636,7 +636,7 @@
 !          The object instance to query.
 !     \item[{[name]}]
 !          The name of this calendar.
-!     \item[{[calendarType]}]
+!     \item[{[calendartype]}]
 !          The {\tt CalendarType} ESMF\_CAL\_GREGORIAN, ESMF\_CAL\_JULIANDAY,
 !          etc.
 !     \item[{[daysPerMonth]}]
@@ -694,13 +694,13 @@
 
       if (present(daysPerMonth)) then
         call c_ESMC_CalendarGet1(calendar, nameLen, tempNameLen, tempName, &
-                                calendarType, &
+                                calendartype, &
                                 daysPerMonth(1), sizeofDaysPerMonth, &
                                 monthsPerYear, secondsPerDay, secondsPerYear, &
                                 daysPerYear, daysPerYearDn, daysPerYearDd, rc)
       else
         call c_ESMC_CalendarGet0(calendar, nameLen, tempNameLen, tempName, &
-                                calendarType, &
+                                calendartype, &
                                 sizeofDaysPerMonth, &
                                 monthsPerYear, secondsPerDay, secondsPerYear, &
                                 daysPerYear, daysPerYearDn, daysPerYearDd, rc)
@@ -719,10 +719,10 @@
 ! !IROUTINE: ESMF_CalendarInitialize - Initialize the default Calendar type
 
 ! !INTERFACE:
-      subroutine ESMF_CalendarInitialize(calendarType, rc)
+      subroutine ESMF_CalendarInitialize(calendartype, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in)            :: calendarType
+      type(ESMF_CalendarType), intent(in)            :: calendartype
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -732,7 +732,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[calendarType]
+!     \item[calendartype]
 !          The calendar type to initialize the default to.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -743,7 +743,7 @@
 !     TMGn.n.n
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarInitialize(calendarType, rc)
+      call c_ESMC_CalendarInitialize(calendartype, rc)
     
       end subroutine ESMF_CalendarInitialize
     
@@ -771,7 +771,7 @@
 !          Print options. If none specified, prints all calendar property
 !                             values. \\
 !          "name"           - print the calendar's name. \\
-!          "calendarType"   - print the calendar's type 
+!          "calendartype"   - print the calendar's type 
 !                               (e.g. ESMF\_CAL\_GREGORIAN). \\
 !          "daysPerMonth"   - print the array of number of days for
 !                               each month. \\
@@ -842,12 +842,12 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSet()
-      subroutine ESMF_CalendarSetBuiltIn(calendar, name, calendarType, rc)
+      subroutine ESMF_CalendarSetBuiltIn(calendar, name, calendartype, rc)
 
 ! !ARGUMENTS:
       type(ESMF_Calendar),     intent(inout)         :: calendar
       character (len=*),       intent(in),  optional :: name
-      type(ESMF_CalendarType), intent(in)            :: calendarType
+      type(ESMF_CalendarType), intent(in)            :: calendartype
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -862,7 +862,7 @@
 !          The object instance to initialize.
 !     \item[{[name]}]
 !          The new name for this calendar.
-!     \item[calendarType]
+!     \item[calendartype]
 !          The built-in {\tt CalendarType}.  Valid values are:
 !            {\tt ESMF\_CAL\_GREGORIAN}, {\tt ESMF\_CAL\_JULIANDAY},
 !            {\tt ESMF\_CAL\_NOLEAP}, {\tt ESMF\_CAL\_360DAY}, and
@@ -886,7 +886,7 @@
       end if
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarSetBuiltIn(calendar, nameLen, name, calendarType, rc)
+      call c_ESMC_CalendarSetBuiltIn(calendar, nameLen, name, calendartype, rc)
     
       end subroutine ESMF_CalendarSetBuiltIn
     
@@ -997,10 +997,10 @@
 
 ! !INTERFACE:
       ! Private name; call using ESMF_CalendarSetDefault()
-      subroutine ESMF_CalendarSetDefaultType(calendarType, rc)
+      subroutine ESMF_CalendarSetDefaultType(calendartype, rc)
 
 ! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in)            :: calendarType
+      type(ESMF_CalendarType), intent(in)            :: calendartype
       integer,                 intent(out), optional :: rc
 
 ! !DESCRIPTION:
@@ -1013,7 +1013,7 @@
 !
 !     The arguments are:
 !     \begin{description}
-!     \item[calendarType]
+!     \item[calendartype]
 !          The calendar type to be the default.
 !     \item[{[rc]}]
 !          Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -1024,7 +1024,7 @@
 !     TMGn.n.n
     
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarSetDefaultType(calendarType, rc)
+      call c_ESMC_CalendarSetDefaultType(calendartype, rc)
     
       end subroutine ESMF_CalendarSetDefaultType
     
@@ -1164,14 +1164,14 @@
 ! !IROUTINE:  ESMF_CalendarTypeEQ - Compare two Calendar types for equality
 !
 ! !INTERFACE:
-      function ESMF_CalendarTypeEQ(calendarType1, calendarType2)
+      function ESMF_CalendarTypeEQ(calendartype1, calendartype2)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarTypeEQ
 
 ! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in) :: calendarType1
-      type(ESMF_CalendarType), intent(in) :: calendarType2
+      type(ESMF_CalendarType), intent(in) :: calendartype1
+      type(ESMF_CalendarType), intent(in) :: calendartype2
 
 ! !DESCRIPTION:
 !     This method overloads the (==) operator for the {\tt ESMF\_Calendar}
@@ -1179,7 +1179,7 @@
 !             
 !EOPI
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarTypeEQ(calendarType1, calendarType2, &
+      call c_ESMC_CalendarTypeEQ(calendartype1, calendartype2, &
                                  ESMF_CalendarTypeEQ)
 
       end function ESMF_CalendarTypeEQ
@@ -1213,14 +1213,14 @@
 ! !IROUTINE:  ESMF_CalendarTypeNE - Compare two Calendar types for inequality
 !
 ! !INTERFACE:
-      function ESMF_CalendarTypeNE(calendarType1, calendarType2)
+      function ESMF_CalendarTypeNE(calendartype1, calendartype2)
 ! 
 ! !RETURN VALUE:
       logical :: ESMF_CalendarTypeNE
 
 ! !ARGUMENTS:
-      type(ESMF_CalendarType), intent(in) :: calendarType1
-      type(ESMF_CalendarType), intent(in) :: calendarType2
+      type(ESMF_CalendarType), intent(in) :: calendartype1
+      type(ESMF_CalendarType), intent(in) :: calendartype2
 
 ! !DESCRIPTION:
 !     This method overloads the (/=) operator for the {\tt ESMF\_Calendar}
@@ -1228,7 +1228,7 @@
 !             
 !EOPI
 !     invoke C to C++ entry point
-      call c_ESMC_CalendarTypeNE(calendarType1, calendarType2, &
+      call c_ESMC_CalendarTypeNE(calendartype1, calendartype2, &
                                  ESMF_CalendarTypeNE)
 
       end function ESMF_CalendarTypeNE

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldSet.cpp,v 1.3 2004/06/08 09:27:17 nscollins Exp $
+! $Id: ESMF_FieldSet.cpp,v 1.4 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,11 +46,10 @@
 
       public ESMF_FieldSetDataPointer
  
-!EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldSet.cpp,v 1.3 2004/06/08 09:27:17 nscollins Exp $'
+      '$Id: ESMF_FieldSet.cpp,v 1.4 2004/06/08 18:39:15 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -61,7 +60,7 @@
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldSetDataPointer -- Set a Fortran pointer to the data contents
 
 ! !INTERFACE:
@@ -76,7 +75,7 @@ InterfaceMacro(FieldSetDataPointer)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_FieldSetDataPointer} subroutines.   
 !  
-!EOP 
+!EOPI 
 end interface
 
 !==============================================================================

@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldCreate.cpp,v 1.5 2004/06/08 09:27:17 nscollins Exp $
+! $Id: ESMF_FieldCreate.cpp,v 1.6 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -56,11 +56,10 @@
 
       public ESMF_FieldCreate
  
-!EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldCreate.cpp,v 1.5 2004/06/08 09:27:17 nscollins Exp $'
+      '$Id: ESMF_FieldCreate.cpp,v 1.6 2004/06/08 18:39:15 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -308,14 +307,14 @@ InterfaceMacro(FieldCreateEPtr)
 
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldCreate()
-      function ESMF_FieldCreateRemap(srcfield, grid, horzRelloc, vertRelloc, &
+      function ESMF_FieldCreateRemap(srcField, grid, horzRelloc, vertRelloc, &
                                      haloWidth, datamap, name, iospec, rc)
 !
 ! !RETURN VALUE:
       type(ESMF_Field) :: ESMF_FieldCreateRemap
 !
 ! !ARGUMENTS:
-      type(ESMF_Field), intent(in) :: srcfield            
+      type(ESMF_Field), intent(in) :: srcField            
       type(ESMF_Grid), intent(in) :: grid                 
       type(ESMF_RelLoc), intent(in), optional :: horzRelloc 
       type(ESMF_RelLoc), intent(in), optional :: vertRelloc 
@@ -335,7 +334,7 @@ InterfaceMacro(FieldCreateEPtr)
 !
 !     The arguments are:
 !     \begin{description}
-!     \item [srcfield]
+!     \item [srcField]
 !           Source {\tt ESMF\_Field}.
 !     \item [grid]
 !           {\tt ESMF\_Grid} of source {\tt ESMF\_Field}.

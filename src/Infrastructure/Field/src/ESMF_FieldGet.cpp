@@ -1,4 +1,4 @@
-! $Id: ESMF_FieldGet.cpp,v 1.6 2004/06/08 09:27:17 nscollins Exp $
+! $Id: ESMF_FieldGet.cpp,v 1.7 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -46,11 +46,10 @@
 
       public ESMF_FieldGetDataPointer
  
-!EOP
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_FieldGet.cpp,v 1.6 2004/06/08 09:27:17 nscollins Exp $'
+      '$Id: ESMF_FieldGet.cpp,v 1.7 2004/06/08 18:39:15 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -61,7 +60,7 @@
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_FieldGetDataPointer -- Get a Fortran pointer to the data contents
 
 ! !INTERFACE:
@@ -76,7 +75,7 @@ InterfaceMacro(FieldGetDataPointer)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_FieldGetDataPointer} subroutines.   
 !  
-!EOP 
+!EOPI 
 end interface
 
 !==============================================================================

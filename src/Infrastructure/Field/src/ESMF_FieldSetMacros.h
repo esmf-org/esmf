@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldSetMacros.h,v 1.2 2004/06/07 05:21:07 nscollins Exp $
+! $Id: ESMF_FieldSetMacros.h,v 1.3 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,14 +34,14 @@
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_FieldSetDataPointer() @\
-!      subroutine ESMF_FieldSetDataPointer<rank><type><kind>(field, fptr, copyFlag, indexFlag, rc) @\
+!      subroutine ESMF_FieldSetDataPointer<rank><type><kind>(field, ptr, copyflag, indexflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Field), intent(inout) :: field @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: ptr @\
 !      integer, intent(in), optional :: haloWidth  @\
-!      type(ESMF_CopyFlag), intent(in), optional :: copyFlag @\
-!      type(ESMF_IndexFlag), intent(in), optional :: indexFlag  @\
+!      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
+!      type(ESMF_IndexFlag), intent(in), optional :: indexflag  @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
 ! !DESCRIPTION: @\
@@ -51,12 +51,12 @@
 !  \begin{description} @\
 !  \item[field] @\
 !   The {\tt ESMF\_Field} to query. @\
-!  \item[fptr] @\
+!  \item[ptr] @\
 !   An associated Fortran pointer of the proper Type, Kind, and Rank as @\
 !   the data in the Field.  When this call returns successfully, the pointer @\
 !   will now point to the data in the Field.  This is either a reference or @\
 !   a copy, depending on the setting of the following argument.  @\
-!  \item[{[copyFlag]}] @\
+!  \item[{[copyflag]}] @\
 !   Defaults to {\tt ESMF\_DATA\_REF}.  If set to {\tt ESMF\_DATA\_COPY}, @\
 !   a separate copy of the data will be allocated and the pointer will point @\
 !   at the copy.  If a new copy of the data is made, the caller is @\
@@ -64,7 +64,7 @@
 !  \item[{[haloWidth]}] @\
 !   Defaults to 0.  If specified, the halo width to add to all sides of the @\
 !   data array. @\
-!  \item[{[indexFlag]}] @\
+!  \item[{[indexflag]}] @\
 !   Defaults to {\tt ESMF\_LOCAL\_INDEX}.  If set to @\
 !   {\tt ESMF\_GLOBAL\_INDEX} and the {\tt ESMF\_Grid} associated with the @\
 !   {\tt ESMF\_Field} is regular, then the lower bounds and upper bounds will @\
@@ -86,13 +86,13 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldSetDataPointer" @\
-      subroutine ESMF_FieldSetDataPointer##mrank##D##mtypekind(field, fptr, copyFlag, haloWidth, indexFlag, rc) @\
+      subroutine ESMF_FieldSetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, haloWidth, indexflag, rc) @\
  @\
       type(ESMF_Field), intent(inout) :: field @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
-      type(ESMF_CopyFlag), intent(in), optional :: copyFlag @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
+      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       integer, intent(in), optional :: haloWidth  @\
-      type(ESMF_IndexFlag), intent(in), optional :: indexFlag @\
+      type(ESMF_IndexFlag), intent(in), optional :: indexflag @\
       integer, intent(out), optional :: rc   @\
 @\
         ! Local variables @\
@@ -112,13 +112,13 @@
         endif @\
  @\
         ! Test to see if pointer already associated, and fail if so. @\
-        if (associated(fptr)) then @\
+        if (associated(ptr)) then @\
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
                               "Data Pointer cannot already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
         endif @\
  @\
-        array = ESMF_ArrayCreate(fptr, counts, haloWidth, lbounds, ubounds, rc=status) @\
+        array = ESMF_ArrayCreate(ptr, counts, haloWidth, lbounds, ubounds, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

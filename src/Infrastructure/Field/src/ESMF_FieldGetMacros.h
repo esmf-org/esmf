@@ -1,5 +1,5 @@
 #if 0
-! $Id: ESMF_FieldGetMacros.h,v 1.2 2004/06/07 05:21:07 nscollins Exp $
+! $Id: ESMF_FieldGetMacros.h,v 1.3 2004/06/08 18:39:15 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -34,11 +34,11 @@
 ! @\
 ! !INTERFACE: @\
 !      ! Private name; call using ESMF_FieldGetDataPointer() @\
-!      subroutine ESMF_FieldGetDataPointer<rank><type><kind>(field, fptr, copyflag, rc) @\
+!      subroutine ESMF_FieldGetDataPointer<rank><type><kind>(field, ptr, copyflag, rc) @\
 ! @\
 ! !ARGUMENTS: @\
 !      type(ESMF_Field), intent(in) :: field @\
-!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: fptr @\
+!      <type> (ESMF_KIND_<kind>), dimension(<rank>), pointer :: ptr @\
 !      type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
 !      integer, intent(out), optional :: rc   @\
 ! @\
@@ -49,7 +49,7 @@
 !  \begin{description} @\
 !  \item[field] @\
 !   The {\tt ESMF\_Field} to query. @\
-!  \item[fptr] @\
+!  \item[ptr] @\
 !   An unassociated Fortran pointer of the proper Type, Kind, and Rank as @\
 !   the data in the Field.  When this call returns successfully, the pointer @\
 !   will now point to the data in the Field.  This is either a reference or @\
@@ -76,10 +76,10 @@
 ! <Created by macro - do not edit directly > @\
 ^undef  ESMF_METHOD @\
 ^define ESMF_METHOD "ESMF_FieldGetDataPointer" @\
-      subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, fptr, copyflag, rc) @\
+      subroutine ESMF_FieldGetDataPointer##mrank##D##mtypekind(field, ptr, copyflag, rc) @\
  @\
       type(ESMF_Field), intent(in) :: field @\
-      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: fptr @\
+      mname (ESMF_KIND_##mtypekind), dimension(mdim), pointer :: ptr @\
       type(ESMF_CopyFlag), intent(in), optional :: copyflag @\
       integer, intent(out), optional :: rc   @\
 @\
@@ -99,7 +99,7 @@
         endif @\
  @\
         ! Test to see if pointer already associated, and fail if so. @\
-        if (associated(fptr)) then @\
+        if (associated(ptr)) then @\
           if (ESMF_LogMsgFoundError(ESMF_RC_OBJ_BAD, & @\
                               "Data Pointer cannot already be associated", & @\
                               ESMF_CONTEXT, rc)) return @\
@@ -110,7 +110,7 @@
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\
  @\
-        call ESMF_ArrayGetData(array, fptr, copyflag, rc=status) @\
+        call ESMF_ArrayGetData(array, ptr, copyflag, rc=status) @\
         if (ESMF_LogMsgFoundError(status, & @\
                                   ESMF_ERR_PASSTHRU, & @\
                                   ESMF_CONTEXT, rc)) return @\

@@ -1,4 +1,4 @@
-% $Id: Field_refdoc.ctex,v 1.28 2004/06/01 19:30:21 cdeluca Exp $
+% $Id: Field_refdoc.ctex,v 1.29 2004/06/08 18:39:14 cdeluca Exp $
 
 #ifdef STANDALONE
 \documentclass[]{article}
@@ -74,9 +74,11 @@
 
 \subsection{Class API: Field Overloads for Fortran Arrays}
 #ifdef STANDALONE
+\input{ESMF_FieldCreate_fapi}
 \input{ESMF_FieldGet_fapi}
 \input{ESMF_FieldSet_fapi}
 #elif defined(CONSTITUENT)
+\input{../Infrastructure/Field/doc/ESMF_FieldCreate_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldGet_fapi}
 \input{../Infrastructure/Field/doc/ESMF_FieldSet_fapi}
 #endif

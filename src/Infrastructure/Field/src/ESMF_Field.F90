@@ -1,4 +1,4 @@
-! $Id: ESMF_Field.F90,v 1.152 2004/06/08 17:41:48 nscollins Exp $
+! $Id: ESMF_Field.F90,v 1.154 2004/06/08 18:40:33 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -228,7 +228,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_Field.F90,v 1.152 2004/06/08 17:41:48 nscollins Exp $'
+      '$Id: ESMF_Field.F90,v 1.154 2004/06/08 18:40:33 cdeluca Exp $'
 
 !==============================================================================
 !
@@ -1606,7 +1606,7 @@
 #define ESMF_METHOD "ESMF_FieldGetLogicalAttr"
 
 !BOP
-! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical Attribute
+! !IROUTINE: ESMF_FieldGetAttribute - Retrieve a logical attribute
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttribute()
@@ -1853,12 +1853,12 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
-      subroutine ESMF_FieldGetAttrInfoByName(field, name, type, count, rc)
+      subroutine ESMF_FieldGetAttrInfoByName(field, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       character(len=*), intent(in) :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -1872,8 +1872,8 @@
 !           An {\tt ESMF\_Field} object.
 !     \item [name]
 !           The name of the attribute to query.
-!     \item [type]
-!           The type of the attribute.
+!     \item [datatype]
+!           The datatype of the attribute.
 !     \item [count]
 !           The number of items in this attribute.  For character types,
 !           the length of the character string.
@@ -1904,7 +1904,7 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
       if (present(count)) count = localCount
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -1921,13 +1921,13 @@
 !
 ! !INTERFACE:
       ! Private name; call using ESMF_FieldGetAttributeInfo()
-      subroutine ESMF_FieldGetAttrInfoByNum(field, num, name, type, count, rc)
+      subroutine ESMF_FieldGetAttrInfoByNum(field, num, name, datatype, count, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field  
       integer, intent(in) :: num
       character(len=*), intent(out), optional :: name
-      type(ESMF_DataType), intent(out), optional :: type
+      type(ESMF_DataType), intent(out), optional :: datatype
       integer, intent(out), optional :: count   
       integer, intent(out), optional :: rc   
 
@@ -1943,8 +1943,8 @@
 !           The number of the attribute to query.
 !     \item [name]
 !           Returns the name of the attribute.
-!     \item [type]
-!           Returns the type of the attribute.
+!     \item [datatype]
+!           Returns the datatype of the attribute.
 !     \item [count]
 !           Returns the number of items in this attribute.  For character types,
 !           this is the length of the character string.
@@ -1977,7 +1977,7 @@
                                   ESMF_CONTEXT, rc)) return
 
       if (present(name)) name = localName
-      if (present(type)) type = localDt
+      if (present(datatype)) datatype = localDt
       if (present(count)) count = localCount
 
       if (rcpresent) rc = ESMF_SUCCESS
@@ -2685,11 +2685,11 @@
 ! !IROUTINE:  ESMF_FieldValidate - Check the internal consistency of a Field
 
 ! !INTERFACE:
-      subroutine ESMF_FieldValidate(field, opt, rc)
+      subroutine ESMF_FieldValidate(field, options, rc)
 !
 ! !ARGUMENTS:
       type(ESMF_Field), intent(in) :: field 
-      character (len = *), intent(in) :: opt 
+      character (len = *), intent(in) :: options 
       integer, intent(out), optional :: rc   
 !
 ! !DESCRIPTION:
@@ -2699,7 +2699,7 @@
 !     \begin{description}
 !     \item [field]
 !           An {\tt ESMF\_Field} object.
-!     \item [opt]
+!     \item [options]
 !           Validation option.
 !     \item [{[rc]}]
 !           Return code; equals {\tt ESMF\_SUCCESS} if there are no errors.
@@ -2872,7 +2872,7 @@
 !------------------------------------------------------------------------------
 !------------------------------------------------------------------------------
 !
-! This section includes all the Field internal methods.
+! This section includes all Field internal methods.
 !
 !------------------------------------------------------------------------------
 

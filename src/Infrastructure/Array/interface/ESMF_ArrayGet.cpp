@@ -1,4 +1,4 @@
-! $Id: ESMF_ArrayGet.cpp,v 1.5 2004/06/08 09:27:14 nscollins Exp $
+! $Id: ESMF_ArrayGet.cpp,v 1.6 2004/06/08 18:39:14 cdeluca Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -57,13 +57,12 @@ AllTypesMacro(ArrayType)
       public ESMF_ArraySetData
       public ESMF_ArrayGetData
 
-!EOP
       public operator(.eq.), operator(.ne.)
 
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_ArrayGet.cpp,v 1.5 2004/06/08 09:27:14 nscollins Exp $'
+      '$Id: ESMF_ArrayGet.cpp,v 1.6 2004/06/08 18:39:14 cdeluca Exp $'
 
 !==============================================================================
 ! 
@@ -73,7 +72,7 @@ AllTypesMacro(ArrayType)
 
 !------------------------------------------------------------------------------
 
-!BOP
+!BOPI
 ! !IROUTINE: ESMF_ArrayGetData -- Get a Fortran pointer to the data contents
 !
 ! !INTERFACE:
@@ -88,7 +87,7 @@ InterfaceMacro(ArrayGetData)
 ! This interface provides a single entry point for the various 
 !  types of {\tt ESMF\_ArrayGetData} functions.   
 !  
-!EOP 
+!EOPI 
 end interface
 
 !==============================================================================

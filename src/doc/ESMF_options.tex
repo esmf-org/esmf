@@ -1,4 +1,4 @@
-% $Id: ESMF_options.tex,v 1.3 2004/06/03 22:55:34 cdeluca Exp $
+% $Id: ESMF_options.tex,v 1.4 2004/06/08 18:39:16 cdeluca Exp $
 
 \section{Global Options and Parameters}
 
@@ -55,6 +55,22 @@ Valid values are:
       Copy the data item to another buffer.
 \item [ESMF\_DATA\_REF]
       Reference the data item.
+\end{description}
+
+%////////////////////////////////////////////////////////////
+\mbox{}\hrulefill\
+
+\subsubsection{ESMF\_IndexFlag}
+
+{\sf DESCRIPTION:\\}
+Indicates whether index is local (per DE) or global (per object).
+
+Valid values are:
+\begin{description}
+\item [ESMF\_LOCAL\_INDEX]
+      Refers to indices on the local DE.
+\item [ESMF\_GLOBAL\_INDEX]
+      Refers to object-wide indices.
 \end{description}
 
 %////////////////////////////////////////////////////////////
