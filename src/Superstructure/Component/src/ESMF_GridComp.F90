@@ -1,4 +1,4 @@
-! $Id: ESMF_GridComp.F90,v 1.22 2004/03/08 22:50:24 svasquez Exp $
+! $Id: ESMF_GridComp.F90,v 1.23 2004/03/09 12:48:31 theurich Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -115,7 +115,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_GridComp.F90,v 1.22 2004/03/08 22:50:24 svasquez Exp $'
+      '$Id: ESMF_GridComp.F90,v 1.23 2004/03/09 12:48:31 theurich Exp $'
 
 !==============================================================================
 !
@@ -353,16 +353,16 @@
 !
 ! !ARGUMENTS:
       !external :: services
-      type(ESMF_VM), intent(in) :: vm
-      character(len=*), intent(in), optional :: name
-      type(ESMF_DELayout), intent(in), optional :: layout
-      type(ESMF_ModelType), intent(in), optional :: mtype 
-      type(ESMF_Grid), intent(in), optional :: grid
-      type(ESMF_Clock), intent(inout), optional :: clock
-      type(ESMF_Config), intent(in), optional :: config
-      character(len=*), intent(in), optional :: configfile
-      integer(ESMF_KIND_I4), intent(in), optional :: petlist(:)
-      integer, intent(out), optional :: rc 
+      type(ESMF_VM),        intent(in)              :: vm
+      character(len=*),     intent(in),    optional :: name
+      type(ESMF_DELayout),  intent(in),    optional :: layout
+      type(ESMF_ModelType), intent(in),    optional :: mtype 
+      type(ESMF_Grid),      intent(in),    optional :: grid
+      type(ESMF_Clock),     intent(inout), optional :: clock
+      type(ESMF_Config),    intent(in),    optional :: config
+      character(len=*),     intent(in),    optional :: configfile
+      integer,              intent(in),    optional :: petlist(:)
+      integer,              intent(out),   optional :: rc 
 !
 ! !DESCRIPTION:
 !  Create a new Component and set the decomposition characteristics.
@@ -925,12 +925,12 @@
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in) ::            component
-    integer(ESMF_KIND_I4), intent(in), optional:: max
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
-    integer, intent(out), optional  ::            rc           
+    type(ESMF_GridComp), intent(in)            :: component
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -988,12 +988,12 @@
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in) ::            component
-    integer(ESMF_KIND_I4), intent(in), optional:: max
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
-    integer, intent(out), optional  ::            rc           
+    type(ESMF_GridComp), intent(in)            :: component
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !     Print VM internals
@@ -1051,12 +1051,12 @@
     pref_intra_process, pref_intra_ssi, pref_inter_ssi, rc)
 !
 ! !ARGUMENTS:
-    type(ESMF_GridComp), intent(in) ::            component
-    integer(ESMF_KIND_I4), intent(in), optional:: max
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_process
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_intra_ssi
-    integer(ESMF_KIND_I4), intent(in), optional:: pref_inter_ssi
-    integer, intent(out), optional  ::            rc           
+    type(ESMF_GridComp), intent(in)            :: component
+    integer,             intent(in),  optional :: max
+    integer,             intent(in),  optional :: pref_intra_process
+    integer,             intent(in),  optional :: pref_intra_ssi
+    integer,             intent(in),  optional :: pref_inter_ssi
+    integer,             intent(out), optional :: rc           
 !
 ! !DESCRIPTION:
 !     Print VM internals
