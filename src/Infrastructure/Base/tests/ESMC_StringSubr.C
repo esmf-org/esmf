@@ -4,17 +4,17 @@
 
 typedef void (*FUNC)(int *, int *, int *, int *);
 typedef void (*FUNC2)(int *, int *, char *, int *, int *, int);
-extern FUNC f90string;
-extern FUNC2 f90string2;
+typedef void (*FUNC3)(int *, char *, int *, char *, int *, int *, int, int);
 
 extern "C" {
 
-      void c_strings(FUNC f90cb, FUNC2 f90cb2, int *i1, int *i2, 
+      void c_strings(FUNC f90cb, FUNC2 f90cb2, FUNC3 f90cb3, int *i1, int *i2, 
                                     char *fstr, int *i3, int *i4, int slen) {
 
       int ni1, ni2, ni3, ni4;
-      int clen;
+      int clen, clen2;
       static char *newstr = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      static char *newstr2 = "0123456789abcdefghijklmnopqrstuvwxyz";
       char tbuf[8192];
 
 
@@ -37,15 +37,22 @@ extern "C" {
 
       clen = 15;
 
-      printf("\n\n-- ready to call f90string2 by callback, passing in 15\n");
+      printf("\n\n-- ready to call f90string2 by callback, passing 15\n");
       (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, clen);
       printf("\n\n-- returned from call f90string2 by callback\n");
 
       clen = 25;
 
-      printf("\n\n-- ready to call f90string2 by callback, passing in 25\n");
+      printf("\n\n-- ready to call f90string2 by callback, passing 25\n");
       (*f90cb2)(&ni1, &ni2, newstr, &ni3, &ni4, clen);
       printf("\n\n-- returned from call f90string2 by callback\n");
+
+      clen = 14;
+      clen2 = 24;
+
+      printf("\n\n-- ready to call f90string3 by callback, passing 14, 24\n");
+      (*f90cb3)(&ni1, newstr, &ni2, newstr2, &ni3, &ni4, clen, clen2);
+      printf("\n\n-- returned from call f90string3 by callback\n");
 
       printf("\n\n-- leaving c_strings\n");
    }
