@@ -1,4 +1,4 @@
-! $Id: ESMF_LocalArray_F90.cpp,v 1.7 2004/02/11 19:05:07 nscollins Exp $
+! $Id: ESMF_LocalArray_F90.cpp,v 1.8 2004/02/11 19:57:03 nscollins Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research, 
@@ -129,8 +129,12 @@
       sequence
       !!private
         ! opaque pointer to the C++ class data
-        !type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+        ! disable this for now - it causes too many compiler problems
+#if !defined(ESMF_NO_INITIALIZERS) && (0)
+        type(ESMF_Pointer) :: this = ESMF_NULL_POINTER
+#else
         type(ESMF_Pointer) :: this
+#endif
       end type
 
 !------------------------------------------------------------------------------
@@ -182,7 +186,7 @@ ArrayAllTypeMacro()
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LocalArray_F90.cpp,v 1.7 2004/02/11 19:05:07 nscollins Exp $'
+      '$Id: ESMF_LocalArray_F90.cpp,v 1.8 2004/02/11 19:57:03 nscollins Exp $'
 
 !==============================================================================
 ! 
@@ -1179,6 +1183,12 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           rc = ESMF_FAILURE
         endif
 
+        ! Simple validity check
+        if (array%this .eq. ESMF_NULL_POINTER) then
+            print *, "LocalArray not initialized or Destroyed"
+            return
+        endif
+
         needsdealloc = .FALSE.
 
         ! TODO: document the current rule - if we do the allocate in
@@ -1208,9 +1218,10 @@ LocalArrayDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
           return
         endif
 
+        ! mark this as destroyed
         array%this = ESMF_NULL_POINTER
 
-!       set return code if user specified it
+        ! set return code if user specified it
         if (rcpresent) rc = ESMF_SUCCESS
 
         end subroutine ESMF_LocalArrayDestroy
@@ -2306,10 +2317,11 @@ AllocDeallocateMacro(real, R8, 5, COL5, LEN5, LOC5)
          rc = ESMF_FAILURE
        endif
 
-       ! Simple validity checks
        if (array%this .eq. ESMF_NULL_POINTER) then
-           print *, "LocalArray not initialized or Destroyed"
-           return 
+         print *, "LocalArray Print:"
+         print *, " Empty or Uninitialized Array"
+         if (present(rc)) rc = ESMF_SUCCESS
+         return
        endif
 
        defaultopts = "brief"
