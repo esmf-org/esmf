@@ -80,7 +80,9 @@ Figure \ref{fig:layouts} shows number of examples of {\tt Layout} objects,
 together with their {\tt Ltuple} description.
 
 \begin{figure}
-
+\caption[{Sample {\tt Layouts}}]{The {\tt Layout} class offers a way of organizing 
+machine information and preferentially distributing data in a systematic
+and generic way.}
 \label{fig:layouts}
 \scalebox{0.7}{\includegraphics{Layout.eps}}
 \end{figure}
@@ -90,6 +92,7 @@ of the {\tt Grid} align with the dimensions of the {\tt Layout}.  The superimpos
 of a {\tt Grid} on a {\tt Layout} is shown in Figure~\ref{fig:gridlayout}.
 
 \begin{figure}
+\caption[{{\tt Grid} aligned on a {\tt Layout}}]{The axes of {\tt Grid}s and {\tt Layout}s are aligned.}
 \label{fig:gridlayout}
 \scalebox{0.7}{\includegraphics{GridLayout.eps}}
 \end{figure}
@@ -108,7 +111,7 @@ inherited directly; others are expected to be overloaded by
 higher level objects.  {\tt Base} class methods include setting and querying 
 attributes, print, validate, read/write, and restart. 
 
-\subsubsection{Attributes (ESMF\_Attr}
+\subsubsection{Attributes (ESMF\_Attr)}
 \label{sec:Attr}
 {\tt Attribute}s are a list of (name, value) pairs associated with any 
 object in the library. The value can be of any data type. 

@@ -204,8 +204,8 @@ Figure~\ref{fig:1waycoupling} shows the sequence of actions involved
 in coupling an atmosphere to an ocean.  The vertical axis is time, positive
 downward, and the horizontal axis shows the objects that are involved in the
 exchange.  Arrow'd lines to text boxes mean that the source of the arrow has 
-created the object that is pointed to.  Solid lines to the start of a vertical
-box indicate that a method has been called.  Dashed lines indicate a return.  
+created the object in the box.  Solid lines to the start of a vertical
+box indicate a method call.  Dashed lines indicate a return.  
 In this example, the coupling is one-way, so that the ocean 
 receives data from the atmosphere but does not send any data back.  Atmosphere
 and ocean components are configured for concurrent execution.
@@ -215,7 +215,7 @@ The atmosphere initialization method defines the atmosphere import and export st
 (import state creation is not shown) and the ocean initialization method defines
 the ocean import and export states (export state creation is not shown).  The
 coupler initialization method creates input and output packets, which at this
-stage may include empty buffers for packing and unpacking data.  The coupler returns a
+stage include empty buffers for packing and unpacking data.  The coupler returns a
 transform (in this case, perhaps a combined unit change, regrid and communication 
 operation) that will occur while the atmosphere 
 component is in the midst of its iteration loop.  The application calls the run methods
@@ -223,11 +223,13 @@ of the atmosphere and ocean components with the transform provided by the couple
 which contains different tasks for the two components.  The atmosphere and ocean 
 check that their import states are valid as they begin executing concurrently on
 different {\tt DE} sets.  At an appropriate time the
-ocean component calls a state transform method using the transform it was passed, 
-which posts a message passing receive.  When the atmosphere's data is ready to send, 
-it calls a state transform method with the transform it was passed, which performs
+ocean component calls a state transform method with its import state and 
+the transform it received from the application.  This call 
+posts a message passing receive.  When the atmosphere's data is ready to send, 
+it calls a state transform method with the transform it was passed and 
+its export state.  This call performs
 the unit conversion and regridding, initiates a send
-to the ocean and returns.  (Although this calculation is performed on the atmosphere 
+to the ocean and returns.  (Although the calculation is performed on the atmosphere 
 {\tt DE}s in this example, the transform could be staged on a separate set of coupler
 {\tt DE}s.)  The atmosphere calls a state transform complete call with the transform
 as an argument before it proceeds to make any changes to data in the export state
