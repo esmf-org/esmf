@@ -1,4 +1,4 @@
-! $Id: ESMF_ClockUTest.F90,v 1.49 2003/10/06 16:26:43 svasquez Exp $
+! $Id: ESMF_ClockUTest.F90,v 1.50 2003/10/06 17:53:42 svasquez Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -37,7 +37,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter :: version = &
-      '$Id: ESMF_ClockUTest.F90,v 1.49 2003/10/06 16:26:43 svasquez Exp $'
+      '$Id: ESMF_ClockUTest.F90,v 1.50 2003/10/06 17:53:42 svasquez Exp $'
 !------------------------------------------------------------------------------
 
       ! cumulative result: count failures; no failures equals "all pass"
@@ -1049,7 +1049,6 @@
 
      ! ----------------------------------------------------------------------------
 
-
       !NEX_UTest
       write(failMsg, *) "Should return ESMF_SUCCESS."
       call ESMF_TimeSyncToRealTime(syncTime, rc)
@@ -1147,6 +1146,64 @@
 
       call ESMF_TimePrint(stopTime, rc=rc)
 
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime, yr=-100, mm=1, dd=1, &
+                                        calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Start Time initialization with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime2, yr=-100, mm=1, dd=1, &
+                                        calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Start Time initialization with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "startTime2 should be equal to startTime"
+      write(name, *) "Verifying the EQ operator Test"
+      call ESMF_Test((startTime2.eq.startTime), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "Should return ESMF_SUCCESS."
+      call ESMF_TimeSet(startTime2, yr=-100, mm=1, dd=1, s=-1,  &
+                                        calendar=gregorianCalendar, rc=rc)
+      write(name, *) "Start Time initialization with year = -100 Test"
+      call ESMF_Test((rc.eq.ESMF_SUCCESS), &
+                      name, failMsg, result, ESMF_SRCLINE)
+
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "startTime2 should not be equal to startTime"
+      write(name, *) "Verifying the NE operator Test"
+      call ESMF_Test((startTime2.ne.startTime), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "startTime2 should be less than startTime"
+      write(name, *) "Verifying the LT operator Test"
+      call ESMF_Test((startTime2.lt.startTime), &
+                      name, failMsg, result, ESMF_SRCLINE)
+      ! ----------------------------------------------------------------------------
+
+      !EX_UTest
+      write(failMsg, *) "startTime2 should less than startTime"
+      write(name, *) "Verifying the LT operator Test"
+      call ESMF_Test(.not.(startTime.lt.startTime2), &
+                      name, failMsg, result, ESMF_SRCLINE)
       ! ----------------------------------------------------------------------------
       ! return number of failures to environment; 0 = success (all pass)
       ! return result  ! TODO: no way to do this in F90 ?
