@@ -1,4 +1,4 @@
-! $Id: ESMF_LogRectGrid.F90,v 1.103 2004/11/01 17:44:25 jwolfe Exp $
+! $Id: ESMF_LogRectGrid.F90,v 1.104 2004/11/01 21:33:28 jwolfe Exp $
 !
 ! Earth System Modeling Framework
 ! Copyright 2002-2003, University Corporation for Atmospheric Research,
@@ -113,7 +113,7 @@
 !------------------------------------------------------------------------------
 ! The following line turns the CVS identifier string into a printable variable.
       character(*), parameter, private :: version = &
-      '$Id: ESMF_LogRectGrid.F90,v 1.103 2004/11/01 17:44:25 jwolfe Exp $'
+      '$Id: ESMF_LogRectGrid.F90,v 1.104 2004/11/01 21:33:28 jwolfe Exp $'
 
 !==============================================================================
 !
@@ -3762,31 +3762,18 @@
       localStart(1) = 0
       localStart(2) = 0
       if (grid%hasLocalData) then
+
+        ! set local starts for this DE
         if (myDE(1).ge.2) then
           do j = 1,myDE(1)-1
             localStart(1) = localStart(1) + countsPerDEDim1(j)
           enddo
         endif
-        j1 = localStart(1) + 1
-        j2 = localStart(1) + 1 + countsPerDEDim1(myDE(1))
-        localMin(1) = minval(coord1(j1:j2))
-        localMax(1) = maxval(coord1(j1:j2))
-
         if (myDE(2).ge.2) then
           do j = 1,myDE(2)-1
             localStart(2) = localStart(2) + countsPerDEDim2(j)
           enddo
         endif
-        j1 = localStart(2) + 1
-        j2 = localStart(2) + 1 + countsPerDEDim2(myDE(2))
-        localMin(2) = minval(coord2(j1:j2))
-        localMax(2) = maxval(coord2(j1:j2))
-  
-        ! modify global counts to include ghost region
-        compCount(1) = size(coord1)
-        compCount(2) = size(coord2)
-        counts(1) = compCount(1) + 2*gridBoundWidth
-        counts(2) = compCount(2) + 2*gridBoundWidth
 
         ! allocate and load coords
         allocate(coordUse1(counts(1)), &
@@ -3814,6 +3801,12 @@
           coordUse2(i+1) = coordUse2(i) &
                          + (coord2(compCount(2))-coord2(compCount(2)-1))
         enddo
+
+        ! modify global counts to include ghost region
+        compCount(1) = size(coord1)
+        compCount(2) = size(coord2)
+        counts(1) = compCount(1) + 2*gridBoundWidth
+        counts(2) = compCount(2) + 2*gridBoundWidth
 
         ! allocate and load cell type masks -- these are by cell and not vertex,
         ! so the counts are all one less
@@ -3900,6 +3893,22 @@
                                 ESMF_CONTEXT, rc)) return
 
       if (grid%hasLocalData) then
+        ! set coordinate min/max using total cell count -- but don't include the halo
+        ! region around the global grid
+        counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
+        counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+        i1 = localStart(1) + 1
+        i2 = localStart(1) + counts(1) + 1
+        j1 = localStart(2) + 1
+        j2 = localStart(2) + counts(2) + 1
+        i1 = max(i1,gridBoundWidth + 1)
+        j1 = max(j1,gridBoundWidth + 1)
+        i2 = min(i2,gridBoundWidth + compCount(1))
+        j2 = min(j2,gridBoundWidth + compCount(2))
+        localMin(1) = minval(coordUse1(i1:i2))
+        localMax(1) = maxval(coordUse1(i1:i2))
+        localMin(2) = minval(coordUse2(j1:j2))
+        localMax(2) = maxval(coordUse2(j1:j2))
         do i = 1,dimCount
           tempCoord = ESMF_PhysCoordCreate(coordType(i), coordNames(i), &
                                            coordUnits(i), &
@@ -3942,10 +3951,10 @@
         ! set coordinates using computational cell count
         counts(1) = countsPerDEDim1(myDE(1))
         counts(2) = countsPerDEDim2(myDE(2))
-        i1 = localStart(1) + 1
-        i2 = i1 + countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
-        j1 = localStart(2) + 1
-        j2 = j1 + countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
+        i1 = localStart(1) + 1 + gridBoundWidth
+        i2 = localStart(1) + counts(1) + 1 + gridBoundWidth
+        j1 = localStart(2) + 1 + gridBoundWidth
+        j2 = localStart(2) + counts(2) + 1 + gridBoundWidth
         call ESMF_LRGridSetCoord(grid, physGridId, dimCount, counts, &
                                  gridBoundWidth, relloc, &
                                  coordUse1(i1:i2), coordUse2(j1:j2), &
@@ -3954,7 +3963,8 @@
                                   ESMF_ERR_PASSTHRU, &
                                   ESMF_CONTEXT, rc)) return
 
-        ! set mask using total cell count
+        ! set mask using total cell count -- but masks are cell centered instead of
+        ! on the vertices
         counts(1) = countsPerDEDim1(myDE(1)) + 2*gridBoundWidth
         counts(2) = countsPerDEDim2(myDE(2)) + 2*gridBoundWidth
         i1 = localStart(1) + 1
